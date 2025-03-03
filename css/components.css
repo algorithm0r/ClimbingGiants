@@ -1,0 +1,299 @@
+/* 
+ * components.css
+ * Contains styles for reusable UI components across the Climbing Giants website
+ */
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    background-color: var(--accent-color);
+    color: white;
+    padding: 12px 30px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s;
+    border: 1px solid var(--border-medium);
+    box-shadow: 0 0 10px var(--glow-accent);
+}
+
+.btn:hover {
+    background-color: var(--btn-hover);
+    box-shadow: 0 0 15px var(--glow-accent);
+    transform: translateY(-2px);
+    color: white;
+    text-shadow: none;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border: 1px solid var(--secondary-color);
+    color: var(--secondary-color);
+    box-shadow: 0 0 10px var(--glow-secondary);
+}
+
+.btn-secondary:hover {
+    background-color: rgba(0, 255, 255, 0.1);
+    box-shadow: 0 0 15px var(--glow-secondary);
+    color: var(--secondary-color);
+}
+
+/* Category Buttons */
+.project-categories {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.category-btn {
+    border: none;
+    background: none;
+    padding: 8px 20px;
+    margin: 5px 10px;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--muted-text);
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.category-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background-color: var(--secondary-color);
+    transition: all 0.3s;
+    transform: translateX(-50%);
+    box-shadow: 0 0 5px var(--glow-secondary);
+    opacity: 0;
+}
+
+.category-btn:hover {
+    color: var(--secondary-color);
+}
+
+.category-btn:hover::after {
+    width: 80%;
+    opacity: 1;
+}
+
+.category-btn.active {
+    color: var(--accent-color);
+    text-shadow: 0 0 5px var(--glow-accent);
+}
+
+.category-btn.active::after {
+    width: 80%;
+    background-color: var(--accent-color);
+    box-shadow: 0 0 5px var(--glow-accent);
+    opacity: 1;
+}
+
+/* Project Cards */
+.project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+.project-card {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s;
+    border: 1px solid var(--border-light);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.project-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px var(--glow-secondary);
+    border: 1px solid var(--border-medium);
+}
+
+.project-image {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+}
+
+.project-info {
+    padding: 25px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.project-info p {
+    color: var(--muted-text);
+    margin-bottom: 20px;
+    flex-grow: 1;
+}
+
+.project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.tag {
+    background-color: rgba(0, 255, 255, 0.15);
+    border: 1px solid rgba(0, 255, 255, 0.4);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 14px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    color: var(--secondary-color);
+}
+
+.project-link {
+    display: inline-block;
+    color: var(--accent-color);
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s;
+    text-shadow: 0 0 5px var(--glow-accent);
+    align-self: flex-start;
+}
+
+.project-link:hover {
+    color: var(--btn-hover);
+    text-shadow: 0 0 10px var(--glow-accent);
+}
+
+/* Featured Items */
+.featured-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.featured-item {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    transition: all 0.3s;
+    border: 1px solid var(--border-light);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.featured-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px var(--glow-secondary);
+    border: 1px solid var(--border-medium);
+}
+
+.featured-icon {
+    font-size: 40px;
+    color: var(--secondary-color);
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px var(--glow-secondary);
+}
+
+.featured-item p {
+    margin-bottom: 20px;
+    flex-grow: 1;
+}
+
+/* Newsletter Form */
+.newsletter-form {
+    max-width: 500px;
+    margin: 0 auto;
+    display: flex;
+}
+
+.newsletter-form input {
+    flex: 1;
+    padding: 15px;
+    border: none;
+    border-radius: 5px 0 0 5px;
+    font-size: 16px;
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.newsletter-form button {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 15px 25px;
+    border-radius: 0 5px 5px 0;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 1px solid var(--border-medium);
+    box-shadow: 0 0 10px var(--glow-accent);
+}
+
+.newsletter-form button:hover {
+    background-color: var(--btn-hover);
+    box-shadow: 0 0 15px var(--glow-accent);
+}
+
+/* Social Links */
+.social-links {
+    display: flex;
+    gap: 15px;
+}
+
+.social-links a {
+    color: var(--secondary-color);
+    font-size: 20px;
+    transition: all 0.3s;
+    text-shadow: 0 0 5px var(--glow-secondary);
+}
+
+.social-links a:hover {
+    color: var(--accent-color);
+    text-shadow: 0 0 10px var(--glow-accent);
+}
+
+/* Images with glow effect */
+.glow-image {
+    border: 2px solid var(--border-light);
+    box-shadow: 0 0 20px var(--glow-secondary);
+    transition: all 0.3s;
+}
+
+.glow-image:hover {
+    border-color: var(--border-medium);
+    box-shadow: 0 0 30px var(--glow-secondary);
+}
+
+.quote {
+    font-style: italic;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--secondary-color);
+    text-shadow: 0 0 5px var(--glow-secondary);
+}
+
+.quote-attribution {
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+    color: var(--light-text);
+}
+
+.hero-description {
+    margin-bottom: 2rem;
+    max-width: 750px;
+    line-height: 1.8;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}

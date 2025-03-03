@@ -1,0 +1,174 @@
+/* 
+ * responsive.css
+ * Contains media queries and responsive design adjustments
+ * for the Climbing Giants website
+ */
+
+/* Large devices (laptops/desktops, up to 1200px) */
+@media screen and (max-width: 1200px) {
+    .container {
+        max-width: 960px;
+    }
+}
+
+/* Medium devices (tablets, up to 992px) */
+@media screen and (max-width: 992px) {
+    .container {
+        max-width: 720px;
+    }
+    
+    .about-content {
+        flex-direction: column;
+        gap: 40px;
+    }
+    
+    h1 {
+        font-size: 2.2rem;
+    }
+    
+    h2 {
+        font-size: 1.8rem;
+    }
+}
+
+/* Small devices (landscape phones, up to 768px) */
+@media screen and (max-width: 768px) {
+    .container {
+        max-width: 540px;
+    }
+    
+    .navbar {
+        flex-direction: column;
+        padding: 20px 0;
+    }
+    
+    .nav-links {
+        margin-top: 20px;
+        justify-content: center;
+    }
+    
+    .nav-links li {
+        margin: 0 15px;
+    }
+    
+    .hero {
+        padding: 60px 0;
+    }
+    
+    .hero h1 {
+        font-size: 2rem;
+    }
+    
+    .hero p {
+        font-size: 1rem;
+    }
+    
+    section {
+        padding: 60px 0;
+    }
+    
+    .featured-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .footer-content {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Extra small devices (portrait phones, up to 576px) */
+@media screen and (max-width: 576px) {
+    .navbar {
+        padding: 15px 0;
+    }
+    
+    .nav-links {
+        flex-wrap: wrap;
+    }
+    
+    .nav-links li {
+        margin: 5px 10px;
+    }
+    
+    .hero {
+        padding: 40px 0;
+    }
+    
+    .project-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .project-categories {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .category-btn {
+        margin: 5px 0;
+    }
+    
+    .section-title h2 {
+        font-size: 1.6rem;
+    }
+    
+    .newsletter-form {
+        flex-direction: column;
+    }
+    
+    .newsletter-form input,
+    .newsletter-form button {
+        width: 100%;
+        border-radius: 5px;
+    }
+    
+    .newsletter-form button {
+        margin-top: 10px;
+    }
+    
+    .footer-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dark mode preference support */
+@media (prefers-color-scheme: dark) {
+    /* Already using a dark theme, so no changes needed */
+    /* But we can add any specific dark mode adjustments here if needed later */
+}
+
+/* Reduced motion preference support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+        animation: none !important;
+    }
+    
+    .btn:hover,
+    .project-card:hover,
+    .featured-item:hover {
+        transform: none;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+    :root {
+        --secondary-color: #00FFFF;
+        --accent-color: #FF1493;
+        --light-text: #FFFFFF;
+        --muted-text: #FFFFFF;
+    }
+    
+    .tag {
+        border: 2px solid var(--secondary-color);
+    }
+    
+    .project-card,
+    .featured-item {
+        border: 2px solid var(--secondary-color);
+    }
+    
+    a:hover {
+        text-decoration: underline;
+    }
+}
