@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Class 1, Assignment 1 and Your Data — Computational Physical Modeling</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="css/blocks.css?v=20261015124713">
+  <link rel="stylesheet" href="css/demos.css?v=20261015124713">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (olive). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #5F7038;
+      --course-accent-dark: #47542A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    /* ── Week page video and class cards (media-cards.js) ── */
+    .media-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+      gap: 0.9rem;
+      margin: 1rem 0;
+    }
+    .media-card {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-top: 4px solid var(--course-accent);
+      border-radius: 4px;
+      padding: 0.75rem 0.9rem 0.85rem;
+    }
+    .media-card.class { border-top-color: #C8860A; }
+    .media-card p { margin: 0; }
+    .mc-kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .mc-title { font-weight: 600; line-height: 1.3; margin: 0.25rem 0 0.35rem !important; }
+    .mc-sub { font-size: 0.85rem; color: #5A5550; line-height: 1.4; }
+    .mc-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.7rem; }
+    .mc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--course-accent);
+      border-radius: 3px;
+      text-decoration: none;
+      color: var(--course-accent-dark);
+    }
+    a.mc-btn:visited { color: var(--course-accent-dark); }
+    a.mc-btn:hover { background: #F0EDE7; }
+    .mc-btn svg { width: 1em; height: 1em; flex: none; }
+    .mc-btn.primary, a.mc-btn.primary:visited { background: var(--course-accent); color: #fff; }
+    a.mc-btn.primary:hover { background: var(--course-accent-dark); }
+    .mc-btn.pending { border-style: dashed; border-color: #b8b2a8; color: #5A5550; }
+    .mc-total { font-size: 0.9rem; color: #5A5550; }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+    /* the remembered data phrase; filled in by page.js */
+    .cg-phrase { display: inline-flex; align-items: center; gap: .3rem; margin-right: .6rem;
+      font-size: .82rem; flex-shrink: 0; }
+    /* The header row is a fixed 780px. The title, the toggle, "Your data", Search and
+       "Report a problem" only just fit in it, so the chip shows the label alone (the
+       phrase is in the link's title and on the data page) and Search shows its icon.
+       An earlier chip that held the phrase and was allowed to shrink squeezed the
+       label down to "Yo" on a classroom projector. */
+    .cg-phrase a { color: rgba(230,238,222,.92); text-decoration: none; white-space: nowrap; }
+    .header-links .search-btn .sb-label { display: none; }
+    .header-links button.report-btn { white-space: nowrap; }
+    /* the title keeps its own width */
+    .site-header-top .site-title { white-space: nowrap; flex-shrink: 0; }
+    .site-header-top .header-links { min-width: 0; margin-left: 1rem; }
+    @media (max-width: 780px) {
+      /* below the 780px row: the report button's short form, as on phones */
+      .header-links .report-btn .rb-full { display: none; }
+      .header-links .report-btn .rb-short { display: inline; }
+      .cg-phrase { margin-right: .2rem; }
+    }
+    .cg-phrase a:hover { color: #fff; text-decoration: underline; }
+    .cg-phrase button { background: none; border: none; cursor: pointer; padding: 0 .2rem;
+      color: rgba(230,238,222,.7); font: inherit; font-size: 1rem; line-height: 1; }
+    .cg-phrase button:hover { color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* Two rules the other course sites do not define. The header's top
+       row carries a report button beside the title, and a page with a
+       wide demo in it needs more than the reading measure. */
+    .site-header-top { border-bottom: 1px solid rgba(200,222,180,0.15); }
+    main.wide { max-width: 1180px; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Computational Physical Modeling</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <span class="cg-phrase" id="cg-phrase"></span>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        
+          <a href="syllabus.html">Syllabus</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="notes.html">Notes</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reports.html">Examples</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reflection.html">Reflection</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="meeting.html">Meeting</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="ai-use.html">AI Use</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="tools.html">Tools</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="workbench.html">Workbench</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="extra-labor.html">Extra Labor</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="canvas-grades.html">Canvas Grades</a>
+          
+        
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+          
+          
+          
+          <span class="week-current">1</span>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-02.html">2</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-03.html">3</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-04.html">4</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          <span class="week-gap" title="Week 5 is a break week">5<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <a href="week-06.html">6</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-07.html">7</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-08.html">8</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-09.html">9</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-10.html">10</a>
+          
+        
+      </div>
+    </nav>
+
+    
+    <nav class="page-family">
+      <div class="nav-inner">
+        Week 1,
+        <a href="week-01.html">Overview</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="anatomy-of-a-measured-signal.html">Anatomy of a signal</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="program-shape-state-and-flow.html">Program shape I</a>
+        
+        <span class="site-nav-sep">·</span>
+        <a href="assign-01.html">Assignment</a>
+      </div>
+    </nav>
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+
+  <main data-pagefind-body>
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <div class="eyebrow">Week 1 · Class recap</div>
+<h1>Class 1, Assignment 1 and Your Data</h1>
+
+<p>Class 1 · Tuesday, October 6, 2026 · Chris Marriott</p>
+
+<div class="aside"><span class="label">About this recap</span>
+<p>This page summarizes a class in a University of Washington course. The recording links need a
+UW login and only work for students enrolled in that class.</p>
+<p><a href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=6f94e609-e68d-4399-a025-b4db016358bf" target="_blank" rel="noopener">Watch the recording</a> (50:50). The first half of class
+(introductions and the course overview) was recorded without sound, so it is not covered here.
+The <a href="syllabus.html">syllabus</a> and the <a href="week-01.html">Week 1</a> page cover
+the course itself.</p>
+</div>
+
+<h2 id="lecture-preview-5-54">Lecture Preview <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=6f94e609-e68d-4399-a025-b4db016358bf&amp;start=354" target="_blank" rel="noopener">5:54</a></h2>
+
+<p>The second half of class was about <a href="assign-01.html">Assignment 1</a>, and about
+getting from an empty folder to your first plot. The order was:</p>
+
+<ol>
+  <li>Assignment 1. What it asks, and why it is deliberately vague.</li>
+  <li>The example reports. Three finished reports on the same data, in three styles.</li>
+  <li>Your data. Rolling your four words and downloading your pack.</li>
+  <li>Reading the file. JSON, VS Code, and the header fields that matter.</li>
+  <li>Continuous and discrete. The sampling interval, the sample rate, and time zero.</li>
+  <li>The workbench and the example code. Checking your plots, and running the code from the
+  notes page on your own test.</li>
+</ol>
+
+<h2 id="admin-notes-26-51">Admin Notes <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=6f94e609-e68d-4399-a025-b4db016358bf&amp;start=1611" target="_blank" rel="noopener">26:51</a></h2>
+
+<p>Claude. You have free access to Claude Opus 5.5 (a top model) for this course, paid for by
+credits from UW. Please keep your chats to this class. The instructors can see all of the chats,
+so keep that in mind if you wander off topic.</p>
+
+<p>Links. If Chris shows something in class and you cannot find it on the site, ask on Discord
+and he will send you a direct link (and fix the link on the site if it was hard to find).</p>
+
+<p>Office hours. Thursday is the open office hour session for section C.</p>
+
+<h2 id="assignment-1-5-54">Assignment 1 <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=6f94e609-e68d-4399-a025-b4db016358bf&amp;start=354" target="_blank" rel="noopener">5:54</a></h2>
+
+<p>Every assignment this quarter is framed as work at an engineering firm that has just hired
+you. In the first one your supervisors, Alice and Bob, hand you a zip file of data and leave on
+vacation. When they get back they want to know what you found in it. The assignment sheet does
+not tell you what is in the file, and that is on purpose. Real problems usually start out ill defined, and a skill most engineers need (in software or anywhere
+else) is turning an ill-defined request
+from a customer or a boss into a well-defined problem you can solve. That is the main skill the
+course asks you to practice. You will not be starting from scratch, though, since every
+assignment comes with example reports.</p>
+
+<p>You will plot data almost every week, and this week the plot is the whole assignment. Get into
+the habit of saying what errors you found and how uncertain you are about what you present.</p>
+
+<h3 id="errors-and-assumptions-8-22">Errors and Assumptions <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=6f94e609-e68d-4399-a025-b4db016358bf&amp;start=502" target="_blank" rel="noopener">8:22</a></h3>
+
+<p>The crash data comes from a federal database of real tests, and it has errors in it. Your pack
+probably has one too. The first week's video describes the error Chris found in his data, but do
+not assume yours matches. Each test was run by a different lab and team, so one team may have made
+a consistent error that the others did not. Look for it in your data, and if you do not find it, go with what your data shows. Your sample rate may also differ from the 12.5 kHz on the notes page (10 kHz
+or 20 kHz, for instance), so check it before you write your report.</p>
+
+<p>When something looks wrong, you make an assumption, and you say so in your report. A
+correction made silently leaves the next person who opens the data unable to follow your
+reasoning. Every report this quarter should show the evidence in your plot, say whether you think
+it is right, and list the assumptions you made along the way.</p>
+
+<div class="aside"><span class="label">Lecture correction</span>
+<p>The unit example came out garbled in class. One channel in Chris's data is labeled in meters,
+and read as meters its values come to about 32 km, which no chest moved in a crash test. The
+assumption that makes sense of it is that the values are micrometers, which turns 32 km into
+32 mm. Check whether the same mislabel occurs in your data, and if you correct it, state the
+assumption in your report.</p>
+</div>
+
+<h2 id="the-example-reports-11-01">The Example Reports <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=6f94e609-e68d-4399-a025-b4db016358bf&amp;start=661" target="_blank" rel="noopener">11:01</a></h2>
+
+<p>Every assignment has three <a href="reports-01.html">example reports</a>, one for each reason
+you might write a report in a professional setting.</p>
+
+<ul>
+  <li>Memo. The shortest, and the one Chris says he would probably pick. It reads like an email
+  back to Alice and Bob with a PDF attached. It says what was in the file (some basketball data and
+  some crash tests), that the crash tests look like what they want, and what it found there.</li>
+  <li>Technical report. More formal, the kind of thing you would send a client. It has the same
+  plots with more detail, headings, a table, and a clear statement of the error it found. Compare
+  it with the memo to see what the shorter one leaves out.</li>
+  <li>Notebook. Written in <a href="tools-colab.html">Google Colab</a>, where code and text live in
+  one document and the code runs in place. This style is popular in machine learning. When you are
+  done you generate a PDF with everything in it.</li>
+</ul>
+
+<p>Chris recommends the memo (written in a Google Doc with the plots pasted in) or the notebook if
+Colab interests you. The technical report is mostly extra work for this assignment.</p>
+
+<h3 id="channels-11-55">Channels <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=6f94e609-e68d-4399-a025-b4db016358bf&amp;start=715" target="_blank" rel="noopener">11:55</a></h3>
+
+<p>A channel is a list of measurements. When the x axis is time (which covers about 95% of what
+gets measured) it is also called a time series, and "channel" is the general term. A real crash
+test records something like 192 channels. Chris cut the files down to about eight, and your file
+may have a few more or fewer. The memo plots each channel with its label (head acceleration in x,
+y and z, for instance) and its units, which is what makes a graph readable by someone else.</p>
+
+<h3 id="using-the-code-13-53">Using the Code <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=6f94e609-e68d-4399-a025-b4db016358bf&amp;start=833" target="_blank" rel="noopener">13:53</a></h3>
+
+<p>Each example links to the program that made its plots, and you are welcome to copy it.
+Most of the work in this course is the physical modeling (i.e. thinking about the physical
+problem and how to approach it mathematically), and the programming is there to support it. You
+may copy and adapt the code (this is normal practice in software engineering), though make sure
+you read what you copied.</p>
+
+<h2 id="your-data-17-34">Your Data <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=6f94e609-e68d-4399-a025-b4db016358bf&amp;start=1054" target="_blank" rel="noopener">17:34</a></h2>
+
+<p>The <a href="data-pack.html">your data</a> page builds your pack from four words. Roll your own
+four words (do not use the ones in Chris's demo), and everyone gets a different pack. If two
+people do end up with the same crash test it does not matter much. The purpose of the four words is to give each of you different data, as a team would have. Chris's pack held one crash test, 60 basketball training arcs,
+and 40 test arcs.</p>
+
+<p>Please remember your four words. They are in the file name of the zip and in the README inside
+it, and you should put them on your report, so the instructors can rebuild your data and check it
+if something goes wrong. Inside the pack, the crash folder holds one file named for its test number
+(a number followed by <code>.json</code>). That is the file you want this week. The shots folder is
+for the extra problem, and you can ignore it otherwise.</p>
+
+<div class="aside"><span class="label">Lecture correction</span>
+<p>In class the README on screen did not seem to show the four words. The pack Chris opened was
+the held-back demo pack, whose README reads "phrase: none (held-back data used for the in-class
+demo)". A pack you download from the your data page carries your four words on the second line of
+its README.</p>
+</div>
+
+<h2 id="reading-the-file-20-04">Reading the File <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=6f94e609-e68d-4399-a025-b4db016358bf&amp;start=1204" target="_blank" rel="noopener">20:04</a></h2>
+
+<p>The crash file is JSON (pronounced like the name Jason), which stands for JavaScript Object
+Notation. You do not need to know much about it. It is a data format that came from JavaScript,
+the language of web pages, and it gathers a bundle of data into one file. Here the bundle is one
+crash test.</p>
+
+<h3 id="vs-code-21-53">VS Code <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=6f94e609-e68d-4399-a025-b4db016358bf&amp;start=1313" target="_blank" rel="noopener">21:53</a></h3>
+
+<p>Chris opened the file in <a href="tools-vscode.html">Visual Studio Code</a>, an integrated
+development environment (the main software programmers write code in). Like Photoshop or AutoCAD,
+it opens with far more features than you need. You will likely only need one or two of them, and you can ignore the rest.
+The most useful one is the file explorer on the left. Make a folder for the course, with a folder
+for your data inside it, and you can move between files without leaving the editor (you can also
+drag files into it). Chris's layout was a course folder, a test folder for the day, a crash folder
+with two data files, and <code>assignment1.py</code>.</p>
+
+<p>The JSON file opens as one line thousands of characters long, and even with word wrap on (in the
+View menu) it is hard to read. That is expected, since the file is written to be read by programs.</p>
+
+<h3 id="the-header-28-09">The Header <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=6f94e609-e68d-4399-a025-b4db016358bf&amp;start=1689" target="_blank" rel="noopener">28:09</a></h3>
+
+<p>Each channel carries a code like <code>11HEADCG0000ACXP</code>, which identifies it for the
+computer. You can pick out some of it ("HEAD" is the head, "AC" is acceleration), and the same
+information is stored in readable fields in the header. One of those is the direction. On a car the
+axes have names, which avoids arguing about which way x points. Longitudinal is along the direction
+of travel, then lateral and vertical.</p>
+
+<p>The <a href="anatomy-of-a-measured-signal.html">Anatomy of a measured signal</a> page shows
+the header laid out readably, with the important fields highlighted (the dimension, the direction,
+the location, the units, and the two time fields). You can ask the chatbot to do the same for your
+file, either by describing what is in it or by writing a small page that displays it.</p>
+
+<h2 id="continuous-and-discrete-31-21">Continuous and Discrete <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=6f94e609-e68d-4399-a025-b4db016358bf&amp;start=1881" target="_blank" rel="noopener">31:21</a></h2>
+
+<p>The gap between continuous and discrete is close to the central lesson of the course, and it will
+come back dozens of times. Calculus and physics assume the world is continuous, but an instrument
+only records discrete samples, one every so many microseconds, and each sample is a little off
+because of error and noise. Connect the samples and you get a jagged line, and this week you only
+need to plot that line. Much of the rest of the quarter is about rebuilding the continuous picture from
+discrete, noisy samples.</p>
+
+<p>The header gives the time between samples. In the notes page's test it is 8 × 10<sup>−5</sup>
+seconds, or 80 microseconds. Inverting it gives the sample rate, 1 / 0.00008 s = 12,500 Hz.</p>
+
+<p>For a sense of scale <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=6f94e609-e68d-4399-a025-b4db016358bf&amp;start=2113" target="_blank" rel="noopener">35:13</a>, film runs at 24 frames a second and video at 30 or 60 (with some films shot at 48).
+That is fast enough for your eyes to see motion. Cameras that shoot thousands of frames a second
+exist, and they make the slow-motion hummingbird videos. The accelerometer is doing the same thing
+at 12,500 samples a second. Generally you want as many samples as you can get, because the curve
+you rebuild is closer to what happened. The next few weeks cover why a rate is chosen, and why you
+might sometimes lower it.</p>
+
+<h3 id="time-zero-36-41">Time Zero <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=6f94e609-e68d-4399-a025-b4db016358bf&amp;start=2201" target="_blank" rel="noopener">36:41</a></h3>
+
+<p>The header also gives the time of the first sample, and it is negative (−0.05 seconds, or
+1/20 of a second). In a crash test the car is towed toward the barrier at a fixed speed, so at
+first the accelerometer reads zero. Then the car hits the barrier and the reading goes negative,
+i.e. it decelerates. Zero is set at the start of the event, the impact. Each lab records a
+different amount of time before impact, and the zero lets you line up the event across every
+record you have.</p>
+
+<h3 id="finding-a-channel-by-its-code-39-07">Finding a Channel by Its Code <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=6f94e609-e68d-4399-a025-b4db016358bf&amp;start=2347" target="_blank" rel="noopener">39:07</a></h3>
+
+<p>To pull out the longitudinal head acceleration you could check the location, the direction and
+the dimension one field at a time. Matching the code does all of that in one check. A good first
+request to the chatbot is a program that lists every code in your file with what it means, so you
+have them on hand.</p>
+
+<h2 id="the-workbench-40-45">The Workbench <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=6f94e609-e68d-4399-a025-b4db016358bf&amp;start=2445" target="_blank" rel="noopener">40:45</a></h2>
+
+<p>The <a href="workbench.html">workbench</a> puts every tool on the site in one place. If the site
+remembers your four words (the header link then reads "Your data" followed by them, though a
+narrow window can cut it short), the "your data" button loads your pack. You can then switch between channels (head x, head y, chest x, vehicle x, and so on),
+which lets you check that a plot you made yourself looks right. Later in the quarter you can
+integrate your data there as well.</p>
+
+<div class="aside"><span class="label">Student question</span>
+<p>Q: You said there are times when fewer samples are better. For a crash test, would you not want
+as many timestamps as possible? <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=6f94e609-e68d-4399-a025-b4db016358bf&amp;start=2554" target="_blank" rel="noopener">42:34</a></p>
+<p>A: Yes. With nothing else constraining you, take as many points as you can. Labs that sample
+differently can reach different conclusions, so the field agrees on a standard that keeps their
+data comparable, even when that means giving up some resolution. That is, the standard is there to keep labs consistent with each other. There are one or two cases later in the quarter where a lower
+rate is better, and Chris will point them out.</p>
+</div>
+
+<div class="aside"><span class="label">Technically</span>
+<p>The standard for crash data (SAE J211) does its work through filtering, which the class had not
+covered yet. It assigns each measurement a filter class, chosen by how quickly the measured quantity
+can change, and labs filter to that class so that their numbers can be compared. Week 2 covers
+sampling and why a rate might be lowered (<a href="discrete-evaluation.html">Discrete
+evaluation</a>), and Week 4 covers filter classes (<a href="why-a-standard-exists.html">The filter
+class is part of the measurement</a>).</p>
+</div>
+
+<h2 id="running-the-example-code-44-03">Running the Example Code <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=6f94e609-e68d-4399-a025-b4db016358bf&amp;start=2643" target="_blank" rel="noopener">44:03</a></h2>
+
+<p>Almost every notes page has code, in three languages.</p>
+
+<ul>
+  <li>Python. The one Chris recommends, and the best fit for mechanical engineers.</li>
+  <li>MATLAB. The traditional choice in engineering, still widely used, and free for you as a
+  student. Use it if you already know it.</li>
+  <li>JavaScript. Included because it is the code the page itself runs.</li>
+</ul>
+
+<p>The Python and MATLAB plots on the page were made by running that code, so you see what to
+expect. Read the code before you paste it, and use the line-by-line highlights where a page has
+them.</p>
+
+<p>Chris made two changes to the code on the anatomy page before running it.</p>
+
+<ul>
+  <li>Your test number. The page loads test 10642, which is held back from the student packs.
+  Change it to the number of your own file.</li>
+  <li><code>plt.show()</code>. Without it the script runs and no plot appears. The page's Python tab
+  now includes it.</li>
+</ul>
+
+<p>Press the play button at the top right of VS Code to run the file, and wait for it to finish
+before pressing it again. A window opens with the plot, and its save button writes a PNG (or a PDF)
+that you can paste into your report. To plot all eight channels, you can paste in each code and
+save each plot, or ask the chatbot to change the program so it plots every channel and saves the
+files for you. Use the chatbot to learn some Python along the way, but do not get bogged down in
+the code.</p>
+
+<div class="aside"><span class="label">Tip: save the plot from Python</span>
+<p>Python can also save the plot to a file for you, so you do not need the save button. Add
+<code>plt.savefig</code> before <code>plt.show()</code>, and the file lands in the folder you ran
+the program from. The extension in the file name sets the format.</p>
+<div class="codetabs"><pre data-lang="python">plt.savefig('head_x.png', dpi=200)   # a picture to paste into a document
+plt.savefig('head_x.pdf')            # a PDF, which stays sharp at any size
+plt.show()</pre></div>
+<p>Save before you show. Once you close the plot window the figure is gone, and a
+<code>savefig</code> after <code>plt.show()</code> writes a blank file. To name the file after the
+channel instead, use <code>plt.savefig(f"{ch['code']}.png", dpi=200)</code>, which writes
+<code>11HEADCG0000ACXP.png</code> (handy once you plot all eight channels in a loop).</p>
+</div>
+
+<div class="aside"><span class="label">Coming next week</span>
+<p>This week you report on your plots. Next week the course starts on the mathematical tools for
+analyzing the data. <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=6f94e609-e68d-4399-a025-b4db016358bf&amp;start=3004" target="_blank" rel="noopener">50:04</a></p>
+</div>
+
+  </main>
+
+  
+
+  <script src="js/page.js?v=20261015124713"></script>
+
+  <footer class="site-footer">
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-07">October 7, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Algorithms');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  
+  
+  
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

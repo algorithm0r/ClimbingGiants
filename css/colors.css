@@ -1,69 +1,72 @@
-/* 
+/*
  * colors.css
- * Contains all color variables and theming for the Climbing Giants website
- * Using a Retro Futurism color scheme with synthwave aesthetics
+ * Climbing Giants — Forest/Redwood palette
+ * Personal brand: deep forest green + warm amber
+ * Course colors: each drawn from the same natural palette
  */
 
 :root {
-    /* Primary Colors */
-    --primary-color: #7B2CBF;       /* Synthwave purple */
-    --secondary-color: #00FFFF;     /* Cyan */
-    --accent-color: #FF1493;        /* Hot pink */
-    
-    /* Background Colors */
-    --dark-bg: #120458;             /* Deep blue */
-    --darker-bg: #0a0129;           /* Darker blue for footer/gradients */
-    --body-bg: #070024;             /* Base background color */
-    
-    /* Text Colors */
-    --light-text: #f8f9fa;          /* Very light gray/off-white for dark backgrounds */
-    --muted-text: #b0b0b0;          /* Medium light gray for less emphasis */
-    
-    /* Effect Colors (for shadows, gradients, glows) */
-    --glow-primary: rgba(123, 44, 191, 0.5);    /* Purple glow */
-    --glow-secondary: rgba(0, 255, 255, 0.5);   /* Cyan glow */
-    --glow-accent: rgba(255, 20, 147, 0.5);     /* Pink glow */
-    
-    /* Gradient Definitions */
-    --gradient-hero: linear-gradient(135deg, var(--dark-bg) 0%, var(--primary-color) 100%);
-    --gradient-featured: linear-gradient(to right, rgba(18, 4, 88, 0.7), rgba(123, 44, 191, 0.7));
-    --gradient-footer: linear-gradient(135deg, var(--darker-bg) 0%, var(--dark-bg) 100%);
-    
-    /* Component-Specific Colors */
-    --navbar-bg: rgba(18, 4, 88, 0.9);
-    --card-bg: rgba(18, 4, 88, 0.6);
-    --btn-hover: #f012a3;           /* Slightly darker pink for button hover */
-    
-    /* Border Colors */
-    --border-light: rgba(0, 255, 255, 0.3);    /* Cyan border - more subtle */
-    --border-medium: rgba(0, 255, 255, 0.5);   /* Cyan border - more visible */
+    /* ── Backgrounds ── */
+    --bg-page:   #F7F4EF;   /* warm parchment — main page background */
+    --bg-card:   #FFFFFF;   /* white — content cards */
+    --bg-subtle: #EEE9E0;   /* slightly darker parchment — alternating rows, insets */
+
+    /* ── Brand ── */
+    --brand:         #2D5016;   /* deep forest green — header, primary headings */
+    --brand-dark:    #1E360E;   /* darker green — hover states on brand elements */
+    --brand-light:   #A8C890;   /* light sage — muted text on dark brand backgrounds */
+
+    /* ── Accent ── */
+    --accent:        #C8860A;   /* warm amber — calls to action, highlights */
+    --accent-dark:   #A06A06;   /* darker amber — hover on accent elements */
+    --accent-light:  #F0D090;   /* pale gold — very subtle accent tints */
+
+    /* ── Course colors ── */
+    --course-ethics:     #3A5F8A;   /* slate blue  — Computer Ethics */
+    --course-ai:         #1A6B6B;   /* forest teal — Artificial Intelligence */
+    --course-algorithms: #9B4423;   /* rust        — Algorithms */
+    --course-four:       #6B3A72;   /* plum        — Discrete Math / Automata */
+    --course-ds:         #8A7340;   /* dark gold   — Data Structures */
+    --course-game:       #2A7A40;   /* jade green  — Game and Simulation Design */
+    --course-modeling:   #5F7038;   /* olive       — Computational Physical Modeling */
+    --course-game-dark:  #1F5E30;   /* dark jade   — hover states */
+    --course-sims:       #7B5032;   /* bark        — Simulations (not a course) */
+
+    /* ── Text ── */
+    --text-primary:  #1A1A1A;   /* near-black — body text */
+    --text-muted:    #5A5550;   /* warm gray — secondary text, captions */
+    --text-on-dark:  #F7F4EF;   /* parchment — text on dark backgrounds */
+    --text-on-dark-muted: #C8DEB4; /* light sage — muted text on dark backgrounds (~5:1 on brand green) */
+
+    /* ── Borders & dividers ── */
+    --border-light:  rgba(45, 80, 22, 0.15);   /* very subtle green tint */
+    --border-medium: rgba(45, 80, 22, 0.30);   /* visible but not heavy */
+
+    /* ── Shadows ── */
+    --shadow-card:   0 1px 6px rgba(45, 80, 22, 0.10);
+    --shadow-hover:  0 4px 16px rgba(45, 80, 22, 0.18);
 }
 
-/* 
- * Helper classes for applying colors directly in HTML
- * Usage example: <span class="text-accent">Important text</span>
- */
+/* ── Utility: text colors ── */
+.text-brand      { color: var(--brand); }
+.text-accent     { color: var(--accent); }
+.text-muted      { color: var(--text-muted); }
+.text-on-dark    { color: var(--text-on-dark); }
 
-/* Text colors */
-.text-primary { color: var(--primary-color); }
-.text-secondary { color: var(--secondary-color); }
-.text-accent { color: var(--accent-color); }
-.text-light { color: var(--light-text); }
-.text-muted { color: var(--muted-text); }
+/* ── Utility: course colors ── */
+.text-ethics     { color: var(--course-ethics); }
+.text-ai         { color: var(--course-ai); }
+.text-algorithms { color: var(--course-algorithms); }
+.text-course-4   { color: var(--course-four); }
 
-/* Background colors */
-.bg-primary { background-color: var(--primary-color); }
-.bg-secondary { background-color: var(--secondary-color); }
-.bg-accent { background-color: var(--accent-color); }
-.bg-dark { background-color: var(--dark-bg); }
-.bg-darker { background-color: var(--darker-bg); }
+.bg-ethics       { background-color: var(--course-ethics); }
+.bg-ai           { background-color: var(--course-ai); }
+.bg-algorithms   { background-color: var(--course-algorithms); }
+.bg-course-4     { background-color: var(--course-four); }
 
-/* Gradient backgrounds */
-.bg-gradient-hero { background: var(--gradient-hero); }
-.bg-gradient-featured { background: var(--gradient-featured); }
-.bg-gradient-footer { background: var(--gradient-footer); }
-
-/* Glow text effects */
-.glow-primary { text-shadow: 0 0 10px var(--glow-primary); }
-.glow-secondary { text-shadow: 0 0 10px var(--glow-secondary); }
-.glow-accent { text-shadow: 0 0 10px var(--glow-accent); }
+/* ── Utility: backgrounds ── */
+.bg-brand        { background-color: var(--brand); }
+.bg-accent       { background-color: var(--accent); }
+.bg-page         { background-color: var(--bg-page); }
+.bg-card         { background-color: var(--bg-card); }
+.bg-subtle       { background-color: var(--bg-subtle); }

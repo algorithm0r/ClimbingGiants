@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 9 Notes — Discrete Structures</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (plum). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #6B3A72;
+      --course-accent-dark: #522D57;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Discrete Math for Computer Science</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        <a href="syllabus.html">Syllabus</a>
+        <span class="site-nav-sep">·</span>
+        <a href="reflection-instructions.html">Reflection</a>
+        <span class="site-nav-sep">·</span>
+        <a href="meeting-instructions.html">Meeting</a>
+        <span class="site-nav-sep">·</span>
+        <a href="ai-use.html">AI Use</a>
+        <span class="site-nav-sep">·</span>
+        <a href="extra-labor.html">Extra Labor</a>
+        <span class="site-nav-sep">·</span>
+        <a href="canvas-grades.html">Canvas Grades</a>
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+        
+          
+            <a href="week-01.html">1</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-02.html">2</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-03.html">3</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-04.html">4</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-05.html">5</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-06.html">6</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-07.html">7</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-08.html">8</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <span class="week-current">9</span>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-10.html">10</a>
+          
+          
+        
+      </div>
+    </nav>
+
+    
+    <nav class="page-family">
+      <div class="nav-inner">
+        Week 9 —
+        <a href="week-09.html">Overview</a> ·
+        <strong>Notes</strong> ·
+        <a href="assign-09.html">Assignment</a> ·
+        <a href="solution-09.html">Solution</a>
+      </div>
+    </nav>
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+  <main data-pagefind-body class="notes">
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <h1>Week 9 Notes — Strong Induction and Recursion</h1>
+<h2 id="contents">Contents</h2>
+<ol>
+<li><a href="#strong-induction">Strong Induction</a></li>
+<li><a href="#recursive-insertion-sort">Recursive Insertion Sort</a></li>
+<li><a href="#recursive-insertion-sort-analysis">Recursive Insertion Sort Analysis</a></li>
+<li><a href="#using-strong-induction-to-prove-recurrence-bounds">Using Strong Induction to Prove Recurrence Bounds</a></li>
+<li><a href="#merge-sort">Merge Sort</a></li>
+<li><a href="#merge-sort-analysis">Merge Sort Analysis</a></li>
+<li><a href="#comparing-sorting-algorithms">Comparing Sorting Algorithms</a></li>
+<li><a href="#connections">Connections</a></li>
+</ol>
+<hr>
+<h2 id="strong-induction">Strong Induction</h2>
+<h3 id="why-weak-induction-is-sometimes-not-enough">Why weak induction is sometimes not enough</h3>
+<p>The induction introduced in <a href="notes-04.html">Week 4 Notes</a> — call it <strong>weak induction</strong> — has the following structure: to prove $P(n)$ for all $n \geq n_0$, assume $P(n)$ holds and derive $P(n+1)$. The inductive hypothesis covers exactly <em>one</em> prior case.</p>
+<p>This works perfectly when the proof for case $n+1$ only needs to lean on case $n$. But many recursive algorithms do not have this shape. The Fibonacci sequence, for example, is defined by</p>
+$$F(n) = F(n-1) + F(n-2),
+$$
+<p>which requires <em>two</em> prior cases. Binary search reduces a problem of size $n$ to one of size $\lfloor n/2 \rfloor$, which for large $n$ is far below $n-1$. Weak induction's single-step hypothesis is not wide enough to cover either situation.</p>
+<h3 id="the-formal-statement">The formal statement</h3>
+<p><strong>Theorem (Strong Induction).</strong> Let $P(n)$ be a predicate over the integers. Suppose:</p>
+<ol>
+<li><strong>Base case(s):</strong> $P(n_0), P(n_0 + 1), \ldots, P(n_1)$ are all true for some $n_1 \geq n_0$.</li>
+<li><strong>Inductive step:</strong> For all $n &gt; n_1$, if $P(k)$ holds for every integer $k$ with $n_0 \leq k &lt; n$, then $P(n)$ holds.</li>
+</ol>
+<p>Then $P(n)$ is true for all $n \geq n_0$.</p>
+<p>The critical difference from weak induction is in the hypothesis of the inductive step: instead of assuming $P(n)$ to prove $P(n+1)$, we assume $P(k)$ for <strong>all</strong> $k &lt; n$ and prove $P(n)$.</p>
+<h3 id="rewriting-the-inductive-hypothesis">Rewriting the inductive hypothesis</h3>
+<p>When carrying out a strong induction proof it is common to write the inductive hypothesis in one of two equivalent forms:</p>
+<ul>
+<li><strong>General form:</strong> Assume $T(k) \leq B \cdot f(k)$ for all integers $k$ with $n_0 \leq k &lt; n$.</li>
+<li><strong>Targeted form:</strong> Assume $T(\lfloor n/2 \rfloor) \leq B \cdot f(\lfloor n/2 \rfloor)$.</li>
+</ul>
+<p>The general form is more versatile; the targeted form is more readable when only one sub-problem size appears in the recurrence. Either is valid: the targeted form is just the general form applied to the specific $k = \lfloor n/2 \rfloor$ that will appear in the next step.</p>
+<h3 id="why-more-base-cases-may-be-needed">Why more base cases may be needed</h3>
+<p>A subtle issue arises with strong induction that rarely surfaces in weak induction: the base case(s) must cover <em>every</em> value that the inductive step cannot reach by unwinding the recurrence. Consider a recurrence $T(n) = T(\lfloor n/2 \rfloor) + c$ starting from $n = 1$. For even $n$, $\lfloor n/2 \rfloor$ eventually reaches 1, so the base case $n = 1$ is sufficient. But if $n = 1$ makes the thing we are trying to prove undefined (for example, because it requires $\log_2 1 = 0$ in a denominator), we must move $n_0$ upward and verify all small cases individually.</p>
+<h3 id="structural-comparison-weak-vs-strong-induction">Structural comparison: weak vs. strong induction</h3>
+<p>In weak induction the dependency chain is linear:</p>
+$$n \;\longleftarrow\; n-1 \;\longleftarrow\; n-2 \;\longleftarrow\; \cdots \;\longleftarrow\; n_0.
+$$
+<p>In strong induction the dependency graph can skip levels:</p>
+$$n \;\longleftarrow\; \lfloor n/2 \rfloor \;\longleftarrow\; \lfloor n/4 \rfloor \;\longleftarrow\; \cdots \;\longleftarrow\; n_0.
+$$
+<p>All weak induction proofs can be recast as strong induction proofs; the converse is false. Whenever a recurrence's sub-problem is anything other than $n - 1$, strong induction is the appropriate tool.</p>
+<hr>
+<h2 id="recursive-insertion-sort">Recursive Insertion Sort</h2>
+<h3 id="the-algorithm">The algorithm</h3>
+<p>Insertion sort can be expressed recursively. The key observation: to sort a list of $n$ elements, sort the first $n - 1$ elements recursively, then insert the $n$-th element into its correct position among the already-sorted prefix.</p>
+<pre><code>InsertionSort(A, n):
+  if n &lt;= 1:
+    return A
+  A' = InsertionSort(A, n - 1)
+  A'.add(A[n])          // append A[n] to the end of the sorted prefix
+  j = n
+  while j &gt; 1 and A[j] &lt; A[j-1]:
+    swap A[j] and A[j-1]
+    j = j - 1
+  return A'
+</code></pre>
+<p>The recursive call sorts $A[1..n-1]$. The <code>while</code> loop then shuffles $A[n]$ leftward until it is in its correct position. In the <strong>best case</strong> $A[n]$ is already the maximum and the loop does not execute. In the <strong>worst case</strong> $A[n]$ is the minimum and it must travel all the way to position 1, performing $n - 1$ swaps.</p>
+<h3 id="setting-up-the-recurrence">Setting up the recurrence</h3>
+<p>Counting operations at mid-level resolution in the worst case:</p>
+<ul>
+<li>The base case ($n \leq 1$) costs a fixed constant: $T(1) = 3$ (one method call, one comparison, one return).</li>
+<li>For $n &gt; 1$: one recursive call of size $n - 1$, plus the cost of the <code>while</code> loop and surrounding overhead.</li>
+</ul>
+<p>The <code>while</code> loop executes with $j$ ranging from $n$ down to $2$ (worst case), giving $n - 1$ iterations. Counting the operations per iteration and the surrounding statements yields:</p>
+$$T(n) = T(n-1) + 8n + 3, \qquad n &gt; 1.
+$$
+<p>In simplified form, absorbing constants:</p>
+$$T(n) = T(n-1) + 8n + 3.
+$$
+<hr>
+<h2 id="recursive-insertion-sort-analysis">Recursive Insertion Sort Analysis</h2>
+<h3 id="unrolling-the-recurrence">Unrolling the recurrence</h3>
+<p>To guess a closed form, apply repeated substitution (algebraic unwinding). Replace $T(n-1)$ with its own definition, then $T(n-2)$, and so on:</p>
+$$T(n) = T(n-1) + 8n + 3
+$$
+$$= T(n-2) + 8(n-1) + 3 + 8n + 3
+$$
+$$= T(n-3) + 8(n-2) + 3 + 8(n-1) + 3 + 8n + 3
+$$
+$$= \cdots
+$$
+<p>After $n - 1$ substitutions the recursion bottoms out at $T(1) = 3$. Collecting terms:</p>
+$$T(n) = 3 + \sum_{j=0}^{n-2} \bigl(8(n - j) + 3\bigr).
+$$
+<p>Distributing and applying Gauss's sum gives the closed form</p>
+$$T(n) = 4n^2 + 7n - 8.
+$$
+<p>The dominant term is $4n^2$, so $T(n) \in \Theta(n^2)$.</p>
+<h3 id="proving-the-upper-bound-by-strong-induction">Proving the upper bound by strong induction</h3>
+<p>Rather than proving the exact formula, it is often easier to prove a bound. We prove $T(n) \leq Bn^2$ for a suitable constant $B$.</p>
+<p><strong>Theorem.</strong> There exists a constant $B &gt; 0$ and an integer $n_0 \geq 1$ such that $T(n) \leq Bn^2$ for all $n \geq n_0$.</p>
+<p><strong>Proof.</strong></p>
+<p><em>Base case ($n = 1$):</em> $T(1) = 3$ and $B \cdot 1^2 = B$. The inequality $3 \leq B$ holds provided $B \geq 3$. This is a condition we will carry forward.</p>
+<p><em>Inductive hypothesis:</em> Assume $T(k) \leq Bk^2$ for all $k &lt; n$ (specifically for $k = n-1$).</p>
+<p><em>Inductive step ($n &gt; 1$):</em></p>
+<p>Starting from the recurrence definition:</p>
+$$T(n) = T(n-1) + 8n + 3.
+$$
+<p>Apply the inductive hypothesis to $T(n-1)$:</p>
+$$T(n) \leq B(n-1)^2 + 8n + 3.
+$$
+<p>Expand $(n-1)^2$:</p>
+$$= Bn^2 - 2Bn + B + 8n + 3.
+$$
+<p>We wish to show this is at most $Bn^2$. The leap of faith is:</p>
+$$Bn^2 - 2Bn + B + 8n + 3 \leq Bn^2.
+$$
+<p>This simplifies to</p>
+$$-2Bn + B + 8n + 3 \leq 0.
+$$
+<p>Promote the constants: since $n \geq 1$, we have $B \leq Bn$ and $3 \leq 3n$, so</p>
+$$-2Bn + B + 8n + 3 \leq -2Bn + Bn + 8n + 3n = n(-B + 11).
+$$
+<p>For this to be $\leq 0$ we need $B \geq 11$.</p>
+<p><em>Choosing constants:</em> We have two conditions: $B \geq 3$ (from the base case) and $B \geq 11$ (from the inductive step). Setting $B = 11$ satisfies both. Take $n_0 = 1$.</p>
+<p><em>Conclusion:</em> By induction, $T(n) \leq 11n^2$ for all $n \geq 1$. Hence $T(n) \in O(n^2)$. $\blacksquare$</p>
+<h3 id="proving-the-lower-bound-by-strong-induction">Proving the lower bound by strong induction</h3>
+<p><strong>Theorem.</strong> There exists a constant $a &gt; 0$ such that $T(n) \geq an^2$ for all $n \geq 1$.</p>
+<p><strong>Proof.</strong></p>
+<p><em>Base case ($n = 1$):</em> $T(1) = 3 \geq a \cdot 1$. This holds for any $a \leq 3$.</p>
+<p><em>Inductive hypothesis:</em> Assume $T(n-1) \geq a(n-1)^2$.</p>
+<p><em>Inductive step ($n &gt; 1$):</em></p>
+$$T(n) = T(n-1) + 8n + 3 \geq a(n-1)^2 + 8n + 3.
+$$
+<p>Expand:</p>
+$$= an^2 - 2an + a + 8n + 3.
+$$
+<p>We wish to show this is at least $an^2$:</p>
+$$an^2 - 2an + a + 8n + 3 \geq an^2.
+$$
+<p>This simplifies to $-2an + a + 8n + 3 \geq 0$. Since $a + 3 &gt; 0$, we can discard that positive term and ask when $n(8 - 2a) \geq 0$, which holds for all $n \geq 1$ provided $a \leq 4$.</p>
+<p><em>Choosing constants:</em> Two conditions: $a \leq 3$ and $a \leq 4$. Setting $a = 3$ satisfies both. Take $n_0 = 1$.</p>
+<p><em>Conclusion:</em> By induction, $T(n) \geq 3n^2$ for all $n \geq 1$. Hence $T(n) \in \Omega(n^2)$. $\blacksquare$</p>
+<h3 id="result">Result</h3>
+<p>Combining both bounds:</p>
+$$T(n) \in \Theta(n^2).
+$$
+<p>Recursive insertion sort has the same asymptotic cost as its iterative counterpart. The recursion adds no asymptotic savings.</p>
+<hr>
+<h2 id="using-strong-induction-to-prove-recurrence-bounds">Using Strong Induction to Prove Recurrence Bounds</h2>
+<p>The insertion sort analysis above illustrates a general technique that can be applied to any recurrence relation when an exact closed form is difficult to find or unnecessary.</p>
+<h3 id="the-technique-in-four-steps">The technique in four steps</h3>
+<ol>
+<li>
+<p><strong>State the bound.</strong> Formulate the claim as $T(n) \leq B \cdot f(n)$ (for an upper bound) or $T(n) \geq a \cdot f(n)$ (for a lower bound), where $f$ is your guessed asymptotic class and $B$, $a$ are unknown positive constants.</p>
+</li>
+<li>
+<p><strong>Verify the base case(s).</strong> Plug in small values. If $f(n_0) = 0$ makes the inequality trivially false (as happens with $\log_2 1 = 0$ on the upper side), move to the next value or augment the bound with an additive constant.</p>
+</li>
+<li>
+<p><strong>Apply the inductive hypothesis.</strong> Replace the recursive term $T(\lfloor n/2 \rfloor)$ (or $T(n-1)$, etc.) with the hypothesized bound. Use $\leq$ when proving upper bounds, $\geq$ for lower bounds.</p>
+</li>
+<li>
+<p><strong>Make the leap of faith and solve for the constant.</strong> After algebra, the inequality reduces to a condition on $B$ (or $a$). Confirm that such a constant exists; any positive real number satisfying the condition is a valid choice.</p>
+</li>
+</ol>
+<h3 id="upper-vs-lower-bound-asymmetry">Upper vs. lower bound asymmetry</h3>
+<p>A key asymmetry appears when floors and ceilings are involved.</p>
+<ul>
+<li><strong>Upper bound:</strong> Replace $\lfloor n/2 \rfloor$ with $n/2$. The floor is never larger than $n/2$, so this replacement makes the argument of $T$ larger, which increases the right-hand side of the $\leq$ and keeps the inequality valid.</li>
+<li><strong>Lower bound:</strong> Replace $\lfloor n/2 \rfloor$ with $n/4$. Since the floor of $n/2$ is at least $n/4$ for $n \geq 2$, this makes the argument smaller, which decreases the right-hand side of the $\geq$ and keeps that inequality valid.</li>
+</ul>
+<p>The choice of $n/4$ (a power of 2 in the denominator) is deliberate: it makes logarithmic algebra clean.</p>
+<h3 id="the-plus-a-trick-for-base-cases">The &quot;plus $a$&quot; trick for base cases</h3>
+<p>When $f(1) = 0$ causes the upper-bound base case to fail, augment the guessed bound to $T(n) \leq Bn \log_2 n + a$. The additive constant $a$ belongs to the same asymptotic class as $Bn \log_2 n$ (it only changes the implicit constant), so the theorem is unchanged in strength. The payoff: at $n = 1$ the right-hand side becomes $0 + a = a$, and choosing $a \geq T(1)$ makes the base case valid without moving $n_0$ upward.</p>
+<hr>
+<h2 id="merge-sort">Merge Sort</h2>
+<h3 id="the-divide-and-conquer-idea">The divide-and-conquer idea</h3>
+<p>Merge sort is a recursive sorting algorithm based on the <strong>divide-and-conquer</strong> paradigm: split the input in half, sort each half independently, then combine the two sorted halves. Unlike insertion sort's sequential structure, merge sort performs two recursive sub-calls, which leads to a fundamentally different recurrence.</p>
+<h3 id="pseudocode">Pseudocode</h3>
+<pre><code>MergeSort(A, n):
+  if n &lt;= 1:
+    return A
+  B = MergeSort(A[1 .. floor(n/2)],  floor(n/2))
+  C = MergeSort(A[floor(n/2)+1 .. n], ceil(n/2))
+  return Merge(B, C)
+</code></pre>
+<p>The <code>Merge</code> subroutine combines two already-sorted lists $B$ and $C$ of sizes $|B|$ and $|C|$ into a single sorted list. It does so in a single linear pass — comparing the front elements of each list and appending the smaller — requiring $\Theta(|B| + |C|)$ operations.</p>
+<h3 id="the-merge-subroutine">The merge subroutine</h3>
+<p>Although the internals of <code>Merge</code> are not spelled out here, the key fact is:</p>
+$$\text{cost of Merge}(B, C) = \Theta(|B| + |C|).
+$$
+<p>For merge sort, $|B| = \lfloor n/2 \rfloor$ and $|C| = \lceil n/2 \rceil$, so $|B| + |C| = n$. The merge step costs $\Theta(n)$.</p>
+<h3 id="setting-up-the-recurrence-2">Setting up the recurrence</h3>
+<p>With the base case costing a fixed constant (3 operations as before) and assuming $n$ is a power of 2 for simplicity (which removes floors and ceilings):</p>
+$$T(1) = 3,
+$$
+$$T(n) = 2T\!\left(\frac{n}{2}\right) + Dn, \qquad n &gt; 1,
+$$
+<p>where $D$ is the constant guaranteed by the $\Theta(n)$ bound on the merge step. (The small fixed overhead from the recursive calls and list setup is absorbed into $D$ by adjusting the constant.)</p>
+<p>This recurrence is fundamentally different from insertion sort's: the recursive term $2T(n/2)$ involves a sub-problem of size $n/2$, not $n-1$. Strong induction — not weak induction — is required to handle it.</p>
+<hr>
+<h2 id="merge-sort-analysis">Merge Sort Analysis</h2>
+<h3 id="guessing-the-bound">Guessing the bound</h3>
+<p>The recurrence $T(n) = 2T(n/2) + Dn$ is one of the most important recurrences in computer science. The intuition: at each level of recursion the total work across all sub-problems is $Dn$; there are $\log_2 n$ levels; so the total is $Dn \log_2 n$. The formal goal is to prove</p>
+$$T(n) \in \Theta(n \log_2 n).
+$$
+<h3 id="upper-bound">Upper bound</h3>
+<p><strong>Theorem.</strong> There exist constants $B, a &gt; 0$ and $n_0 \geq 1$ such that $T(n) \leq Bn\log_2 n + a$ for all $n \geq n_0$.</p>
+<p>The additive constant $a$ is included to handle the base case cleanly (the &quot;plus $a$&quot; trick described above).</p>
+<p><strong>Proof.</strong></p>
+<p><em>Base case ($n = 1$):</em> $T(1) = 3$. The bound gives $B \cdot 1 \cdot \log_2 1 + a = 0 + a = a$. We need $3 \leq a$, so take $a \geq 3$.</p>
+<p><em>Inductive hypothesis:</em> Assume $T(k) \leq Bk\log_2 k + a$ for all $k &lt; n$. In particular, since $n/2 &lt; n$:</p>
+$$T\!\left(\frac{n}{2}\right) \leq B\cdot\frac{n}{2}\cdot\log_2\!\left(\frac{n}{2}\right) + a.
+$$
+<p><em>Inductive step ($n &gt; 1$):</em></p>
+$$T(n) = 2T\!\left(\frac{n}{2}\right) + Dn
+$$
+$$\leq 2\left(B\cdot\frac{n}{2}\cdot\log_2\!\left(\frac{n}{2}\right) + a\right) + Dn
+$$
+$$= Bn\log_2\!\left(\frac{n}{2}\right) + 2a + Dn.
+$$
+<p>Apply the logarithm rule $\log_2(n/2) = \log_2 n - \log_2 2 = \log_2 n - 1$:</p>
+$$= Bn(\log_2 n - 1) + 2a + Dn
+$$
+$$= Bn\log_2 n - Bn + 2a + Dn
+$$
+$$= Bn\log_2 n + a + \underbrace{(-Bn + Dn + a)}_{\text{must be} \leq 0}.
+$$
+<p>The leap of faith requires</p>
+$$-Bn + Dn + a \leq 0.
+$$
+<p>Promote $a$ to $an$ (valid since $n \geq 1$ makes $an \geq a$), giving $n(-B + D + a) \leq 0$, so $B \geq D + a$.</p>
+<p><em>Choosing constants:</em> Set $a = 3$ (from the base case condition). Then $B \geq D + 3$; take $B = D + 3$. Set $n_0 = 1$.</p>
+<p><em>Conclusion:</em> $T(n) \leq Bn\log_2 n + a$ for all $n \geq 1$, so $T(n) \in O(n\log n)$. $\blacksquare$</p>
+<h3 id="lower-bound">Lower bound</h3>
+<p><strong>Theorem.</strong> There exist constants $a &gt; 0$ and $n_0 \geq 1$ such that $T(n) \geq an\log_2 n$ for all $n \geq n_0$.</p>
+<p>Note: the additive constant is not needed here because the lower-bound base case is easy.</p>
+<p><strong>Proof.</strong></p>
+<p><em>Base case ($n = 1$):</em> $T(1) = 3 \geq a \cdot 1 \cdot \log_2 1 = 0$. True for any $a &gt; 0$. No condition on $a$ required.</p>
+<p><em>Inductive hypothesis:</em> Assume $T(n/2) \geq a \cdot (n/2) \cdot \log_2(n/2)$.</p>
+<p><em>Inductive step ($n &gt; 1$):</em></p>
+$$T(n) = 2T\!\left(\frac{n}{2}\right) + Dn \geq 2 \cdot a\cdot\frac{n}{2}\cdot\log_2\!\left(\frac{n}{2}\right) + Dn
+$$
+$$= an(\log_2 n - 1) + Dn
+$$
+$$= an\log_2 n + n(D - a).
+$$
+<p>We want this to be $\geq an\log_2 n$, so we need $n(D - a) \geq 0$, which holds when $a \leq D$.</p>
+<p><em>Choosing constants:</em> Take $a = D$ (or any $a \leq D$). Set $n_0 = 1$.</p>
+<p><em>Conclusion:</em> $T(n) \geq Dn\log_2 n$ for all $n \geq 1$, so $T(n) \in \Omega(n\log n)$. $\blacksquare$</p>
+<h3 id="result-2">Result</h3>
+$$T(n) \in \Theta(n\log n).
+$$
+<p>This is the tight asymptotic bound for merge sort. The proof demonstrates exactly how the divide-and-conquer structure — two sub-calls of size $n/2$ combined with $\Theta(n)$ merge work — collapses to $\Theta(n\log n)$ via strong induction.</p>
+<hr>
+<h2 id="comparing-sorting-algorithms">Comparing Sorting Algorithms</h2>
+<h3 id="the-landscape">The landscape</h3>
+<p>Four sorting algorithms now appear in this course. Their worst-case complexities are:</p>
+<table>
+<thead>
+<tr>
+<th>Algorithm</th>
+<th>Recurrence</th>
+<th>Complexity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bubble sort</td>
+<td>$T(n) = T(n-1) + cn$</td>
+<td>$\Theta(n^2)$</td>
+</tr>
+<tr>
+<td>Selection sort</td>
+<td>$T(n) = T(n-1) + cn$</td>
+<td>$\Theta(n^2)$</td>
+</tr>
+<tr>
+<td>Insertion sort (iterative or recursive)</td>
+<td>$T(n) = T(n-1) + cn$</td>
+<td>$\Theta(n^2)$</td>
+</tr>
+<tr>
+<td>Merge sort</td>
+<td>$T(n) = 2T(n/2) + cn$</td>
+<td>$\Theta(n\log n)$</td>
+</tr>
+</tbody>
+</table>
+<p>The $\Theta(n^2)$ algorithms share a common recurrence structure: one sub-problem of size $n-1$, plus linear work. The essential difference in merge sort is the <em>two</em> sub-calls of size $n/2$ in place of one sub-call of size $n-1$.</p>
+<h3 id="the-practical-gap">The practical gap</h3>
+<p>The ratio of $n^2$ to $n\log n$ grows without bound:</p>
+$$\frac{n^2}{n\log_2 n} = \frac{n}{\log_2 n} \to \infty \quad \text{as } n \to \infty.
+$$
+<p>At $n = 1{,}000$: $n^2 = 10^6$, while $n\log_2 n \approx 10{,}000$. Merge sort is roughly 100 times faster at this size. At $n = 10^6$: $n^2 = 10^{12}$, while $n\log_2 n \approx 2 \times 10^7$ — a factor of roughly 50,000. For large inputs, the difference between $\Theta(n^2)$ and $\Theta(n\log n)$ is not academic; it is the difference between a computation that finishes in seconds and one that would take years.</p>
+<h3 id="why-merge-sort-is-not-always-preferred">Why merge sort is not always preferred</h3>
+<p>Despite its asymptotic advantage, merge sort has practical costs that the $\Theta$-notation hides:</p>
+<ul>
+<li><strong>Space:</strong> merge sort requires auxiliary space proportional to $n$ for the merge step. Bubble and insertion sort can be implemented in place.</li>
+<li><strong>Constant factors:</strong> for small $n$ (say $n \leq 20$), the constant overhead of merge sort's bookkeeping can make insertion sort faster in practice. Many production sort implementations use merge sort for large sub-arrays and switch to insertion sort once the sub-array is small.</li>
+<li><strong>Cache behavior:</strong> insertion sort accesses memory sequentially, which is cache-friendly. Merge sort's access pattern is less predictable.</li>
+</ul>
+<p>These considerations are why asymptotic analysis always comes with the caveat that constants matter at small scales — and why knowing <em>both</em> the asymptotic class and the constant factors is valuable.</p>
+<hr>
+<h2 id="connections">Connections</h2>
+<p><strong><a href="notes-04.html">Week 4 Notes</a> — Simple induction.</strong> The weak induction introduced in Week 4 (assume $P(n)$, prove $P(n+1)$) is the foundation for everything in this week. Strong induction is the natural extension: the hypothesis is wider, covering all prior cases rather than just the immediately preceding one. Every structural move — base case, inductive hypothesis, inductive step, identifying conditions on constants — is identical; only the strength of the assumption changes.</p>
+<p><strong><a href="notes-07.html">Week 7 Notes</a> — Iterative sorting as a baseline.</strong> Week 7 established that bubble sort, selection sort, and iterative insertion sort are all $\Theta(n^2)$. This week's recursive insertion sort confirms the same bound via a different analysis path (recurrence + strong induction rather than direct loop counting), and merge sort finally breaks out of that $\Theta(n^2)$ ceiling.</p>
+<p><strong><a href="notes-08.html">Week 8 Notes</a> — Unrolling recurrences.</strong> The algebraic unwinding technique used in Week 8 to derive exact closed forms reappears here in the insertion sort analysis. Week 9 then pairs that technique with strong induction, shifting the goal from finding the exact expression to proving a bound — a technique that is both more robust and more widely applicable when exact forms are hard to find.</p>
+<p><strong>This week as a capstone.</strong> Week 9 is the point where several threads running through the course converge: asymptotic notation from Week 6, summation and induction from Week 4, recursion and recurrence relations from Week 8, and sorting algorithms from Week 7. The merge sort analysis in particular unites all of them: it takes a recursive algorithm, writes its recurrence relation, guesses an asymptotic bound, and proves it by strong induction — a complete end-to-end exercise in the mathematical toolkit built up over the course. The design and analysis of algorithms course that follows from here takes exactly this toolkit and applies it more broadly.</p>
+
+  </main>
+
+  
+  <script>
+    document.querySelectorAll('h2[id], h3[id]').forEach(h => {
+      const a = document.createElement('a');
+      a.className = 'anchor-link';
+      a.href = '#' + h.id;
+      a.textContent = '§';
+      a.title = 'Link to this section';
+      h.appendChild(a);
+    });
+  </script>
+  
+
+  <footer class="site-footer">
+    <span>Discrete Structures · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-04-20">April 20, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Discrete Structures');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The error minimum in step size — Computational Physical Modeling</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="css/blocks.css?v=20261015124713">
+  <link rel="stylesheet" href="css/demos.css?v=20261015124713">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (olive). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #5F7038;
+      --course-accent-dark: #47542A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    /* ── Week page video and class cards (media-cards.js) ── */
+    .media-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+      gap: 0.9rem;
+      margin: 1rem 0;
+    }
+    .media-card {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-top: 4px solid var(--course-accent);
+      border-radius: 4px;
+      padding: 0.75rem 0.9rem 0.85rem;
+    }
+    .media-card.class { border-top-color: #C8860A; }
+    .media-card p { margin: 0; }
+    .mc-kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .mc-title { font-weight: 600; line-height: 1.3; margin: 0.25rem 0 0.35rem !important; }
+    .mc-sub { font-size: 0.85rem; color: #5A5550; line-height: 1.4; }
+    .mc-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.7rem; }
+    .mc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--course-accent);
+      border-radius: 3px;
+      text-decoration: none;
+      color: var(--course-accent-dark);
+    }
+    a.mc-btn:visited { color: var(--course-accent-dark); }
+    a.mc-btn:hover { background: #F0EDE7; }
+    .mc-btn svg { width: 1em; height: 1em; flex: none; }
+    .mc-btn.primary, a.mc-btn.primary:visited { background: var(--course-accent); color: #fff; }
+    a.mc-btn.primary:hover { background: var(--course-accent-dark); }
+    .mc-btn.pending { border-style: dashed; border-color: #b8b2a8; color: #5A5550; }
+    .mc-total { font-size: 0.9rem; color: #5A5550; }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+    /* the remembered data phrase; filled in by page.js */
+    .cg-phrase { display: inline-flex; align-items: center; gap: .3rem; margin-right: .6rem;
+      font-size: .82rem; flex-shrink: 0; }
+    /* The header row is a fixed 780px. The title, the toggle, "Your data", Search and
+       "Report a problem" only just fit in it, so the chip shows the label alone (the
+       phrase is in the link's title and on the data page) and Search shows its icon.
+       An earlier chip that held the phrase and was allowed to shrink squeezed the
+       label down to "Yo" on a classroom projector. */
+    .cg-phrase a { color: rgba(230,238,222,.92); text-decoration: none; white-space: nowrap; }
+    .header-links .search-btn .sb-label { display: none; }
+    .header-links button.report-btn { white-space: nowrap; }
+    /* the title keeps its own width */
+    .site-header-top .site-title { white-space: nowrap; flex-shrink: 0; }
+    .site-header-top .header-links { min-width: 0; margin-left: 1rem; }
+    @media (max-width: 780px) {
+      /* below the 780px row: the report button's short form, as on phones */
+      .header-links .report-btn .rb-full { display: none; }
+      .header-links .report-btn .rb-short { display: inline; }
+      .cg-phrase { margin-right: .2rem; }
+    }
+    .cg-phrase a:hover { color: #fff; text-decoration: underline; }
+    .cg-phrase button { background: none; border: none; cursor: pointer; padding: 0 .2rem;
+      color: rgba(230,238,222,.7); font: inherit; font-size: 1rem; line-height: 1; }
+    .cg-phrase button:hover { color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* Two rules the other course sites do not define. The header's top
+       row carries a report button beside the title, and a page with a
+       wide demo in it needs more than the reading measure. */
+    .site-header-top { border-bottom: 1px solid rgba(200,222,180,0.15); }
+    main.wide { max-width: 1180px; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Computational Physical Modeling</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <span class="cg-phrase" id="cg-phrase"></span>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        
+          <a href="syllabus.html">Syllabus</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="notes.html">Notes</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reports.html">Examples</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reflection.html">Reflection</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="meeting.html">Meeting</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="ai-use.html">AI Use</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="tools.html">Tools</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="workbench.html">Workbench</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="extra-labor.html">Extra Labor</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="canvas-grades.html">Canvas Grades</a>
+          
+        
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+          
+          
+          
+          <a href="week-01.html">1</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-02.html">2</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-03.html">3</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <span class="week-current">4</span>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          <span class="week-gap" title="Week 5 is a break week">5<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <a href="week-06.html">6</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-07.html">7</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-08.html">8</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-09.html">9</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-10.html">10</a>
+          
+        
+      </div>
+    </nav>
+
+    
+    <nav class="page-family">
+      <div class="nav-inner">
+        Week 4,
+        <a href="week-04.html">Overview</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="finite-differences.html">Finite differences</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="differentiation-amplifies-noise.html">Amplified noise</a>
+        
+          <span class="site-nav-sep">·</span>
+          <strong>The error minimum</strong>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="smoothing.html">Smoothing</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="phase-lag.html">Phase lag</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="why-a-standard-exists.html">Filter class</a>
+        
+        <span class="site-nav-sep">·</span>
+        <a href="assign-04.html">Assignment</a>
+      </div>
+    </nav>
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+
+  <main data-pagefind-body class="wide">
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <div class="eyebrow">Week 4 · Noise and Filtering</div>
+<h1>The error minimum in step size</h1>
+
+<div class="claim">
+  <span class="label">Claim</span>
+  <p class="exact">The error in a finite-difference derivative is the sum of two terms that move
+  in
+  opposite directions as the step $h$ shrinks. Truncation error falls with $h$. Rounding error
+  grows as $1/h$ because a fixed subtraction error is divided by a shrinking number. Their sum
+  has a
+  minimum at a finite $h$, below which making the step smaller makes the answer worse.</p>
+  <p class="plain">There is a best step size, and it is not the smallest one your computer can
+  represent.</p>
+</div>
+
+<h2 id="truncation-error-and-rounding-error">Truncation Error and Rounding Error</h2>
+
+<p>Take the <dfn data-g="central-difference">central difference</dfn> as the case to follow:</p>
+
+$$f'(x) \;\approx\; \frac{f(x+h) - f(x-h)}{2h}$$
+
+<p><dfn data-g="truncation-error"><strong>Truncation error</strong></dfn> is the error the formula
+would still have on a machine that made no arithmetic mistakes at all. It is there because the
+formula is an abbreviation. <a href="finite-differences.html">Finite differences</a> showed where
+it comes from: the central difference equals the derivative plus an infinite tail of terms, and
+the formula keeps the first and discards the rest.</p>
+
+$$\frac{f(x+h) - f(x-h)}{2h}
+  \;=\; \underbrace{f'(x)}_{\text{kept}}
+  \;+\; \underbrace{\frac{h^2}{6}f'''(x) + \dots}_{\text{truncated}}$$
+
+<p>"Truncated" is literal. The error is the part of the sum that was cut off, and it is worth
+seeing that this is a prediction you can check and not a statement of principle. Take
+$f = \sin x$ at $x = 1$ with $h = 0.1$, where $f'''(x) = -\cos x$:</p>
+
+<table class="data">
+  <tr><td>central difference, $h = 0.1$</td><td class="num">0.539402252170</td></tr>
+  <tr><td>true value, $\cos 1$</td><td class="num">0.540302305868</td></tr>
+  <tr><td>measured error</td><td class="num"><strong>&minus;9.001&times;10<sup>&minus;4</sup></strong></td></tr>
+  <tr><td>first discarded term, $\frac{h^2}{6}f'''(1) = -\frac{0.01}{6}\cos 1$</td>
+      <td class="num">&minus;9.005&times;10<sup>&minus;4</sup></td></tr>
+</table>
+
+<p>The first term of the tail accounts for the error to three figures, which is 0.05%. That is what
+"proportional to $h^2$" means in practice, and it is why halving $h$ quarters this term. On its
+own it would say: make $h$ as small as you can.</p>
+
+<p><dfn data-g="rounding-error"><strong>Rounding error</strong></dfn> is what the machine adds.
+A double holds about 16 significant decimal digits and no more, so every stored value carries an
+absolute error of roughly $\varepsilon |f|$, where $\varepsilon$ is
+<dfn data-g="machine-epsilon">machine epsilon</dfn>, about $2.2\times10^{-16}$. That sounds
+harmless, and the subtraction is what makes it not.</p>
+
+<p>Here are the two samples the formula subtracts, printed in full, at three step sizes:</p>
+
+<table class="data">
+  <tr><th class="num">h</th><th>$f(x+h)$ and $f(x-h)$</th>
+      <th class="num">digits they share</th><th class="num">error in the estimate</th></tr>
+  <tr><td class="num">10<sup>&minus;1</sup></td>
+      <td><code>0.89120736006143542</code><br><code>0.78332690962748341</code></td>
+      <td class="num">0</td><td class="num">9.0&times;10<sup>&minus;4</sup></td></tr>
+  <tr><td class="num">10<sup>&minus;8</sup></td>
+      <td><code>0.84147099021091953</code><br><code>0.84147097940487336</code></td>
+      <td class="num">7</td><td class="num">2.6&times;10<sup>&minus;9</sup></td></tr>
+  <tr><td class="num">10<sup>&minus;12</sup></td>
+      <td><code>0.84147098480843685</code><br><code>0.84147098480735627</code></td>
+      <td class="num">11</td><td class="num">1.2&times;10<sup>&minus;5</sup></td></tr>
+</table>
+
+<p>Read the bottom row. The two values agree in their first eleven significant digits, so of the
+sixteen the machine is holding, only about five survive the subtraction. Those five are then
+divided by $2h = 2\times10^{-12}$, which multiplies whatever error they carry by
+$5\times10^{11}$. Nothing went wrong in the arithmetic. The subtraction itself is exact, and
+every operation was correctly rounded. The information was lost earlier, when each sine was
+rounded to sixteen digits to be stored, and the subtraction removed the eleven shared digits
+that had been hiding that rounding.</p>
+
+<p>This is why the third row is worse than the second despite using a smaller step. The absolute
+error in the numerator does not shrink as $h$ does, because it is set by the size of $f$ and not
+by the size of the difference. Dividing a fixed error by $2h$ therefore grows it as
+$1/h$. Writing the two terms together:</p>
+
+$$E(h) \;\approx\; \underbrace{C h^2}_{\text{truncation}} \;+\;
+                   \underbrace{\frac{\varepsilon |f|}{h}}_{\text{rounding}}$$
+
+<p>One term falls as $h$ falls and the other rises, so their sum has a minimum somewhere. Finding
+it is ordinary calculus. Differentiate $E$ with respect to $h$:</p>
+
+$$E(h) = C h^2 + \frac{\varepsilon |f|}{h}
+  \qquad\Longrightarrow\qquad
+  E'(h) = 2Ch - \frac{\varepsilon |f|}{h^2}$$
+
+<p>The second term picked up its minus sign and its $h^{2}$ in the denominator from
+differentiating $h^{-1}$. Set $E'(h) = 0$ and the two terms balance:</p>
+
+$$2Ch \;=\; \frac{\varepsilon |f|}{h^2}
+  \qquad\Longrightarrow\qquad
+  h^3 \;=\; \frac{\varepsilon |f|}{2C}
+  \qquad\Longrightarrow\qquad
+  h_{\text{best}} \;=\; \left(\frac{\varepsilon |f|}{2C}\right)^{1/3}$$
+
+<p>The cube root is the whole result. $\varepsilon$ is the only small quantity in there, so
+$h_{\text{best}}$ scales as $\varepsilon^{1/3}$, and $\varepsilon^{1/3} \approx
+6\times10^{-6}$. The constants move it a little without changing the story: for $\sin x$ at
+$x = 1$, where $C = |f'''|/6 = \cos(1)/6$ and $|f| = \sin 1$, the formula gives
+$h_{\text{best}} = 1.0\times10^{-5}$.</p>
+
+<p>Two things are worth taking from the shape of that answer. The first is that the best step is
+nowhere near the smallest step, and it is not close: $10^{-5}$ against the $10^{-16}$ the machine
+can represent. The second is that $h_{\text{best}}$ depends on $\varepsilon$ and on the function,
+and on nothing about your data, so it can be computed before you have any, though it does
+assume a size for $f$ and its derivatives that your problem need not have.</p>
+
+<p>The same argument for the <dfn data-g="forward-difference">forward difference</dfn> runs
+identically, except that its truncation error is proportional to $h$ and not to $h^2$, so
+$E = C_1 h + \varepsilon|f|/h$ and setting $E' = C_1 - \varepsilon|f|/h^2$ to zero gives a
+square root instead of a cube root, $h_{\text{best}} \sim \varepsilon^{1/2} \approx
+1.5\times10^{-8}$. A worse rule wants a smaller step, because its truncation error falls
+more slowly, so $h$ has to go much further down before rounding takes over.</p>
+
+<figure class="figure mini" id="fig-cancel">
+  <div class="fig-body"></div>
+  <figcaption>The two values at $h = 10^{-12}$, drawn as the sixteen significant digits a double
+  carries. The shaded cells are the digits the two numbers share, and they cancel exactly when
+  one is subtracted from the other. Only the five gold cells contribute anything to the
+  difference, and those five are then divided by $2h$. Every operation here is correctly
+  rounded; the information is gone before the division runs.</figcaption>
+</figure>
+
+<h2 id="the-error-against-step-size">The Error Against Step Size</h2>
+
+<p>Differentiating $\sin x$ at $x = 1$, where the true answer is $\cos 1 = 0.5403023\ldots$ and the
+error can therefore be computed and not estimated. Both axes are logarithmic, because the
+quantities span sixteen orders of magnitude (this is one of the few places in the course where a
+log axis is not a stylistic choice).</p>
+
+<cg-demo case="ucurve"></cg-demo>
+
+<p>The measured minima:</p>
+
+<table class="data">
+  <tr><th>Rule</th><th class="num">best <var>h</var> measured</th><th class="num">error there</th>
+      <th class="num">predicted <var>h</var></th></tr>
+  <tr><td>forward difference</td><td class="num">10⁻⁸</td><td class="num">3.0×10⁻⁹</td>
+      <td class="num">ε<sup>1/2</sup> = 1.5×10⁻⁸</td></tr>
+  <tr><td>central difference</td><td class="num">10⁻⁵</td><td class="num">1.1×10⁻¹¹</td>
+      <td class="num">ε<sup>1/3</sup> = 6.0×10⁻⁶</td></tr>
+</table>
+
+<p>Both predictions land within a factor of two of the measured minimum, which is what an
+order-of-magnitude argument is entitled to. The minima are quoted at decade steps deliberately:
+between decades on the left-hand branch the error swings by orders of magnitude, because it
+depends on the exact bits of two nearly equal numbers. Searching a fine grid there finds a lucky
+cancellation, and nothing reproducible. The prediction is that the best step is near
+$\varepsilon^{1/3}$. It is that it is near it, and specifically that it is nowhere near zero.</p>
+
+<h2 id="reading-the-exponents-off-the-slopes">Reading the Exponents off the Slopes</h2>
+
+<p>On the logarithmic plot each error term is a straight line, and the slope of each line is the
+exponent in its power law. Read the plot left to right, in the direction of increasing $h$.</p>
+
+<ul class="plain">
+  <li>To the right of the minimum, truncation dominates and the error grows with
+  $h$. The central-difference branch has slope 2, a factor of 10 in $h$ is a factor of 100 in
+  error, and the forward branch has slope 1.</li>
+  <li>To the left of the minimum, rounding dominates and the error is
+  proportional
+  to $h^{-1}$, which is slope −1, falling as you read rightwards, which is to say growing without limit as
+  $h$ is made smaller. Both rules share this branch, because both divide the same fixed
+  subtraction
+  error by the same $h$.</li>
+</ul>
+
+<p>The left-hand branch is the same for both rules, which is the giveaway that it has nothing to do
+with the formula and everything to do with the arithmetic. A better formula moves the right-hand
+branch down and the minimum right, and it cannot help you on the left at all.</p>
+
+<div class="aside">
+  <span class="label">The subtraction is where it happens</span>
+  <p>At $h = 10^{-12}$, $\sin(1 + h)$ and $\sin(1 - h)$ agree in their first eleven significant
+figures. Their difference is therefore determined by the last five figures each of them has, and
+those are exactly the figures the floating-point representation is least sure about. This is
+<dfn data-g="cancellation">cancellation</dfn>, and it is not specific to differentiation. Any
+subtraction of two nearly equal computed numbers loses significant figures, and the loss is a
+silent one, because the result has the same number of digits as before and most of them are now
+meaningless. That is what makes it worth watching for deliberately.</p>
+</div>
+
+<h2 id="finding-an-event">Finding an Event</h2>
+
+<p>A common reason to differentiate a record is to locate a moment, meaning the instant something
+starts, stops, or changes character. The derivative itself is often discarded once the moment is
+found. A ball leaves a hand and its vertical acceleration becomes $-g$ and stays there. A
+vehicle contacts a barrier and its acceleration leaves zero. Neither moment is written down
+anywhere. Both are visible in a derivative and nowhere in the values themselves.</p>
+
+<p>This is where the minimum above stops being a curiosity. Locating an event needs two things at
+once, and the stencil width trades the one against the other.</p>
+
+<ul class="plain">
+  <li><strong>A narrow stencil is noisy.</strong> The scatter can be larger than the change being
+  looked for, and the event is somewhere inside it.</li>
+  <li><strong>A wide stencil is late and blunt.</strong> It averages across the event, so the
+  transition is smeared over the width of the stencil and its apparent position moves.</li>
+</ul>
+
+<p>The second failure is the dangerous one, because a smoothed signal looks better. A wide stencil
+returns a clean curve with an obvious corner in it, and the corner is in the wrong place. Page
+13 is about that shift in general. Here it lands directly on the number being reported, because
+the number is a time. For 25&nbsp;Hz tracking with 3.07&nbsp;cm of vertical noise, a
+two-frame second difference carries a scatter of roughly 19&nbsp;m/s&sup2;, about twice gravity,
+against a signal of one gravity, so nothing can be located from a single one. Widening the
+stencil brings the scatter down as the averaging demands, and pushes the apparent event later.</p>
+
+<p class="plain">An event found in a differentiated signal has an uncertainty in time,
+and
+it is set by the same choice that sets the uncertainty in value.</p>
+
+<p>Two things follow for practice. State the criterion, because "where the acceleration settles to
+$-g$" is not one until "settles" has a tolerance and a number of consecutive samples attached to
+it, and check the answer against something the derivative did not produce. The values themselves
+usually show whether the moment you found is plausible.</p>
+
+<h2 id="three-consequences-for-a-computed-function">Three Consequences for a Computed Function</h2>
+
+<p>The situation this page describes is the one where $f$ can be evaluated wherever you like, which
+means a computed function and not a record. Three consequences:</p>
+
+<ol class="plain">
+  <li><strong>Do not reach for the smallest representable step.</strong> The instinct that smaller
+  is more accurate is wrong below the minimum, and wrong by a lot. At $h = 10^{-16}$ the central
+  difference is off by $1.5 \times 10^{-2}$, which is 2.7% of the answer and sixteen times worse
+  than at $h = 0.1$.</li>
+  <li><strong>Prefer the higher-order rule.</strong> The central difference at its best is 270
+  times
+  more accurate than the forward difference at its best, for one extra function evaluation.</li>
+  <li><strong>Find the minimum by measuring.</strong> Halve $h$ repeatedly and
+  watch
+  the answer. While it keeps changing in the same direction you are on the truncation branch. When
+  it starts moving erratically you have crossed into the rounding branch and gone too far.</li>
+</ol>
+
+<p>For a measured record none of this applies, because $h$ is the sample interval and cannot be
+changed. The error that matters there is noise, and that is the next page.</p>
+
+<div class="check">
+  <span class="label">Check</span>
+  <ol>
+    <li>You halve <em>h</em> and the central-difference answer changes by 1%. You halve it again
+    and
+    it changes by 0.25%. Which branch are you on, and what should you do next?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Changes falling by a factor of 4 for each halving is error &prop; <em>h</em>&sup2;, so you are
+on the <strong>truncation branch</strong>, meaning the right-hand side of the curve, where
+making <em>h</em> smaller makes the answer better. What to do next: <strong>keep halving, and
+watch the ratio and not the answer.</strong> While it stays near 4 you are still winning. When
+it falls towards 2, then 1, then starts rising, you have passed the minimum and rounding error
+is taking over, and the best answer available was one or two steps back. Doing this is the only
+way to find the minimum for a particular function on a particular machine. The textbook estimate
+of the optimal <em>h</em> assumes a size for <em>f</em> and its derivatives that your problem
+need not have.</p></div></details></li>
+    <li>A colleague reports a derivative computed with <em>h</em> = 10⁻¹⁴ "to be safe". How would
+    you show them, in one run, that it is not?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Compute the same derivative at a <strong>sweep of <em>h</em></strong>, from
+10<sup>&minus;1</sup> down to 10<sup>&minus;16</sup>, and plot the error on log-log. The U
+appears, and their <em>h</em> is a long way up the left-hand wall of it. One run, one figure, no
+argument required.</p>
+     <p>If they want the reason as well as the picture, then at
+<em>h</em>&nbsp;=&nbsp;10<sup>&minus;14</sup>, <em>f</em>(<em>x</em>+<em>h</em>) and
+<em>f</em>(<em>x</em>&minus;<em>h</em>) agree to about twelve digits, and a double carries
+sixteen. Their difference has about four significant digits left. The rest was
+cancelled away. Dividing that by 2&times;10<sup>&minus;14</sup> does not recover the lost
+digits, it scales what remains. "To be safe" is the instinct that smaller steps are safer, which
+is true of the truncation term alone and false of the sum.</p></div></details></li>
+    <li>Why does the left-hand branch of the plot have the same slope for both rules, when the
+    right-hand branches do not?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Because the left branch is not about the rule.</p>
+     <p>There, the error is dominated by rounding. The numerator is a subtraction of two nearly equal
+numbers, carrying an absolute error of about &epsilon;|<em>f</em>|, and the result is divided by
+<em>h</em>. That gives &epsilon;|<em>f</em>|/<em>h</em>, a slope of &minus;1 on log-log, and
+nothing in it depends on which difference formula produced the numerator. Both rules subtract
+two values of similar size and divide by a small number, so both rise identically. The right
+branch is truncation, which is where the rule's order lives: slope 1 for the one-sided rules, 2
+for the central one. The order of a method describes only half of the picture, and it is the
+half that stops mattering first.</p></div></details></li>
+  </ol>
+</div>
+
+<h2 id="terms-used-on-this-page">Terms Used on This Page</h2>
+
+<p>Hover or tab to a highlighted term in the text to see its definition. Every term marked on this
+page is listed here.</p>
+
+<dl class="glossary"></dl>
+
+<p class="deeper">Go deeper: <a href="workbench.html?tool=differentiate">the workbench</a>,
+forward and central differences at any spacing. On a generated signal the exact derivative is
+known, so the error is the error.</p>
+
+  </main>
+
+  
+  <script>
+    document.querySelectorAll('h2[id], h3[id]').forEach(h => {
+      const a = document.createElement('a');
+      a.className = 'anchor-link';
+      a.href = '#' + h.id;
+      a.textContent = '§';
+      a.title = 'Link to this section';
+      h.appendChild(a);
+    });
+  </script>
+  
+
+  <script type="module" src="js/bundle/the-error-minimum.js?v=20261015124713"></script>
+  
+
+  <footer class="site-footer">
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-11">October 11, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Algorithms');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  
+  
+  
+    
+  
+  
+  <script src="https://uwt-tutor-backend.onrender.com/widget.js"
+          data-key="wk_bcb80c4ee2d5718131d24548528577c3"
+          data-content-selector="main"
+          data-color="#5F7038"></script>
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

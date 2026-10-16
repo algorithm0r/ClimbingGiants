@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Writing Toolkit — Computer Ethics</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body)"></script>
+  <style>
+    /* Per-course accent (slate blue). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #3A5F8A;
+      --course-accent-dark: #2C4A6B;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes { max-width: 960px; }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Computer Ethics</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        <a href="syllabus.html">Syllabus</a>
+        <span class="site-nav-sep">·</span>
+        <a href="essay.html">Essay</a>
+        <span class="site-nav-sep">·</span>
+        <a href="reflection-instructions.html">Reflection</a>
+        <span class="site-nav-sep">·</span>
+        <a href="meeting-instructions.html">Meeting</a>
+        <span class="site-nav-sep">·</span>
+        <strong>Toolkit</strong>
+        <span class="site-nav-sep">·</span>
+        <a href="ai-use.html">AI Use</a>
+        <span class="site-nav-sep">·</span>
+        <a href="extra-labor.html">Extra Labor</a>
+        <span class="site-nav-sep">·</span>
+        <a href="canvas-grades.html">Canvas Grades</a>
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+        
+          
+            <a href="week-01.html">1</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-02.html">2</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-03.html">3</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-04.html">4</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-05.html">5</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-06.html">6</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-07.html">7</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-08.html">8</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-09.html">9</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-10.html">10</a>
+          
+          
+        
+      </div>
+    </nav>
+
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+  <main data-pagefind-body>
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <h1>The Ethical and Writing Toolkit</h1>
+<p>This page is your reference guide for the core questions and skills you'll use all quarter. Return here whenever you need to ground your thinking or refresh what a skill means in practice.</p>
+<p><strong>Jump to a skill:</strong></p>
+<p><strong>Ethical framework —</strong> <a href="#who-is-harmed">Who is harmed?</a> · <a href="#what-are-our-obligations">What are our obligations?</a> · <a href="#what-would-a-person-of-integrity-do">What would a person of integrity do?</a></p>
+<p><strong>Thinking skills —</strong> <a href="#free-ideation">Free Ideation</a> · <a href="#so-what">So What</a> · <a href="#steelmanning">Steelmanning</a> · <a href="#role-reversal">Role Reversal</a></p>
+<p><strong>Writing skills —</strong> <a href="#finding-and-evaluating-sources">Finding Sources</a> · <a href="#citing-sources">Citing Sources</a> · <a href="#paragraph-as-unit-of-argument">Paragraph as Argument</a> · <a href="#structural-editing">Structural Editing</a> · <a href="#sentence-level-editing">Sentence Editing</a> · <a href="#final-framing">Final Framing</a></p>
+<hr>
+<h2 id="section-1-the-three-toolkit-questions">Section 1: The Three Toolkit Questions</h2>
+<p>These three questions form the backbone of ethical reasoning in this course. They give you a structure for seeing ethical problems from different angles. Every major decision involves all three, but each one lights up different stakes.</p>
+<h3 id="who-is-harmed">Who is harmed?</h3>
+<p><strong>The question:</strong> Who is affected by this system or decision, and what specific harms could they face?</p>
+<p><strong>What it maps to:</strong> This question roots itself in <strong>consequentialist thinking</strong>, the idea that actions matter primarily because of their results. You're asking: what are the real-world consequences?</p>
+<p><strong>How to apply it:</strong> Suppose you're designing a hiring algorithm. Ask: who is harmed if the model has a gender bias? Job applicants from underrepresented groups are harmed directly (they lose opportunities). The company is harmed indirectly (it loses good candidates). Society is harmed (the bias reinforces systemic inequality). Specificity matters. Name the people, not abstractions.</p>
+<p><strong>Common mistakes students make:</strong></p>
+<ul>
+<li>Stopping too early. &quot;Someone could be harmed&quot; is not specific enough. Who exactly? How?</li>
+<li>Ignoring distributed harm. Small harms that affect many people are still real.</li>
+<li>Only considering direct harm. Secondary consequences (the hiring algorithm affecting what candidates even apply) count.</li>
+<li>Assuming harm requires intention. A system can harm people without anyone trying to harm them.</li>
+</ul>
+<hr>
+<h3 id="what-are-our-obligations">What are our obligations?</h3>
+<p><strong>The question:</strong> What duties, rules, or principles should guide this decision, regardless of consequences?</p>
+<p><strong>What it maps to:</strong> This leans toward <strong>deontological thinking</strong>, the idea that some things are right or wrong in themselves. You're asking: what do I owe people, even if the outcome is worse?</p>
+<p><strong>How to apply it:</strong> Return to the hiring algorithm. You have an obligation to be honest about the tool's limitations. You should disclose that it's imperfect. You have an obligation not to deceive candidates about what's evaluating them. You have an obligation to respect people's autonomy (not treat them as pure data points). These hold regardless of whether disclosure costs the company money or whether the tool still produces good hiring outcomes.</p>
+<p><strong>Common mistakes students make:</strong></p>
+<ul>
+<li>Confusing obligations with personal preference. &quot;I think it would be nice to disclose&quot; is not the same as &quot;we are obligated to disclose.&quot;</li>
+<li>Treating obligations as absolute when they're actually contextual. You're obligated to be honest, but that obligation can compete with others.</li>
+<li>Only considering obligations to the obvious beneficiary. You have obligations to people downstream of your decisions, not just the direct user.</li>
+<li>Invoking &quot;everyone does it&quot; as an excuse. The fact that other companies don't disclose their limitations doesn't erase your obligation to do so.</li>
+</ul>
+<hr>
+<h3 id="what-would-a-person-of-integrity-do">What would a person of integrity do?</h3>
+<p><strong>The question:</strong> Setting aside rules and consequences, what does this situation ask of you as a person with values?</p>
+<p><strong>What it maps to:</strong> This draws on <strong>virtue ethics</strong>, the idea that good choices come from good character. You're asking: who do I want to be, and what would that person do here?</p>
+<p><strong>How to apply it:</strong> With the hiring algorithm, ask: do I feel comfortable with this decision? Can I explain it to the people affected? Would I want my family making decisions about whether to trust this tool? A person of integrity doesn't hide behind &quot;the algorithm decided it.&quot; They stay accountable. They ask hard questions even if the answers are inconvenient.</p>
+<p><strong>Common mistakes students make:</strong></p>
+<ul>
+<li>Treating integrity as purely individual. &quot;I feel fine with it&quot; doesn't settle the question. You have to ask whether you'd feel fine if you were on the other side.</li>
+<li>Confusing integrity with moral purity. You won't find a perfectly clean answer, but you can still act with integrity by acknowledging the tradeoffs you're making.</li>
+<li>Using this question to override the other two. Integrity doesn't mean ignoring consequences or obligations. It means living with both.</li>
+<li>Treating it as post-hoc justification. Asking &quot;what would a person of integrity do?&quot; <em>before</em> you decide, not as a way to feel better about a decision already made.</li>
+</ul>
+<hr>
+<h2 id="section-2-thinking-skills">Section 2: Thinking Skills</h2>
+<p>These are tools for working through difficult problems. You'll learn them in context across the course. Each one appears when it's most useful. They are applicable everywhere, so return here whenever you get stuck.</p>
+<h3 id="free-ideation">Free Ideation</h3>
+<p><strong>What it is:</strong> Get everything down without judgment. Not all of it will be useful. This is generative thinking. Quantity and range matter more than quality right now.</p>
+<p><strong>When to use it:</strong> At the beginning, when the problem is still fuzzy. When you feel stuck and need to break through initial ideas. When you're trying to see all the angles.</p>
+<p><strong>How it works:</strong> Set a time limit (15–20 minutes). Write everything that comes to mind: observations, questions, half-formed arguments, objections, examples, curiosities. Don't organize it. Don't evaluate it. Don't dismiss anything as &quot;too obvious&quot; or &quot;already covered.&quot; The goal is a pile of material to work with, not a finished argument.</p>
+<p><strong>Example applied to gen AI ethics:</strong> You're starting to think about AI in hiring. Free ideation might produce: <em>&quot;algorithms are biased but humans are too,&quot; &quot;candidates don't know they're being evaluated by AI,&quot; &quot;the company saves money by automating screening,&quot; &quot;some people trust algorithms more than humans,&quot; &quot;AI doesn't get tired so it's consistent,&quot; &quot;but consistency with biased data is still bias,&quot; &quot;what if the algorithm finds patterns human recruiters would miss,&quot; &quot;but what patterns, and are they good patterns,&quot; &quot;people might feel dehumanized,&quot; &quot;or they might feel relieved not to face human prejudice,&quot; &quot;what counts as fairness in hiring anyway.&quot;</em> None of these are finished thoughts, but together they map the terrain.</p>
+<hr>
+<h3 id="so-what">So What</h3>
+<p><strong>What it is:</strong> Test whether an idea has stakes. Push observations toward claims. Move from &quot;this is interesting&quot; to &quot;this matters because.&quot;</p>
+<p><strong>When to use it:</strong> When you have an observation but it hasn't become an argument yet. When you want to know if an idea is worth building on.</p>
+<p><strong>How it works:</strong> Take a statement. Ask: so what? Why does this matter? What follows if you're right? Keep asking until you hit something real. &quot;Gen AI models are trained on copyrighted material.&quot; So what? &quot;So creators don't get compensated or permission.&quot; So what? &quot;So the incentive to create new work is weakened and creators are harmed.&quot; So what? &quot;So we lose cultural production and economic justice, and we need policies that address this.&quot;</p>
+<p><strong>Example applied to gen AI ethics:</strong> Start with: &quot;LLMs sometimes make up information.&quot; Apply so what: &quot;So they can't be trusted for accuracy.&quot; So what? &quot;So organizations using them for customer service or technical support might give people wrong information.&quot; So what? &quot;So real decisions based on false information harm the person who got the bad answer.&quot; Now you see why hallucination isn't just a technical problem. It's an ethical one, and it has a human cost.</p>
+<hr>
+<h3 id="steelmanning">Steelmanning</h3>
+<p><strong>What it is:</strong> State the strongest possible case against your own position before you argue against it. This is not a strawman, which is the weakest version of the opposing view. It is the steel-man, the smartest and most compelling version.</p>
+<p><strong>When to use it:</strong> Before you commit to a position. When you want to test whether your argument actually holds up. When you're writing a counterargument.</p>
+<p><strong>How it works:</strong> Articulate your position. Then ask: what would a thoughtful, intelligent person who disagrees with me say? Not &quot;they'd say it's all fine.&quot; They'd say something that actually matters. Give that position your best interpretation. Then engage with that version.</p>
+<p><strong>Example applied to gen AI ethics:</strong> You believe AI companies should disclose their training data. Steelman the opposite: &quot;Disclosing training data creates massive privacy risks for the millions of people whose content was included. It also exposes competitive secrets that required billions of dollars to develop. And it won't actually solve the problem — people will still be harmed regardless of whether they know exactly which books trained the model. So the costs of disclosure outweigh the benefits.&quot; Now you can respond to it honestly instead of fighting a weak version.</p>
+<hr>
+<h3 id="role-reversal">Role Reversal</h3>
+<p><strong>What it is:</strong> Place yourself on the other side of the system. What do things look like from their position? What do they need that the current system doesn't provide?</p>
+<p><strong>When to use it:</strong> When you're mapping stakeholders. When you want to understand impact beyond your own perspective. When you're designing something that affects others.</p>
+<p><strong>How it works:</strong> Choose a stakeholder affected by the system you're analyzing. Imagine their day, their constraints, their fears, their hopes. What problem is the system solving for them? What problem is it creating? What would they ask for if anyone listened?</p>
+<p><strong>Example applied to gen AI ethics:</strong> You're thinking about AI in content creation. Role-reverse: you're a writer whose work trained an AI model. You didn't consent. Now the model can generate text in your style. You get no credit, no payment. You can't even see exactly what of your work was used or how. From your position, what do you need? Credit? Compensation? The ability to opt out? The ability to delete your work from the training set? From this position, you can see what transparency, consent, and fairness would actually require from the system's builders.</p>
+<hr>
+<h2 id="section-3-writing-skills">Section 3: Writing Skills</h2>
+<p>These are the technical moves you'll practice throughout the course. Learn them where they appear. They compound, and each one makes the others more powerful.</p>
+<h3 id="finding-and-evaluating-sources">Finding and Evaluating Sources</h3>
+<p><strong>What it is:</strong> Know the difference between credible evidence and assertion. Distinguish between different types of sources and understand when each one is appropriate.</p>
+<p><strong>Why it matters:</strong> Your argument is only as strong as the evidence behind it. A claim without a source is your opinion. A claim backed by a bad source is misleading. Knowing how to find and evaluate sources is how you move from &quot;I think&quot; to &quot;I can show.&quot;</p>
+<p><strong>How it works:</strong> Learn to distinguish four source types and what they're good for:</p>
+<p><strong>Journal articles</strong> (peer-reviewed academic research) are the gold standard for claims about how the world works scientifically. Someone else has checked the methodology. It's slow (takes years to publish) but rigorous. Use this when you need credible evidence of a phenomenon or mechanism.</p>
+<p><strong>Think tank reports</strong> (policy organizations, nonprofits) are rigorous but faster than journals. They bring together research and analysis for practitioners and policymakers. They have institutional credibility but also institutional perspective. You should know who funds them. Use this for policy analysis and current events.</p>
+<p><strong>Journalism</strong> (news articles, magazines, podcasts) is fast and often excellent, but not peer-reviewed. A good journalist fact-checks and interviews sources, but they're also working under deadline and space constraints. Use this for breaking news and current context, but verify critical claims with other sources.</p>
+<p><strong>Blogs and commentary</strong> (tech blogs, opinion pieces) are useful for the current conversation and perspective, but the least credible on their own. Someone's thoughts about a topic, without institutional backing or peer review. Use this for context or to understand how people in a field are thinking, but don't build arguments on blogs alone.</p>
+<p><strong>Better practice:</strong> Mix them. Use a journal article to show that an effect is real. Use a think tank report to show what policy experts recommend. Use journalism to show what's happening right now. Use a blog to show how industry insiders are reacting.</p>
+<p><strong>Example applied to gen AI ethics:</strong> You want to argue that AI hiring algorithms are biased. A strong approach: cite a journal article that documents the bias mechanism in peer-reviewed research, a think tank report that proposes policy solutions, journalism that covers real hiring discrimination incidents, and industry commentary showing what engineers are actually worrying about. That's layered, credible, and complete.</p>
+<hr>
+<h3 id="citing-sources">Citing Sources</h3>
+<p><strong>What it is:</strong> Providing enough information for a reader to locate and verify every source you use. Citation format matters less than consistency and completeness.</p>
+<p><strong>Why it matters:</strong> A claim backed by a source readers can't find is worse than no source. It creates an appearance of evidence without the substance. Consistent, complete citations let readers check your work, which is how academic and professional writing builds trust.</p>
+<p><strong>The standard for this course:</strong> Use any recognized citation style (MLA, APA, Chicago, Harvard), but use it consistently throughout your paper. Your bibliography goes at the end of your document. In your text, hyperlink the source name or the claim it supports so readers can click through directly.</p>
+<p><strong>Using Google Scholar:</strong></p>
+<p><a href="https://scholar.google.com">Google Scholar</a> is the fastest way to get correctly formatted citations for academic sources.</p>
+<ol>
+<li>Search for your source by title, author, or keywords.</li>
+<li>Click the quotation mark icon ( &quot; ) below the result.</li>
+<li>Choose a style: MLA, APA, Chicago, Harvard, or Vancouver.</li>
+<li>Copy and paste it into your bibliography.</li>
+<li>Pick one style and use it for every source.</li>
+</ol>
+<p><strong>If the paper is behind a paywall:</strong> UW students have access to most academic journals through the UW Libraries. Go to <a href="https://lib.uw.edu">lib.uw.edu</a>, search for the paper title, and access it through the library portal. You can also configure Google Scholar to show UW library links directly: go to Settings → Library Links and add &quot;University of Washington.&quot;</p>
+<p><strong>If your source isn't on Google Scholar:</strong> Many excellent sources (journalism, think tank reports, government documents) won't appear there. For these, write a citation manually in your chosen style, or use a citation generator like <a href="https://zbib.org/">ZoteroBib</a>. At minimum include: author or organization, title, publication name, date, and URL.</p>
+<p><strong>Example applied to gen AI ethics:</strong> Your bibliography might mix a journal article (formatted from Google Scholar), an AI Now Institute report (formatted manually in the same style), and a ProPublica investigation (same style, with URL). The reader can locate all three. The styles match. That's the standard.</p>
+<hr>
+<h3 id="paragraph-as-unit-of-argument">Paragraph as Unit of Argument</h3>
+<p><strong>What it is:</strong> A paragraph is one unit of thinking. It makes a claim, supports it, and connects to what comes next.</p>
+<p><strong>Why it matters:</strong> A well-built paragraph forces you to think clearly. If you can't explain your claim, back it with evidence, and analyze what that evidence means (in one paragraph), you don't actually understand the idea yet.</p>
+<p><strong>The structure:</strong> Topic sentence (your claim) → Evidence (what supports it) → Analysis (what the evidence means) → Transition (how this connects to what's next).</p>
+<p><strong>Topic sentence:</strong> One clear claim. It should be an argument (&quot;X matters because Y&quot;). It should not be a question or a bare topic (&quot;this paper discusses X&quot;). The reader should know where the paragraph is going.</p>
+<p><strong>Evidence:</strong> Something concrete. A quote from a source. Data. A real example. Something the reader can examine. Not &quot;many people believe&quot; or &quot;it's widely known.&quot; Show what you mean.</p>
+<p><strong>Analysis:</strong> Don't just drop the evidence and move on. Explain what it means, why it supports your claim, how it connects to your argument. This is where your thinking happens.</p>
+<p><strong>Transition:</strong> End with something that points forward. How does this claim set up the next one? What question does it raise?</p>
+<p><strong>Example applied to gen AI ethics:</strong> <em>Weak paragraph: &quot;Bias in AI is a big problem. Many systems are biased. This affects hiring, credit, and criminal justice. Bias is bad.&quot;</em> You see the problem: no evidence, no analysis, no argument.</p>
+<p><em>Better paragraph: &quot;LLMs trained on internet text absorb and amplify the biases present in that data, with measurable impact on real decisions. A 2025 study in PNAS found that even models explicitly fine-tuned to reduce bias still formed stereotypical associations at statistically significant rates — meaning the bias is baked into how the models understand language itself, not just in what they were trained on. This matters because it means removing bias requires more than better training data; it requires rethinking how we approach model design. As AI systems are deployed in hiring, lending, and criminal justice, these embedded biases directly affect people's economic opportunities and freedom.&quot;</em> Now you can see: the claim (bias is structural), the evidence (the study), the analysis (why this is structural), the forward movement (what deployment means).</p>
+<hr>
+<h3 id="structural-editing">Structural Editing</h3>
+<p><strong>What it is:</strong> Step back from individual sentences and paragraphs and look at the whole. Does the structure of your paper serve your argument? Does every section earn its place?</p>
+<p><strong>Why it matters:</strong> A paper can have excellent sentences and still not work. It fails if sections are in the wrong order, if paragraphs do the same job twice, or if a long section defends something the reader already accepted. Structural editing is where you cut, reorder, and combine at the section and paragraph level. It's a different skill from sentence editing and has to happen first.</p>
+<p><strong>How it works:</strong> Read your draft with one question at a time:</p>
+<p><strong>Does this section belong here?</strong> Could it move earlier or later and make the argument clearer? Is it set up by what comes before it? Does it set up what comes after?</p>
+<p><strong>Does this paragraph do one job?</strong> If you can write two different topic sentences for the same paragraph, it should be two paragraphs. If two consecutive paragraphs are making the same point with different examples, combine them.</p>
+<p><strong>Does this section earn its place?</strong> Could you cut it and lose nothing essential? If yes, cut it. Length that doesn't serve the argument dilutes the parts that do.</p>
+<p><strong>Is this evidence doing work, or is it decoration?</strong> If you can't say in one sentence exactly what claim the evidence supports, it may not belong.</p>
+<p><strong>The one-sentence test:</strong> Summarize each paragraph in one sentence. If you can't, the paragraph is doing too many things. If two summaries say essentially the same thing, you have redundancy to cut.</p>
+<p><strong>Example applied to gen AI ethics:</strong> You're writing about algorithmic bias in hiring. You have a section explaining how the Amazon recruiting tool worked technically, then a section on its impact on women, then a section on Amazon's response. Read structurally: does the technical description earn its place, or does it slow you down before you get to the argument? If the technical detail is necessary to understand the impact, keep only what's necessary, not everything you found interesting. If the reader can follow the impact argument without it, cut it.</p>
+<hr>
+<h3 id="sentence-level-editing">Sentence-Level Editing</h3>
+<p><strong>What it is:</strong> Make every sentence as clear, precise, and efficient as possible. Cut words that don't earn their place. Say what you mean.</p>
+<p><strong>Why it matters:</strong> Clarity is a form of honesty. If your sentence is vague, your thinking is vague. If your sentence is hedged, you're not committing to what you're arguing.</p>
+<p><strong>Four moves:</strong></p>
+<p><strong>Clarity:</strong> Does the sentence say what you mean? Can someone read it once and understand it? If not, rewrite. Use active voice where possible. For instance, &quot;the algorithm biased the hiring process&quot; is clearer than &quot;the hiring process was biased by the algorithm.&quot; Use concrete nouns. For instance, &quot;the model's output&quot; is clearer than &quot;it.&quot;</p>
+<p><strong>Precision:</strong> Say exactly what you mean, not roughly. &quot;AI systems sometimes have problems&quot; is vague. &quot;LLMs hallucinate false information with measurable frequency&quot; is precise. Which stakes matter, which don't, which harms are you talking about?</p>
+<p><strong>Efficiency:</strong> Cut words that don't add meaning. &quot;It is the case that bias exists&quot; can be &quot;Bias exists.&quot; &quot;In the context of hiring, algorithms that have bias can affect candidates&quot; can be &quot;Biased hiring algorithms affect candidates.&quot; Every word should do work.</p>
+<p><strong>Cut hedging:</strong> Watch for &quot;arguably,&quot; &quot;it could be said,&quot; &quot;many would argue,&quot; &quot;it seems like,&quot; &quot;in some sense.&quot; These are sometimes necessary when you're genuinely uncertain. But often they're a sign that you don't believe your own argument. If you believe it, say it. If you don't, revise until you do.</p>
+<p><strong>Example applied to gen AI ethics:</strong></p>
+<p><em>Weak sentence (vague, hedged, inefficient):</em> &quot;It could arguably be suggested that the ways in which generative AI systems have been developed might potentially raise some concerns about fairness and bias issues in various contexts.&quot;</p>
+<p><em>Better sentence (clear, precise, efficient):</em> &quot;Generative AI systems trained on biased data systematically disadvantage underrepresented groups in hiring, lending, and criminal justice.&quot;</p>
+<p>Now you know what the sentence claims, why it matters, and what it's evidence for.</p>
+<hr>
+<h3 id="final-framing">Final Framing</h3>
+<p><strong>What it is:</strong> Write the pieces that frame your whole argument (conclusion, introduction, abstract, and title) after you know what you actually argued.</p>
+<p><strong>Why it matters:</strong> Most writers draft these pieces first, which means they promise something they may not have delivered, or summarize something that doesn't yet exist. Writing them last (after the draft is done) means you're framing work that's real, not imagined.</p>
+<p><strong>The four pieces, in order of increasing compression:</strong></p>
+<p><strong>Conclusion: synthesis, not summary.</strong> Don't restate what you said. Synthesize it. A conclusion answers: given everything you've argued, what should the reader think now? What follows? What should change? A weak conclusion says &quot;as I have shown in this paper...&quot; A strong conclusion says &quot;this means X, and if we accept X, we're obligated to do Y.&quot; End with stakes. What happens if nothing changes?</p>
+<p><strong>Introduction: a promise.</strong> Your reader needs three things from the introduction: what problem you're addressing and why it matters, the position you're taking, and enough background to follow the argument. An introduction is a contract. It tells the reader what to expect, and your paper must deliver it. Write the introduction after the conclusion, so you know exactly what you're promising.</p>
+<p><strong>Abstract: condensed argument.</strong> An abstract is your entire paper in 150 words: the problem, your position, your key evidence, and the stakes. It's not a table of contents (&quot;this paper discusses...&quot;). It's the argument itself, compressed. A reader who reads only the abstract should know exactly what you argue and why it matters.</p>
+<p><strong>Title: an argument, not a topic.</strong> A title tells the reader what you claim, not just what you cover. &quot;AI Safety&quot; is a topic. &quot;When AI Systems Fail, Who Answers?&quot; is an argument. &quot;Algorithmic Bias in Hiring&quot; is a topic. &quot;Trained on the Past, Hired for the Future: How Biased Training Data Locks Out Qualified Candidates&quot; is a claim. Your title should make someone want to read the paper because they want to see if you're right.</p>
+<p><strong>Example applied to gen AI ethics:</strong> You've argued that companies deploying AI chatbots should be legally liable for harm those chatbots cause. Your conclusion synthesizes. It does not merely claim that &quot;AI companies should be accountable.&quot; It shows that &quot;existing product liability law provides a workable framework — if we treat AI outputs as products, courts already know how to assign responsibility.&quot; Your introduction frames the Air Canada case and the Hong Kong deepfake fraud, states your position clearly, and promises an argument about liability frameworks. Your abstract compresses all of it in 150 words. Your title: &quot;No One Accountable: Why AI Companies Must Face Product Liability for Chatbot Harm.&quot;</p>
+<hr>
+<h2 id="using-these-tools-together">Using These Tools Together</h2>
+<p>The thinking skills and writing skills are not separate. Free ideation generates material you sharpen with &quot;so what.&quot; Steelmanning and role reversal help you understand stakeholders completely enough to write about them. Edge cases help you see what you actually believe. And all of it lives in paragraphs where your claims earn their place through evidence and analysis.</p>
+<p>The toolkit is here. Use it when you need it. Better yet, return to it when you're stuck. The answer is usually not to think harder. It is to use a different thinking skill.</p>
+
+  </main>
+
+  <footer class="site-footer">
+    <span>Computer Ethics · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-09-18">September 18, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Computer Ethics');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  
+  <script src="https://uwt-tutor-backend.onrender.com/widget.js"
+    data-key="wk_3e7a91c5d84b2f60a1c93d7e58b04af2"
+    data-page-context="on"></script>
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

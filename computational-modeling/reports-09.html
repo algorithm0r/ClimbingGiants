@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Example reports · Assignment 8 — Computational Physical Modeling</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="css/blocks.css?v=20261015124713">
+  <link rel="stylesheet" href="css/demos.css?v=20261015124713">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (olive). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #5F7038;
+      --course-accent-dark: #47542A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    /* ── Week page video and class cards (media-cards.js) ── */
+    .media-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+      gap: 0.9rem;
+      margin: 1rem 0;
+    }
+    .media-card {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-top: 4px solid var(--course-accent);
+      border-radius: 4px;
+      padding: 0.75rem 0.9rem 0.85rem;
+    }
+    .media-card.class { border-top-color: #C8860A; }
+    .media-card p { margin: 0; }
+    .mc-kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .mc-title { font-weight: 600; line-height: 1.3; margin: 0.25rem 0 0.35rem !important; }
+    .mc-sub { font-size: 0.85rem; color: #5A5550; line-height: 1.4; }
+    .mc-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.7rem; }
+    .mc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--course-accent);
+      border-radius: 3px;
+      text-decoration: none;
+      color: var(--course-accent-dark);
+    }
+    a.mc-btn:visited { color: var(--course-accent-dark); }
+    a.mc-btn:hover { background: #F0EDE7; }
+    .mc-btn svg { width: 1em; height: 1em; flex: none; }
+    .mc-btn.primary, a.mc-btn.primary:visited { background: var(--course-accent); color: #fff; }
+    a.mc-btn.primary:hover { background: var(--course-accent-dark); }
+    .mc-btn.pending { border-style: dashed; border-color: #b8b2a8; color: #5A5550; }
+    .mc-total { font-size: 0.9rem; color: #5A5550; }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+    /* the remembered data phrase; filled in by page.js */
+    .cg-phrase { display: inline-flex; align-items: center; gap: .3rem; margin-right: .6rem;
+      font-size: .82rem; flex-shrink: 0; }
+    /* The header row is a fixed 780px. The title, the toggle, "Your data", Search and
+       "Report a problem" only just fit in it, so the chip shows the label alone (the
+       phrase is in the link's title and on the data page) and Search shows its icon.
+       An earlier chip that held the phrase and was allowed to shrink squeezed the
+       label down to "Yo" on a classroom projector. */
+    .cg-phrase a { color: rgba(230,238,222,.92); text-decoration: none; white-space: nowrap; }
+    .header-links .search-btn .sb-label { display: none; }
+    .header-links button.report-btn { white-space: nowrap; }
+    /* the title keeps its own width */
+    .site-header-top .site-title { white-space: nowrap; flex-shrink: 0; }
+    .site-header-top .header-links { min-width: 0; margin-left: 1rem; }
+    @media (max-width: 780px) {
+      /* below the 780px row: the report button's short form, as on phones */
+      .header-links .report-btn .rb-full { display: none; }
+      .header-links .report-btn .rb-short { display: inline; }
+      .cg-phrase { margin-right: .2rem; }
+    }
+    .cg-phrase a:hover { color: #fff; text-decoration: underline; }
+    .cg-phrase button { background: none; border: none; cursor: pointer; padding: 0 .2rem;
+      color: rgba(230,238,222,.7); font: inherit; font-size: 1rem; line-height: 1; }
+    .cg-phrase button:hover { color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* Two rules the other course sites do not define. The header's top
+       row carries a report button beside the title, and a page with a
+       wide demo in it needs more than the reading measure. */
+    .site-header-top { border-bottom: 1px solid rgba(200,222,180,0.15); }
+    main.wide { max-width: 1180px; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Computational Physical Modeling</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <span class="cg-phrase" id="cg-phrase"></span>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        
+          <a href="syllabus.html">Syllabus</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="notes.html">Notes</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reports.html">Examples</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reflection.html">Reflection</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="meeting.html">Meeting</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="ai-use.html">AI Use</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="tools.html">Tools</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="workbench.html">Workbench</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="extra-labor.html">Extra Labor</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="canvas-grades.html">Canvas Grades</a>
+          
+        
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+          
+          
+          
+          <a href="week-01.html">1</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-02.html">2</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-03.html">3</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-04.html">4</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          <span class="week-gap" title="Week 5 is a break week">5<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <a href="week-06.html">6</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-07.html">7</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-08.html">8</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-09.html">9</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-10.html">10</a>
+          
+        
+      </div>
+    </nav>
+
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+
+  <main data-pagefind-body>
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <div class="eyebrow"><a href="reports.html">Example reports</a></div>
+<h1>Example reports &middot; Assignment 8</h1>
+
+<p>These are three reports for <a href="assign-09.html">Assignment 8, Uncertainty Intervals</a>,
+written in three different styles. All three describe the same example pack (crash test 9793,
+which no phrase assigns), so nothing here answers anybody's assignment. Each student reruns the
+driver's head injury calculation many times with noise added, and each chooses the noise and the
+level differently. Please see the <a href="reports.html">Example reports</a> page for what every
+report needs and who it is written for.</p>
+
+<p>The three students agree on the value and on what the record shows. Their intervals differ
+in width by a factor of about six (0.15 against roughly 1), and each says which choice moved it.
+Each report is followed by a short note on what it does well. The purpose of the notes is to show
+that three styles can meet the same standard (plots identified at a glance, errors flagged,
+assumptions noted).</p>
+
+<div class="aside"><span class="label">Things to watch for</span>
+<p>Test 9793 starts 50&nbsp;ms before impact, which gives 1000 quiet samples for measuring the noise.
+Many tests start 30 or 20&nbsp;ms before impact, and at 10&nbsp;kHz a 20&nbsp;ms stretch holds only
+200 samples. For this reason your noise estimate will probably be less certain, and a method that cuts
+pieces from that stretch (as the technical report does) has little to choose from. Set the piece
+length in samples from your own sample rate (the technical report's 200 samples is 10&nbsp;ms only
+at 20&nbsp;kHz).</p>
+</div>
+
+<h2 id="a-memo">A Memo</h2>
+
+<div class="aside report"><span class="label">Example 1 &middot; Memo</span>
+<div class="memo-head">
+<p><strong>To:</strong> Alice</p>
+<p><strong>Re:</strong> How well we know the driver's head injury number</p>
+<p><strong>Data phrase:</strong> example pack (test 9793)</p>
+</div>
+
+<p>HIC15 for the driver is 150.4, with a 90% interval of 150.3 to 150.5. I would put my name
+beside both, as long as one sentence goes with them: the interval covers the noise in the head
+instruments and nothing else. (HIC15 is the head injury criterion searched over windows no
+longer than 15&nbsp;ms. The regulation's limit for it is 700.)</p>
+
+<p><strong>What I varied.</strong> Before impact the car is towed at a steady speed, so the
+50&nbsp;ms of record before impact (1000 samples) shows what the head instruments read when
+nothing is happening. Their spread (standard deviation, sigma) is 0.811, 1.061 and
+0.929&nbsp;m/s&sup2; in the X, Y and Z directions, or 0.08 to 0.11&nbsp;<em>g</em> (one
+<em>g</em> is 9.80665&nbsp;m/s&sup2;). I added fresh random noise of that size to each channel
+and ran the whole calculation again. That includes the CFC&nbsp;1000 smoothing filter the
+standard sets for head acceleration, the resultant (the three directions combined into one size)
+and the window search. I did this 1000 times. The interval runs from the 5th to the 95th percentile
+of the 1000 answers (the 5th percentile is the answer that 5% of the reruns fall below), so nine
+reruns in ten land inside it.</p>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r09-memo-interval.svg?v=20261015124713"
+    alt="Left, the three driver head acceleration channels over the 50 ms before impact, each
+    labeled with its sigma in m/s squared. Right, a histogram of HIC15 over 1000 reruns, running
+    from about 150.25 to 150.51, with the 90 per cent interval from 150.31 to 150.46 shaded and
+    the value on the record, 150.39, marked."></div>
+  <figcaption>Left, the noise I measured before impact. Right, what that noise does to HIC15 over
+  1000 reruns, drawn by <code>a8_hic_interval.py</code>.</figcaption>
+</figure>
+
+<p><strong>What I held fixed.</strong></p>
+<ul>
+  <li>The filter class (CFC&nbsp;1000) and the 15&nbsp;ms window limit. The standards set both
+  (SAE J211-1 and FMVSS 208).</li>
+  <li>The value of <em>g</em> (9.80665&nbsp;m/s&sup2;).</li>
+  <li>No offset removed. The pre-impact means are small (&minus;0.205 to 0.097&nbsp;m/s&sup2;),
+  and subtracting them moves HIC15 by +0.02.</li>
+  <li>The test itself. A second crash of the same car would probably give a different number, and
+  the interval says nothing about that.</li>
+</ul>
+
+<p><strong>Two things need your attention before the meeting.</strong></p>
+<ul>
+  <li><strong>The interval is very narrow.</strong> It is 0.15 wide, about a tenth of a percent of
+  the value. It says how much the instruments' noise moves the calculation, and the customer's
+  engineers could easily read it as how well we know this car's HIC.</li>
+  <li><strong>I assumed the noise is independent from one sample to the next.</strong> I have not
+  checked this. If neighboring samples tend to move together, the noise would cancel less inside a
+  15&nbsp;ms window, and the interval is probably too narrow.</li>
+</ul>
+
+<p><strong>Assumptions.</strong> Time zero in the file is the moment of impact, and the
+50&nbsp;ms before it is noise alone. The noise during the crash is the same size as before it. The
+three head channels (all in m/s&sup2;, status <code>ok</code>) are calibrated correctly, since a
+scale error would move every rerun the same way and would not show in the interval.</p>
+
+<p><strong>Program.</strong> <a href="data/example/code/a8_hic_interval.py" download><code>a8_hic_interval.py</code></a>
+(attached) measures the noise, computes HIC15, runs the 1000 reruns and draws the figure.</p>
+</div>
+
+<div class="aside notice"><span class="label">What to notice</span>
+<p>The first paragraph gives Alice the value, the interval, the level and the sentence she can say
+in the room. The figure puts the measured noise beside what it does to the answer. A reader sees
+what was varied and what came of it. The memo also names the one assumption it did not check (that
+the noise is independent), and that line is probably the most useful one in it.</p>
+</div>
+
+<h2 id="a-technical-report">A Technical Report</h2>
+
+<div class="aside report"><span class="label">Example 2 &middot; Technical report</span>
+<p><strong>Data phrase:</strong> example pack (test 9793)</p>
+
+<h4>Summary</h4>
+<p>HIC15 for the driver of test 9793 is 150.4, with a 95% interval of 150.0 to 151.0. The interval
+comes from rerunning the whole calculation 1000 times with noise cut from the record's own
+pre-impact stretch, so it covers instrument noise and nothing else. The filter class and the window
+limit were held fixed by rule, and the value of <em>g</em> and the baseline by choice. Changing
+either choice leaves the answer inside the interval. I would put my name beside the value and
+the interval, provided the words "instrument noise only" go with them.</p>
+
+<h4>Data</h4>
+<p>The three driver head channels of test 9793 (codes <code>11HEADCG0000ACXP</code>,
+<code>ACYP</code> and <code>ACZP</code>) are accelerations at the head's center of gravity in
+m/s&sup2;. Each holds 7001 samples 0.05&nbsp;ms apart (a sample rate of 20,000 per second), from
+&minus;50 to +300&nbsp;ms. Each header also gives a prefilter of 4000&nbsp;Hz, which means the
+instrument smoothed the signal before it was recorded. The 1000 samples before impact are the noise
+record. Table 1 gives their mean and spread, and how much each sample resembles the samples after
+it (the autocorrelation at a given lag, which is 0 for noise that is independent from sample to
+sample and 1 for a copy).</p>
+
+<table class="data">
+  <tr><th>Channel</th><th class="num">Mean (m/s&sup2;)</th><th class="num">Sigma (m/s&sup2;)</th><th class="num">Sigma (<em>g</em>)</th><th class="num">r at 0.05&nbsp;ms</th><th class="num">r at 1&nbsp;ms</th><th class="num">r at 5&nbsp;ms</th><th class="num">r at 10&nbsp;ms</th></tr>
+  <tr><td>Head X</td><td class="num">0.054</td><td class="num">0.811</td><td class="num">0.0827</td><td class="num">0.79</td><td class="num">0.36</td><td class="num">0.13</td><td class="num">0.02</td></tr>
+  <tr><td>Head Y</td><td class="num">&minus;0.205</td><td class="num">1.061</td><td class="num">0.1082</td><td class="num">0.89</td><td class="num">0.64</td><td class="num">0.46</td><td class="num">0.17</td></tr>
+  <tr><td>Head Z</td><td class="num">0.097</td><td class="num">0.929</td><td class="num">0.0948</td><td class="num">0.83</td><td class="num">0.47</td><td class="num">0.37</td><td class="num">0.21</td></tr>
+</table>
+<p class="plain">Table 1. The 50&nbsp;ms before impact. One <em>g</em> is 9.80665&nbsp;m/s&sup2;. The
+last four columns are autocorrelations (r) at the lag shown.</p>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r09-rep-noise.svg?v=20261015124713"
+    alt="Three stacked plots of driver head acceleration in m/s squared over the 50 ms before
+    impact, one per channel, each titled with its header description and code. The Y channel
+    drifts from about -2 up to about +1 and back down across the 50 ms."></div>
+  <figcaption>Figure 1. The three driver head channels before impact, titled from their headers.</figcaption>
+</figure>
+
+<h4>Method</h4>
+<p>A Python program, <a href="data/example/code/a8_noise_intervals.py" download><code>a8_noise_intervals.py</code></a>
+(listed in the appendix and submitted with this report), does every step below and draws every
+figure.</p>
+<ol>
+  <li><strong>The value.</strong> Each head channel is filtered at CFC&nbsp;1000 (the four-pole
+  Butterworth that SAE J211-1 assigns to head acceleration, run forward and then backward). The
+  resultant is formed from the three filtered channels and divided by 9.80665 to put it in
+  <em>g</em>. HIC is then searched over every window no longer than 15&nbsp;ms (FMVSS 208), using a
+  running total so that each window's integral is one subtraction.</li>
+  <li><strong>The noise model.</strong> Table 1 and Figure 2 show that the noise is far from
+  independent, so I did not use independent Gaussian noise. For each rerun and each channel, I cut
+  10&nbsp;ms pieces (200 samples) at random from the pre-impact record, with its mean removed, and
+  joined them end to end to the length of the record. A piece keeps the noise's own wander inside
+  it. I chose 10&nbsp;ms because the X channel's autocorrelation has fallen to 0.02 there and the
+  other two to about 0.2. Longer pieces would keep more of the wander, but the 50&nbsp;ms record
+  would then offer fewer different pieces to choose from.</li>
+  <li><strong>The reruns.</strong> Noise is added to all three raw channels and the whole of step 1
+  is run again, 1000 times. For comparison, the same is done with independent Gaussian noise of
+  each channel's sigma (the "independent" model).</li>
+  <li><strong>The interval.</strong> The 95% interval runs from the 2.5th to the 97.5th
+  percentile of the 1000 answers. I used percentiles because they make no assumption about the
+  shape of the spread, and Figure 3 shows the spread is not centered on the value. I chose 95%,
+  which the Reporting an Interval notes give as the common scientific default, because the number
+  is going to a customer's engineers who will test it.</li>
+  <li><strong>The fixed choices.</strong> The two fixed choices that are judgment calls (the value
+  of <em>g</em> and the baseline) are each changed on their own and HIC15 recomputed, to compare how
+  far they move the answer with the interval's width.</li>
+</ol>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r09-rep-autocorr.svg?v=20261015124713"
+    alt="Autocorrelation of the pre-impact noise against lag from 0 to 25 ms for the three head
+    channels. All three start near 0.8 to 0.9. X falls to about zero by 10 ms, Z stays near 0.2,
+    and Y falls steadily to about -0.45 at 25 ms. A dashed line marks the 10 ms block length."></div>
+  <figcaption>Figure 2. Autocorrelation of the pre-impact noise. Independent noise would sit
+  on the zero line at every lag.</figcaption>
+</figure>
+
+<h4>Results</h4>
+<p>HIC15 on the record is 150.39. Table 2 gives the intervals from both noise models at both
+levels.</p>
+
+<table class="data">
+  <tr><th>Noise model</th><th class="num">Median</th><th class="num">90% interval</th><th class="num">Width</th><th class="num">95% interval</th><th class="num">Width</th></tr>
+  <tr><td>Independent Gaussian</td><td class="num">150.39</td><td class="num">150.31 to 150.46</td><td class="num">0.15</td><td class="num">150.31 to 150.48</td><td class="num">0.17</td></tr>
+  <tr><td>Blocks (10&nbsp;ms pieces of the record), used</td><td class="num">150.53</td><td class="num">150.07 to 150.94</td><td class="num">0.87</td><td class="num">150.01 to 151.01</td><td class="num">1.00</td></tr>
+</table>
+<p class="plain">Table 2. HIC15 over 1000 reruns for each noise model.</p>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r09-rep-draws.svg?v=20261015124713"
+    alt="Two overlaid histograms of HIC15 over 1000 reruns. The independent-noise model is a narrow
+    spike around 150.4 with its 95 per cent interval from 150.31 to 150.48. The blocks model is
+    broad and runs from about 149.8 to 151.2, with its 95 per cent interval from 150.01 to 151.01.
+    A black line marks the value on the record, 150.39."></div>
+  <figcaption>Figure 3. HIC15 over 1000 reruns for each noise model, with each model's 95% interval
+  dashed.</figcaption>
+</figure>
+
+<p>With the noise cut from the record, the 95% interval is about six times wider than with
+independent noise (1.00 against 0.17). The independent noise mostly cancels inside a 15&nbsp;ms window, and
+the record's own noise, which wanders over several milliseconds, does not. The block interval is
+also lopsided about the value, reaching 0.38 below it and 0.62 above, and its median (150.53) sits
+above the value. A likely reason is that the search keeps whichever window has the largest
+average, so noise that raises some window's average shows up in HIC15 more readily than noise that
+lowers it. I have not checked this.</p>
+
+<h4>Checks on What Was Held Fixed</h4>
+<table class="data">
+  <tr><th>Held fixed, changed to</th><th class="num">HIC15</th><th class="num">Shift</th><th class="num">Shift / 95% width</th></tr>
+  <tr><td><em>g</em> = 9.81 instead of 9.80665</td><td class="num">150.26</td><td class="num">&minus;0.13</td><td class="num">0.13</td></tr>
+  <tr><td>Pre-impact mean subtracted from each channel</td><td class="num">150.41</td><td class="num">+0.02</td><td class="num">0.02</td></tr>
+</table>
+<p class="plain">Table 3. Each fixed choice changed on its own, against HIC15 = 150.39.</p>
+
+<p>Neither change moves HIC15 outside the block interval. Rounding <em>g</em> to 9.81 would,
+however, move the answer outside the independent-noise interval. The window limit and the filter
+class are set by the standards, so they are fixed by rule and not varied here.</p>
+
+<h4>Errors and Anomalies</h4>
+<p><strong>The pre-impact noise is not independent from sample to sample.</strong> Neighboring
+samples have autocorrelations of 0.79 to 0.89 (Table 1). The 4000&nbsp;Hz prefilter probably
+accounts for that much, since smoothing makes neighbors alike. It would not explain the Y and Z
+channels still being correlated at 5&nbsp;ms (0.46 and 0.37), so something slower is in the record
+too.</p>
+<p><strong>The Y channel drifts.</strong> Across the 50&nbsp;ms before impact it rises by a few
+m/s&sup2; and falls back (Figure 1), which is probably where its negative correlation at long lags
+comes from. It could be the dummy's head moving while the car is towed, or a slow drift in
+the instrument. I cannot tell which from the record. The block model treats it as noise, which
+probably makes the interval wider than the instrument noise alone would.</p>
+
+<h4>Assumptions</h4>
+<ul>
+  <li>Time zero is the moment of impact, and the 50&nbsp;ms before it holds no crash signal. The
+  car is towed at constant speed, so the true acceleration there should be zero.</li>
+  <li>The noise during the crash has the same size and character as the noise before it. I have
+  not checked this, and an instrument under the crash load may well behave differently.</li>
+  <li>The three channels' noise is independent of each other, so each gets its own draw. I have not
+  checked this either.</li>
+  <li>The instruments are calibrated correctly. A scale error would move every rerun the same way,
+  and no resampling can show it.</li>
+</ul>
+
+<h4>Appendix. Program</h4>
+<pre class="nb-in">"""Assignment 8: an uncertainty interval on the driver's HIC15.
+
+Run this from the unzipped pack folder. It
+  1. measures the noise on the three driver head channels over the 50 ms
+     before impact, including how much each sample resembles its neighbors,
+  2. reruns the whole HIC15 calculation (CFC 1000 filter, resultant, 15 ms
+     window search) 1000 times with noise added, for two noise models:
+       independent: Gaussian noise drawn fresh for each sample, same sigma
+       blocks:      10 ms pieces cut at random from the pre-impact record itself
+  3. gives the 90% and 95% intervals for both,
+  4. changes each judgment call that was held fixed (g and the baseline), one
+     at a time, to see how far it moves HIC15.
+Saves noise_before_impact.svg, noise_autocorrelation.svg and hic_draws.svg.
+"""
+import json
+import math
+import os
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+G = 9.80665        # standard gravity, m/s^2 in one g
+DRAWS = 1000       # reruns per noise model
+BLOCK = 200        # samples per block for the 'blocks' model (10 ms at 20 kHz)
+CODES = ['11HEADCG0000ACXP', '11HEADCG0000ACYP', '11HEADCG0000ACZP']
+
+
+def cfc(y, dt, cls):
+    """SAE J211-1 four-pole Butterworth (Smoothing notes), forward then backward."""
+    wd = 2 * math.pi * cls * 2.0775
+    wa = math.tan(wd * dt / 2)
+    d = 1 + math.sqrt(2) * wa + wa ** 2
+    a0 = wa ** 2 / d
+    b1 = -2 * (wa ** 2 - 1) / d
+    b2 = (-1 + math.sqrt(2) * wa - wa ** 2) / d
+
+    def one_pass(x):
+        out = np.zeros(len(x))
+        for i in range(2, len(x)):
+            out[i] = (a0 * x[i] + 2 * a0 * x[i - 1] + a0 * x[i - 2]
+                      + b1 * out[i - 1] + b2 * out[i - 2])
+        return out
+
+    return one_pass(one_pass(y)[::-1])[::-1]
+
+
+def hic(a, dt, limit_ms):
+    """Largest HIC over every window up to limit_ms, a = resultant in g.
+    Prefix sum of the trapezoid integral, one numpy pass per window length."""
+    S = np.concatenate([[0.0], np.cumsum((a[1:] + a[:-1]) / 2 * dt)])
+    best = 0.0
+    for k in range(1, round(limit_ms / 1000 / dt) + 1):
+        T = k * dt
+        mean = np.clip((S[k:] - S[:-k]) / T, 0, None)
+        best = max(best, (T * mean ** 2.5).max())
+    return best
+
+
+def pipeline(chs, dt, cls=1000, limit_ms=15, g=G):
+    """The whole analysis: filter each component, resultant in g, HIC search.
+    cls=None skips the filter."""
+    if cls is not None:
+        chs = [cfc(c, dt, cls) for c in chs]
+    return hic(np.sqrt(sum(c ** 2 for c in chs)) / g, dt, limit_ms)
+
+
+def autocorr(r, lag):
+    """Correlation between the noise and itself shifted by lag samples."""
+    return np.corrcoef(r[:-lag], r[lag:])[0, 1]
+
+
+def independent_noise(pre, n, rng):
+    return rng.normal(0, pre.std(), n)
+
+
+def block_noise(pre, n, rng):
+    """Join random 10 ms pieces of the (mean-removed) pre-impact record."""
+    r = pre - pre.mean()
+    pieces = []
+    for _ in range(n // BLOCK + 1):
+        s = rng.integers(0, len(r) - BLOCK + 1)
+        pieces.append(r[s:s + BLOCK])
+    return np.concatenate(pieces)[:n]
+
+
+with open(os.path.join('crash', os.listdir('crash')[0])) as f:
+    test = json.load(f)
+chans = [c for c in test['channels'].values() if c['code'] in CODES]
+dt, n, t0 = chans[0]['dt'], chans[0]['n'], chans[0]['t0']
+t_ms = 1000 * (t0 + dt * np.arange(n))
+before = t_ms &lt; 0
+raw = [np.array(c['y']) for c in chans]
+pre = [c[before] for c in raw]
+
+# 1. the noise
+print(f"{len(chans)} head channels, {n} samples every {dt * 1000:g} ms, "
+      f"{t_ms[0]:.2f} to {t_ms[-1]:.2f} ms")
+print(f"pre-impact stretch: {before.sum()} samples, "
+      f"{t_ms[0]:.2f} to {t_ms[before][-1]:.2f} ms")
+LAGS = [1, 20, 100, 200]
+print(f"{'code':18} {'prefilter':&gt;9} {'mean':&gt;7} {'sigma':&gt;6} {'sigma':&gt;7}   "
+      + '  '.join(f'r({l * dt * 1000:g} ms)' for l in LAGS))
+for c, p in zip(chans, pre):
+    r = p - p.mean()
+    print(f"{c['code']:18} {c['prefilter_hz']:&gt;6} Hz {p.mean():7.3f} {p.std():6.3f} "
+          f"{p.std() / G:6.4f}g   "
+          + '  '.join(f'{autocorr(r, l):9.2f}' for l in LAGS))
+
+# 2. the value, then the reruns
+value = pipeline(raw, dt)
+print(f"\nHIC15 on the record: {value:.2f}")
+rng = np.random.default_rng(310)
+draws = {}
+for name, noise in (('independent', independent_noise), ('blocks', block_noise)):
+    runs = []
+    for _ in range(DRAWS):
+        runs.append(pipeline([c + noise(p, n, rng) for c, p in zip(raw, pre)], dt))
+    draws[name] = np.array(runs)
+
+# 3. the intervals
+print(f"\n{'noise model':12} {'median':&gt;7} {'90% interval':&gt;17} {'width':&gt;6} "
+      f"{'95% interval':&gt;17} {'width':&gt;6}")
+for name, d in draws.items():
+    l90, h90, l95, h95 = np.percentile(d, [5, 95, 2.5, 97.5])
+    print(f"{name:12} {np.median(d):7.2f} {l90:8.2f} to {h90:6.2f} {h90 - l90:6.2f} "
+          f"{l95:8.2f} to {h95:6.2f} {h95 - l95:6.2f}")
+
+# 4. what was held fixed, changed one at a time
+l95, h95 = np.percentile(draws['blocks'], [2.5, 97.5])
+print(f"\n{'held fixed, changed to':34} {'HIC15':&gt;7} {'shift':&gt;7} "
+      f"{'x 95% width':&gt;11}")
+changes = [('g = 9.81', pipeline(raw, dt, g=9.81)),
+           ('pre-impact mean subtracted',
+            pipeline([c - p.mean() for c, p in zip(raw, pre)], dt))]
+for name, v in changes:
+    ratio = abs(v - value) / (h95 - l95)
+    print(f"{name:34} {v:7.2f} {v - value:+7.2f} {ratio:11.2f}")
+
+# Figure 1: the pre-impact stretch of each channel
+fig, axs = plt.subplots(3, 1, figsize=(8, 6), sharex=True)
+for ax, c, p in zip(axs, chans, pre):
+    ax.plot(t_ms[before], p, linewidth=0.7)
+    ax.set_title(f"{c['comment']}  [{c['code']}]", fontsize=9)
+    ax.set_ylabel('acceleration (m/s$^2$)', fontsize=8)
+axs[-1].set_xlabel('time from impact (ms)')
+fig.suptitle('Driver head acceleration in the 50 ms before impact, test 9793',
+             fontsize=10)
+fig.tight_layout()
+fig.savefig('noise_before_impact.svg')
+plt.close(fig)
+
+# Figure 2: how alike neighboring samples are
+lags = np.arange(1, 501)
+plt.figure(figsize=(8, 3.6))
+for c, p in zip(chans, pre):
+    r = p - p.mean()
+    plt.plot(lags * dt * 1000, [autocorr(r, l) for l in lags], label=c['code'])
+plt.axhline(0, color='gray', linewidth=0.8)
+plt.axvline(BLOCK * dt * 1000, color='gray', linestyle='--', linewidth=0.8,
+            label='block length, 10 ms')
+plt.title('Autocorrelation of the pre-impact noise (independent noise would sit at 0)')
+plt.xlabel('lag (ms)')
+plt.ylabel('autocorrelation (no units)')
+plt.legend(fontsize=8)
+plt.tight_layout()
+plt.savefig('noise_autocorrelation.svg')
+plt.close()
+
+# Figure 3: the reruns under both noise models, 95% intervals marked
+plt.figure(figsize=(8, 3.8))
+bins = np.linspace(min(d.min() for d in draws.values()),
+                   max(d.max() for d in draws.values()), 50)
+for (name, d), col in zip(draws.items(), ('tab:blue', 'tab:orange')):
+    lo, hi = np.percentile(d, [2.5, 97.5])
+    plt.hist(d, bins=bins, alpha=0.6, color=col,
+             label=f'{name}: 95% interval {lo:.2f} to {hi:.2f}')
+    for v in (lo, hi):
+        plt.axvline(v, color=col, linestyle='--', linewidth=1)
+plt.axvline(value, color='black', linewidth=1.2,
+            label=f'value on the record, {value:.2f}')
+plt.title(f'HIC15 over {DRAWS} reruns for each noise model')
+plt.xlabel('HIC15 (a in g, t in s)')
+plt.ylabel('number of reruns')
+plt.legend(fontsize=8)
+plt.tight_layout()
+plt.savefig('hic_draws.svg')</pre>
+</div>
+
+<div class="aside notice"><span class="label">What to notice</span>
+<p>The summary answers all four of Alice's questions before any heading. Table 1 and Figure 2 are
+the evidence for the main decision (the noise is not independent). The choice of noise model is
+therefore argued from the data. Tables 2 and 3 put the noise models and the fixed choices in the
+same units, so a reader can see that neither judgment call moves the answer beyond the interval.</p>
+</div>
+
+<h2 id="a-notebook">A Notebook</h2>
+
+<div class="aside report"><span class="label">Example 3 &middot; Notebook, exported to PDF</span>
+<p><strong>Assignment 8, an interval on the driver's HIC15.</strong> Data phrase: example pack (test 9793)</p>
+
+<p><strong>Answer for Alice.</strong> HIC15 = 150.4, 90% interval 149.9 to 150.9, from 500
+reruns with the recorded pre-impact noise added to the head channels. What I varied, what I held
+fixed and whether I would sign it are at the end.</p>
+
+<p>I did this in Google Colab. The plan from the Resampling notes is to add noise to the three
+head channels, rerun the whole HIC calculation from assignment 6 many times, and look at the spread
+of the answers. The 50&nbsp;ms before impact is the noise on its own, so I start there.</p>
+
+<pre class="nb-in">import json
+import numpy as np
+
+with open('crash/09793.json') as f:
+    test = json.load(f)
+
+head = [test['channels'][k] for k in ('head_x', 'head_y', 'head_z')]
+dt, n, t0 = head[0]['dt'], head[0]['n'], head[0]['t0']
+t_ms = 1000 * (t0 + dt * np.arange(n))
+x, y, z = [np.array(c['y']) for c in head]
+quiet = t_ms &lt; 0          # the 50 ms before impact
+
+print(quiet.sum(), 'samples before impact')
+for c, a in zip(head, (x, y, z)):
+    print(c['code'], c['comment'], ' mean %.3f  sigma %.3f m/s^2'
+          % (a[quiet].mean(), a[quiet].std()))</pre>
+<pre class="nb-out">1000 samples before impact
+11HEADCG0000ACXP V1P1 HEAD CG X ACCELERATION  mean 0.054  sigma 0.811 m/s^2
+11HEADCG0000ACYP V1P1 HEAD CG Y ACCELERATION  mean -0.205  sigma 1.061 m/s^2
+11HEADCG0000ACZP V1P1 HEAD CG Z ACCELERATION  mean 0.097  sigma 0.929 m/s^2</pre>
+
+<p>Each channel has 1000 quiet samples, and the spread (sigma, the standard deviation) is about
+1&nbsp;m/s&sup2;, or about 0.1&nbsp;<em>g</em>. The means are not quite zero. The biggest is
+&minus;0.205&nbsp;m/s&sup2; on Y, about 0.02&nbsp;<em>g</em>, so I left it in. Next the calculation
+from assignment 6, written as functions so I can rerun it. The HIC search loops over window lengths
+and does every start time at once, because the double loop I used in assignment 6 is too slow to
+run hundreds of times.</p>
+
+<pre class="nb-in">import math
+G = 9.80665
+
+def cfc(y, dt, cls):
+    # SAE J211-1 filter, copied from the Smoothing notes
+    wd = 2 * math.pi * cls * 2.0775
+    wa = math.tan(wd * dt / 2)
+    d = 1 + math.sqrt(2) * wa + wa ** 2
+    a0 = wa ** 2 / d
+    b1 = -2 * (wa ** 2 - 1) / d
+    b2 = (-1 + math.sqrt(2) * wa - wa ** 2) / d
+    def one_pass(x):
+        out = np.zeros(len(x))
+        for i in range(2, len(x)):
+            out[i] = (a0 * x[i] + 2 * a0 * x[i - 1] + a0 * x[i - 2]
+                      + b1 * out[i - 1] + b2 * out[i - 2])
+        return out
+    return one_pass(one_pass(y)[::-1])[::-1]
+
+def hic(a, dt, limit_ms=15):
+    # prefix sum, then every window length up to the limit, all starts at once
+    S = np.concatenate([[0.0], np.cumsum((a[1:] + a[:-1]) / 2 * dt)])
+    best = 0.0
+    for k in range(1, round(limit_ms / 1000 / dt) + 1):
+        mean = np.clip((S[k:] - S[:-k]) / (k * dt), 0, None)
+        best = max(best, (k * dt * mean ** 2.5).max())
+    return best
+
+def head_hic(x, y, z, g=G, limit_ms=15):
+    fx, fy, fz = cfc(x, dt, 1000), cfc(y, dt, 1000), cfc(z, dt, 1000)
+    return hic(np.sqrt(fx ** 2 + fy ** 2 + fz ** 2) / g, dt, limit_ms)
+
+value = head_hic(x, y, z)
+print('HIC15 = %.2f' % value)</pre>
+<pre class="nb-out">HIC15 = 150.39</pre>
+
+<p>That matches assignment 6. Now the first try, the way the Resampling notes do it: independent
+Gaussian noise of each channel's sigma added to the raw channels, 200 runs, and the 5th and 95th
+percentiles as a 90% interval.</p>
+
+<pre class="nb-in">rng = np.random.default_rng(2026)
+sig = [a[quiet].std() for a in (x, y, z)]
+
+indep = []
+for k in range(200):
+    indep.append(head_hic(x + rng.normal(0, sig[0], n),
+                          y + rng.normal(0, sig[1], n),
+                          z + rng.normal(0, sig[2], n)))
+lo, hi = np.percentile(indep, [5, 95])
+print('independent noise, 200 runs: 90%% interval %.2f to %.2f, width %.2f'
+      % (lo, hi, hi - lo))</pre>
+<pre class="nb-out">independent noise, 200 runs: 90% interval 150.31 to 150.46, width 0.16</pre>
+
+<p>That is tiny, about a tenth of a percent of the value. The noise is filtered at CFC&nbsp;1000 (the
+smoothing filter the standard sets for head acceleration) and then averaged over a 15&nbsp;ms window, so most of it cancels (the Bias and Noise notes say random
+error cancels as it is added up). That only works if each sample's noise is independent of the next
+one's, so I plotted the recorded noise next to independent noise of the same sigma.</p>
+
+<pre class="nb-in">import matplotlib.pyplot as plt
+
+plt.figure(figsize=(8, 3.5))
+plt.plot(t_ms[quiet], y[quiet], label='recorded (head Y)')
+plt.plot(t_ms[quiet], y[quiet].mean() + rng.normal(0, sig[1], quiet.sum()),
+         alpha=0.6, label='independent noise, same sigma')
+plt.xlabel('time from impact (ms)')
+plt.ylabel('head Y acceleration (m/s$^2$)')
+plt.title('Driver head Y before impact, against independent noise of the same size')
+plt.legend()
+plt.show()</pre>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r09-nb-1.svg?v=20261015124713"
+    alt="Driver head Y acceleration over the 50 ms before impact, plotted over independent noise of the
+    same sigma. The independent noise jumps from sample to sample around zero. The recorded noise
+    wanders slowly, starting near -2.5 m/s squared, rising to about +1 and falling back."></div>
+  <figcaption>The notebook's plot of the recorded head Y noise against independent noise.</figcaption>
+</figure>
+
+<p>They do not look alike. The independent noise jumps around from sample to sample. The recorded noise
+wanders up and down over several milliseconds, and across the whole 50&nbsp;ms it climbs by a few
+m/s&sup2; and comes back. Slow wander like that will not cancel inside a 15&nbsp;ms window,
+so <strong>I am flagging the independent-noise interval as probably too narrow</strong>. In place of a
+formula for the noise, I used the recorded noise itself. For each channel, I take the pre-impact
+stretch with its mean removed, repeat it end to end and start it at a random point. Every run then
+gets the real noise in its real order, wander and all. I am keeping 90%, since the Reporting an
+Interval notes give it as the usual level for engineering reports.</p>
+
+<pre class="nb-in">def real_noise(a):
+    # the recorded noise before impact, mean removed, repeated end to end
+    # and started at a random point
+    r = a[quiet] - a[quiet].mean()
+    s = rng.integers(len(r))
+    return np.tile(r, n // len(r) + 2)[s:s + n]
+
+real = []
+for k in range(500):
+    real.append(head_hic(x + real_noise(x), y + real_noise(y), z + real_noise(z)))
+real = np.array(real)
+lo, hi = np.percentile(real, [5, 95])
+print('recorded noise, 500 runs: 90%% interval %.2f to %.2f, width %.2f'
+      % (lo, hi, hi - lo))
+print('median %.2f' % np.median(real))
+
+bins = np.linspace(min(real.min(), min(indep)), max(real.max(), max(indep)), 60)
+plt.figure(figsize=(8, 3.5))
+plt.hist(indep, bins=bins, alpha=0.7, label='independent noise (200 runs)')
+plt.hist(real, bins=bins, alpha=0.7, label='recorded noise (500 runs)')
+plt.axvline(value, color='black', label='value on the record')
+plt.axvspan(lo, hi, color='tab:orange', alpha=0.15,
+            label='90% interval, recorded noise')
+plt.xlabel('HIC15 (a in g, t in s)')
+plt.ylabel('number of runs')
+plt.title('Driver HIC15 rerun with noise added, two noise models')
+plt.legend(fontsize=8)
+plt.show()</pre>
+<pre class="nb-out">recorded noise, 500 runs: 90% interval 149.88 to 150.86, width 0.98
+median 150.45</pre>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r09-nb-2.svg?v=20261015124713"
+    alt="Histograms of HIC15 for the two noise models on the same bins. The independent noise runs make
+    a narrow spike at about 150.4. The recorded noise runs spread from about 149.6 to 151.0 in two
+    humps, one near 150.1 and one near 150.6, with the 90 per cent interval from 149.88 to
+    150.86 shaded."></div>
+  <figcaption>The notebook's histogram of both sets of runs.</figcaption>
+</figure>
+
+<p>The interval is now 149.88 to 150.86, six times wider than before. The recorded-noise runs
+fall in two humps, one either side of the value. My guess is that this is the slow wander in the Y
+channel. Depending on where the copy starts, the HIC window gets either the high part of it or the
+low part. I have not checked that. Two humps are also a reason to use percentiles and not the mean
+plus or minus some number of sigmas, since a symmetric interval would describe a shape this is
+not. Next, whether 500 runs is enough.</p>
+
+<pre class="nb-in">m = np.arange(20, 501, 10)
+plt.figure(figsize=(8, 3.5))
+plt.plot(m, [np.percentile(real[:k], 5) for k in m], label='5th percentile')
+plt.plot(m, [np.percentile(real[:k], 95) for k in m], label='95th percentile')
+plt.axhline(value, color='black', linewidth=0.8, label='value on the record')
+plt.xlabel('number of runs used')
+plt.ylabel('HIC15 (a in g, t in s)')
+plt.title('Ends of the 90% interval as the runs add up (recorded noise)')
+plt.legend(fontsize=8, loc='lower right', bbox_to_anchor=(1, 0.15))
+plt.show()
+
+for k in (100, 200, 300, 400, 500):
+    print(k, 'runs: %.2f to %.2f' % tuple(np.percentile(real[:k], [5, 95])))</pre>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r09-nb-3.svg?v=20261015124713"
+    alt="The 5th and 95th percentiles of the recorded-noise runs against the number of runs used,
+    from 20 to 500. Both settle by about 200 runs, near 149.88 and 150.86, with the value on the
+    record drawn between them."></div>
+  <figcaption>The notebook's plot of the interval's ends as runs are added.</figcaption>
+</figure>
+<pre class="nb-out">100 runs: 149.81 to 150.84
+200 runs: 149.88 to 150.86
+300 runs: 149.88 to 150.86
+400 runs: 149.84 to 150.85
+500 runs: 149.88 to 150.86</pre>
+
+<p>At 200, 300, 400 and 500 runs the ends agree to within 0.04, so 500 is plenty. Last, one of the things I
+held fixed, to see how it compares with the interval.</p>
+
+<pre class="nb-in">print('g = 9.81 instead of 9.80665: %.2f' % head_hic(x, y, z, g=9.81))</pre>
+<pre class="nb-out">g = 9.81 instead of 9.80665: 150.26</pre>
+
+<p>Rounding <em>g</em> to 9.81 moves HIC15 by 0.13. That would put it outside the independent-noise
+interval, although it stays inside the recorded-noise one. Both the window (15&nbsp;ms, FMVSS 208) and the filter class
+(CFC&nbsp;1000, SAE J211-1) are set by the standards, so I held them fixed.</p>
+
+<p><strong>For Alice.</strong> The value is 150.4, the 90% interval is 149.9 to 150.9, and it comes
+from 500 reruns. <strong>Varied:</strong> the noise on the three head channels, taken from the
+record itself. <strong>Held fixed:</strong> the filter class, the 15&nbsp;ms window, <em>g</em> =
+9.80665&nbsp;m/s&sup2;, no offset removed, and this one test of this one car. <strong>My
+name:</strong> I would sign the value and the interval as long as the interval is described as
+instrument noise only, because a second crash of the same car could give a different number,
+and nothing here measures how different.</p>
+
+<p><strong>Flags.</strong> The recorded noise is not independent from sample to sample, so the
+independent-noise interval is probably too narrow. The Y channel climbs and falls by a few m/s&sup2; before
+impact, and I do not know whether that is the head moving or the instrument drifting.
+<strong>Assumptions.</strong> Time zero is the impact. The 50&nbsp;ms before it is noise only, and
+the noise is the same during the crash. The three channels get independent draws. The instruments
+are calibrated correctly.</p>
+</div>
+
+<div class="aside notice"><span class="label">What to notice</span>
+<p>The notebook shows its first interval and then the check that overturned it, in the order the
+work was done. The plot of recorded against independent noise shows why a second noise model was needed.
+It is a good idea to put the answer at the top, as this one does, and to gather the flags and
+assumptions again at the end.</p>
+</div>
+
+  </main>
+
+  
+
+  <script src="js/page.js?v=20261015124713"></script>
+
+  <footer class="site-footer">
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-11">October 11, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Algorithms');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  
+  
+  
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

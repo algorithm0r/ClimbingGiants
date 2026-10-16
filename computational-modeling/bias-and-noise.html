@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bias and noise accumulate at different rates — Computational Physical Modeling</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="css/blocks.css?v=20261015124713">
+  <link rel="stylesheet" href="css/demos.css?v=20261015124713">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (olive). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #5F7038;
+      --course-accent-dark: #47542A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    /* ── Week page video and class cards (media-cards.js) ── */
+    .media-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+      gap: 0.9rem;
+      margin: 1rem 0;
+    }
+    .media-card {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-top: 4px solid var(--course-accent);
+      border-radius: 4px;
+      padding: 0.75rem 0.9rem 0.85rem;
+    }
+    .media-card.class { border-top-color: #C8860A; }
+    .media-card p { margin: 0; }
+    .mc-kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .mc-title { font-weight: 600; line-height: 1.3; margin: 0.25rem 0 0.35rem !important; }
+    .mc-sub { font-size: 0.85rem; color: #5A5550; line-height: 1.4; }
+    .mc-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.7rem; }
+    .mc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--course-accent);
+      border-radius: 3px;
+      text-decoration: none;
+      color: var(--course-accent-dark);
+    }
+    a.mc-btn:visited { color: var(--course-accent-dark); }
+    a.mc-btn:hover { background: #F0EDE7; }
+    .mc-btn svg { width: 1em; height: 1em; flex: none; }
+    .mc-btn.primary, a.mc-btn.primary:visited { background: var(--course-accent); color: #fff; }
+    a.mc-btn.primary:hover { background: var(--course-accent-dark); }
+    .mc-btn.pending { border-style: dashed; border-color: #b8b2a8; color: #5A5550; }
+    .mc-total { font-size: 0.9rem; color: #5A5550; }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+    /* the remembered data phrase; filled in by page.js */
+    .cg-phrase { display: inline-flex; align-items: center; gap: .3rem; margin-right: .6rem;
+      font-size: .82rem; flex-shrink: 0; }
+    /* The header row is a fixed 780px. The title, the toggle, "Your data", Search and
+       "Report a problem" only just fit in it, so the chip shows the label alone (the
+       phrase is in the link's title and on the data page) and Search shows its icon.
+       An earlier chip that held the phrase and was allowed to shrink squeezed the
+       label down to "Yo" on a classroom projector. */
+    .cg-phrase a { color: rgba(230,238,222,.92); text-decoration: none; white-space: nowrap; }
+    .header-links .search-btn .sb-label { display: none; }
+    .header-links button.report-btn { white-space: nowrap; }
+    /* the title keeps its own width */
+    .site-header-top .site-title { white-space: nowrap; flex-shrink: 0; }
+    .site-header-top .header-links { min-width: 0; margin-left: 1rem; }
+    @media (max-width: 780px) {
+      /* below the 780px row: the report button's short form, as on phones */
+      .header-links .report-btn .rb-full { display: none; }
+      .header-links .report-btn .rb-short { display: inline; }
+      .cg-phrase { margin-right: .2rem; }
+    }
+    .cg-phrase a:hover { color: #fff; text-decoration: underline; }
+    .cg-phrase button { background: none; border: none; cursor: pointer; padding: 0 .2rem;
+      color: rgba(230,238,222,.7); font: inherit; font-size: 1rem; line-height: 1; }
+    .cg-phrase button:hover { color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* Two rules the other course sites do not define. The header's top
+       row carries a report button beside the title, and a page with a
+       wide demo in it needs more than the reading measure. */
+    .site-header-top { border-bottom: 1px solid rgba(200,222,180,0.15); }
+    main.wide { max-width: 1180px; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Computational Physical Modeling</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <span class="cg-phrase" id="cg-phrase"></span>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        
+          <a href="syllabus.html">Syllabus</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="notes.html">Notes</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reports.html">Examples</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reflection.html">Reflection</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="meeting.html">Meeting</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="ai-use.html">AI Use</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="tools.html">Tools</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="workbench.html">Workbench</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="extra-labor.html">Extra Labor</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="canvas-grades.html">Canvas Grades</a>
+          
+        
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+          
+          
+          
+          <a href="week-01.html">1</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-02.html">2</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <span class="week-current">3</span>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-04.html">4</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          <span class="week-gap" title="Week 5 is a break week">5<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <a href="week-06.html">6</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-07.html">7</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-08.html">8</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-09.html">9</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-10.html">10</a>
+          
+        
+      </div>
+    </nav>
+
+    
+    <nav class="page-family">
+      <div class="nav-inner">
+        Week 3,
+        <a href="week-03.html">Overview</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="area-under-a-curve.html">Area under a curve</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="cumulative-integration.html">Cumulative integration</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="the-constant-of-integration.html">The constant</a>
+        
+          <span class="site-nav-sep">·</span>
+          <strong>Bias and noise</strong>
+        
+        <span class="site-nav-sep">·</span>
+        <a href="assign-03.html">Assignment</a>
+      </div>
+    </nav>
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+
+  <main data-pagefind-body class="wide">
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <div class="eyebrow">Week 3 · Numerical Integration</div>
+<h1>Bias and noise accumulate at different rates</h1>
+
+<div class="claim">
+  <span class="label">Claim</span>
+  <p class="exact">Summing <em>n</em> samples, a constant offset <em>b</em> contributes an error
+  proportional to <em>n</em>, while random error of standard deviation σ that is equally likely to
+  be positive or negative contributes an error proportional to&nbsp;√<em>n</em>. Integrating a
+  record of duration <em>T</em>, the offset produces a velocity error <em>bT</em>. Integrating a
+  second time produces a displacement error <em>bT</em>²/2.</p>
+  <p class="plain">Random error partly cancels as it is added up. A constant offset does not
+  cancel
+  at all.</p>
+</div>
+
+<h2 id="the-three-terms-in-a-sample">The Three Terms in a Sample</h2>
+
+<p>Sample $i$ returned by an <dfn data-g="accelerometer">accelerometer</dfn> is the sum of three
+separate quantities:</p>
+
+$$a_i \;=\; s_i \;+\; b \;+\; \varepsilon_i$$
+
+<dl class="terms">
+  <dt>$s_i$</dt>
+  <dd>the acceleration of the object the sensor is attached to, which is the quantity the measurement is
+  for.</dd>
+  <dt>$b$</dt>
+  <dd>a constant <strong>offset</strong>, the same in every sample, present whether or not the
+  object is accelerating. It arises from the sensor and its mounting and drifts slowly with
+  temperature.</dd>
+  <dt>$\varepsilon_i$</dt>
+  <dd>random <strong>noise</strong>, differing from sample to sample, equally likely to be
+  positive
+  or negative, with <dfn data-g="standard-deviation">standard deviation</dfn> $\sigma$.</dd>
+</dl>
+
+<p>The instrument reports $a_i$. The three terms on the right are not separately available. Only
+their sum is recorded.</p>
+
+<h2 id="integration-as-a-sum">Integration as a Sum</h2>
+
+<p>The velocity after a time $T$ is the integral of the acceleration:</p>
+
+$$v(T) \;=\; \int_0^T a \,\mathrm{d}t$$
+
+<p>That integral cannot be evaluated, because $a$ arrives as samples and not as a function. What you
+have is $n$ samples spaced $\Delta t$ apart, and the integral is evaluated by adding them up:</p>
+
+$$v(T) \;\approx\; \Delta t \sum_{i=1}^{n} a_i$$
+
+<p>Substituting the decomposition and splitting the sum into three sums, one per term:</p>
+
+$$\Delta t \sum_{i=1}^{n} a_i
+  \;=\; \underbrace{\Delta t \sum_{i=1}^{n} s_i}_{\text{signal}}
+  \;+\; \underbrace{\Delta t \sum_{i=1}^{n} b}_{\text{offset}}
+  \;+\; \underbrace{\Delta t \sum_{i=1}^{n} \varepsilon_i}_{\text{noise}}$$
+
+<p>The three sums have the same number of terms and are formed by the same operation. What
+separates them is what happens when their terms are added.</p>
+
+<h3 id="the-offset-sum">The Offset Sum</h3>
+
+<p>Every term is the same number, so the sum is that number $n$ times:</p>
+
+$$\Delta t \sum_{i=1}^{n} b \;=\; n\,b\,\Delta t \;=\; bT$$
+
+<p>Adding a constant involves no cancellation, so the sum is $n$ times that constant and doubling
+the number of samples doubles the result.</p>
+
+<h3 id="the-noise-sum">The Noise Sum</h3>
+
+<p>Here the terms have different signs. Adding $n$ independent values that are equally likely to be
+positive or negative does not give $n$ times a typical value, because positive and negative
+terms cancel. The sum of $n$ such values with standard deviation $\sigma$ has standard deviation
+$\sigma\sqrt{n}$, so</p>
+
+$$\Delta t \sum_{i=1}^{n} \varepsilon_i
+  \quad\text{has standard deviation}\quad
+  \sigma\,\Delta t\,\sqrt{n} \;=\; \sigma\sqrt{\Delta t\,T}$$
+
+<p>using $n = T/\Delta t$. Doubling the number of samples multiplies this by $\sqrt{2}$, not by 2.</p>
+
+<p>That result needs the $\varepsilon_i$ to be uncorrelated with one another, which is to say that
+knowing one sample's noise tells you nothing about the next one's. Being equally likely to be
+positive or negative is not enough on its own. Noise that has been smoothed or filtered fails
+this, because a filter that removes fast content makes neighbouring samples resemble each other,
+and its sum grows faster than $\sqrt{n}$. <a href="differentiation-amplifies-noise.html">Week
+4</a> measures a record where exactly that happens.</p>
+
+<p>This is a different kind of statement from the one about the offset. $bT$ is a number. Given $b$
+and $T$ it can be computed, and it is the error present in the record. The noise sum cannot be
+computed, because the individual $\varepsilon_i$ are unknown. Its distribution is known. It has
+<strong>expected value zero</strong>. Over many records made under the same conditions it
+contributes nothing on average, and standard deviation $\sigma\sqrt{\Delta t\,T}$. A single
+record produces one draw from that distribution. The formula does not say what the draw will be.
+It says how large such draws typically are.</p>
+
+<p>That difference decides what can be done about each. The offset is a number, so it can be
+estimated and subtracted. The best estimate of the noise sum is its <dfn
+data-g="expected-value">expected value</dfn>, zero, so subtracting the best estimate changes
+nothing. Noise is reduced by averaging or by filtering. It is not removed by correction.</p>
+
+<figure class="figure" id="fig-draw">
+  <div class="fig-body"></div>
+  <figcaption>The two error terms are different kinds of thing, and this is the difference. The
+  offset error is one number, drawn as one line, and it can be computed from <em>b</em> and
+  <em>T</em>. The noise error is a distribution of width
+  &sigma;&radic;(&Delta;<em>tT</em>) centred on zero, and a record is one draw from it. The
+  draw marked is this record's, at +0.0001&nbsp;m/s. Another test would land somewhere else under
+  the same curve.</figcaption>
+  <div class="source constructed"><span class="tag">Constructed</span><span>A normal curve of
+  standard deviation 0.0048&nbsp;m/s, which is &sigma;&radic;(&Delta;<em>tT</em>) for this
+  channel's 50&nbsp;ms window, against <em>bT</em> = &minus;0.0107&nbsp;m/s. Both numbers are the
+  page's own. The curve is drawn.</span></div>
+</figure>
+
+<h3 id="the-two-errors-together">The Two Errors Together</h3>
+
+<p>Writing $E(T)$ for the noise sum, the measured velocity is</p>
+
+$$v(T) \;=\; v_{\text{true}}(T) \;+\; \underbrace{bT}_{\text{grows as } n} \;+\;
+  \underbrace{E(T)}_{\text{grows as } \sqrt{n}}$$
+
+<p>Integrating a second time gives displacement. The velocity now carries the term $bt$, which
+grows in proportion to elapsed time, and that term is summed in its turn. At sample $i$ the
+elapsed time is $i\,\Delta t$, so the term contributes $b\,i\,\Delta t$ and the sum is</p>
+
+$$\Delta t \sum_{i=1}^{n} b\,i\,\Delta t
+  \;=\; b\,\Delta t^{2} \sum_{i=1}^{n} i
+  \;=\; b\,\Delta t^{2}\,\frac{n(n+1)}{2}
+  \;\approx\; \frac{1}{2}\,b\,T^{2}$$
+
+<p>The last step drops the $+1$ against $n$, which matters only when $n$ is small. The factor of a
+half is the sum of the first $n$ whole numbers. It was not a rule applied from outside. So</p>
+
+$$x(T) \;=\; x_{\text{true}}(T) \;+\; \frac{1}{2}bT^{2}$$
+
+<p>Each integration multiplies the offset error by a further factor of $T$. The offset measured on
+this page&rsquo;s channel, &minus;0.2135&nbsp;m/s&sup2;, displaces the answer by 1.1&nbsp;mm
+after 0.1&nbsp;s, 10.7&nbsp;cm after 1&nbsp;s, and 10.7&nbsp;m after 10&nbsp;s. Dividing the
+offset error by the noise error:</p>
+
+$$\frac{bT}{\sigma\sqrt{\Delta t\,T}} \;=\; \frac{b}{\sigma}\sqrt{n}$$
+
+<p>The ratio of the two errors in the sum is the ratio of offset to noise in a single sample,
+multiplied by $\sqrt{n}$. An offset far smaller than the noise in any individual reading
+overtakes it once enough readings have been added, and this says how many are needed.</p>
+
+<h2 id="accumulated-offset-and-noise">Accumulated Offset and Noise</h2>
+
+<p>Both terms can be computed directly from the record, so neither has to be argued about. The
+offset term is the running total of $b$. The noise term is the running total of the recorded
+pre-impact residuals about $b$, real instrument noise, accumulated. No model of it is involved.</p>
+
+<cg-demo case="growth"></cg-demo>
+
+<p>Switch the axes to logarithmic. Each term becomes a straight line, and the slope of each line is
+its exponent: 1 for the offset, one half for the noise. That is the claim at the top of the
+page, drawn.</p>
+
+<p>Drag the offset down and the crossing moves to the right. Drag it up and the crossing moves left
+until the offset dominates from the first sample. Set it to zero and the offset line disappears
+entirely, which is what a perfectly calibrated instrument would give and what no instrument
+does.</p>
+
+<p>Compare the two noise readouts. Over the whole record the predicted size is 0.0128 m/s and this
+record's actual accumulated noise is 0.0025 m/s, about five times smaller. That is not a failure
+of the prediction. The prediction is the width of a distribution and this record is one draw
+from it. A draw well inside the width is the common case, and a second test would give a
+different value of similar order.</p>
+
+<div class="aside">
+  <span class="label">The trapezoid weighting</span>
+  <p>The code on this page uses the <dfn data-g="trapezoid-rule">trapezoid rule</dfn>, which weights
+the two end samples by a half instead of giving every sample equal weight. That changes $bT$ by
+one sample's worth, $b\,\Delta t$, and leaves the $\sqrt{n}$ behaviour of the noise term
+unchanged. For $n$ in the hundreds or thousands neither difference is visible, and the results
+above are used as written.</p>
+</div>
+
+<h2 id="separating-offset-from-noise">Separating Offset from Noise</h2>
+
+<p>Separating the three terms requires a stretch of record where the first one is zero.</p>
+
+<p>Every crash test recording begins before the impact. During those samples the vehicle is
+travelling at constant speed on a tow line, so its true acceleration is zero. Anything the
+instrument records in that window is offset plus noise, with no signal underneath. The recording
+used throughout this page is from a 2019 BMW X5 driven into a <dfn data-g="rigid-barrier">rigid
+barrier</dfn> at 15.65 m/s. The <dfn data-g="channel">channel</dfn> is a <dfn
+data-g="longitudinal">longitudinal</dfn> accelerometer on the left rear seat <dfn
+data-g="crossmember">crossmember</dfn>, sampled at <dfn data-g="sample-rate">12 500 Hz</dfn>,
+with 625 samples, 50 milliseconds, recorded before the impact.</p>
+
+<p>Over that pre-impact window the mean of the recorded values is <strong>−0.2135 m/s²</strong> and
+their standard deviation is <strong>2.377 m/s²</strong>. The mean is the offset. The scatter
+about the mean is the noise.</p>
+
+<figure class="figure" id="fig-window">
+  <div class="fig-body"></div>
+  <figcaption>The 625 samples recorded before the impact. This is the stretch the page uses,
+  because the vehicle is on the tow line and the true acceleration through it is zero. The horizontal line is their mean, &minus;0.2135&nbsp;m/s²,
+  and that is the offset. The band is one standard deviation either side of it,
+  &plusmn;2.377&nbsp;m/s², and that is the noise. Everything in this window is one or the other,
+  because there is no signal underneath it.</figcaption>
+  <div class="source measured"><span class="tag">Measured</span><span>The first 625 samples of
+  channel <code>10SEATLERE00ACXP</code>, NHTSA test 10642, covering the 50&nbsp;ms before the
+  impact. The mean and standard deviation are computed in the browser from those
+  samples.</span></div>
+</figure>
+
+<cg-demo name="bias-noise" src="data/test10642-crossmember-x.json"
+  caption="Left rear seat crossmember, longitudinal. The dashed grey curve is the same record
+  with the offset subtracted. The dotted red line on the velocity panel is bT, the error
+  predicted from the offset alone."></cg-demo>
+
+<h2 id="the-formulas-against-this-record">The Formulas Against This Record</h2>
+
+<p>The pre-impact window supplies every quantity the formulas need: <var>b</var> = −0.2135 m/s²,
+<var>σ</var> = 2.377 m/s², Δ<var>t</var> = 8×10⁻⁵ s, <var>T</var> = 0.050 s, and therefore
+<var>n</var> = 625 samples.</p>
+
+<table style="border-collapse:collapse;margin:1.2rem 0;font-size:.95rem">
+  <tr style="border-bottom:1px solid #ddd6c9">
+    <th style="text-align:left;padding:.4rem 1.4rem .4rem 0">Quantity</th>
+    <th style="text-align:right;padding:.4rem 1.4rem .4rem 0">Predicted</th>
+    <th style="text-align:right;padding:.4rem 0">Measured</th></tr>
+  <tr><td style="padding:.35rem 1.4rem .35rem 0">offset error <var>bT</var></td>
+      <td style="text-align:right;padding:.35rem 1.4rem .35rem 0">−0.0107 m/s</td>
+      <td style="text-align:right;padding:.35rem 0">−0.0105 m/s</td></tr>
+  <tr><td style="padding:.35rem 1.4rem .35rem 0">noise error <var>σ</var>√(Δ<var>tT</var>)</td>
+      <td style="text-align:right;padding:.35rem 1.4rem .35rem 0">0.0048 m/s</td>
+      <td style="text-align:right;padding:.35rem 0">+0.0001 m/s</td></tr>
+  <tr><td style="padding:.35rem 1.4rem .35rem 0">ratio (<var>b</var>/<var>σ</var>)√<var>n</var></td>
+      <td style="text-align:right;padding:.35rem 1.4rem .35rem 0">2.2</td>
+      <td style="text-align:right;padding:.35rem 0">&mdash;</td></tr>
+</table>
+
+<p>The ratio row has no measured entry on purpose. Dividing the two measured numbers gives 105,
+and that is not a disagreement with the prediction. The predicted ratio compares a fixed number
+against the <em>typical</em> size of a noise draw, and this record's draw happened to be a small
+one, so the ratio of these two particular measurements says nothing about typical sizes.</p>
+
+<p>The offset error is a prediction of a single number and it lands within 2% of the integrated
+record. The dotted red line on the velocity panel is that prediction, <var>bT</var>, drawn over
+the measured curve.</p>
+
+<p>The noise error is a predicted spread. Reading it as a predicted value claims more than it says.
+Subtracting <var>b</var> from every sample removes the <var>bT</var> term and leaves the noise
+sum on its own. The corrected curve ends at +0.0001 m/s. That is one draw from a distribution
+centred on zero with a width of 0.0048 m/s, and this draw came out small. The same calculation
+on a different test would give a different value of similar size.</p>
+
+<div class="aside">
+  <span class="label">Where √n comes from</span>
+  <p>Adding values that are equally likely to be positive or negative is a random walk: each step
+moves up or down with equal probability, so steps in opposite directions cancel and the expected
+distance from the start after <var>n</var> steps grows as √<var>n</var>. The same result
+explains why averaging repeated measurements improves precision only as √<var>n</var>. A hundred
+repeats reduce the scatter by a factor of ten. The square root is what rules out a hundred.</p>
+</div>
+
+<h2 id="checking-against-the-measured-impact-speed">Checking Against the Measured Impact Speed</h2>
+
+<p>A velocity obtained by integration can be checked against a velocity that was measured some
+other way. The test report gives the vehicle&rsquo;s speed at the moment of impact as
+15.65&nbsp;m/s. Integrating the <dfn data-g="baseline">baseline-corrected</dfn> acceleration
+over the whole 360&nbsp;ms record gives a change in speed of <strong>17.51&nbsp;m/s</strong>.
+Those two numbers differ by 12%. Two things can produce that difference, and they are not
+distinguishable from the change in speed alone:</p>
+
+<ul class="plain">
+  <li>An uncorrected offset. A negative <var>b</var> accumulates over the record as <var>bT</var>
+  and inflates the total.</li>
+  <li>A rebound. If the vehicle leaves the barrier travelling backwards, the total change in speed
+  is the approach speed plus the rebound speed, and genuinely exceeds 15.65&nbsp;m/s.</li>
+</ul>
+
+<p>The offset was measured in the pre-impact window, so its contribution is computed and not
+guessed. Over 360&nbsp;ms, <var>bT</var> = &minus;0.0769&nbsp;m/s, which is
+<strong>0.44%</strong> of 17.51&nbsp;m/s. It is too small to account for 12%. The rebound is
+settled by looking at the speed itself and not at the change in speed. Adding the known
+15.65&nbsp;m/s to the integrated velocity gives the speed of the vehicle at every instant:</p>
+
+<figure class="figure" id="fig-whole">
+  <div class="fig-body"></div>
+  <figcaption>Speed of the left rear seat crossmember through the impact: the baseline-corrected
+  acceleration integrated once, added to the measured impact speed of 15.65&nbsp;m/s. Four points are marked: the speed at impact, the crossing of zero, the most negative value, and the value at the end of the record.</figcaption>
+</figure>
+
+<p>The speed falls, crosses zero at <strong>62&nbsp;ms</strong>, and continues into negative
+values. A negative speed means the vehicle is travelling backwards, away from the barrier. The
+curve reaches &minus;2.52&nbsp;m/s at 87&nbsp;ms, comes back up, and is level at
+<strong>&minus;1.86&nbsp;m/s</strong> from about 180&nbsp;ms to the end of the record. The
+rebound is therefore observed directly, and it accounts for the discrepancy, since 15.65 + 1.86
+= 17.51&nbsp;m/s. The ratio of rebound speed to approach speed, 1.86&nbsp;/&nbsp;15.65 = 0.119,
+is the <dfn data-g="restitution">coefficient of restitution</dfn> for this impact.</p>
+
+<div class="aside">
+  <span class="label">The curve is the speed of one point</span>
+  <p>This accelerometer is bolted to the left rear seat crossmember, so the curve is the speed of
+that point on the structure and not of the vehicle as a whole. The overshoot to
+&minus;2.52&nbsp;m/s and the recovery to &minus;1.86&nbsp;m/s are the mounting point moving
+relative to the rest of the vehicle while the structure deforms and springs back. The flat
+section at the end, once that relative motion has stopped, is the part of the tail that can be
+read as the vehicle&rsquo;s rebound speed. Reading it off the overshoot instead would give a
+coefficient of restitution of 0.161, from the same record.</p>
+</div>
+
+<h2 id="the-offset-at-longer-durations">The Offset at Longer Durations</h2>
+
+<p>The offset error is small here because the record is short. Holding <var>b</var> and
+<var>σ</var> at the values measured for this channel and evaluating the two formulas at longer
+durations:</p>
+
+<table style="border-collapse:collapse;margin:1.2rem 0;font-size:.95rem">
+  <tr style="border-bottom:1px solid #ddd6c9">
+    <th style="text-align:left;padding:.4rem 1.4rem .4rem 0"><var>T</var></th>
+    <th style="text-align:right;padding:.4rem 1.4rem .4rem 0"><var>n</var></th>
+    <th style="text-align:right;padding:.4rem 1.4rem .4rem 0">offset <var>bT</var></th>
+    <th style="text-align:right;padding:.4rem 1.4rem .4rem 0">noise <var>σ</var>√(Δ<var>tT</var>)</th>
+    <th style="text-align:right;padding:.4rem 0">ratio</th></tr>
+  <tr><td style="padding:.3rem 1.4rem .3rem 0">50 ms, pre-impact window</td>
+      <td style="text-align:right;padding:.3rem 1.4rem .3rem 0">625</td>
+      <td style="text-align:right;padding:.3rem 1.4rem .3rem 0">−0.011 m/s</td>
+      <td style="text-align:right;padding:.3rem 1.4rem .3rem 0">0.005 m/s</td>
+      <td style="text-align:right;padding:.3rem 0">2.2</td></tr>
+  <tr><td style="padding:.3rem 1.4rem .3rem 0">360 ms, whole record</td>
+      <td style="text-align:right;padding:.3rem 1.4rem .3rem 0">4 500</td>
+      <td style="text-align:right;padding:.3rem 1.4rem .3rem 0">−0.077 m/s</td>
+      <td style="text-align:right;padding:.3rem 1.4rem .3rem 0">0.013 m/s</td>
+      <td style="text-align:right;padding:.3rem 0">6.0</td></tr>
+  <tr><td style="padding:.3rem 1.4rem .3rem 0">1 s</td>
+      <td style="text-align:right;padding:.3rem 1.4rem .3rem 0">12 500</td>
+      <td style="text-align:right;padding:.3rem 1.4rem .3rem 0">−0.21 m/s</td>
+      <td style="text-align:right;padding:.3rem 1.4rem .3rem 0">0.021 m/s</td>
+      <td style="text-align:right;padding:.3rem 0">10</td></tr>
+  <tr><td style="padding:.3rem 1.4rem .3rem 0">10 s</td>
+      <td style="text-align:right;padding:.3rem 1.4rem .3rem 0">125 000</td>
+      <td style="text-align:right;padding:.3rem 1.4rem .3rem 0">−2.1 m/s</td>
+      <td style="text-align:right;padding:.3rem 1.4rem .3rem 0">0.067 m/s</td>
+      <td style="text-align:right;padding:.3rem 0">32</td></tr>
+</table>
+
+<p>A hundredfold increase in record length multiplies the offset error by a hundred and the noise
+error by ten. The crash record is short enough that the offset stays negligible. A record of
+seconds, from the same instrument, would not be.</p>
+
+<h2 id="in-code">In Code</h2>
+
+<div class="codetabs" id="code1">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+    <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
+  </div>
+  <pre data-lang="python" data-notes="1|Cumulative trapezoid: each output is the running total up to that sample.;2|Prepend a zero so the output has the same length as the input.;5|The pre-impact samples are the ones at negative time. Their mean estimates the offset.;7|b is the offset in m/s^2: -0.2135 for this channel.;8|Subtracting b from every sample removes the straight-line term.;9|Integrating a second time gives displacement.">def integrate(y, dt):
+    return np.concatenate([[0.0], np.cumsum((y[1:] + y[:-1]) * 0.5 * dt)])
+
+def offset(a, t):
+    return a[t &lt; 0].mean()
+
+b = offset(a, t)
+v = integrate(a - b, dt)
+x = integrate(v, dt)</pre>
+  <pre data-lang="matlab" hidden data-notes="1|Cumulative trapezoid: each output is the running total up to that sample.;2|Leading zero keeps the output the same length as the input.;5|Logical indexing selects the pre-impact samples.;6|Subtract the offset before integrating.">function s = integrate(y, dt)
+    s = [0; cumsum((y(2:end) + y(1:end-1)) * 0.5 * dt)];
+end
+
+b = mean(a(t &lt; 0));
+v = integrate(a - b, dt);
+x = integrate(v, dt);</pre>
+  <pre data-lang="js" hidden data-notes="2|Start the running total at zero.;3|Each step adds the trapezoid between two samples.;8|Keep only the samples recorded before impact.;9|Their mean is the offset.">function integrate(y, dt) {
+  const s = [0];
+  for (let i = 1; i &lt; y.length; i++)
+    s.push(s[i - 1] + (y[i] + y[i - 1]) * 0.5 * dt);
+  return s;
+}
+
+const pre = a.filter((_, i) =&gt; t[i] &lt; 0);
+const b = pre.reduce((p, c) =&gt; p + c, 0) / pre.length;
+const v = integrate(a.map(x =&gt; x - b), dt);</pre>
+  <div class="code-hint">Hover a highlighted line for a description of what it does.</div>
+</div>
+
+<div class="aside">
+  <span class="label">A note on units</span>
+  <p>Accelerations in this record are stored in m/s², and every calculation on this page uses those
+units. Crash engineering conventionally quotes <em>peak</em> accelerations as multiples of <dfn
+data-g="standard-gravity">standard gravity</dfn>: the peak here is −1541 m/s², reported in that
+convention as −157 <em>g</em>. Both describe the same acceleration.</p>
+</div>
+
+<div class="check">
+  <span class="label">Check</span>
+  <ol>
+    <li>An accelerometer has an offset of 0.05 m/s². You integrate two seconds of its output. What
+    velocity error does the offset produce, and what displacement error?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Velocity: 0.1&nbsp;m/s.</strong> A constant 0.05&nbsp;m/s&sup2; integrated for 2&nbsp;s
+gives 0.05 &times; 2 = 0.1&nbsp;m/s.</p>
+     <p><strong>Displacement: 0.1&nbsp;m.</strong> Integrating again gives &frac12;<em>at</em>&sup2; =
+0.5 &times; 0.05 &times; 4 = 0.1&nbsp;m.</p>
+     <p>Note what happened to the exponent. The offset is constant, its effect on velocity grows as
+<em>t</em>, and its effect on displacement grows as <em>t</em>&sup2;. A bias too small to see on
+the acceleration trace, 0.05 against peaks of hundreds, becomes ten centimetres of displacement,
+and would become 40&nbsp;cm in four seconds.</p></div></details></li>
+    <li>The same instrument has a noise standard deviation of 2 m/s² and samples at 10 kHz. Over
+    the same two seconds, is the velocity error dominated by the offset or by the noise?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>By the offset</strong>, by a factor of about 3.5. Two seconds at 10&nbsp;kHz is
+<em>n</em> = 20&thinsp;000 samples with <em>dt</em> = 10<sup>&minus;4</sup>&nbsp;s. Zero-mean
+noise partly cancels, so its contribution to the sum grows as &radic;<em>n</em>:</p>
+     <p>&sigma;<sub>v</sub> = &sigma; &middot; <em>dt</em> &middot; &radic;<em>n</em> = 2 &times;
+10<sup>&minus;4</sup> &times; 141.4 = <strong>0.028&nbsp;m/s</strong>, against 0.1&nbsp;m/s from
+the offset. And the gap widens with time: the offset term grows as <em>n</em> and the noise term
+as &radic;<em>n</em>, so doubling the duration doubles one and multiplies the other by 1.41. The
+noise is forty times larger than the offset in the raw signal, 2 against 0.05, and contributes
+less than a third as much to the answer. Which of two errors matters is a question about the
+operation, not about their sizes.</p></div></details></li>
+    <li>An integrated speed change exceeds the known approach speed by 12%. What measurement
+    distinguishes an uncorrected offset from a rebound?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Measure the mean of the acceleration in the pre-impact window</strong>, before anything
+has happened. The true value there is zero, so whatever you get is the offset, and you can then
+subtract it and integrate again.</p>
+     <p>The two produce the same symptom by different routes. A rebound is real: the vehicle bounces
+back off the barrier, so the total change in velocity genuinely exceeds the approach speed. An
+offset is arithmetic, a small constant accumulating over the whole record. They also look
+different after the event. A rebound leaves the velocity <strong>flat at a new value</strong>
+once the vehicle is free. An offset leaves it <strong>still drifting</strong>, at a constant
+slope, for as long as the record runs. The pre-impact window is the better check because it is
+quantitative and available first.</p></div></details></li>
+  </ol>
+</div>
+
+<h2 id="terms-used-on-this-page">Terms Used on This Page</h2>
+
+<p>Hover or tab to a dotted term in the text to see its definition. Every term marked on this page
+is listed here.</p>
+
+<dl class="glossary"></dl>
+
+<p class="deeper">Go deeper: <a href="workbench.html?tool=integrate">the workbench</a>, which runs
+the rectangle and trapezoid rules on any record and reports the difference between them as you
+change the spacing.</p>
+
+  </main>
+
+  
+  <script>
+    document.querySelectorAll('h2[id], h3[id]').forEach(h => {
+      const a = document.createElement('a');
+      a.className = 'anchor-link';
+      a.href = '#' + h.id;
+      a.textContent = '§';
+      a.title = 'Link to this section';
+      h.appendChild(a);
+    });
+  </script>
+  
+
+  <script type="module" src="js/bundle/bias-and-noise.js?v=20261015124713"></script>
+  
+
+  <footer class="site-footer">
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-09-23">September 23, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Algorithms');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  
+  
+  
+    
+  
+  
+  <script src="https://uwt-tutor-backend.onrender.com/widget.js"
+          data-key="wk_bcb80c4ee2d5718131d24548528577c3"
+          data-content-selector="main"
+          data-color="#5F7038"></script>
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

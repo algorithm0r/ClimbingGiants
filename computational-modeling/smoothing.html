@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smoothing — Computational Physical Modeling</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="css/blocks.css?v=20261015124713">
+  <link rel="stylesheet" href="css/demos.css?v=20261015124713">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (olive). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #5F7038;
+      --course-accent-dark: #47542A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    /* ── Week page video and class cards (media-cards.js) ── */
+    .media-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+      gap: 0.9rem;
+      margin: 1rem 0;
+    }
+    .media-card {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-top: 4px solid var(--course-accent);
+      border-radius: 4px;
+      padding: 0.75rem 0.9rem 0.85rem;
+    }
+    .media-card.class { border-top-color: #C8860A; }
+    .media-card p { margin: 0; }
+    .mc-kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .mc-title { font-weight: 600; line-height: 1.3; margin: 0.25rem 0 0.35rem !important; }
+    .mc-sub { font-size: 0.85rem; color: #5A5550; line-height: 1.4; }
+    .mc-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.7rem; }
+    .mc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--course-accent);
+      border-radius: 3px;
+      text-decoration: none;
+      color: var(--course-accent-dark);
+    }
+    a.mc-btn:visited { color: var(--course-accent-dark); }
+    a.mc-btn:hover { background: #F0EDE7; }
+    .mc-btn svg { width: 1em; height: 1em; flex: none; }
+    .mc-btn.primary, a.mc-btn.primary:visited { background: var(--course-accent); color: #fff; }
+    a.mc-btn.primary:hover { background: var(--course-accent-dark); }
+    .mc-btn.pending { border-style: dashed; border-color: #b8b2a8; color: #5A5550; }
+    .mc-total { font-size: 0.9rem; color: #5A5550; }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+    /* the remembered data phrase; filled in by page.js */
+    .cg-phrase { display: inline-flex; align-items: center; gap: .3rem; margin-right: .6rem;
+      font-size: .82rem; flex-shrink: 0; }
+    /* The header row is a fixed 780px. The title, the toggle, "Your data", Search and
+       "Report a problem" only just fit in it, so the chip shows the label alone (the
+       phrase is in the link's title and on the data page) and Search shows its icon.
+       An earlier chip that held the phrase and was allowed to shrink squeezed the
+       label down to "Yo" on a classroom projector. */
+    .cg-phrase a { color: rgba(230,238,222,.92); text-decoration: none; white-space: nowrap; }
+    .header-links .search-btn .sb-label { display: none; }
+    .header-links button.report-btn { white-space: nowrap; }
+    /* the title keeps its own width */
+    .site-header-top .site-title { white-space: nowrap; flex-shrink: 0; }
+    .site-header-top .header-links { min-width: 0; margin-left: 1rem; }
+    @media (max-width: 780px) {
+      /* below the 780px row: the report button's short form, as on phones */
+      .header-links .report-btn .rb-full { display: none; }
+      .header-links .report-btn .rb-short { display: inline; }
+      .cg-phrase { margin-right: .2rem; }
+    }
+    .cg-phrase a:hover { color: #fff; text-decoration: underline; }
+    .cg-phrase button { background: none; border: none; cursor: pointer; padding: 0 .2rem;
+      color: rgba(230,238,222,.7); font: inherit; font-size: 1rem; line-height: 1; }
+    .cg-phrase button:hover { color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* Two rules the other course sites do not define. The header's top
+       row carries a report button beside the title, and a page with a
+       wide demo in it needs more than the reading measure. */
+    .site-header-top { border-bottom: 1px solid rgba(200,222,180,0.15); }
+    main.wide { max-width: 1180px; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Computational Physical Modeling</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <span class="cg-phrase" id="cg-phrase"></span>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        
+          <a href="syllabus.html">Syllabus</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="notes.html">Notes</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reports.html">Examples</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reflection.html">Reflection</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="meeting.html">Meeting</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="ai-use.html">AI Use</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="tools.html">Tools</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="workbench.html">Workbench</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="extra-labor.html">Extra Labor</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="canvas-grades.html">Canvas Grades</a>
+          
+        
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+          
+          
+          
+          <a href="week-01.html">1</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-02.html">2</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-03.html">3</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <span class="week-current">4</span>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          <span class="week-gap" title="Week 5 is a break week">5<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <a href="week-06.html">6</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-07.html">7</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-08.html">8</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-09.html">9</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-10.html">10</a>
+          
+        
+      </div>
+    </nav>
+
+    
+    <nav class="page-family">
+      <div class="nav-inner">
+        Week 4,
+        <a href="week-04.html">Overview</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="finite-differences.html">Finite differences</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="differentiation-amplifies-noise.html">Amplified noise</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="the-error-minimum.html">The error minimum</a>
+        
+          <span class="site-nav-sep">·</span>
+          <strong>Smoothing</strong>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="phase-lag.html">Phase lag</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="why-a-standard-exists.html">Filter class</a>
+        
+        <span class="site-nav-sep">·</span>
+        <a href="assign-04.html">Assignment</a>
+      </div>
+    </nav>
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+
+  <main data-pagefind-body class="wide">
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <div class="eyebrow">Week 4 · Noise and Filtering</div>
+<h1>Smoothing</h1>
+
+<div class="claim">
+  <span class="label">Claim</span>
+  <p class="exact">  Smoothing replaces each sample by a weighted combination of its neighbours, which reduces the
+  noise by averaging it and generally reduces the signal by averaging that too. The total
+  error
+  against the true signal therefore has a minimum at a finite window width. Too narrow leaves noise, and too wide removes the thing being measured.</p>
+  <p class="plain">Smoothing is a trade. It buys a reduction in noise with a distortion of the signal, and there
+  is usually a width that buys the most for the least.</p>
+</div>
+
+<h2 id="the-simplest-smoother">The Simplest Smoother</h2>
+
+<p>A <dfn data-g="moving-average">moving average</dfn> of width $w$ replaces each sample by the
+mean of the $w$ samples centred on it:</p>
+
+$$\tilde y_i \;=\; \frac{1}{w} \sum_{k=-(w-1)/2}^{(w-1)/2} y_{i+k}$$
+
+<p>Two consequences follow from that one line.</p>
+
+<p><strong>The noise is reduced by $\sqrt{w}$.</strong> Averaging $w$ independent values of
+standard deviation $\sigma$ gives one of standard deviation $\sigma/\sqrt{w}$, which is the same
+square-root law that governs accumulation in week 3, used deliberately this time.</p>
+
+<p>The square root is what makes this expensive. Halving the noise means dividing $\sqrt{w}$ by
+two, so the width has to go up by a factor of four:</p>
+
+$$\frac{\sigma}{\sqrt{w}} \;\to\; \frac{\sigma}{2\sqrt{w}}
+  \qquad\text{needs}\qquad \sqrt{4w} \;=\; 2\sqrt{w}$$
+
+<p>A window of 25 leaves a fifth of the noise, since $\sqrt{25} = 5$. Going from 25 to 100
+quadruples the width and halves the noise again, to a tenth. The halving after that costs a
+window of 400. Each halving costs four times the width of the one before it, and the second
+consequence below is what that width does to the signal.</p>
+
+<p><strong>The signal is reduced too.</strong> The average of a curve over a window is not the
+value of the curve at the centre unless the curve is straight there, so wherever it bends, which
+is to say at every peak and every trough, the average is pulled toward the surroundings and the
+peak comes out lower than it is. The peak is commonly the number you were after.</p>
+
+<figure class="figure mini" id="fig-month">
+  <div class="fig-body"></div>
+  <figcaption>A year of daily temperatures in grey, and a 31-day centred average through them.
+  The average is a fair picture of the season and it has removed the one night that anybody
+  wanted to know about, marked by the ringed dot where the smoothed curve runs instead. Nothing
+  in the smoothed curve records that the removal happened.</figcaption>
+</figure>
+
+<h2 id="measured-error-by-window-width">Measured Error by Window Width</h2>
+
+<p>A 2 Hz sine of amplitude 1 at 1 kHz with noise of standard deviation σ = 0.01, smoothed at
+several widths and compared against the noise-free signal it was built from. The error column is
+the root mean square difference from that signal, taken over every sample:</p>
+
+$$\text{RMS error} \;=\; \sqrt{\frac{1}{N}\sum_{i=1}^{N}
+  \left( \tilde y_i - y^{\text{true}}_i \right)^{2}}$$
+
+<table class="data">
+  <tr><th class="num">width w</th><th class="num">RMS error, whole record</th>
+      <th class="num">peak, true value 1.0000</th>
+      <th class="num">noise reduced by</th></tr>
+  <tr><td class="num">1 (none)</td><td class="num">0.00999</td><td class="num">1.0262</td><td class="num">×1.00</td></tr>
+  <tr><td class="num">5</td><td class="num">0.00388</td><td class="num">1.0036</td><td class="num">×0.45</td></tr>
+  <tr><td class="num">9, the minimum</td><td class="num">0.00285</td><td class="num">1.0014</td><td class="num">×0.33</td></tr>
+  <tr><td class="num">11</td><td class="num">0.00306</td><td class="num">1.0006</td><td class="num">×0.30</td></tr>
+  <tr><td class="num">25</td><td class="num">0.00768</td><td class="num">0.9964</td><td class="num">×0.20</td></tr>
+  <tr><td class="num">51</td><td class="num">0.02369</td><td class="num">0.9839</td><td class="num">×0.14</td></tr>
+  <tr><td class="num">101</td><td class="num">0.06983</td><td class="num">0.9347</td><td class="num">×0.10</td></tr>
+</table>
+
+<p>The second column falls, reaches a minimum at $w = 9$, and then rises past the unsmoothed value.
+By $w = 101$ the smoothed signal is seven times further from the truth than the
+raw noisy one, so the smoothing has done a good deal more damage than the noise it removed. The
+fourth column is the noise reduction, $1/\sqrt{w}$, and it improves in every row, all the way
+down, which is where the trap sits. The quantity smoothing is chosen for keeps getting better
+while the quantity actually wanted gets worse, and a person watching only the smoothness of the
+plot has no signal at all that anything has gone wrong.</p>
+
+<p>The third column says where the damage lands. The peak falls monotonically, 1.0262, 1.0036,
+1.0014, 1.0006, 0.9964, 0.9839, 0.9347, because a wider window averages more of the descent
+either side of the peak into it. It passes through the true value of 1.0000 between $w = 13$
+(1.0001) and $w = 15$ (0.9993), which is a coincidence of this signal and this noise and not a width to
+choose.</p>
+
+<p>The two error columns do not agree on the best width, and the reason is worth sitting with.
+The RMS column is smallest at $w = 9$, and it rises at $w = 11$. The peak column is closer to the
+truth at $w = 11$ than at $w = 9$. Both are correct. Widening from 9 to 11 removes a little more
+noise everywhere and flattens the peak a little more, and for this signal the first effect is
+smaller than the second across the record as a whole, while at the single instant of the peak the
+two happen to cancel more completely.</p>
+
+<p>That is the same lesson as the CFC classes two pages on, arriving early. <strong>"Best" is not a
+property of the width. It is a property of the width and the question together.</strong> If you
+are reporting the whole trace, $w = 9$ is the better choice here. If you are reporting the peak
+and nothing else, a wider window is. Choose the width against the quantity you are going to
+report, and say which one you chose.</p>
+
+<cg-demo case="smooth"></cg-demo>
+
+<h2 id="the-standard-s-filter">The Standard's Filter</h2>
+
+<p>Everything above specified a smoother by its width: average nine samples. Measurement
+standards specify one the other way round, by frequency: keep everything that wiggles
+slower than 180 times a second and remove everything faster. Two reasons for the change, and
+both matter for choosing a class in the assignment.</p>
+
+<ul class="plain">
+  <li><strong>Frequency is what the physics is stated in.</strong> What you want to keep is
+  whatever the thing you are measuring actually responds to, and that is a rate, as
+  <a href="why-a-standard-exists.html">the filter class page</a> works through. There is no
+  sample count that means "what a thorax responds to".</li>
+  <li><strong>A width does not travel between records.</strong> Nine samples is 0.7&nbsp;ms at
+  12&thinsp;500&nbsp;Hz and 9&nbsp;ms at 1&nbsp;kHz, so the same code does two different things to
+  two recordings of the same event. "Remove above 180&nbsp;Hz" means the same thing on
+  both.</li>
+</ul>
+
+<p>Asking for a sharp frequency cut-off changes the shape of the arithmetic. A moving average
+builds each output only from inputs, and to get a sharp cut-off that way you need hundreds of
+coefficients. The standard's filter instead computes each output from a few recent inputs
+and the outputs it has already produced, feeding its own results back in. That buys the
+same sharpness for five numbers, and the trade is the familiar one: keep a little state and you
+do far less work.</p>
+
+<p>SAE J211 specifies a four-pole Butterworth low-pass. "Four-pole" is how steeply it cuts, a
+compromise between a sharp edge and the ringing a sharper one would add, and "Butterworth" is the
+family that keeps the passband flat so the content you meant to keep comes through at its true
+size. The number in its name is the <dfn data-g="cfc">channel frequency class</dfn>. The filter
+arrives as a rule for each output sample in terms of the inputs and the outputs before it:</p>
+
+$$y_i \;=\; a_0 x_i + a_1 x_{i-1} + a_2 x_{i-2} + b_1 y_{i-1} + b_2 y_{i-2}$$
+
+<p>The five coefficients come from the class and the sample interval $T$, and from nothing else.
+Deriving them is filter design and is outside this course. Using them is not, and the point to
+hold on to is that they are fully determined: two analysts who implement this correctly get
+identical output, which is the whole purpose of putting a filter in a standard.</p>
+
+$$\omega_d = 2\pi \cdot \mathrm{CFC} \cdot 2.0775, \qquad \omega_a = \tan\!\left(\frac{\omega_d
+T}{2}\right)$$
+
+$$a_0 = \frac{\omega_a^2}{1 + \sqrt{2}\,\omega_a + \omega_a^2}, \qquad a_1 = 2a_0, \qquad a_2 =
+a_0$$
+
+$$b_1 = \frac{-2(\omega_a^2 - 1)}{1 + \sqrt{2}\,\omega_a + \omega_a^2}, \qquad
+  b_2 = \frac{-1 + \sqrt{2}\,\omega_a - \omega_a^2}{1 + \sqrt{2}\,\omega_a + \omega_a^2}$$
+
+<p class="plain">Every output sample needs the two before it, so the samples have to be produced in order. A
+moving average may be computed at any sample you like, in any order, and this one cannot.</p>
+
+<div class="aside">
+  <span class="label">Checking your implementation</span>
+  <p>Five coefficients and two feedback terms give a lot of room for a sign error, and a wrong
+  filter usually still produces a plausible-looking curve. One check catches most mistakes and
+  takes a line of code. <strong>Feed the filter a constant.</strong> A low-pass filter must pass a
+  constant through unchanged, because a constant has no frequency content to remove, so filtering
+  an array of 1.0 must return 1.0.</p>
+  <p>In terms of the coefficients, that says</p>
+  $$\frac{a_0 + a_1 + a_2}{1 - b_1 - b_2} \;=\; 1$$
+  <p>and it holds to the last bit of double precision for every class. If your coefficients give
+  anything else, the error is in the coefficients and not in the record. The second check is to
+  filter the record twice at a very high class and confirm almost nothing changes, since a filter
+  that removes nothing should return what it was given.</p>
+</div>
+
+<h3 id="forward-backward-filtering">Forward-Backward Filtering</h3>
+
+<p>One pass delays the signal, and <a href="phase-lag.html">phase lag</a> is about how invisible
+that delay usually is in the output. The standard's answer is to run the filter forward over the record and then run it again
+backward over its own output, because the second pass delays by the same amount in the opposite
+direction and the two cancel exactly. The cost is that the result is no longer causal, because a
+value at 30&nbsp;ms now depends on samples recorded at 80&nbsp;ms. That is legitimate for a
+record already on disk and impossible for a controller acting in real time, which is why the
+same signal is filtered differently by an airbag computer during the crash and by an analyst
+afterwards.</p>
+
+<figure class="figure mini" id="fig-twopass">
+  <div class="fig-body"></div>
+  <figcaption>The grey pulse is the record, repeated in all three panels. One pass of the filter
+  moves the peak later. Running the same filter again over that output, from the end of the
+  record back to the beginning, moves it earlier by the same amount, so the two shifts cancel
+  exactly. The cost is that the third panel needed samples from later in the record to produce
+  its value at any given instant.</figcaption>
+</figure>
+
+<h3 id="the-minimum-rate">The Minimum Rate</h3>
+
+<p>The class you ask for and the rate you recorded at are not independent, and the constraint
+between them is one you have already met. A filter set to keep everything below some frequency is
+a promise about content at that frequency, and a record cannot make that promise above its
+<dfn data-g="nyquist">Nyquist frequency</dfn>, which is half its sample rate. Asking for a class
+above Nyquist is asking the record to preserve something it was never able to represent.</p>
+
+<p>The formula enforces this by itself. The $\tan$ in the coefficients passes through infinity at
+$\omega_d T/2 = \pi/2$, and putting $\omega_d = 2\pi \cdot \mathrm{CFC} \cdot 2.0775$ into
+that gives the limit directly:</p>
+
+$$\frac{\omega_d T}{2} < \frac{\pi}{2}
+  \quad\Longrightarrow\quad
+  f_s \;>\; 2 \times 2.0775 \times \mathrm{CFC} \;=\; 4.155\,\mathrm{CFC}$$
+
+<p>The 2.0775 is the standard's own conversion from the class number to the design frequency the
+coefficients are built around. Taking it as given, the rule to carry into the assignment is that
+the sample rate must exceed about 4.16 times the class:</p>
+
+<table class="data">
+  <tr><th>class</th><th class="num">CFC 1000</th><th class="num">CFC 600</th>
+      <th class="num">CFC 180</th><th class="num">CFC 60</th></tr>
+  <tr><td>cannot be built below</td><td class="num">4155 Hz</td><td class="num">2493 Hz</td>
+      <td class="num">748 Hz</td><td class="num">249 Hz</td></tr>
+</table>
+
+<p>Below that rate the coefficients do not degrade gracefully. They change sign, and the output
+stops being a smoothed version of anything. Nobody imposed this as a rule and the algebra forces
+it, so it sets a floor on the logger before any argument about accuracy has begun.</p>
+
+<p>The crash channel is recorded at 12&thinsp;500&nbsp;Hz, which supports classes up to about
+CFC 3000, so every class in the standard is available on it and the constraint never binds.
+It binds the moment you reduce the rate. A record thinned as in
+<a href="discrete-evaluation.html">discrete evaluation</a> to 1&nbsp;kHz still supports CFC 180
+and can no longer be filtered at CFC 1000 at all, which is worth checking before you decimate
+anything you intend to filter afterwards.</p>
+
+<div class="check"><p><strong>Check.</strong> A colleague filters a 10&nbsp;kHz record at CFC 1000
+in a single forward pass, reads off the time of the peak, and reports it. What is wrong with the
+time, and would comparing it against the unfiltered record reveal it?
+
+    <details class="ans"><summary><span>Answer</span></summary><div class="body">
+    <p><strong>The reported time is late.</strong> A single pass delays every feature, so the peak in
+the output sits after the peak in the record. The standard's second, backward pass exists to
+remove exactly this.</p>
+    <p>Comparing against the unfiltered record does reveal it, and that is the one
+comparison worth making, because the delay is visible only against something that has not been
+through the filter. What will not reveal it is any check done inside the filtered signal. The
+shape is intact, the peak is smooth and well formed, and every interval between features is
+preserved. A delay shifts everything equally, so nothing internal to the output is inconsistent
+with anything else in it. On a crash record the shift is a fraction of a millisecond at CFC 1000
+and grows as the class falls, which is small enough to survive review and large enough to matter
+when the number being reported is a time.</p>
+    </div></details></p></div>
+
+<div class="aside standard"><span class="label">The standard</span>
+<p>Which class to use is not an open question on a crash record. <strong>SAE J211-1</strong> Table
+1 assigns one to each kind of measurement: CFC 1000 for head acceleration, CFC 180 for thorax
+spine, CFC 60 for vehicle structure being compared between vehicles and CFC 180 for the same
+structure being integrated. See <a href="standards.html">The standards behind the crash
+data</a>.</p></div>
+
+<h3 id="in-code">In Code</h3>
+
+<div class="codetabs" id="codeCFC">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+    <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
+  </div>
+  <pre data-lang="python" data-notes="3|2.0775 converts the class number into the filter's design frequency. It is a constant of the standard, not something to tune.;4|The pre-warp. This is the step that fails below the minimum rate: tan passes through infinity and the coefficients change sign.;11|Each output needs the two outputs before it. That is what makes this recursive, and why the samples must be produced in order.;15|Forward, reversed, forward again, reversed back. The two passes delay by the same amount in opposite directions.">def cfc(y, dt, cls):
+    wd = 2 * np.pi * cls * 2.0775
+    wa = np.tan(wd * dt / 2)
+    d  = 1 + np.sqrt(2) * wa + wa**2
+    a0 = wa**2 / d;  a1 = 2 * a0;  a2 = a0
+    b1 = -2 * (wa**2 - 1) / d
+    b2 = (-1 + np.sqrt(2) * wa - wa**2) / d
+
+    def one_pass(x):
+        out = np.zeros_like(x)
+        for i in range(2, len(x)):
+            out[i] = (a0*x[i] + a1*x[i-1] + a2*x[i-2]
+                      + b1*out[i-1] + b2*out[i-2])
+        return out
+
+    return one_pass(one_pass(y)[::-1])[::-1]</pre>
+  <pre data-lang="matlab" hidden data-notes="6|All five coefficients in one vector, so one pass can be written once and called twice.;7|flip twice: forward over the record, then backward over the result.">function out = cfc(y, dt, cls)
+    wd = 2*pi*cls*2.0775;
+    wa = tan(wd*dt/2);
+    d  = 1 + sqrt(2)*wa + wa^2;
+    c  = [wa^2/d, 2*wa^2/d, wa^2/d, ...
+          -2*(wa^2-1)/d, (-1+sqrt(2)*wa-wa^2)/d];
+    out = flip(one_pass(flip(one_pass(y, c)), c));
+end
+
+function out = one_pass(x, c)
+    out = zeros(size(x));
+    for i = 3:numel(x)
+        out(i) = c(1)*x(i) + c(2)*x(i-1) + c(3)*x(i-2) ...
+               + c(4)*out(i-1) + c(5)*out(i-2);
+    end
+end</pre>
+  <pre data-lang="js" hidden data-notes="8|An arrow function so the coefficients above stay in scope.;14|reverse() mutates, which is safe here because each array is used once.">function cfc(y, dt, cls) {
+  const wd = 2*Math.PI*cls*2.0775, wa = Math.tan(wd*dt/2);
+  const d = 1 + Math.SQRT2*wa + wa*wa;
+  const a0 = wa*wa/d, a1 = 2*a0, a2 = a0;
+  const b1 = -2*(wa*wa - 1)/d;
+  const b2 = (-1 + Math.SQRT2*wa - wa*wa)/d;
+  const onePass = x =&gt; {
+    const o = new Float64Array(x.length);
+    for (let i = 2; i &lt; x.length; i++)
+      o[i] = a0*x[i] + a1*x[i-1] + a2*x[i-2] + b1*o[i-1] + b2*o[i-2];
+    return o;
+  };
+  return onePass(onePass(y).reverse()).reverse();
+}</pre>
+  <div class="code-hint">Hover a highlighted line for a description of what it does.</div>
+</div>
+
+<h2 id="comparison-with-the-step-size-minimum">Comparison with the Step-Size Minimum</h2>
+
+<p>This is the second U-curve in the course. Side by side:</p>
+
+<table class="data">
+  <tr><th></th><th>Step size (<a href="the-error-minimum.html">the error minimum</a>)</th><th>Smoothing width</th></tr>
+  <tr><td>falls as the parameter grows</td><td>rounding error</td><td>noise</td></tr>
+  <tr><td>rises as the parameter grows</td><td>truncation error</td><td>signal distortion</td></tr>
+  <tr><td>the minimum is at</td><td>ε<sup>1/3</sup>, computable in advance</td>
+      <td>a width that depends on the signal</td></tr>
+</table>
+
+<p>The step-size minimum can be predicted
+because both terms are properties of the arithmetic. The smoothing minimum cannot, because the
+distortion term depends on how sharply the signal bends, which is a property of the thing being
+measured and is not known in advance. The minimum in the table above is 9 for this sine, measured on the whole
+record. For a
+sharper signal it is narrower, and there is no formula that will tell you. What follows is that
+the width is a decision, made by a person, that changes the reported answer. That is the
+situation the next two pages are about.</p>
+
+<div class="aside">
+  <span class="label">A moving average is a crude filter</span>
+  <p>A rectangular window is the simplest weighting and not a good one. It responds to some
+frequencies it should reject and rejects some it should pass. Better weightings, such as
+Gaussian, Savitzky-Golay and Butterworth, trade a little more computation for a much cleaner
+separation.</p>
+  <p>The trade-off this page describes survives all of them. Every smoother reduces noise by mixing
+neighbouring samples, and most therefore distort anything that varies within the
+region they mix over. The shape of the U-curve changes. Its existence does not.</p>
+</div>
+
+<div class="check">
+  <span class="label">Check</span>
+  <ol>
+    <li>Widening a moving average from 9 to 36 samples. By what factor does the noise fall, and
+    what
+    would you check before accepting the result?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>By 2.</strong> Averaging <em>w</em> samples divides the noise by &radic;<em>w</em>, and
+&radic;(36/9) = 2. Quadrupling the window buys one halving, which is the same diminishing return
+integration gives.</p>
+     <p>Before accepting it, check what the window did to the signal. At 12.5&nbsp;kHz,
+36 samples is 2.9&nbsp;ms, comparable to the width of a crash <dfn data-g="pulse">pulse</dfn>
+feature, so the averaging is no longer acting only on the noise. Compare the smoothed peak
+against the unsmoothed one. If it has dropped, the window is eating signal, and the drop is the
+part of the "improvement" you paid for. Noise reduction is measurable and free to quote. Signal
+attenuation has to be looked for.</p></div></details></li>
+    <li>Between <em>w</em> = 11 and <em>w</em> = 25 there is a width at which the smoothed peak is
+    exactly 1.0000. Why would choosing that width be a mistake?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Because you would be choosing the parameter to reproduce the answer, and the answer then stops
+being evidence for anything.</p>
+     <p>Two errors are moving in opposite directions as <em>w</em> grows. Noise is being suppressed and
+signal is being flattened. At one width they happen to cancel. That cancellation is a property
+of this record, this noise realisation and this peak. A different sample of the same
+experiment would cancel at a different width, and you would have no way to find it without
+already knowing the true peak. It is also unjustifiable to a reader. "I chose <em>w</em> = 17"
+invites the question "why", and the honest answer is "because it gave 1.0000", which is the same
+as having no method at all.</p></div></details></li>
+    <li>Why can the step-size minimum be predicted in advance when the smoothing minimum
+    cannot?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Because both terms of the step-size error are known in advance and one term of the smoothing
+error is not. For a finite difference, truncation goes as
+<em>h</em>&sup2;<em>f</em>&Prime;&prime; and rounding as &epsilon;|<em>f</em>|/<em>h</em>. Both
+are expressible in machine epsilon and derivatives of a function you have, so the optimum can be
+written down, roughly (3&epsilon;|<em>f</em>|/|<em>f</em>&Prime;&prime;|)<sup>1/3</sup>, before
+running anything.</p>
+     <p>For smoothing, the noise term is known, at &sigma;/&radic;<em>w</em>, but the other term is
+<strong>how much of the true signal a window of width <em>w</em> removes</strong>, and that
+depends on the shape of the signal you are trying to recover. If you knew that, you would not be
+filtering. The optimum exists and can only be approached from the outside, by holding something
+back or by comparing against an independent measurement.</p></div></details></li>
+  </ol>
+</div>
+
+<h2 id="terms-used-on-this-page">Terms Used on This Page</h2>
+
+<p>Hover or tab to a highlighted term in the text to see its definition. Every term marked on this
+page is listed here.</p>
+
+<dl class="glossary"></dl>
+
+<p class="deeper">Go deeper: <a href="workbench.html?tool=filter">the workbench</a>. any CFC
+class, one pass or forward-and-backward, with the peak and the integral reported side by side.</p>
+
+  </main>
+
+  
+  <script>
+    document.querySelectorAll('h2[id], h3[id]').forEach(h => {
+      const a = document.createElement('a');
+      a.className = 'anchor-link';
+      a.href = '#' + h.id;
+      a.textContent = '§';
+      a.title = 'Link to this section';
+      h.appendChild(a);
+    });
+  </script>
+  
+
+  <script type="module" src="js/bundle/smoothing.js?v=20261015124713"></script>
+  
+
+  <footer class="site-footer">
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-11">October 11, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Algorithms');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  
+  
+  
+    
+  
+  
+  <script src="https://uwt-tutor-backend.onrender.com/widget.js"
+          data-key="wk_bcb80c4ee2d5718131d24548528577c3"
+          data-content-selector="main"
+          data-color="#5F7038"></script>
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

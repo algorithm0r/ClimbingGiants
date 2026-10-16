@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 6 Notes — Discrete Structures</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (plum). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #6B3A72;
+      --course-accent-dark: #522D57;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Discrete Math for Computer Science</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        <a href="syllabus.html">Syllabus</a>
+        <span class="site-nav-sep">·</span>
+        <a href="reflection-instructions.html">Reflection</a>
+        <span class="site-nav-sep">·</span>
+        <a href="meeting-instructions.html">Meeting</a>
+        <span class="site-nav-sep">·</span>
+        <a href="ai-use.html">AI Use</a>
+        <span class="site-nav-sep">·</span>
+        <a href="extra-labor.html">Extra Labor</a>
+        <span class="site-nav-sep">·</span>
+        <a href="canvas-grades.html">Canvas Grades</a>
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+        
+          
+            <a href="week-01.html">1</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-02.html">2</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-03.html">3</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-04.html">4</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-05.html">5</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <span class="week-current">6</span>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-07.html">7</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-08.html">8</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-09.html">9</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-10.html">10</a>
+          
+          
+        
+      </div>
+    </nav>
+
+    
+    <nav class="page-family">
+      <div class="nav-inner">
+        Week 6 —
+        <a href="week-06.html">Overview</a> ·
+        <strong>Notes</strong> ·
+        <a href="assign-06.html">Assignment</a> ·
+        <a href="solution-06.html">Solution</a>
+      </div>
+    </nav>
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+  <main data-pagefind-body class="notes">
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <h1>Week 6 Notes — Big-Oh Notation</h1>
+<h2 id="contents">Contents</h2>
+<ol>
+<li><a href="#why-asymptotic-notation">Why Asymptotic Notation?</a></li>
+<li><a href="#big-oh-upper-bounds">Big-Oh: Upper Bounds</a></li>
+<li><a href="#big-omega-lower-bounds">Big-Omega: Lower Bounds</a></li>
+<li><a href="#big-theta-tight-bounds">Big-Theta: Tight Bounds</a></li>
+<li><a href="#proving-bounds-from-the-definition">Proving Bounds from the Definition</a></li>
+<li><a href="#little-o-and-little-omega">Little-o and Little-omega</a></li>
+<li><a href="#the-limit-test">The Limit Test</a></li>
+<li><a href="#common-growth-classes">Common Growth Classes</a></li>
+<li><a href="#exercise-ordering-functions-by-growth-rate">Exercise: Ordering Functions by Growth Rate</a></li>
+<li><a href="#connections">Connections</a></li>
+</ol>
+<hr>
+<h2 id="why-asymptotic-notation">Why Asymptotic Notation?</h2>
+<p>In Week 4 we derived exact runtime functions for three algorithms by counting every operation. The minimum algorithm cost $4n + 1$ operations in the worst case; the sequential search cost $4n + 5$; the string-equality check cost $4n + 7$. These are precise, complete answers — but their precision is part of the problem.</p>
+<h3 id="the-dominance-of-the-leading-term">The dominance of the leading term</h3>
+<p>Consider what those three functions actually say about the <em>relative</em> cost of the algorithms. For small inputs the constant terms matter a great deal: at $n = 0$, the ratio of $4n + 7$ to $4n + 1$ is $7$, which seems large. But as $n$ grows, something changes. Look at the table below:</p>
+<table>
+<thead>
+<tr>
+<th>$n$</th>
+<th>$4n+1$</th>
+<th>$4n+5$</th>
+<th>$4n+7$</th>
+<th>Max difference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$0$</td>
+<td>$1$</td>
+<td>$5$</td>
+<td>$7$</td>
+<td>$7\times$ larger</td>
+</tr>
+<tr>
+<td>$10$</td>
+<td>$41$</td>
+<td>$45$</td>
+<td>$47$</td>
+<td>$\approx 15\%$ larger</td>
+</tr>
+<tr>
+<td>$100$</td>
+<td>$401$</td>
+<td>$405$</td>
+<td>$407$</td>
+<td>$\approx 1.5\%$ larger</td>
+</tr>
+<tr>
+<td>$1000$</td>
+<td>$4001$</td>
+<td>$4005$</td>
+<td>$4007$</td>
+<td>$\approx 0.15\%$ larger</td>
+</tr>
+</tbody>
+</table>
+<p>The <em>absolute</em> difference between any two of these functions is always at most 6 — a fixed constant, independent of $n$. Yet as $n$ increases the <em>relative</em> significance of that difference shrinks toward zero. At $n = 1{,}000{,}000$, the constant offset of 6 is completely negligible compared to the $4{,}000{,}000$ contributed by the linear term. The leading term $4n$ dominates everything else in the long run.</p>
+<p>This is a general principle: for a polynomial like $4n + 7$, the highest-degree term is the one that matters for large $n$; the lower-order terms and constant multipliers are noise. Asymptotic notation is the formal machinery for expressing that principle precisely.</p>
+<h3 id="the-goals-of-asymptotic-notation">The goals of asymptotic notation</h3>
+<p>There are two related things we want to do:</p>
+<ol>
+<li><strong>Classify</strong> functions by their growth rate, ignoring constant multipliers and lower-order terms. We want to say &quot;$4n + 1$, $4n + 5$, and $4n + 7$ are all essentially the same&quot; because they all grow linearly.</li>
+<li><strong>Compare</strong> functions from different growth classes. We want to be able to say definitively that a quadratic function grows faster than a linear one as $n \to \infty$, even if for small $n$ the linear function happens to be larger (due to a very large constant coefficient).</li>
+</ol>
+<p>Both goals require talking about the behavior of functions <em>eventually</em> — for large enough $n$ — rather than for all $n$. The asymptotic notations $O$, $\Omega$, $\Theta$, $o$, and $\omega$ each capture a different aspect of this eventual behavior.</p>
+<hr>
+<h2 id="big-oh-upper-bounds">Big-Oh: Upper Bounds</h2>
+<h3 id="formal-definition">Formal definition</h3>
+<p>Let $f$ and $g$ be functions from $\mathbb{N}$ to $\mathbb{R}^+$. We say $f(n)$ is in <strong>big-Oh</strong> of $g(n)$, written</p>
+$$f(n) \in O(g(n)),
+$$
+<p>if there exist positive constants $b$ and $n_0$ such that</p>
+$$f(n) \leq b \cdot g(n) \quad \text{for all } n \geq n_0.
+$$
+<p>The definition has three moving parts worth understanding individually.</p>
+<p><strong>The constants $b$ and $n_0$.</strong> We are not required to find the <em>smallest</em> $b$ or the <em>smallest</em> $n_0$ — only to show that <em>some</em> pair exists. This is an <strong>existential</strong> claim: to prove that $f \in O(g)$ you just need to exhibit any $b$ and $n_0$ that make the inequality hold. You do not need to find the optimal ones, and you do not need to check that the inequality holds for all possible constants.</p>
+<p><strong>The threshold $n_0$.</strong> The inequality $f(n) \leq b \cdot g(n)$ only has to hold for $n \geq n_0$. For $n &lt; n_0$ the two functions may behave however they like. This is what &quot;asymptotic&quot; means: we care about eventual behavior, not behavior near the origin. Choosing a larger $n_0$ gives you more room to work with; if the inequality is messy to establish for small $n$, you can simply push $n_0$ out far enough that the messy part lies below the threshold.</p>
+<p><strong>The multiplier $b$.</strong> The factor $b$ accounts for constant multipliers. It says: &quot;$f$ might be larger than $g$ pointwise, but once we scale $g$ up by a factor of $b$, it dominates $f$ for all large $n$.&quot; This is what &quot;up to a constant factor&quot; means. Because $b$ is free to be any positive constant, the constant multiplier $4$ in $4n + 1$ is irrelevant — we can absorb it into $b$.</p>
+<h3 id="intuition">Intuition</h3>
+<p>The intuitive reading of $f(n) \in O(g(n))$ is:</p>
+<blockquote>
+<p><em>$f$ grows no faster than $g$, up to a constant factor and for large enough $n$.</em></p>
+</blockquote>
+<p>Equivalently, $g$ is an <strong>asymptotic upper bound</strong> for $f$. The key word is <em>upper</em>: Big-Oh says $g$ is at least as large as $f$ in the long run (after scaling). It does not say anything about $f$ being as large as $g$.</p>
+<h3 id="worked-example-4n-1-in-o-n">Worked example: $4n + 1 \in O(n)$</h3>
+<p>We want to show that $f(n) = 4n + 1$ is in $O(n)$, meaning $g(n) = n$.</p>
+<p>We need to find constants $b &gt; 0$ and $n_0 &gt; 0$ such that $4n + 1 \leq b \cdot n$ for all $n \geq n_0$.</p>
+<p><strong>Strategy:</strong> choose $b$ generously, then find $n_0$ that makes the inequality true.</p>
+<p>Try $b = 5$. We need $4n + 1 \leq 5n$, which simplifies to $1 \leq n$. So the inequality holds for all $n \geq 1$.</p>
+<p>Setting $n_0 = 1$, we have: for all $n \geq 1$,</p>
+$$4n + 1 \leq 4n + n = 5n,
+$$
+<p>where the first inequality used $1 \leq n$. The constants $b = 5$ and $n_0 = 1$ witness $4n + 1 \in O(n)$. $\square$</p>
+<p>The same argument works for $4n + 5$ and $4n + 7$: both are $O(n)$ with constants that are easy to find. All three Week 4 runtime functions live in $O(n)$.</p>
+<h3 id="worked-example-n-2-notin-o-n">Worked example: $n^2 \notin O(n)$</h3>
+<p>It is equally important to know how to show that a bound does <em>not</em> hold. Suppose for contradiction that $n^2 \in O(n)$: then there would exist constants $b$ and $n_0$ with $n^2 \leq b \cdot n$ for all $n \geq n_0$. Dividing both sides by $n$ (valid for $n &gt; 0$), this would require $n \leq b$ for all $n \geq n_0$ — but no fixed constant $b$ can bound all sufficiently large $n$. Contradiction. Therefore $n^2 \notin O(n)$. $\square$</p>
+<hr>
+<h2 id="big-omega-lower-bounds">Big-Omega: Lower Bounds</h2>
+<h3 id="formal-definition-2">Formal definition</h3>
+<p>We say $f(n)$ is in <strong>big-Omega</strong> of $g(n)$, written</p>
+$$f(n) \in \Omega(g(n)),
+$$
+<p>if there exist positive constants $a$ and $n_0$ such that</p>
+$$f(n) \geq a \cdot g(n) \quad \text{for all } n \geq n_0.
+$$
+<p>The only change from the Big-Oh definition is the direction of the inequality: $\leq$ becomes $\geq$. Everything else — the existential quantification over $a$ and $n_0$, the threshold $n_0$, the freedom to choose any positive $a$ — is identical. (The constant is renamed from $b$ to $a$ to signal that when both bounds are present they may take different values, though the same $n_0$ can often serve both.)</p>
+<h3 id="intuition-2">Intuition</h3>
+<p>The intuitive reading of $f(n) \in \Omega(g(n))$ is:</p>
+<blockquote>
+<p><em>$f$ grows at least as fast as $g$, up to a constant factor and for large enough $n$.</em></p>
+</blockquote>
+<p>$g$ is an <strong>asymptotic lower bound</strong> for $f$. Where $O$ is an upper bound (&quot;at most this fast&quot;), $\Omega$ is a lower bound (&quot;at least this fast&quot;).</p>
+<h3 id="worked-example-4n-1-in-omega-n">Worked example: $4n + 1 \in \Omega(n)$</h3>
+<p>We need constants $a &gt; 0$ and $n_0 &gt; 0$ such that $4n + 1 \geq a \cdot n$ for all $n \geq n_0$.</p>
+<p>Since $4n + 1 &gt; 4n$ for all $n \geq 0$, we immediately have $4n + 1 \geq 4n$ — so $a = 4$ and $n_0 = 0$ witness $4n + 1 \in \Omega(n)$. $\square$</p>
+<hr>
+<h2 id="big-theta-tight-bounds">Big-Theta: Tight Bounds</h2>
+<h3 id="formal-definition-3">Formal definition</h3>
+<p>We say $f(n)$ is in <strong>big-Theta</strong> of $g(n)$, written</p>
+$$f(n) \in \Theta(g(n)),
+$$
+<p>if $f(n) \in O(g(n))$ <strong>and</strong> $f(n) \in \Omega(g(n))$.</p>
+<p>Unrolling both definitions, this means there exist positive constants $a$, $b$, and $n_0$ such that</p>
+$$a \cdot g(n) \leq f(n) \leq b \cdot g(n) \quad \text{for all } n \geq n_0.
+$$
+<p>$f$ is sandwiched between two scaled copies of $g$. Note that a single $n_0$ can serve as the cutoff for both inequalities — just take the larger of the two $n_0$ values that would work for $O$ and $\Omega$ separately.</p>
+<h3 id="intuition-3">Intuition</h3>
+<p>$f \in \Theta(g)$ means $f$ and $g$ have <strong>the same growth rate up to constant factors</strong>. The analogy with the number line is direct: if $f \leq g$ (up to constants) and $f \geq g$ (up to constants), then $f$ and $g$ must be essentially equal. Big-Theta is the asymptotic equality relation.</p>
+<p>When $f \in \Theta(g)$ we often say:</p>
+<ul>
+<li>&quot;$f$ and $g$ are <strong>asymptotically equivalent</strong>&quot;;</li>
+<li>&quot;$g$ is a <strong>tight bound</strong> for $f$&quot;;</li>
+<li>&quot;$f$ and $g$ have the <strong>same order of growth</strong>.&quot;</li>
+</ul>
+<h3 id="worked-example-4n-1-in-theta-n">Worked example: $4n + 1 \in \Theta(n)$</h3>
+<p>We have already shown $4n + 1 \in O(n)$ (with $b = 5$, $n_0 = 1$) and $4n + 1 \in \Omega(n)$ (with $a = 4$, $n_0 = 0$). Setting $n_0 = 1$ for both,</p>
+$$4n \leq 4n + 1 \leq 5n \quad \text{for all } n \geq 1,
+$$
+<p>which establishes $4n + 1 \in \Theta(n)$ with constants $a = 4$, $b = 5$, $n_0 = 1$. $\square$</p>
+<p>By the same reasoning, $4n + 5 \in \Theta(n)$ and $4n + 7 \in \Theta(n)$. All three Week 4 runtime functions have the same asymptotic growth rate — linear — even though their exact operation counts differ by constants.</p>
+<hr>
+<h2 id="proving-bounds-from-the-definition">Proving Bounds from the Definition</h2>
+<h3 id="the-general-technique">The general technique</h3>
+<p>To prove $f(n) \in O(g(n))$ from the definition:</p>
+<ol>
+<li><strong>Write down the goal:</strong> find constants $b &gt; 0$ and $n_0 &gt; 0$ such that $f(n) \leq b \cdot g(n)$ for all $n \geq n_0$.</li>
+<li><strong>Choose a generous $b$:</strong> pick a value that absorbs all the constant coefficients of $f$. It does not have to be tight.</li>
+<li><strong>Establish $n_0$:</strong> rearrange $f(n) \leq b \cdot g(n)$ to find the smallest $n$ for which it holds; set $n_0$ to that value (or any larger value).</li>
+<li><strong>Write the proof:</strong> state your $b$ and $n_0$, then show the inequality holds for all $n \geq n_0$.</li>
+</ol>
+<p>The key algebraic moves are:</p>
+<ul>
+<li><strong>Drop lower-order terms:</strong> $4n + 1 \leq 4n + n = 5n$ when $n \geq 1$ (because $1 \leq n$).</li>
+<li><strong>Replace a smaller term with a larger one:</strong> $\log n \leq n$ for all $n \geq 1$, so $n \log n \leq n \cdot n = n^2$.</li>
+<li><strong>Factor and simplify:</strong> after bounding each term individually, combine the results.</li>
+</ul>
+<p>For $\Omega$, the moves are reversed: you bound $f$ <em>from below</em> by dropping positive terms.</p>
+<h3 id="example-a-polynomial-is-o-of-its-leading-term">Example: a polynomial is $O$ of its leading term</h3>
+<p><strong>Claim:</strong> $n^2 - 6n + 5 \in O(n^2)$.</p>
+<p><strong>Proof:</strong> For $n \geq 1$, the constant $5 \leq 5n^2$ (since $n^2 \geq 1$). For $n \geq 6$, the term $6n \leq 6n^2$. However, we can give a cleaner argument using the triangle inequality: for $n \geq 1$,</p>
+$$n^2 - 6n + 5 \leq n^2 + 5 \leq n^2 + 5n^2 = 6n^2,
+$$
+<p>where the second step uses $5 \leq 5n^2 \leq 5n^2$ once $n \geq 1$.</p>
+<p>Setting $b = 6$ and $n_0 = 1$ witnesses $n^2 - 6n + 5 \in O(n^2)$. $\square$</p>
+<p><strong>Claim:</strong> $n^2 - 6n + 5 \in \Omega(n^2)$.</p>
+<p><strong>Proof:</strong> We need to bound $n^2 - 6n + 5$ from below by $a \cdot n^2$ for large $n$. For $n \geq 12$, note that $6n \leq \tfrac{1}{2} n^2$ (equivalent to $12 \leq n$), so:</p>
+$$n^2 - 6n + 5 \geq n^2 - \tfrac{1}{2} n^2 + 5 \geq \tfrac{1}{2} n^2.
+$$
+<p>Setting $a = \tfrac{1}{2}$ and $n_0 = 12$ witnesses $n^2 - 6n + 5 \in \Omega(n^2)$. $\square$</p>
+<p>Combining, $n^2 - 6n + 5 \in \Theta(n^2)$: the function is asymptotically quadratic, as expected from its highest-degree term.</p>
+<h3 id="why-constant-multipliers-do-not-matter">Why constant multipliers do not matter</h3>
+<p>The freedom to choose $b$ in the Big-Oh definition is precisely what makes constant multipliers irrelevant. Given $f(n) = c \cdot n$ for any positive constant $c$, we immediately have $f(n) \leq c \cdot n \cdot 1 = c \cdot n$, so $f \in O(n)$ with $b = c$ and $n_0 = 1$. A function with a bigger constant coefficient is $O(n)$ just as much as one with a small coefficient — both are linear.</p>
+<p>This is what allows us to say $4n + 1$, $4n + 5$, and $4n + 7$ are all &quot;the same&quot; asymptotically: the constant offsets and the coefficient 4 are all absorbed by the freedom in choosing $b$.</p>
+<hr>
+<h2 id="little-o-and-little-omega">Little-o and Little-omega</h2>
+<h3 id="filling-the-gap-in-our-intuition">Filling the gap in our intuition</h3>
+<p>Big-Oh, Big-Omega, and Big-Theta correspond to $\leq$, $\geq$, and $=$ respectively in the asymptotic sense. But numbers also have a strict less-than $&lt;$ and a strict greater-than $&gt;$. The notations <strong>little-o</strong> and <strong>little-omega</strong> fill those gaps.</p>
+<h3 id="little-o-strict-upper-bound">Little-o: strict upper bound</h3>
+<p>We say $f(n)$ is in <strong>little-o</strong> of $g(n)$, written</p>
+$$f(n) \in o(g(n)),
+$$
+<p>if for <strong>every</strong> positive constant $b$ there exists a positive constant $n_0$ such that</p>
+$$f(n) &lt; b \cdot g(n) \quad \text{for all } n \geq n_0.
+$$
+<p>The crucial difference from Big-Oh: the existential quantifier and universal quantifier have swapped roles. Big-Oh says: <em>there exists a $b$ that works.</em> Little-o says: <em>every $b$ works, no matter how small</em> — as long as we push $n_0$ out far enough.</p>
+<p>Intuitively, $f \in o(g)$ means $g$ grows <strong>strictly faster</strong> than $f$: no matter how small a constant you multiply $g$ by, $g$ will eventually dominate $f$.</p>
+<h3 id="little-omega-strict-lower-bound">Little-omega: strict lower bound</h3>
+<p>We say $f(n)$ is in <strong>little-omega</strong> of $g(n)$, written</p>
+$$f(n) \in \omega(g(n)),
+$$
+<p>if for every positive constant $a$ there exists a positive constant $n_0$ such that</p>
+$$f(n) &gt; a \cdot g(n) \quad \text{for all } n \geq n_0.
+$$
+<p>Little-omega is the strict lower-bound counterpart: $f$ grows strictly faster than $g$.</p>
+<h3 id="the-complete-picture">The complete picture</h3>
+<table>
+<thead>
+<tr>
+<th>Notation</th>
+<th>Meaning</th>
+<th>Analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$f \in O(g)$</td>
+<td>$f$ grows no faster than $g$</td>
+<td>$f \leq g$</td>
+</tr>
+<tr>
+<td>$f \in \Omega(g)$</td>
+<td>$f$ grows no slower than $g$</td>
+<td>$f \geq g$</td>
+</tr>
+<tr>
+<td>$f \in \Theta(g)$</td>
+<td>$f$ and $g$ grow at the same rate</td>
+<td>$f = g$</td>
+</tr>
+<tr>
+<td>$f \in o(g)$</td>
+<td>$f$ grows strictly slower than $g$</td>
+<td>$f &lt; g$</td>
+</tr>
+<tr>
+<td>$f \in \omega(g)$</td>
+<td>$f$ grows strictly faster than $g$</td>
+<td>$f &gt; g$</td>
+</tr>
+</tbody>
+</table>
+<p>Note that the analogy is imperfect in one important respect: two functions can both be in $O(g)$ without having the same growth rate as each other. The table captures the relationship of each function to $g$, not a total order on all functions.</p>
+<hr>
+<h2 id="the-limit-test">The Limit Test</h2>
+<h3 id="motivation">Motivation</h3>
+<p>Proving bounds from the definition requires algebraic manipulation — finding explicit constants $b$ and $n_0$. For complex functions (products, compositions, exponentials), that algebra can become unwieldy. The <strong>limit test</strong> offers an alternative route that leverages calculus.</p>
+<h3 id="statement-of-the-limit-test">Statement of the limit test</h3>
+<p>Let $f$ and $g$ be eventually-positive functions, and suppose the limit</p>
+$$L = \lim_{n \to \infty} \frac{f(n)}{g(n)}
+$$
+<p>exists (possibly as $0$ or $\infty$). Then:</p>
+$$\begin{cases}
+L = 0 &amp; \Rightarrow f \in o(g) \text{ and } f \in O(g) \\
+0 &lt; L &lt; \infty &amp; \Rightarrow f \in \Theta(g) \\
+L = \infty &amp; \Rightarrow f \in \omega(g) \text{ and } f \in \Omega(g)
+\end{cases}$$
+<p>The intuition is direct: the ratio $f(n)/g(n)$ tells us how large $f$ is relative to $g$ for large $n$. If the ratio goes to zero, $f$ is eventually negligible compared to $g$. If the ratio goes to infinity, $f$ eventually dominates $g$. If the ratio stabilizes at a positive constant $L$, the two functions grow at the same rate (they are within a constant factor of each other), placing them in $\Theta$ of each other.</p>
+<h3 id="example-n-in-o-n-2">Example: $n \in o(n^2)$</h3>
+$$\lim_{n \to \infty} \frac{n}{n^2} = \lim_{n \to \infty} \frac{1}{n} = 0.
+$$
+<p>Since $L = 0$, we conclude $n \in o(n^2)$: linear functions grow strictly slower than quadratic ones.</p>
+<h3 id="example-4n-1-in-theta-n">Example: $4n + 1 \in \Theta(n)$</h3>
+$$\lim_{n \to \infty} \frac{4n + 1}{n} = \lim_{n \to \infty} \left(4 + \frac{1}{n}\right) = 4.
+$$
+<p>Since $L = 4$, a positive finite constant, we conclude $4n + 1 \in \Theta(n)$. This confirms what we proved from the definition earlier.</p>
+<h3 id="example-n-2-6n-5-in-theta-n-2">Example: $n^2 - 6n + 5 \in \Theta(n^2)$</h3>
+$$\lim_{n \to \infty} \frac{n^2 - 6n + 5}{n^2} = \lim_{n \to \infty} \left(1 - \frac{6}{n} + \frac{5}{n^2}\right) = 1.
+$$
+<p>Distributing the limit across the three terms: $\lim 1 = 1$, $\lim 6/n = 0$, $\lim 5/n^2 = 0$, so $L = 1 &gt; 0$. Therefore $n^2 - 6n + 5 \in \Theta(n^2)$.</p>
+<h3 id="using-l-hopital-s-rule">Using L'Hôpital's rule</h3>
+<p>When the limit produces the indeterminate form $\infty/\infty$ or $0/0$, L'Hôpital's rule applies: if both $f(n) \to \infty$ and $g(n) \to \infty$, then</p>
+$$\lim_{n \to \infty} \frac{f(n)}{g(n)} = \lim_{n \to \infty} \frac{f'(n)}{g'(n)},
+$$
+<p>provided the latter limit exists. This is particularly useful for comparing polynomials against exponentials, or logarithms against polynomials.</p>
+<p><strong>Example:</strong> $\log_2 n \in o(n)$.</p>
+$$\lim_{n \to \infty} \frac{\log_2 n}{n} \overset{\text{L'H}}{=} \lim_{n \to \infty} \frac{1/(n \ln 2)}{1} = \lim_{n \to \infty} \frac{1}{n \ln 2} = 0.
+$$
+<p>Therefore $\log_2 n \in o(n)$: logarithms grow strictly slower than any linear function.</p>
+<h3 id="when-the-limit-test-applies-vs-the-definition">When the limit test applies vs. the definition</h3>
+<p>The limit test is convenient for most elementary functions. However, it requires that the limit exist. Functions that oscillate or are not eventually-monotone may not have a limit of the ratio, and in those cases the definition must be used directly. In practice, the limit test handles virtually all runtime functions that arise in algorithm analysis.</p>
+<hr>
+<h2 id="common-growth-classes">Common Growth Classes</h2>
+<p>The following hierarchy of growth classes arises repeatedly in algorithm analysis. The notation $A \subset B$ means &quot;every function in class $A$ is also in $O(g)$ for $g \in B$, but not vice versa&quot; — i.e., $A$ grows strictly slower than $B$:</p>
+$$O(1) \subset O(\log n) \subset O(n) \subset O(n \log n) \subset O(n^2) \subset O(n^3) \subset O(2^n)
+$$
+<p>Each inclusion is strict, meaning functions in the smaller class are in little-o of any function in the larger class.</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Common name</th>
+<th>Typical algorithm</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$O(1)$</td>
+<td>Constant</td>
+<td>Array index lookup</td>
+</tr>
+<tr>
+<td>$O(\log n)$</td>
+<td>Logarithmic</td>
+<td>Binary search</td>
+</tr>
+<tr>
+<td>$O(n)$</td>
+<td>Linear</td>
+<td>Sequential search, MinAlg</td>
+</tr>
+<tr>
+<td>$O(n \log n)$</td>
+<td>Linearithmic</td>
+<td>Mergesort, Heapsort</td>
+</tr>
+<tr>
+<td>$O(n^2)$</td>
+<td>Quadratic</td>
+<td>Bubble sort, insertion sort</td>
+</tr>
+<tr>
+<td>$O(n^3)$</td>
+<td>Cubic</td>
+<td>Naive matrix multiplication</td>
+</tr>
+<tr>
+<td>$O(2^n)$</td>
+<td>Exponential</td>
+<td>Brute-force subset enumeration</td>
+</tr>
+</tbody>
+</table>
+<h3 id="why-the-hierarchy-matters">Why the hierarchy matters</h3>
+<p>Going from $O(n)$ to $O(n^2)$ might seem like a modest step — two different exponents. But the practical consequences are enormous. An $O(n)$ algorithm running on $n = 10^6$ inputs performs on the order of $10^6$ operations — fast. An $O(n^2)$ algorithm performs on the order of $10^{12}$ operations on the same input — likely too slow to be useful without a much faster computer.</p>
+<p>The jump from polynomial to exponential is even more dramatic. No polynomial algorithm grows as fast as $2^n$: even $n^{100}$ is in $o(2^n)$. An exponential algorithm with $n = 100$ inputs requires more operations than there are atoms in the observable universe.</p>
+<h3 id="key-relationships-to-remember">Key relationships to remember</h3>
+<ul>
+<li>Every polynomial of degree $k$ is in $\Theta(n^k)$ — only the leading term matters.</li>
+<li>$n^k \in o(2^n)$ for any fixed $k$ — exponentials dominate all polynomials.</li>
+<li>$(\log n)^k \in o(n)$ for any fixed $k$ — any power of a logarithm is eventually dominated by $n$.</li>
+<li>$n^k \in o(n^{k+\epsilon})$ for any $\epsilon &gt; 0$ — polynomial growth classes are dense.</li>
+</ul>
+<hr>
+<h2 id="exercise-ordering-functions-by-growth-rate">Exercise: Ordering Functions by Growth Rate</h2>
+<p>This section walks through the type of exercise in Video 4: given a collection of functions, determine the $\Theta$ class of each and then order them from slowest-growing to fastest-growing.</p>
+<h3 id="the-five-functions">The five functions</h3>
+<p>Suppose we are given:</p>
+<ol>
+<li>$f_1(n) = n^2 - 6n + 5$</li>
+<li>$f_2(n) = (2n + 5)^8$</li>
+<li>$f_3(n) = 2^n$</li>
+<li>$f_4(n) = n \log_2 n$</li>
+<li>$f_5(n) = 100$</li>
+</ol>
+<p>Our task: find the $\Theta$ class of each, then sort them.</p>
+<h3 id="step-1-find-the-theta-class-of-each-function">Step 1: Find the $\Theta$ class of each function</h3>
+<p><strong>$f_1(n) = n^2 - 6n + 5 \in \Theta(n^2)$.</strong></p>
+<p>The limit test gives $\lim_{n\to\infty} (n^2 - 6n + 5)/n^2 = 1$, a positive constant. So $f_1 \in \Theta(n^2)$.</p>
+<p><strong>$f_2(n) = (2n + 5)^8 \in \Theta(n^8)$.</strong></p>
+<p>Here the function is a polynomial of degree 8 in disguise. One approach is to use the limit test directly:</p>
+$$\lim_{n \to \infty} \frac{(2n + 5)^8}{n^8} = \lim_{n \to \infty} \left(\frac{2n + 5}{n}\right)^8 = \lim_{n \to \infty} \left(2 + \frac{5}{n}\right)^8 = 2^8 = 256.
+$$
+<p>Since $L = 256 &gt; 0$ is a finite positive constant, $(2n+5)^8 \in \Theta(n^8)$.</p>
+<p>An alternative: expand $(2n + 5)^8$ by the binomial theorem to obtain $256n^8 + \text{lower-order terms}$. The leading coefficient $256$ does not affect the $\Theta$ class, and all lower-order terms are in $o(n^8)$. Either approach confirms the result.</p>
+<p>Note that attempting to prove this from the definition directly involves either expanding an eighth power — tedious — or choosing $n_0$ large enough to handle the expansion cleanly. The limit test is considerably more efficient here.</p>
+<p><strong>$f_3(n) = 2^n \in \Theta(2^n)$.</strong></p>
+<p>This is trivially true: $2^n \leq 1 \cdot 2^n \leq 1 \cdot 2^n$ for all $n \geq 0$.</p>
+<p><strong>$f_4(n) = n \log_2 n \in \Theta(n \log n)$.</strong></p>
+<p>The limit test gives:</p>
+$$\lim_{n \to \infty} \frac{n \log_2 n}{n \log_2 n} = 1.
+$$
+<p>This is immediate (the function equals its own target), so $f_4 \in \Theta(n \log n)$.</p>
+<p><strong>$f_5(n) = 100 \in \Theta(1)$.</strong></p>
+<p>A constant function: $100 = 100 \cdot 1$ for all $n$, so $f_5 \in O(1)$; and $100 \geq 100 \cdot 1$, so $f_5 \in \Omega(1)$. Therefore $f_5 \in \Theta(1)$.</p>
+<h3 id="step-2-order-the-growth-classes">Step 2: Order the growth classes</h3>
+<p>We now have:</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>$\Theta$ class</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$f_5(n) = 100$</td>
+<td>$\Theta(1)$</td>
+</tr>
+<tr>
+<td>$f_4(n) = n \log_2 n$</td>
+<td>$\Theta(n \log n)$</td>
+</tr>
+<tr>
+<td>$f_1(n) = n^2 - 6n + 5$</td>
+<td>$\Theta(n^2)$</td>
+</tr>
+<tr>
+<td>$f_2(n) = (2n+5)^8$</td>
+<td>$\Theta(n^8)$</td>
+</tr>
+<tr>
+<td>$f_3(n) = 2^n$</td>
+<td>$\Theta(2^n)$</td>
+</tr>
+</tbody>
+</table>
+<p>Placing them in increasing order of asymptotic growth rate, from slowest to fastest:</p>
+$$100 \prec n \log n \prec n^2 \prec n^8 \prec 2^n
+$$
+<p>where $f \prec g$ means $f \in o(g)$ (strict asymptotic domination). Each relationship can be confirmed with the limit test:</p>
+<ul>
+<li>$\lim_{n\to\infty} 100 / (n \log n) = 0$: constant is $o(n \log n)$. $\checkmark$</li>
+<li>$\lim_{n\to\infty} (n \log n) / n^2 = \lim_{n\to\infty} (\log n)/n = 0$ (by L'Hôpital or known hierarchy): $n \log n$ is $o(n^2)$. $\checkmark$</li>
+<li>$\lim_{n\to\infty} n^2 / n^8 = \lim_{n\to\infty} n^{-6} = 0$: quadratic is $o(n^8)$. $\checkmark$</li>
+<li>$\lim_{n\to\infty} n^8 / 2^n = 0$ (exponentials dominate polynomials; can be shown by eight applications of L'Hôpital): $n^8$ is $o(2^n)$. $\checkmark$</li>
+</ul>
+<h3 id="lessons-from-the-exercise">Lessons from the exercise</h3>
+<p>Three practical takeaways:</p>
+<ol>
+<li>
+<p><strong>Simplify first.</strong> Functions like $(2n + 5)^8$ are intimidating until you recognize them as polynomials in disguise. Looking for the dominant term — whether by expanding, by the limit test, or by the binomial theorem — quickly determines the $\Theta$ class.</p>
+</li>
+<li>
+<p><strong>Choose your tool.</strong> The definition is direct and rigorous; the limit test is often faster for smooth functions. Knowing both gives you flexibility. For the $(2n+5)^8$ example, the limit test turns a potentially messy binomial expansion into a one-line calculation.</p>
+</li>
+<li>
+<p><strong>The hierarchy is absolute.</strong> An exponential function will always eventually dominate a polynomial, regardless of constant coefficients. Even $0.0001 \cdot 2^n$ eventually exceeds $10^{100} \cdot n^{1000}$.</p>
+</li>
+</ol>
+<hr>
+<h2 id="connections">Connections</h2>
+<p><strong>Backward — <a href="notes-04.html">Week 4 Notes</a>.</strong> The runtime functions $4n + 1$, $4n + 5$, and $4n + 7$ derived by exact operation counting in Week 4 are the direct motivation for Big-Oh. Week 4 shows <em>how</em> to get an exact count; Week 6 shows how to express the result concisely by discarding the constant offsets and coefficients that are negligible for large $n$. The progression from exact counts to asymptotic bounds is the natural arc of algorithm analysis.</p>
+<p><strong>Forward — <a href="notes-07.html">Week 7 Notes</a>.</strong> Sorting algorithms are the canonical application of asymptotic analysis. Insertion sort runs in $\Theta(n^2)$ in the worst case; mergesort runs in $\Theta(n \log n)$. The Big-Oh and Big-Theta machinery developed this week is the language in which those claims are stated and proved.</p>
+<p><strong>Forward — <a href="notes-08.html">Week 8 Notes</a>.</strong> Recursive algorithms do not admit straightforward operation-count arguments — their runtime satisfies a <strong>recurrence relation</strong> rather than a closed-form expression. Techniques like the Master Theorem resolve those recurrences into closed-form asymptotic bounds, which are then interpreted using exactly the $O$, $\Omega$, and $\Theta$ notation established this week.</p>
+
+  </main>
+
+  
+  <script>
+    document.querySelectorAll('h2[id], h3[id]').forEach(h => {
+      const a = document.createElement('a');
+      a.className = 'anchor-link';
+      a.href = '#' + h.id;
+      a.textContent = '§';
+      a.title = 'Link to this section';
+      h.appendChild(a);
+    });
+  </script>
+  
+
+  <footer class="site-footer">
+    <span>Discrete Structures · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-04-20">April 20, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Discrete Structures');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

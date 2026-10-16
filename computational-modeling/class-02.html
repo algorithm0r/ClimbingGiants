@@ -1,0 +1,1422 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Class 2 — Questions, then what a sample rate costs</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="css/blocks.css?v=20261015124713">
+<link rel="stylesheet" href="css/demos.css?v=20261015124713">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+/* The deck's own styling, inlined here because none of it belongs to the notes
+   pages and build.py sorts styles.css into layers this would not fit. The
+   variables are the site's own values, copied so the deck cannot drift. */
+:root{
+  /* Stage content comes in two sizes and only two. Every block that
+     carries prose uses the first, every block that carries code uses the
+     second, so a table on one slide and a list on the next are set alike. */
+  --claim:      clamp(2.1rem, min(4.5vw, 8.4vh), 4.5rem);
+  --stage-text: clamp(1.25rem, min(2.65vw, 4.1vh), 2.65rem);
+  --stage-code: clamp(1.1rem, min(2.35vw, 3.5vh), 2.35rem);
+  --gutter:     3.5vw;
+  --card:#FFFFFF; --subtle:#EEE9E0; --ink:#1A1A1A; --warm-gray:#5A5550;
+  --course-accent:#5F7038; --course-accent-dark:#47542A;
+  /* Two emphasis colours, both already carrying meaning on the site.
+     term: the thing being named or defined, and the subject of the claim.
+     def:  what is said about it -- the verb phrase, or the definition.
+     Both are a step lighter than the notes pages use them, because against
+     near-black ink at this size the darker green read as black. Measured:
+     the term is 48.5 dE from the ink rather than 35.8, and both still clear
+     5.3 contrast on white, which survives a washed-out projector. */
+  --term:#5F7038; --def:#8A6508;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--card); color:var(--ink); overflow:hidden;
+  font-family:"Segoe UI",-apple-system,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+body.blank .deck-slide{visibility:hidden}
+
+/* Nothing on a slide is hidden, so a slide is simply centred: text alone sits
+   in the middle, and text with a figure finds its own balance. The stage keeps
+   a floor so a figure arriving with its data does not shift what is above it. */
+.deck-slide{
+  position:fixed; inset:0; display:none; padding:4vh var(--gutter) 5vh;
+  flex-direction:column; justify-content:center; align-items:center; gap:2.4vh;
+}
+.deck-slide.on{display:flex}
+
+.deck-slide .head{text-align:center; width:100%; max-width:100%}
+.deck-slide .say{
+  margin:0 auto; text-align:center;
+  font-size:var(--claim); line-height:1.1; font-weight:600;
+  /* one measure for every claim, so the margins do not change slide to
+     slide and a line wraps only because it is long */
+  letter-spacing:-.015em; max-width:100%;
+  /* a claim that does wrap splits into even lines, not a line and one word */
+  text-wrap:balance;
+}
+.term{color:var(--term)}
+.def{color:var(--def)}
+
+.deck-slide .sub{
+  /* auto side margins, or the box sits left of centre whenever max-width is
+     narrower than the slide and only the text inside it is centred */
+  margin:1.2rem auto 0; font-size:var(--stage-text); line-height:1.4;
+  color:var(--warm-gray); max-width:100%; text-align:center; font-weight:400;
+}
+.deck-slide .sub code{font-size:1.02em; color:var(--def); font-weight:600}
+.deck-slide .stage{
+  width:100%; max-width:100%; margin:0 auto;
+  display:flex; flex-direction:column; justify-content:center;
+}
+/* .full used to widen a capped stage. Nothing is capped now, so it only
+   marks a slide that carries one. */
+/* Only a figure or a demo needs its space held: both arrive with their data
+   after first paint, and without a floor the claim above them jumps when they
+   do. Text in the stage is there from the start and can size itself. */
+.deck-slide .stage:has(.figure),
+.deck-slide .stage:has(cg-demo){min-height:38vh}
+/* A table or a block of arithmetic reads as part of the claim when it sits as
+   close to it as a figure does, so those get a little more air above them. */
+.deck-slide .stage:has(.tbl),
+.deck-slide .stage:has(.work){margin-top:1.6vh}
+/* A notes-page figure on a projector. Three things, and the third is the one
+   that bites: blocks.css caps .figure.narrow at 32rem, which is a text
+   column's width and not a slide's; the SVGs carry a viewBox and no fixed
+   size, so widening the box is the whole of the scaling they need; and the
+   stage is a flex column, where auto side margins do centre a box but also
+   cancel its stretch, collapsing it onto the SVG's own 300px. align-self
+   centres a flex item without giving up its width. */
+.deck-slide .stage .figure{
+  margin:0; border:0; background:none; align-self:center; width:100%;
+}
+/* A narrow figure is a squarish one, about 3:2, so its width is also capped
+   by the screen's height; otherwise on a laptop it stands taller than the
+   stage and pushes its own title up under the claim. */
+.deck-slide .stage .figure.narrow{max-width:min(62rem,74vw,100vh)}
+/* A wide figure, about 5:2, that shares the stage with a line of math. Full
+   width would stand too tall under two lines of claim on a laptop, so its
+   width is capped by the screen's height too, at a looser ratio. */
+.deck-slide .stage .figure.wide{max-width:min(100%,130vh)}
+/* A notes-page row of small diagrams, each drawn in a 300-unit viewBox, sets
+   its labels at about 11px on a projector. Opted into per figure, because a
+   label placed for 10.5px text can collide once it is larger. */
+.deck-slide .figure.legible .cgs text{font-size:15px}
+.deck-slide .figure.legible .cgs text.cgs-title{font-size:15px}
+/* Point cards in a video deck, the class-02 style: a row of bordered cards under
+   the claim, each a small tag, a bold title and one sentence. For a claim that
+   needs a few items of text under it. Sized from the stage text; the class decks
+   keep their own rules below. */
+body:not(.inclass) .deck-slide .pcards{display:grid; gap:1.2vw; width:100%; margin-top:1vh;
+  font-size:calc(var(--stage-text) * .74); line-height:1.32; text-align:left}
+body:not(.inclass) .deck-slide .pcards.c2{grid-template-columns:repeat(2, minmax(0,1fr))}
+body:not(.inclass) .deck-slide .pcards.c3{grid-template-columns:repeat(3, minmax(0,1fr))}
+body:not(.inclass) .deck-slide .pcards.c4{grid-template-columns:repeat(4, minmax(0,1fr))}
+body:not(.inclass) .deck-slide .pcard{border:1px solid #d9d3c7; border-radius:5px; background:#fff;
+  padding:1.8vh 1.1vw; display:flex; flex-direction:column; gap:.8vh; min-width:0}
+body:not(.inclass) .deck-slide .pcard .tag{align-self:flex-start; font-size:.62em; font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase; padding:.15em .5em; border-radius:3px;
+  background:var(--subtle); color:var(--warm-gray)}
+body:not(.inclass) .deck-slide .pcard > b{color:var(--course-accent-dark); font-size:1.15em; line-height:1.15}
+body:not(.inclass) .deck-slide .pcard > span{color:var(--warm-gray)}
+body:not(.inclass) .deck-slide .pcard.gold{background:#fbf6ea; border-color:#d9c08a}
+body:not(.inclass) .deck-slide .pcard.gold > b{color:#8A6508}
+body:not(.inclass) .deck-slide .pcard.gold .tag{background:#f1e4c4; color:#8A6508}
+/* A figure with its formula beside it. The figure is squarish, so side by side
+   is the only way both fit under a claim; its width is capped by the screen's
+   height for the same reason a narrow figure's is. */
+.deck-slide .figmath{
+  display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:3vw; align-items:center; width:100%;
+}
+.deck-slide .figmath .figure{max-width:min(100%,92vh); justify-self:end}
+.deck-slide .figmath .work{margin:0; justify-self:start; font-size:calc(var(--stage-text) * .88)}
+/* A video carries its own size and does not scale to a viewBox, and the sweep
+   video across a full stage would stand 685 tall, which with a claim above it
+   does not fit a laptop. It stays at its own width, or smaller. */
+.deck-slide .stage .fig-body video{
+  width:100%; max-width:min(72rem,94vw); height:auto; max-height:62vh;
+  margin:0 auto;
+}
+.deck-slide .stage figcaption,.deck-slide .stage .source{display:none}
+.deck-slide .stage cg-demo{display:block; margin:0}
+/* The notes demo carries its setting, caption, source and whole header. A
+   slide has room for the plot, the channel buttons and the six rows. */
+.deck-slide .stage .cgd-setting,
+.deck-slide .stage .cgd-caption,
+.deck-slide .stage .source{display:none}
+/* Lecture 1's channel demo shows only the six header rows it is about. That
+   is a property of that demo, not of decks, so it is opted into. Without the
+   scope it also hid lecture 2's state table, whose rows carry no such class. */
+.deck-slide .stage.six-only .cgd-table tr:not(.six){display:none}
+.deck-slide .stage .cgd{border:0; background:none}
+.deck-slide .stage .cgd-table{border-top:1px solid #ece7dd}
+
+/* A demo's tooling, at lecture size. demos.css sets these for a notes page
+   read at arm's length: .7rem readout labels and an 11px axis. On a projector,
+   and worse in a recording downscaled to 1080p, they are the smallest text on
+   the slide -- and on the decimate demo they are the whole point of it, since
+   "peak read" against "peak at full rate" is the claim. The plot needs nothing;
+   only the chrome around it does.
+
+   Sized from --stage-code so this tracks the viewport like every other size in
+   the deck, rather than fixing a pixel count that is right on one screen. Note
+   .stage.big already applies zoom:1.4, so the rendered size is 1.4x these. */
+.deck-slide .stage .cgd-controls{padding:1rem 1.2rem}
+.deck-slide .stage .cgd-controls label{font-size:calc(var(--stage-code) * .55)}
+.deck-slide .stage .cgd-val{font-size:calc(var(--stage-code) * .55)}
+/* the slider is dragged on camera, so it gets room to be seen moving */
+.deck-slide .stage .cgd-controls input[type=range]{width:min(300px, 22vw)}
+.deck-slide .stage .cgd-readouts{padding:.9rem 1.2rem}
+.deck-slide .stage .cgd-readouts .k{font-size:calc(var(--stage-code) * .48)}
+.deck-slide .stage .cgd-readouts .v{font-size:calc(var(--stage-code) * .72)}
+/* axis numbers and the two axis titles, which are set in SVG user units */
+.deck-slide .stage .cgp text{font-size:15px}
+.deck-slide .stage .cgp text.ylab,
+.deck-slide .stage .cgp text.mk{font-size:15px}
+/* A demo built for a page can be far too small on a projector, and its own
+   sizes are in rem so a parent font-size will not reach them. Scale the whole
+   element instead, on the slides that need it. */
+.deck-slide .stage.big cg-demo{zoom:1.4}
+/* zoom is a fixed number, so it has to step down as the screen gets shorter,
+   or the demo runs off the bottom of a laptop screen */
+@media (max-height:860px){ .deck-slide .stage.big cg-demo{zoom:1.2} }
+@media (max-height:720px){ .deck-slide .stage.big cg-demo{zoom:1.0} }
+@media (max-height:620px){ .deck-slide .stage.big cg-demo{zoom:.85} }
+/* A demo with several stacked panels (acceleration, velocity, displacement)
+   is too tall to zoom. Each panel is capped by the screen's height instead,
+   and keeps its aspect, so the stack narrows and centers. */
+.deck-slide .stage.tall .cgd-plots svg{max-height:15vh}
+/* the controls and readouts still need lecture size, so they get the zoom the
+   whole demo gets on a .big stage, stepped down the same way */
+.deck-slide .stage.tall .cgd-controls,
+.deck-slide .stage.tall .cgd-readouts{zoom:1.4}
+/* a laptop screen has no height to spare once the claim wraps: the controls
+   drop to their own size and the plots give up a little more */
+@media (max-height:860px){ .deck-slide .stage.tall .cgd-controls,
+  .deck-slide .stage.tall .cgd-readouts{zoom:1.0}
+  .deck-slide .stage.tall .cgd-plots svg{max-height:13vh} }
+
+.deck-slide.part{background:var(--course-accent-dark); color:#fff; grid-template-rows:1fr}
+.deck-slide.part .course{
+  font-size:clamp(1.4rem,min(2.7vw,5vh),2.7rem); letter-spacing:.05em;
+  text-transform:uppercase; opacity:.82; margin:0 0 1.1rem; font-weight:600;
+  text-align:center; line-height:1.1;
+}
+/* A divider is a title, so it is set larger than a claim and spans the slide
+   like one. At this size the longest title in the course, 44 characters, runs
+   to two lines and everything shorter fits on one. */
+.deck-slide.part .say{
+  color:#fff; max-width:100%; font-size:clamp(2.4rem,min(5.1vw,9.4vh),5.1rem);
+  line-height:1.08;
+}
+
+/* raw file text, and arithmetic worked on the slide */
+.deck-slide .raw{
+  font-family:"SF Mono",Consolas,monospace; text-align:left; display:table;
+  margin:0 auto; font-size:var(--stage-code); line-height:1.45;
+  color:#3f3b36;
+}
+.deck-slide .raw .k{color:var(--term); font-weight:600}
+.deck-slide .raw .v{color:var(--def)}
+.deck-slide .raw .dim{color:#a8a294}
+/* worked arithmetic, set by KaTeX. The aligned environment does the spacing,
+   so there is no hand padding and no monospace face to fake a column. */
+.deck-slide .work{margin:0 auto; font-size:var(--stage-text)}
+.deck-slide .work .katex-display{margin:0}
+/* two display equations under one claim need air between them, or the
+   second one's numerator lands on the first one's denominator */
+.deck-slide .work .katex-display + .katex-display{margin-top:.8em}
+
+/* A hover note on one piece of code. display rather than visibility, because a
+   hidden absolutely-positioned box still counts towards a scroll container's
+   overflow and a slide clips what leaves it. */
+.deck-slide .tip{cursor:help; border-bottom:1px dotted var(--warm-gray)}
+.deck-slide .tip::after{
+  /* to the right of the call, not under it, so the note never covers the
+     lines it is talking about */
+  content:attr(data-note); position:absolute; left:calc(100% + 1.6rem); top:50%;
+  transform:translateY(-50%);
+  z-index:60; display:none; width:max-content; max-width:30ch;
+  background:#1d1b18; color:#e8e4dc; padding:.6rem .85rem; border-radius:4px;
+  font-family:"Segoe UI",-apple-system,system-ui,sans-serif; font-weight:400;
+  font-size:.64em; line-height:1.45; white-space:normal; text-align:left;
+  box-shadow:0 6px 18px rgba(0,0,0,.18);
+}
+.deck-slide .tip:hover{background:#fdf5db}
+.deck-slide .tip:hover::after{display:block}
+
+/* Working on paper beside the same working as a program, row for row, so a
+   hand step and the line that carries it sit on one line of the slide. */
+.deck-slide .pair{
+  display:grid; grid-template-columns:auto auto; gap:.35rem 3rem;
+  margin:1.6vh auto 0; text-align:left; align-items:baseline; position:relative;
+  font-size:var(--stage-code);
+}
+.deck-slide .pair .ph{
+  color:var(--warm-gray); font-size:.72em; letter-spacing:.07em;
+  text-transform:uppercase; font-weight:600; padding-bottom:.3rem;
+}
+.deck-slide .pair .hand{font-family:Georgia,"Times New Roman",serif; color:#3f3b36}
+.deck-slide .pair .code{font-family:"SF Mono",Consolas,monospace; white-space:pre;
+  color:#3f3b36}
+.deck-slide .pair .code .k{color:var(--term); font-weight:600}
+.deck-slide .pair .code .v{color:var(--def)}
+
+/* Code and what there is to say about it, on one slide. A comment belongs on
+   the line it is about, so the two panels share grid rows. */
+.deck-slide .panels{
+  display:grid; grid-template-columns:auto 1fr; gap:.15rem 2.6rem;
+  margin:1.6vh auto 0; text-align:left; align-items:baseline; position:relative;
+  font-size:var(--stage-code);
+}
+.deck-slide .panels .code{
+  font-family:"SF Mono",Consolas,monospace; white-space:pre; color:#3f3b36;
+}
+.deck-slide .panels .code .k{color:var(--term); font-weight:600}
+.deck-slide .panels .code .v{color:var(--def)}
+.deck-slide .panels .code .dim{color:#a8a294}
+.deck-slide .panels .note{color:var(--warm-gray); font-size:.86em; line-height:1.35}
+
+/* a two-by-two, for a division that runs the same way in two domains */
+.deck-slide .grid2{
+  display:grid; grid-template-columns:auto 1fr 1fr; gap:.7rem 2.4rem;
+  font-size:var(--stage-text); margin:0 auto; text-align:left;
+  align-items:baseline;
+}
+.deck-slide .grid2 .hd{color:var(--warm-gray); font-size:.78em; letter-spacing:.06em;
+  text-transform:uppercase; font-weight:600}
+.deck-slide .grid2 .rw{color:var(--term); font-weight:600}
+.deck-slide .grid2 .cell{color:var(--ink)}
+
+/* a name and what is under it */
+.deck-slide .names{
+  display:grid; grid-template-columns:auto 1fr; gap:1.2rem 1.8rem;
+  font-size:var(--stage-text); margin:0 auto; text-align:left;
+  align-items:baseline;
+}
+.deck-slide .names .nm{font-family:"SF Mono",Consolas,monospace; color:var(--term);
+  font-weight:600}
+.deck-slide .names .val{font-family:"SF Mono",Consolas,monospace; color:var(--ink)}
+.deck-slide .names .how{color:var(--warm-gray); font-size:.82em}
+
+/* a small table of names, as the by-hand calculation leaves them */
+.deck-slide .tbl{border-collapse:collapse; margin:0 auto;
+  font-size:var(--stage-text)}
+.deck-slide .tbl th{text-align:left; font-size:.72em; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--warm-gray); padding:0 1.6rem .5rem 0;
+  font-weight:600}
+.deck-slide .tbl td{padding:.34rem 1.6rem .34rem 0; vertical-align:baseline}
+.deck-slide .tbl td:first-child{font-family:"SF Mono",Consolas,monospace;
+  color:var(--term); font-weight:600}
+.deck-slide .tbl td:nth-child(2){color:var(--def); font-weight:600}
+.deck-slide .tbl td:nth-child(3){color:var(--warm-gray);
+  font-family:"SF Mono",Consolas,monospace; font-size:.86em}
+
+/* The three rules above describe one table: a name, what it holds, where it
+   came from. A table whose columns are all the same kind of thing opts out of
+   them, or the columns stop looking comparable, which is the whole reason it
+   is on the slide. .key marks the column the claim is about. */
+.deck-slide .tbl.nums td{font-variant-numeric:tabular-nums}
+/* every value column alike: one font, one size, one weight. Styling column 2
+   and column 3 separately set a three-column table's numbers in two fonts. */
+.deck-slide .tbl.nums td:nth-child(n+2){color:var(--warm-gray); font-weight:400;
+  font-family:"SF Mono",Consolas,monospace; font-size:1em}
+.deck-slide .tbl.nums td.key{color:var(--def); font-weight:600}
+
+/* A record of photographs, shown as the record it is. The strip leaves a
+   gutter between frames on purpose: the gutter is the part of the event nobody
+   photographed, which is the whole reason the figure is on the slide. */
+.deck-slide .strip img{display:block; width:100%; height:auto}
+
+/* Two frames either side of one interval, with the interval named between
+   them at a size that says it matters. */
+.deck-slide .frames{
+  display:flex; align-items:center; justify-content:center; gap:2.4vw;
+  width:100%;
+}
+.deck-slide .frames figure{margin:0; text-align:center}
+.deck-slide .frames img{
+  display:block; width:100%; max-width:27vw; max-height:54vh; height:auto;
+}
+/* the stage hides figcaptions, because a notes-page caption is prose the slide
+   has already said. These are not that: they are the timestamps, and they are
+   the point of the pair. */
+.deck-slide .stage .frames figcaption{
+  display:block; margin-top:.55rem; font-size:var(--stage-code);
+  color:var(--warm-gray); font-family:"SF Mono",Consolas,monospace;
+}
+/* The interval nothing was recorded or computed in. Not scoped to one layout:
+   the frame pair and the two-run pair both use it. */
+.deck-slide .gapmark{
+  font-size:var(--stage-text); color:var(--def); font-weight:600;
+  text-align:center; line-height:1.2; white-space:nowrap; flex:0 0 auto;
+}
+.deck-slide .gapmark span{
+  display:block; font-size:.58em; color:var(--warm-gray); font-weight:400;
+  margin-top:.4rem; white-space:normal; max-width:14ch; margin-inline:auto;
+}
+
+/* A photograph that is not ours, with the credit its licence requires. The
+   stage hides .source because a notes-page source block is prose; a credit
+   line is four words and has to be visible wherever the image is. */
+.deck-slide .stage .credit{
+  display:block; margin:.7rem auto 0; text-align:center;
+  font-size:calc(var(--stage-code) * .62); color:var(--warm-gray);
+  font-weight:400; line-height:1.4;
+}
+.deck-slide .stage .portrait img{
+  display:block; margin:0 auto; width:auto; height:auto;
+  max-height:52vh; max-width:100%;
+}
+
+/* Two runs of a sweep, side by side, with the unswept interval between them.
+   Wider and shorter than the frame pair, because a settled hill is a wide
+   flat thing. Each run is a looping clip, rendered on one shared view box. */
+.deck-slide .runs{
+  display:flex; align-items:center; justify-content:center; gap:1.6vw;
+  width:100%;
+}
+.deck-slide .runs figure{margin:0; text-align:center; flex:0 1 auto}
+.deck-slide .runs img, .deck-slide .runs video{display:block; width:100%; max-width:38vw; height:auto}
+.deck-slide .stage .runs figcaption{
+  display:block; margin-top:.6rem; font-size:calc(var(--stage-text) * .8);
+  color:var(--ink); line-height:1.35;
+}
+.deck-slide .stage .runs figcaption b{color:var(--term); font-weight:600}
+.deck-slide .stage .runs figcaption span{
+  display:block; color:var(--warm-gray); font-size:.86em; margin-top:.15rem;
+}
+
+/* Two columns of prose under one claim: a question on the left and what came
+   of it on the right, each with a heading of its own. */
+.deck-slide .duo{
+  display:grid; grid-template-columns:1fr 1fr; gap:1.2vh 3.2vw;
+  width:100%; text-align:left; font-size:var(--stage-text);
+}
+/* a portrait beside the prose about it */
+.deck-slide .duo.photo{grid-template-columns:auto minmax(0,1fr); align-items:start}
+.deck-slide .duo.photo figure{margin:0}
+.deck-slide .duo.photo img{
+  display:block; width:100%; max-width:min(22vw,320px); height:auto;
+}
+.deck-slide .stage .duo.photo figcaption{
+  display:block; margin-top:.5rem; text-align:center;
+  font-size:calc(var(--stage-code) * .62); color:var(--warm-gray);
+}
+.deck-slide .duo.photo h3:not(:first-child){margin-top:1.1rem}
+.deck-slide .duo h3{
+  margin:0 0 .5rem; font-size:.82em; font-weight:600; color:var(--term);
+  letter-spacing:.04em; text-transform:uppercase;
+}
+.deck-slide .duo p{margin:0 0 .7rem; line-height:1.35}
+.deck-slide .duo p:last-child{margin-bottom:0}
+.deck-slide .duo em{font-style:normal; color:var(--def); font-weight:600}
+/* not .aside: that is a site-wide block in blocks.css and it arrives with a
+   background. This is one quiet line under a claim. */
+.deck-slide .duo .footnote{color:var(--warm-gray); font-size:.86em}
+
+/* A signal chain: boxes with arrows between them, left to right. */
+.deck-slide .chain{
+  display:flex; align-items:stretch; justify-content:center; gap:.8vw;
+  width:100%; font-size:calc(var(--stage-text) * .84);
+}
+.deck-slide .chain > div{flex:0 1 auto; text-align:center}
+.deck-slide .chain .box{
+  border:1px solid #d9d2c4; border-radius:5px; padding:.7rem .9rem;
+  display:flex; flex-direction:column; justify-content:center; height:100%;
+}
+.deck-slide .chain .box b{display:block; color:var(--term); font-weight:600}
+.deck-slide .chain .box span{
+  display:block; color:var(--warm-gray); font-size:.8em; margin-top:.3rem;
+  line-height:1.3;
+}
+.deck-slide .chain .arrow{
+  display:flex; align-items:center; color:var(--warm-gray);
+  font-size:1.4em; padding:0 .1vw;
+}
+/* one box in the chain is where the damage is done */
+.deck-slide .chain .box.here{border-color:var(--def); border-width:2px}
+.deck-slide .chain .mark{
+  display:block; margin-top:.5rem; color:var(--def); font-weight:600;
+  font-size:.78em;
+}
+
+/* the six fields: the name, then what it settles, in plain words */
+.deck-slide .fields{
+  list-style:none; margin:0 auto; padding:0; display:grid; gap:.7rem;
+  font-size:var(--stage-text); text-align:left; max-width:58ch;
+}
+.deck-slide .fields b{color:var(--term); font-weight:600}
+.deck-slide .fields span{color:var(--warm-gray)}
+/* A one-word term is separated from its definition by its colour alone, which
+   is enough. A term several words long is not: it runs straight into the
+   definition and the eye has nowhere to break. Those go in two columns, opted
+   into, since most lists do not need it. */
+.deck-slide .fields.cols{grid-template-columns:auto 1fr; gap:.8rem 1.8rem;
+  max-width:74ch}
+.deck-slide .fields.cols li{display:contents}
+.deck-slide .fields.cols b{text-align:right}
+
+.deck-bar{position:fixed; left:0; right:0; bottom:0; height:3px; background:var(--subtle); z-index:40}
+.deck-bar > i{display:block; height:100%; width:0; background:var(--course-accent)}
+.deck-num{
+  position:fixed; right:1.6vw; bottom:1.6vh; font-size:.85rem; color:var(--warm-gray);
+  z-index:40; font-variant-numeric:tabular-nums;
+}
+.deck-notes{
+  position:fixed; left:0; right:0; bottom:0; max-height:38vh; overflow:auto;
+  display:none; padding:1.1rem 2rem 1.6rem; z-index:50;
+  background:#1d1b18; color:#e8e4dc; font-size:1rem; line-height:1.55;
+  border-top:3px solid var(--course-accent);
+}
+body.notes-on .deck-notes{display:block}
+.deck-notes p{margin:0 0 .6rem; max-width:80ch}
+.deck-help{
+  position:fixed; left:1.6vw; bottom:1.4vh; font-size:.76rem; color:var(--warm-gray);
+  z-index:40; opacity:.5;
+}
+/* Presenter tools. All of it is inert until p or d is pressed, so a student
+   who never presses either sees the deck exactly as it was. */
+
+/* The ink sits above the slide and below the notes panel, so opening the
+   notes covers a drawing rather than the other way round. pointer-events is
+   set from script: off while not inking, or the canvas would eat the clicks
+   that advance and the ones a demo wants. */
+.deck-ink{position:fixed; inset:0; z-index:45; pointer-events:none}
+/* b blanks the screen. A drawing is part of what is on the screen. */
+body.blank .deck-ink{visibility:hidden}
+
+/* The pointer. A mouse arrow is a few dark pixels and disappears on a
+   recording scaled to half size, so while presenting the system cursor is
+   hidden and this stands in for it. Amber with a white ring: the slides are
+   near-white and the dividers are dark green, and neither the term green nor
+   the def gold can be seen against both. */
+body.pointing, body.inking{cursor:none}
+.deck-dot{
+  --dot:clamp(14px, 2.2vh, 26px);
+  position:fixed; left:0; top:0; width:var(--dot); height:var(--dot);
+  margin:calc(var(--dot) / -2) 0 0 calc(var(--dot) / -2);
+  border-radius:50%; background:#E8A33D; border:2px solid #FFF;
+  box-shadow:0 0 0 1px rgba(0,0,0,.35), 0 2px 10px rgba(0,0,0,.35);
+  z-index:70; pointer-events:none; display:none;
+}
+body.pointing .deck-dot, body.inking .deck-dot{display:block}
+/* While inking the dot takes the pen's colour, so the nib says what it will
+   draw before it draws it. Smaller, because it is a nib and not a pointer. */
+body.inking .deck-dot{--dot:clamp(9px, 1.3vh, 15px)}
+
+/* Which mode is on, and what the keys are once it is. Sits where the help
+   line sits, one line above it. */
+.deck-hud{
+  position:fixed; left:1.6vw; bottom:calc(1.4vh + 1.5rem); z-index:40;
+  font-size:.76rem; color:var(--warm-gray); display:flex; align-items:center;
+  gap:.45rem; pointer-events:none;
+}
+.deck-hud:empty{display:none}
+.deck-hud i{
+  width:.62rem; height:.62rem; border-radius:50%; background:#E8A33D;
+  box-shadow:0 0 0 1px rgba(0,0,0,.2);
+}
+.deck-hud span{opacity:.55; margin-left:.35rem}
+
+@media print{
+  body{overflow:visible}
+  .deck-slide{position:static; display:flex; page-break-after:always; height:100vh}
+  .deck-bar,.deck-num,.deck-help,.deck-notes{display:none}
+  .deck-ink,.deck-dot,.deck-hud{display:none}
+}
+/* ---------------------------------------------------------------------------
+   In-class decks (front matter deck: "class"). The video decks above make one
+   claim per slide for a recording; a class deck delivers information to a room
+   that can read, so a slide carries a topic label and dense, scannable blocks:
+   cards in columns, compact tables, short lists. Everything is scoped to
+   body.inclass so the video decks are untouched.
+--------------------------------------------------------------------------- */
+body.inclass{--ic-text:clamp(1.1rem, min(2.05vw, 3.6vh), 2.2rem)}
+body.inclass .deck-slide:not(.part){justify-content:flex-start; align-items:stretch;
+  padding:4.5vh var(--gutter) 5vh; gap:2.2vh}
+body.inclass .deck-slide:not(.part) .head{text-align:left;
+  border-bottom:3px solid var(--course-accent); padding-bottom:1vh}
+body.inclass .deck-slide:not(.part) .say{text-align:left; margin:0;
+  font-size:clamp(1.5rem, min(2.9vw, 5.2vh), 2.9rem); text-wrap:wrap}
+body.inclass .deck-slide .kicker{display:block; font-size:.42em; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--warm-gray); font-weight:600; margin-bottom:.35vh}
+body.inclass .deck-slide .stage{font-size:var(--ic-text); line-height:1.38;
+  justify-content:flex-start; flex:1; min-height:0}
+/* cards in two or three columns */
+body.inclass .cols{display:grid; gap:1.6vh 2vw; align-items:start; width:100%}
+body.inclass .cols.c2{grid-template-columns:repeat(2, minmax(0,1fr))}
+body.inclass .cols.c3{grid-template-columns:repeat(3, minmax(0,1fr))}
+body.inclass .card{background:#f7f9f1; border-left:5px solid var(--course-accent);
+  padding:1.3vh 1.2vw 1.4vh; border-radius:3px}
+body.inclass .card h3{margin:0 0 .6vh; font-size:1.08em; color:var(--course-accent-dark)}
+body.inclass .card p{margin:0 0 .6vh}
+body.inclass .card ul, body.inclass .stage > ul{margin:0; padding-left:1.15em}
+body.inclass .card li, body.inclass .stage > ul li{margin:.25vh 0}
+body.inclass .card .dim{color:var(--warm-gray)}
+body.inclass .card.gold{background:#fbf6ea; border-left-color:#B8860B}
+body.inclass .card.gold h3{color:#8A6508}
+/* compact tables */
+body.inclass .ic-tbl{border-collapse:collapse; width:100%; font-size:.95em}
+body.inclass .ic-tbl th{text-align:left; font-size:.78em; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--warm-gray); border-bottom:2px solid var(--course-accent); padding:.4vh .8vw .4vh 0}
+body.inclass .ic-tbl td{padding:.45vh .8vw .45vh 0; border-bottom:1px solid #e6e0d4; vertical-align:top}
+body.inclass .ic-tbl td.n{font-variant-numeric:tabular-nums; color:var(--def); font-weight:600}
+/* a figure beside text */
+body.inclass .figside{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
+  gap:2vw; align-items:start; width:100%}
+body.inclass .figside img, body.inclass .figside video{width:100%; height:auto; display:block;
+  max-height:58vh; object-fit:contain; border:1px solid #e6e0d4}
+body.inclass .wideimg{width:100%; max-height:30vh; object-fit:contain; display:block; margin-top:1.2vh}
+body.inclass .src{font-size:.72em; color:var(--warm-gray); margin-top:.6vh}
+/* a "moment to arrive" slide (Five for Flourishing): the image, full screen */
+body.inclass .deck-slide.arrive{padding:0; justify-content:center; align-items:center; background:#000}
+body.inclass .deck-slide.arrive img{max-width:100vw; max-height:100vh; width:auto; height:auto; display:block}
+/* a sparse overview: one line and a row of pictures to talk over */
+body.inclass .lead{font-size:1.35em; line-height:1.3; margin:1vh 0 3vh; color:var(--ink)}
+body.inclass .trio{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:2vw; align-items:end}
+body.inclass .trio figure{margin:0}
+body.inclass .trio img{width:100%; height:34vh; object-fit:contain; display:block; border:1px solid #e6e0d4; background:#fff}
+body.inclass .trio figcaption{text-align:center; color:var(--course-accent-dark); font-weight:600; margin-top:1vh}
+/* a dense roster slide: smaller text, section headings between card rows */
+body.inclass .stage.tight{font-size:calc(var(--ic-text) * .74); line-height:1.28}
+body.inclass .stage.tight .card{padding:.9vh .9vw}
+body.inclass .stage.tight .card h3{margin-bottom:.3vh}
+body.inclass .stage.tight .cols{gap:1vh 1.2vw}
+body.inclass .sec{margin:1vh 0 .6vh; font-size:1em; color:var(--warm-gray);
+  text-transform:uppercase; letter-spacing:.06em}
+body.inclass .stage.tight .sec:first-child{margin-top:0}
+body.inclass .qr{display:flex; gap:1.4vw; align-items:center}
+body.inclass .qr p{margin:0 0 .6vh; font-weight:600}
+body.inclass .card .ico{height:1.15em; width:auto; vertical-align:-.2em; margin-right:.25em}
+/* a point slide, after the TCSS 490 decks: no title bar, the main point centred as the
+   heading with a grey line under it, and the content centred below */
+body.inclass .deck-slide.point:not(.part){padding-top:9vh; gap:3vh}
+body.inclass .deck-slide.point:not(.part) .head{text-align:center; border-bottom:0; padding-bottom:0}
+body.inclass .deck-slide.point:not(.part) .say{text-align:center; text-wrap:balance;
+  font-size:clamp(1.8rem, min(3.6vw, 6.4vh), 3.6rem)}
+/* a point slide with a figure: a smaller heading leaves the figure room, since the fit
+   script cannot shrink a figure, only the text beside it */
+body.inclass .deck-slide.point.compact:not(.part){padding-top:5vh; gap:2vh}
+body.inclass .deck-slide.point.compact:not(.part) .say{font-size:clamp(1.5rem, min(3vw, 5.4vh), 3rem)}
+/* point cards, after the TCSS 490 decks: a row of bordered cards under the slide's
+   main point, each a small tag, a title and one sentence */
+body.inclass .pcards{display:grid; gap:1.2vw; width:100%; margin-top:1vh}
+body.inclass .pcards.c3{grid-template-columns:repeat(3, minmax(0,1fr))}
+body.inclass .pcards.c4{grid-template-columns:repeat(4, minmax(0,1fr))}
+body.inclass .pcard{border:1px solid #d9d3c7; border-radius:5px; background:#fff;
+  padding:1.8vh 1.1vw; display:flex; flex-direction:column; gap:.8vh; min-width:0}
+body.inclass .pcard .tag{align-self:flex-start; font-size:.62em; font-weight:700; letter-spacing:.06em;
+  text-transform:uppercase; padding:.15em .5em; border-radius:3px; background:var(--subtle); color:var(--warm-gray)}
+body.inclass .pcard > b{color:var(--course-accent-dark); font-size:1.15em; line-height:1.15}
+body.inclass .pcard > span, body.inclass .pcard > p{color:var(--warm-gray); line-height:1.32; margin:0}
+body.inclass .pcard ul, body.inclass .pcard ol{margin:0; padding-left:1.15em; color:var(--warm-gray); line-height:1.32}
+body.inclass .pcard li{margin:.3vh 0}
+body.inclass .pcard li b{color:var(--ink)}
+body.inclass .pcard .vote{margin-top:.4vh}
+/* one gold card among plain ones */
+body.inclass .pcard.gold{background:#fbf6ea; border-color:#d9c08a}
+body.inclass .pcard.gold > b{color:#8A6508}
+body.inclass .pcard.gold .tag{background:#f1e4c4; color:#8A6508}
+body.inclass .pcol{display:flex; flex-direction:column; gap:1.2vh; min-width:0}
+body.inclass .pcards.c1{grid-template-columns:minmax(0,1fr)}
+body.inclass .pcards.c2{grid-template-columns:repeat(2, minmax(0,1fr))}
+body.inclass .pcard .q{color:var(--ink); font-style:italic}
+/* the row of point cards that says what to do */
+body.inclass .pcards.do .pcard{background:#fbf6ea; border-color:#d9c08a}
+body.inclass .pcards.do .pcard > b{color:#8A6508}
+body.inclass .pcards.do .tag{background:#f1e4c4; color:#8A6508}
+/* a quieter row of point cards under the main row */
+body.inclass .pcards.minor{font-size:.78em; margin-top:1.6vh}
+body.inclass .pcards.minor .pcard{background:#f7f6f2; border-color:#e6e0d4; padding:1.2vh 1vw}
+body.inclass .pcards.minor .pcard > b{color:var(--warm-gray)}
+/* the learning-group roster: one card per group, names listed down the card so a
+   student scans for their own while the details beside it are reviewed */
+body.inclass .groups{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:1vh .8vw; align-content:start}
+body.inclass .gcard{background:#f7f9f1; border-top:4px solid var(--course-accent); border-radius:3px;
+  padding:.8vh .7vw .9vh; font-size:.86em; line-height:1.28}
+body.inclass .gcard h4{margin:0 0 .4vh; font-size:1.08em; color:var(--course-accent-dark)}
+body.inclass .gcard h4 span{font-weight:400; color:var(--warm-gray); font-size:.8em; margin-left:.3em}
+body.inclass .gcard ul{list-style:none; margin:0; padding:0}
+body.inclass .gcard li{margin:0; white-space:nowrap}
+/* a day-by-day timeline, set large: it is the whole slide */
+body.inclass .timeline{font-size:1.15em}
+body.inclass .timeline td{padding:1.6vh 1.5vw 1.6vh 0}
+body.inclass .timeline td:first-child{white-space:nowrap; width:1%; color:var(--course-accent-dark)}
+body.inclass .stage a{color:var(--course-accent-dark)}
+body.inclass .qr img{width:22vh; height:22vh; display:block}
+/* class 2: figure hosts, channel legend chips, vote cards, and an amber kicker
+   for the slides where the room does something */
+body.inclass .c2fig{width:100%}
+body.inclass .c2fig > svg{display:block; width:100%; height:auto; max-height:62vh}
+body.inclass .c2fig.half > svg{max-height:31vh}
+body.inclass .c2fig .cgd .cgp:not(.c2chart) text{font-size:15px}
+body.inclass .c2key b{display:inline-block; width:.75em; height:.75em; border-radius:50%; vertical-align:-.05em}
+body.inclass .c2key b.head{background:#5F7038}
+body.inclass .c2key b.cross{background:#b0443a}
+body.inclass .c2key b.amber{background:#b8860b}
+body.inclass .c2key b.sq{border-radius:1px}
+body.inclass .c2key i.amber{border-color:#b8860b}
+body.inclass .c2key i.faint{border-color:#cfc8bb}
+body.inclass .card .c2fig{margin:.4vh 0 .6vh}
+body.inclass .c2row{display:grid; grid-template-columns:1fr 1fr; gap:1.2vw; margin-top:.6vh}
+body.inclass .c2row svg{display:block; width:100%; height:auto; max-height:30vh}
+body.inclass .c2fig .cgd{margin:0}
+body.inclass .c2key{display:inline-flex; align-items:center; gap:.35em; margin-right:1.1em; font-weight:600}
+body.inclass .c2key i{display:inline-block; width:1.8em; border-top:3px solid}
+body.inclass .c2key i.head{border-color:#5F7038}
+body.inclass .c2key i.cross{border-color:#b0443a}
+body.inclass .c2key i.chest{border-top-style:dashed; border-color:#3A5F8A}
+body.inclass .c2key i.neck{border-top-style:dotted; border-color:#b8860b}
+body.inclass .vote{display:grid; grid-template-columns:1fr; gap:.8vh; margin-top:1vh}
+body.inclass .vote div{display:flex; align-items:center; gap:1vw; border:2px solid var(--course-accent); border-radius:6px; padding:.6vh 1vw; background:#fff}
+body.inclass .vote b{font-size:1.4em; color:var(--course-accent-dark); min-width:1.2em}
+body.inclass .kicker.act{color:#8A6508}
+/* a slide being measured by the fit script below: laid out, never seen */
+body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
+</style>
+</head>
+<body class="inclass" data-pagefind-ignore="all">
+
+
+<section class="deck-slide arrive">
+  <img src="data/img/f4f/f4f-02.png?v=20261015124713" width="1920" height="1080"
+       alt="Huskies Don't Cancel. The pledge reads: I pledge as a UW Husky to build understanding across difference, to be curious about things I don't understand, and to engage in dialogue with those I disagree with. I will not engage with cancel culture, and instead model intellectual curiosity by asking questions, fighting cognitive biases, finding common ground, and seeing challenges as opportunities for growth and learning. Take the pledge, at livewell.uw.edu/huskiesdontcancel, with a QR code.">
+</section>
+
+<section class="deck-slide part">
+  <div class="head">
+    <p class="course">TME 310 &middot; Computational Physical Modeling</p>
+    <p class="say">Class 2</p>
+  </div>
+</section>
+
+<!-- ============================================================ assignment 1 and AI -->
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">The seven <span class="term">maxims</span> apply to the AI you work with, to other people, and to your own work.</p>
+    <p class="sub">From the AI Use page.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c4">
+      <div class="pcard"><span class="tag">1</span><b>Augmented intelligence, not artificial replacement</b>
+        <span>AI, like team members, should extend our own capabilities and understanding without substituting our judgment and contributions.</span></div>
+      <div class="pcard"><span class="tag">2</span><b>Prompt as craft</b>
+        <span>Clear communication drives results whether with AI, colleagues, or personal goals.</span></div>
+      <div class="pcard"><span class="tag">3</span><b>Iterative refinement</b>
+        <span>Progress comes through cycles of reflection and improvement in AI work, team projects, and self-development.</span></div>
+      <div class="pcard"><span class="tag">4</span><b>Critical evaluation</b>
+        <span>Apply discerning judgment to AI outputs, others' contributions, and your own work.</span></div>
+    </div>
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">5</span><b>Attribution and recognition</b>
+        <span>Acknowledge sources of ideas, whether AI-generated, from others, or from your past work.</span></div>
+      <div class="pcard"><span class="tag">6</span><b>Ethical responsibility</b>
+        <span>Consider impacts on others when using AI, leading teams, or making personal choices.</span></div>
+      <div class="pcard"><span class="tag">7</span><b>Continuous improvement</b>
+        <span>The skills of collaboration with AI, others, and ourselves can all be developed through deliberate practice and a growth mindset.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">Four of the seven <span class="term">maxims</span> cover what went wrong in the Assignment 1 reports.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c4">
+      <div class="pcard"><span class="tag">errors left on the page</span><b>Critical evaluation</b>
+        <span>Judge what an assistant, a colleague or you produced before it goes out.</span></div>
+      <div class="pcard"><span class="tag">checks not carried out</span><b>Augmented intelligence</b>
+        <span>Use an assistant to extend your judgment, and make the decisions yourself.</span></div>
+      <div class="pcard"><span class="tag">numbers with no source</span><b>Attribution</b>
+        <span>Say where each number, idea and line of code came from.</span></div>
+      <div class="pcard"><span class="tag">unsupported claims</span><b>Ethical responsibility</b>
+        <span>Consider the person who acts on what you write.</span></div>
+    </div>
+    <div class="pcards c3 minor">
+      <div class="pcard"><b>Prompt as craft</b>
+        <span>Say clearly what you want, to an assistant, a colleague or yourself.</span></div>
+      <div class="pcard"><b>Iterative refinement</b>
+        <span>Improve the work in cycles of reflection and revision.</span></div>
+      <div class="pcard"><b>Continuous improvement</b>
+        <span>Working with AI, with others and with yourself usually improves with practice.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say"><span class="term">Critical evaluation</span> applies to your own work as much as to an assistant's.</p>
+    <p class="sub">Each of these was on the page when the PDF went in.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c4">
+      <div class="pcard"><span class="tag">left in</span><b>An assistant's notes</b>
+        <span>Notes to its user on the last page ("check it yourself before submitting").</span></div>
+      <div class="pcard"><span class="tag">carried over</span><b>The example's phrase</b>
+        <span>"Data phrase: example pack" at the top of the report.</span></div>
+      <div class="pcard"><span class="tag">misread</span><b>The header's numbers</b>
+        <span>A record that "ends at 30 seconds" (0.30&nbsp;s), and a sample spacing ten times the header's.</span></div>
+      <div class="pcard"><span class="tag">unmentioned</span><b>A spike</b>
+        <span>A crossmember spike several times any other test's, plotted with nothing said about it.</span></div>
+    </div>
+    <div class="pcards c3 do">
+      <div class="pcard"><span class="tag">before you submit</span><b>Read the PDF once</b>
+        <span>Start to finish, as the file you are about to upload.</span></div>
+      <div class="pcard"><span class="tag">before you submit</span><b>Find every number</b>
+        <span>Each number in the report should appear in your program's output.</span></div>
+      <div class="pcard"><span class="tag">before you submit</span><b>Look at each plot</b>
+        <span>Find its strangest feature, and make sure the report says something about it.</span></div>
+    </div>
+    <p class="src">From the reports, with no names, and restated on the example test (9793) where a number would identify a test.</p>
+  </div>
+</section>
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">Use an assistant to extend your <span class="term">judgment</span>, and make the decisions yourself.</p>
+    <p class="sub">Each of these looks like a decision left with an assistant.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c4">
+      <div class="pcard"><span class="tag">check described</span><b>The units</b>
+        <span>"If the values reach thousands, the units should be checked," beside a plot reaching &minus;31,676.</span></div>
+      <div class="pcard"><span class="tag">code not read</span><b>A missing channel</b>
+        <span>A program plotted channels whose description ends in X, Y or Z, so the chest displacement never appeared.</span></div>
+      <div class="pcard"><span class="tag">no finding</span><b>The program, described</b>
+        <span>A report on what the program checks for, with no vehicle, number or finding from the data.</span></div>
+      <div class="pcard"><span class="tag">left in</span><b>A placeholder</b>
+        <span>A program still carrying "replace with the real key name".</span></div>
+    </div>
+    <div class="pcards c3 do">
+      <div class="pcard"><span class="tag">what to do</span><b>Read the code at its edges</b>
+        <span>Ask what it does with a channel it is not looking for (Reading Code, on the AI page).</span></div>
+      <div class="pcard"><span class="tag">what to do</span><b>Count in and out</b>
+        <span>If the pack has eight channels the report should have eight plots, or a sentence saying why not.</span></div>
+      <div class="pcard"><span class="tag">what to do</span><b>Make the check yourself</b>
+        <span>If an assistant names a check, carry it out yourself and report what you found.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say"><span class="term">Attribution</span> means saying where each number, idea and line of code came from.</p>
+    <p class="sub">Your program, the examples, an assistant and your four words are all sources.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c4">
+      <div class="pcard"><span class="tag">no program behind them</span><b>Numbers</b>
+        <span>Peaks in <i>g</i> and pre-impact averages that the submitted program never prints.</span></div>
+      <div class="pcard"><span class="tag">borrowed</span><b>Wording</b>
+        <span>A memo that follows the example memo's wording closely, with new numbers.</span></div>
+      <div class="pcard"><span class="tag">missing</span><b>The program</b>
+        <span>No program, an empty "Program" heading, or a path to a file on the writer's own laptop.</span></div>
+      <div class="pcard"><span class="tag">missing</span><b>The phrase</b>
+        <span>No data phrase, or a phrase with a typo, which rebuilds a different pack.</span></div>
+    </div>
+    <div class="pcards c3 do">
+      <div class="pcard"><span class="tag">what to do</span><b>Every number</b>
+        <span>Make sure it comes from the program you hand in, and submit the program with the report.</span></div>
+      <div class="pcard"><span class="tag">what to do</span><b>Your four words</b>
+        <span>At the top of the first page, spelled as you rolled them.</span></div>
+      <div class="pcard"><span class="tag">what to do</span><b>Code from the examples</b>
+        <span>It may be copied and adapted (please say which), and the wording of your report should be your own.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">Someone may <span class="term">act on</span> what your report says.</p>
+    <p class="sub">Ethical responsibility asks you to keep each claim to what the record shows.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">not asked</span><b>A fatal crash</b>
+        <span>"It is unlikely anyone would survive," from a driver's head peak of about 50&nbsp;<i>g</i>.</span></div>
+      <div class="pcard"><span class="tag">not in the data</span><b>A loose dummy</b>
+        <span>An offset explained by a dummy loose in the seat, in a test whose offsets were all under 0.4&nbsp;m/s&sup2;.</span></div>    </div>
+    <div class="pcards c2 do">
+      <div class="pcard"><span class="tag">what to do</span><b>Keep each claim to the record</b>
+        <span>If you make a claim the question did not ask for, make sure the record supports it.</span></div>
+      <div class="pcard"><span class="tag">what to do</span><b>Label an explanation</b>
+        <span>Call it an assumption until something checks it.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">Some of the chats I looked at used the assistant to <span class="term">build understanding</span>.</p>
+    <p class="sub">Each of these is worth doing on Assignment 2.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">the code</span><b>Ask it to explain each line</b>
+        <span>Or ask it to add a comment to every line, written for a beginner.</span></div>
+      <div class="pcard"><span class="tag">when you are lost</span><b>Stop and ask</b>
+        <span>If anything does not make sense, ask the assistant to explain it before you go on.</span></div>
+      <div class="pcard gold"><span class="tag">its questions</span><b>Answer its questions</b>
+        <span>An assistant may ask you questions to guide your thinking. Answering them is good practice, and the next slide has a set of questions worth asking yourself.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ Polya -->
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say"><span class="term">P&oacute;lya's</span> four steps can help turn a vague request into a problem you can solve.</p>
+    <p class="sub">Each step asks its own question, and each one applied to Assignment 1.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c4">
+      <div class="pcard"><span class="tag">step 1</span><b>Understand the problem</b>
+        <span class="q">What is the unknown, what are the data, and what is the condition?</span>
+        <span>The unknown is what the pack holds. Alice and Bob set the conditions, and they do not ask for a judgment about injury.</span></div>
+      <div class="pcard"><span class="tag">step 2</span><b>Devise a plan</b>
+        <span class="q">Have you seen a related problem, and can you use its method?</span>
+        <span>The example reports and Anatomy of a signal are related problems. Your plan can be the questions you ask of each channel.</span></div>
+      <div class="pcard"><span class="tag">step 3</span><b>Carry out the plan</b>
+        <span class="q">Can you see that each step is correct?</span>
+        <span>Make sure you can read and explain each step your program takes, including the one that chooses what to plot.</span></div>
+      <div class="pcard"><span class="tag">step 4</span><b>Look back</b>
+        <span class="q">Can you check the result, and can you use the result or the method for another problem?</span>
+        <span>A chest compression of about 32&nbsp;km fails that check. Every week you will reuse the code that reads your pack.</span></div>
+    </div>
+    <p class="src">George P&oacute;lya, <i>How to Solve It</i> (1945). The questions are paraphrased.</p>
+  </div>
+</section>
+
+<!-- ============================================================ your questions about the data -->
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">The <span class="term">header</span> answers most of the questions in your reports.</p>
+    <p class="sub">Six that came up, with their answers.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">time</span><b>Is time zero the impact?</b>
+        <span>Yes. Recording starts 20 to 50&nbsp;ms before it, depending on the test.</span></div>
+      <div class="pcard"><span class="tag">seats</span><b>Which seat is position 1, and which is 2?</b>
+        <span>The code's second digit is the seat: 0 the vehicle, 1 the driver, 3 the front right passenger. The descriptions number the dummies, so the passenger is P2 with code 13.</span></div>
+      <div class="pcard"><span class="tag">units</span><b>What unit is time in?</b>
+        <span>Seconds, for the sampling interval and for the time of the first sample.</span></div>
+      <div class="pcard"><span class="tag">direction</span><b>Which way is +x?</b>
+        <span>Forward. A car slowing against a barrier has a negative longitudinal acceleration.</span></div>
+      <div class="pcard"><span class="tag">location</span><b>The location and description disagree</b>
+        <span>Both describe one sensor. The location comes from the standard's fixed list, and the description is the lab's own words (a sill runs along the bottom of the door opening).</span></div>
+      <div class="pcard"><span class="tag">status</span><b>Status says ok. Is the channel right?</b>
+        <span>The status is the lab's verdict on the recording, and the chest displacement reads ok with the wrong unit.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">Some of the strangest values in your reports have <span class="term">ordinary explanations</span>.</p>
+    <p class="sub">Check a value against physics and units before calling it an error.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c4">
+      <div class="pcard"><span class="tag">offset</span><b>Before impact the average is not zero</b>
+        <span>The true acceleration is close to zero, so what remains is the instrument's own offset and noise (week 3, <a href="bias-and-noise.html">Bias and noise</a>).</span></div>
+      <div class="pcard"><span class="tag">spikes</span><b>Is a sharp spike a bad reading?</b>
+        <span>Count its samples. A spike over many samples is likely a real event, and a spike of one sample is likely the instrument. Labs sometimes mark spikes they doubt in the description, and our export kept only the last line of three of those notes (tests 8543, 8660 and 8993).</span></div>
+      <div class="pcard"><span class="tag">units</span><b>NHTSA's files say 15.71</b>
+        <span>The original files store speed in m/s, and 15.71&nbsp;m/s is 56.56&nbsp;km/h. It is the same speed as the pack's 56.57, rounded.</span></div>
+      <div class="pcard"><span class="tag">timing</span><b>The head peaks long after the structure</b>
+        <span>This is most likely the belt and airbag taking up the occupant's motion (next slide).</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">The driver's head starts to slow about <span class="term">20&nbsp;ms after the car</span> does.</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
+      <div>
+        <div class="c2fig" data-c2="lag"></div>
+        <p class="src">NHTSA test 10642 (2019 BMW&nbsp;X5), held back from the phrase assignment. A channel starts where its size first stays above 2&nbsp;<i>g</i> for 1&nbsp;ms.</p>
+      </div>
+      <div class="pcards c1">
+        <div class="pcard"><span class="tag">from the car inward</span><b>Three channels</b>
+          <span>The crossmember sensor responds about 3&nbsp;ms after impact. The pelvis starts at about 18&nbsp;ms and the head at about 26&nbsp;ms, and the head's largest value comes at 79&nbsp;ms. By 40&nbsp;ms the car has slowed by about 7&nbsp;m/s and the head by under 1&nbsp;m/s.</span></div>
+        <div class="pcard"><span class="tag">why</span><b>The belt, then the airbag</b>
+          <span>The dummy carries on at about the car's original speed until the belt slack is taken up and the airbag fills, and then it usually slows over a shorter time than the car did. Some gap is expected (in this test, about 20&nbsp;ms).</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">Questions from <span class="term">week 1</span>, before we start Assignment 2.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">week 1</span><b>What we covered</b>
+        <ul>
+          <li>Measured records and their headers</li>
+          <li>Building the time vector from <code>t0</code>, <code>dt</code> and <code>n</code></li>
+          <li>Finding a channel by its code</li>
+          <li>Program shape I, state and flow</li>
+          <li>Assignment 1, data inspection</li>
+        </ul></div>
+      <div class="pcard gold"><span class="tag">reminders</span><b>Late, incomplete, stuck</b>
+        <ul>
+          <li><b>Late work is accepted.</b> It counts toward the late column of the grading table.</li>
+          <li><b>Incomplete work can be resubmitted.</b> It comes back with a comment, and the resubmission counts as late.</li>
+          <li><b>If you are stuck or have a question, please reach out</b> on Discord, at the open session with the TA, or by appointment with me.</li>
+        </ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide part">
+  <div class="head">
+    <p class="course">TME 310 &middot; Computational Physical Modeling</p>
+    <p class="say">Break &middot; 10 minutes</p>
+  </div>
+</section>
+
+<!-- ============================================================ the request -->
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Purchasing wants a <span class="term">1&nbsp;kHz logger</span>, and Alice wants to know what the lab gives up.</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
+      <div>
+        <div class="c2fig" data-c2="request"></div>
+        <p class="src"><span class="c2key"><b class="head"></b>the present logger, 12.5&nbsp;kHz</span><span class="c2key"><b class="amber"></b>the proposed logger, about 1&nbsp;kHz</span></p>
+      </div>
+      <div class="pcol">
+        <div class="pcard"><span class="tag">the request</span><b>The thread Alice forwards you</b>
+          <span><em>"Purchasing wants to standardise the whole lab on a cheaper logger next year. It records at 1&nbsp;kHz. [&hellip;] I have to sign off on this by Friday and I would like to know what we give up."</em></span></div>
+        <div class="pcard gold"><span class="tag">Assignment 2</span><b>What Alice needs back</b>
+          <ul>
+            <li><b>A rate</b>, one number</li>
+            <li><b>What is given up</b> at that rate, quantified</li>
+            <li><b>The evidence</b> for it</li>
+            <li><b>Where your evidence runs out</b></li>
+          </ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ peaks -->
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Each dot is a <span class="term">measurement</span>, and each line between two dots is a guess.</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
+      <div class="c2fig half" data-c2="line"></div>
+      <div class="pcol">
+        <div class="pcard"><span class="tag">look</span><b>6&nbsp;ms of the X5 crossmember</b>
+          <ul>
+            <li>The top plot has every sample, 80&nbsp;&micro;s apart. The guesses are short and the curve looks solid.</li>
+            <li>The bottom plot has every 12th sample. The guesses are long, and the deepest dip on the top plot is not on the bottom one at all.</li>
+          </ul></div>
+        <p class="src">Every figure today comes from two crash tests held back from the phrase assignment, 10642 (a 2019 BMW X5, recorded at 12.5&nbsp;kHz) and 9793 (a 2017 Hyundai Elantra, 20&nbsp;kHz).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Which channel keeps more of its peak at about <span class="term">1&nbsp;kHz</span>?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
+      <div class="c2fig half" data-c2="two"></div>
+      <div class="pcol">
+        <div class="pcard"><span class="tag">predict &middot; vote</span><b>One sample in twelve</b>
+          <span>The proposed logger keeps about one sample in twelve.</span></div>
+        <div class="vote">
+          <div><b>A</b>The driver's head</div>
+          <div><b>B</b>The crossmember</div>
+          <div><b>C</b>About the same</div>
+        </div>
+        <p class="src">The driver's head (top) and a crossmember under the rear seat (bottom), both along the car. The first 150&nbsp;ms of the same crash, every sample drawn.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">At about 1&nbsp;kHz the head keeps nearly all of its peak, and the <span class="term">crossmember</span> can lose about half.</p>
+  </div>
+  <div class="stage tight">
+    <div class="c2fig" data-c2="rate"></div>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Count the <span class="term">samples across each peak</span>, then divide by 12.</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
+      <div class="c2fig" data-c2="width"></div>
+      <div class="pcol">
+        <div class="pcard"><span class="tag">count</span><b>The dots in the shaded band</b>
+          <ul>
+            <li>The band is where the peak is beyond half its height.</li>
+            <li>The top plot is the head's whole pulse. Its band is 37&nbsp;ms wide.</li>
+            <li>The two small plots show the same 2.6&nbsp;ms around each peak, every sample. The head is beyond half height across all of it.</li>
+            <li>Count the crossmember's dots in its band, then divide each count by 12. That is how many the proposed logger would keep.</li>
+          </ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Channels with <span class="term">few samples across the peak</span> usually lose the most at about 1&nbsp;kHz.</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
+      <div>
+        <div class="c2fig" data-c2="rule"></div>
+        <p class="src"><span class="c2key"><b class="head"></b>X5, every 12th (1042&nbsp;Hz)</span><span class="c2key"><b class="amber sq"></b>Elantra, every 20th (1000&nbsp;Hz)</span> One point per channel, at its worst starting sample.</p>
+      </div>
+      <div class="pcol">
+        <div class="pcard"><span class="tag">wide</span><b>X5 head X</b>
+          <span>459 samples at half height, and 38 of them at every 12th. The worst start reads 98.9% of the peak.</span></div>
+        <div class="pcard"><span class="tag">narrow</span><b>X5 crossmember</b>
+          <span>7 samples at half height, and 0.6 of one at every 12th. The worst start reads 50.6% of the peak.</span></div>
+        <div class="pcard gold"><span class="tag">an exception</span><b>X5 head Z</b>
+          <span>It is wide and still loses 6%, because its top is a plateau with small, fast ripples, and the highest ripple falls between samples.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Where the <span class="term">samples happen to fall</span> changes what a slow logger reads.</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
+      <div>
+        <div class="c2fig" data-c2="starts"></div>
+        <p class="src"><span class="c2key"><b class="head"></b>X5 head X</span><span class="c2key"><b class="cross"></b>X5 crossmember</span></p>
+      </div>
+      <div class="pcol">
+        <div class="pcard"><span class="tag">peaks</span><b>Twelve possible loggers</b>
+          <ul>
+            <li>Keeping every 12th sample can start on any of the first 12.</li>
+            <li>Each start is a logger whose clock happened to line up differently with the impact.</li>
+            <li>The head reads within about 1% of its peak from every start. The crossmember reads anything from about half of its peak to all of it.</li>
+          </ul></div>
+        <div class="pcard gold"><span class="tag">in your report</span><b>Report the worst case</b>
+          <span>The proposed logger cannot choose where its samples fall, so the lowest of the twelve is what the lab would be signing up for.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ cycles -->
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">At about 1&nbsp;kHz, what will the record of the <span class="term">ringing</span> look like?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
+      <div class="c2fig" data-c2="ring"></div>
+      <div class="pcol">
+        <div class="pcard"><span class="tag">predict &middot; vote</span><b>The crossmember rings</b>
+          <span>After it is struck, the crossmember rings.</span></div>
+        <div class="vote">
+          <div><b>A</b>The same shape, fewer dots</div>
+          <div><b>B</b>Smoother, with the wiggles gone</div>
+          <div><b>C</b>A different, slower wiggle</div>
+        </div>
+        <p class="src">The first 40&nbsp;ms of the X5 crossmember, every sample drawn.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">A cycle faster than half the sample rate shows up in the record as a <span class="term">slower one</span>.</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)">
+      <div class="c2fig" data-c2="alias"></div>
+      <div class="pcol">
+        <div class="pcard"><span class="tag">live</span><b>Three starting samples at one in 12</b>
+          <ul>
+            <li>Each start draws a different wiggle on the crossmember, and none of them is the one that happened. The head barely changes.</li>
+            <li>A logger needs at least two samples in every cycle to see the cycle at all, and typically about ten to get its shape.</li>
+            <li>The slow record gives no sign that the cycle was faster.</li>
+            <li>The crossmember's change in velocity, the area under its curve, moves with the starting sample too (see the readout).</li>
+          </ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">The channels that lose the most peak tend to have the most <span class="term">fast signal</span>.</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)">
+      <div class="c2fig" data-c2="board"></div>
+      <div class="pcol">
+        <div class="pcard"><span class="tag">sixteen channels at about 1&nbsp;kHz</span><b>Read across each row</b>
+          <ul>
+            <li><b>Left.</b> The worst share of the peak the proposed logger keeps.</li>
+            <li><b>Right.</b> The share of the signal that changes faster than the logger can follow (faster than half its rate).</li>
+            <li><b>Red.</b> More than 5% of the peak lost.</li>
+          </ul></div>
+        <div class="pcard gold"><span class="tag">both tests</span><b>Narrow features</b>
+          <span>The three channels that lose the most (both crossmembers and the Elantra's head Y) also have the most signal too fast for the rate. Both measures come from features narrower than the gap between samples.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ the decision -->
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">On a crash test a slower logger mostly saves on <span class="term">hardware</span>.</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
+      <div>
+        <div class="c2fig" data-c2="cost"></div>
+        <p class="src">Arithmetic, not measurement, for a crash test of about 190 channels for 0.36&nbsp;s, and a fatigue test of 50 channels for 8 hours.</p>
+      </div>
+      <div class="pcol">
+        <div class="pcard"><span class="tag">back to purchasing</span><b>What the slower logger saves</b>
+          <ul>
+            <li><b>Hardware, per channel.</b> Shock-rated, in the car or the dummy, on about 190 channels.</li>
+            <li><b>One logger for the whole lab.</b> One set of software, calibration, spares and training.</li>
+            <li><b>Storage.</b> It matters on long tests, where it is tens of GB, and barely on a crash test.</li>
+          </ul></div>
+        <div class="pcard gold"><span class="tag">the risk</span><b>What the lab risks</b>
+          <span>A crash test destroys the vehicle, so the lab has only the record from that one test. On the last slide, that record loses up to two thirds of some peaks.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point compact" data-fill="0.98">
+  <div class="head">
+    <p class="say">The rate you recommend depends on the <span class="term">tolerance</span> you choose.</p>
+  </div>
+  <div class="stage tight">
+    <div class="c2fig" data-c2="tolerance"></div>
+    <p class="src"><span class="c2key"><i class="head"></i>head X</span><span class="c2key"><i class="chest"></i>chest</span><span class="c2key"><i class="cross"></i>crossmember</span><span class="c2key"><i class="faint"></i>the other five</span> The dashed red line is the tolerance. Each ring is the last rate before a channel's curve drops below it, and its dropline lands on the rate shown under the plot.</p>
+    <div class="pcards c2">
+      <div class="pcard gold"><span class="tag">live</span><b>Set it with the room</b>
+        <ol>
+          <li>How far low may a peak read? Set the slider.</li>
+          <li>Which channels does the lab need? Read their rates.</li>
+          <li>Switch tests. Does the answer hold for the other car?</li>
+        </ol></div>
+      <div class="pcard"><span class="tag">in your report</span><b>Stating your tolerance</b>
+        <span>The three example reports use the Elantra and recommend 5, 10 and 20&nbsp;kHz, because each chose a different standard. Each report is defensible because it states the standard it used.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">The same choice of rate comes up <span class="term">outside crash testing</span> too.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">beyond crash tests</span><b>Recorded sound</b>
+        <div class="c2fig" data-c2="sound"></div>
+        <span>CD audio samples at 44.1&nbsp;kHz (green), more than twice the 20&nbsp;kHz people can hear. At half that rate (red squares) an 18&nbsp;kHz tone comes back as a 4&nbsp;kHz one, so recorders filter out fast content before they sample (week&nbsp;2, <a href="discrete-evaluation.html#aliasing-a-fast-signal-read-as-slow">Aliasing</a>).</span></div>
+      <div class="pcard"><span class="tag">beyond crash tests</span><b>A design sweep</b>
+        <div class="c2fig" data-c2="sweep"></div>
+        <span>From the <a href="discrete-evaluation.html">notes</a>, a 2&nbsp;Hz sweep finds 12.0 and passes a limit of 15. The structure reaches 25.0, between two grid points.</span></div>
+      <div class="pcard"><span class="tag">beyond crash tests</span><b>Refining the sweep</b>
+        <div class="c2fig" data-c2="refine"></div>
+        <span>Halving the step keeps moving the answer until the grid resolves the peak. A simulation can be rerun this way. A test record cannot.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ your report -->
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">Your report should state <span class="term">three choices</span>, and where your evidence runs out.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c2">
+        <div class="pcard"><span class="tag">Assignment 2</span><b>Three choices to make and state</b>
+          <ul>
+            <li><b>What counts as good enough.</b> How far low a peak may read, and why.</li>
+            <li><b>The worst case.</b> Every starting sample.</li>
+            <li><b>Which channels count.</b> And the reason you think so.</li>
+          </ul></div>
+        <div class="pcard gold"><span class="tag">Assignment 2</span><b>Where your evidence runs out</b>
+          <ul>
+            <li>One test, from one vehicle</li>
+            <li>Your record is sampled too, so its peaks may already be a little low</li>
+            <li>A real logger typically filters before it samples, and your thinned copy does not</li>
+          </ul>
+          <span>Please see the <a href="reports-02.html">example reports</a>.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Start from your own test's <span class="term">sample rate</span>.</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
+      <div class="pcol">
+        <div class="c2fig" data-c2="steps"></div>
+        <div class="pcard gold"><span class="tag">watch for</span><b>1&nbsp;kHz may not be a whole step</b>
+          <span>From a 10 or 20&nbsp;kHz test it is every 10th or 20th sample. From 12.5&nbsp;kHz it is every 12.5th, so every 12th and every 13th bracket it, and both drift away from a true 1&nbsp;kHz clock. Say which you used.</span></div>
+      </div>
+      <div class="pcard"><span class="tag">getting started</span><b>The steps</b>
+        <ol>
+          <li>Read your test's sample rate from its header.</li>
+          <li>Write the measurement once, as a function of the record, its spacing and the starting sample (<a href="program-shape-branching.html">Program shape II</a>).</li>
+          <li>Run it at several rates and every start, on every channel.</li>
+          <li>Count the samples across each channel's peak, to see why the channels differ.</li>
+          <li>Check a few results on the <a href="workbench.html?tool=resolution">workbench</a>.</li>
+        </ol></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">Assignment 2 is due <span class="term">Sunday, October 18</span>, at 11:59&nbsp;pm.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">this week</span><b>In Canvas</b>
+        <ul>
+          <li>Assignment 2, sample rate and peak loss</li>
+          <li>Quiz 2</li>
+          <li>Reflection 2</li>
+          <li>Meeting 2 minutes</li>
+        </ul></div>
+      <div class="pcard gold"><span class="tag">today</span><b>Before you leave</b>
+        <ul>
+          <li>Find your test's sample rate.</li>
+          <li>Count the samples across its sharpest peak.</li>
+          <li>Write one sentence to Alice: the rate you would recommend today, and what would change your mind.</li>
+        </ul></div>
+    </div>
+  </div>
+</section>
+
+
+<div class="deck-bar"><i></i></div>
+<div class="deck-num">1</div>
+<div class="deck-help">&larr; &rarr; move &nbsp;·&nbsp; n notes &nbsp;·&nbsp; b blank &nbsp;·&nbsp; p pointer &nbsp;·&nbsp; d draw</div>
+<div class="deck-notes"></div>
+
+
+<script>
+/* Size the text on in-class slides. One fixed size leaves the sparse slides half
+   empty; sizing each slide to fill makes the text jump from slide to slide. So
+   each slide's largest fitting size is found (by bisection, content filling at
+   most FILL of the space below the title), the deck takes the median of those,
+   and every slide uses that shared size unless its own content needs smaller.
+   Slides other than the current one are display:none and measure as zero, so
+   each is shown unseen (.fitting) while it is measured. */
+(function () {
+  var FILL = 0.85, CAP_VH = 7;
+  /* the stage is a fixed-height flex item, so its own scrollHeight never drops
+     below its height; what counts is how far down the last block reaches */
+  function fits(st) {
+    var top = st.getBoundingClientRect().top, bottom = top;
+    for (var c = st.firstElementChild; c; c = c.nextElementSibling)
+      bottom = Math.max(bottom, c.getBoundingClientRect().bottom);
+    /* a slide whose figure cannot shrink may claim more of the space with
+       data-fill on its section, or its text is squeezed to the minimum */
+    var sl = st.closest(".deck-slide"), fill = parseFloat(sl && sl.dataset.fill) || FILL;
+    if (bottom - top > st.clientHeight * fill || st.scrollWidth > st.clientWidth + 1) return false;
+    /* a name on a group card stays on one line, so the text stops growing
+       before the longest name would overrun its card */
+    var names = st.querySelectorAll(".gcard li");
+    for (var i = 0; i < names.length; i++)
+      if (names[i].scrollWidth > names[i].clientWidth + 1) return false;
+    return true;
+  }
+  function measure(sl, fn) {
+    var on = sl.classList.contains("on");
+    if (!on) sl.classList.add("fitting");
+    var r = fn();
+    if (!on) sl.classList.remove("fitting");
+    return r;
+  }
+  function largest(st) {
+    st.style.fontSize = "";
+    var base = parseFloat(getComputedStyle(st).fontSize);
+    var lo = base * 0.5, hi = Math.max(base, innerHeight * CAP_VH / 100);
+    st.style.fontSize = hi + "px";
+    if (fits(st)) return hi;
+    for (var i = 0; i < 14; i++) {
+      var mid = (lo + hi) / 2;
+      st.style.fontSize = mid + "px";
+      if (fits(st)) lo = mid; else hi = mid;
+    }
+    return lo;
+  }
+  function fitAll() {
+    var stages = [], sizes = [];
+    document.querySelectorAll(".deck-slide:not(.part):not(.arrive)").forEach(function (sl) {
+      var st = sl.querySelector(".stage");
+      if (!st) return;
+      stages.push(st);
+      sizes.push(measure(sl, function () { return largest(st); }));
+    });
+    if (!sizes.length) return;
+    var sorted = sizes.slice().sort(function (a, b) { return a - b; });
+    var shared = sorted[Math.floor((sorted.length - 1) / 2)];
+    stages.forEach(function (st, i) { st.style.fontSize = Math.min(shared, sizes[i]) + "px"; });
+  }
+  addEventListener("load", fitAll);
+  /* refit once the new size has settled (entering full screen fires resize
+     before the layout has its final height) */
+  var raf = 0;
+  addEventListener("resize", function () {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(function () { raf = requestAnimationFrame(fitAll); });
+  });
+  if (document.fonts) document.fonts.ready.then(fitAll);
+})();
+</script>
+
+<script type="module" src="js/bundle/class-02.js?v=20261015124713"></script>
+</body>
+</html>

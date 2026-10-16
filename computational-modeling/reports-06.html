@@ -1,0 +1,1921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Example reports · Assignment 5 — Computational Physical Modeling</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="css/blocks.css?v=20261015124713">
+  <link rel="stylesheet" href="css/demos.css?v=20261015124713">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (olive). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #5F7038;
+      --course-accent-dark: #47542A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    /* ── Week page video and class cards (media-cards.js) ── */
+    .media-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+      gap: 0.9rem;
+      margin: 1rem 0;
+    }
+    .media-card {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-top: 4px solid var(--course-accent);
+      border-radius: 4px;
+      padding: 0.75rem 0.9rem 0.85rem;
+    }
+    .media-card.class { border-top-color: #C8860A; }
+    .media-card p { margin: 0; }
+    .mc-kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .mc-title { font-weight: 600; line-height: 1.3; margin: 0.25rem 0 0.35rem !important; }
+    .mc-sub { font-size: 0.85rem; color: #5A5550; line-height: 1.4; }
+    .mc-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.7rem; }
+    .mc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--course-accent);
+      border-radius: 3px;
+      text-decoration: none;
+      color: var(--course-accent-dark);
+    }
+    a.mc-btn:visited { color: var(--course-accent-dark); }
+    a.mc-btn:hover { background: #F0EDE7; }
+    .mc-btn svg { width: 1em; height: 1em; flex: none; }
+    .mc-btn.primary, a.mc-btn.primary:visited { background: var(--course-accent); color: #fff; }
+    a.mc-btn.primary:hover { background: var(--course-accent-dark); }
+    .mc-btn.pending { border-style: dashed; border-color: #b8b2a8; color: #5A5550; }
+    .mc-total { font-size: 0.9rem; color: #5A5550; }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+    /* the remembered data phrase; filled in by page.js */
+    .cg-phrase { display: inline-flex; align-items: center; gap: .3rem; margin-right: .6rem;
+      font-size: .82rem; flex-shrink: 0; }
+    /* The header row is a fixed 780px. The title, the toggle, "Your data", Search and
+       "Report a problem" only just fit in it, so the chip shows the label alone (the
+       phrase is in the link's title and on the data page) and Search shows its icon.
+       An earlier chip that held the phrase and was allowed to shrink squeezed the
+       label down to "Yo" on a classroom projector. */
+    .cg-phrase a { color: rgba(230,238,222,.92); text-decoration: none; white-space: nowrap; }
+    .header-links .search-btn .sb-label { display: none; }
+    .header-links button.report-btn { white-space: nowrap; }
+    /* the title keeps its own width */
+    .site-header-top .site-title { white-space: nowrap; flex-shrink: 0; }
+    .site-header-top .header-links { min-width: 0; margin-left: 1rem; }
+    @media (max-width: 780px) {
+      /* below the 780px row: the report button's short form, as on phones */
+      .header-links .report-btn .rb-full { display: none; }
+      .header-links .report-btn .rb-short { display: inline; }
+      .cg-phrase { margin-right: .2rem; }
+    }
+    .cg-phrase a:hover { color: #fff; text-decoration: underline; }
+    .cg-phrase button { background: none; border: none; cursor: pointer; padding: 0 .2rem;
+      color: rgba(230,238,222,.7); font: inherit; font-size: 1rem; line-height: 1; }
+    .cg-phrase button:hover { color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* Two rules the other course sites do not define. The header's top
+       row carries a report button beside the title, and a page with a
+       wide demo in it needs more than the reading measure. */
+    .site-header-top { border-bottom: 1px solid rgba(200,222,180,0.15); }
+    main.wide { max-width: 1180px; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Computational Physical Modeling</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <span class="cg-phrase" id="cg-phrase"></span>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        
+          <a href="syllabus.html">Syllabus</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="notes.html">Notes</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reports.html">Examples</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reflection.html">Reflection</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="meeting.html">Meeting</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="ai-use.html">AI Use</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="tools.html">Tools</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="workbench.html">Workbench</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="extra-labor.html">Extra Labor</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="canvas-grades.html">Canvas Grades</a>
+          
+        
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+          
+          
+          
+          <a href="week-01.html">1</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-02.html">2</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-03.html">3</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-04.html">4</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          <span class="week-gap" title="Week 5 is a break week">5<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <a href="week-06.html">6</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-07.html">7</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-08.html">8</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-09.html">9</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-10.html">10</a>
+          
+        
+      </div>
+    </nav>
+
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+
+  <main data-pagefind-body>
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <div class="eyebrow"><a href="reports.html">Example reports</a></div>
+<h1>Example reports &middot; Assignment 5</h1>
+
+<p>These are three reports for <a href="assign-06.html">Assignment 5, Model Selection</a>, written
+in three different styles. All three use the training arcs in the example pack (test 9793, which no phrase assigns).
+Nothing here answers anybody's assignment. The
+three students made different choices about where a flight starts and how to test a model, and each
+one says why. Please see the <a href="reports.html">Example reports</a> page for what every report
+needs and who it is written for.</p>
+
+<p>Each report is followed by a short note on what it does well. The purpose of the notes is to
+show that different methods can reach the same answer and meet the same standard. That is, plots
+are identified at a glance, errors are flagged and assumptions are noted. Their numbers differ because their
+tests differ, and every one of those numbers comes from the program that is attached.</p>
+
+<h2 id="a-memo">A Memo</h2>
+
+<div class="aside report"><span class="label">Example 1 &middot; Memo</span>
+<div class="memo-head">
+<p><strong>To:</strong> Bob</p>
+<p><strong>Re:</strong> Which flight model to build the season on</p>
+<p><strong>Data phrase:</strong> example pack (test 9793)</p>
+</div>
+
+<p>Build on the model that holds gravity at 9.81&nbsp;m/s&sup2;. I fitted both models to the first
+10 frames of free flight (0.4&nbsp;s, at 25 frames a second) on 23 of the 24 training arcs, and
+asked each one how high the ball would be when it reached the hoop. Holding gravity, the prediction
+was off by 4.3&nbsp;cm on the median arc and by 18.1&nbsp;cm at worst. Fitting gravity, it was off
+by 16.3&nbsp;cm on the median arc and by 180.8&nbsp;cm at worst. The fixed model was closer on 19
+of the 23 arcs.</p>
+
+<p>The model that fits gravity is better at one thing, which is passing close to the 10 frames it
+was given. Its residual (the rms gap between the curve and those frames) was smaller on all 23 arcs,
+but only just, at 1.74&nbsp;cm against 1.79&nbsp;cm on the median arc. Both are under the 3&nbsp;cm
+of noise the tracker is said to have. The free model probably gets its small advantage by bending its curve
+to that noise, and the gravity it reports ranges from 5.33 to 11.86&nbsp;m/s&sup2; across the
+arcs. That bend is likely why its prediction drifts away from the
+ball once the frames run out. Figure 1 shows a
+typical arc.</p>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r06-memo-arc.svg?v=20261015124713"
+    alt="Ball height in meters against time for arc 1223. The ten fitted frames are circled. Both
+    fitted curves pass through them, then separate. By the dashed line at the end of the flight the
+    gravity-fitted curve is above the measured point and the curve with gravity at 9.81 is close
+    to it."></div>
+  <figcaption>Figure 1. Arc 1223, both models fitted to the same 10 frames and drawn on to the last
+  frame before the hoop (dashed line). Fitting gravity gives 9.3&nbsp;m/s&sup2; here, and the
+  prediction ends 13.8&nbsp;cm high against 4.3&nbsp;cm for the fixed model.</figcaption>
+</figure>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r06-memo-hoop.svg?v=20261015124713"
+    alt="Height error at the hoop in centimeters on a log scale, one pair of markers per arc, sorted
+    by the fixed model's error. The squares for gravity held at 9.81 run from under 1 cm to about
+    18 cm. The circles for gravity fitted sit above them on most arcs, with one at about 180 cm."></div>
+  <figcaption>Figure 2. The height error at the hoop for every arc used, both ways. The scale is
+  logarithmic because the errors run from under a centimeter to almost two meters.</figcaption>
+</figure>
+
+<p><strong>How I decided.</strong> The file does not say when the ball leaves the hand, so I
+estimated the vertical acceleration at each frame from a parabola through the 9 frames around it.
+While the hand is pushing, the acceleration is upward. I started each flight 5 frames after the
+last upward reading, so that no estimate there reaches back into the throw. I ended each flight at
+the last frame where the ball was still 1&nbsp;m or more from the hoop, measured across the floor,
+before it can touch the rim. The error at the hoop is the gap between the predicted and the measured
+height at that last frame.</p>
+
+<p>Three things need your attention.</p>
+
+<ul>
+  <li><strong>Arc 325 has a filled-in gap.</strong> From near the top of the flight to the hoop its
+  height falls in straight lines, by the same step every frame. Real tracking always carries some
+  noise, so the tracker probably lost the ball and the gap was filled in. I left this arc out.</li>
+  <li><strong>Arc 739 shows no throw.</strong> My rule found no upward push in it at all, so I
+  started its flight at its first frame. The header says every record starts before the ball leaves
+  the hand. Either this one does not, or the push is too short to see. I have not checked which.
+  It is also the arc where fitting gravity does worst (5.33&nbsp;m/s&sup2;, and 180.8&nbsp;cm off at
+  the hoop).</li>
+  <li><strong>The margin depends on the 10 frames.</strong> With more of the flight to fit, the free
+  model should do better. I have only tested 10 frames, and I have not checked how much of each
+  flight your season records will show.</li>
+</ul>
+
+<p><strong>Assumptions.</strong> The coordinates have no unit in the header. I took them to be
+meters, since the rim height is given in meters. Gravity is 9.81&nbsp;m/s&sup2;, as you set it.
+Between release and the hoop the ball follows a parabola, so I ignored air drag and spin. The times
+are as recorded in the file.</p>
+
+<p><strong>Program.</strong> <a href="data/example/code/a5_which_model.py" download><code>a5_which_model.py</code></a>
+(attached) finds each flight, fits both models, prints a line for every arc and draws both
+figures.</p>
+</div>
+
+<div class="aside notice"><span class="label">What to notice</span>
+<p>Bob asked which model, and the first sentence tells him. The second paragraph answers what each
+model is better at, with the residual and the error side by side. The memo picks one test, the
+height at the hoop, because that is probably what Bob will use the model for.
+The last bullet names the limit of
+the memo's own test (only 10 frames were tried).</p>
+</div>
+
+<h2 id="a-technical-report">A Technical Report</h2>
+
+<div class="aside report"><span class="label">Example 2 &middot; Technical report</span>
+<p><strong>Data phrase:</strong> example pack (test 9793)</p>
+
+<h4>Summary</h4>
+<p>The model that holds gravity at 9.81&nbsp;m/s&sup2; is the one to build on. Fitted to 10 frames
+of each flight and scored on the rest of the flight, its median rms height error was 3.7&nbsp;cm
+against 13.6&nbsp;cm for the model that fits gravity, over 23 training arcs. It was the closer of
+the two on 19 of them. The model that fits gravity always matches the frames it was fitted to a
+little more closely, and it narrows the gap as it is given more frames (7.1 against 3.9&nbsp;cm at
+14 frames). It does better the more of the flight it
+is given. For the part-flights tested here
+(6, 10 and 14 frames), holding gravity predicts better at every length.</p>
+
+<h4>Data</h4>
+<p>The training file holds 24 arcs of a basketball's position, tracked at 25 frames a second (one
+frame every 0.04&nbsp;s). The header gives the vertical tracking noise as 3.07&nbsp;cm. Each
+training record starts before the ball leaves the shooter's hand and ends 15 frames after the ball
+passes the rim. The three test files hold shots that start partway and stop before the hoop, which
+is presumably what the model will be given during the season. Counting frames after the shooter's
+last upward push gives a median of 7 frames in a short record, 11 in a mid record and 15 in a long
+one. The fits below use 6, 10 and 14 frames so that each matches one kind of record, with a frame
+to spare for finding the release.</p>
+
+<h4>Method</h4>
+<p>The two models of the ball's height <em>z</em> at time <em>t</em> are</p>
+<ul>
+  <li><strong>Gravity fitted.</strong> <em>z</em> = <em>c</em><sub>0</sub> + <em>c</em><sub>1</sub><em>t</em> + <em>c</em><sub>2</sub><em>t</em>&sup2;,
+  with all three coefficients fitted, so the fitted gravity is &minus;2<em>c</em><sub>2</sub>.</li>
+  <li><strong>Gravity held.</strong> <em>z</em> = <em>c</em><sub>0</sub> + <em>c</em><sub>1</sub><em>t</em> &minus; &frac12;<em>g</em><em>t</em>&sup2;
+  with <em>g</em> = 9.81&nbsp;m/s&sup2;. The known term is moved to the left side and
+  <em>z</em> + &frac12;<em>g</em><em>t</em>&sup2; is fitted with a straight line, so this is still
+  ordinary least squares.</li>
+</ul>
+<p><strong>Finding the flight.</strong> The vertical acceleration at each frame is estimated from a
+parabola through the 9 frames centered on it (0.32&nbsp;s). Release is the first frame after the
+last upward reading at which the acceleration is within 5&nbsp;m/s&sup2; of &minus;9.81 and stays
+there for 4 frames in a row. The 9-frame estimate still wanders by several m/s&sup2; in mid-flight
+(Figure 1), which is why the tolerance is that wide. The flight ends at the frame before the
+acceleration leaves that band for 4 frames in a row (the ball has hit the rim, board or net), or
+before the ball drops below rim height (3.048&nbsp;m), whichever comes first.</p>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r06-rep-release.svg?v=20261015124713"
+    alt="Two panels for arc 1223 against time. Top, ball height in meters with the free flight drawn
+    in black between a red dashed line at release, frame 14, and a blue dashed line at the end of
+    flight, frame 38. Bottom, vertical acceleration in meters per second squared. It rises to about
+    plus 11 during the throw, settles into a green band around minus 9.81 between the two lines, then
+    jumps to about plus 30 when the ball reaches the rim."></div>
+  <figcaption>Figure 1. Finding the free flight in arc 1223. The acceleration is upward during the
+  throw, settles into the band around &minus;9.81&nbsp;m/s&sup2; (green), and leaves it when the
+  ball reaches the rim.</figcaption>
+</figure>
+
+<p><strong>Testing.</strong> Each model is fitted to the first 6, 10 and 14 frames of each flight.
+The <em>residual</em> is the rms height gap on the fitted frames. The <em>held-out error</em> is the
+rms gap on all the remaining frames of the flight, which the fit did not see. An arc needs at least
+3 frames left over to be scored, and all 23 arcs used have that at every length.</p>
+
+<p>A Python program, <a href="data/example/code/a5_model_selection.py" download><code>a5_model_selection.py</code></a>
+(listed in the appendix and submitted with this report), does all of the above and draws every
+figure.</p>
+
+<h4>Results</h4>
+<table class="data">
+  <tr><th class="num">Frames fitted</th><th class="num">Residual, free (cm)</th><th class="num">Residual, fixed (cm)</th><th class="num">Held-out, free (cm)</th><th class="num">Held-out, fixed (cm)</th><th class="num">Fixed closer</th><th class="num">Fitted <em>g</em> (m/s&sup2;)</th></tr>
+  <tr><td class="num">6</td><td class="num">1.56</td><td class="num">1.60</td><td class="num">55.0</td><td class="num">7.9</td><td class="num">22 of 23</td><td class="num">9.42</td></tr>
+  <tr><td class="num">10</td><td class="num">1.62</td><td class="num">1.85</td><td class="num">13.6</td><td class="num">3.7</td><td class="num">19 of 23</td><td class="num">9.79</td></tr>
+  <tr><td class="num">14</td><td class="num">2.15</td><td class="num">2.24</td><td class="num">7.1</td><td class="num">3.9</td><td class="num">16 of 23</td><td class="num">9.87</td></tr>
+</table>
+<p>Every entry except the count is a median over the 23 arcs. The free model's residual was smaller than or
+equal to the fixed model's on all 23 arcs at every length, which least squares guarantees (it has
+one more coefficient to spend). Its held-out error was larger on most arcs at every length. Its fitted
+gravity ranges from &minus;3.0 to 18.0&nbsp;m/s&sup2; at 6 frames, from 5.9 to 12.3 at 10 and
+from 7.8 to 10.7 at 14. The first range includes a ball accelerating upward, so with that little
+flight the free model is likely fitting mostly noise. Figure 2 shows the two
+measures against the number of frames fitted.</p>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r06-rep-errors.svg?v=20261015124713"
+    alt="Two panels against frames fitted, 6, 10 and 14. Left, median residual on the fitted frames
+    in centimeters, rising from about 1.6 to 2.2 for both models, with the gravity-fitted line
+    slightly lower. Right, median rms error on the unseen frames in centimeters, falling from 55 to
+    7 for gravity fitted and staying between about 4 and 8 for gravity held."></div>
+  <figcaption>Figure 2. Left, the residual on the fitted frames. Right, the error on the frames
+  the fit did not see. Each point is a median over 23 arcs.</figcaption>
+</figure>
+
+<p>The residual rises as more frames are fitted, while the held-out error falls. With a short stretch either curve can bend toward
+the noise, and the free model, with one more coefficient, likely bends further.
+Fitted to whole flights, the free model gives a median gravity of 9.61&nbsp;m/s&sup2; (8.80 to
+10.28 over 23 arcs). It is probably better suited to measuring
+gravity once the whole flight has been seen. Bob's season records stop before the hoop, so the model has to predict, and the fixed
+model predicts better at every length tested.</p>
+
+<h4>Errors and Anomalies</h4>
+<p><strong>Arc 325 is filled in.</strong> Its height runs in straight lines from frame 25 to frame
+44 (Figure 3). Measured heights carry about 3&nbsp;cm of noise and never fall by an identical step
+frame after frame, so the tracker probably lost the ball near the top and the gap was filled. The
+arc was dropped, which leaves 23.</p>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r06-rep-325.svg?v=20261015124713"
+    alt="Ball height in meters against time for arc 325. Frames 25 to 44 are drawn in red and form
+    two straight segments, a nearly flat one from about 4.6 m and a steep one down to about 3.1 m."></div>
+  <figcaption>Figure 3. Arc 325. The red frames lie on two straight lines.</figcaption>
+</figure>
+
+<p><strong>Uneven frame spacing.</strong> Inside the flights, 8 steps between frames are not
+40&nbsp;ms, ranging from 30 to 50&nbsp;ms, in arcs 289, 1283, 83 and 739. The times were used as
+recorded. Whether the ball was really sampled at those times or the clock is rounded has not been
+checked.</p>
+
+<p><strong>Gravity a little low.</strong> The whole-flight median of 9.61&nbsp;m/s&sup2; is under
+9.81. The cause has not been found. Air drag, a small error in the tracker's height scale, or the
+flight windows themselves could each do it. The held-out errors above already include whatever
+effect it has on the fixed model.</p>
+
+<h4>Assumptions</h4>
+<ul>
+  <li>The coordinates are in meters. The header gives no unit for them, but it gives the rim height
+  in meters.</li>
+  <li>Gravity is 9.81&nbsp;m/s&sup2;, as Bob set it.</li>
+  <li>Between release and the rim the ball follows a parabola (no drag, no spin).</li>
+  <li>The flight runs from the release rule to the end rule above. A different rule would move the
+  numbers. I have not tested whether it would change the ranking.</li>
+  <li>The number of frames after the last upward push in a test record stands for how much flight
+  the model will be given during the season.</li>
+</ul>
+
+<h4>Appendix. Program</h4>
+<pre class="nb-in">"""Assignment 5: model selection for the shot-flight model.
+
+Run this from the unzipped pack folder. It compares two models of the ball's
+height in free flight,
+
+    free:   z = c0 + c1 t + c2 t^2           (c2 fitted, so gravity is fitted)
+    fixed:  z = c0 + c1 t - (g/2) t^2        (g held at 9.81 m/s^2)
+
+on every training arc. Each model is fitted to the first 6, 10 and 14 frames of
+the flight and scored on the rest of the flight, which it did not see. It prints
+the release frames, the frames of flight in the test records, a line per arc
+and a summary table, and saves release.svg, errors_by_window.svg and arc_325.svg.
+"""
+import json
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+G = 9.81               # m/s^2
+WINDOW = 9             # frames in each acceleration estimate (0.32 s)
+TOL = 5.0              # m/s^2, how close to -g counts as "settled"
+RUN = 4                # frames in a row it has to stay settled
+RIM = 3.048            # m, rim height (from the header)
+FIT_LENGTHS = [6, 10, 14]
+MIN_HELD_OUT = 3       # an arc needs at least this many unseen frames to be scored
+
+
+def load(name):
+    with open(f'shots/{name}.json') as f:
+        return json.load(f)
+
+
+def accel(t, z):
+    """Vertical acceleration at every frame, from a parabola through the 9 frames
+    centered on it. NaN where the window runs off either end."""
+    h = WINDOW // 2
+    a = np.full(len(t), np.nan)
+    for i in range(h, len(t) - h):
+        c = np.polyfit(t[i - h:i + h + 1] - t[i], z[i - h:i + h + 1], 2)
+        a[i] = 2 * c[0]
+    return a
+
+
+def last_push(t, z):
+    """The last frame before the top where the acceleration is upward, meaning
+    the hand is still on the ball. None if there is no such frame."""
+    a = accel(t, z)
+    top = int(np.argmax(z))
+    pushing = [i for i in range(top) if a[i] &gt; 0]
+    return pushing[-1] if pushing else None
+
+
+def release(t, z):
+    """The first frame after the last upward push at which the acceleration is
+    within TOL of -g and stays there for RUN frames. None if it never does."""
+    a = accel(t, z)
+    p = last_push(t, z)
+    first = p + 1 if p is not None else WINDOW // 2
+    for i in range(first, len(t) - RUN + 1):
+        if np.all(np.abs(a[i:i + RUN] + G) &lt; TOL):
+            return i
+    return None
+
+
+def flight_end(t, z):
+    """Last frame of the flight: the frame before the acceleration leaves the
+    band for RUN frames in a row (the ball has hit something), or the frame
+    before the ball drops through rim height, whichever comes first."""
+    a = accel(t, z)
+    top = int(np.argmax(z))
+    for i in range(top, len(t) - RUN + 1):
+        if np.all(np.abs(a[i:i + RUN] + G) &gt;= TOL) or z[i] &lt; RIM:
+            return i - 1
+    return len(t) - 1
+
+
+def straight_runs(z, frames=6):
+    """First and last frame of any stretch where the height falls on a straight
+    line for 'frames' steps or more. Measured heights carry about 3 cm of noise,
+    so a straight line means the tracker filled a gap."""
+    flat = np.abs(np.diff(z, 2)) &lt; 0.001
+    hits = [i for i in range(len(flat) - frames + 2) if flat[i:i + frames - 1].all()]
+    return (hits[0], hits[-1] + frames) if hits else None
+
+
+def fit(t, z, fixed):
+    if fixed:   # the known term moves to the left-hand side
+        A = np.column_stack([np.ones_like(t), t])
+        c0, c1 = np.linalg.lstsq(A, z + 0.5 * G * t ** 2, rcond=None)[0]
+        return np.array([c0, c1, -G / 2])
+    A = np.column_stack([np.ones_like(t), t, t ** 2])
+    return np.linalg.lstsq(A, z, rcond=None)[0]
+
+
+def rms(c, t, z):
+    return np.sqrt(np.mean((c[0] + c[1] * t + c[2] * t ** 2 - z) ** 2))
+
+
+train = load('train')
+shots = train['shots']
+noise = train['header']['tracking_noise']['vertical_m']
+print('vertical tracking noise from the header (m):', noise)
+
+# how much flight does a test record give us to fit?
+for name in ['test_short', 'test_mid', 'test_long']:
+    seen = []
+    for s in load(name)['shots']:
+        t, z = np.array(s['t']), np.array(s['z'])
+        seen.append(len(t) - 1 - last_push(t, z))
+    print(f'{name:10}  frames after the last upward push: '
+          f'median {np.median(seen):.0f}, range {min(seen)} to {max(seen)}')
+
+# find the flight in every training arc
+arcs = []
+print()
+print(f"{'arc':&gt;5} {'release':&gt;7} {'end':&gt;4} {'frames':&gt;6} {'steps not 40 ms':&gt;16}")
+odd_steps = []
+for s in shots:
+    t, z = np.array(s['t']), np.array(s['z'])
+    gap = straight_runs(z)
+    if gap:
+        print(f"{s['id']:&gt;5}  dropped: height is a straight line, "
+              f"frames {gap[0]} to {gap[1]}")
+        continue
+    r, e = release(t, z), flight_end(t, z)
+    steps = 1000 * np.diff(t[r:e + 1])     # ms between frames in the flight
+    odd = steps[np.abs(steps - 40) &gt; 5]
+    odd_steps += list(odd)
+    print(f"{s['id']:&gt;5} {r:&gt;7} {e:&gt;4} {e - r + 1:&gt;6} {len(odd):&gt;16}")
+    arcs.append((s['id'], t[r:e + 1], z[r:e + 1]))
+
+print(f'steps other than 40 ms inside the flights: {len(odd_steps)}, '
+      f'from {min(odd_steps):.0f} to {max(odd_steps):.0f} ms')
+
+# both models, three fit lengths, scored on the unseen part of the flight
+results = {}
+for n_fit in FIT_LENGTHS:
+    rows = []
+    for arc_id, t, z in arcs:
+        if len(t) - n_fit &lt; MIN_HELD_OUT:
+            continue
+        tf, zf, th, zh = t[:n_fit], z[:n_fit], t[n_fit:], z[n_fit:]
+        free, fixed = fit(tf, zf, False), fit(tf, zf, True)
+        rows.append([rms(free, tf, zf), rms(fixed, tf, zf),
+                     rms(free, th, zh), rms(fixed, th, zh), -2 * free[2]])
+    # residuals and errors to cm, g stays in m/s^2
+    results[n_fit] = np.array(rows) * [100, 100, 100, 100, 1]
+
+print()
+for n_fit, r in results.items():
+    med = np.median(r, axis=0)
+    print(f'{n_fit} frames fitted, {len(r)} arcs (medians over the arcs)')
+    print(f'  residual (cm):     free {med[0]:.2f}  fixed {med[1]:.2f}  '
+          f'free &lt;= fixed on {np.sum(r[:, 0] &lt;= r[:, 1])}')
+    print(f'  held-out (cm):     free {med[2]:.1f}  fixed {med[3]:.1f}  '
+          f'fixed closer on {np.sum(r[:, 3] &lt; r[:, 2])}')
+    print(f'  fitted g (m/s^2):  {med[4]:.2f}, '
+          f'range {r[:, 4].min():.1f} to {r[:, 4].max():.1f}')
+
+# whole flights, gravity fitted
+g_whole = [-2 * fit(t, z, False)[2] for _, t, z in arcs]
+print()
+print(f'g fitted to whole flights: median {np.median(g_whole):.2f}, '
+      f'range {min(g_whole):.2f} to {max(g_whole):.2f} m/s^2, {len(g_whole)} arcs')
+
+# Figure 1: how the release is found, on one arc
+s = [s for s in shots if s['id'] == 1223][0]
+t, z = np.array(s['t']), np.array(s['z'])
+a, r, e = accel(t, z), release(t, z), flight_end(t, z)
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(7, 5.5), sharex=True)
+ax1.plot(t, z, '.', color='gray')
+ax1.plot(t[r:e + 1], z[r:e + 1], '.', color='black')
+ax1.set_ylabel('ball height (m)')
+ax1.set_title('Arc 1223: height, and the free flight found in it (black)')
+ax2.plot(t, a, '-', marker='.')
+ax2.axhspan(-G - TOL, -G + TOL, color='tab:green', alpha=0.2,
+            label='within 5 m/s² of -9.81')
+ax2.axhline(0, color='gray', linewidth=0.8)
+ax2.set_ylabel('vertical acceleration (m/s²)')
+ax2.set_xlabel('time from first frame (s)')
+ax2.set_title('Vertical acceleration, 9-frame parabola at each frame')
+for ax in (ax1, ax2):
+    ax.axvline(t[r], color='tab:red', linestyle='--', linewidth=0.8,
+               label=f'release (frame {r})')
+    ax.axvline(t[e], color='tab:blue', linestyle='--', linewidth=0.8,
+               label=f'end of flight (frame {e})')
+ax1.legend(fontsize=8, loc='upper left')
+ax2.legend(fontsize=8, loc='upper left')
+fig.tight_layout()
+fig.savefig('release.svg')
+plt.close(fig)
+
+# Figure 2: residual and held-out error against frames fitted
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 3.8))
+models = [(0, 'gravity fitted', 'o-'), (1, 'gravity held at 9.81', 's-')]
+for col, label, mark in models:
+    resid = [np.median(results[n][:, col]) for n in FIT_LENGTHS]
+    held_out = [np.median(results[n][:, col + 2]) for n in FIT_LENGTHS]
+    ax1.plot(FIT_LENGTHS, resid, mark, label=label)
+    ax2.plot(FIT_LENGTHS, held_out, mark, label=label)
+ax1.set_title('Residual on the fitted frames')
+ax2.set_title('Error on the unseen frames')
+for ax in (ax1, ax2):
+    ax.set_xlabel('frames fitted (25 per second)')
+    ax.set_ylabel('median rms height error (cm)')
+    ax.set_xticks(FIT_LENGTHS)
+    ax.legend(fontsize=8)
+fig.tight_layout()
+fig.savefig('errors_by_window.svg')
+plt.close(fig)
+
+# Figure 3: the filled gap in arc 325
+s = [s for s in shots if s['id'] == 325][0]
+t, z = np.array(s['t']), np.array(s['z'])
+lo, hi = straight_runs(z)
+plt.figure(figsize=(7, 3.5))
+plt.plot(t, z, '.-', color='gray', linewidth=0.6)
+plt.plot(t[lo:hi + 1], z[lo:hi + 1], '.', color='tab:red',
+         label=f'straight lines, frames {lo} to {hi}')
+plt.title('Arc 325: ball height, with a stretch the tracker filled in')
+plt.xlabel('time from first frame (s)')
+plt.ylabel('ball height (m)')
+plt.legend(fontsize=8)
+plt.tight_layout()
+plt.savefig('arc_325.svg')
+plt.close()</pre>
+</div>
+
+<div class="aside notice"><span class="label">What to notice</span>
+<p>The summary gives the choice, the evidence and the one thing the other model does better. The table shows both measures at three
+lengths, and the residual rises while the held-out error falls. The report ties its fit lengths (6, 10 and 14
+frames) to the test records. A reader would likely ask about this first. Each anomaly says what was seen and what
+was done about it.</p>
+</div>
+
+<h2 id="a-notebook">A Notebook</h2>
+
+<div class="aside report"><span class="label">Example 3 &middot; Notebook, exported to PDF</span>
+<p><strong>Assignment 5, which flight model.</strong> Data phrase: example pack (test 9793)</p>
+
+<p>I did this in Google Colab. Bob's two models are a parabola with all three coefficients fitted,
+and the same parabola with the <em>t</em>&sup2; coefficient held at &minus;9.81/2. My plan is to cut
+each training arc down to its free flight, see what gravity each whole flight gives, and then fit
+each model to half a flight and score it on the other half. First, what is in the training file.</p>
+
+<pre class="nb-in">import json
+import numpy as np
+
+with open('shots/train.json') as f:
+    train = json.load(f)
+
+h = train['header']
+print(len(train['shots']), 'arcs')
+keys = ['sample_rate_hz', 'record_begins', 'record_ends', 'rim_height_m',
+        'hoop_inner_radius_m', 'ball_radius_m']
+for key in keys:
+    print(key, ':', h[key])
+print('vertical noise (m) :', h['tracking_noise']['vertical_m'])</pre>
+<pre class="nb-out">24 arcs
+sample_rate_hz : 25
+record_begins : before the ball leaves the hand
+record_ends : 15 frames past the rim crossing
+rim_height_m : 3.048
+hoop_inner_radius_m : 0.2286
+ball_radius_m : 0.1195
+vertical noise (m) : 0.0307</pre>
+
+<p>There are 24 arcs at 25 frames a second, so one frame every 0.04&nbsp;s, with about 3&nbsp;cm of
+noise in the height. Each record starts before the ball leaves the hand and runs past the rim, so
+neither end is free flight. Next, one arc and its vertical speed, to see where the hand lets go.</p>
+
+<pre class="nb-in">import matplotlib.pyplot as plt
+
+s = train['shots'][0]
+t, z = np.array(s['t']), np.array(s['z'])
+# vertical speed: central difference two frames each side
+vz = (z[4:] - z[:-4]) / (t[4:] - t[:-4])
+
+fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
+ax1.plot(t, z, '.')
+ax1.set_ylabel('height (m)')
+ax1.set_title(f"Arc {s['id']}: height and vertical speed")
+ax2.plot(t[2:-2], vz, '.-')
+ax2.set_ylabel('vertical speed (m/s)')
+ax2.set_xlabel('time from first frame (s)')
+plt.show()</pre>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r06-nb-1.svg?v=20261015124713"
+    alt="Two panels for arc 1092 against time. Top, height in meters rising to about 4.7 m and
+    falling, with a bounce near 1.6 s. Bottom, vertical speed in meters per second, climbing to
+    almost 6 at about 0.45 s, then falling in a straight line to about minus 4.5 before jumping up
+    near 1.6 s."></div>
+  <figcaption>The notebook's first plot, in matplotlib's default style.</figcaption>
+</figure>
+
+<p>The speed climbs to almost 6&nbsp;m/s at about 0.45&nbsp;s while the hand is pushing, and then
+falls in a straight line. That straight line is gravity, which should take 9.81&nbsp;&times;&nbsp;0.04
+= 0.39&nbsp;m/s off the speed every frame. The jump at about 1.6&nbsp;s is the ball hitting the rim.
+I am taking the release as the frame where the upward speed stops growing, found by walking back
+from the top of the arc. For the end, the rim is 0.23&nbsp;m from the center of the hoop and the
+ball's radius is 0.12&nbsp;m (both from the header), so the ball can touch the rim once its center
+is about 0.35&nbsp;m from the hoop's center. I stop at 1&nbsp;m to leave a few frames of margin.</p>
+
+<pre class="nb-in">G = 9.81
+
+def release(t, z):
+    # walk back from the top while the upward speed keeps growing;
+    # the frame where it stops growing is where the hand let go
+    vz = np.full(len(t), np.nan)
+    vz[2:-2] = (z[4:] - z[:-4]) / (t[4:] - t[:-4])
+    i = int(np.argmax(z))
+    while i &gt; 3 and (vz[i - 1] &gt; vz[i] or vz[i - 2] &gt; vz[i]):
+        i -= 1
+    return i
+
+def flight(s):
+    t, z = np.array(s['t']), np.array(s['z'])
+    dx = np.array(s['x']) - s['hoop_x']
+    dy = np.array(s['y']) - s['hoop_y']
+    end = int(np.argmax(np.hypot(dx, dy) &lt; 1.0))   # first frame within 1 m
+    r = release(t, z)
+    return t[r:end], z[r:end], r, end
+
+def fit_free(t, z):
+    A = np.column_stack([np.ones_like(t), t, t**2])
+    return np.linalg.lstsq(A, z, rcond=None)[0]
+
+def fit_fixed(t, z):
+    A = np.column_stack([np.ones_like(t), t])
+    c = np.linalg.lstsq(A, z + 0.5*G*t**2, rcond=None)[0]
+    return np.array([c[0], c[1], -G/2])
+
+def rms_cm(c, t, z):
+    return 100 * np.sqrt(np.mean((c[0] + c[1]*t + c[2]*t**2 - z)**2))
+
+for s in train['shots']:
+    t, z, r, end = flight(s)
+    c = fit_free(t, z)    # the whole flight, gravity fitted
+    print(f"{s['id']:5}  release {r:2}  1 m at {end:2}  frames {len(t):2}  "
+          f"g {-2*c[2]:5.2f}  rms {rms_cm(c, t, z):3.1f} cm")</pre>
+<pre class="nb-out"> 1092  release 11  1 m at 37  frames 26  g  9.34  rms 2.5 cm
+  163  release 10  1 m at 36  frames 26  g  9.63  rms 1.8 cm
+  583  release  9  1 m at 35  frames 26  g  9.35  rms 2.4 cm
+  541  release 18  1 m at 42  frames 24  g  9.66  rms 1.8 cm
+  325  release 13  1 m at 41  frames 28  g  9.26  rms 5.8 cm
+ 1223  release 12  1 m at 38  frames 26  g  9.63  rms 2.5 cm
+  289  release  6  1 m at 30  frames 24  g  8.92  rms 3.1 cm
+  794  release 11  1 m at 38  frames 27  g  9.87  rms 2.5 cm
+ 1111  release 16  1 m at 40  frames 24  g  9.60  rms 2.0 cm
+  662  release 11  1 m at 37  frames 26  g  9.72  rms 1.6 cm
+ 1144  release 10  1 m at 35  frames 25  g  9.96  rms 1.6 cm
+ 1283  release 14  1 m at 38  frames 24  g  9.57  rms 2.6 cm
+   83  release 11  1 m at 42  frames 31  g 10.01  rms 2.6 cm
+  707  release 11  1 m at 36  frames 25  g 10.43  rms 2.6 cm
+ 1095  release  7  1 m at 32  frames 25  g  9.46  rms 2.0 cm
+  677  release 10  1 m at 35  frames 25  g  9.42  rms 1.7 cm
+  700  release  7  1 m at 36  frames 29  g  9.76  rms 2.8 cm
+ 1039  release 11  1 m at 41  frames 30  g  9.83  rms 2.5 cm
+  739  release  3  1 m at 28  frames 25  g  9.89  rms 3.2 cm
+ 1151  release 17  1 m at 46  frames 29  g  9.59  rms 2.7 cm
+  749  release  6  1 m at 35  frames 29  g  9.80  rms 2.7 cm
+  372  release  6  1 m at 29  frames 23  g  9.79  rms 2.2 cm
+ 1307  release 19  1 m at 44  frames 25  g  9.57  rms 1.4 cm
+  693  release 13  1 m at 39  frames 26  g  9.55  rms 1.7 cm</pre>
+
+<p>Most arcs give a whole-flight gravity between about 9.3 and 10.0&nbsp;m/s&sup2; and an rms of
+1.4 to 3.2&nbsp;cm, which is about the tracker's noise. Two arcs stand out. Arc 325 has an rms of
+5.8&nbsp;cm, about twice the others. Arc 739 has its release at frame 3, which is the earliest frame
+my rule can return, so <strong>I think the record for 739 starts after the ball has left the
+hand</strong>, even though the header says every record starts before. I have kept 739 and noted it.
+Next, a closer look at 325.</p>
+
+<pre class="nb-in">s = [s for s in train['shots'] if s['id'] == 325][0]
+t, z = np.array(s['t']), np.array(s['z'])
+print(np.round(np.diff(z[22:47]), 4))
+
+plt.plot(t, z, '.-')
+plt.xlabel('time from first frame (s)')
+plt.ylabel('height (m)')
+plt.title('Arc 325, height')
+plt.show()</pre>
+<pre class="nb-out">[ 0.0997  0.0903  0.0781 -0.0164 -0.0164 -0.0164 -0.0163 -0.0164 -0.0164
+ -0.0164 -0.0163 -0.0164 -0.0164 -0.1459 -0.1459 -0.146  -0.1459 -0.1459
+ -0.146  -0.1459 -0.146  -0.1459 -0.119  -0.0815]</pre>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r06-nb-2.svg?v=20261015124713"
+    alt="Height in meters against time for arc 325. Near the top the points stop curving and run
+    in two straight segments, one almost flat and one steep, before the curve continues."></div>
+  <figcaption>The notebook's second plot.</figcaption>
+</figure>
+
+<p>The height changes by the same &minus;0.0164&nbsp;m (give or take 0.1&nbsp;mm) eleven times in
+a row, and then by &minus;0.146&nbsp;m nine times. Real tracking with 3&nbsp;cm of noise cannot do that.
+<strong>Arc 325 has a gap that was filled in with straight lines</strong>, probably because the
+tracker lost the ball near the top. Part of it is not measured flight, so I am leaving it out, which leaves 23 arcs. Next, the gravity that each whole flight gives when it is fitted.</p>
+
+<pre class="nb-in">g_all, ids = [], []
+for s in train['shots']:
+    if s['id'] == 325:
+        continue
+    t, z, r, end = flight(s)
+    g_all.append(-2*fit_free(t, z)[2])
+    ids.append(s['id'])
+g_all = np.array(g_all)
+print(len(g_all), 'arcs')
+sd = g_all.std(ddof=1)
+print(f'mean {g_all.mean():.2f}  sd {sd:.2f}')
+print(f'min {g_all.min():.2f}  max {g_all.max():.2f}')
+
+plt.hist(g_all, bins=8)
+plt.axvline(9.81, color='k', linestyle='--', label='9.81')
+plt.xlabel('g fitted to the whole flight (m/s²)')
+plt.ylabel('number of arcs')
+plt.title('Gravity fitted to each whole flight, 23 arcs')
+plt.legend()
+plt.show()</pre>
+<pre class="nb-out">23 arcs
+mean 9.67  sd 0.29
+min 8.92  max 10.43</pre>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r06-nb-3.svg?v=20261015124713"
+    alt="Histogram of gravity fitted to each whole flight in meters per second squared, 23 arcs,
+    from about 8.9 to 10.4 with most between 9.3 and 10.0. A dashed line marks 9.81, a little to
+    the right of the tallest bar."></div>
+  <figcaption>The notebook's third plot.</figcaption>
+</figure>
+
+<p>Given a whole flight, the free model finds gravity with a spread of 0.29&nbsp;m/s&sup2; from arc
+to arc, and 9.81 sits inside that spread. The mean of 9.67 is a little under 9.81,
+though. I do not know why. It could be my flight windows, air drag or the tracker's
+height scale, and I have not checked any of them. Next, whether a model fitted to
+part of a flight can predict the rest. I fit each model to the first half of each flight
+and score it on the second half.</p>
+
+<pre class="nb-in">fit_f, fit_x, out_f, out_x = [], [], [], []
+for s in train['shots']:
+    if s['id'] == 325:
+        continue
+    t, z, r, end = flight(s)
+    half = len(t) // 2
+    tf, zf, tp, zp = t[:half], z[:half], t[half:], z[half:]
+    cf, cx = fit_free(tf, zf), fit_fixed(tf, zf)
+    fit_f.append(rms_cm(cf, tf, zf))
+    fit_x.append(rms_cm(cx, tf, zf))
+    out_f.append(rms_cm(cf, tp, zp))
+    out_x.append(rms_cm(cx, tp, zp))
+fit_f, fit_x, out_f, out_x = map(np.array, [fit_f, fit_x, out_f, out_x])
+
+m = [np.median(x) for x in (fit_f, fit_x, out_f, out_x)]
+print(f'first half (fitted), median rms:   free {m[0]:.2f}  fixed {m[1]:.2f}')
+print(f'   free smaller or equal on {np.sum(fit_f &lt;= fit_x)} of {len(fit_f)}')
+print(f'second half (unseen), median rms:  free {m[2]:.1f}  fixed {m[3]:.1f}')
+print(f'   fixed smaller on {np.sum(out_x &lt; out_f)} of {len(out_f)}')
+print(f'   worst: free {out_f.max():.1f}  fixed {out_x.max():.1f}')</pre>
+<pre class="nb-out">first half (fitted), median rms:   free 1.99  fixed 2.12
+   free smaller or equal on 23 of 23
+second half (unseen), median rms:  free 5.8  fixed 4.2
+   fixed smaller on 14 of 23
+   worst: free 35.7  fixed 11.8</pre>
+
+<pre class="nb-in">plt.loglog(out_x, out_f, 'o')
+plt.plot([1, 100], [1, 100], 'k--', label='equal error')
+plt.xlabel('gravity held at 9.81: rms error on 2nd half (cm)')
+plt.ylabel('gravity fitted: rms error on 2nd half (cm)')
+plt.title('Each arc fitted on its first half, scored on its second')
+plt.legend()
+plt.show()</pre>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r06-nb-4.svg?v=20261015124713"
+    alt="Log-log scatter of rms error on the second half in centimeters, gravity fitted against
+    gravity held at 9.81, one point per arc, with a dashed equal-error line. Fourteen of the 23
+    points sit above the line, several of them far above it."></div>
+  <figcaption>The notebook's fourth plot. Points above the dashed line are arcs where holding gravity
+  did better.</figcaption>
+</figure>
+
+<p>On the half it was fitted to, the free model is closer on all 23 arcs, as it has to be with an
+extra coefficient. On the half it did not see, the fixed model is closer on 14 of 23, with a median
+of 4.2&nbsp;cm against 5.8&nbsp;cm. The free model's worst arc is 35.7&nbsp;cm out and the fixed
+model's is 11.8&nbsp;cm, so the free model's misses are the
+bigger ones. My answer for Bob is to build on the fixed model. The free model
+is better at matching the frames it has and at measuring gravity from a whole flight. The fixed model predicted the unseen frames better on 14 of 23 arcs, and
+that is the job Bob has for it. The difference with half a flight is smaller than I expected. With shorter pieces of
+flight I would expect the fixed model's lead to grow, although I have only tested halves.</p>
+
+<p><strong>Flags.</strong> Arc 325 has a straight-line fill and was left out. Arc 739 seems to start
+after the release. The mean fitted gravity is a little under 9.81 and I do not know why.
+<strong>Assumptions.</strong> Coordinates are in meters (the header gives the rim in meters and the
+coordinates no unit). Gravity is 9.81&nbsp;m/s&sup2;. The flight is a parabola from the frame where
+the upward speed peaks to the last frame more than 1&nbsp;m from the hoop. Times are used as
+recorded. 23 of the 24 arcs were used.</p>
+</div>
+
+<div class="aside notice"><span class="label">What to notice</span>
+<p>The notebook shows how each decision was reached (the speed plot for the release, the printed
+steps for arc 325). Each step can be checked against the output beneath it. Its test
+uses half of each flight, and it reports the smaller margin that test gives without stretching
+it. The flags and assumptions are gathered at the end so a reader does not have
+to find them in the middle.</p>
+</div>
+
+  </main>
+
+  
+
+  <script src="js/page.js?v=20261015124713"></script>
+
+  <footer class="site-footer">
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-11">October 11, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Algorithms');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  
+  
+  
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

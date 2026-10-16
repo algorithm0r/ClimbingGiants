@@ -1,0 +1,912 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 11 — The error minimum in step size</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="css/blocks.css?v=20261015124713">
+<link rel="stylesheet" href="css/demos.css?v=20261015124713">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+/* The deck's own styling, inlined here because none of it belongs to the notes
+   pages and build.py sorts styles.css into layers this would not fit. The
+   variables are the site's own values, copied so the deck cannot drift. */
+:root{
+  /* Stage content comes in two sizes and only two. Every block that
+     carries prose uses the first, every block that carries code uses the
+     second, so a table on one slide and a list on the next are set alike. */
+  --claim:      clamp(2.1rem, min(4.5vw, 8.4vh), 4.5rem);
+  --stage-text: clamp(1.25rem, min(2.65vw, 4.1vh), 2.65rem);
+  --stage-code: clamp(1.1rem, min(2.35vw, 3.5vh), 2.35rem);
+  --gutter:     3.5vw;
+  --card:#FFFFFF; --subtle:#EEE9E0; --ink:#1A1A1A; --warm-gray:#5A5550;
+  --course-accent:#5F7038; --course-accent-dark:#47542A;
+  /* Two emphasis colours, both already carrying meaning on the site.
+     term: the thing being named or defined, and the subject of the claim.
+     def:  what is said about it -- the verb phrase, or the definition.
+     Both are a step lighter than the notes pages use them, because against
+     near-black ink at this size the darker green read as black. Measured:
+     the term is 48.5 dE from the ink rather than 35.8, and both still clear
+     5.3 contrast on white, which survives a washed-out projector. */
+  --term:#5F7038; --def:#8A6508;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--card); color:var(--ink); overflow:hidden;
+  font-family:"Segoe UI",-apple-system,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+body.blank .deck-slide{visibility:hidden}
+
+/* Nothing on a slide is hidden, so a slide is simply centred: text alone sits
+   in the middle, and text with a figure finds its own balance. The stage keeps
+   a floor so a figure arriving with its data does not shift what is above it. */
+.deck-slide{
+  position:fixed; inset:0; display:none; padding:4vh var(--gutter) 5vh;
+  flex-direction:column; justify-content:center; align-items:center; gap:2.4vh;
+}
+.deck-slide.on{display:flex}
+
+.deck-slide .head{text-align:center; width:100%; max-width:100%}
+.deck-slide .say{
+  margin:0 auto; text-align:center;
+  font-size:var(--claim); line-height:1.1; font-weight:600;
+  /* one measure for every claim, so the margins do not change slide to
+     slide and a line wraps only because it is long */
+  letter-spacing:-.015em; max-width:100%;
+  /* a claim that does wrap splits into even lines, not a line and one word */
+  text-wrap:balance;
+}
+.term{color:var(--term)}
+.def{color:var(--def)}
+
+.deck-slide .sub{
+  /* auto side margins, or the box sits left of centre whenever max-width is
+     narrower than the slide and only the text inside it is centred */
+  margin:1.2rem auto 0; font-size:var(--stage-text); line-height:1.4;
+  color:var(--warm-gray); max-width:100%; text-align:center; font-weight:400;
+}
+.deck-slide .sub code{font-size:1.02em; color:var(--def); font-weight:600}
+.deck-slide .stage{
+  width:100%; max-width:100%; margin:0 auto;
+  display:flex; flex-direction:column; justify-content:center;
+}
+/* .full used to widen a capped stage. Nothing is capped now, so it only
+   marks a slide that carries one. */
+/* Only a figure or a demo needs its space held: both arrive with their data
+   after first paint, and without a floor the claim above them jumps when they
+   do. Text in the stage is there from the start and can size itself. */
+.deck-slide .stage:has(.figure),
+.deck-slide .stage:has(cg-demo){min-height:38vh}
+/* A table or a block of arithmetic reads as part of the claim when it sits as
+   close to it as a figure does, so those get a little more air above them. */
+.deck-slide .stage:has(.tbl),
+.deck-slide .stage:has(.work){margin-top:1.6vh}
+/* A notes-page figure on a projector. Three things, and the third is the one
+   that bites: blocks.css caps .figure.narrow at 32rem, which is a text
+   column's width and not a slide's; the SVGs carry a viewBox and no fixed
+   size, so widening the box is the whole of the scaling they need; and the
+   stage is a flex column, where auto side margins do centre a box but also
+   cancel its stretch, collapsing it onto the SVG's own 300px. align-self
+   centres a flex item without giving up its width. */
+.deck-slide .stage .figure{
+  margin:0; border:0; background:none; align-self:center; width:100%;
+}
+/* A narrow figure is a squarish one, about 3:2, so its width is also capped
+   by the screen's height; otherwise on a laptop it stands taller than the
+   stage and pushes its own title up under the claim. */
+.deck-slide .stage .figure.narrow{max-width:min(62rem,74vw,100vh)}
+/* A wide figure, about 5:2, that shares the stage with a line of math. Full
+   width would stand too tall under two lines of claim on a laptop, so its
+   width is capped by the screen's height too, at a looser ratio. */
+.deck-slide .stage .figure.wide{max-width:min(100%,130vh)}
+/* A notes-page row of small diagrams, each drawn in a 300-unit viewBox, sets
+   its labels at about 11px on a projector. Opted into per figure, because a
+   label placed for 10.5px text can collide once it is larger. */
+.deck-slide .figure.legible .cgs text{font-size:15px}
+.deck-slide .figure.legible .cgs text.cgs-title{font-size:15px}
+/* Point cards in a video deck, the class-02 style: a row of bordered cards under
+   the claim, each a small tag, a bold title and one sentence. For a claim that
+   needs a few items of text under it. Sized from the stage text; the class decks
+   keep their own rules below. */
+body:not(.inclass) .deck-slide .pcards{display:grid; gap:1.2vw; width:100%; margin-top:1vh;
+  font-size:calc(var(--stage-text) * .74); line-height:1.32; text-align:left}
+body:not(.inclass) .deck-slide .pcards.c2{grid-template-columns:repeat(2, minmax(0,1fr))}
+body:not(.inclass) .deck-slide .pcards.c3{grid-template-columns:repeat(3, minmax(0,1fr))}
+body:not(.inclass) .deck-slide .pcards.c4{grid-template-columns:repeat(4, minmax(0,1fr))}
+body:not(.inclass) .deck-slide .pcard{border:1px solid #d9d3c7; border-radius:5px; background:#fff;
+  padding:1.8vh 1.1vw; display:flex; flex-direction:column; gap:.8vh; min-width:0}
+body:not(.inclass) .deck-slide .pcard .tag{align-self:flex-start; font-size:.62em; font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase; padding:.15em .5em; border-radius:3px;
+  background:var(--subtle); color:var(--warm-gray)}
+body:not(.inclass) .deck-slide .pcard > b{color:var(--course-accent-dark); font-size:1.15em; line-height:1.15}
+body:not(.inclass) .deck-slide .pcard > span{color:var(--warm-gray)}
+body:not(.inclass) .deck-slide .pcard.gold{background:#fbf6ea; border-color:#d9c08a}
+body:not(.inclass) .deck-slide .pcard.gold > b{color:#8A6508}
+body:not(.inclass) .deck-slide .pcard.gold .tag{background:#f1e4c4; color:#8A6508}
+/* A figure with its formula beside it. The figure is squarish, so side by side
+   is the only way both fit under a claim; its width is capped by the screen's
+   height for the same reason a narrow figure's is. */
+.deck-slide .figmath{
+  display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:3vw; align-items:center; width:100%;
+}
+.deck-slide .figmath .figure{max-width:min(100%,92vh); justify-self:end}
+.deck-slide .figmath .work{margin:0; justify-self:start; font-size:calc(var(--stage-text) * .88)}
+/* A video carries its own size and does not scale to a viewBox, and the sweep
+   video across a full stage would stand 685 tall, which with a claim above it
+   does not fit a laptop. It stays at its own width, or smaller. */
+.deck-slide .stage .fig-body video{
+  width:100%; max-width:min(72rem,94vw); height:auto; max-height:62vh;
+  margin:0 auto;
+}
+.deck-slide .stage figcaption,.deck-slide .stage .source{display:none}
+.deck-slide .stage cg-demo{display:block; margin:0}
+/* The notes demo carries its setting, caption, source and whole header. A
+   slide has room for the plot, the channel buttons and the six rows. */
+.deck-slide .stage .cgd-setting,
+.deck-slide .stage .cgd-caption,
+.deck-slide .stage .source{display:none}
+/* Lecture 1's channel demo shows only the six header rows it is about. That
+   is a property of that demo, not of decks, so it is opted into. Without the
+   scope it also hid lecture 2's state table, whose rows carry no such class. */
+.deck-slide .stage.six-only .cgd-table tr:not(.six){display:none}
+.deck-slide .stage .cgd{border:0; background:none}
+.deck-slide .stage .cgd-table{border-top:1px solid #ece7dd}
+
+/* A demo's tooling, at lecture size. demos.css sets these for a notes page
+   read at arm's length: .7rem readout labels and an 11px axis. On a projector,
+   and worse in a recording downscaled to 1080p, they are the smallest text on
+   the slide -- and on the decimate demo they are the whole point of it, since
+   "peak read" against "peak at full rate" is the claim. The plot needs nothing;
+   only the chrome around it does.
+
+   Sized from --stage-code so this tracks the viewport like every other size in
+   the deck, rather than fixing a pixel count that is right on one screen. Note
+   .stage.big already applies zoom:1.4, so the rendered size is 1.4x these. */
+.deck-slide .stage .cgd-controls{padding:1rem 1.2rem}
+.deck-slide .stage .cgd-controls label{font-size:calc(var(--stage-code) * .55)}
+.deck-slide .stage .cgd-val{font-size:calc(var(--stage-code) * .55)}
+/* the slider is dragged on camera, so it gets room to be seen moving */
+.deck-slide .stage .cgd-controls input[type=range]{width:min(300px, 22vw)}
+.deck-slide .stage .cgd-readouts{padding:.9rem 1.2rem}
+.deck-slide .stage .cgd-readouts .k{font-size:calc(var(--stage-code) * .48)}
+.deck-slide .stage .cgd-readouts .v{font-size:calc(var(--stage-code) * .72)}
+/* axis numbers and the two axis titles, which are set in SVG user units */
+.deck-slide .stage .cgp text{font-size:15px}
+.deck-slide .stage .cgp text.ylab,
+.deck-slide .stage .cgp text.mk{font-size:15px}
+/* A demo built for a page can be far too small on a projector, and its own
+   sizes are in rem so a parent font-size will not reach them. Scale the whole
+   element instead, on the slides that need it. */
+.deck-slide .stage.big cg-demo{zoom:1.4}
+/* zoom is a fixed number, so it has to step down as the screen gets shorter,
+   or the demo runs off the bottom of a laptop screen */
+@media (max-height:860px){ .deck-slide .stage.big cg-demo{zoom:1.2} }
+@media (max-height:720px){ .deck-slide .stage.big cg-demo{zoom:1.0} }
+@media (max-height:620px){ .deck-slide .stage.big cg-demo{zoom:.85} }
+/* A demo with several stacked panels (acceleration, velocity, displacement)
+   is too tall to zoom. Each panel is capped by the screen's height instead,
+   and keeps its aspect, so the stack narrows and centers. */
+.deck-slide .stage.tall .cgd-plots svg{max-height:15vh}
+/* the controls and readouts still need lecture size, so they get the zoom the
+   whole demo gets on a .big stage, stepped down the same way */
+.deck-slide .stage.tall .cgd-controls,
+.deck-slide .stage.tall .cgd-readouts{zoom:1.4}
+/* a laptop screen has no height to spare once the claim wraps: the controls
+   drop to their own size and the plots give up a little more */
+@media (max-height:860px){ .deck-slide .stage.tall .cgd-controls,
+  .deck-slide .stage.tall .cgd-readouts{zoom:1.0}
+  .deck-slide .stage.tall .cgd-plots svg{max-height:13vh} }
+
+.deck-slide.part{background:var(--course-accent-dark); color:#fff; grid-template-rows:1fr}
+.deck-slide.part .course{
+  font-size:clamp(1.4rem,min(2.7vw,5vh),2.7rem); letter-spacing:.05em;
+  text-transform:uppercase; opacity:.82; margin:0 0 1.1rem; font-weight:600;
+  text-align:center; line-height:1.1;
+}
+/* A divider is a title, so it is set larger than a claim and spans the slide
+   like one. At this size the longest title in the course, 44 characters, runs
+   to two lines and everything shorter fits on one. */
+.deck-slide.part .say{
+  color:#fff; max-width:100%; font-size:clamp(2.4rem,min(5.1vw,9.4vh),5.1rem);
+  line-height:1.08;
+}
+
+/* raw file text, and arithmetic worked on the slide */
+.deck-slide .raw{
+  font-family:"SF Mono",Consolas,monospace; text-align:left; display:table;
+  margin:0 auto; font-size:var(--stage-code); line-height:1.45;
+  color:#3f3b36;
+}
+.deck-slide .raw .k{color:var(--term); font-weight:600}
+.deck-slide .raw .v{color:var(--def)}
+.deck-slide .raw .dim{color:#a8a294}
+/* worked arithmetic, set by KaTeX. The aligned environment does the spacing,
+   so there is no hand padding and no monospace face to fake a column. */
+.deck-slide .work{margin:0 auto; font-size:var(--stage-text)}
+.deck-slide .work .katex-display{margin:0}
+/* two display equations under one claim need air between them, or the
+   second one's numerator lands on the first one's denominator */
+.deck-slide .work .katex-display + .katex-display{margin-top:.8em}
+
+/* A hover note on one piece of code. display rather than visibility, because a
+   hidden absolutely-positioned box still counts towards a scroll container's
+   overflow and a slide clips what leaves it. */
+.deck-slide .tip{cursor:help; border-bottom:1px dotted var(--warm-gray)}
+.deck-slide .tip::after{
+  /* to the right of the call, not under it, so the note never covers the
+     lines it is talking about */
+  content:attr(data-note); position:absolute; left:calc(100% + 1.6rem); top:50%;
+  transform:translateY(-50%);
+  z-index:60; display:none; width:max-content; max-width:30ch;
+  background:#1d1b18; color:#e8e4dc; padding:.6rem .85rem; border-radius:4px;
+  font-family:"Segoe UI",-apple-system,system-ui,sans-serif; font-weight:400;
+  font-size:.64em; line-height:1.45; white-space:normal; text-align:left;
+  box-shadow:0 6px 18px rgba(0,0,0,.18);
+}
+.deck-slide .tip:hover{background:#fdf5db}
+.deck-slide .tip:hover::after{display:block}
+
+/* Working on paper beside the same working as a program, row for row, so a
+   hand step and the line that carries it sit on one line of the slide. */
+.deck-slide .pair{
+  display:grid; grid-template-columns:auto auto; gap:.35rem 3rem;
+  margin:1.6vh auto 0; text-align:left; align-items:baseline; position:relative;
+  font-size:var(--stage-code);
+}
+.deck-slide .pair .ph{
+  color:var(--warm-gray); font-size:.72em; letter-spacing:.07em;
+  text-transform:uppercase; font-weight:600; padding-bottom:.3rem;
+}
+.deck-slide .pair .hand{font-family:Georgia,"Times New Roman",serif; color:#3f3b36}
+.deck-slide .pair .code{font-family:"SF Mono",Consolas,monospace; white-space:pre;
+  color:#3f3b36}
+.deck-slide .pair .code .k{color:var(--term); font-weight:600}
+.deck-slide .pair .code .v{color:var(--def)}
+
+/* Code and what there is to say about it, on one slide. A comment belongs on
+   the line it is about, so the two panels share grid rows. */
+.deck-slide .panels{
+  display:grid; grid-template-columns:auto 1fr; gap:.15rem 2.6rem;
+  margin:1.6vh auto 0; text-align:left; align-items:baseline; position:relative;
+  font-size:var(--stage-code);
+}
+.deck-slide .panels .code{
+  font-family:"SF Mono",Consolas,monospace; white-space:pre; color:#3f3b36;
+}
+.deck-slide .panels .code .k{color:var(--term); font-weight:600}
+.deck-slide .panels .code .v{color:var(--def)}
+.deck-slide .panels .code .dim{color:#a8a294}
+.deck-slide .panels .note{color:var(--warm-gray); font-size:.86em; line-height:1.35}
+
+/* a two-by-two, for a division that runs the same way in two domains */
+.deck-slide .grid2{
+  display:grid; grid-template-columns:auto 1fr 1fr; gap:.7rem 2.4rem;
+  font-size:var(--stage-text); margin:0 auto; text-align:left;
+  align-items:baseline;
+}
+.deck-slide .grid2 .hd{color:var(--warm-gray); font-size:.78em; letter-spacing:.06em;
+  text-transform:uppercase; font-weight:600}
+.deck-slide .grid2 .rw{color:var(--term); font-weight:600}
+.deck-slide .grid2 .cell{color:var(--ink)}
+
+/* a name and what is under it */
+.deck-slide .names{
+  display:grid; grid-template-columns:auto 1fr; gap:1.2rem 1.8rem;
+  font-size:var(--stage-text); margin:0 auto; text-align:left;
+  align-items:baseline;
+}
+.deck-slide .names .nm{font-family:"SF Mono",Consolas,monospace; color:var(--term);
+  font-weight:600}
+.deck-slide .names .val{font-family:"SF Mono",Consolas,monospace; color:var(--ink)}
+.deck-slide .names .how{color:var(--warm-gray); font-size:.82em}
+
+/* a small table of names, as the by-hand calculation leaves them */
+.deck-slide .tbl{border-collapse:collapse; margin:0 auto;
+  font-size:var(--stage-text)}
+.deck-slide .tbl th{text-align:left; font-size:.72em; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--warm-gray); padding:0 1.6rem .5rem 0;
+  font-weight:600}
+.deck-slide .tbl td{padding:.34rem 1.6rem .34rem 0; vertical-align:baseline}
+.deck-slide .tbl td:first-child{font-family:"SF Mono",Consolas,monospace;
+  color:var(--term); font-weight:600}
+.deck-slide .tbl td:nth-child(2){color:var(--def); font-weight:600}
+.deck-slide .tbl td:nth-child(3){color:var(--warm-gray);
+  font-family:"SF Mono",Consolas,monospace; font-size:.86em}
+
+/* The three rules above describe one table: a name, what it holds, where it
+   came from. A table whose columns are all the same kind of thing opts out of
+   them, or the columns stop looking comparable, which is the whole reason it
+   is on the slide. .key marks the column the claim is about. */
+.deck-slide .tbl.nums td{font-variant-numeric:tabular-nums}
+/* every value column alike: one font, one size, one weight. Styling column 2
+   and column 3 separately set a three-column table's numbers in two fonts. */
+.deck-slide .tbl.nums td:nth-child(n+2){color:var(--warm-gray); font-weight:400;
+  font-family:"SF Mono",Consolas,monospace; font-size:1em}
+.deck-slide .tbl.nums td.key{color:var(--def); font-weight:600}
+
+/* A record of photographs, shown as the record it is. The strip leaves a
+   gutter between frames on purpose: the gutter is the part of the event nobody
+   photographed, which is the whole reason the figure is on the slide. */
+.deck-slide .strip img{display:block; width:100%; height:auto}
+
+/* Two frames either side of one interval, with the interval named between
+   them at a size that says it matters. */
+.deck-slide .frames{
+  display:flex; align-items:center; justify-content:center; gap:2.4vw;
+  width:100%;
+}
+.deck-slide .frames figure{margin:0; text-align:center}
+.deck-slide .frames img{
+  display:block; width:100%; max-width:27vw; max-height:54vh; height:auto;
+}
+/* the stage hides figcaptions, because a notes-page caption is prose the slide
+   has already said. These are not that: they are the timestamps, and they are
+   the point of the pair. */
+.deck-slide .stage .frames figcaption{
+  display:block; margin-top:.55rem; font-size:var(--stage-code);
+  color:var(--warm-gray); font-family:"SF Mono",Consolas,monospace;
+}
+/* The interval nothing was recorded or computed in. Not scoped to one layout:
+   the frame pair and the two-run pair both use it. */
+.deck-slide .gapmark{
+  font-size:var(--stage-text); color:var(--def); font-weight:600;
+  text-align:center; line-height:1.2; white-space:nowrap; flex:0 0 auto;
+}
+.deck-slide .gapmark span{
+  display:block; font-size:.58em; color:var(--warm-gray); font-weight:400;
+  margin-top:.4rem; white-space:normal; max-width:14ch; margin-inline:auto;
+}
+
+/* A photograph that is not ours, with the credit its licence requires. The
+   stage hides .source because a notes-page source block is prose; a credit
+   line is four words and has to be visible wherever the image is. */
+.deck-slide .stage .credit{
+  display:block; margin:.7rem auto 0; text-align:center;
+  font-size:calc(var(--stage-code) * .62); color:var(--warm-gray);
+  font-weight:400; line-height:1.4;
+}
+.deck-slide .stage .portrait img{
+  display:block; margin:0 auto; width:auto; height:auto;
+  max-height:52vh; max-width:100%;
+}
+
+/* Two runs of a sweep, side by side, with the unswept interval between them.
+   Wider and shorter than the frame pair, because a settled hill is a wide
+   flat thing. Each run is a looping clip, rendered on one shared view box. */
+.deck-slide .runs{
+  display:flex; align-items:center; justify-content:center; gap:1.6vw;
+  width:100%;
+}
+.deck-slide .runs figure{margin:0; text-align:center; flex:0 1 auto}
+.deck-slide .runs img, .deck-slide .runs video{display:block; width:100%; max-width:38vw; height:auto}
+.deck-slide .stage .runs figcaption{
+  display:block; margin-top:.6rem; font-size:calc(var(--stage-text) * .8);
+  color:var(--ink); line-height:1.35;
+}
+.deck-slide .stage .runs figcaption b{color:var(--term); font-weight:600}
+.deck-slide .stage .runs figcaption span{
+  display:block; color:var(--warm-gray); font-size:.86em; margin-top:.15rem;
+}
+
+/* Two columns of prose under one claim: a question on the left and what came
+   of it on the right, each with a heading of its own. */
+.deck-slide .duo{
+  display:grid; grid-template-columns:1fr 1fr; gap:1.2vh 3.2vw;
+  width:100%; text-align:left; font-size:var(--stage-text);
+}
+/* a portrait beside the prose about it */
+.deck-slide .duo.photo{grid-template-columns:auto minmax(0,1fr); align-items:start}
+.deck-slide .duo.photo figure{margin:0}
+.deck-slide .duo.photo img{
+  display:block; width:100%; max-width:min(22vw,320px); height:auto;
+}
+.deck-slide .stage .duo.photo figcaption{
+  display:block; margin-top:.5rem; text-align:center;
+  font-size:calc(var(--stage-code) * .62); color:var(--warm-gray);
+}
+.deck-slide .duo.photo h3:not(:first-child){margin-top:1.1rem}
+.deck-slide .duo h3{
+  margin:0 0 .5rem; font-size:.82em; font-weight:600; color:var(--term);
+  letter-spacing:.04em; text-transform:uppercase;
+}
+.deck-slide .duo p{margin:0 0 .7rem; line-height:1.35}
+.deck-slide .duo p:last-child{margin-bottom:0}
+.deck-slide .duo em{font-style:normal; color:var(--def); font-weight:600}
+/* not .aside: that is a site-wide block in blocks.css and it arrives with a
+   background. This is one quiet line under a claim. */
+.deck-slide .duo .footnote{color:var(--warm-gray); font-size:.86em}
+
+/* A signal chain: boxes with arrows between them, left to right. */
+.deck-slide .chain{
+  display:flex; align-items:stretch; justify-content:center; gap:.8vw;
+  width:100%; font-size:calc(var(--stage-text) * .84);
+}
+.deck-slide .chain > div{flex:0 1 auto; text-align:center}
+.deck-slide .chain .box{
+  border:1px solid #d9d2c4; border-radius:5px; padding:.7rem .9rem;
+  display:flex; flex-direction:column; justify-content:center; height:100%;
+}
+.deck-slide .chain .box b{display:block; color:var(--term); font-weight:600}
+.deck-slide .chain .box span{
+  display:block; color:var(--warm-gray); font-size:.8em; margin-top:.3rem;
+  line-height:1.3;
+}
+.deck-slide .chain .arrow{
+  display:flex; align-items:center; color:var(--warm-gray);
+  font-size:1.4em; padding:0 .1vw;
+}
+/* one box in the chain is where the damage is done */
+.deck-slide .chain .box.here{border-color:var(--def); border-width:2px}
+.deck-slide .chain .mark{
+  display:block; margin-top:.5rem; color:var(--def); font-weight:600;
+  font-size:.78em;
+}
+
+/* the six fields: the name, then what it settles, in plain words */
+.deck-slide .fields{
+  list-style:none; margin:0 auto; padding:0; display:grid; gap:.7rem;
+  font-size:var(--stage-text); text-align:left; max-width:58ch;
+}
+.deck-slide .fields b{color:var(--term); font-weight:600}
+.deck-slide .fields span{color:var(--warm-gray)}
+/* A one-word term is separated from its definition by its colour alone, which
+   is enough. A term several words long is not: it runs straight into the
+   definition and the eye has nowhere to break. Those go in two columns, opted
+   into, since most lists do not need it. */
+.deck-slide .fields.cols{grid-template-columns:auto 1fr; gap:.8rem 1.8rem;
+  max-width:74ch}
+.deck-slide .fields.cols li{display:contents}
+.deck-slide .fields.cols b{text-align:right}
+
+.deck-bar{position:fixed; left:0; right:0; bottom:0; height:3px; background:var(--subtle); z-index:40}
+.deck-bar > i{display:block; height:100%; width:0; background:var(--course-accent)}
+.deck-num{
+  position:fixed; right:1.6vw; bottom:1.6vh; font-size:.85rem; color:var(--warm-gray);
+  z-index:40; font-variant-numeric:tabular-nums;
+}
+.deck-notes{
+  position:fixed; left:0; right:0; bottom:0; max-height:38vh; overflow:auto;
+  display:none; padding:1.1rem 2rem 1.6rem; z-index:50;
+  background:#1d1b18; color:#e8e4dc; font-size:1rem; line-height:1.55;
+  border-top:3px solid var(--course-accent);
+}
+body.notes-on .deck-notes{display:block}
+.deck-notes p{margin:0 0 .6rem; max-width:80ch}
+.deck-help{
+  position:fixed; left:1.6vw; bottom:1.4vh; font-size:.76rem; color:var(--warm-gray);
+  z-index:40; opacity:.5;
+}
+/* Presenter tools. All of it is inert until p or d is pressed, so a student
+   who never presses either sees the deck exactly as it was. */
+
+/* The ink sits above the slide and below the notes panel, so opening the
+   notes covers a drawing rather than the other way round. pointer-events is
+   set from script: off while not inking, or the canvas would eat the clicks
+   that advance and the ones a demo wants. */
+.deck-ink{position:fixed; inset:0; z-index:45; pointer-events:none}
+/* b blanks the screen. A drawing is part of what is on the screen. */
+body.blank .deck-ink{visibility:hidden}
+
+/* The pointer. A mouse arrow is a few dark pixels and disappears on a
+   recording scaled to half size, so while presenting the system cursor is
+   hidden and this stands in for it. Amber with a white ring: the slides are
+   near-white and the dividers are dark green, and neither the term green nor
+   the def gold can be seen against both. */
+body.pointing, body.inking{cursor:none}
+.deck-dot{
+  --dot:clamp(14px, 2.2vh, 26px);
+  position:fixed; left:0; top:0; width:var(--dot); height:var(--dot);
+  margin:calc(var(--dot) / -2) 0 0 calc(var(--dot) / -2);
+  border-radius:50%; background:#E8A33D; border:2px solid #FFF;
+  box-shadow:0 0 0 1px rgba(0,0,0,.35), 0 2px 10px rgba(0,0,0,.35);
+  z-index:70; pointer-events:none; display:none;
+}
+body.pointing .deck-dot, body.inking .deck-dot{display:block}
+/* While inking the dot takes the pen's colour, so the nib says what it will
+   draw before it draws it. Smaller, because it is a nib and not a pointer. */
+body.inking .deck-dot{--dot:clamp(9px, 1.3vh, 15px)}
+
+/* Which mode is on, and what the keys are once it is. Sits where the help
+   line sits, one line above it. */
+.deck-hud{
+  position:fixed; left:1.6vw; bottom:calc(1.4vh + 1.5rem); z-index:40;
+  font-size:.76rem; color:var(--warm-gray); display:flex; align-items:center;
+  gap:.45rem; pointer-events:none;
+}
+.deck-hud:empty{display:none}
+.deck-hud i{
+  width:.62rem; height:.62rem; border-radius:50%; background:#E8A33D;
+  box-shadow:0 0 0 1px rgba(0,0,0,.2);
+}
+.deck-hud span{opacity:.55; margin-left:.35rem}
+
+@media print{
+  body{overflow:visible}
+  .deck-slide{position:static; display:flex; page-break-after:always; height:100vh}
+  .deck-bar,.deck-num,.deck-help,.deck-notes{display:none}
+  .deck-ink,.deck-dot,.deck-hud{display:none}
+}
+/* ---------------------------------------------------------------------------
+   In-class decks (front matter deck: "class"). The video decks above make one
+   claim per slide for a recording; a class deck delivers information to a room
+   that can read, so a slide carries a topic label and dense, scannable blocks:
+   cards in columns, compact tables, short lists. Everything is scoped to
+   body.inclass so the video decks are untouched.
+--------------------------------------------------------------------------- */
+body.inclass{--ic-text:clamp(1.1rem, min(2.05vw, 3.6vh), 2.2rem)}
+body.inclass .deck-slide:not(.part){justify-content:flex-start; align-items:stretch;
+  padding:4.5vh var(--gutter) 5vh; gap:2.2vh}
+body.inclass .deck-slide:not(.part) .head{text-align:left;
+  border-bottom:3px solid var(--course-accent); padding-bottom:1vh}
+body.inclass .deck-slide:not(.part) .say{text-align:left; margin:0;
+  font-size:clamp(1.5rem, min(2.9vw, 5.2vh), 2.9rem); text-wrap:wrap}
+body.inclass .deck-slide .kicker{display:block; font-size:.42em; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--warm-gray); font-weight:600; margin-bottom:.35vh}
+body.inclass .deck-slide .stage{font-size:var(--ic-text); line-height:1.38;
+  justify-content:flex-start; flex:1; min-height:0}
+/* cards in two or three columns */
+body.inclass .cols{display:grid; gap:1.6vh 2vw; align-items:start; width:100%}
+body.inclass .cols.c2{grid-template-columns:repeat(2, minmax(0,1fr))}
+body.inclass .cols.c3{grid-template-columns:repeat(3, minmax(0,1fr))}
+body.inclass .card{background:#f7f9f1; border-left:5px solid var(--course-accent);
+  padding:1.3vh 1.2vw 1.4vh; border-radius:3px}
+body.inclass .card h3{margin:0 0 .6vh; font-size:1.08em; color:var(--course-accent-dark)}
+body.inclass .card p{margin:0 0 .6vh}
+body.inclass .card ul, body.inclass .stage > ul{margin:0; padding-left:1.15em}
+body.inclass .card li, body.inclass .stage > ul li{margin:.25vh 0}
+body.inclass .card .dim{color:var(--warm-gray)}
+body.inclass .card.gold{background:#fbf6ea; border-left-color:#B8860B}
+body.inclass .card.gold h3{color:#8A6508}
+/* compact tables */
+body.inclass .ic-tbl{border-collapse:collapse; width:100%; font-size:.95em}
+body.inclass .ic-tbl th{text-align:left; font-size:.78em; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--warm-gray); border-bottom:2px solid var(--course-accent); padding:.4vh .8vw .4vh 0}
+body.inclass .ic-tbl td{padding:.45vh .8vw .45vh 0; border-bottom:1px solid #e6e0d4; vertical-align:top}
+body.inclass .ic-tbl td.n{font-variant-numeric:tabular-nums; color:var(--def); font-weight:600}
+/* a figure beside text */
+body.inclass .figside{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
+  gap:2vw; align-items:start; width:100%}
+body.inclass .figside img, body.inclass .figside video{width:100%; height:auto; display:block;
+  max-height:58vh; object-fit:contain; border:1px solid #e6e0d4}
+body.inclass .wideimg{width:100%; max-height:30vh; object-fit:contain; display:block; margin-top:1.2vh}
+body.inclass .src{font-size:.72em; color:var(--warm-gray); margin-top:.6vh}
+/* a "moment to arrive" slide (Five for Flourishing): the image, full screen */
+body.inclass .deck-slide.arrive{padding:0; justify-content:center; align-items:center; background:#000}
+body.inclass .deck-slide.arrive img{max-width:100vw; max-height:100vh; width:auto; height:auto; display:block}
+/* a sparse overview: one line and a row of pictures to talk over */
+body.inclass .lead{font-size:1.35em; line-height:1.3; margin:1vh 0 3vh; color:var(--ink)}
+body.inclass .trio{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:2vw; align-items:end}
+body.inclass .trio figure{margin:0}
+body.inclass .trio img{width:100%; height:34vh; object-fit:contain; display:block; border:1px solid #e6e0d4; background:#fff}
+body.inclass .trio figcaption{text-align:center; color:var(--course-accent-dark); font-weight:600; margin-top:1vh}
+/* a dense roster slide: smaller text, section headings between card rows */
+body.inclass .stage.tight{font-size:calc(var(--ic-text) * .74); line-height:1.28}
+body.inclass .stage.tight .card{padding:.9vh .9vw}
+body.inclass .stage.tight .card h3{margin-bottom:.3vh}
+body.inclass .stage.tight .cols{gap:1vh 1.2vw}
+body.inclass .sec{margin:1vh 0 .6vh; font-size:1em; color:var(--warm-gray);
+  text-transform:uppercase; letter-spacing:.06em}
+body.inclass .stage.tight .sec:first-child{margin-top:0}
+body.inclass .qr{display:flex; gap:1.4vw; align-items:center}
+body.inclass .qr p{margin:0 0 .6vh; font-weight:600}
+body.inclass .card .ico{height:1.15em; width:auto; vertical-align:-.2em; margin-right:.25em}
+/* a point slide, after the TCSS 490 decks: no title bar, the main point centred as the
+   heading with a grey line under it, and the content centred below */
+body.inclass .deck-slide.point:not(.part){padding-top:9vh; gap:3vh}
+body.inclass .deck-slide.point:not(.part) .head{text-align:center; border-bottom:0; padding-bottom:0}
+body.inclass .deck-slide.point:not(.part) .say{text-align:center; text-wrap:balance;
+  font-size:clamp(1.8rem, min(3.6vw, 6.4vh), 3.6rem)}
+/* a point slide with a figure: a smaller heading leaves the figure room, since the fit
+   script cannot shrink a figure, only the text beside it */
+body.inclass .deck-slide.point.compact:not(.part){padding-top:5vh; gap:2vh}
+body.inclass .deck-slide.point.compact:not(.part) .say{font-size:clamp(1.5rem, min(3vw, 5.4vh), 3rem)}
+/* point cards, after the TCSS 490 decks: a row of bordered cards under the slide's
+   main point, each a small tag, a title and one sentence */
+body.inclass .pcards{display:grid; gap:1.2vw; width:100%; margin-top:1vh}
+body.inclass .pcards.c3{grid-template-columns:repeat(3, minmax(0,1fr))}
+body.inclass .pcards.c4{grid-template-columns:repeat(4, minmax(0,1fr))}
+body.inclass .pcard{border:1px solid #d9d3c7; border-radius:5px; background:#fff;
+  padding:1.8vh 1.1vw; display:flex; flex-direction:column; gap:.8vh; min-width:0}
+body.inclass .pcard .tag{align-self:flex-start; font-size:.62em; font-weight:700; letter-spacing:.06em;
+  text-transform:uppercase; padding:.15em .5em; border-radius:3px; background:var(--subtle); color:var(--warm-gray)}
+body.inclass .pcard > b{color:var(--course-accent-dark); font-size:1.15em; line-height:1.15}
+body.inclass .pcard > span, body.inclass .pcard > p{color:var(--warm-gray); line-height:1.32; margin:0}
+body.inclass .pcard ul, body.inclass .pcard ol{margin:0; padding-left:1.15em; color:var(--warm-gray); line-height:1.32}
+body.inclass .pcard li{margin:.3vh 0}
+body.inclass .pcard li b{color:var(--ink)}
+body.inclass .pcard .vote{margin-top:.4vh}
+/* one gold card among plain ones */
+body.inclass .pcard.gold{background:#fbf6ea; border-color:#d9c08a}
+body.inclass .pcard.gold > b{color:#8A6508}
+body.inclass .pcard.gold .tag{background:#f1e4c4; color:#8A6508}
+body.inclass .pcol{display:flex; flex-direction:column; gap:1.2vh; min-width:0}
+body.inclass .pcards.c1{grid-template-columns:minmax(0,1fr)}
+body.inclass .pcards.c2{grid-template-columns:repeat(2, minmax(0,1fr))}
+body.inclass .pcard .q{color:var(--ink); font-style:italic}
+/* the row of point cards that says what to do */
+body.inclass .pcards.do .pcard{background:#fbf6ea; border-color:#d9c08a}
+body.inclass .pcards.do .pcard > b{color:#8A6508}
+body.inclass .pcards.do .tag{background:#f1e4c4; color:#8A6508}
+/* a quieter row of point cards under the main row */
+body.inclass .pcards.minor{font-size:.78em; margin-top:1.6vh}
+body.inclass .pcards.minor .pcard{background:#f7f6f2; border-color:#e6e0d4; padding:1.2vh 1vw}
+body.inclass .pcards.minor .pcard > b{color:var(--warm-gray)}
+/* the learning-group roster: one card per group, names listed down the card so a
+   student scans for their own while the details beside it are reviewed */
+body.inclass .groups{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:1vh .8vw; align-content:start}
+body.inclass .gcard{background:#f7f9f1; border-top:4px solid var(--course-accent); border-radius:3px;
+  padding:.8vh .7vw .9vh; font-size:.86em; line-height:1.28}
+body.inclass .gcard h4{margin:0 0 .4vh; font-size:1.08em; color:var(--course-accent-dark)}
+body.inclass .gcard h4 span{font-weight:400; color:var(--warm-gray); font-size:.8em; margin-left:.3em}
+body.inclass .gcard ul{list-style:none; margin:0; padding:0}
+body.inclass .gcard li{margin:0; white-space:nowrap}
+/* a day-by-day timeline, set large: it is the whole slide */
+body.inclass .timeline{font-size:1.15em}
+body.inclass .timeline td{padding:1.6vh 1.5vw 1.6vh 0}
+body.inclass .timeline td:first-child{white-space:nowrap; width:1%; color:var(--course-accent-dark)}
+body.inclass .stage a{color:var(--course-accent-dark)}
+body.inclass .qr img{width:22vh; height:22vh; display:block}
+/* class 2: figure hosts, channel legend chips, vote cards, and an amber kicker
+   for the slides where the room does something */
+body.inclass .c2fig{width:100%}
+body.inclass .c2fig > svg{display:block; width:100%; height:auto; max-height:62vh}
+body.inclass .c2fig.half > svg{max-height:31vh}
+body.inclass .c2fig .cgd .cgp:not(.c2chart) text{font-size:15px}
+body.inclass .c2key b{display:inline-block; width:.75em; height:.75em; border-radius:50%; vertical-align:-.05em}
+body.inclass .c2key b.head{background:#5F7038}
+body.inclass .c2key b.cross{background:#b0443a}
+body.inclass .c2key b.amber{background:#b8860b}
+body.inclass .c2key b.sq{border-radius:1px}
+body.inclass .c2key i.amber{border-color:#b8860b}
+body.inclass .c2key i.faint{border-color:#cfc8bb}
+body.inclass .card .c2fig{margin:.4vh 0 .6vh}
+body.inclass .c2row{display:grid; grid-template-columns:1fr 1fr; gap:1.2vw; margin-top:.6vh}
+body.inclass .c2row svg{display:block; width:100%; height:auto; max-height:30vh}
+body.inclass .c2fig .cgd{margin:0}
+body.inclass .c2key{display:inline-flex; align-items:center; gap:.35em; margin-right:1.1em; font-weight:600}
+body.inclass .c2key i{display:inline-block; width:1.8em; border-top:3px solid}
+body.inclass .c2key i.head{border-color:#5F7038}
+body.inclass .c2key i.cross{border-color:#b0443a}
+body.inclass .c2key i.chest{border-top-style:dashed; border-color:#3A5F8A}
+body.inclass .c2key i.neck{border-top-style:dotted; border-color:#b8860b}
+body.inclass .vote{display:grid; grid-template-columns:1fr; gap:.8vh; margin-top:1vh}
+body.inclass .vote div{display:flex; align-items:center; gap:1vw; border:2px solid var(--course-accent); border-radius:6px; padding:.6vh 1vw; background:#fff}
+body.inclass .vote b{font-size:1.4em; color:var(--course-accent-dark); min-width:1.2em}
+body.inclass .kicker.act{color:#8A6508}
+/* a slide being measured by the fit script below: laid out, never seen */
+body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
+</style>
+</head>
+<body>
+
+
+<section class="deck-slide part">
+  <div class="head">
+    <p class="course">Computational Physical Modeling</p>
+    <p class="say">The best step size for a computed derivative</p>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>All right, welcome. So in this video I want to pick up from the last two, where we were differentiating records, the basketball and the crash. And in a record the step size h isn't ours to choose. It's the time between samples, 0.04 seconds for the ball, 0.08 milliseconds for the crash, and the noise in the record set how well we could do.</p><p>Now a lot of the time we differentiate something we compute ourselves instead, a formula, or a model, or the output of a program. Then there are no samples, we can evaluate it wherever we like, and h is a choice. So the obvious question is how small to make it, and that's what we'll work out. So let's take a look.</p>">
+  <div class="head">
+    <p class="say">For a function we compute, <span class="def">the step size $h$ is ours to choose</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">measured</span><b>A record</b>
+        <span>$h$ is the time between samples, 0.04&nbsp;s for the ball. The noise sets the limit.</span></div>
+      <div class="pcard gold"><span class="tag">computed</span><b>A function we compute</b>
+        <span>We can evaluate it anywhere, so $h$ is a choice.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So let's try it on a function where we know the answer, so we can measure the error exactly. The derivative of sine at x equals one is cosine of one, and we'll take the central difference and move the step around with this slider.</p><p>Now on the left I've taken sine and subtracted its tangent line at one. Why do that? Well, the tangent line has the slope we want, so whatever is left over is what the formula has to deal with. And the red chord joins the two samples the central difference uses, so its slope is exactly the error. On the right is that error for every step, and both axes are log scales, and the circle is wherever the slider is.</p><p>So let's start big, h equals one. The curve is lopsided, the chord tilts, and the error is almost a tenth. Now make h smaller. The chord levels out and the circle slides down the right-hand branch, just like the order said it would, a hundred times less error for every ten times smaller step.</p><p>And somewhere around ten to the minus five that stops. Keep going, let's say to ten to the minus nine, and the thing on the left isn't a curve anymore. It's a sawtooth about ten to the minus sixteen from top to bottom, and that's more or less the last digit of every sine the computer stored. The chord tilts with the sawtooth, and the error is back up to three times ten to the minus nine. Those sharp dips on the right are steps where the two samples happen to land at the same height on the sawtooth, so that's just luck, and we can't really count on it.</p><p>So for sine, smaller is better only down to about ten to the minus five. So in this video I want to look at why there's a turning point at all, and how we might find it.</p>">
+  <div class="head">
+    <p class="say">For $\sin x$ at $x = 1$, steps below about $10^{-5}$ <span class="def">make the error larger</span>.</p>
+    <p class="sub">Left: $\sin x$ with its tangent line at $x = 1$ taken away. The red chord&rsquo;s slope is the error.</p>
+  </div>
+  <div class="stage">
+    <!-- the step slider: sin x less its tangent (the chord's slope is the error), and the error at every step -->
+    <style>.deck-slide cg-demo[case="step"] .cgd-plots{display:grid; grid-template-columns:1fr 1fr; gap:1.2vw}</style>
+    <cg-demo case="step" set="lg=-1"></cg-demo>
+  </div>
+</section>
+
+<section class="deck-slide part">
+  <div class="head">
+    <p class="course">Computational Physical Modeling</p>
+    <p class="say">Truncation error, from the formula</p>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Okay. So there are two errors here, and they sort of pull in opposite directions. And we already have the first one, from lecture nine. When we subtracted the two Taylor expansions, the even powers cancelled, and dividing by 2h left the derivative plus h squared over six times f triple prime, plus smaller terms.</p><p>So the formula keeps the derivative and throws the rest away. What we call that is truncation error, the error we'd still have on a machine that kept every digit. It's there because the formula is an abbreviation, and truncated is literal, the error is the bit we cut off.</p>">
+  <div class="head">
+    <p class="say">From lecture 9, the central difference is the derivative <span class="def">plus a truncation error</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work">
+      $$\frac{f(x+h) - f(x-h)}{2h} \;=\; \underbrace{f'(x)}_{\text{kept}} \;+\; \underbrace{\textcolor{#8A6508}{\tfrac{h^2}{6}f'''(x) + \dots}}_{\text{truncated}}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>And I like this next bit, because it's a prediction we can actually check. For sine, the third derivative is minus cosine, so the first term we threw away is h squared over six times cosine of one.</p><p>The dots are the measured errors of the central difference at seven step sizes, from a tenth down to a thousandth. And the dashed line is that first dropped term. And they sit right on it. At a tenth, the measured error is 9.001 times ten to the minus four, and the dropped term says 9.005. Further down they agree to four or five digits.</p><p>And on its own, truncation says one thing to us, make h as small as you possibly can.</p>">
+  <div class="head">
+    <p class="say">The first dropped term <span class="def">predicts the measured error</span>.</p>
+    <p class="sub">Dots: measured error. Dashed: $\tfrac{h^2}{6}\cos 1$, the first dropped term for $\sin x$.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l11-trunc"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide part">
+  <div class="head">
+    <p class="course">Computational Physical Modeling</p>
+    <p class="say">Rounding error, from the machine</p>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Right. The second error is the one that bites, and what we call it is rounding error. And I want to start with a cat.</p><p>Let's say we want to weigh the cat, and the cat will not sit on the scale. So we weigh ourselves, 70.4 kilos, then we pick up the cat and weigh again, 74.9, and subtract. The cat is 4.5 kilos. Now the scale reads to a tenth of a kilo, so each weighing had three good digits in it, and the answer has two. Nothing went wrong. We just subtracted two numbers that were nearly the same, and the 7 they shared at the front cancelled out.</p><p>And it gets worse the smaller the thing we're weighing. Let's say it's the hamster. Seventy point four, then seventy point five, so the hamster is a tenth of a kilo. But each reading could be off by up to five hundredths, so that tenth could really be anything from about nothing to two tenths. One digit, and we can't trust it.</p><p>And the mouse is twenty grams. So both weighings read 70.4, and the mouse comes out at exactly zero. Everything cancelled.</p><p>And keep the mouse in mind, because we're going to see the computer do exactly that.</p>">
+  <div class="head">
+    <p class="say">The closer the two weighings, <span class="def">the less of the answer survives</span>.</p>
+    <p class="sub">A bathroom scale that reads to 0.1&nbsp;kg.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">74.9 &minus; 70.4</span><b>Cat: 4.5&nbsp;kg</b>
+        <span>Two digits survive.</span></div>
+      <div class="pcard"><span class="tag">70.5 &minus; 70.4</span><b>Hamster: 0.1&nbsp;kg</b>
+        <span>One digit, and either reading could be off by 0.05.</span></div>
+      <div class="pcard gold"><span class="tag">70.4 &minus; 70.4</span><b>Mouse: 0.0&nbsp;kg</b>
+        <span>A 20&nbsp;g mouse vanishes. Nothing survives.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>And the computer does exactly the same thing, just with more digits. A double, that's the standard number in Python and MATLAB, holds about sixteen significant digits.</p><p>So here's our central difference at h equals ten to the minus twelve, with every digit printed. Sine of one plus h and sine of one minus h. And the grey part, the first eleven digits after the point, is the same in both. So when we subtract, all of that cancels, just like the 70 on the scale, and what's left comes from the last few digits.</p><p>And the subtraction itself is exact. The trouble is that each sine was already rounded to sixteen digits when it was stored, and those last digits are exactly where that rounding lives. So the difference is mostly rounding.</p><p>Divide by 2h and we get 0.54029. The true answer is 0.54030. So out of all those digits, only three of the answer are right.</p>">
+  <div class="head">
+    <p class="say">At $h = 10^{-12}$ the derivative keeps <span class="def">only 3 correct digits</span>.</p>
+    <p class="sub">A <code class="ide">double</code> (the standard number in Python and MATLAB) keeps about 16 significant digits.</p>
+  </div>
+  <div class="stage">
+    <!-- the type name set as an editor would show it -->
+    <style>.deck-slide code.ide{font:500 .92em/1 Consolas,"Cascadia Code","Courier New",monospace; color:#0000ff;
+      background:#f5f5f5; border:1px solid #e3e3e3; border-radius:4px; padding:.08em .3em}</style>
+    <div class="work" style="font-size:calc(var(--stage-text) * .8)">
+      $$\begin{aligned}
+      \sin(1+h) &= 0.\textcolor{#b9b0a0}{84147098480}843685\\
+      \sin(1-h) &= 0.\textcolor{#b9b0a0}{84147098480}735627\\[4pt]
+      \text{difference} &= 0.000000000001080580\\[4pt]
+      \text{difference} \div 2h &= \textcolor{#8A6508}{0.54029}00\ldots \qquad \cos 1 = 0.5403023\ldots
+      \end{aligned}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So let's put a number on that rounding. Each stored sine is off by about ten to the minus sixteen, that's sixteen digits on a number near one, and what we call that precision is machine epsilon, epsilon for short, 2.2 times ten to the minus sixteen.</p><p>Now that error doesn't get smaller when h does. It's set by the size of the sines, not by the step. But the formula divides it by 2h. So at ten to the minus twelve, ten to the minus sixteen over 2 times ten to the minus twelve is 5 times ten to the minus five. And the measured error there is 1.2 times ten to the minus five, so the same size, a little smaller because the rounding doesn't always land the worst way.</p><p>And that's the dashed line on the plot, ten to the minus sixteen over 2h. The measured errors on the left follow it, and every time h gets ten times smaller, the error gets ten times bigger.</p>">
+  <div class="head">
+    <p class="say">A fixed storage error divided by $2h$ <span class="def">grows as $h$ shrinks</span>.</p>
+    <p class="sub">Each stored sine is off by about $10^{-16}$, whatever the step.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l11-round"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide part">
+  <div class="head">
+    <p class="course">Computational Physical Modeling</p>
+    <p class="say">The step size that makes the total error smallest</p>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Okay. So now we can write the two together. The total error, I'm going to call it E, is roughly C h squared, that's truncation, where C is the h squared over six times f triple prime from before, so for sine at one it's a sixth of cosine of one. Plus epsilon times the size of f over h, that's rounding.</p><p>This plot is those two terms for sine at x equals one. Truncation is the red dotted line, falling as h gets smaller. Rounding is the grey dashed one, rising as h gets smaller. And their sum, the solid curve, has a minimum somewhere in between, roughly where the two lines cross.</p><p>And any smooth function we compute gives the same V shape. Its own constants just slide the two lines up or down, which moves where the bottom is.</p>">
+  <div class="head">
+    <p class="say">The total error is truncation <span class="def">plus rounding</span>, so it has a minimum.</p>
+    <p class="sub">Drawn for $\sin x$ at $x = 1$. Other functions shift the two lines.</p>
+  </div>
+  <div class="stage">
+    <div class="work" style="font-size:calc(var(--stage-text) * .7)">
+      $$E(h) \;\approx\; \underbrace{C h^2}_{\text{truncation}} \;+\; \underbrace{\frac{\varepsilon |f|}{h}}_{\text{rounding}}$$
+    </div>
+    <figure class="figure wide" data-fig="l11-terms"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So how do we find the bottom of that curve? Well, at the bottom the curve is flat for a moment, its slope is zero. So we take the derivative of E with respect to h, and set it to zero. This is the same move you used in calculus to find the lowest point of any curve.</p><p>And we do it one term at a time. The first term is C h squared, so its derivative is 2 C h. The second one is epsilon f times h to the minus one, so by the power rule its derivative is minus one times epsilon f times h to the minus two. That's the minus sign and the h squared on the bottom.</p>">
+  <div class="head">
+    <p class="say">At the minimum, <span class="def">the slope of $E$ is zero</span>.</p>
+    <p class="sub">Differentiate each term with the power rule.</p>
+  </div>
+  <div class="stage">
+    <div class="work">
+      $$\begin{aligned}
+      E(h) &= C h^2 \;+\; \varepsilon|f|\,h^{-1}\\[6pt]
+      \frac{dE}{dh} &= 2Ch \;-\; \varepsilon|f|\,h^{-2} \;=\; \textcolor{#8A6508}{2Ch - \frac{\varepsilon|f|}{h^2}}
+      \end{aligned}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Now set that to zero. That says the two terms balance, 2 C h equals epsilon f over h squared.</p><p>Multiply both sides by h squared to get the h's together, and we get 2 C h cubed equals epsilon f. Divide by 2C, and h cubed is epsilon f over 2C. And take the cube root of both sides, and that's the best step.</p><p>So the best step is the cube root of a small number, and that's maybe the main thing to take away. Epsilon is the only really small thing in there, so the best step goes as the cube root of epsilon.</p>">
+  <div class="head">
+    <p class="say">Setting the slope to zero and solving <span class="def">gives the best step</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work">
+      $$\begin{aligned}
+      2Ch &= \frac{\varepsilon|f|}{h^2} &&\text{the two terms balance}\\[6pt]
+      2C\,h^3 &= \varepsilon|f| &&\text{multiply both sides by } h^2\\[6pt]
+      h_{\text{best}} &= \textcolor{#8A6508}{\left(\frac{\varepsilon|f|}{2C}\right)^{1/3}} &&\text{divide by } 2C\text{, take the cube root}
+      \end{aligned}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So let's put the numbers in for sine at x equals one, one at a time.</p><p>C is a sixth of cosine of one, which is 0.0901. The size of f is sine of one, 0.841. Epsilon is 2.2 times ten to the minus sixteen, so epsilon times f is 1.87 times ten to the minus sixteen. Two C is 0.180. So the ratio is 1.04 times ten to the minus fifteen.</p><p>And the cube root of that is 1.0 times ten to the minus five. Which is right where the curve turned around at the start.</p>">
+  <div class="head">
+    <p class="say">For $\sin x$ at $x = 1$, the best step size is <span class="def">about $10^{-5}$</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work" style="font-size:calc(var(--stage-text) * .85)">
+      $$\begin{aligned}
+      C &= \tfrac{1}{6}\cos 1 = 0.0901 & |f| &= \sin 1 = 0.841\\[6pt]
+      \varepsilon|f| &= (2.2\times10^{-16})(0.841) = 1.87\times10^{-16} & 2C &= 0.180\\[6pt]
+      \frac{\varepsilon|f|}{2C} &= 1.04\times10^{-15} & h_{\text{best}} &= (1.04\times10^{-15})^{1/3} = \textcolor{#8A6508}{1.0\times10^{-5}}
+      \end{aligned}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide part">
+  <div class="head">
+    <p class="course">Computational Physical Modeling</p>
+    <p class="say">Both rules, measured</p>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So let's go and measure it for both rules. Same sine, same point. The solid line is the central difference and the red dotted line is the forward difference.</p><p>The forward difference has its best step at about ten to the minus eight. The same argument for it gives a square root instead of a cube root, because its truncation error goes as h and not h squared, and that predicts about 2 times ten to the minus eight. And the central difference has its best step at about ten to the minus five, where we predicted 1.0 times ten to the minus five. So both land within about a factor of two, which is what an argument like this is good for.</p><p>Now read the plot from the right. Over there truncation is in charge. The central branch has slope two, so a factor of ten in h is a factor of a hundred in error, and the forward branch has slope one.</p><p>And over on the left, rounding is in charge, and the error goes as one over h, slope minus one. That left-hand branch is very nearly the same line for both rules. So it looks like that comes from the arithmetic, whichever formula we use, because the rounding left after the subtraction is about epsilon times the size of f either way. A better formula moves the right-hand branch down and the minimum to the right, and it probably can't do much for us on the left.</p><p>And remember the mouse. Go all the way down to ten to the minus sixteen and the forward difference returns exactly zero, because one plus ten to the minus sixteen rounds back to exactly one. Both weighings came out the same, and the answer vanished.</p>">
+  <div class="head">
+    <p class="say">Each rule&rsquo;s best step is near its prediction, and below it <span class="def">both rise together as $1/h$</span>.</p>
+    <p class="sub">Predicted: about 2&times;10&#8315;&#8312; for forward, 1.0&times;10&#8315;&#8309; for central.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l11-both"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So here's what to do with a function we compute.</p><p>So the first thing I'd do is estimate the best step. It depends on epsilon, the size of the function and its third derivative, and none of that needs any data. So we can work it out before we've computed anything, at least roughly.</p><p>Prefer the higher-order rule. At their best, the central difference is about 270 times more accurate than the forward difference, for the same two evaluations of the function.</p><p>And then check the step. Halve h and watch the answer. For the central difference, while the change keeps shrinking by about four each time, we're on the truncation branch and still winning. When it stops shrinking and starts jumping around, we've gone past the minimum, so use the step before.</p><p>And for a record, most of this doesn't really apply, because h is fixed by the sampling and the noise sets the limit.</p><p>So hopefully that gives you an idea why the best step isn't the smallest one. And in the next two videos we'll look at what we can do about the noise in a record. Thanks a lot for watching and we'll see you in the next video.</p>">
+  <div class="head">
+    <p class="say">Estimate the best step size, then <span class="def">check it by halving $h$</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">estimate</span><b>Before computing</b>
+        <span>The best step depends on $\varepsilon$ and the function, not on data, so it can usually be worked out first.</span></div>
+      <div class="pcard"><span class="tag">prefer</span><b>The central difference</b>
+        <span>At its best it is roughly 270 times more accurate than the forward difference at its best.</span></div>
+      <div class="pcard gold"><span class="tag">do</span><b>Halve $h$ and watch</b>
+        <span>For central, the change between halvings shrinks about 4 times. When it stops shrinking, use the previous $h$.</span></div>
+    </div>
+  </div>
+</section>
+
+
+<div class="deck-bar"><i></i></div>
+<div class="deck-num">1</div>
+<div class="deck-help">&larr; &rarr; move &nbsp;·&nbsp; n notes &nbsp;·&nbsp; b blank &nbsp;·&nbsp; p pointer &nbsp;·&nbsp; d draw</div>
+<div class="deck-notes"></div>
+
+
+<script type="module" src="js/bundle/lecture-11.js?v=20261015124713"></script>
+</body>
+</html>

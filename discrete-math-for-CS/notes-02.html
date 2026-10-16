@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 2 Notes — Discrete Structures</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (plum). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #6B3A72;
+      --course-accent-dark: #522D57;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Discrete Math for Computer Science</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        <a href="syllabus.html">Syllabus</a>
+        <span class="site-nav-sep">·</span>
+        <a href="reflection-instructions.html">Reflection</a>
+        <span class="site-nav-sep">·</span>
+        <a href="meeting-instructions.html">Meeting</a>
+        <span class="site-nav-sep">·</span>
+        <a href="ai-use.html">AI Use</a>
+        <span class="site-nav-sep">·</span>
+        <a href="extra-labor.html">Extra Labor</a>
+        <span class="site-nav-sep">·</span>
+        <a href="canvas-grades.html">Canvas Grades</a>
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+        
+          
+            <a href="week-01.html">1</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <span class="week-current">2</span>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-03.html">3</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-04.html">4</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-05.html">5</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-06.html">6</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-07.html">7</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-08.html">8</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-09.html">9</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-10.html">10</a>
+          
+          
+        
+      </div>
+    </nav>
+
+    
+    <nav class="page-family">
+      <div class="nav-inner">
+        Week 2 —
+        <a href="week-02.html">Overview</a> ·
+        <strong>Notes</strong> ·
+        <a href="assign-02.html">Assignment</a> ·
+        <a href="solution-02.html">Solution</a>
+      </div>
+    </nav>
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+  <main data-pagefind-body class="notes">
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <h1>Week 2 Notes — Proofs and Proof Techniques</h1>
+<h2 id="contents">Contents</h2>
+<ol>
+<li><a href="#what-is-a-proof">What Is a Proof?</a></li>
+<li><a href="#axioms-theorems-and-definitions">Axioms, Theorems, and Definitions</a></li>
+<li><a href="#a-menagerie-of-proof-types">A Menagerie of Proof Types</a></li>
+<li><a href="#direct-proof">Direct Proof</a></li>
+<li><a href="#proof-by-contrapositive">Proof by Contrapositive</a></li>
+<li><a href="#proof-by-contradiction">Proof by Contradiction</a></li>
+<li><a href="#biconditional-proofs">Biconditional Proofs</a></li>
+<li><a href="#nand-is-universal">NAND is Universal</a></li>
+<li><a href="#counterexamples-and-practical-reasoning">Counterexamples and Practical Reasoning</a></li>
+<li><a href="#introduction-to-abstract-algebra">Introduction to Abstract Algebra</a></li>
+<li><a href="#connections">Connections</a></li>
+</ol>
+<hr>
+<h2 id="what-is-a-proof">What Is a Proof?</h2>
+<p>A <strong>proof</strong> is a valid and sound argument that establishes the truth of a proposition.</p>
+<p>Unpack that carefully:</p>
+<ul>
+<li>A <strong>proposition</strong> is a statement that can be true or false.</li>
+<li>An <strong>argument</strong> is a sequence of statements (premises) leading to a conclusion.</li>
+<li>An argument is <strong>valid</strong> if the conclusion follows necessarily from the premises — that is, if the premises are all true, the conclusion must be true. Validity is a structural property; it says nothing about whether the premises are actually true.</li>
+<li>An argument is <strong>sound</strong> if it is valid <em>and</em> all of its premises are in fact true.</li>
+</ul>
+<p>A proof requires both. Validity without soundness gives you a correct chain of reasoning built on false foundations. A proof must start from true things and reason correctly to establish something new.</p>
+<p>In mathematics and computer science, proofs are the mechanism by which we move from what we <em>assume</em> to what we <em>know</em>. Without proof, a claim — however plausible — remains a conjecture.</p>
+<hr>
+<h2 id="axioms-theorems-and-definitions">Axioms, Theorems, and Definitions</h2>
+<p>Mathematical reasoning is built on a foundation of named, categorized statements:</p>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Axiom</strong> (or <em>postulate</em>)</td>
+<td>A statement accepted as true without proof; it is a starting assumption.</td>
+</tr>
+<tr>
+<td><strong>Theorem</strong></td>
+<td>A statement that has been proved true.</td>
+</tr>
+<tr>
+<td><strong>Lemma</strong></td>
+<td>A helper theorem — proved true primarily to assist in proving a larger theorem.</td>
+</tr>
+<tr>
+<td><strong>Corollary</strong></td>
+<td>A theorem that follows easily and directly from a theorem already proved.</td>
+</tr>
+<tr>
+<td><strong>Conjecture</strong></td>
+<td>A statement believed to be true but not yet proved.</td>
+</tr>
+</tbody>
+</table>
+<p>A <strong>definition</strong> assigns a precise meaning to a term. In a proof, definitions are crucial: to show that a number is odd, you must use the <em>definition</em> of odd. You cannot rely on intuition or examples alone.</p>
+<p><strong>Formal vs. informal proofs.</strong> A <em>formal</em> proof spells out every inference step using named rules of inference (as we did in propositional logic). An <em>informal</em> proof uses ordinary mathematical language, citing steps of algebra or well-known facts without justifying each one individually. Most proofs you will encounter and write are informal — clear, precise prose with enough detail that a careful reader could fill in any gaps.</p>
+<hr>
+<h2 id="a-menagerie-of-proof-types">A Menagerie of Proof Types</h2>
+<p>Before looking at specific techniques in depth, it helps to name the major varieties:</p>
+<p><strong>Direct proof.</strong> Start from the premises and derive the conclusion step by step. Most proofs are direct.</p>
+<p><strong>Vacuous proof.</strong> When the hypothesis of a conditional is false, the conditional $p \rightarrow q$ is vacuously true regardless of $q$. There is nothing to prove; the statement holds trivially.</p>
+<p><strong>Exhaustive proof.</strong> Enumerate every possible case and verify the conclusion holds in each one. Practical only when the number of cases is finite and manageable (or can be reduced to a finite number via careful partitioning).</p>
+<p><strong>Proof by contrapositive.</strong> Prove $\neg q \rightarrow \neg p$ instead of $p \rightarrow q$, using the logical equivalence $$(p \rightarrow q) \equiv (\neg q \rightarrow \neg p).$$
+</p>
+<p><strong>Proof by contradiction.</strong> Assume $\neg p$ (the negation of what you want to prove), then derive a contradiction — a statement of the form $r \wedge \neg r$. Since contradictions cannot be true, the assumption $\neg p$ must be false, so $p$ must be true.</p>
+<p><strong>Proof by induction.</strong> Prove a base case, then prove that if the statement holds for some $k$ it also holds for $k+1$. This technique gets its own extended treatment in later weeks.</p>
+<p><strong>Diagonalization.</strong> A powerful technique for comparing infinite sets — used, for instance, to show that the real numbers are strictly more numerous than the integers.</p>
+<hr>
+<h2 id="direct-proof">Direct Proof</h2>
+<p>In a direct proof of $p \rightarrow q$:</p>
+<ol>
+<li><strong>Assume</strong> $p$ (the hypothesis).</li>
+<li><strong>Derive</strong> $q$ (the conclusion) through a sequence of valid inference steps.</li>
+</ol>
+<p>Each step must follow from the previous ones by a rule of inference, an algebraic identity, or a previously established theorem.</p>
+<p><strong>Worked example.</strong> Prove: <em>If $n$ is odd, then $3n + 2$ is odd.</em></p>
+<p><em>Proof.</em> Assume $n$ is odd. By definition of odd, there exists a natural number $k$ such that</p>
+$$n = 2k + 1.
+$$
+<p>Substituting into $3n + 2$:</p>
+$$3n + 2 = 3(2k + 1) + 2 = 6k + 3 + 2 = 6k + 5.
+$$
+<p>Rewrite $6k + 5 = 6k + 4 + 1 = 2(3k + 2) + 1$.</p>
+<p>Since $k$ is a natural number, $3k + 2$ is also a natural number (natural numbers are closed under multiplication and addition). Therefore $3n + 2 = 2(3k + 2) + 1$ is of the form $2m + 1$ with $m = 3k + 2 \in \mathbb{N}$, so $3n + 2$ is odd. $\square$</p>
+<hr>
+<h2 id="proof-by-contrapositive">Proof by Contrapositive</h2>
+<p>The contrapositive of $p \rightarrow q$ is $\neg q \rightarrow \neg p$. These two conditionals are logically equivalent:</p>
+$$(p \rightarrow q) \equiv (\neg q \rightarrow \neg p).
+$$
+<p><strong>When to use it.</strong> Choose contrapositive when the negation of the conclusion ($\neg q$) gives you something more concrete to work with than the hypothesis ($p$) itself. Going &quot;backwards&quot; from $p$ to $q$ is sometimes much harder than going forwards from $\neg q$ to $\neg p$.</p>
+<p><strong>Structure.</strong> Assume $\neg q$. Derive $\neg p$.</p>
+<p><strong>Worked example.</strong> Prove: <em>If $3n + 2$ is odd, then $n$ is odd.</em></p>
+<p>The contrapositive is: <em>If $n$ is even, then $3n + 2$ is even.</em></p>
+<p><em>Proof.</em> Assume $n$ is even. By definition, $n = 2k$ for some $k \in \mathbb{N}$. Then:</p>
+$$3n + 2 = 3(2k) + 2 = 6k + 2 = 2(3k + 1).
+$$
+<p>Since $3k + 1 \in \mathbb{N}$, we have $3n + 2 = 2(3k + 1)$, which is even.</p>
+<p>We have shown: $n$ even $\Rightarrow$ $3n + 2$ even. By contrapositive, $3n + 2$ odd $\Rightarrow$ $n$ odd. $\square$</p>
+<hr>
+<h2 id="proof-by-contradiction">Proof by Contradiction</h2>
+<p>In a proof by contradiction of proposition $p$:</p>
+<ol>
+<li><strong>Assume</strong> $\neg p$.</li>
+<li><strong>Derive</strong> a contradiction — a statement $r \wedge \neg r$ that is always false.</li>
+<li><strong>Conclude</strong> that $\neg p$ must be false, so $p$ is true.</li>
+</ol>
+<p>The justification rests on a bedrock principle of classical logic: a contradiction cannot hold. If our assumption $\neg p$ leads inevitably to $r \wedge \neg r$, then $\neg p$ cannot be true.</p>
+<p><strong>Relationship to contrapositive.</strong> Proof by contrapositive is a special case of proof by contradiction. When proving $p \rightarrow q$ by contrapositive, we assume $\neg q$, derive $\neg p$, and note that $p \wedge \neg p$ would be the contradiction if we had also kept $p$ in scope. The two techniques are closely related; in practice, &quot;proof by contradiction&quot; often names the more general strategy where we manufacture an explicit absurdity, while &quot;proof by contrapositive&quot; names the specific flip of a conditional's direction.</p>
+<hr>
+<h2 id="biconditional-proofs">Biconditional Proofs</h2>
+<p>To prove $p \leftrightarrow q$, use the logical equivalence:</p>
+$$(p \leftrightarrow q) \equiv (p \rightarrow q) \wedge (q \rightarrow p).
+$$
+<p>A biconditional proof always requires <strong>proving both directions separately</strong>:</p>
+<ul>
+<li><strong>Forward direction</strong> ($p \rightarrow q$): Assume $p$, derive $q$.</li>
+<li><strong>Reverse direction</strong> ($q \rightarrow q$): Assume $q$, derive $p$.</li>
+</ul>
+<p>Either direction can itself be proved directly, by contrapositive, or by contradiction, depending on which is easier.</p>
+<p>This structure parallels how subset equality is proved in set theory ($A = B$ iff $A \subseteq B$ and $B \subseteq A$) and how equality is established by double inequality in real analysis ($a = b$ iff $a \leq b$ and $b \leq a$). Whenever you want to establish a two-way relationship, the standard strategy is to divide and conquer: split into two one-way obligations and handle each separately.</p>
+<p><strong>Worked example.</strong> Prove: <em>$n$ is odd if and only if $3n + 2$ is odd.</em></p>
+<p>This requires both directions. The forward direction ($n$ odd $\Rightarrow$ $3n + 2$ odd) was proved directly above. The reverse direction ($3n + 2$ odd $\Rightarrow$ $n$ odd) was proved by contrapositive above. Together, both proofs establish the biconditional. $\square$</p>
+<hr>
+<h2 id="nand-is-universal">NAND is Universal</h2>
+<h3 id="background-universal-sets-of-operators">Background: Universal Sets of Operators</h3>
+<p>The standard propositional connectives $\{\neg, \wedge, \vee, \rightarrow, \leftrightarrow, \oplus\}$ are not all independent. A set of operators is called <strong>universal</strong> (or <em>functionally complete</em>) if every possible boolean function — equivalently, every possible truth table — can be expressed using only operators from that set.</p>
+<p><strong>Theorem.</strong> The set $\{\neg, \wedge, \vee\}$ is universal.</p>
+<p><strong>Proof sketch.</strong> Any boolean function $O(x_1, x_2, \ldots, x_n)$ can be represented by its truth table. For each row of the truth table where $O$ evaluates to true, write down the conjunction of its inputs: for each $x_i$, write $x_i$ if that row has $x_i = \text{true}$, and $\neg x_i$ if $x_i = \text{false}$. Then take the disjunction of all such conjunctions (one per true-row). The result is a formula using only $\neg$, $\wedge$, and $\vee$ that is logically equivalent to $O$.</p>
+<p>The resulting form is called <strong>disjunctive normal form (DNF)</strong>: a disjunction of conjunctions, where each conjunction may contain negated or unnegated variables. Every boolean formula can be written in DNF. (Its dual — <strong>conjunctive normal form (CNF)</strong> — is a conjunction of disjunctions, obtainable by applying De Morgan's laws.) $\square$</p>
+<h3 id="the-nand-operator">The NAND Operator</h3>
+<p>The <strong>NAND</strong> operator, written $p \uparrow q$, is defined as:</p>
+$$p \uparrow q \equiv \neg(p \wedge q).
+$$
+<p>Its truth table:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">$p$</th>
+<th style="text-align:center">$q$</th>
+<th style="text-align:center">$p \uparrow q$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">T</td>
+<td style="text-align:center">T</td>
+<td style="text-align:center">F</td>
+</tr>
+<tr>
+<td style="text-align:center">T</td>
+<td style="text-align:center">F</td>
+<td style="text-align:center">T</td>
+</tr>
+<tr>
+<td style="text-align:center">F</td>
+<td style="text-align:center">T</td>
+<td style="text-align:center">T</td>
+</tr>
+<tr>
+<td style="text-align:center">F</td>
+<td style="text-align:center">F</td>
+<td style="text-align:center">T</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Theorem.</strong> $\{\uparrow\}$ is universal.</p>
+<p><strong>Proof.</strong> Since $\{\neg, \wedge, \vee\}$ is universal, it suffices to show that each of $\neg$, $\wedge$, and $\vee$ can be expressed using $\uparrow$ alone.</p>
+<p><strong>NOT from NAND:</strong></p>
+$$\neg p \equiv p \uparrow p.
+$$
+<p><em>Proof.</em> When $p = \text{T}$: $p \uparrow p = \neg(\text{T} \wedge \text{T}) = \neg\text{T} = \text{F}$. When $p = \text{F}$: $p \uparrow p = \neg(\text{F} \wedge \text{F}) = \neg\text{F} = \text{T}$. This matches the truth table for $\neg p$. $\square$</p>
+<p><strong>OR from NAND:</strong></p>
+$$p \vee q \equiv (p \uparrow p) \uparrow (q \uparrow q).
+$$
+<p><em>Proof by boolean algebra:</em></p>
+$$p \vee q \equiv \neg\neg(p \vee q) \equiv \neg(\neg p \wedge \neg q) \equiv \neg p \uparrow \neg q \equiv (p \uparrow p) \uparrow (q \uparrow q). \qquad\square
+$$
+<p>The steps used: double negation, then De Morgan's law ($\neg(A \wedge B) \equiv \neg A \vee \neg B$ applied in reverse gives $\neg(\neg p \wedge \neg q) \equiv \neg p \uparrow \neg q$), then substituting $\neg p = p \uparrow p$ and $\neg q = q \uparrow q$.</p>
+<p><strong>AND from NAND:</strong></p>
+$$p \wedge q \equiv (p \uparrow q) \uparrow (p \uparrow q).
+$$
+<p><em>Proof by boolean algebra:</em></p>
+$$p \wedge q \equiv \neg\neg(p \wedge q) \equiv \neg(p \uparrow q) \equiv (p \uparrow q) \uparrow (p \uparrow q). \qquad\square
+$$
+<p>The steps: double negation; recognize $\neg(p \wedge q) = p \uparrow q$ by definition; apply $\neg X = X \uparrow X$.</p>
+<p>Since $\neg$, $\wedge$, and $\vee$ are all expressible using $\uparrow$, and $\{\neg, \wedge, \vee\}$ is universal, it follows that $\{\uparrow\}$ is universal. $\square$</p>
+<p><strong>Engineering significance.</strong> In digital circuit design, every logic gate can be implemented from NAND gates alone. This means a chip manufacturer needs to produce only one type of gate. NOR ($\neg(p \vee q)$) is likewise universal, and similar proofs apply.</p>
+<hr>
+<h2 id="counterexamples-and-practical-reasoning">Counterexamples and Practical Reasoning</h2>
+<h3 id="disproving-universal-statements">Disproving Universal Statements</h3>
+<p>A <strong>universal statement</strong> has the form &quot;for all $x$, $P(x)$.&quot; To <em>prove</em> such a statement requires showing $P(x)$ holds for every $x$ in the domain — potentially infinitely many. To <em>disprove</em> it requires only a single <strong>counterexample</strong>: one specific $x_0$ such that $P(x_0)$ is false.</p>
+<p>This asymmetry is fundamental: proofs of universal statements are hard (you must cover all cases); disproofs are potentially easy (one bad case suffices).</p>
+<h3 id="equivalence-partitioning-and-exhaustive-testing">Equivalence Partitioning and Exhaustive Testing</h3>
+<p>A practical application of these ideas appears in software testing and code verification. When verifying that an implementation matches a specification, the goal is to find the minimal set of test inputs that covers all logically distinct cases.</p>
+<p><strong>Key insight.</strong> Most variables with large or infinite domains can be partitioned into a small number of <em>equivalence classes</em> — groups of inputs that the program treats identically. You only need to test one representative from each class.</p>
+<p><strong>Example.</strong> For a <code>canGetDiscount</code> function with the following specification:</p>
+<ul>
+<li>Student must have valid ID <strong>and</strong> be currently enrolled.</li>
+<li>Show must be a matinée (before 4:00 p.m.) <strong>or</strong> on a Tuesday.</li>
+<li>If the film is rated R, the customer must be at least 17 <strong>or</strong> accompanied by an adult.</li>
+</ul>
+<p>The variable <code>showHour</code> ranges over 0–23, but the logic only cares whether it is less than 16 (matinée). So the domain splits into two equivalence classes: $\{\text{showHour} &lt; 16\}$ and $\{\text{showHour} \geq 16\}$. Similarly, <code>customerAge</code> splits on 17. Once every continuous variable is reduced to a boolean partition, the full input space becomes a finite truth table.</p>
+<p><strong>Finding bugs.</strong> Consider the showtime logic as originally coded:</p>
+<pre><code>timeValid = (showHour &lt; 16 AND NOT isTuesday) OR (showHour &gt;= 16 AND isTuesday)
+</code></pre>
+<p>Testing the four cases (matinée/not × Tuesday/not-Tuesday) reveals a bug: a Tuesday matinée (showHour = 14, isTuesday = true) evaluates to false, but the spec says it should be true. The corrected logic is:</p>
+<pre><code>timeValid = (showHour &lt; 16) OR isTuesday
+</code></pre>
+<p>Similarly, the original age-check used <code>AND</code> where the spec requires <code>OR</code>:</p>
+<pre><code>// Buggy:
+ageValid = (customerAge &gt;= 17) AND isWithAdult
+// Correct:
+ageValid = (customerAge &gt;= 17) OR isWithAdult
+</code></pre>
+<p>The counterexample that exposes the bug: age = 25, no adult. The customer is old enough but the buggy condition rejects them.</p>
+<p><strong>Proof by exhaustive case analysis.</strong> After fixing the code, proving it correct means verifying it on every equivalence class. For this function there are three logically independent groups of inputs (student credentials: 4 cases; showtime: 4 cases; age/rating: 8 cases), giving 16 test cases total. If the implementation passes all 16, it is provably correct for all possible inputs — because every input belongs to exactly one case that has been tested.</p>
+<hr>
+<h2 id="introduction-to-abstract-algebra">Introduction to Abstract Algebra</h2>
+<p>Abstract algebra studies mathematical structures defined by a <strong>set</strong> together with one or more <strong>binary operations</strong> that satisfy specified properties. The goal is to reason about whole classes of structures at once rather than one number system at a time.</p>
+<h3 id="closure">Closure</h3>
+<p>A set $S$ is <strong>closed</strong> under a binary operation $\star$ if for every $a, b \in S$, the result $a \star b$ is also in $S$.</p>
+<p><strong>Examples.</strong></p>
+<ul>
+<li>The set of even integers $E = \{\ldots, -4, -2, 0, 2, 4, \ldots\}$ is closed under multiplication: an even times an even is even. It is also closed under addition.</li>
+<li>The set of odd integers is <em>not</em> closed under multiplication when restricted to natural numbers in the usual sense, since odd $\times$ odd = odd (closed), but the key point is that closure depends on both the set <em>and</em> the operation.</li>
+</ul>
+<p>Closure is the minimal property needed for a binary operation to make sense within a set — without it, applying the operation might take you outside the set entirely.</p>
+<h3 id="semigroups-and-monoids">Semigroups and Monoids</h3>
+<p>A <strong>semigroup</strong> is a set $S$ with a binary operation $\star$ that is:</p>
+<ol>
+<li><strong>Closed</strong>: $\forall a, b \in S,\ a \star b \in S$.</li>
+<li><strong>Associative</strong>: $\forall a, b, c \in S,\ (a \star b) \star c = a \star (b \star c)$.</li>
+</ol>
+<p>A <strong>monoid</strong> is a semigroup that also has:</p>
+<ol start="3">
+<li><strong>Identity element</strong>: $\exists e \in S$ such that $\forall a \in S,\ e \star a = a \star e = a$.</li>
+</ol>
+<p>The integers under addition form a monoid with identity $0$. The natural numbers under multiplication form a monoid with identity $1$.</p>
+<h3 id="groups">Groups</h3>
+<p>A <strong>group</strong> is a monoid that additionally satisfies:</p>
+<ol start="4">
+<li><strong>Inverses</strong>: $\forall a \in S,\ \exists a^{-1} \in S$ such that $a \star a^{-1} = a^{-1} \star a = e$.</li>
+</ol>
+<p>The integers under addition form a group: the inverse of $n$ is $-n$. The natural numbers under addition do <em>not</em> form a group (there are no additive inverses within $\mathbb{N}$).</p>
+<h3 id="using-definitions-in-proofs">Using Definitions in Proofs</h3>
+<p>Abstract algebra illustrates an important proof technique: <strong>proof from definition</strong>. To show a set is closed under an operation, you take two arbitrary elements, apply the operation, and verify the result is in the set — exactly as in the odd/even proofs above. To show something is a group, you verify each of the four properties in turn.</p>
+<p><strong>Example.</strong> <em>Prove that the set of even integers is closed under addition.</em></p>
+<p><em>Proof.</em> Let $a, b$ be even integers. By definition, $a = 2j$ and $b = 2k$ for some $j, k \in \mathbb{Z}$. Then $a + b = 2j + 2k = 2(j + k)$. Since $j + k \in \mathbb{Z}$, we have $a + b = 2(j+k)$, which is even. $\square$</p>
+<p>This is a direct proof that follows the same structure as the odd-number examples: invoke the definition, do algebra, conclude by applying the definition again.</p>
+<hr>
+<h2 id="connections">Connections</h2>
+<p>The proof techniques introduced this week are the primary tools used throughout the course and throughout mathematics.</p>
+<p><strong>Looking back.</strong> Everything here depends on <a href="notes-01.html">Week 1 Notes</a>: propositional logic supplies the connectives ($\wedge$, $\vee$, $\neg$, $\rightarrow$, $\leftrightarrow$), De Morgan's laws, logical equivalence, and the structure of valid argument. Without that foundation, the contrapositive would have no meaning and the NAND universality proof would have no tools.</p>
+<p><strong>Looking ahead.</strong> <a href="notes-03.html">Week 3 Notes</a> introduce loop invariants — a technique for proving that iterative algorithms are correct. A loop invariant proof has the same skeleton as a direct proof: state a proposition, show it holds at initialization, show it is preserved at each step, conclude it holds at termination. The same discipline of &quot;assume the hypothesis, derive the conclusion&quot; applies.</p>
+<p><a href="notes-09.html">Week 9 Notes</a> develop strong induction. Strong induction extends direct proof to infinite families of statements: the base case is a direct proof, and the inductive step is itself a conditional proof (if the statement holds for all values up to $k$, prove it for $k+1$). The biconditional structure of the odd-number proof — two separate conditional proofs combined — foreshadows how inductive arguments are organized.</p>
+
+  </main>
+
+  
+  <script>
+    document.querySelectorAll('h2[id], h3[id]').forEach(h => {
+      const a = document.createElement('a');
+      a.className = 'anchor-link';
+      a.href = '#' + h.id;
+      a.textContent = '§';
+      a.title = 'Link to this section';
+      h.appendChild(a);
+    });
+  </script>
+  
+
+  <footer class="site-footer">
+    <span>Discrete Structures · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-04-20">April 20, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Discrete Structures');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

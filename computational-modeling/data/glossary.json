@@ -1,0 +1,801 @@
+{
+ "_comment": "Shared term store for every page on the course site. One entry per term. Pages mark terms with <dfn data-g=\"key\">any wording</dfn>; the marked wording need not match the term name. See PAGE_SPEC.md, section 'Glossary'.",
+ "_fields": {
+  "term": "canonical name, shown in each page's terms list",
+  "def": "one or two sentences, self-contained, no forward references",
+  "taught": "slug of the page where the concept is taught, or null if it is background the course does not teach",
+  "tags": "coarse grouping, for a future all-terms index page"
+ },
+ "terms": {
+  "accelerometer": {
+   "term": "accelerometer",
+   "def": "A sensor reporting the acceleration of the point it is bolted to. It measures the motion of its own mounting point, which is not always the motion of the object as a whole.",
+   "taught": null,
+   "tags": [
+    "measurement",
+    "crash"
+   ]
+  },
+  "aliasing": {
+   "term": "aliasing",
+   "def": "A feature oscillating faster than half the sample rate appearing in the record as a slower one. It cannot be undone after sampling, which is why records are filtered before being sampled.",
+   "taught": null,
+   "tags": [
+    "measurement"
+   ]
+  },
+  "anti-alias-filter": {
+   "term": "anti-alias filter",
+   "def": "A low-pass filter applied to a signal before it is sampled, removing content too fast for the sample rate to represent. It has to act before sampling, because after sampling the aliased content is no longer separable from the rest.",
+   "taught": "discrete-evaluation",
+   "tags": [
+    "measurement"
+   ]
+  },
+  "baseline": {
+   "term": "baseline",
+   "def": "The value a signal takes when the quantity it measures is zero. Estimating it from a stretch of record where nothing is happening and subtracting it is called baseline correction.",
+   "taught": "bias-and-noise",
+   "tags": [
+    "measurement"
+   ]
+  },
+  "bending-moment": {
+   "term": "bending moment",
+   "def": "The internal moment carried by a beam at a cross-section, equal to the moment about that section of all loads and reactions to one side of it.",
+   "taught": null,
+   "tags": [
+    "mechanics"
+   ]
+  },
+  "bisection": {
+   "term": "bisection",
+   "def": "A root-finding method that keeps an interval whose ends give f opposite signs, and halves it each step. It cannot start without such an interval, and it cannot fail once it has one.",
+   "taught": "bisection",
+   "tags": [
+    "method"
+   ]
+  },
+  "bootstrap": {
+   "term": "bootstrap",
+   "def": "Resampling the data itself, with replacement, to see how much a result depends on which particular measurements were taken.",
+   "taught": "propagating-by-resampling",
+   "tags": [
+    "statistics"
+   ]
+  },
+  "bracket": {
+   "term": "bracket",
+   "def": "An interval whose two ends give f values of opposite sign. If f is continuous, a root lies somewhere inside it.",
+   "taught": "bisection",
+   "tags": [
+    "method"
+   ]
+  },
+  "branch": {
+   "term": "branch",
+   "def": "A point where a condition selects which of two paths executes. In numerical code the condition is usually a comparison against a tolerance or a bound.",
+   "taught": "program-shape-branching",
+   "tags": [
+    "programming"
+   ]
+  },
+  "cancellation": {
+   "term": "cancellation",
+   "def": "The loss of significant figures when two nearly equal computed numbers are subtracted. The result keeps its digits; most of them stop meaning anything.",
+   "taught": "the-error-minimum",
+   "tags": [
+    "method"
+   ]
+  },
+  "central-difference": {
+   "term": "central difference",
+   "def": "Estimating a derivative from the samples either side of a point: (f(x+h) − f(x−h)) / 2h. Its truncation error is proportional to h².",
+   "taught": "finite-differences",
+   "tags": [
+    "method"
+   ]
+  },
+  "cfc": {
+   "term": "CFC class",
+   "def": "The channel frequency class in SAE J211, naming which low-pass filter a signal must pass through before a given quantity is computed. CFC 1000 is required for head acceleration, CFC 180 before integrating to velocity.",
+   "taught": "why-a-standard-exists",
+   "tags": [
+    "standards",
+    "measurement"
+   ]
+  },
+  "channel": {
+   "term": "channel",
+   "def": "One recorded signal within a test: a single sensor on a single axis, with its own units, sample rate, and identifying code.",
+   "taught": "anatomy-of-a-measured-signal",
+   "tags": [
+    "measurement",
+    "crash"
+   ]
+  },
+  "channel-code": {
+   "term": "channel code",
+   "def": "The positional string in a channel's header identifying what was measured and where, such as 11HEADCG0000ACXP for a driver head acceleration. It identifies the measurement wherever the channel happens to sit in the file.",
+   "taught": "anatomy-of-a-measured-signal",
+   "tags": [
+    "measurement",
+    "crash",
+    "standards"
+   ]
+  },
+  "concave": {
+   "term": "concave",
+   "def": "Bending downward, so that a chord joining two points on the curve lies below the curve between them. A function is concave wherever its second derivative is negative.",
+   "taught": "area-under-a-curve",
+   "tags": [
+    "method"
+   ]
+  },
+  "condition-number": {
+   "term": "condition number",
+   "def": "How much a linear system amplifies error: the factor by which a small change in the matrix or the right-hand side can change the solution. About log10 of it is the number of significant digits lost, out of the sixteen a double carries.",
+   "taught": 18,
+   "tags": [
+    "linear-algebra",
+    "error"
+   ]
+  },
+  "confidence-level": {
+   "term": "confidence level",
+   "def": "The proportion of repeated cases in which an interval is claimed to contain the true value. An interval quoted without one is not interpretable.",
+   "taught": "reporting-an-interval",
+   "tags": [
+    "statistics"
+   ]
+  },
+  "conserved-quantity": {
+   "term": "conserved quantity",
+   "def": "Something the physics fixes: energy, momentum, mass. Its known behaviour makes it a check on an integrator that needs no exact solution to compare against.",
+   "taught": "stability-and-accuracy",
+   "tags": [
+    "method",
+    "mechanics"
+   ]
+  },
+  "constant-of-integration": {
+   "term": "constant of integration",
+   "def": "The additive constant an integral does not determine. Integration fixes the shape of the curve; an initial condition fixes where it sits.",
+   "taught": "the-constant-of-integration",
+   "tags": [
+    "method"
+   ]
+  },
+  "contraflexure": {
+   "term": "point of contraflexure",
+   "def": "A point along a beam where the bending moment passes through zero and the curvature reverses. Beams with an overhang have one between the supports.",
+   "taught": null,
+   "tags": [
+    "mechanics"
+   ]
+  },
+  "convergence-order": {
+   "term": "order of convergence",
+   "def": "The exponent p in e(k+1) ≈ C·e(k)^p. Bisection has p = 1, the secant method p ≈ 1.618, Newton p = 2 near a simple root.",
+   "taught": "newton-and-secant",
+   "tags": [
+    "method"
+   ]
+  },
+  "convergence-study": {
+   "term": "convergence study",
+   "def": "Halving a step or refining a grid until the answer stops moving, as a way of defending a resolution when no exact answer is available.",
+   "taught": "order-of-accuracy-measured",
+   "tags": [
+    "method"
+   ]
+  },
+  "convex": {
+   "term": "convex",
+   "def": "Bending upward, so that a chord joining two points on the curve lies above the curve between them. A function is convex wherever its second derivative is positive.",
+   "taught": "area-under-a-curve",
+   "tags": [
+    "method"
+   ]
+  },
+  "coverage": {
+   "term": "coverage",
+   "def": "The proportion of repeated cases in which an interval actually does contain the true value. It is measured, where the confidence level is claimed.",
+   "taught": "coverage",
+   "tags": [
+    "statistics"
+   ]
+  },
+  "crossmember": {
+   "term": "crossmember",
+   "def": "A structural beam running across the vehicle floor between the side rails. Instruments are often mounted on one because it is stiff and close to the occupants.",
+   "taught": null,
+   "tags": [
+    "crash"
+   ]
+  },
+  "crush": {
+   "term": "crush",
+   "def": "How far the front of a vehicle deforms during an impact, measured from first contact to the moment it stops moving forward, and found by integrating an acceleration record twice. Also called dynamic crush, which separates it from the smaller permanent deformation left once the structure springs back.",
+   "taught": null,
+   "tags": [
+    "crash",
+    "mechanics"
+   ]
+  },
+  "cumulative-integral": {
+   "term": "cumulative integral",
+   "def": "The running total of an integral: an output value for every input sample, each holding the area accumulated up to that point.",
+   "taught": "cumulative-integration",
+   "tags": [
+    "method"
+   ]
+  },
+  "data-status": {
+   "term": "data status",
+   "def": "The header field carrying the laboratory's own verdict on whether a channel is usable. A channel can be full of numbers and still be marked as something other than ok.",
+   "taught": "anatomy-of-a-measured-signal",
+   "tags": [
+    "measurement",
+    "crash",
+    "standards"
+   ]
+  },
+  "decimation": {
+   "term": "decimation",
+   "def": "Keeping every k-th sample of a record and discarding the rest, reducing the sample rate by the factor k.",
+   "taught": "discrete-evaluation",
+   "tags": [
+    "method"
+   ]
+  },
+  "definite-integral": {
+   "term": "definite integral",
+   "def": "The signed area between a curve and the axis over a stated interval. One number, not a curve.",
+   "taught": "area-under-a-curve",
+   "tags": [
+    "method"
+   ]
+  },
+  "deflection": {
+   "term": "deflection",
+   "def": "The transverse displacement of a beam from its unloaded position, measured perpendicular to its axis.",
+   "taught": null,
+   "tags": [
+    "mechanics"
+   ]
+  },
+  "delta-v": {
+   "term": "change in velocity",
+   "def": "The total change in a body's velocity over an event, written Δv. For a crash it is the approach speed plus any rebound speed, and it is the standard measure of severity.",
+   "taught": null,
+   "tags": [
+    "crash",
+    "mechanics"
+   ]
+  },
+  "double-root": {
+   "term": "double root",
+   "def": "A root where f touches zero without crossing it, so f has the same sign on both sides. No bracket containing it exists.",
+   "taught": "root-finding-fails",
+   "tags": [
+    "method"
+   ]
+  },
+  "encapsulation": {
+   "term": "encapsulation",
+   "def": "Naming a block of computation and fixing what crosses its boundary: declared inputs in, a returned value out, and nothing else either way.",
+   "taught": "program-shape-branching",
+   "tags": [
+    "programming"
+   ]
+  },
+  "error": {
+   "term": "error",
+   "def": "The gap between a model and the truth. It can be evaluated only where the truth is known, and fitting has not minimised it.",
+   "taught": "residual-and-error",
+   "tags": [
+    "method",
+    "error"
+   ]
+  },
+  "eulers-method": {
+   "term": "Euler's method",
+   "def": "The simplest stepping rule: advance the state by the step times the rate found at the start of the step. First order, and the cumulative integral of week 3 with the integrand recomputed each step.",
+   "taught": "from-a-rate-to-a-trajectory",
+   "tags": [
+    "method"
+   ]
+  },
+  "evaluation-budget": {
+   "term": "evaluation budget",
+   "def": "The number of times a method may compute f. The unit that matters whenever f is expensive, and the one that makes methods with different per-iteration costs comparable.",
+   "taught": "evaluations-are-the-currency",
+   "tags": [
+    "method"
+   ]
+  },
+  "expected-value": {
+   "term": "expected value",
+   "def": "The average a quantity would take over indefinitely many repetitions of the same measurement. A random error with expected value zero is as likely to be positive as negative.",
+   "taught": "bias-and-noise",
+   "tags": [
+    "statistics"
+   ]
+  },
+  "extrapolation": {
+   "term": "extrapolation",
+   "def": "Evaluating a fitted model outside the range of the data used to fit it. Parameter uncertainty is multiplied by the distance beyond that range.",
+   "taught": "extrapolation-amplifies",
+   "tags": [
+    "method"
+   ]
+  },
+  "fit-error": {
+   "term": "fit error",
+   "def": "Error measured on the data the model was fitted to. Adding parameters always reduces it.",
+   "taught": "fit-error-and-prediction-error",
+   "tags": [
+    "method",
+    "fitting"
+   ]
+  },
+  "flow": {
+   "term": "flow",
+   "def": "The order in which a program's steps execute: straight through, repeated by a loop, or selected by a branch.",
+   "taught": "program-shape-state-and-flow",
+   "tags": [
+    "programming"
+   ]
+  },
+  "fmvss": {
+   "term": "FMVSS 208",
+   "def": "The United States federal motor vehicle safety standard for occupant crash protection. It sets the injury assessment reference values a vehicle must meet, including HIC15 of 700.",
+   "taught": null,
+   "tags": [
+    "standards",
+    "crash"
+   ]
+  },
+  "forward-difference": {
+   "term": "forward difference",
+   "def": "Estimating a derivative from a point and the one after it: (f(x+h) − f(x)) / h. Its truncation error is proportional to h.",
+   "taught": "finite-differences",
+   "tags": [
+    "method"
+   ]
+  },
+  "frequency": {
+   "term": "frequency",
+   "def": "How many times something repeats per unit time, measured in hertz (Hz), where one hertz is once per second. A sample rate is a frequency; so is the rate at which a quantity oscillates.",
+   "taught": "discrete-evaluation",
+   "tags": [
+    "measurement"
+   ]
+  },
+  "gaussian-noise": {
+   "term": "Gaussian noise",
+   "def": "Random error following the normal distribution, characterised entirely by its mean and standard deviation. Most measurement scatter is modelled this way.",
+   "taught": null,
+   "tags": [
+    "statistics"
+   ]
+  },
+  "held-out-data": {
+   "term": "held-out data",
+   "def": "Data kept out of the fit and used afterwards to measure prediction error. The only direct way to find out how a model does on something it was not fitted to.",
+   "taught": "fit-error-and-prediction-error",
+   "tags": [
+    "method"
+   ]
+  },
+  "hic": {
+   "term": "Head Injury Criterion",
+   "def": "A number computed from a head acceleration record, defined as the largest value a particular weighted average attains over any window no longer than a stated limit. Written HIC15 or HIC36 for the 15 ms and 36 ms limits.",
+   "taught": "windowed-optimum",
+   "tags": [
+    "crash",
+    "standards"
+   ]
+  },
+  "initial-condition": {
+   "term": "initial condition",
+   "def": "A known value of the integrated quantity at one instant, which supplies the constant of integration.",
+   "taught": "the-constant-of-integration",
+   "tags": [
+    "method"
+   ]
+  },
+  "interpolation": {
+   "term": "interpolation",
+   "def": "Constructing a curve that passes through every data point. Appropriate when the values are exact, and a way of following the noise when they are not.",
+   "taught": "interpolation-and-regression",
+   "tags": [
+    "method"
+   ]
+  },
+  "least-squares": {
+   "term": "least squares",
+   "def": "Choosing model parameters to minimise the sum of squared residuals. One convention among several: it is the choice that minimises the 2-norm of the residual vector.",
+   "taught": "least-squares-is-one-norm",
+   "tags": [
+    "method"
+   ]
+  },
+  "linear-in-parameters": {
+   "term": "linear in the parameters",
+   "def": "A model in which each unknown appears only multiplied by a function of the independent variable and added to the others. It is this, not the shape of the curve, that gives least squares a closed-form solution.",
+   "taught": "linearity-in-the-parameters",
+   "tags": [
+    "method"
+   ]
+  },
+  "literal": {
+   "term": "literal",
+   "def": "A value written directly into the source code rather than reached through a name, as 1e-6 and 0.5 are. Contrast a constant, which is a name whose value is fixed for the run.",
+   "taught": "program-shape-branching",
+   "tags": [
+    "programming"
+   ]
+  },
+  "longitudinal": {
+   "term": "longitudinal",
+   "def": "Along the vehicle's fore-and-aft axis. The other two vehicle axes are lateral, across the vehicle, and vertical.",
+   "taught": null,
+   "tags": [
+    "crash"
+   ]
+  },
+  "loop": {
+   "term": "loop",
+   "def": "A block of code executed repeatedly. What carries from one pass to the next is the loop's state; everything else is rebuilt each time.",
+   "taught": "program-shape-state-and-flow",
+   "tags": [
+    "programming"
+   ]
+  },
+  "machine-epsilon": {
+   "term": "machine epsilon",
+   "def": "The smallest number that, added to 1, gives something other than 1 in the machine's arithmetic. About 2.2×10⁻¹⁶ in double precision.",
+   "taught": "the-error-minimum",
+   "tags": [
+    "method"
+   ]
+  },
+  "magic-number": {
+   "term": "magic number",
+   "def": "A literal sitting inside an expression with nothing to say what it means or where it came from. It cannot be questioned by a reader and cannot be found reliably when it has to change.",
+   "taught": "program-shape-branching",
+   "tags": [
+    "programming"
+   ]
+  },
+  "model-form": {
+   "term": "model form",
+   "def": "The shape of a model — a line, a parabola, a decaying exponential — chosen before fitting. Fitting adjusts the parameters within a form; it cannot change the form.",
+   "taught": "model-form-and-parameters",
+   "tags": [
+    "method"
+   ]
+  },
+  "moving-average": {
+   "term": "moving average",
+   "def": "Replacing each sample by the mean of a window of samples around it. The simplest smoothing filter, and the one whose cost is easiest to state.",
+   "taught": "smoothing",
+   "tags": [
+    "method"
+   ]
+  },
+  "newtons-method": {
+   "term": "Newton's method",
+   "def": "A root-finding method that follows the tangent at the current estimate down to the axis and takes the crossing as the next estimate. It needs the derivative and keeps no interval.",
+   "taught": "newton-and-secant",
+   "tags": [
+    "method"
+   ]
+  },
+  "normal-equations": {
+   "term": "normal equations",
+   "def": "The square linear system whose solution is the least-squares fit of a model linear in its parameters. Entry (i,j) is the sum over the data of the ith and jth model functions multiplied together.",
+   "taught": 18,
+   "tags": [
+    "fitting",
+    "linear-algebra"
+   ]
+  },
+  "nyquist": {
+   "term": "Nyquist frequency",
+   "def": "Half the sample rate. It is the fastest oscillation a record at that rate can represent; anything faster is recorded as something slower, which is aliasing.",
+   "taught": "discrete-evaluation",
+   "tags": [
+    "measurement"
+   ]
+  },
+  "order-of-accuracy": {
+   "term": "order of accuracy",
+   "def": "The exponent p in error ∝ h^p, relating a method's error to its step size. It is measured by halving the step and taking the ratio of successive errors: a ratio of 2 is order 1, of 4 order 2, of 16 order 4.",
+   "taught": "order-of-accuracy-measured",
+   "tags": [
+    "method"
+   ]
+  },
+  "overfitting": {
+   "term": "overfitting",
+   "def": "Using enough free parameters that the model follows the noise in the data as well as the signal. The residual falls; the error against the truth rises.",
+   "taught": "model-form-and-parameters",
+   "tags": [
+    "method"
+   ]
+  },
+  "partial-pivoting": {
+   "term": "partial pivoting",
+   "def": "Swapping the row with the largest entry in the current column to the top before eliminating with it. Costs one comparison per column and prevents division by a small pivot, which would otherwise cancel the leading digits of every row it touches.",
+   "taught": 18,
+   "tags": [
+    "linear-algebra"
+   ]
+  },
+  "phase-lag": {
+   "term": "phase lag",
+   "def": "The shift in time a filter introduces. A filter applied once delays events; applied forward and then backward, the two shifts cancel and it delays nothing.",
+   "taught": "phase-lag",
+   "tags": [
+    "method",
+    "standards"
+   ]
+  },
+  "pole": {
+   "term": "pole",
+   "def": "A point where a function grows without bound because its denominator goes to zero. A function can change sign across a pole without having a root there.",
+   "taught": "root-finding-fails",
+   "tags": [
+    "method"
+   ]
+  },
+  "prediction-error": {
+   "term": "prediction error",
+   "def": "Error measured on data the model was not fitted to. Adding parameters reduces it only up to a point, after which it rises.",
+   "taught": "fit-error-and-prediction-error",
+   "tags": [
+    "method",
+    "fitting"
+   ]
+  },
+  "prefix-sum": {
+   "term": "prefix sum",
+   "def": "An array whose entry i holds the running total of the input up to i. Once built, the total over any range is the difference of two of its entries.",
+   "taught": "windowed-optimum",
+   "tags": [
+    "method"
+   ]
+  },
+  "pulse": {
+   "term": "pulse",
+   "def": "The acceleration record of a vehicle through an impact, so called because it is one brief excursion: near zero before contact, tens of g for a few tens of milliseconds, near zero again. The envelope has that shape, while the signal inside it oscillates as the structure folds.",
+   "taught": null,
+   "tags": [
+    "crash",
+    "measurement"
+   ]
+  },
+  "regression": {
+   "term": "regression",
+   "def": "Fitting a model with fewer parameters than data points, so it cannot pass through them all. Its residuals are what is left of the noise it declined to follow.",
+   "taught": "interpolation-and-regression",
+   "tags": [
+    "method"
+   ]
+  },
+  "resampling": {
+   "term": "resampling",
+   "def": "Estimating the spread of a result by perturbing the inputs within their known scatter, re-running the whole analysis, and collecting the distribution of answers.",
+   "taught": "propagating-by-resampling",
+   "tags": [
+    "method",
+    "statistics"
+   ]
+  },
+  "residual": {
+   "term": "residual",
+   "def": "The value of f at an estimate: how far the equation is from being satisfied there. Distinct from the error, which is how far the estimate is from the true root.",
+   "taught": "residual-and-error",
+   "tags": [
+    "method",
+    "statistics"
+   ]
+  },
+  "residual-structure": {
+   "term": "residual structure",
+   "def": "Pattern in the residuals — runs of the same sign, a trend, a shape — as opposed to random scatter. Structure says the model form is wrong, whatever the residuals' size.",
+   "taught": "residual-structure",
+   "tags": [
+    "method"
+   ]
+  },
+  "resonance": {
+   "term": "resonance",
+   "def": "The large response a lightly damped structure gives when it is driven near its natural frequency. The peak is narrow in frequency, which is what makes it easy for a coarse sweep to miss.",
+   "taught": "discrete-evaluation",
+   "tags": [
+    "mechanics"
+   ]
+  },
+  "restitution": {
+   "term": "coefficient of restitution",
+   "def": "The ratio of separation speed to approach speed in an impact. Zero means the bodies stay together; one means no kinetic energy is lost.",
+   "taught": null,
+   "tags": [
+    "mechanics"
+   ]
+  },
+  "resultant": {
+   "term": "resultant",
+   "def": "The magnitude of a vector quantity measured on three perpendicular axes: the square root of the sum of the squared components. It has no direction and is never negative.",
+   "taught": null,
+   "tags": [
+    "measurement"
+   ]
+  },
+  "rigid-barrier": {
+   "term": "rigid barrier",
+   "def": "A fixed, non-deforming concrete block used as the impact surface, so that essentially all of the deformation happens in the vehicle.",
+   "taught": null,
+   "tags": [
+    "crash"
+   ]
+  },
+  "rk4": {
+   "term": "RK4",
+   "def": "The classical fourth-order Runge-Kutta method: four rate evaluations per step, combined so the errors of orders 1 through 4 cancel.",
+   "taught": "order-of-accuracy-measured",
+   "tags": [
+    "method"
+   ]
+  },
+  "rounding-error": {
+   "term": "rounding error",
+   "def": "The error introduced by storing numbers to finite precision. In a difference formula it does not shrink with the step, so dividing by the step magnifies it.",
+   "taught": "the-error-minimum",
+   "tags": [
+    "method"
+   ]
+  },
+  "sample-rate": {
+   "term": "sample rate",
+   "def": "How many measurements are recorded per second, in hertz. Its reciprocal is the spacing Δt between consecutive samples.",
+   "taught": "anatomy-of-a-measured-signal",
+   "tags": [
+    "measurement"
+   ]
+  },
+  "secant-method": {
+   "term": "secant method",
+   "def": "A root finder that replaces Newton's tangent with the line through the two most recent estimates. It needs no derivative and costs one evaluation per step.",
+   "taught": "newton-and-secant",
+   "tags": [
+    "method"
+   ]
+  },
+  "simply-supported": {
+   "term": "simply supported",
+   "def": "A beam resting on two supports that carry vertical force but apply no moment, so the bending moment is zero at each support.",
+   "taught": null,
+   "tags": [
+    "mechanics"
+   ]
+  },
+  "spline": {
+   "term": "spline",
+   "def": "A curve built from low-degree polynomials on each interval, joined smoothly. Interpolates without the oscillation a single high-degree polynomial suffers.",
+   "taught": "interpolation-and-regression",
+   "tags": [
+    "method"
+   ]
+  },
+  "stability": {
+   "term": "stability",
+   "def": "Whether a method's solution stays bounded. It fails abruptly past a threshold set by the step size and the system, and far past the step at which the answer stopped being accurate.",
+   "taught": "stability-and-accuracy",
+   "tags": [
+    "method"
+   ]
+  },
+  "standard-deviation": {
+   "term": "standard deviation",
+   "def": "A measure of how far values typically fall from their mean: the square root of the average squared distance from it.",
+   "taught": null,
+   "tags": [
+    "statistics"
+   ]
+  },
+  "standard-gravity": {
+   "term": "standard gravity",
+   "def": "The conventional acceleration 9.80665 m/s², written g. Accelerations are often quoted as multiples of it.",
+   "taught": null,
+   "tags": [
+    "units"
+   ]
+  },
+  "state": {
+   "term": "state",
+   "def": "The set of named values that exist at a given point in a program's execution. A single number and an array of a million are both state.",
+   "taught": "program-shape-state-and-flow",
+   "tags": [
+    "programming"
+   ]
+  },
+  "stencil": {
+   "term": "stencil",
+   "def": "The set of sample points a difference formula uses. A wider stencil can cancel more Taylor terms, or average away more noise, but reaches further from the point of interest.",
+   "taught": "finite-differences",
+   "tags": [
+    "method"
+   ]
+  },
+  "sweep": {
+   "term": "sweep",
+   "def": "Evaluating a quantity at a chosen set of input values and collecting the results, in order to see how one depends on the other.",
+   "taught": "discrete-evaluation",
+   "tags": [
+    "method"
+   ]
+  },
+  "symplectic": {
+   "term": "symplectic method",
+   "def": "A stepping rule that preserves a structural property of the equations — for mechanics, that it does not manufacture energy — usually at the cost of accuracy.",
+   "taught": "stability-and-accuracy",
+   "tags": [
+    "method"
+   ]
+  },
+  "time-series": {
+   "term": "time series",
+   "def": "A sequence of values indexed by time. Every channel in a crash record is one: the values are stored in order, and the instant each belongs to comes from the time of the first sample and the sampling interval.",
+   "taught": "anatomy-of-a-measured-signal",
+   "tags": [
+    "measurement"
+   ]
+  },
+  "tolerance": {
+   "term": "tolerance",
+   "def": "The threshold a routine tests against to decide it has finished. Usually a bound on the size of f at the current estimate, which is not the same as a bound on the error in the estimate.",
+   "taught": "bisection",
+   "tags": [
+    "method"
+   ]
+  },
+  "trapezoid-rule": {
+   "term": "trapezoid rule",
+   "def": "Estimating the area under a curve by joining consecutive samples with straight lines and adding the areas of the trapezoids that result.",
+   "taught": "area-under-a-curve",
+   "tags": [
+    "method"
+   ]
+  },
+  "truncation-error": {
+   "term": "truncation error",
+   "def": "The error a finite-difference formula would have on a machine of infinite precision: the size of the Taylor terms the formula drops. It falls as the step falls.",
+   "taught": "the-error-minimum",
+   "tags": [
+    "method"
+   ]
+  },
+  "udl": {
+   "term": "uniformly distributed load",
+   "def": "A load spread evenly along a beam, quoted as force per unit length. Written w, in N/m or kN/m.",
+   "taught": null,
+   "tags": [
+    "mechanics"
+   ]
+  },
+  "zero-phase-filtering": {
+   "term": "zero-phase filtering",
+   "def": "Running the same filter over a record twice, once forwards and once backwards, so the two equal and opposite time shifts cancel exactly. It buys that cancellation with a filter that uses the future, which a real-time filter cannot do.",
+   "taught": "phase-lag",
+   "tags": [
+    "method",
+    "standards"
+   ]
+  }
+ }
+}

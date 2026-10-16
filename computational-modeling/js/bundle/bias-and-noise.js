@@ -1,0 +1,1455 @@
+/* Generated bundle: kit, demo, page script. Do not edit.
+   Source: src/kit.js, src/demos/bias-and-noise.js, src/page.js */
+
+const $ = (s, r = document) => r.querySelector(s);
+const svgEl = (n, a = {}) => { const e = document.createElementNS('http://www.w3.org/2000/svg', n);
+  for (const k in a) e.setAttribute(k, a[k]); return e; };
+
+/* cumulative trapezoid: s[i] is the integral from the start up to sample i.
+   Shared because pages 5-8 and 25 all build one. */
+function integrate(y, dt) {
+  const s = new Float64Array(y.length);
+  for (let i = 1; i < y.length; i++) s[i] = s[i-1] + (y[i] + y[i-1]) * 0.5 * dt;
+  return s;
+}
+
+function extent(a){let lo=Infinity,hi=-Infinity;for(const v of a){if(!isFinite(v))continue;
+  if(v<lo)lo=v;if(v>hi)hi=v} if(!isFinite(lo)||lo===hi){lo=(isFinite(lo)?lo:0)-1;hi=lo+2}return [lo,hi]}
+function niceTicks(lo,hi,want=4){const span=hi-lo;if(!(span>0))return[lo];
+  const mag=Math.pow(10,Math.floor(Math.log10(span/want)));
+  let best=null;
+  for(const m of [1,2,2.5,5,10,20]){const step=m*mag;
+    const cnt=Math.floor(hi/step+1e-9)-Math.ceil(lo/step-1e-9)+1;
+    if(cnt<2||cnt>12)continue;
+    const score=Math.abs(cnt-want);
+    if(!best||score<best.score)best={step,score};}
+  const step=best?best.step:span/want,out=[];
+  for(let v=Math.ceil(lo/step-1e-9)*step;v<=hi+step*1e-9;v+=step)
+    out.push(Math.abs(v)<step*1e-9?0:v);
+  return out}
+const fmt = step => {
+  const a = Math.abs(step);
+  if (a < 1e-3 || a >= 1e5) return v => v === 0 ? '0' : v.toExponential(1);
+  let dp = 0;
+  while (dp < 8 && Math.abs(parseFloat(a.toFixed(dp)) - a) > a * 1e-9) dp++;
+  return v => v.toFixed(dp);
+};
+const MINUS=s=>String(s).replace('-','−');
+const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴',
+           '5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+const supNum=n=>String(n).split('').map(c=>SUP[c]||c).join('');
+
+/* panel(): one stacked plot. Time series or any other x quantity.
+   opts on each render: pred, label, marks, bands, rings, iterates, hlines. */
+/* decade ticks for a log axis, and log-spaced sampling to go with them */
+function decadeTicks(lo,hi){const out=[];
+  for(let e=Math.ceil(Math.log10(lo)-1e-9);e<=Math.floor(Math.log10(hi)+1e-9);e++)out.push(Math.pow(10,e));
+  return out.length>=2?out:[lo,hi]}
+function logspace(a,b,n){const x=new Float64Array(n);
+  const la=Math.log10(a),lb=Math.log10(b);
+  for(let i=0;i<n;i++)x[i]=Math.pow(10,la+(lb-la)*i/(n-1));
+  return x}
+
+let CGP_UID = 0;
+function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms',xScale=1000,
+                       yClamp=null,xLog=false,yLog=false,lens=false,lensZoom=6,
+                       lensZoomY=null}){
+  const W=900,PADL=78,PADR=14,PADT=20,PADB=xAxis?32:12;
+  const svg=svgEl('svg',{viewBox:`0 0 ${W} ${height}`,role:'img',class:'cgp'});
+  svg.setAttribute('aria-label',`${label} in ${unit} against ${xLabel}`);
+  parent.appendChild(svg);
+  const gBand=svgEl('g'),gGrid=svgEl('g'),gLines=svgEl('g'),gText=svgEl('g'),gMark=svgEl('g');
+  /* the drawn content lives in one identified group so the lens can <use> it
+     rather than redraw or recompute anything */
+  const uid='cgp'+(++CGP_UID);
+  const gPlot=svgEl('g',{id:uid+'-plot'});
+  gPlot.append(gBand,gGrid,gLines,gText,gMark);
+  svg.appendChild(gPlot);
+  const yl=svgEl('text',{x:0,y:12,class:'ylab'});gText.appendChild(yl);
+  const ghost=svgEl('path',{class:'ghost'}),trace=svgEl('path',{class:'trace'}),
+        pred=svgEl('path',{class:'pred'}),zero=svgEl('line',{class:'zero'});
+  gLines.append(zero,ghost,pred,trace);
+  const fmtZ=v=>v>=100?String(Math.round(v)):(v>=10?v.toFixed(0):v.toFixed(1));
+  /* ---- the magnifier ---- */
+  let lensAt=null;                       /* [x,y] in user units, or null */
+  /* the last render publishes its data and its coordinate mapping, so the lens
+     can ride the curve instead of wherever the pointer happens to be */
+  let curT=null,curY=null,curMapX=null,curMapY=null;
+  let lensSync=null;                     /* refreshes the lens copy, per render */
+  /* the magnification can be set per render, because how much stretch is useful
+     depends on the state the demo is in -- a trapezoid error falls as h^2 */
+  let zx=lensZoom, zy=lensZoomY===null?lensZoom:lensZoomY;
+  if(lens){
+    const LW=210,LH=140;
+    const defs=svgEl('defs');
+    const clip=svgEl('clipPath',{id:uid+'-clip'});
+    const clipR=svgEl('rect',{x:0,y:0,width:LW,height:LH,rx:3});
+    clip.appendChild(clipR);defs.appendChild(clip);
+    const gLens=svgEl('g',{class:'lens'});
+    const back=svgEl('rect',{class:'lensback',x:0,y:0,width:LW,height:LH,rx:3});
+    const inner=svgEl('g',{'clip-path':`url(#${uid}-clip)`});
+    /* a clone, not a <use>: the stylesheet's descendant selectors do not reach
+       into a use-element's shadow tree, and every shape would render black */
+    const use=svgEl('g');
+    inner.appendChild(use);
+    lensSync=()=>{
+      const c=gPlot.cloneNode(true);
+      c.removeAttribute('id');
+      c.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));
+      /* magnify the geometry, not the ink: point markers are shrunk by the same
+         factor the lens enlarges by, and strokes are held at their drawn width
+         by non-scaling-stroke in the stylesheet. Otherwise a 3.5 px dot becomes
+         a 28 px blob and covers the gap the lens exists to show. */
+      const shrink=Math.max(zx,zy);
+      c.querySelectorAll('circle').forEach(e=>{
+        const r=parseFloat(e.getAttribute('r'));
+        if(isFinite(r))e.setAttribute('r',r/shrink);
+      });
+      c.querySelectorAll('rect').forEach(e=>{
+        const rx=parseFloat(e.getAttribute('rx'));
+        if(isFinite(rx))e.setAttribute('rx',rx/shrink);
+      });
+      /* axis labels and tick text magnify into nonsense, so drop them */
+      c.querySelectorAll('text').forEach(e=>e.remove());
+      use.replaceChildren(c);
+    };
+    const frame=svgEl('rect',{class:'lensframe',x:0,y:0,width:LW,height:LH,rx:3});
+    const cross=svgEl('circle',{class:'lenscross',r:2.5});
+    const tag=svgEl('text',{class:'lenstag'});
+    gLens.append(back,inner,frame,tag);
+    svg.append(defs,gLens,cross);
+    gLens.style.display=cross.style.display='none';
+
+    const place=()=>{
+      if(!lensAt){gLens.style.display=cross.style.display='none';return}
+      const [px,py]=lensAt;
+      /* keep the box on the canvas, and away from the point it magnifies */
+      let bx=px+18, by=py-LH-14;
+      if(bx+LW>W-2)bx=px-LW-18;
+      if(bx<2)bx=2;
+      if(by<2)by=py+18;
+      if(by+LH>height-2)by=Math.max(2,height-LH-2);
+      gLens.setAttribute('transform',`translate(${bx} ${by})`);
+      /* map the magnified point to the centre of the box */
+      use.setAttribute('transform',
+        `translate(${LW/2} ${LH/2}) scale(${zx} ${zy}) translate(${-px} ${-py})`);
+      cross.setAttribute('cx',px);cross.setAttribute('cy',py);
+      tag.setAttribute('x',6);tag.setAttribute('y',LH-6);
+      tag.textContent=(zx===zy)?('\u00d7'+fmtZ(zx))
+        :('\u00d7'+fmtZ(zx)+' across, \u00d7'+fmtZ(zy)+' up');
+      gLens.style.display=cross.style.display='';
+    };
+
+    /* vertically the lens follows the plotted series, because at these
+       magnifications a free pointer misses the curve almost every time and the
+       thing worth magnifying is always on it */
+    const onCurve=x=>{
+      if(!curT||!curY||!curMapX||!curMapY)return null;
+      let best=null,bd=Infinity;
+      for(let i=0;i<curT.length;i++){
+        const d=Math.abs(curMapX(curT[i])-x);
+        if(d<bd&&isFinite(curY[i])){bd=d;best=i}
+      }
+      if(best===null||bd>40)return null;
+      const y=curMapY(curY[best]);
+      return isFinite(y)?y:null;
+    };
+    const at=e=>{
+      const r=svg.getBoundingClientRect();
+      const x=(e.clientX-r.left)/r.width*W, y=(e.clientY-r.top)/r.height*height;
+      if(x<PADL||x>W-PADR||y<PADT||y>height-PADB){lensAt=null;place();return}
+      const cy=onCurve(x);
+      lensAt=[x, cy===null?y:Math.max(PADT,Math.min(height-PADB,cy))];
+      place();
+    };
+    svg.addEventListener('pointermove',at);
+    svg.addEventListener('pointerleave',()=>{lensAt=null;place()});
+    svg.classList.add('haslens');
+    /* keyboard: the lens is a convenience, so it is not the only way to read
+       the figure, but it should not be mouse-only either */
+    svg.setAttribute('tabindex','0');
+    svg.addEventListener('keydown',e=>{
+      const step=(W-PADL-PADR)/40;
+      if(!lensAt)lensAt=[(PADL+W-PADR)/2,height/2];
+      if(e.key==='ArrowLeft')lensAt[0]-=step;
+      else if(e.key==='ArrowRight')lensAt[0]+=step;
+      else if(e.key==='ArrowUp')lensAt[1]-=step;
+      else if(e.key==='ArrowDown')lensAt[1]+=step;
+      else if(e.key==='Escape'){lensAt=null;place();return}
+      else return;
+      e.preventDefault();
+      lensAt[0]=Math.max(PADL,Math.min(W-PADR,lensAt[0]));
+      lensAt[1]=Math.max(PADT,Math.min(height-PADB,lensAt[1]));
+      place();
+    });
+  }
+
+  /* Coordinate precision in the path strings. One decimal is a 0.05-unit
+     quantum, which is a twentieth of a pixel at 1x and invisible -- until the
+     lens magnifies it a hundredfold and starts putting trapezoid tops above the
+     curve they are supposed to sit under. Three decimals is 0.1 px at the
+     highest magnification the lens offers. */
+  const P=3;
+
+  return function update(t,ys,yg,tRange,opts={}){
+    const hlines=opts.hlines||[];
+    const predFn=opts.pred||null, marks=opts.marks||[], bands=opts.bands||[],
+          rings=opts.rings||[], iterates=opts.iterates||null, polys=opts.polys||[],
+          curves=opts.curves||[];
+    /* zero, ghost, pred and trace persist across renders; anything else in
+       gLines was added by the last render and has to go, or extra curves and
+       scatter points accumulate every time a control moves */
+    for(const el of [...gLines.children])
+      if(el!==zero&&el!==ghost&&el!==pred&&el!==trace)el.remove();
+    const [t0,t1]=tRange;
+    const vis=[];for(let i=0;i<t.length;i++)if(t[i]>=t0&&t[i]<=t1)vis.push(i);
+    const pick=arr=>vis.map(i=>arr[i]);
+    /* opts.yRange fixes the axis for this render only, so a demo can hold its
+       axes still while a control moves the curve on them */
+    const yFix = opts.yRange || yClamp;
+    let [lo,hi] = yFix ? [yFix[0],yFix[1]]
+                       : extent(yg?[...pick(ys),...pick(yg)]:pick(ys));
+    if(!yFix){
+      if(yLog){const pos=[...pick(ys),...(yg?pick(yg):[])].filter(v=>v>0&&isFinite(v));
+        lo=Math.pow(10,Math.floor(Math.log10(Math.min(...pos))));
+        hi=Math.pow(10,Math.ceil(Math.log10(Math.max(...pos))));}
+      else {const pad=(hi-lo)*0.10;lo-=pad;hi+=pad;}
+    }
+    /* on a log axis everything is positioned by log10 of the value; the tick
+       labels still print the value itself */
+    const gx=v=>xLog?Math.log10(v):v, gy=v=>yLog?Math.log10(v):v;
+    const T0=gx(t0),T1=gx(t1),LO=gy(lo),HI=gy(hi);
+    const X=v=>PADL+(gx(v)-T0)/(T1-T0)*(W-PADL-PADR);
+    const Y=v=>PADT+(HI-gy(v))/(HI-LO)*(height-PADT-PADB);
+    /* hand the lens this render's data and mapping */
+    curT=t;curY=ys;curMapX=X;curMapY=Y;
+    /* a render setting lensZoom moves both axes: the magnifier is isotropic
+       unless a caller deliberately asks for a stretch */
+    if(opts.lensZoom!==undefined)zx=zy=opts.lensZoom;
+    if(opts.lensZoomY!==undefined)zy=opts.lensZoomY;
+    if(lensSync)queueMicrotask(lensSync);   /* after this render has drawn */
+    const inY=v=>isFinite(v)&&(yLog?v>0:true)&&v>=lo&&v<=hi;
+    const path=arr=>{const step=Math.max(1,Math.floor(vis.length/900));let d='',open=false;
+      for(let k=0;k<vis.length;k+=step){const i=vis[k];
+        if(!inY(arr[i])){open=false;continue}
+        d+=(open?'L':'M')+X(t[i]).toFixed(P)+' '+Y(arr[i]).toFixed(P);open=true}
+      return d};
+    /* opts.scatter: further point sets [{x, y, cls, r}] drawn under the main
+       series, such as the raw values a smoothed series is compared with */
+    for(const s of (opts.scatter||[]))
+      for(let i=0;i<s.x.length;i++){
+        if(s.x[i]<t0||s.x[i]>t1||!inY(s.y[i]))continue;
+        gLines.appendChild(svgEl('circle',{class:s.cls||'scatter',cx:X(s.x[i]),cy:Y(s.y[i]),r:s.r||3}));
+      }
+    /* opts.dots: the samples are a scatter, not a series, so draw the points
+       and suppress the line that would imply an order between them */
+    if(opts.dots){
+      trace.setAttribute('d','');
+      for(const i of vis){
+        if(!isFinite(ys[i])||!inY(ys[i]))continue;
+        gLines.appendChild(svgEl('circle',{class:opts.dotCls||'scatter',
+          cx:X(t[i]),cy:Y(ys[i]),r:opts.dotR||3}));
+      }
+    } else trace.setAttribute('d',path(ys));
+    if(yg){ghost.setAttribute('d',path(yg));ghost.style.display=''}else ghost.style.display='none';
+    if(predFn){let d='';for(const v of (xLog?logspace(t0,t1,40):[t0,t1]))
+        d+=(d?'L':'M')+X(v)+' '+Y(predFn(v));
+      pred.setAttribute('d',d);pred.style.display=''}else pred.style.display='none';
+    if(yLog){zero.style.display='none';}
+    else{zero.style.display='';const y0=Y(0);
+      zero.setAttribute('x1',PADL);zero.setAttribute('x2',W-PADR);
+      zero.setAttribute('y1',y0);zero.setAttribute('y2',y0);}
+
+    gBand.textContent='';
+    /* a horizontal threshold: a design limit, a tolerance, a level the prose
+       names. Drawn in the band group so it sits under the trace rather than
+       over it, and labelled at the left where the axis already is. */
+    for(const hl of hlines){
+      if(!inY(hl.y))continue;
+      const hy=Y(hl.y);
+      gBand.appendChild(svgEl('line',{class:hl.cls||'limit',x1:PADL,x2:W-PADR,y1:hy,y2:hy}));
+      if(hl.text){
+        const tx=svgEl('text',{x:W-PADR,y:hy-5,'text-anchor':'end',class:'mk'});
+        tx.textContent=hl.text;gBand.appendChild(tx);
+      }
+    }
+    for(const b of bands){
+      const bx0=X(Math.max(b.x0,t0)),bx1=X(Math.min(b.x1,t1));
+      if(bx1<=bx0)continue;
+      gBand.appendChild(svgEl('rect',{class:b.cls||'band',x:bx0,y:PADT,
+        width:bx1-bx0,height:height-PADT-PADB}));
+      for(const bx of [bx0,bx1])
+        gBand.appendChild(svgEl('line',{class:'bandedge',x1:bx,x2:bx,y1:PADT,y2:height-PADB}));
+    }
+
+    /* extra parametric curves, each with its own x. The trace and ghost share
+       one x array, which is right for a time series and cannot express two
+       trajectories in a plane; a phase portrait needs this. */
+    for(const c of curves){
+      let d='',open=false;
+      const st=Math.max(1,Math.floor(c.x.length/900));
+      for(let i=0;i<c.x.length;i+=st){
+        if(c.x[i]<t0||c.x[i]>t1||!inY(c.y[i])){open=false;continue}
+        d+=(open?'L':'M')+X(c.x[i]).toFixed(P)+' '+Y(c.y[i]).toFixed(P);open=true;
+      }
+      if(d)gLines.appendChild(svgEl('path',{class:c.cls||'ghost',d}));
+    }
+
+    /* filled shapes in data coordinates: integration panels, and anything else
+       whose area is the thing being shown */
+    for(const q of polys){
+      const d=q.pts.map((p2,i)=>(i?'L':'M')+X(p2.x).toFixed(P)+' '+Y(p2.y).toFixed(P)).join('')+'Z';
+      gBand.appendChild(svgEl('path',{class:q.cls||'poly',d}));
+    }
+
+    gGrid.textContent='';[...gText.querySelectorAll('.tick')].forEach(e=>e.remove());
+    const yt=yLog?decadeTicks(lo,hi):niceTicks(lo,hi,4);
+    const maxAbs=Math.max(...yt.map(Math.abs));
+    let ex=0;
+    if(!yLog&&maxAbs>0){const m=Math.floor(Math.log10(maxAbs)); if(m<-2||m>4) ex=m;}
+    const sc=Math.pow(10,ex);
+    const uparen = (unit||ex) ? ` (${ex?'×10'+supNum(ex)+(unit?' ':''):''}${unit})` : '';
+    yl.textContent=`${opts.label||label}${uparen}`;
+    const yf=yLog?(v=>'10'+supNum(Math.round(Math.log10(v))))
+                 :fmt((yt.length>1?yt[1]-yt[0]:1)/sc);
+    yt.forEach(v=>{const y=Y(v);
+      gGrid.appendChild(svgEl('line',{class:'grid',x1:PADL,x2:W-PADR,y1:y,y2:y}));
+      const tx=svgEl('text',{x:PADL-8,y:y+4,'text-anchor':'end',class:'tick'});
+      tx.textContent=yLog?yf(v):MINUS(yf(v/sc));gText.appendChild(tx)});
+    if(xAxis){const xt=xLog?decadeTicks(t0,t1):niceTicks(t0,t1,6),yb=height-PADB+14;
+      const xf=xLog?(v=>'10'+supNum(Math.round(Math.log10(v))))
+                   :fmt(xt.length>1?(xt[1]-xt[0])*xScale:1);
+      xt.forEach(v=>{
+        if(xLog)gGrid.appendChild(svgEl('line',{class:'grid',x1:X(v),x2:X(v),y1:PADT,y2:height-PADB}));
+        const tx=svgEl('text',{x:X(v),y:yb,'text-anchor':'middle',class:'tick'});
+        tx.textContent=xLog?xf(v):MINUS(xf(v*xScale));gText.appendChild(tx)});
+      const lab=svgEl('text',{x:W-PADR,y:yb+14,'text-anchor':'end',class:'tick'});
+      lab.textContent=xUnit?`${xLabel} (${xUnit})`:xLabel;gText.appendChild(lab)}
+
+    gMark.textContent='';
+    for(const r of rings){
+      if(r.x<t0||r.x>t1)continue;
+      gMark.appendChild(svgEl('circle',{class:'rootmk',cx:X(r.x),cy:Y(r.y||0),r:6}));
+      if(r.text){const tx=svgEl('text',{x:X(r.x),y:Y(r.y||0)+20,'text-anchor':'middle',class:'mk'});
+        tx.textContent=r.text;gMark.appendChild(tx)}
+    }
+    if(iterates){
+      const vis2=[];
+      iterates.forEach((q,k)=>{
+        if(q.x<t0||q.x>t1||!inY(q.y))return;
+        vis2.push({px:X(q.x),py:Y(q.y),k});
+      });
+      let d='';
+      for(const q of vis2) d+=(d?'L':'M')+q.px.toFixed(P)+' '+q.py.toFixed(P);
+      if(d) gMark.appendChild(svgEl('path',{class:'itpath',d}));
+      /* keep the last of any run that lands within 10 px, so a converged run
+         shows one dot carrying its true step number */
+      const keep=[];
+      for(const q of vis2){
+        const prev=keep[keep.length-1];
+        if(prev&&Math.hypot(q.px-prev.px,q.py-prev.py)<10) keep[keep.length-1]=q;
+        else keep.push(q);
+      }
+      for(const q of keep){
+        gMark.appendChild(svgEl('circle',{class:'itmk',cx:q.px,cy:q.py,r:7.5}));
+        const tx=svgEl('text',{x:q.px,y:q.py+3.4,'text-anchor':'middle',class:'itlab'});
+        tx.textContent=String(q.k);gMark.appendChild(tx);
+      }
+    }
+    for(const m of marks){
+      const mx=X(m.t),my=Y(m.y);
+      if(m.cast==='y'||m.cast==='both')
+        gMark.appendChild(svgEl('line',{class:'cast',x1:PADL,y1:my,x2:mx,y2:my}));
+      if(m.cast==='x'||m.cast==='both')
+        gMark.appendChild(svgEl('line',{class:'cast',x1:mx,y1:my,x2:mx,y2:height-PADB}));
+      /* ring: an open circle rather than a filled dot, for a point the method
+         did not visit. A filled dot in the same style as the evaluated points
+         reads as one of them. */
+      gMark.appendChild(m.square?svgEl('rect',{class:'bimk',x:mx-4.5,y:my-4.5,width:9,height:9})
+        :svgEl('circle',m.ring?{class:'rootmk',cx:mx,cy:my,r:5.5}
+                               :{class:'dot',cx:mx,cy:my,r:3.5}));
+      if(m.text){
+        const tx=svgEl('text',{x:mx+(m.dx||8),y:my+(m.dy||-8),class:'mk',
+          'text-anchor':m.anchor||'start'});
+        tx.textContent=m.text;gMark.appendChild(tx);
+      }
+    }
+  };
+}
+
+/* histogram(): the kit's second display primitive. Same axis machinery as
+   panel(), but bars over bins rather than a trace over samples. */
+function histogram(parent, {label, unit, height = 230, xLabel, xUnit, nbins = 48}) {
+  const W = 900, PADL = 62, PADR = 14, PADT = 20, PADB = 34;
+  const svg = svgEl('svg', {viewBox: `0 0 ${W} ${height}`, role: 'img', class: 'cgp'});
+  svg.setAttribute('aria-label', `${label} against ${xLabel}`);
+  parent.appendChild(svg);
+  const gBand = svgEl('g'), gGrid = svgEl('g'), gBars = svgEl('g'),
+        gText = svgEl('g'), gMark = svgEl('g');
+  svg.append(gBand, gGrid, gBars, gText, gMark);
+  const yl = svgEl('text', {x: 0, y: 12, class: 'ylab'}); gText.appendChild(yl);
+
+  return function update(values, opts = {}) {
+    const {truth = null, band = null, range = null, truthLabel = 'truth',
+           bandCls = 'claimband'} = opts;
+    gBand.textContent = ''; gGrid.textContent = ''; gBars.textContent = '';
+    gMark.textContent = '';
+    [...gText.querySelectorAll('.tick')].forEach(e => e.remove());
+    yl.textContent = `${label}${unit ? ' (' + unit + ')' : ''}`;
+
+    if (!values.length) return;
+    const sorted = [...values].sort((a, b) => a - b);
+    const pct = q => sorted[Math.min(sorted.length - 1,
+                     Math.max(0, Math.round(q * (sorted.length - 1))))];
+    let [x0, x1] = range || [pct(0.01), pct(0.99)];
+    if (truth !== null) { x0 = Math.min(x0, truth - 0.02); x1 = Math.max(x1, truth + 0.02); }
+    if (!(x1 > x0)) { x0 -= 0.05; x1 += 0.05; }
+    const pad = (x1 - x0) * 0.04; x0 -= pad; x1 += pad;
+
+    const counts = new Array(nbins).fill(0);
+    let outside = 0;
+    for (const v of values) {
+      const k = Math.floor((v - x0) / (x1 - x0) * nbins);
+      if (k < 0 || k >= nbins) { outside++; continue; }
+      counts[k]++;
+    }
+    const cmax = Math.max(1, ...counts);
+    const X = v => PADL + (v - x0) / (x1 - x0) * (W - PADL - PADR);
+    const Y = c => PADT + (1 - c / cmax) * (height - PADT - PADB);
+
+    if (band) {
+      const bx0 = X(Math.max(band[0], x0)), bx1 = X(Math.min(band[1], x1));
+      gBand.appendChild(svgEl('rect', {class: bandCls, x: bx0, y: PADT,
+        width: Math.max(1.5, bx1 - bx0), height: height - PADT - PADB}));
+    }
+
+    const yt = niceTicks(0, cmax, 4), yf = fmt(yt.length > 1 ? yt[1] - yt[0] : 1);
+    yt.forEach(v => { const y = Y(v);
+      gGrid.appendChild(svgEl('line', {class: 'grid', x1: PADL, x2: W - PADR, y1: y, y2: y}));
+      const tx = svgEl('text', {x: PADL - 8, y: y + 4, 'text-anchor': 'end', class: 'tick'});
+      tx.textContent = yf(v); gText.appendChild(tx); });
+
+    const bw = (W - PADL - PADR) / nbins;
+    counts.forEach((c, k) => {
+      if (!c) return;
+      gBars.appendChild(svgEl('rect', {class: 'bar', x: PADL + k * bw + 0.5,
+        y: Y(c), width: Math.max(1, bw - 1), height: height - PADB - Y(c)}));
+    });
+
+    const xt = niceTicks(x0, x1, 6), yb = height - PADB + 15;
+    const xf = fmt(xt.length > 1 ? xt[1] - xt[0] : 1);
+    xt.forEach(v => { const tx = svgEl('text', {x: X(v), y: yb, 'text-anchor': 'middle', class: 'tick'});
+      tx.textContent = MINUS(xf(v)); gText.appendChild(tx); });
+    const lab = svgEl('text', {x: W - PADR, y: yb + 14, 'text-anchor': 'end', class: 'tick'});
+    lab.textContent = xUnit ? `${xLabel} (${xUnit})` : xLabel; gText.appendChild(lab);
+
+    if (truth !== null && truth >= x0 && truth <= x1) {
+      gMark.appendChild(svgEl('line', {class: 'truth', x1: X(truth), x2: X(truth),
+        y1: PADT - 6, y2: height - PADB}));
+      /* the y-axis label occupies the same row above the plot, so a mark near
+         the left edge has to drop inside the frame rather than sit on top of it */
+      const clash = X(truth) < PADL + 150;
+      const tx = svgEl('text', {x: X(truth), y: clash ? PADT + 13 : PADT - 9,
+        'text-anchor': 'middle', class: 'mk'});
+      tx.textContent = truthLabel + ' ' + (+truth.toPrecision(5));
+      gMark.appendChild(tx);
+    }
+    if (outside) {
+      const tx = svgEl('text', {x: W - PADR, y: PADT + 2, 'text-anchor': 'end', class: 'mk'});
+      tx.textContent = outside + ' outside the plotted range'; gMark.appendChild(tx);
+    }
+  };
+}
+
+/* ---------------------------------------------------------------------------
+   diagram() — a schematic figure, deliberately not a plot.
+
+   panel() draws measurements. It hangs units on both axes, formats tick labels
+   so they state their own positions, and marks points that carry values, and
+   every one of those is right for a curve that came out of an instrument.
+
+   Some figures argue about shape instead. "Here are two samples, and here are
+   three different curves that pass through both of them" has nothing to read
+   off an axis, because nothing here was measured and the vertical scale means
+   only 'more' and 'less'. Putting that through panel() would print tick values
+   on a picture that has none and invite a reader to measure a drawing.
+
+   So a diagram carries axis lines without tick values, sits at about a third of
+   the text column, and tiles: three in a row inside one <figure> is the shape
+   these were built for. Styles key off svg.cgs, set here, so a diagram is
+   styled wherever it appears.
+
+   diagram(parent, {
+     w, h,                        // viewBox, in its own units
+     xRange, yRange,              // data coordinates mapped onto it
+     title,                       // small heading inside the frame
+     curves:  [{x, y, cls}],      // cls: trace (default) | alt | ghost
+     points:  [{x, y, cls, r}],   // the samples, drawn as dots
+     areas:   [{pts, cls}],       // a filled region: the panel, the sliver it misses
+     drops:   [{x, y}],           // dashed line from a point down to the axis
+     leads:   [{from: [x,y], to: [x,y], cls}],  // leader from a label to what it names
+     notes:   [{x, y, text, dx, dy, anchor, cls}],   // or tex: 'f(x_{i+1})' in place of text
+     axes,                        // false to suppress the L-shaped rule
+     zero                         // draw a zero line, when the range spans it
+   })
+--------------------------------------------------------------------------- */
+function diagram(parent, spec) {
+  const {w = 300, h = 172, xRange, yRange, title = '', axes = true} = spec;
+  const PADL = 10, PADR = 10, PADT = title ? 24 : 10, PADB = 16;
+  const svg = svgEl('svg', {viewBox: `0 0 ${w} ${h}`, class: 'cgs', role: 'img'});
+  if (spec.alt) svg.setAttribute('aria-label', spec.alt);
+  parent.appendChild(svg);
+
+  const [x0, x1] = xRange, [y0, y1] = yRange;
+  const X = v => PADL + (v - x0) / (x1 - x0) * (w - PADL - PADR);
+  const Y = v => h - PADB - (v - y0) / (y1 - y0) * (h - PADT - PADB);
+
+  if (title) {
+    const t = svgEl('text', {x: PADL, y: 13, class: 'cgs-title'});
+    t.textContent = title;
+    svg.appendChild(t);
+  }
+  if (axes) {
+    const ax = svgEl('path', {class: 'axis', d:
+      `M${PADL} ${PADT} L${PADL} ${h - PADB} L${w - PADR} ${h - PADB}`});
+    svg.appendChild(ax);
+  }
+  /* a zero line, for the panels whose curves go negative. Without it "below
+     zero" is a claim in the caption and nothing on the drawing. */
+  if (spec.zero && y0 < 0 && y1 > 0)
+    svg.appendChild(svgEl('line', {class: 'zeroline', x1: PADL, x2: w - PADR,
+                                   y1: Y(0), y2: Y(0)}));
+  for (const a of spec.areas || []) {
+    let d = '';
+    for (const q of a.pts) d += (d ? 'L' : 'M') + X(q.x).toFixed(2) + ' ' + Y(q.y).toFixed(2);
+    svg.appendChild(svgEl('path', {class: a.cls || 'fill', d: d + 'Z'}));
+  }
+  for (const d of spec.drops || []) {
+    const l = svgEl('line', {class: 'cast', x1: X(d.x), y1: Y(d.y),
+                             x2: X(d.x), y2: h - PADB});
+    svg.appendChild(l);
+  }
+  /* a lead with over: true is drawn after the curves, so a mark that lies along
+     a curve (a tangent) sits on top of it and is not hidden by it */
+  const lead = l => svg.appendChild(svgEl('line', {class: l.cls || 'lead',
+    x1: X(l.from[0]), y1: Y(l.from[1]), x2: X(l.to[0]), y2: Y(l.to[1])}));
+  for (const l of spec.leads || []) if (!l.over) lead(l);
+  for (const c of spec.curves || []) {
+    let d = '';
+    for (let i = 0; i < c.x.length; i++)
+      d += (i ? 'L' : 'M') + X(c.x[i]).toFixed(2) + ' ' + Y(c.y[i]).toFixed(2);
+    svg.appendChild(svgEl('path', {class: c.cls || 'trace', d}));
+  }
+  for (const l of spec.leads || []) if (l.over) lead(l);
+  for (const p of spec.points || [])
+    svg.appendChild(svgEl('circle', {class: p.cls || 'dot', cx: X(p.x),
+                                     cy: Y(p.y), r: p.r || 3.6}));
+  for (const n of spec.notes || []) {
+    if (n.tex !== undefined) {
+      /* one <text> per line, so a subscript's shift cannot leak into the next */
+      String(n.tex).split('\n').forEach((line, i) => {
+        const t = svgEl('text', {x: X(n.x) + (n.dx || 0), y: Y(n.y) + (n.dy || 0) + i * 13.5,
+                                 class: 'mk tex ' + (n.cls || '')});
+        if (n.anchor) t.setAttribute('text-anchor', n.anchor);
+        texInto(t, line);
+        svg.appendChild(t);
+      });
+      continue;
+    }
+    const t = svgEl('text', {x: X(n.x) + (n.dx || 0), y: Y(n.y) + (n.dy || 0),
+                             class: 'mk ' + (n.cls || '')});
+    if (n.anchor) t.setAttribute('text-anchor', n.anchor);
+    /* a note may be two short lines; the second is a tspan on the same anchor */
+    String(n.text).split('\n').forEach((line, i) => {
+      const s = svgEl('tspan', {x: X(n.x) + (n.dx || 0)});
+      if (i) s.setAttribute('dy', '1.15em');
+      s.textContent = line;
+      t.appendChild(s);
+    });
+    svg.appendChild(t);
+  }
+  return svg;
+}
+
+/* texInto: set a short piece of math into an SVG <text> in KaTeX's own fonts,
+   so a label on a figure matches the same symbol typeset beside it.
+
+   It is not TeX. It knows exactly what a figure label needs: letters are
+   italic (KaTeX_Math), digits, brackets and operators are upright (KaTeX_Main),
+   '-' is a true minus, and _x or _{...} is a subscript, set smaller and
+   dropped. The drop is done with dy on the subscript and undone on whatever
+   follows, because baseline-shift is not honoured by every browser. */
+function texInto(t, src) {
+  const SUB = 0.72, DROP = 0.22;            /* subscript size, and its drop in ems */
+  let pending = 0;                          /* rise owed after a subscript, in ems */
+  const put = (s, cls, sub) => {
+    const ts = svgEl('tspan', {class: cls + (sub ? ' sub' : '')});
+    ts.textContent = s;
+    if (sub && !pending) { ts.setAttribute('dy', (DROP / SUB).toFixed(3) + 'em'); pending = DROP; }
+    else if (!sub && pending) { ts.setAttribute('dy', (-pending).toFixed(3) + 'em'); pending = 0; }
+    t.appendChild(ts);
+  };
+  const run = (s, sub) => {
+    for (const m of s.matchAll(/[A-Za-z]+|[^A-Za-z]+/g)) {
+      const piece = m[0].replace(/-/g, '\u2212');
+      put(piece, /[A-Za-z]/.test(piece) ? 'mi' : 'mn', sub);
+    }
+  };
+  let i = 0;
+  while (i < src.length) {
+    const u = src.indexOf('_', i);
+    if (u < 0) { run(src.slice(i), false); break; }
+    if (u > i) run(src.slice(i, u), false);
+    let body, next;
+    if (src[u + 1] === '{') { const c = src.indexOf('}', u); body = src.slice(u + 2, c); next = c + 1; }
+    else { body = src[u + 1]; next = u + 2; }
+    run(body, true);
+    i = next;
+  }
+}
+
+/* A row of diagrams inside one <figure>, so small multiples share a caption and
+   a frame. Returns the host elements, in order, for diagram() to draw into. */
+function diagramRow(figBody, n) {
+  const row = document.createElement('div');
+  row.className = 'figrow';
+  const cells = [];
+  for (let i = 0; i < n; i++) {
+    const c = document.createElement('div');
+    c.className = 'figcell';
+    row.appendChild(c);
+    cells.push(c);
+  }
+  figBody.appendChild(row);
+  return cells;
+}
+
+/* ---------------------------------------------------------------------------
+   makeDemo / mountDemo — the declarative path.
+
+   Most demos are: a few controls, one or more stacked panels, a row of
+   readouts. Those are written as a spec and mounted with mountDemo(). A page
+   whose demo needs something the spec cannot express defines its own CgDemo
+   class instead; both kinds coexist because this file only defines functions.
+
+   spec = {
+     setting, caption,
+     controls: [{key, label, min, max, step, value, unit, dp}],
+     segments: [{key, label, value, options: [{value, label}]}],
+     buttons:  [{key, label}],           // compute() sees state.fired === key
+     panels:   [{label, unit, xLabel, xUnit, xScale, height, xAxis, yClamp}],
+     readouts: [{key, label}],
+     init:     state => {...},           // once, before the first compute
+     compute:  state => ({
+                 panels: [{x, y, ghost, opts}],   // one per declared panel
+                 readouts: {key: 'text'}
+               })
+   }
+--------------------------------------------------------------------------- */
+function makeDemo(host, spec) {
+  const root = document.createElement('div');
+  root.className = 'cgd';
+  const ctl = [], seg = [], btn = [];
+  for (const c of spec.controls || [])
+    ctl.push(`<label>${c.label}
+      <input type="range" data-c="${c.key}" min="${c.min}" max="${c.max}"
+             step="${c.step ?? 'any'}" value="${c.value}">
+      <span class="cgd-val" data-v="${c.key}"></span></label>`);
+  for (const s of spec.segments || [])
+    seg.push(`<label>${s.label} <span class="cgd-seg" data-s="${s.key}">` +
+      s.options.map(o => `<button type="button" data-o="${o.value}"` +
+        `${o.value === s.value ? ' aria-pressed="true"' : ''}>${o.label}</button>`).join('') +
+      `</span></label>`);
+  if ((spec.buttons || []).length)
+    btn.push(`<span class="cgd-seg">` + spec.buttons.map(b =>
+      `<button type="button" data-b="${b.key}">${b.label}</button>`).join('') + `</span>`);
+
+  root.innerHTML =
+    (spec.setting ? `<div class="cgd-setting">${spec.setting}</div>` : '') +
+    `<div class="cgd-plots"></div>` +
+    (ctl.length + seg.length + btn.length
+      ? `<div class="cgd-controls">${ctl.join('')}${seg.join('')}${btn.join('')}</div>` : '') +
+    ((spec.readouts || []).length
+      ? `<div class="cgd-readouts">` + spec.readouts.map(r =>
+          `<div><span class="k">${r.label}</span><span class="v" data-r="${r.key}"></span></div>`
+        ).join('') + `</div>` : '') +
+    (spec.caption ? `<div class="cgd-caption">${spec.caption}</div>` : '') +
+    sourceBlock(spec.source);
+  host.appendChild(root);
+
+  const plotBox = root.querySelector('.cgd-plots');
+  /* a panel declaring hist:true is a distribution, not a trace; the two
+     primitives take different render arguments, handled below */
+  const panels = (spec.panels || []).map(p =>
+    p.hist ? histogram(plotBox, p) : panel(plotBox, p));
+  const state = {};
+  for (const c of spec.controls || []) state[c.key] = +c.value;
+  for (const s of spec.segments || []) state[s.key] = s.value;
+  state.fired = null;
+  state.root = root;
+  if (spec.init) spec.init(state);
+
+  const render = () => {
+    /* call with the spec as `this`, so a demo that loaded data in data()
+       can reach it as this.<name> rather than through a module global */
+    const out = spec.compute.call(spec, state) || {};
+    (out.panels || []).forEach((pd, i) => {
+      if (!panels[i] || !pd) return;
+      if (spec.panels[i].hist) { panels[i](pd.values || [], pd.opts || {}); return; }
+      panels[i](pd.x, pd.y, pd.ghost || null,
+                pd.range || [pd.x[0], pd.x[pd.x.length - 1]], pd.opts || {});
+    });
+    for (const c of spec.controls || []) {
+      const el = root.querySelector(`[data-v="${c.key}"]`);
+      if (el) el.textContent = (c.fmt ? c.fmt(state[c.key])
+        : state[c.key].toFixed(c.dp ?? 2)) + (c.unit ? ' ' + c.unit : '');
+    }
+    for (const k in (out.readouts || {})) {
+      const el = root.querySelector(`[data-r="${k}"]`);
+      if (el) el.textContent = out.readouts[k];
+    }
+    state.fired = null;
+  };
+
+  root.querySelectorAll('input[type=range]').forEach(el =>
+    el.addEventListener('input', () => { state[el.dataset.c] = parseFloat(el.value); render(); }));
+  root.querySelectorAll('[data-s]').forEach(box =>
+    box.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      const v = b.dataset.o;
+      state[box.dataset.s] = isNaN(+v) || v === '' ? v : +v;
+      [...box.children].forEach(x => x.setAttribute('aria-pressed', x === b));
+      render();
+    }));
+  root.querySelectorAll('[data-b]').forEach(b =>
+    b.addEventListener('click', () => { state.fired = b.dataset.b; render(); }));
+
+  render();
+  return {state, render, root};
+}
+
+/* Mount one spec, or a map of specs keyed by the element's `case` attribute.
+   A `set` attribute ("key=value;key=value") overrides the starting value of the
+   named controls or segments, so one case can open at a different setting on
+   each slide that shows it. */
+function mountDemo(specs) {
+  class CgDemo extends HTMLElement {
+    async connectedCallback() {
+      if (this._done) return; this._done = true;
+      let spec = typeof specs === 'function' ? specs : specs;
+      if (spec && !spec.compute) {                 // a map of cases
+        const key = this.getAttribute('case');
+        spec = spec[key];
+        if (!spec) { this.textContent = 'unknown demo case: ' + key; return; }
+      }
+      if (spec.data) spec = {...spec, ...(await spec.data())};
+      const set = this.getAttribute('set');
+      if (set) {
+        const o = {};
+        for (const kv of set.split(';')) {
+          const [k, v] = kv.split('=').map(z => z.trim());
+          if (k) o[k] = v;
+        }
+        spec = {...spec,
+          controls: (spec.controls || []).map(c =>
+            c.key in o ? {...c, value: +o[c.key]} : c),
+          segments: (spec.segments || []).map(g =>
+            g.key in o ? {...g, value: o[g.key]} : g)};
+      }
+      makeDemo(this, spec);
+    }
+  }
+  customElements.define('cg-demo', CgDemo);
+}
+
+/* linspace, and a small seeded RNG so demo pages reproduce their own figures */
+function linspace(a, b, n) {
+  const x = new Float64Array(n);
+  for (let i = 0; i < n; i++) x[i] = a + (b - a) * i / (n - 1);
+  return x;
+}
+function sample(f, a, b, n) {
+  const x = linspace(a, b, n), y = new Float64Array(n);
+  for (let i = 0; i < n; i++) y[i] = f(x[i]);
+  return {x, y};
+}
+function mulberry(seed) {           // deterministic uniform generator
+  let t = seed >>> 0;
+  return () => { t += 0x6D2B79F5;
+    let r = Math.imul(t ^ (t >>> 15), 1 | t);
+    r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296; };
+}
+function gaussFrom(rand) {          // Box-Muller on a given uniform source
+  let spare = null;
+  return () => {
+    if (spare !== null) { const v = spare; spare = null; return v; }
+    let u = 0; while (u === 0) u = rand();
+    const r = Math.sqrt(-2 * Math.log(u)), th = 2 * Math.PI * rand();
+    spare = r * Math.sin(th);
+    return r * Math.cos(th);
+  };
+}
+
+/* ---------------------------------------------------------------------------
+   SAE J211 CFC filter. Two-pole Butterworth with the coefficients the standard
+   specifies; applied once it is causal and lags, applied forward then backward
+   it is phaseless. Weeks 4 and beyond use both, and the difference between them
+   is the subject of one of the pages.
+--------------------------------------------------------------------------- */
+function cfcOnce(x, cfc, T) {
+  const wd = 2 * Math.PI * cfc * 2.0775;
+  const wa = Math.tan(wd * T / 2);
+  const den = 1 + Math.SQRT2 * wa + wa * wa;
+  const a0 = wa * wa / den, a1 = 2 * a0, a2 = a0;
+  const b1 = -2 * (wa * wa - 1) / den;
+  const b2 = (-1 + Math.SQRT2 * wa - wa * wa) / den;
+  const y = new Float64Array(x.length);
+  y[0] = x[0]; y[1] = x[1];
+  for (let i = 2; i < x.length; i++)
+    y[i] = a0 * x[i] + a1 * x[i-1] + a2 * x[i-2] + b1 * y[i-1] + b2 * y[i-2];
+  return y;
+}
+const reversed = x => { const y = new Float64Array(x.length);
+  for (let i = 0; i < x.length; i++) y[i] = x[x.length - 1 - i]; return y; };
+function cfc(x, klass, T) { return reversed(cfcOnce(reversed(cfcOnce(x, klass, T)), klass, T)); }
+
+/* central, forward and backward differences on a uniform grid */
+function differentiate(y, dt, kind = 'central') {
+  const n = y.length, d = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    if (kind === 'forward')  d[i] = i < n - 1 ? (y[i+1] - y[i]) / dt : (y[i] - y[i-1]) / dt;
+    else if (kind === 'backward') d[i] = i > 0 ? (y[i] - y[i-1]) / dt : (y[i+1] - y[i]) / dt;
+    else d[i] = (i > 0 && i < n - 1) ? (y[i+1] - y[i-1]) / (2 * dt)
+              : (i === 0 ? (y[1] - y[0]) / dt : (y[n-1] - y[n-2]) / dt);
+  }
+  return d;
+}
+
+/* a centred moving average of odd width w */
+function movingAverage(y, w) {
+  const n = y.length, half = (w - 1) >> 1, out = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    let s = 0, c = 0;
+    for (let k = -half; k <= half; k++) {
+      const j = i + k;
+      if (j >= 0 && j < n) { s += y[j]; c++; }
+    }
+    out[i] = s / c;
+  }
+  return out;
+}
+
+/* ---------------------------------------------------------------------------
+   Time stepping. One system definition per page, stepped by any of the rules.
+   state is a plain array; deriv(t, s) returns the array of rates.
+--------------------------------------------------------------------------- */
+const STEPPERS = {
+  euler: (f, t, s, h) => {
+    const k1 = f(t, s);
+    return s.map((v, i) => v + h * k1[i]);
+  },
+  heun: (f, t, s, h) => {                     // explicit trapezoid, order 2
+    const k1 = f(t, s);
+    const p = s.map((v, i) => v + h * k1[i]);
+    const k2 = f(t + h, p);
+    return s.map((v, i) => v + h / 2 * (k1[i] + k2[i]));
+  },
+  rk4: (f, t, s, h) => {
+    const k1 = f(t, s);
+    const k2 = f(t + h / 2, s.map((v, i) => v + h / 2 * k1[i]));
+    const k3 = f(t + h / 2, s.map((v, i) => v + h / 2 * k2[i]));
+    const k4 = f(t + h, s.map((v, i) => v + h * k3[i]));
+    return s.map((v, i) => v + h / 6 * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]));
+  },
+  symplectic: (f, t, s, h) => {               // for [x, v] systems only
+    const a = f(t, s)[1];
+    const v = s[1] + h * a;
+    return [s[0] + h * v, v];
+  }
+};
+
+/* Integrate to time T, returning every state visited. Bails out if the state
+   stops being finite or grows past `bound`, and says so, because a run that
+   diverged is a different outcome from one that finished. */
+function stepTo(f, s0, h, T, method = 'rk4', bound = 1e8) {
+  const step = STEPPERS[method];
+  const n = Math.max(1, Math.round(T / h));
+  const ts = [0], ss = [s0.slice()];
+  let s = s0.slice(), t = 0;
+  for (let k = 0; k < n; k++) {
+    s = step(f, t, s, h);
+    t += h;
+    if (!s.every(isFinite) || s.some(v => Math.abs(v) > bound))
+      return {ts, ss, t, diverged: true};
+    ts.push(t); ss.push(s.slice());
+  }
+  return {ts, ss, t, diverged: false};
+}
+const column = (ss, i) => Float64Array.from(ss, s => s[i]);
+
+
+/* ---------------------------------------------------------------------------
+   Source attribution. Every demo says where its numbers came from, in one of
+   three kinds:
+
+     measured    — a real recording, named, with the channel and test
+     constructed — values generated so that the truth is known exactly
+     mixed       — a constructed signal carrying real recorded noise
+
+   The distinction matters to a reader deciding how much to believe a figure, and
+   it is invisible from the plot. spec.source is rendered into the demo; pages
+   use the same markup inline with <div class="source">.
+--------------------------------------------------------------------------- */
+function sourceBlock(src) {
+  if (!src) return '';
+  const kind = src.kind || 'measured';
+  const tag = {measured: 'Measured', constructed: 'Constructed', mixed: 'Mixed'}[kind] || kind;
+  return `<div class="source ${kind}"><span class="tag">${tag}</span><span>${src.text}</span></div>`;
+}
+
+
+/* ---------------------------------------------------------------------------
+   REAL instrument noise, embedded so that any demo can use it synchronously.
+
+   These are 625 consecutive samples from the pre-impact window of channel 093
+   (left rear seat crossmember, longitudinal) of NHTSA test 10642, with their
+   mean removed. During that window the vehicle is on the tow line at constant
+   speed, so the true acceleration is zero and every value here is the
+   instrument: its electrical noise, its mounting, the vehicle's own vibration.
+
+   It is not Gaussian. Its excess kurtosis is +0.78, so it has heavier tails than
+   the normal distribution every formula in weeks 3 and 9 assumes. That is the
+   reason to prefer it to a generator.
+
+   realNoise(n, sd) returns n values scaled to the requested standard deviation,
+   cycling through the sequence if more than 625 are asked for.
+--------------------------------------------------------------------------- */
+const REAL_NOISE = [-0.132, -1.336, -0.734, 0.47, 1.072, -0.132, -0.132, 0.47, 0.47, 1.072, 0.47, 1.072, -0.132, 0.47, 0.47, -0.132, 1.072, -0.734, -0.132, 0.47, 0.47, 0.47, -0.734, -0.734, -1.336, -0.132, 0.47, 0.47, -0.132, -0.132, -0.132, 1.072, -0.132, -0.132, 0.47, 1.072, 0.47, 0.47, 0.47, 1.072, -0.132, -0.132, 0.47, 0.47, 0.47, 1.072, 1.072, 1.072, -0.132, -0.734, 0.47, -0.132, -0.132, 0.47, 0.47, 0.47, 1.674, 0.47, 1.072, 1.072, 1.674, 1.674, 1.072, 1.674, 1.674, 0.47, 1.072, 0.47, 0.47, -0.132, -0.132, -1.336, -0.132, -1.336, -1.336, -0.734, -0.132, 1.072, 1.674, 1.674, 1.674, 1.674, -0.132, -0.734, -1.336, -0.734, 2.879, 1.072, -0.132, -0.734, -0.132, -0.132, 1.072, 0.47, 0.47, 1.072, -1.938, -1.336, -0.132, -0.132, 0.47, 0.47, 0.47, 0.47, 0.47, 1.072, 1.072, 1.072, -0.132, 0.47, -1.336, -0.132, -0.132, 0.47, -0.132, -0.132, 0.47, -0.734, -0.734, -0.734, -0.734, -0.132, -0.734, -0.132, 0.47, 0.47, 0.47, 0.47, 1.072, 0.47, 0.47, 1.674, 1.072, 1.674, -1.938, -0.734, 1.072, 1.674, 1.072, 1.072, -0.734, 0.47, 1.072, 1.072, 0.47, -0.132, 1.072, 0.47, -0.132, 0.47, 0.47, 0.47, 1.072, 0.47, 0.47, 1.072, 1.072, 0.47, 0.47, 0.47, 0.47, -1.336, 0.47, -0.132, -1.336, -0.734, -1.938, -0.734, -1.336, -1.336, -0.734, -0.734, -1.336, -1.336, 0.47, -0.132, 1.072, 0.47, 1.072, 1.072, 0.47, 0.47, 0.47, -1.336, -2.541, -1.938, -1.336, -1.938, -1.336, -1.336, -0.734, -1.336, -0.734, -1.336, -0.734, -0.734, -1.336, 0.47, -0.132, -0.132, 1.072, 1.674, 1.674, 1.674, 2.879, 2.879, 2.879, 2.879, 1.674, 1.674, 1.072, -0.132, -0.132, -0.734, 1.072, -0.734, -0.132, -1.938, -3.143, -4.347, -4.949, -4.347, -4.949, -5.551, -3.143, -1.938, 1.072, 1.674, 2.879, 1.674, -0.132, -0.734, -1.336, -0.734, 1.674, 3.481, 2.277, 2.879, 3.481, 4.083, 1.072, 1.072, -0.734, -2.541, -3.745, -4.347, -4.347, -3.143, -2.541, 0.47, 2.277, 2.277, 2.277, 1.674, 1.674, 2.879, 1.674, 0.47, -0.132, -1.938, -1.938, -1.336, -0.734, 1.072, 0.47, 1.072, 0.47, -0.734, -1.938, -3.143, -4.949, -4.347, -3.745, -1.938, -0.132, 2.879, 5.287, 4.685, 4.685, 3.481, 3.481, 0.47, -0.734, -2.541, -2.541, -3.143, -3.745, -4.347, -1.938, 1.072, 1.674, 2.277, 0.47, -1.938, -4.347, -4.347, -4.949, -2.541, 0.47, 5.89, 7.696, 7.696, 5.89, 2.277, -1.938, -2.541, -2.541, 0.47, 0.47, -0.132, 1.674, -0.132, -3.143, -5.551, -1.938, -0.132, -0.734, 1.072, 1.674, -0.734, -1.336, -4.949, -3.745, -2.541, 1.674, 4.685, 4.083, 1.072, -1.938, -1.938, -0.734, 0.47, 1.072, -0.734, -3.143, -1.938, 0.47, 2.277, 1.674, 1.072, 1.072, 1.674, 0.47, -0.734, -1.336, 1.674, 2.277, 3.481, 3.481, 1.674, -1.336, -1.336, -1.336, -1.938, -1.336, -0.734, -1.938, -3.143, -4.949, -3.745, -1.938, 2.277, 5.287, 6.492, 1.072, -3.745, -6.756, -6.756, -3.745, -0.132, 1.674, 2.277, -0.132, -0.132, -0.734, 0.47, -1.336, -2.541, -3.143, -3.143, -2.541, -1.938, -0.734, -0.132, -0.132, -0.734, -2.541, -3.745, -0.734, 1.674, 2.879, 0.47, -3.143, -4.347, -1.336, 2.277, 5.287, 5.287, 4.685, 2.277, 0.47, -0.734, -0.132, 2.277, 2.879, 2.277, 2.879, -0.734, -4.347, -4.949, -3.143, 1.674, 7.094, 7.696, 5.89, 1.072, -3.143, -6.153, -3.143, -0.132, 4.685, 3.481, 1.072, -0.132, -1.336, -1.938, -3.143, -2.541, -4.949, -4.347, -4.347, -3.745, -2.541, -3.143, -1.938, -0.734, 0.47, -0.734, -1.938, -4.347, -2.541, 1.674, 2.879, 4.685, 5.287, 2.879, 1.674, 2.277, 0.47, -0.132, -0.132, -0.132, -0.132, 1.072, -0.132, 1.674, 0.47, 0.47, 1.072, 3.481, 2.277, 1.674, 0.47, -0.734, -0.132, -1.938, -1.938, -1.336, 0.47, 1.072, 1.072, -0.132, 1.072, 2.879, 3.481, 2.879, 3.481, -1.336, -1.938, -1.336, -1.336, -3.745, -4.347, -4.347, -3.143, -1.938, -0.734, 1.674, 2.879, 4.083, 3.481, 1.072, -1.938, -4.347, -2.541, 0.47, 3.481, 4.083, 2.879, 1.072, -0.132, 1.674, 2.277, 5.89, 3.481, -0.734, -3.745, -6.756, -4.949, -1.938, -0.132, 0.47, -1.336, -1.336, 0.47, 2.277, 2.277, 4.685, 4.685, 2.879, 0.47, -1.938, -2.541, -2.541, -0.734, 1.072, 4.685, 4.685, 2.277, 0.47, -1.938, -3.143, -4.949, -6.153, -7.358, -7.358, -6.153, -0.132, 2.879, 4.685, 4.685, 2.277, 0.47, -0.132, -0.734, 0.47, 1.674, 2.277, 1.674, -0.734, -2.541, -3.143, -2.541, -0.734, 0.47, 1.674, 2.277, 2.277, 1.674, -0.132, -0.734, -0.734, -0.734, 1.674, 4.685, 4.083, 4.083, 2.277, 0.47, 0.47, 2.277, 2.879, 3.481, 3.481, 1.674, -1.938, -5.551, -4.949, -4.347, -0.734, 0.47, -0.734, -1.938, -2.541, -1.938, 0.47, 1.072, -0.132, -0.132, -0.132, -0.132, 0.47, 1.674, -0.132, -1.938, -2.541, -2.541, -1.938, -1.336, -1.336, -0.734, 0.47, 0.47, -0.132, -1.336, -0.734, 0.47, 1.072, 1.072, -0.734, -1.336, -0.734, 1.072, 1.674, 1.072, 1.072, -0.734, 1.072, 4.083, 5.287, 2.277, 0.47, -3.143, -4.347, -3.143];
+const REAL_NOISE_SD = 2.379064;   /* m/s^2, as recorded */
+/* Consecutive samples of this record are NOT independent: the laboratory's
+   2000 Hz anti-alias filter, at a 12500 Hz sample rate, leaves a lag-1
+   correlation of +0.78. It falls to zero by lag 3.
+
+   realNoise()    strides by 3, so the values behave like independent draws —
+                  which is what every fitting and error-propagation formula in
+                  this course assumes about its inputs.
+   realNoiseRaw() returns consecutive samples, correlation intact, for the pages
+                  where the correlation is the subject. */
+const NOISE_STRIDE = 3;
+
+/* Both return exactly the requested standard deviation. A short slice of a real
+   sequence does not have the sd of the whole sequence — for n = 24 it can be
+   several times off — so the slice is rescaled to what the caller asked for.
+   The values, their shape and their correlation are the recording's; only the
+   overall amplitude is set by the caller. */
+function scaleTo(out, sd) {
+  let m = 0;
+  for (let i = 0; i < out.length; i++) m += out[i];
+  m /= out.length;
+  let v = 0;
+  for (let i = 0; i < out.length; i++) v += (out[i] - m) * (out[i] - m);
+  const s = Math.sqrt(v / Math.max(1, out.length - 1));
+  const k = s > 0 ? sd / s : 0;
+  for (let i = 0; i < out.length; i++) out[i] = (out[i] - m) * k;
+  return out;
+}
+function realNoise(n, sd = 1, offset = 0) {
+  const out = new Float64Array(n);
+  const o = ((offset % REAL_NOISE.length) + REAL_NOISE.length) % REAL_NOISE.length;
+  for (let i = 0; i < n; i++)
+    out[i] = REAL_NOISE[(o + i * NOISE_STRIDE) % REAL_NOISE.length];
+  return scaleTo(out, sd);
+}
+function realNoiseRaw(n, sd = 1) {
+  const out = new Float64Array(n);
+  for (let i = 0; i < n; i++) out[i] = REAL_NOISE[i % REAL_NOISE.length];
+  return scaleTo(out, sd);
+}
+
+/* panel(), integrate(), niceTicks() and friends come from _shell/kit.js. */
+
+let DATA = null;
+async function load(src){ if(!DATA) DATA = await (await fetch(src)).json(); return DATA; }
+
+class CgDemo extends HTMLElement{
+  async connectedCallback(){
+    if(this._done)return;this._done=true;
+    if(this.getAttribute('case')==='growth'){ await growthDemo(this); return; }
+    const root=document.createElement('div');root.className='cgd';
+    root.innerHTML=`<div class="cgd-plots"></div>
+      <div class="cgd-controls">
+        <label>Window
+          <span class="cgd-seg">
+            <button type="button" data-win="pre" aria-pressed="true">Before impact</button>
+            <button type="button" data-win="all" aria-pressed="false">Whole record</button>
+          </span></label>
+        <label>Offset added
+          <input type="range" min="-2" max="2" step="any" value="0">
+          <span class="cgd-val"></span></label>
+        <span class="cgd-seg">
+          <button type="button" data-set="cancel">Cancel the measured offset</button>
+          <button type="button" data-set="zero">Add nothing</button>
+        </span>
+      </div>
+      <div class="cgd-readouts">
+        <div><span class="k">measured offset <var>b</var></span><span class="v" data-r="bias"></span></div>
+        <div><span class="k">offset in the signal</span><span class="v" data-r="tot"></span></div>
+        <div><span class="k">noise sd</span><span class="v" data-r="sd"></span></div>
+        <div><span class="k">velocity error, uncorrected</span><span class="v" data-r="raw"></span></div>
+        <div><span class="k">velocity error, corrected</span><span class="v" data-r="cor"></span></div>
+      </div>
+      <div class="cgd-caption"></div>
+      <div class="source measured"><span class="tag">Measured</span><span>Channel 093, left rear seat crossmember, longitudinal, with the offset and noise measured in its 50&nbsp;ms pre-impact window. NHTSA test 10642, 2019 BMW&nbsp;X5 into a rigid barrier at 15.65&nbsp;m/s, TRC of Ohio, 7 January 2019.</span></div>`;
+    this.appendChild(root);
+    $('.cgd-caption',root).textContent=this.getAttribute('caption')||'';
+
+    const d=await load(this.getAttribute('src'));
+    const dt=d.dt,n=d.n,a=Float64Array.from(d.a);
+    const t=new Float64Array(n);for(let i=0;i<n;i++)t[i]=d.t0+i*dt;
+    let b=0,c=0;for(let i=0;i<n;i++)if(t[i]<0){b+=a[i];c++}b/=c;
+    let sd=0;for(let i=0;i<n;i++)if(t[i]<0)sd+=(a[i]-b)**2;sd=Math.sqrt(sd/c);
+
+    const plots=$('.cgd-plots',root);
+    const pA=panel(plots,{label:'acceleration',unit:'m/s²'});
+    const pV=panel(plots,{label:'velocity error',unit:'m/s'});
+    const pX=panel(plots,{label:'displacement error',unit:'m',xAxis:true});
+    const R=k=>$(`[data-r="${k}"]`,root);
+    const slider=$('input[type=range]',root),val=$('.cgd-val',root);
+    /* a slide can open it on the whole record with window="all"; the notes
+       page opens on the pre-impact window as before */
+    let win=this.getAttribute('window')==='all'?'all':'pre';
+    root.querySelectorAll('[data-win]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.win===win));
+
+    /* The axes hold still while the offset changes. Each window's range covers
+       the record as measured and with the offset cancelled, the two states the
+       buttons set, so pressing one moves the curve on fixed axes and the change
+       is visible. It widens only when the slider goes past both. */
+    const curves=off=>{
+      const aa=new Float64Array(n);for(let i=0;i<n;i++)aa[i]=a[i]+off;
+      const vv=integrate(aa,dt);return [aa,vv,integrate(vv,dt)];
+    };
+    const span=(arrs,i0,i1)=>{let lo=Infinity,hi=-Infinity;
+      for(const y of arrs)for(let i=i0;i<=i1;i++){if(y[i]<lo)lo=y[i];if(y[i]>hi)hi=y[i];}
+      return [lo,hi]};
+    const base={};
+    {const m=curves(0),k=curves(-b);
+     for(const [w,i1] of [['pre',c-1],['all',n-1]])
+       base[w]=[0,1,2].map(j=>span([m[j],k[j]],0,i1));}
+    const fixed=(j,cur,i1)=>{const [l0,h0]=base[win][j],[l1,h1]=span([cur],0,i1);
+      const lo=Math.min(l0,l1),hi=Math.max(h0,h1),pad=(hi-lo)*0.10;return [lo-pad,hi+pad]};
+
+    const render=()=>{
+      const off=parseFloat(slider.value), total=b+off;
+      const [aa,vv,xx]=curves(off),[ac,vc,xc]=curves(-b);
+      const range = win==='pre' ? [t[0],0] : [t[0],t[n-1]];
+      const iR = win==='pre' ? c-1 : n-1;
+      const predFn = v => total*(v-t[0]);
+      pA(t,aa,ac,range,{yRange:fixed(0,aa,iR)});
+      /* over the whole record these are the motion itself, not an error */
+      pV(t,vv,vc,range,{pred:win==='pre'?predFn:null,label:win==='pre'?'velocity error':'change in velocity',
+                        yRange:fixed(1,vv,iR)});
+      pX(t,xx,xc,range,{label:win==='pre'?'displacement error':'position relative to coasting',
+                        yRange:fixed(2,xx,iR)});
+      const iEnd = win==='pre' ? c-1 : n-1;
+      val.textContent=(off>=0?'+':'')+off.toFixed(4)+' m/s²';
+      R('tot').textContent=(total>=0?'+':'')+total.toFixed(4)+' m/s²';
+      R('bias').textContent=b.toFixed(4)+' m/s²';
+      R('sd').textContent=sd.toFixed(3)+' m/s²';
+      /* over the pre-impact window the true change is zero, so the readout is an
+         error; over the whole record it is the change in velocity itself */
+      R('raw').previousElementSibling.textContent=(win==='pre'?'velocity error':'change in velocity')+', uncorrected';
+      R('cor').previousElementSibling.textContent=(win==='pre'?'velocity error':'change in velocity')+', corrected';
+      R('raw').textContent=vv[iEnd].toFixed(4)+' m/s';
+      R('cor').textContent=vc[iEnd].toFixed(4)+' m/s';
+    };
+    root.querySelectorAll('[data-win]').forEach(btn=>btn.addEventListener('click',()=>{
+      win=btn.dataset.win;
+      root.querySelectorAll('[data-win]').forEach(x=>x.setAttribute('aria-pressed',x===btn));
+      render();
+    }));
+    slider.addEventListener('input',render);
+    root.querySelectorAll('[data-set]').forEach(btn=>btn.addEventListener('click',()=>{
+      slider.value=String(btn.dataset.set==='cancel' ? -b : 0);
+      render();
+    }));
+    render();
+
+    /* static figure: whole record as absolute speed */
+    const fig=$('#fig-whole .fig-body');
+    if(fig){
+      const p=panel(fig,{label:'speed',unit:'m/s',height:215,xAxis:true});
+      const ac=new Float64Array(n);for(let i=0;i<n;i++)ac[i]=a[i]-b;
+      const v0=d.closing_speed_mps;
+      const v=integrate(ac,dt);const abs=new Float64Array(n);
+      for(let i=0;i<n;i++)abs[i]=v0+v[i];
+      /* strategic points: impact, zero crossing, overshoot, final plateau */
+      const iImp=Math.round((0-t[0])/dt);
+      let iZero=iImp;while(iZero<n-1&&abs[iZero]>0)iZero++;
+      let iMin=iImp;for(let i=iImp;i<n;i++)if(abs[i]<abs[iMin])iMin=i;
+      const mn=v=>v.toFixed(2).replace('-','−');
+      const marks=[
+        {t:t[iImp],y:abs[iImp],cast:'y',text:mn(abs[iImp])+' m/s at impact',dx:8,dy:-8},
+        {t:t[iZero],y:0,cast:'x',text:'zero at '+(t[iZero]*1000).toFixed(0)+' ms',dx:8,dy:-8},
+        {t:t[iMin],y:abs[iMin],text:mn(abs[iMin])+' m/s',dx:-7,dy:15,anchor:'end'},
+        {t:t[n-1],y:abs[n-1],cast:'y',text:mn(abs[n-1])+' m/s at rest',dx:-8,dy:-9,anchor:'end'}
+      ];
+      p(t,abs,null,[t[0],t[n-1]],{marks});
+    }
+  }
+}
+customElements.define('cg-demo',CgDemo);
+
+/* ---------------------------------------------------------------------------
+   Second demo: the two error terms as n grows.
+
+   The page derives bT growing as n and the noise sum growing as sqrt(n). Both
+   are then computed directly from the record, cumulatively, so the two growth
+   laws are drawn rather than asserted — and the crossing point where the offset
+   overtakes the noise is a place on the plot rather than a formula.
+--------------------------------------------------------------------------- */
+async function growthDemo(host) {
+  const root = document.createElement('div');
+  root.className = 'cgd';
+  root.innerHTML = `<div class="cgd-setting">The two error terms of the decomposition, accumulated
+      sample by sample over the real record. The offset term is the running total of b; the noise
+      term is the running total of the pre-impact residuals about b.</div>
+    <div class="cgd-plots"></div>
+    <div class="cgd-controls">
+      <label>Offset b <input type="range" data-c="b" min="0" max="3" step="any" value="0.2135">
+        <span class="cgd-val" data-v="b"></span></label>
+      <span class="cgd-seg">
+        <button type="button" data-set="meas" aria-pressed="true">As measured</button>
+      </span>
+      <label>Axes <span class="cgd-seg" data-s="ax">
+        <button type="button" data-o="lin" aria-pressed="true">Linear</button>
+        <button type="button" data-o="log">Logarithmic</button>
+      </span></label>
+    </div>
+    <div class="cgd-readouts">
+      <div><span class="k">samples n</span><span class="v" data-r="n"></span></div>
+      <div><span class="k">offset term bT</span><span class="v" data-r="off"></span></div>
+      <div><span class="k">noise term, this record</span><span class="v" data-r="noi"></span></div>
+      <div><span class="k">noise term, predicted</span><span class="v" data-r="pn"></span></div>
+      <div><span class="k">ratio</span><span class="v" data-r="rat"></span></div>
+      <div><span class="k">they cross at</span><span class="v" data-r="x"></span></div>
+    </div>
+    <div class="cgd-caption">The offset term is a straight line on logarithmic axes, slope 1,
+      because it is a number accumulating. The noise term is not a line: it is one realisation of a
+      random walk, and it wanders. The dotted red curve is its <em>predicted</em> size,
+      &sigma;&radic;(&Delta;t&thinsp;T), which does have slope one half &mdash; and the difference
+      between a curve you can draw and a curve you can only bound is the difference between the two
+      kinds of statement the page makes.</div>
+    <div class="source measured"><span class="tag">Measured</span><span>The noise term is the
+      accumulated pre-impact residuals of channel 093 &mdash; real instrument noise, not a model of
+      it. NHTSA test 10642, 2019 BMW&nbsp;X5 into a rigid barrier, TRC of Ohio, 7 January 2019.</span></div>`;
+  host.appendChild(root);
+
+  const d = await load('data/test10642-crossmember-x.json');
+  const dt = d.dt, n = d.n, a = Float64Array.from(d.a);
+  const t = new Float64Array(n);
+  for (let i = 0; i < n; i++) t[i] = d.t0 + i * dt;
+  let b0 = 0, c = 0;
+  for (let i = 0; i < n; i++) if (t[i] < 0) { b0 += a[i]; c++; }
+  b0 /= c;
+  /* the real pre-impact residuals, tiled to the length of the record: the noise
+     term is accumulated from recorded values, not from a generator */
+  const eps = new Float64Array(n);
+  for (let i = 0; i < n; i++) eps[i] = a[i % c] - b0;
+
+  /* the predicted noise size uses sigma from the pre-impact residuals:
+     sigma*sqrt(dt*T) is a bound on a distribution, not a value the realisation
+     has to take */
+  let sd = 0;
+  for (let i = 0; i < c; i++) sd += eps[i] * eps[i];
+  sd = Math.sqrt(sd / (c - 1));
+
+  const box = root.querySelector('.cgd-plots');
+  const slider = root.querySelector('[data-c="b"]');
+  const R = k => root.querySelector(`[data-r="${k}"]`);
+  let axes = 'lin', p = null, built = null;
+
+  const render = () => {
+    const b = parseFloat(slider.value);
+    root.querySelector('[data-v="b"]').textContent = b.toFixed(4) + ' m/s²';
+    const off = new Float64Array(n), noi = new Float64Array(n), ns = new Float64Array(n);
+    let s = 0;
+    for (let i = 0; i < n; i++) {
+      s += eps[i] * dt;
+      ns[i] = i + 1;
+      off[i] = Math.abs(b) * (i + 1) * dt;
+      noi[i] = Math.abs(s);
+    }
+    if (built !== axes) {
+      box.textContent = '';
+      /* on log axes the first few samples reach 1e-18 and would give the plot
+         eighteen decades of empty space; clamp to the range that carries the
+         argument */
+      p = panel(box, {label: 'error contributed', unit: 'm/s', height: 250, xAxis: true,
+        xLabel: 'samples accumulated', xUnit: '', xScale: 1,
+        xLog: axes === 'log', yLog: axes === 'log',
+        yClamp: axes === 'log' ? [1e-6, 1] : null});
+      built = axes;
+    }
+    /* first n where the offset term exceeds the noise term and stays above it */
+    let cross = null;
+    for (let i = n - 1; i > 0; i--) if (off[i] < noi[i]) { cross = i + 1; break; }
+    const lo = axes === 'log' ? 1 : 0;
+    p(ns, off, noi, [Math.max(lo, 1), n], {
+      label: 'error contributed — offset solid, noise dashed',
+      pred: k => sd * dt * Math.sqrt(k),
+      marks: cross ? [{t: cross, y: off[cross - 1], cast: 'x',
+                       text: 'n ≈ ' + cross, dx: 8, dy: -10}] : []
+    });
+    R('n').textContent = n.toLocaleString();
+    R('off').textContent = off[n - 1].toFixed(4) + ' m/s';
+    R('noi').textContent = noi[n - 1].toFixed(4) + ' m/s';
+    R('pn').textContent = (sd * dt * Math.sqrt(n)).toFixed(4) + ' m/s';
+    R('rat').textContent = (off[n - 1] / noi[n - 1]).toFixed(1) + '×';
+    R('x').textContent = cross ? 'n ≈ ' + cross.toLocaleString() : 'offset leads throughout';
+  };
+  slider.addEventListener('input', render);
+  root.querySelector('[data-set="meas"]').addEventListener('click', () => {
+    slider.value = String(Math.abs(b0)); render();
+  });
+  root.querySelector('[data-s="ax"]').addEventListener('click', e => {
+    const btn = e.target.closest('button'); if (!btn) return;
+    axes = btn.dataset.o;
+    [...e.currentTarget.children].forEach(x => x.setAttribute('aria-pressed', x === btn));
+    render();
+  });
+  render();
+}
+
+
+/* ---------------------------------------------------------------------------
+   A number against a distribution, and the window both are measured in.
+
+   The cold reader put the "those two statements aren't the same kind of
+   statement" passage at seventy seconds over one static paragraph, carrying the
+   hardest idea in the video. This is that idea.
+--------------------------------------------------------------------------- */
+(() => {
+  const host = document.querySelector('#fig-draw .fig-body');
+  if (!host) return;
+
+  const SD = 0.004754, BT = -0.010675, DRAW = 0.0001;
+  const X0 = -0.016, X1 = 0.011;
+  const x = [], y = [];
+  for (let i = 0; i <= 300; i++) {
+    const v = X0 + (X1 - X0) * i / 300;
+    x.push(v); y.push(Math.exp(-0.5 * (v / SD) * (v / SD)));
+  }
+  const band = [];
+  for (let i = 0; i <= 120; i++) {
+    const v = -SD + 2 * SD * i / 120;
+    band.push({x: v, y: Math.exp(-0.5 * (v / SD) * (v / SD))});
+  }
+
+  diagram(host, {
+    w: 660, h: 250, xRange: [X0, X1], yRange: [0, 1.30],
+    title: 'velocity error (m/s) after integrating the 50 ms pre-impact window',
+    alt: 'A bell curve centred on zero with one standard deviation shaded, and a single vertical '
+       + 'line well to its left marking the offset error, which is one fixed number.',
+    areas: [{cls: 'fill', pts: [{x: -SD, y: 0}, ...band, {x: SD, y: 0}]}],
+    curves: [{x, y}],
+    leads: [{from: [BT, 0], to: [BT, 1.06], cls: 'chord'}],
+    points: [{x: DRAW, y: Math.exp(-0.5 * (DRAW / SD) * (DRAW / SD)), r: 4.5, cls: 'miss'}],
+    notes: [
+      {x: BT, y: 1.20, anchor: 'middle', text: 'bT = \u22120.0107'},
+      {x: BT, y: 1.10, anchor: 'middle', cls: 'hi', text: 'one number'},
+      {x: 0, y: 1.20, anchor: 'middle', text: 'the noise error'},
+      {x: 0, y: 1.10, anchor: 'middle', cls: 'hi', text: 'a distribution of values'},
+      {x: SD * 1.15, y: 0.52, text: '\u00b1 0.0048'},
+      {x: DRAW + 0.0008, y: 0.90, text: "this record's draw"}
+    ]
+  });
+})();
+
+(async () => {
+  const host = document.querySelector('#fig-window .fig-body');
+  if (!host) return;
+  let d;
+  try { d = await (await fetch('data/test10642-crossmember-x.json')).json(); }
+  catch (e) { return; }
+  const pre = Math.round(-d.t0 / d.dt);            /* 625 samples before t = 0 */
+  const a = d.a.slice(0, pre);
+  const mean = a.reduce((s, v) => s + v, 0) / a.length;
+  const sd = Math.sqrt(a.reduce((s, v) => s + (v - mean) * (v - mean), 0) / a.length);
+
+  const t = a.map((_, i) => (d.t0 + i * d.dt) * 1e3);   /* ms */
+  const T0 = t[0], T1 = t[t.length - 1];
+
+  diagram(host, {
+    w: 660, h: 250, xRange: [T0, T1], yRange: [mean - 4.2 * sd, mean + 4.2 * sd], zero: true,
+    title: 'acceleration (m/s\u00b2) over the 625 samples before impact',
+    alt: 'A noisy trace with no trend, a horizontal line through its mean, and a shaded band one '
+       + 'standard deviation either side of the mean.',
+    areas: [{cls: 'fill', pts: [{x: T0, y: mean - sd}, {x: T1, y: mean - sd},
+                                {x: T1, y: mean + sd}, {x: T0, y: mean + sd}]}],
+    curves: [{x: t, y: a}],
+    leads: [{from: [T0, mean], to: [T1, mean], cls: 'chord'}],
+    notes: [
+      {x: T0 + 1, y: mean + sd * 3.5, cls: 'hi',
+       text: 'mean = ' + mean.toFixed(4) + ', the offset'},
+      {x: T0 + 1, y: mean - sd * 3.2,
+       text: 'the band is \u00b1 ' + sd.toFixed(3) + ', the noise'}
+    ]
+  });
+})();
+
+/* ---- code: highlighting + per-line notes ---- */
+const RULES={
+  python:{kw:/\b(def|return|import|from|as|for|in|if|else|elif|while|lambda|None|True|False)\b/g,
+          cmt:/#.*$/gm, str:/(['"])(?:\\.|(?!\1).)*\1/g},
+  matlab:{kw:/\b(function|end|for|while|if|else|elseif|return|nargin|abs)\b/g,
+          cmt:/%.*$/gm, str:/'(?:[^']|'')*'/g},
+  js:{kw:/\b(function|const|let|var|return|for|of|in|if|else|new|=>)\b/g,
+      cmt:/\/\/.*$/gm, str:/(['"`])(?:\\.|(?!\1).)*\1/g}
+};
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function highlight(raw,lang){
+  const r=RULES[lang]||RULES.python;
+  const marks=[];
+  const grab=(re,cls)=>{let m;re.lastIndex=0;while((m=re.exec(raw))){marks.push([m.index,m.index+m[0].length,cls])}};
+  grab(r.cmt,'cmt');grab(r.str,'str');
+  grab(/\b\d+(\.\d+)?(e-?\d+)?\b/g,'num');grab(r.kw,'kw');
+  marks.sort((a,b)=>a[0]-b[0]||b[1]-a[1]);
+  let out='',pos=0;
+  for(const [s,e,cls] of marks){ if(s<pos)continue;
+    out+=esc(raw.slice(pos,s))+`<span class="${cls}">${esc(raw.slice(s,e))}</span>`;pos=e}
+  return out+esc(raw.slice(pos));
+}
+document.querySelectorAll('.codetabs pre').forEach(pre=>{
+  const lang=pre.dataset.lang;
+  const notes={};
+  /* split only where a line number follows, so a note may contain a ';' */
+  (pre.dataset.notes||'').split(/;(?=\d+\|)/).filter(Boolean).forEach(s=>{
+    const i=s.indexOf('|'); notes[+s.slice(0,i)]=s.slice(i+1);
+  });
+  const src=pre.textContent.replace(/\n$/,'');
+  pre.innerHTML=src.split('\n').map((line,i)=>{
+    const note=notes[i+1];
+    return `<span class="ln"${note?` data-note="${note.replace(/"/g,'&quot;')}"`:''}>${
+      highlight(line,lang)||'&nbsp;'}</span>`;
+  }).join('');
+});
+const LANG_KEY='cg-code-lang';
+function applyLang(lang){
+  document.querySelectorAll('.codetabs').forEach(box=>{
+    /* a box that lacks the chosen language falls back to Python, and one that
+       has no Python either (a MATLAB-only guide) to whatever it does have */
+    const langs=[...box.querySelectorAll('pre')].map(p=>p.dataset.lang);
+    const use=langs.includes(lang)?lang:(langs.includes('python')?'python':langs[0]);
+    box.querySelectorAll('pre,.out').forEach(p=>{p.hidden=p.dataset.lang!==use});
+    box.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.lang===use));
+  });
+}
+document.querySelectorAll('.codetabs .tabs button').forEach(b=>b.addEventListener('click',()=>{
+  localStorage.setItem(LANG_KEY,b.dataset.lang);applyLang(b.dataset.lang)}));
+applyLang(localStorage.getItem(LANG_KEY)||'python');
+
+/* ---- glossary: shared store + hover/focus definitions + generated list ----
+   data/glossary.json is the single source of truth for every page on the site. */
+(async function(){
+  let TERMS={};
+  try{
+    /* no-store because a cached glossary that predates a term makes that term
+       silently vanish from the page. On the built site this becomes a hashed
+       filename instead; see BUILD_PLAN. */
+    const r=await fetch('data/glossary.json',{cache:'no-store'});
+    if(!r.ok) throw new Error(r.status);
+    TERMS=(await r.json()).terms;
+  }catch(e){ console.error('glossary unavailable:',e); return; }
+
+  /* the slide decks have no <main>; measure the page body there instead */
+  const used=new Set(), main=(document.querySelector('main')||document.body).getBoundingClientRect();
+  document.querySelectorAll('dfn[data-g]').forEach(el=>{
+    const e=TERMS[el.dataset.g];
+    if(!e){
+      /* fail loudly rather than quietly dropping the highlight: an unresolved
+         term is an authoring error, not something a reader should absorb */
+      console.error('glossary: no entry for',el.dataset.g,'- page is out of step with the store');
+      el.removeAttribute('data-g');
+      return;
+    }
+    el.setAttribute('data-def',e.def);
+    el.setAttribute('tabindex','0');
+    used.add(el.dataset.g);
+    if(el.getBoundingClientRect().left-main.left > main.width-440) el.classList.add('right');
+  });
+  const dl=document.querySelector('dl.glossary');
+  if(!dl)return;
+  [...used].map(k=>TERMS[k]).sort((a,b)=>a.term.localeCompare(b.term)).forEach(e=>{
+    const dt=document.createElement('dt'),dd=document.createElement('dd');
+    dt.textContent=e.term;dd.textContent=e.def;dl.append(dt,dd);
+  });
+})();
+
+
+/* Printing a closed <details> omits its content in most browsers, so every
+   answer is opened before the print and restored afterwards. A reader who has
+   opened some already keeps them open. */
+(() => {
+  let wasOpen = null;
+  addEventListener('beforeprint', () => {
+    const all = [...document.querySelectorAll('.check .ans')];
+    wasOpen = all.map(d => d.open);
+    all.forEach(d => { d.open = true; });
+  });
+  addEventListener('afterprint', () => {
+    if (!wasOpen) return;
+    [...document.querySelectorAll('.check .ans')].forEach((d, i) => { d.open = wasOpen[i]; });
+    wasOpen = null;
+  });
+})();
+/* ---- the data phrase, remembered ----
+   A student's four words choose their data (assign.js), and nothing about them
+   is stored on the server. This keeps them in the browser so any page can find
+   them: the header shows them, the data page restores them, and a demo that can
+   load "your data" reads them from here. localStorage belongs to the whole
+   climbinggiants.com origin, so the phrase follows the student to every course
+   site in the same browser, and to no other device. The phrase itself stays the
+   way back from anywhere else. */
+const PHRASE_KEY = 'cg-data-phrase';
+window.cgPhrase = {
+  get() { try { return localStorage.getItem(PHRASE_KEY) || ''; } catch (e) { return ''; } },
+  set(p) { try { localStorage.setItem(PHRASE_KEY, p); } catch (e) {} cgPhraseChip(); },
+  clear() { try { localStorage.removeItem(PHRASE_KEY); } catch (e) {} cgPhraseChip(); }
+};
+function cgPhraseChip() {
+  const box = document.getElementById('cg-phrase');
+  if (!box) return;
+  const p = window.cgPhrase.get();
+  box.textContent = '';
+  const a = document.createElement('a');
+  a.href = 'data-pack.html';
+  /* The label only: the header has no room for the phrase beside it (see the
+     .cg-phrase rules in layout.njk), so the phrase goes in the title. */
+  a.textContent = 'Your data';
+  a.title = p ? 'Your data phrase: ' + p + ' (remembered on this browser)' : 'Get your data phrase';
+  box.appendChild(a);
+  if (p) {
+    const x = document.createElement('button');
+    x.type = 'button';
+    x.textContent = '\u00d7';
+    x.title = 'Forget this phrase on this browser (your data is not affected)';
+    x.setAttribute('aria-label', 'Forget the remembered data phrase');
+    x.onclick = () => window.cgPhrase.clear();
+    box.appendChild(x);
+  }
+}
+cgPhraseChip();
+
+/* A link marked data-phrase-handoff carries the remembered phrase to a site on
+   another origin (the slope lab), which cannot read this localStorage. It goes
+   in the fragment, which the browser never sends to a server; the receiving
+   page reads it, keeps it, and clears it from the address bar. Set at click
+   time so a phrase entered after the page loaded still travels. */
+document.addEventListener('click', e => {
+  const a = e.target.closest && e.target.closest('a[data-phrase-handoff]');
+  if (!a) return;
+  const p = window.cgPhrase.get();
+  const base = a.href.split('#')[0];
+  a.href = p ? base + '#phrase=' + encodeURIComponent(p) : base;
+});

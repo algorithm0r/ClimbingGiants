@@ -1,0 +1,1054 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 9 — Finite differences</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="css/blocks.css?v=20261015124713">
+<link rel="stylesheet" href="css/demos.css?v=20261015124713">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+/* The deck's own styling, inlined here because none of it belongs to the notes
+   pages and build.py sorts styles.css into layers this would not fit. The
+   variables are the site's own values, copied so the deck cannot drift. */
+:root{
+  /* Stage content comes in two sizes and only two. Every block that
+     carries prose uses the first, every block that carries code uses the
+     second, so a table on one slide and a list on the next are set alike. */
+  --claim:      clamp(2.1rem, min(4.5vw, 8.4vh), 4.5rem);
+  --stage-text: clamp(1.25rem, min(2.65vw, 4.1vh), 2.65rem);
+  --stage-code: clamp(1.1rem, min(2.35vw, 3.5vh), 2.35rem);
+  --gutter:     3.5vw;
+  --card:#FFFFFF; --subtle:#EEE9E0; --ink:#1A1A1A; --warm-gray:#5A5550;
+  --course-accent:#5F7038; --course-accent-dark:#47542A;
+  /* Two emphasis colours, both already carrying meaning on the site.
+     term: the thing being named or defined, and the subject of the claim.
+     def:  what is said about it -- the verb phrase, or the definition.
+     Both are a step lighter than the notes pages use them, because against
+     near-black ink at this size the darker green read as black. Measured:
+     the term is 48.5 dE from the ink rather than 35.8, and both still clear
+     5.3 contrast on white, which survives a washed-out projector. */
+  --term:#5F7038; --def:#8A6508;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--card); color:var(--ink); overflow:hidden;
+  font-family:"Segoe UI",-apple-system,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+body.blank .deck-slide{visibility:hidden}
+
+/* Nothing on a slide is hidden, so a slide is simply centred: text alone sits
+   in the middle, and text with a figure finds its own balance. The stage keeps
+   a floor so a figure arriving with its data does not shift what is above it. */
+.deck-slide{
+  position:fixed; inset:0; display:none; padding:4vh var(--gutter) 5vh;
+  flex-direction:column; justify-content:center; align-items:center; gap:2.4vh;
+}
+.deck-slide.on{display:flex}
+
+.deck-slide .head{text-align:center; width:100%; max-width:100%}
+.deck-slide .say{
+  margin:0 auto; text-align:center;
+  font-size:var(--claim); line-height:1.1; font-weight:600;
+  /* one measure for every claim, so the margins do not change slide to
+     slide and a line wraps only because it is long */
+  letter-spacing:-.015em; max-width:100%;
+  /* a claim that does wrap splits into even lines, not a line and one word */
+  text-wrap:balance;
+}
+.term{color:var(--term)}
+.def{color:var(--def)}
+
+.deck-slide .sub{
+  /* auto side margins, or the box sits left of centre whenever max-width is
+     narrower than the slide and only the text inside it is centred */
+  margin:1.2rem auto 0; font-size:var(--stage-text); line-height:1.4;
+  color:var(--warm-gray); max-width:100%; text-align:center; font-weight:400;
+}
+.deck-slide .sub code{font-size:1.02em; color:var(--def); font-weight:600}
+.deck-slide .stage{
+  width:100%; max-width:100%; margin:0 auto;
+  display:flex; flex-direction:column; justify-content:center;
+}
+/* .full used to widen a capped stage. Nothing is capped now, so it only
+   marks a slide that carries one. */
+/* Only a figure or a demo needs its space held: both arrive with their data
+   after first paint, and without a floor the claim above them jumps when they
+   do. Text in the stage is there from the start and can size itself. */
+.deck-slide .stage:has(.figure),
+.deck-slide .stage:has(cg-demo){min-height:38vh}
+/* A table or a block of arithmetic reads as part of the claim when it sits as
+   close to it as a figure does, so those get a little more air above them. */
+.deck-slide .stage:has(.tbl),
+.deck-slide .stage:has(.work){margin-top:1.6vh}
+/* A notes-page figure on a projector. Three things, and the third is the one
+   that bites: blocks.css caps .figure.narrow at 32rem, which is a text
+   column's width and not a slide's; the SVGs carry a viewBox and no fixed
+   size, so widening the box is the whole of the scaling they need; and the
+   stage is a flex column, where auto side margins do centre a box but also
+   cancel its stretch, collapsing it onto the SVG's own 300px. align-self
+   centres a flex item without giving up its width. */
+.deck-slide .stage .figure{
+  margin:0; border:0; background:none; align-self:center; width:100%;
+}
+/* A narrow figure is a squarish one, about 3:2, so its width is also capped
+   by the screen's height; otherwise on a laptop it stands taller than the
+   stage and pushes its own title up under the claim. */
+.deck-slide .stage .figure.narrow{max-width:min(62rem,74vw,100vh)}
+/* A wide figure, about 5:2, that shares the stage with a line of math. Full
+   width would stand too tall under two lines of claim on a laptop, so its
+   width is capped by the screen's height too, at a looser ratio. */
+.deck-slide .stage .figure.wide{max-width:min(100%,130vh)}
+/* A notes-page row of small diagrams, each drawn in a 300-unit viewBox, sets
+   its labels at about 11px on a projector. Opted into per figure, because a
+   label placed for 10.5px text can collide once it is larger. */
+.deck-slide .figure.legible .cgs text{font-size:15px}
+.deck-slide .figure.legible .cgs text.cgs-title{font-size:15px}
+/* Point cards in a video deck, the class-02 style: a row of bordered cards under
+   the claim, each a small tag, a bold title and one sentence. For a claim that
+   needs a few items of text under it. Sized from the stage text; the class decks
+   keep their own rules below. */
+body:not(.inclass) .deck-slide .pcards{display:grid; gap:1.2vw; width:100%; margin-top:1vh;
+  font-size:calc(var(--stage-text) * .74); line-height:1.32; text-align:left}
+body:not(.inclass) .deck-slide .pcards.c2{grid-template-columns:repeat(2, minmax(0,1fr))}
+body:not(.inclass) .deck-slide .pcards.c3{grid-template-columns:repeat(3, minmax(0,1fr))}
+body:not(.inclass) .deck-slide .pcards.c4{grid-template-columns:repeat(4, minmax(0,1fr))}
+body:not(.inclass) .deck-slide .pcard{border:1px solid #d9d3c7; border-radius:5px; background:#fff;
+  padding:1.8vh 1.1vw; display:flex; flex-direction:column; gap:.8vh; min-width:0}
+body:not(.inclass) .deck-slide .pcard .tag{align-self:flex-start; font-size:.62em; font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase; padding:.15em .5em; border-radius:3px;
+  background:var(--subtle); color:var(--warm-gray)}
+body:not(.inclass) .deck-slide .pcard > b{color:var(--course-accent-dark); font-size:1.15em; line-height:1.15}
+body:not(.inclass) .deck-slide .pcard > span{color:var(--warm-gray)}
+body:not(.inclass) .deck-slide .pcard.gold{background:#fbf6ea; border-color:#d9c08a}
+body:not(.inclass) .deck-slide .pcard.gold > b{color:#8A6508}
+body:not(.inclass) .deck-slide .pcard.gold .tag{background:#f1e4c4; color:#8A6508}
+/* A figure with its formula beside it. The figure is squarish, so side by side
+   is the only way both fit under a claim; its width is capped by the screen's
+   height for the same reason a narrow figure's is. */
+.deck-slide .figmath{
+  display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:3vw; align-items:center; width:100%;
+}
+.deck-slide .figmath .figure{max-width:min(100%,92vh); justify-self:end}
+.deck-slide .figmath .work{margin:0; justify-self:start; font-size:calc(var(--stage-text) * .88)}
+/* A video carries its own size and does not scale to a viewBox, and the sweep
+   video across a full stage would stand 685 tall, which with a claim above it
+   does not fit a laptop. It stays at its own width, or smaller. */
+.deck-slide .stage .fig-body video{
+  width:100%; max-width:min(72rem,94vw); height:auto; max-height:62vh;
+  margin:0 auto;
+}
+.deck-slide .stage figcaption,.deck-slide .stage .source{display:none}
+.deck-slide .stage cg-demo{display:block; margin:0}
+/* The notes demo carries its setting, caption, source and whole header. A
+   slide has room for the plot, the channel buttons and the six rows. */
+.deck-slide .stage .cgd-setting,
+.deck-slide .stage .cgd-caption,
+.deck-slide .stage .source{display:none}
+/* Lecture 1's channel demo shows only the six header rows it is about. That
+   is a property of that demo, not of decks, so it is opted into. Without the
+   scope it also hid lecture 2's state table, whose rows carry no such class. */
+.deck-slide .stage.six-only .cgd-table tr:not(.six){display:none}
+.deck-slide .stage .cgd{border:0; background:none}
+.deck-slide .stage .cgd-table{border-top:1px solid #ece7dd}
+
+/* A demo's tooling, at lecture size. demos.css sets these for a notes page
+   read at arm's length: .7rem readout labels and an 11px axis. On a projector,
+   and worse in a recording downscaled to 1080p, they are the smallest text on
+   the slide -- and on the decimate demo they are the whole point of it, since
+   "peak read" against "peak at full rate" is the claim. The plot needs nothing;
+   only the chrome around it does.
+
+   Sized from --stage-code so this tracks the viewport like every other size in
+   the deck, rather than fixing a pixel count that is right on one screen. Note
+   .stage.big already applies zoom:1.4, so the rendered size is 1.4x these. */
+.deck-slide .stage .cgd-controls{padding:1rem 1.2rem}
+.deck-slide .stage .cgd-controls label{font-size:calc(var(--stage-code) * .55)}
+.deck-slide .stage .cgd-val{font-size:calc(var(--stage-code) * .55)}
+/* the slider is dragged on camera, so it gets room to be seen moving */
+.deck-slide .stage .cgd-controls input[type=range]{width:min(300px, 22vw)}
+.deck-slide .stage .cgd-readouts{padding:.9rem 1.2rem}
+.deck-slide .stage .cgd-readouts .k{font-size:calc(var(--stage-code) * .48)}
+.deck-slide .stage .cgd-readouts .v{font-size:calc(var(--stage-code) * .72)}
+/* axis numbers and the two axis titles, which are set in SVG user units */
+.deck-slide .stage .cgp text{font-size:15px}
+.deck-slide .stage .cgp text.ylab,
+.deck-slide .stage .cgp text.mk{font-size:15px}
+/* A demo built for a page can be far too small on a projector, and its own
+   sizes are in rem so a parent font-size will not reach them. Scale the whole
+   element instead, on the slides that need it. */
+.deck-slide .stage.big cg-demo{zoom:1.4}
+/* zoom is a fixed number, so it has to step down as the screen gets shorter,
+   or the demo runs off the bottom of a laptop screen */
+@media (max-height:860px){ .deck-slide .stage.big cg-demo{zoom:1.2} }
+@media (max-height:720px){ .deck-slide .stage.big cg-demo{zoom:1.0} }
+@media (max-height:620px){ .deck-slide .stage.big cg-demo{zoom:.85} }
+/* A demo with several stacked panels (acceleration, velocity, displacement)
+   is too tall to zoom. Each panel is capped by the screen's height instead,
+   and keeps its aspect, so the stack narrows and centers. */
+.deck-slide .stage.tall .cgd-plots svg{max-height:15vh}
+/* the controls and readouts still need lecture size, so they get the zoom the
+   whole demo gets on a .big stage, stepped down the same way */
+.deck-slide .stage.tall .cgd-controls,
+.deck-slide .stage.tall .cgd-readouts{zoom:1.4}
+/* a laptop screen has no height to spare once the claim wraps: the controls
+   drop to their own size and the plots give up a little more */
+@media (max-height:860px){ .deck-slide .stage.tall .cgd-controls,
+  .deck-slide .stage.tall .cgd-readouts{zoom:1.0}
+  .deck-slide .stage.tall .cgd-plots svg{max-height:13vh} }
+
+.deck-slide.part{background:var(--course-accent-dark); color:#fff; grid-template-rows:1fr}
+.deck-slide.part .course{
+  font-size:clamp(1.4rem,min(2.7vw,5vh),2.7rem); letter-spacing:.05em;
+  text-transform:uppercase; opacity:.82; margin:0 0 1.1rem; font-weight:600;
+  text-align:center; line-height:1.1;
+}
+/* A divider is a title, so it is set larger than a claim and spans the slide
+   like one. At this size the longest title in the course, 44 characters, runs
+   to two lines and everything shorter fits on one. */
+.deck-slide.part .say{
+  color:#fff; max-width:100%; font-size:clamp(2.4rem,min(5.1vw,9.4vh),5.1rem);
+  line-height:1.08;
+}
+
+/* raw file text, and arithmetic worked on the slide */
+.deck-slide .raw{
+  font-family:"SF Mono",Consolas,monospace; text-align:left; display:table;
+  margin:0 auto; font-size:var(--stage-code); line-height:1.45;
+  color:#3f3b36;
+}
+.deck-slide .raw .k{color:var(--term); font-weight:600}
+.deck-slide .raw .v{color:var(--def)}
+.deck-slide .raw .dim{color:#a8a294}
+/* worked arithmetic, set by KaTeX. The aligned environment does the spacing,
+   so there is no hand padding and no monospace face to fake a column. */
+.deck-slide .work{margin:0 auto; font-size:var(--stage-text)}
+.deck-slide .work .katex-display{margin:0}
+/* two display equations under one claim need air between them, or the
+   second one's numerator lands on the first one's denominator */
+.deck-slide .work .katex-display + .katex-display{margin-top:.8em}
+
+/* A hover note on one piece of code. display rather than visibility, because a
+   hidden absolutely-positioned box still counts towards a scroll container's
+   overflow and a slide clips what leaves it. */
+.deck-slide .tip{cursor:help; border-bottom:1px dotted var(--warm-gray)}
+.deck-slide .tip::after{
+  /* to the right of the call, not under it, so the note never covers the
+     lines it is talking about */
+  content:attr(data-note); position:absolute; left:calc(100% + 1.6rem); top:50%;
+  transform:translateY(-50%);
+  z-index:60; display:none; width:max-content; max-width:30ch;
+  background:#1d1b18; color:#e8e4dc; padding:.6rem .85rem; border-radius:4px;
+  font-family:"Segoe UI",-apple-system,system-ui,sans-serif; font-weight:400;
+  font-size:.64em; line-height:1.45; white-space:normal; text-align:left;
+  box-shadow:0 6px 18px rgba(0,0,0,.18);
+}
+.deck-slide .tip:hover{background:#fdf5db}
+.deck-slide .tip:hover::after{display:block}
+
+/* Working on paper beside the same working as a program, row for row, so a
+   hand step and the line that carries it sit on one line of the slide. */
+.deck-slide .pair{
+  display:grid; grid-template-columns:auto auto; gap:.35rem 3rem;
+  margin:1.6vh auto 0; text-align:left; align-items:baseline; position:relative;
+  font-size:var(--stage-code);
+}
+.deck-slide .pair .ph{
+  color:var(--warm-gray); font-size:.72em; letter-spacing:.07em;
+  text-transform:uppercase; font-weight:600; padding-bottom:.3rem;
+}
+.deck-slide .pair .hand{font-family:Georgia,"Times New Roman",serif; color:#3f3b36}
+.deck-slide .pair .code{font-family:"SF Mono",Consolas,monospace; white-space:pre;
+  color:#3f3b36}
+.deck-slide .pair .code .k{color:var(--term); font-weight:600}
+.deck-slide .pair .code .v{color:var(--def)}
+
+/* Code and what there is to say about it, on one slide. A comment belongs on
+   the line it is about, so the two panels share grid rows. */
+.deck-slide .panels{
+  display:grid; grid-template-columns:auto 1fr; gap:.15rem 2.6rem;
+  margin:1.6vh auto 0; text-align:left; align-items:baseline; position:relative;
+  font-size:var(--stage-code);
+}
+.deck-slide .panels .code{
+  font-family:"SF Mono",Consolas,monospace; white-space:pre; color:#3f3b36;
+}
+.deck-slide .panels .code .k{color:var(--term); font-weight:600}
+.deck-slide .panels .code .v{color:var(--def)}
+.deck-slide .panels .code .dim{color:#a8a294}
+.deck-slide .panels .note{color:var(--warm-gray); font-size:.86em; line-height:1.35}
+
+/* a two-by-two, for a division that runs the same way in two domains */
+.deck-slide .grid2{
+  display:grid; grid-template-columns:auto 1fr 1fr; gap:.7rem 2.4rem;
+  font-size:var(--stage-text); margin:0 auto; text-align:left;
+  align-items:baseline;
+}
+.deck-slide .grid2 .hd{color:var(--warm-gray); font-size:.78em; letter-spacing:.06em;
+  text-transform:uppercase; font-weight:600}
+.deck-slide .grid2 .rw{color:var(--term); font-weight:600}
+.deck-slide .grid2 .cell{color:var(--ink)}
+
+/* a name and what is under it */
+.deck-slide .names{
+  display:grid; grid-template-columns:auto 1fr; gap:1.2rem 1.8rem;
+  font-size:var(--stage-text); margin:0 auto; text-align:left;
+  align-items:baseline;
+}
+.deck-slide .names .nm{font-family:"SF Mono",Consolas,monospace; color:var(--term);
+  font-weight:600}
+.deck-slide .names .val{font-family:"SF Mono",Consolas,monospace; color:var(--ink)}
+.deck-slide .names .how{color:var(--warm-gray); font-size:.82em}
+
+/* a small table of names, as the by-hand calculation leaves them */
+.deck-slide .tbl{border-collapse:collapse; margin:0 auto;
+  font-size:var(--stage-text)}
+.deck-slide .tbl th{text-align:left; font-size:.72em; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--warm-gray); padding:0 1.6rem .5rem 0;
+  font-weight:600}
+.deck-slide .tbl td{padding:.34rem 1.6rem .34rem 0; vertical-align:baseline}
+.deck-slide .tbl td:first-child{font-family:"SF Mono",Consolas,monospace;
+  color:var(--term); font-weight:600}
+.deck-slide .tbl td:nth-child(2){color:var(--def); font-weight:600}
+.deck-slide .tbl td:nth-child(3){color:var(--warm-gray);
+  font-family:"SF Mono",Consolas,monospace; font-size:.86em}
+
+/* The three rules above describe one table: a name, what it holds, where it
+   came from. A table whose columns are all the same kind of thing opts out of
+   them, or the columns stop looking comparable, which is the whole reason it
+   is on the slide. .key marks the column the claim is about. */
+.deck-slide .tbl.nums td{font-variant-numeric:tabular-nums}
+/* every value column alike: one font, one size, one weight. Styling column 2
+   and column 3 separately set a three-column table's numbers in two fonts. */
+.deck-slide .tbl.nums td:nth-child(n+2){color:var(--warm-gray); font-weight:400;
+  font-family:"SF Mono",Consolas,monospace; font-size:1em}
+.deck-slide .tbl.nums td.key{color:var(--def); font-weight:600}
+
+/* A record of photographs, shown as the record it is. The strip leaves a
+   gutter between frames on purpose: the gutter is the part of the event nobody
+   photographed, which is the whole reason the figure is on the slide. */
+.deck-slide .strip img{display:block; width:100%; height:auto}
+
+/* Two frames either side of one interval, with the interval named between
+   them at a size that says it matters. */
+.deck-slide .frames{
+  display:flex; align-items:center; justify-content:center; gap:2.4vw;
+  width:100%;
+}
+.deck-slide .frames figure{margin:0; text-align:center}
+.deck-slide .frames img{
+  display:block; width:100%; max-width:27vw; max-height:54vh; height:auto;
+}
+/* the stage hides figcaptions, because a notes-page caption is prose the slide
+   has already said. These are not that: they are the timestamps, and they are
+   the point of the pair. */
+.deck-slide .stage .frames figcaption{
+  display:block; margin-top:.55rem; font-size:var(--stage-code);
+  color:var(--warm-gray); font-family:"SF Mono",Consolas,monospace;
+}
+/* The interval nothing was recorded or computed in. Not scoped to one layout:
+   the frame pair and the two-run pair both use it. */
+.deck-slide .gapmark{
+  font-size:var(--stage-text); color:var(--def); font-weight:600;
+  text-align:center; line-height:1.2; white-space:nowrap; flex:0 0 auto;
+}
+.deck-slide .gapmark span{
+  display:block; font-size:.58em; color:var(--warm-gray); font-weight:400;
+  margin-top:.4rem; white-space:normal; max-width:14ch; margin-inline:auto;
+}
+
+/* A photograph that is not ours, with the credit its licence requires. The
+   stage hides .source because a notes-page source block is prose; a credit
+   line is four words and has to be visible wherever the image is. */
+.deck-slide .stage .credit{
+  display:block; margin:.7rem auto 0; text-align:center;
+  font-size:calc(var(--stage-code) * .62); color:var(--warm-gray);
+  font-weight:400; line-height:1.4;
+}
+.deck-slide .stage .portrait img{
+  display:block; margin:0 auto; width:auto; height:auto;
+  max-height:52vh; max-width:100%;
+}
+
+/* Two runs of a sweep, side by side, with the unswept interval between them.
+   Wider and shorter than the frame pair, because a settled hill is a wide
+   flat thing. Each run is a looping clip, rendered on one shared view box. */
+.deck-slide .runs{
+  display:flex; align-items:center; justify-content:center; gap:1.6vw;
+  width:100%;
+}
+.deck-slide .runs figure{margin:0; text-align:center; flex:0 1 auto}
+.deck-slide .runs img, .deck-slide .runs video{display:block; width:100%; max-width:38vw; height:auto}
+.deck-slide .stage .runs figcaption{
+  display:block; margin-top:.6rem; font-size:calc(var(--stage-text) * .8);
+  color:var(--ink); line-height:1.35;
+}
+.deck-slide .stage .runs figcaption b{color:var(--term); font-weight:600}
+.deck-slide .stage .runs figcaption span{
+  display:block; color:var(--warm-gray); font-size:.86em; margin-top:.15rem;
+}
+
+/* Two columns of prose under one claim: a question on the left and what came
+   of it on the right, each with a heading of its own. */
+.deck-slide .duo{
+  display:grid; grid-template-columns:1fr 1fr; gap:1.2vh 3.2vw;
+  width:100%; text-align:left; font-size:var(--stage-text);
+}
+/* a portrait beside the prose about it */
+.deck-slide .duo.photo{grid-template-columns:auto minmax(0,1fr); align-items:start}
+.deck-slide .duo.photo figure{margin:0}
+.deck-slide .duo.photo img{
+  display:block; width:100%; max-width:min(22vw,320px); height:auto;
+}
+.deck-slide .stage .duo.photo figcaption{
+  display:block; margin-top:.5rem; text-align:center;
+  font-size:calc(var(--stage-code) * .62); color:var(--warm-gray);
+}
+.deck-slide .duo.photo h3:not(:first-child){margin-top:1.1rem}
+.deck-slide .duo h3{
+  margin:0 0 .5rem; font-size:.82em; font-weight:600; color:var(--term);
+  letter-spacing:.04em; text-transform:uppercase;
+}
+.deck-slide .duo p{margin:0 0 .7rem; line-height:1.35}
+.deck-slide .duo p:last-child{margin-bottom:0}
+.deck-slide .duo em{font-style:normal; color:var(--def); font-weight:600}
+/* not .aside: that is a site-wide block in blocks.css and it arrives with a
+   background. This is one quiet line under a claim. */
+.deck-slide .duo .footnote{color:var(--warm-gray); font-size:.86em}
+
+/* A signal chain: boxes with arrows between them, left to right. */
+.deck-slide .chain{
+  display:flex; align-items:stretch; justify-content:center; gap:.8vw;
+  width:100%; font-size:calc(var(--stage-text) * .84);
+}
+.deck-slide .chain > div{flex:0 1 auto; text-align:center}
+.deck-slide .chain .box{
+  border:1px solid #d9d2c4; border-radius:5px; padding:.7rem .9rem;
+  display:flex; flex-direction:column; justify-content:center; height:100%;
+}
+.deck-slide .chain .box b{display:block; color:var(--term); font-weight:600}
+.deck-slide .chain .box span{
+  display:block; color:var(--warm-gray); font-size:.8em; margin-top:.3rem;
+  line-height:1.3;
+}
+.deck-slide .chain .arrow{
+  display:flex; align-items:center; color:var(--warm-gray);
+  font-size:1.4em; padding:0 .1vw;
+}
+/* one box in the chain is where the damage is done */
+.deck-slide .chain .box.here{border-color:var(--def); border-width:2px}
+.deck-slide .chain .mark{
+  display:block; margin-top:.5rem; color:var(--def); font-weight:600;
+  font-size:.78em;
+}
+
+/* the six fields: the name, then what it settles, in plain words */
+.deck-slide .fields{
+  list-style:none; margin:0 auto; padding:0; display:grid; gap:.7rem;
+  font-size:var(--stage-text); text-align:left; max-width:58ch;
+}
+.deck-slide .fields b{color:var(--term); font-weight:600}
+.deck-slide .fields span{color:var(--warm-gray)}
+/* A one-word term is separated from its definition by its colour alone, which
+   is enough. A term several words long is not: it runs straight into the
+   definition and the eye has nowhere to break. Those go in two columns, opted
+   into, since most lists do not need it. */
+.deck-slide .fields.cols{grid-template-columns:auto 1fr; gap:.8rem 1.8rem;
+  max-width:74ch}
+.deck-slide .fields.cols li{display:contents}
+.deck-slide .fields.cols b{text-align:right}
+
+.deck-bar{position:fixed; left:0; right:0; bottom:0; height:3px; background:var(--subtle); z-index:40}
+.deck-bar > i{display:block; height:100%; width:0; background:var(--course-accent)}
+.deck-num{
+  position:fixed; right:1.6vw; bottom:1.6vh; font-size:.85rem; color:var(--warm-gray);
+  z-index:40; font-variant-numeric:tabular-nums;
+}
+.deck-notes{
+  position:fixed; left:0; right:0; bottom:0; max-height:38vh; overflow:auto;
+  display:none; padding:1.1rem 2rem 1.6rem; z-index:50;
+  background:#1d1b18; color:#e8e4dc; font-size:1rem; line-height:1.55;
+  border-top:3px solid var(--course-accent);
+}
+body.notes-on .deck-notes{display:block}
+.deck-notes p{margin:0 0 .6rem; max-width:80ch}
+.deck-help{
+  position:fixed; left:1.6vw; bottom:1.4vh; font-size:.76rem; color:var(--warm-gray);
+  z-index:40; opacity:.5;
+}
+/* Presenter tools. All of it is inert until p or d is pressed, so a student
+   who never presses either sees the deck exactly as it was. */
+
+/* The ink sits above the slide and below the notes panel, so opening the
+   notes covers a drawing rather than the other way round. pointer-events is
+   set from script: off while not inking, or the canvas would eat the clicks
+   that advance and the ones a demo wants. */
+.deck-ink{position:fixed; inset:0; z-index:45; pointer-events:none}
+/* b blanks the screen. A drawing is part of what is on the screen. */
+body.blank .deck-ink{visibility:hidden}
+
+/* The pointer. A mouse arrow is a few dark pixels and disappears on a
+   recording scaled to half size, so while presenting the system cursor is
+   hidden and this stands in for it. Amber with a white ring: the slides are
+   near-white and the dividers are dark green, and neither the term green nor
+   the def gold can be seen against both. */
+body.pointing, body.inking{cursor:none}
+.deck-dot{
+  --dot:clamp(14px, 2.2vh, 26px);
+  position:fixed; left:0; top:0; width:var(--dot); height:var(--dot);
+  margin:calc(var(--dot) / -2) 0 0 calc(var(--dot) / -2);
+  border-radius:50%; background:#E8A33D; border:2px solid #FFF;
+  box-shadow:0 0 0 1px rgba(0,0,0,.35), 0 2px 10px rgba(0,0,0,.35);
+  z-index:70; pointer-events:none; display:none;
+}
+body.pointing .deck-dot, body.inking .deck-dot{display:block}
+/* While inking the dot takes the pen's colour, so the nib says what it will
+   draw before it draws it. Smaller, because it is a nib and not a pointer. */
+body.inking .deck-dot{--dot:clamp(9px, 1.3vh, 15px)}
+
+/* Which mode is on, and what the keys are once it is. Sits where the help
+   line sits, one line above it. */
+.deck-hud{
+  position:fixed; left:1.6vw; bottom:calc(1.4vh + 1.5rem); z-index:40;
+  font-size:.76rem; color:var(--warm-gray); display:flex; align-items:center;
+  gap:.45rem; pointer-events:none;
+}
+.deck-hud:empty{display:none}
+.deck-hud i{
+  width:.62rem; height:.62rem; border-radius:50%; background:#E8A33D;
+  box-shadow:0 0 0 1px rgba(0,0,0,.2);
+}
+.deck-hud span{opacity:.55; margin-left:.35rem}
+
+@media print{
+  body{overflow:visible}
+  .deck-slide{position:static; display:flex; page-break-after:always; height:100vh}
+  .deck-bar,.deck-num,.deck-help,.deck-notes{display:none}
+  .deck-ink,.deck-dot,.deck-hud{display:none}
+}
+/* ---------------------------------------------------------------------------
+   In-class decks (front matter deck: "class"). The video decks above make one
+   claim per slide for a recording; a class deck delivers information to a room
+   that can read, so a slide carries a topic label and dense, scannable blocks:
+   cards in columns, compact tables, short lists. Everything is scoped to
+   body.inclass so the video decks are untouched.
+--------------------------------------------------------------------------- */
+body.inclass{--ic-text:clamp(1.1rem, min(2.05vw, 3.6vh), 2.2rem)}
+body.inclass .deck-slide:not(.part){justify-content:flex-start; align-items:stretch;
+  padding:4.5vh var(--gutter) 5vh; gap:2.2vh}
+body.inclass .deck-slide:not(.part) .head{text-align:left;
+  border-bottom:3px solid var(--course-accent); padding-bottom:1vh}
+body.inclass .deck-slide:not(.part) .say{text-align:left; margin:0;
+  font-size:clamp(1.5rem, min(2.9vw, 5.2vh), 2.9rem); text-wrap:wrap}
+body.inclass .deck-slide .kicker{display:block; font-size:.42em; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--warm-gray); font-weight:600; margin-bottom:.35vh}
+body.inclass .deck-slide .stage{font-size:var(--ic-text); line-height:1.38;
+  justify-content:flex-start; flex:1; min-height:0}
+/* cards in two or three columns */
+body.inclass .cols{display:grid; gap:1.6vh 2vw; align-items:start; width:100%}
+body.inclass .cols.c2{grid-template-columns:repeat(2, minmax(0,1fr))}
+body.inclass .cols.c3{grid-template-columns:repeat(3, minmax(0,1fr))}
+body.inclass .card{background:#f7f9f1; border-left:5px solid var(--course-accent);
+  padding:1.3vh 1.2vw 1.4vh; border-radius:3px}
+body.inclass .card h3{margin:0 0 .6vh; font-size:1.08em; color:var(--course-accent-dark)}
+body.inclass .card p{margin:0 0 .6vh}
+body.inclass .card ul, body.inclass .stage > ul{margin:0; padding-left:1.15em}
+body.inclass .card li, body.inclass .stage > ul li{margin:.25vh 0}
+body.inclass .card .dim{color:var(--warm-gray)}
+body.inclass .card.gold{background:#fbf6ea; border-left-color:#B8860B}
+body.inclass .card.gold h3{color:#8A6508}
+/* compact tables */
+body.inclass .ic-tbl{border-collapse:collapse; width:100%; font-size:.95em}
+body.inclass .ic-tbl th{text-align:left; font-size:.78em; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--warm-gray); border-bottom:2px solid var(--course-accent); padding:.4vh .8vw .4vh 0}
+body.inclass .ic-tbl td{padding:.45vh .8vw .45vh 0; border-bottom:1px solid #e6e0d4; vertical-align:top}
+body.inclass .ic-tbl td.n{font-variant-numeric:tabular-nums; color:var(--def); font-weight:600}
+/* a figure beside text */
+body.inclass .figside{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
+  gap:2vw; align-items:start; width:100%}
+body.inclass .figside img, body.inclass .figside video{width:100%; height:auto; display:block;
+  max-height:58vh; object-fit:contain; border:1px solid #e6e0d4}
+body.inclass .wideimg{width:100%; max-height:30vh; object-fit:contain; display:block; margin-top:1.2vh}
+body.inclass .src{font-size:.72em; color:var(--warm-gray); margin-top:.6vh}
+/* a "moment to arrive" slide (Five for Flourishing): the image, full screen */
+body.inclass .deck-slide.arrive{padding:0; justify-content:center; align-items:center; background:#000}
+body.inclass .deck-slide.arrive img{max-width:100vw; max-height:100vh; width:auto; height:auto; display:block}
+/* a sparse overview: one line and a row of pictures to talk over */
+body.inclass .lead{font-size:1.35em; line-height:1.3; margin:1vh 0 3vh; color:var(--ink)}
+body.inclass .trio{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:2vw; align-items:end}
+body.inclass .trio figure{margin:0}
+body.inclass .trio img{width:100%; height:34vh; object-fit:contain; display:block; border:1px solid #e6e0d4; background:#fff}
+body.inclass .trio figcaption{text-align:center; color:var(--course-accent-dark); font-weight:600; margin-top:1vh}
+/* a dense roster slide: smaller text, section headings between card rows */
+body.inclass .stage.tight{font-size:calc(var(--ic-text) * .74); line-height:1.28}
+body.inclass .stage.tight .card{padding:.9vh .9vw}
+body.inclass .stage.tight .card h3{margin-bottom:.3vh}
+body.inclass .stage.tight .cols{gap:1vh 1.2vw}
+body.inclass .sec{margin:1vh 0 .6vh; font-size:1em; color:var(--warm-gray);
+  text-transform:uppercase; letter-spacing:.06em}
+body.inclass .stage.tight .sec:first-child{margin-top:0}
+body.inclass .qr{display:flex; gap:1.4vw; align-items:center}
+body.inclass .qr p{margin:0 0 .6vh; font-weight:600}
+body.inclass .card .ico{height:1.15em; width:auto; vertical-align:-.2em; margin-right:.25em}
+/* a point slide, after the TCSS 490 decks: no title bar, the main point centred as the
+   heading with a grey line under it, and the content centred below */
+body.inclass .deck-slide.point:not(.part){padding-top:9vh; gap:3vh}
+body.inclass .deck-slide.point:not(.part) .head{text-align:center; border-bottom:0; padding-bottom:0}
+body.inclass .deck-slide.point:not(.part) .say{text-align:center; text-wrap:balance;
+  font-size:clamp(1.8rem, min(3.6vw, 6.4vh), 3.6rem)}
+/* a point slide with a figure: a smaller heading leaves the figure room, since the fit
+   script cannot shrink a figure, only the text beside it */
+body.inclass .deck-slide.point.compact:not(.part){padding-top:5vh; gap:2vh}
+body.inclass .deck-slide.point.compact:not(.part) .say{font-size:clamp(1.5rem, min(3vw, 5.4vh), 3rem)}
+/* point cards, after the TCSS 490 decks: a row of bordered cards under the slide's
+   main point, each a small tag, a title and one sentence */
+body.inclass .pcards{display:grid; gap:1.2vw; width:100%; margin-top:1vh}
+body.inclass .pcards.c3{grid-template-columns:repeat(3, minmax(0,1fr))}
+body.inclass .pcards.c4{grid-template-columns:repeat(4, minmax(0,1fr))}
+body.inclass .pcard{border:1px solid #d9d3c7; border-radius:5px; background:#fff;
+  padding:1.8vh 1.1vw; display:flex; flex-direction:column; gap:.8vh; min-width:0}
+body.inclass .pcard .tag{align-self:flex-start; font-size:.62em; font-weight:700; letter-spacing:.06em;
+  text-transform:uppercase; padding:.15em .5em; border-radius:3px; background:var(--subtle); color:var(--warm-gray)}
+body.inclass .pcard > b{color:var(--course-accent-dark); font-size:1.15em; line-height:1.15}
+body.inclass .pcard > span, body.inclass .pcard > p{color:var(--warm-gray); line-height:1.32; margin:0}
+body.inclass .pcard ul, body.inclass .pcard ol{margin:0; padding-left:1.15em; color:var(--warm-gray); line-height:1.32}
+body.inclass .pcard li{margin:.3vh 0}
+body.inclass .pcard li b{color:var(--ink)}
+body.inclass .pcard .vote{margin-top:.4vh}
+/* one gold card among plain ones */
+body.inclass .pcard.gold{background:#fbf6ea; border-color:#d9c08a}
+body.inclass .pcard.gold > b{color:#8A6508}
+body.inclass .pcard.gold .tag{background:#f1e4c4; color:#8A6508}
+body.inclass .pcol{display:flex; flex-direction:column; gap:1.2vh; min-width:0}
+body.inclass .pcards.c1{grid-template-columns:minmax(0,1fr)}
+body.inclass .pcards.c2{grid-template-columns:repeat(2, minmax(0,1fr))}
+body.inclass .pcard .q{color:var(--ink); font-style:italic}
+/* the row of point cards that says what to do */
+body.inclass .pcards.do .pcard{background:#fbf6ea; border-color:#d9c08a}
+body.inclass .pcards.do .pcard > b{color:#8A6508}
+body.inclass .pcards.do .tag{background:#f1e4c4; color:#8A6508}
+/* a quieter row of point cards under the main row */
+body.inclass .pcards.minor{font-size:.78em; margin-top:1.6vh}
+body.inclass .pcards.minor .pcard{background:#f7f6f2; border-color:#e6e0d4; padding:1.2vh 1vw}
+body.inclass .pcards.minor .pcard > b{color:var(--warm-gray)}
+/* the learning-group roster: one card per group, names listed down the card so a
+   student scans for their own while the details beside it are reviewed */
+body.inclass .groups{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:1vh .8vw; align-content:start}
+body.inclass .gcard{background:#f7f9f1; border-top:4px solid var(--course-accent); border-radius:3px;
+  padding:.8vh .7vw .9vh; font-size:.86em; line-height:1.28}
+body.inclass .gcard h4{margin:0 0 .4vh; font-size:1.08em; color:var(--course-accent-dark)}
+body.inclass .gcard h4 span{font-weight:400; color:var(--warm-gray); font-size:.8em; margin-left:.3em}
+body.inclass .gcard ul{list-style:none; margin:0; padding:0}
+body.inclass .gcard li{margin:0; white-space:nowrap}
+/* a day-by-day timeline, set large: it is the whole slide */
+body.inclass .timeline{font-size:1.15em}
+body.inclass .timeline td{padding:1.6vh 1.5vw 1.6vh 0}
+body.inclass .timeline td:first-child{white-space:nowrap; width:1%; color:var(--course-accent-dark)}
+body.inclass .stage a{color:var(--course-accent-dark)}
+body.inclass .qr img{width:22vh; height:22vh; display:block}
+/* class 2: figure hosts, channel legend chips, vote cards, and an amber kicker
+   for the slides where the room does something */
+body.inclass .c2fig{width:100%}
+body.inclass .c2fig > svg{display:block; width:100%; height:auto; max-height:62vh}
+body.inclass .c2fig.half > svg{max-height:31vh}
+body.inclass .c2fig .cgd .cgp:not(.c2chart) text{font-size:15px}
+body.inclass .c2key b{display:inline-block; width:.75em; height:.75em; border-radius:50%; vertical-align:-.05em}
+body.inclass .c2key b.head{background:#5F7038}
+body.inclass .c2key b.cross{background:#b0443a}
+body.inclass .c2key b.amber{background:#b8860b}
+body.inclass .c2key b.sq{border-radius:1px}
+body.inclass .c2key i.amber{border-color:#b8860b}
+body.inclass .c2key i.faint{border-color:#cfc8bb}
+body.inclass .card .c2fig{margin:.4vh 0 .6vh}
+body.inclass .c2row{display:grid; grid-template-columns:1fr 1fr; gap:1.2vw; margin-top:.6vh}
+body.inclass .c2row svg{display:block; width:100%; height:auto; max-height:30vh}
+body.inclass .c2fig .cgd{margin:0}
+body.inclass .c2key{display:inline-flex; align-items:center; gap:.35em; margin-right:1.1em; font-weight:600}
+body.inclass .c2key i{display:inline-block; width:1.8em; border-top:3px solid}
+body.inclass .c2key i.head{border-color:#5F7038}
+body.inclass .c2key i.cross{border-color:#b0443a}
+body.inclass .c2key i.chest{border-top-style:dashed; border-color:#3A5F8A}
+body.inclass .c2key i.neck{border-top-style:dotted; border-color:#b8860b}
+body.inclass .vote{display:grid; grid-template-columns:1fr; gap:.8vh; margin-top:1vh}
+body.inclass .vote div{display:flex; align-items:center; gap:1vw; border:2px solid var(--course-accent); border-radius:6px; padding:.6vh 1vw; background:#fff}
+body.inclass .vote b{font-size:1.4em; color:var(--course-accent-dark); min-width:1.2em}
+body.inclass .kicker.act{color:#8A6508}
+/* a slide being measured by the fit script below: laid out, never seen */
+body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
+</style>
+</head>
+<body>
+
+
+<section class="deck-slide part">
+  <div class="head">
+    <p class="course">Computational Physical Modeling</p>
+    <p class="say">A derivative from sampled data</p>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>All right, welcome. So week three was all integration, adding a record up. In this video I want to go the other way and differentiate one, so let's take a look.</p><p>Now the record I want to use is a basketball shot. During the 2015-16 season the NBA had a camera system called SportVU in every arena, and it tracked the ball's position twenty-five times a second. So one frame about every 0.04 seconds, and exactly that through the whole flight.</p><p>This is one shot, a three-pointer from about 24 feet, and it missed. Up the side is the ball's height in meters. For the first part of the record the ball is in the shooter's hands, at about a meter. Then it goes up, it leaves the hands at frame 20, which is the ringed point, and the shaded stretch is free flight, up and back down to the height of the rim.</p>">
+  <div class="head">
+    <p class="say" style="min-height:2.2em">A camera system recorded this shot's height <span class="def">25 times a second</span> (about every 0.04&nbsp;s).</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l9-ball"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So how fast is the ball going up? Well, the rate of change of height is vertical speed, and the rate of change is the derivative, which is the slope of this curve.</p><p>Now in calculus you'd get a slope from a formula. But with the ball we don't have a formula. What we have is 62 numbers, one per frame. So whatever slope we get has to come out of the samples themselves.</p>">
+  <div class="head">
+    <p class="say" style="min-height:2.2em">The ball's vertical speed is <span class="def">the slope of this curve</span>.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l9-ball"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Okay. So here are five frames from the way up, zoomed in.</p><p>A slope is rise over run. Our run is the time between two samples, 0.04 seconds, and I'm going to call that h, because that's the usual name for it. Our rise is the difference between two heights.</p><p>So from frame 24 to frame 25 the ball goes up 0.1256 meters. Divide by 0.04 and we get 3.14 meters per second. That's an estimate of the vertical speed, and that's what we call a finite difference.</p>">
+  <div class="head">
+    <p class="say">From two samples, a slope is <span class="def">the rise divided by the run</span>.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l9-rise"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide part">
+  <div class="head">
+    <p class="course">Computational Physical Modeling</p>
+    <p class="say">Forward, backward and central differences</p>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So the only real question is which two samples we use.</p><p>Let's say we're driving and we want to know how fast we're going right now, and all we've got is the odometer, which we glance at once a minute. One thing we could do is take this reading and the next one, subtract, and divide by one minute. That's what we call the forward difference, because we looked forward.</p><p>Or we could use the last reading and this one. That's the backward difference.</p><p>Or we could take the reading before and the reading after, and divide by two minutes. That's the central difference, because we're sitting in the middle of it. And that's why there's a two h on the bottom, because those two samples are two steps apart.</p><p>And I'm going to call the curve f of x from here on, so on the ball f is the height and x is the time.</p>">
+  <div class="head">
+    <p class="say">Each rule divides <span class="def">a difference of two samples</span> by the time between them.</p>
+  </div>
+  <div class="stage">
+    <div class="work">
+      $$\begin{aligned}
+      \text{forward:}&\quad f'(x) \approx \frac{f(x+h) - f(x)}{h}\\[4pt]
+      \text{backward:}&\quad f'(x) \approx \frac{f(x) - f(x-h)}{h}\\[4pt]
+      \text{central:}&\quad f'(x) \approx \frac{f(x+h) - f(x-h)}{2h}
+      \end{aligned}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So here are all three on the ball, at frame 25. It's the same five frames and the same point, and each rule gives us a line through two of them, what we call a chord. The slope of the chord is the estimate.</p><p>Forward uses frames 25 and 26 and gets 2.245 meters per second. Backward uses 24 and 25 and gets 3.140. Central uses 24 and 26, and gets 2.6925.</p><p>So that's three answers from one record. And we don't know the true speed at frame 25, so from the ball alone we can't say which one is best. For that we need a curve where we do know the answer.</p>">
+  <div class="head">
+    <p class="say">At frame 25 the three rules give <span class="def">three different speeds</span>.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l9-three"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So this one is a drawing, a smooth curve where we know the true slope. And the step is big on purpose, so we can actually see the gap.</p><p>The gold dots are the samples each rule uses, the red line is the chord through them, and the grey dashed line is the true tangent, which is the answer we'd like.</p><p>So the forward chord comes out a bit too shallow, the backward chord a bit too steep, and the central chord sits a lot closer to the tangent than either of them.</p><p>And there's one odd thing about that third panel. The central difference never reads the middle sample at all. It's ringed there, and the rule just skips it.</p>">
+  <div class="head">
+    <p class="say">On a smooth curve the central chord is <span class="def">usually closest to the tangent</span>.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide legible" id="fig-stencils"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Okay. Now here's the thing that makes the rest of this work, and it's just algebra. The central difference is the average of the other two.</p><p>So if we write out a half times forward plus backward, the f-of-x terms cancel, and what's left is exactly the central difference. And that's exact, there's no approximation in it.</p><p>And we can check it on the ball. Forward was 2.245, backward was 3.140, and halfway between them is 2.6925, which is what the central difference gave.</p><p>So whatever the forward rule gets wrong and whatever the backward rule gets wrong, the central rule gets the average of the two. That only helps if the two mistakes point in opposite directions, so let's go and show that they do.</p>">
+  <div class="head">
+    <p class="say">The central difference is <span class="def">the average of the other two</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work">
+      $$\begin{aligned}
+      \frac{1}{2}\left[\frac{f(x+h) - f(x)}{h} + \frac{f(x) - f(x-h)}{h}\right]
+        &= \textcolor{#8A6508}{\frac{f(x+h) - f(x-h)}{2h}}\\[18pt]
+      \text{frame 25:}\quad \tfrac12\,(2.245 + 3.140) &= \textcolor{#8A6508}{2.6925\ \text{m/s}}
+      \end{aligned}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide part">
+  <div class="head">
+    <p class="course">Computational Physical Modeling</p>
+    <p class="say">The error in each rule, from a Taylor expansion</p>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>All right. So to see where the error in each rule comes from, we need a tool you probably saw in calculus, what we call a Taylor expansion. Just as a reminder, it answers this question. If we know everything about f at one point x, what is f a little way off, at x plus h?</p><p>And the answer is a sum. Start with the value at x. Add h times the slope, which is what we'd get if the curve were a straight line. Then add a correction for how the curve bends, h squared over two times the second derivative, and then smaller and smaller corrections after that.</p><p>And the thing to notice is that each term carries a higher power of h. So when h is small, each term is a lot smaller than the one before it, and the first few terms are usually all we need.</p>">
+  <div class="head">
+    <p class="say">A <span class="term">Taylor expansion</span> gives $f$ a step away <span class="def">from what is known at $x$</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work">
+      $$f(x+h) \;=\; \underbrace{f(x)}_{\text{value}} \;+\; \underbrace{h\,f'(x)}_{\text{slope}} \;+\; \underbrace{\tfrac{h^2}{2}f''(x)}_{\text{curvature}} \;+\; \tfrac{h^3}{6}f'''(x) \;+\; \dots$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So how does that help us with a derivative? Well, the expansion has f-prime sitting right in it, in the second term. So let's solve for it, and see what the forward difference really gives us.</p><p>Start with the expansion. Subtract f of x from both sides, and the value cancels, so what's left on the left is a difference of two samples, the top of the forward rule.</p><p>Now divide everything by h, and every term on the right loses one power of h. So the forward difference equals f-prime, which is the answer we wanted, plus h over two times f-double-prime, plus smaller stuff.</p><p>And one last step. What we actually want is f-prime, so let's move everything else to the other side. Now f-prime equals the forward difference, minus h over two f-double-prime, minus smaller stuff.</p><p>So read that line in two parts. The forward difference, circled in green, is the formula we can actually compute, two samples and a step. The rest, circled in red, is what that formula leaves out, and that's its error. It pops out on its own. The forward difference is exactly right only if the curvature is zero, meaning the curve really is a straight line between the samples. And that's why we care about the curvature term of the expansion. Dividing by h turns it into the error of the rule.</p>">
+  <div class="head">
+    <p class="say">Solved for $f'(x)$, the expansion gives the forward difference <span class="def">and its error</span>.</p>
+  </div>
+  <div class="stage">
+    <!-- the forward difference worked on a whiteboard (the beats are in
+         lecture-09-figs.js). Each step is worked out in full, what is added to
+         both sides in blue; the pieces that cancel are struck out, then fade
+         and close up, so what survives slides together into the step's line:
+         the expansion, subtract f(x), divide by h, then solve for f'(x), so the
+         formula we compute and the term it leaves out (its error) sit on one
+         line, each circled -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&amp;display=swap">
+    <style>
+      @property --a{syntax:"<angle>"; inherits:false; initial-value:360deg}
+      .c9fd{display:grid; grid-template-columns:auto auto; column-gap:2.4em; row-gap:1.1em; align-items:center;
+            justify-content:center; margin:2vh auto 0; pointer-events:none;
+            font-family:Caveat,"Segoe Print","Bradley Hand",cursive; font-size:calc(var(--stage-text) * 1.05);
+            line-height:1.05; color:#222}
+      .c9fd > span{white-space:nowrap; display:flex; align-items:center; gap:.25em}
+      .c9fd .note{color:#1f4e9c; font-size:.85em}
+      .c9fd .add{color:#1f4e9c}
+      .c9fd .g{display:inline-block; white-space:nowrap}
+      .c9fd .eq{margin:0 .2em}
+      .c9fd > .note{white-space:normal; display:block; max-width:10em; line-height:1}
+      .c9fd .fr{display:inline-flex; flex-direction:column; align-items:center; margin:0 .1em}
+      .c9fd .fr > span + span{border-top:2px solid currentColor; padding:0 .15em}
+      .c9fd .fr.sm{font-size:.8em}
+      .c9fd .x{position:relative; display:inline-block}
+      .c9fd .x::after{content:""; position:absolute; left:-12%; right:-12%; top:55%;
+                      border-top:2.5px solid #c0392b; transform:rotate(-30deg); transform-origin:left center}
+      .c9fd .x:not(.on)::after{transform:rotate(-30deg) scaleX(0)}
+      .c9fd .x.wide::after{left:-3%; right:-3%; transform:rotate(-8deg)}
+      .c9fd .x.wide:not(.on)::after{transform:rotate(-8deg) scaleX(0)}
+      .c9fd .x.mid::after{left:-6%; right:-6%; top:72%; transform:rotate(-14deg)}
+      .c9fd .x.mid:not(.on)::after{transform:rotate(-14deg) scaleX(0)}
+      .c9fd .fr > span{align-self:stretch; text-align:center}
+      .c9fd .ringed{position:relative; display:inline-flex; align-items:center; gap:.25em; padding:.1em .2em}
+      .c9fd .ringed + .ringed{margin-left:.25em}
+      .c9fd .ring{position:absolute; left:-4%; top:-18%; width:108%; height:136%;
+                  border:2.5px solid #2e7d32; border-radius:50%; transform:rotate(-2deg);
+                  -webkit-mask:conic-gradient(from 200deg, #000 var(--a), transparent 0);
+                  mask:conic-gradient(from 200deg, #000 var(--a), transparent 0)}
+      .c9fd .ring.err{border-color:#c0392b}
+      .c9fd .cap{position:absolute; top:118%; white-space:nowrap; font-size:.7em; color:#2e7d32}
+      .c9fd .cap.fm{right:6%}
+      .c9fd .cap.err{left:6%; color:#c0392b}
+    </style>
+    <div class="c9fd" data-board="fwd" data-strike="-30deg" aria-label="Working: f of x plus h equals f of x plus h f prime of x plus h squared over 2 f double prime of x and so on. Subtract f of x from both sides, and the f of x terms on the right cancel. Divide by h, and one h cancels in each term, so the forward difference equals f prime plus h over 2 f double prime and so on. Subtract h over 2 f double prime from both sides and it cancels on the right, so f prime of x equals the forward difference, the formula we compute, minus h over 2 f double prime, what the formula leaves out, its error.">
+
+      <span data-k="m1">f(x+h) = f(x) + h f′(x) + <span class="fr sm"><span>h²</span><span>2</span></span> f″(x) + &hellip;</span>
+      <span class="note" data-k="n1">the expansion</span>
+
+      <span data-k="r2">f(x+h) <span class="add" data-k="a2">&minus; f(x)</span> = <span class="g" data-k="g2a"><span class="x mid" data-k="x2a" data-rot="-14deg">f(x)</span>&nbsp;+</span>
+        h f′(x) + <span class="fr sm"><span>h²</span><span>2</span></span> f″(x) + &hellip;
+        <span class="g add" data-k="g2b"><span class="x mid" data-k="x2b" data-rot="-14deg">&minus; f(x)</span></span></span>
+      <span class="note" data-k="n2">subtract f(x) from both sides</span>
+
+      <span data-k="r3"><span class="fr"><span>f(x+h) &minus; f(x)</span><span class="add" data-k="a3">h</span></span> =
+        <span class="fr"><span><span class="g" data-k="g3a"><span class="x" data-k="x3a">h</span>&nbsp;</span>f′(x)</span><span class="add" data-k="g3b" data-fold="y"><span class="x" data-k="x3b">h</span></span></span> +
+        <span class="fr sm"><span>h<span class="g" data-k="g3c">&nbsp;<span class="x" data-k="x3c">h</span></span></span><span>2<span class="g add" data-k="g3d">&nbsp;<span class="x" data-k="x3d">h</span></span></span></span> f″(x) + &hellip;</span>
+      <span class="note" data-k="n3">divide every term by h</span>
+
+      <span data-k="r4">
+        <span class="ringed" data-k="L"><span class="fr"><span>f(x+h) &minus; f(x)</span><span>h</span></span>
+          <span class="ring" data-k="rf"></span><span class="cap fm" data-k="cf">the formula we compute</span></span>
+        <span class="ringed add" data-k="a4"><span>&minus; <span class="fr sm"><span>h</span><span>2</span></span> f″(x) &minus; &hellip;</span>
+          <span class="ring err" data-k="re"></span><span class="cap err" data-k="ce">what it leaves out: the error</span></span>
+        <span class="eq" data-k="eq">=</span>
+        <span data-k="d4">f′(x)</span>
+        <span class="g" data-k="g4a"><span class="x wide" data-k="x4a" data-rot="-8deg">+ <span class="fr sm"><span>h</span><span>2</span></span> f″(x) + &hellip;</span></span>
+        <span class="g add" data-k="g4b"><span class="x wide" data-k="x4b" data-rot="-8deg">&minus; <span class="fr sm"><span>h</span><span>2</span></span> f″(x) &minus; &hellip;</span></span></span>
+      <span class="note" data-k="n4">subtract the error from both sides, then swap the sides</span>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So let's see that on the ball. The value is its height at frame 25. The slope is its vertical speed, and the central difference gave us 2.69 meters per second. And the curvature is the second derivative of height, which is acceleration, and in free flight that's just gravity, minus 9.81. So the first three terms are z plus v h minus a half g h squared, the kinematics formula from physics.</p><p>Now the red dotted line is two terms, value plus slope. That's a straight line, and a straight line between samples is exactly what a one-sided difference assumes. The grey dashed curve adds the curvature. So the gap between them is the term the straight line leaves out, a half g h squared, and the arithmetic for the current frame is down at the bottom.</p><p>After one frame that gap is about eight millimeters. Divide it by h, 0.04, and that's about 0.2 meters per second, which is the h over two f-double-prime from the last slide. So that's the size of the mistake a forward difference makes on this ball, from the curvature alone.</p><p>And if we keep going, the gap grows like h squared. It stops here at frame 30, two tenths of a second on, where two terms is about twenty centimeters too high and three terms lands within a couple of millimeters of the tracked height. Then it runs on to the rim.</p>">
+  <div class="head">
+    <p class="say">On the ball, the curvature term is <span class="def">what a straight line misses</span>.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l9-taylor"><div class="fig-body"></div></figure>
+    <style>.deck-slide .taylor-math{font-size:calc(var(--stage-text) * .62); margin-top:1.2vh; min-height:7.6em} .deck-slide .taylor-replay{align-self:center; margin-top:.6vh; font:inherit; font-size:.8rem; color:var(--warm-gray); background:none; border:1px solid #d9d3c7; border-radius:4px; padding:.2em .8em; cursor:pointer}</style>
+    <div class="work taylor-math" data-taylor-math></div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So now let's write the expansion twice. We do it once stepping forward a distance h, and once stepping backward.</p><p>And those two lines are identical except for the signs on the odd powers of h. Why? Well, because minus h raised to an odd power is negative, and raised to an even power it's positive. So the even terms come out the same either way, and the odd ones flip sign.</p>">
+  <div class="head">
+    <p class="say">A step forward and a step back differ <span class="def">only in the sign of the odd powers of $h$</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work">
+      $$\begin{aligned}
+      f(x+h) &= f(x) \textcolor{#8A6508}{\;+\; h f'(x)} + \tfrac{h^2}{2}f''(x) \textcolor{#8A6508}{\;+\; \tfrac{h^3}{6}f'''(x)} + \dots\\[4pt]
+      f(x-h) &= f(x) \textcolor{#8A6508}{\;-\; h f'(x)} + \tfrac{h^2}{2}f''(x) \textcolor{#8A6508}{\;-\; \tfrac{h^3}{6}f'''(x)} + \dots
+      \end{aligned}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>We already did the forward difference, so here it is again on the top line. f-prime, which is the answer we wanted, plus h over two f-double-prime, plus smaller stuff.</p><p>Now the backward one. Same thing, except the term in h comes in with a minus. So f-prime, minus h over two f-double-prime.</p><p>So compare those two lines. They both start with f-prime, good. Then they both carry a term in h, and those two terms are the same size with opposite signs. That's the leading error of each one-sided rule, and it's proportional to h, so if we halve the step we halve the error. Okay.</p>">
+  <div class="head">
+    <p class="say">The leading forward and backward errors are <span class="def">equal and opposite</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work">
+      $$\begin{aligned}
+      \frac{f(x+h) - f(x)}{h} &= f'(x) \textcolor{#8A6508}{\;+\; \tfrac{h}{2}f''(x)} + \tfrac{h^2}{6}f'''(x) + \dots\\[4pt]
+      \frac{f(x) - f(x-h)}{h} &= f'(x) \textcolor{#8A6508}{\;-\; \tfrac{h}{2}f''(x)} + \tfrac{h^2}{6}f'''(x) - \dots
+      \end{aligned}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>And now we average them. The h terms are equal and opposite, so they cancel to nothing. The h-squared terms are identical, so they survive.</p><p>So our leading error is now h-squared over six times f-triple-prime. It goes as h squared, and halving the step now quarters the error.</p><p>And I think the thing to notice is that we didn't add anything to get that. It's the same samples the one-sided rules already needed, combined so that their errors cancel.</p>">
+  <div class="head">
+    <p class="say">Averaging cancels the $h$ term and <span class="def">leaves an error in $h^2$</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work">
+      $$\frac{f(x+h) - f(x-h)}{2h} \;=\; f'(x) \textcolor{#8A6508}{\;+\; \tfrac{h^2}{6}f'''(x)} + \dots$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Okay. So let's put the two side by side, because this is really the result of the whole derivation.</p><p>Here's how to read this graph. We start both rules at some step, I'll call it h-nought, and that's the point up in the corner. Then we shrink the step, so we move to the left, and the height tells us how much of each rule's error is still left.</p><p>The one-sided rules have an error that's linear in h, so that's the straight line. Halve the step and half the error is left. And what we call that is first order, because h shows up to the first power.</p><p>The central rule has an error that's quadratic in h, so it's the curve. Halve the step and only a quarter is left. That's second order. And it keeps pulling away. Cut the step by ten and the line keeps a tenth of its error, and the curve keeps a hundredth.</p><p>Now notice that both curves start at the same point, and that's on purpose. Each one is its own error divided by its own error at h-nought, because the constants out front, the f-double-prime and f-triple-prime, depend on the curve. So this graph doesn't say which error is bigger. What it says is how fast each one shrinks, and once h is small enough the quadratic one is usually the smaller. And that's the main thing to carry away about these three rules.</p>">
+  <div class="head">
+    <p class="say">One-sided error is <span class="def">linear in $h$</span> and central error is <span class="def">quadratic in $h$</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work" style="font-size:calc(var(--stage-text) * .7)">
+      $$\text{one-sided: } \tfrac{h}{2}f''(x) \qquad\qquad \text{central: } \tfrac{h^2}{6}f'''(x)$$
+    </div>
+    <figure class="figure wide" data-fig="l9-linquad"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide part">
+  <div class="head">
+    <p class="course">Computational Physical Modeling</p>
+    <p class="say">The first and last sample of a record</p>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Okay. Now there's one problem with the central difference, and it's at the ends of a record.</p><p>And the ball has a good one. Say we want the vertical speed at release, frame 20, which is a number you'd actually want for a shot. The forward difference uses frames 20 and 21, and both of those are in flight.</p><p>The central difference needs frame 19 as well, and at frame 19 the ball is still in the shooter's hands, being pushed up. So the central difference at release mixes a frame from the hands with a frame from the flight.</p>">
+  <div class="head">
+    <p class="say">At release the central difference uses <span class="def">a frame from before the ball left the hands</span>.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l9-release"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So here are the numbers. Forward gives 3.69 meters per second, central gives 4.89, and backward, which uses only the frame in the hands and the release frame, gives 6.09. Central is still the average of the other two, 3.69 and 6.09.</p><p>So the forward and central estimates of release speed differ by 1.2 meters per second, about a quarter of the answer, and that's purely from which samples we let the rule read. Neither one is clean. Forward is only order one, and central reads a frame from a different kind of motion.</p><p>So when the motion we care about starts partway through a record, like the flight does here, the samples we let in at that edge can change the answer. And the same thing happens at the real ends of any record.</p>">
+  <div class="head">
+    <p class="say">At the release frame the rules disagree <span class="def">by 1.2 m/s</span> (about a quarter of the answer).</p>
+  </div>
+  <div class="stage">
+    <table class="tbl nums">
+      <tr><th>rule</th><th>frames read</th><th>vertical speed at release</th></tr>
+      <tr><td>forward</td><td>20 and 21</td><td class="key">3.69 m/s</td></tr>
+      <tr><td>central</td><td>19 and 21</td><td class="key">4.89 m/s</td></tr>
+      <tr><td>backward</td><td>19 and 20</td><td>6.09 m/s</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So at the very first sample of any record there's nothing to the left, and at the very last there's nothing to the right. Every implementation has to do something there, and whatever it does, you usually can't see it in the output.</p><p>There are three things people do. One, use a one-sided rule at the ends, so forward at the start and backward at the finish. The array stays the right length, and those two end values are order one, and everything in between is order two.</p><p>Two, return a shorter array, n minus two values. That's honest about what we know, and now the output doesn't line up with its own time base.</p><p>And three, invent a sample past the end. And I'd really rather we didn't do that to a measured record. That invented value is an assumption, and it comes back in the output looking exactly like data.</p>">
+  <div class="head">
+    <p class="say">At an end, code can <span class="def">go one-sided, shorten the output, or invent a sample</span>.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide legible" id="fig-ends"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>And here's what the libraries do. This is the whole derivative in Python, three lines.</p><p>The first line does the interior, every sample that has a neighbor on both sides, with the central difference. Then forward at the first sample and backward at the last.</p><p>And numpy's gradient function does exactly this, and so does gradient in MATLAB. So when you call one of them, the two end values come from a different rule than everything else.</p>">
+  <div class="head">
+    <p class="say"><span class="term">np.gradient</span> and MATLAB's <span class="term">gradient</span> <span class="def">use one side at the ends</span> (the default).</p>
+  </div>
+  <div class="stage">
+    <div class="panels">
+      <div class="code">d[1:-1] = (y[2:] - y[:-2]) / (2*dt)</div><div class="note">central, at every sample with a neighbor on both sides</div>
+      <div class="code">d[0] &nbsp;&nbsp;&nbsp;= (y[1] - y[0]) / dt</div><div class="note">forward, at the first sample</div>
+      <div class="code">d[-1] &nbsp;&nbsp;= (y[-1] - y[-2]) / dt</div><div class="note">backward, at the last sample</div>
+      <div class="code"><span class="k">d = np.gradient(y, dt)</span></div><div class="note">the same three steps in one call</div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide part">
+  <div class="head">
+    <p class="course">Computational Physical Modeling</p>
+    <p class="say">Vertical speed over a whole shot</p>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>All right. So let's run the central difference over the whole flight, from just after release to the rim, and plot the speed it gives at every frame.</p><p>It starts at about four meters per second going up, crosses zero at the top of the arc, and ends at about minus four and a half coming down.</p><p>Now in free flight the only thing changing the vertical speed is gravity, so it should fall by 9.81 meters per second every second. The dashed line has exactly that slope, drawn through the middle of the points. And the points do follow it.</p>">
+  <div class="head">
+    <p class="say">The speeds roughly follow <span class="def">a line falling 9.81 m/s each second</span>.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l9-speed"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>But they don't sit on it. They scatter about it, with a standard deviation of about 0.45 meters per second.</p><p>And most of that is probably coming from the tracking. The cameras place the ball to within about three centimeters, and three centimeters doesn't sound like much on a ball that peaks four and a half meters off the floor. But each speed is a difference of two heights divided by 0.08 seconds, and with about three centimeters of error in each height that comes out to about half a meter per second.</p><p>So keep that conclusion in mind, because in a minute we'll come back to how we actually reached it.</p>">
+  <div class="head">
+    <p class="say">About 3&nbsp;cm of tracking noise gives <span class="def">about 0.5&nbsp;m/s of scatter</span>.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l9-speed"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Now, what if we wanted the acceleration? Well, it's the derivative of the speed, so let's just difference again. The central rule applied twice comes out as z ahead, minus two z, plus z behind, all over h squared.</p><p>And here's what that gives us on the same flight. The dashed line is minus 9.81, which is what free fall says it should be. And the points are all over the place. One frame at a time they scatter by about 27 meters per second squared, so almost three times g, and a couple of them even come out positive by forty or fifty.</p><p>So differentiating a second time made the noise a lot worse. That's not a bug in the rule, and the next video is about exactly why it happens. For now, just notice that if you averaged all twenty-five of them you'd get about minus 8.7, which isn't too far from g. So the information is in there, it's just buried in the noise.</p>">
+  <div class="head">
+    <p class="say">Differencing again gives the acceleration, and <span class="def">the noise grows</span>.</p>
+    <p class="sub">One frame at a time these scatter by about 27&nbsp;m/s&sup2;. The average of all 25 is &minus;8.7&nbsp;m/s&sup2;.</p>
+  </div>
+  <div class="stage">
+    <div class="work" style="font-size:calc(var(--stage-text) * .7)">
+      $$a_i \;\approx\; \frac{z_{i+1} - 2z_i + z_{i-1}}{h^2}$$
+    </div>
+    <figure class="figure wide" data-fig="l9-accel"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So let's go back to that speed plot and ask, how did we actually get the conclusion that the speeds follow g? Because it wasn't just differentiation.</p><p>The differencing gave us the speeds, that's this video. Then we brought in a model, which is just physics. In free flight the only force is gravity, so the speed should fall along a straight line with slope minus 9.81. We didn't measure that slope, we assumed it.</p><p>Then we placed that line. I put it through the middle of the points, and choosing where a model's line goes so it sits as close as it can to the data is what we call fitting. That's week six, least squares.</p><p>And last, we judged how far the points sit off the line, about half a meter per second, and said that's about what three centimeters of tracking noise should give. Working out how much a measurement's noise moves a computed answer is week nine.</p><p>So that one conclusion used three things we haven't covered yet. Hopefully this video gave you the first of the tools, the difference rules and what their errors look like. In the next video we look at what differentiation does to noise. Thanks a lot for watching and we'll see you in the next video.</p>">
+  <div class="head">
+    <p class="say">The 9.81 line came from <span class="def">a model, a fit and a noise estimate</span>, and not only from differencing.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c4">
+      <div class="pcard"><span class="tag">this video</span><b>Differencing</b>
+        <span>Central differences turn the tracked heights into speeds.</span></div>
+      <div class="pcard"><span class="tag">physics</span><b>A model</b>
+        <span>In free flight the speed falls along a line of slope &minus;9.81&nbsp;m/s&sup2;. That slope was assumed, and not measured.</span></div>
+      <div class="pcard"><span class="tag">week 6</span><b>A fit</b>
+        <span>The line was placed through the middle of the points. Choosing where a model sits against the data is least squares fitting.</span></div>
+      <div class="pcard"><span class="tag">weeks 4 and 9</span><b>A noise estimate</b>
+        <span>About 3&nbsp;cm of tracking noise should give about 0.5&nbsp;m/s of scatter in a speed. Noise through a derivative is the next video, and through any calculation is week 9.</span></div>
+    </div>
+  </div>
+</section>
+
+
+<div class="deck-bar"><i></i></div>
+<div class="deck-num">1</div>
+<div class="deck-help">&larr; &rarr; move &nbsp;·&nbsp; n notes &nbsp;·&nbsp; b blank &nbsp;·&nbsp; p pointer &nbsp;·&nbsp; d draw</div>
+<div class="deck-notes"></div>
+
+
+<script type="module" src="js/bundle/lecture-09.js?v=20261015124713"></script>
+</body>
+</html>

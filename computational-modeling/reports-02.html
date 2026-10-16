@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Example reports · Assignment 2 — Computational Physical Modeling</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="css/blocks.css?v=20261015124713">
+  <link rel="stylesheet" href="css/demos.css?v=20261015124713">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (olive). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #5F7038;
+      --course-accent-dark: #47542A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    /* ── Week page video and class cards (media-cards.js) ── */
+    .media-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+      gap: 0.9rem;
+      margin: 1rem 0;
+    }
+    .media-card {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-top: 4px solid var(--course-accent);
+      border-radius: 4px;
+      padding: 0.75rem 0.9rem 0.85rem;
+    }
+    .media-card.class { border-top-color: #C8860A; }
+    .media-card p { margin: 0; }
+    .mc-kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .mc-title { font-weight: 600; line-height: 1.3; margin: 0.25rem 0 0.35rem !important; }
+    .mc-sub { font-size: 0.85rem; color: #5A5550; line-height: 1.4; }
+    .mc-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.7rem; }
+    .mc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--course-accent);
+      border-radius: 3px;
+      text-decoration: none;
+      color: var(--course-accent-dark);
+    }
+    a.mc-btn:visited { color: var(--course-accent-dark); }
+    a.mc-btn:hover { background: #F0EDE7; }
+    .mc-btn svg { width: 1em; height: 1em; flex: none; }
+    .mc-btn.primary, a.mc-btn.primary:visited { background: var(--course-accent); color: #fff; }
+    a.mc-btn.primary:hover { background: var(--course-accent-dark); }
+    .mc-btn.pending { border-style: dashed; border-color: #b8b2a8; color: #5A5550; }
+    .mc-total { font-size: 0.9rem; color: #5A5550; }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+    /* the remembered data phrase; filled in by page.js */
+    .cg-phrase { display: inline-flex; align-items: center; gap: .3rem; margin-right: .6rem;
+      font-size: .82rem; flex-shrink: 0; }
+    /* The header row is a fixed 780px. The title, the toggle, "Your data", Search and
+       "Report a problem" only just fit in it, so the chip shows the label alone (the
+       phrase is in the link's title and on the data page) and Search shows its icon.
+       An earlier chip that held the phrase and was allowed to shrink squeezed the
+       label down to "Yo" on a classroom projector. */
+    .cg-phrase a { color: rgba(230,238,222,.92); text-decoration: none; white-space: nowrap; }
+    .header-links .search-btn .sb-label { display: none; }
+    .header-links button.report-btn { white-space: nowrap; }
+    /* the title keeps its own width */
+    .site-header-top .site-title { white-space: nowrap; flex-shrink: 0; }
+    .site-header-top .header-links { min-width: 0; margin-left: 1rem; }
+    @media (max-width: 780px) {
+      /* below the 780px row: the report button's short form, as on phones */
+      .header-links .report-btn .rb-full { display: none; }
+      .header-links .report-btn .rb-short { display: inline; }
+      .cg-phrase { margin-right: .2rem; }
+    }
+    .cg-phrase a:hover { color: #fff; text-decoration: underline; }
+    .cg-phrase button { background: none; border: none; cursor: pointer; padding: 0 .2rem;
+      color: rgba(230,238,222,.7); font: inherit; font-size: 1rem; line-height: 1; }
+    .cg-phrase button:hover { color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* Two rules the other course sites do not define. The header's top
+       row carries a report button beside the title, and a page with a
+       wide demo in it needs more than the reading measure. */
+    .site-header-top { border-bottom: 1px solid rgba(200,222,180,0.15); }
+    main.wide { max-width: 1180px; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Computational Physical Modeling</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <span class="cg-phrase" id="cg-phrase"></span>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        
+          <a href="syllabus.html">Syllabus</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="notes.html">Notes</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reports.html">Examples</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reflection.html">Reflection</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="meeting.html">Meeting</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="ai-use.html">AI Use</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="tools.html">Tools</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="workbench.html">Workbench</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="extra-labor.html">Extra Labor</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="canvas-grades.html">Canvas Grades</a>
+          
+        
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+          
+          
+          
+          <a href="week-01.html">1</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-02.html">2</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-03.html">3</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-04.html">4</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          <span class="week-gap" title="Week 5 is a break week">5<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <a href="week-06.html">6</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-07.html">7</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-08.html">8</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-09.html">9</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-10.html">10</a>
+          
+        
+      </div>
+    </nav>
+
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+
+  <main data-pagefind-body>
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <div class="eyebrow"><a href="reports.html">Example reports</a></div>
+<h1>Example reports &middot; Assignment 2</h1>
+
+<p>These are three reports for <a href="assign-02.html">Assignment 2, Sample Rate and Peak
+Loss</a>, written in three different styles. All three use the example pack (crash test 9793,
+which no phrase assigns), so nothing here answers anybody's assignment. Each student builds the
+cheaper logger's record from the one they have and reads the peaks again. They agree on what the
+record shows, and they recommend different rates because each chose a different standard for
+good enough. Please see the <a href="reports.html">Example reports</a> page for what every report
+needs and who it is written for.</p>
+
+<p>Each report is followed by a short note on what it does well. The purpose of the notes is to
+show that a choice the assignment leaves open is part of the answer. Stating the choice is what
+makes the answer defensible. Here the choices move the recommended rate from 5&nbsp;kHz to
+20&nbsp;kHz (all three reject the proposed 1&nbsp;kHz).</p>
+
+<div class="aside"><span class="label">Things to watch for</span>
+<p>Test 9793 is sampled at 20&nbsp;kHz, and most tests in the course are sampled at 10&nbsp;kHz
+(some at 12.5&nbsp;kHz). If yours is one of those there are fewer slower rates below it to try, and
+the rate a report recommends here may not apply to your test. It is a good idea to start from your
+own sample rate and work down from it.</p>
+</div>
+
+<h2 id="a-memo">A Memo</h2>
+
+<div class="aside report"><span class="label">Example 1 &middot; Memo</span>
+<div class="memo-head">
+<p><strong>To:</strong> Alice</p>
+<p><strong>Re:</strong> The 1&nbsp;kHz logger from purchasing</p>
+<p><strong>Data phrase:</strong> example pack (test 9793)</p>
+</div>
+
+<p>I recommend 5&nbsp;kHz (5,000 samples a second) as the lowest rate we accept. On our test,
+the proposed 1&nbsp;kHz logger could read the dummy's peaks up to 7.4% low (the driver's chest,
+54.6&nbsp;<em>g</em> read as 50.5&nbsp;<em>g</em>), and the peak on the car's structure up to
+64.6% low (195.7&nbsp;<em>g</em> read as 69.4&nbsp;<em>g</em>). Our present logger records at
+20&nbsp;kHz, one sample every 0.05&nbsp;ms, which is the rate stored in the test file.</p>
+
+<p>The evidence is our own test (crash test 9793, a 2017 Hyundai Elantra driven into a rigid
+barrier at 56.15&nbsp;km/h). A 1&nbsp;kHz logger takes one sample for every 20 of ours, so I
+made its record by keeping every 20th sample of ours and reading the peak again. Its first sample
+could fall on any of our first 20, so I tried all 20 starts and kept the lowest peak (the worst
+case). I did the same at 10, 5, 2 and 0.5&nbsp;kHz. The figure shows the worst case for four
+dummy measurements and for the left rear seat crossmember, a sensor on the car's structure. Peaks
+are in <em>g</em>, where one <em>g</em> is 9.81&nbsp;m/s&sup2;.</p>
+
+<p>I counted a rate as acceptable if no dummy peak reads more than 5% low at the worst start.
+5&nbsp;kHz is the lowest rate on the list that passes, with the driver's chest keeping 95.8% of
+its peak. 2&nbsp;kHz misses narrowly (the chest keeps 94.4%).</p>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r02-memo-worst.svg?v=20261015124713"
+    alt="Worst-case peak as a percentage of the 20 kHz peak, against sample rate from 500 to
+    20,000 Hz on a log scale. The four dummy lines stay above 87% at every rate and above the
+    dotted 95% line from 5000 Hz up. The dashed crossmember line falls from 100% at 20,000 Hz to
+    35% at 1000 Hz. A red line marks the proposed 1000 Hz logger."></div>
+  <figcaption>The lowest peak each measurement could read at each rate, as a share of what our
+  20&nbsp;kHz logger read, drawn by <code>a2_logger_check.py</code>. The dotted line is the 5%
+  standard and the red line is the proposed logger.</figcaption>
+</figure>
+
+<p>Three things need your attention before you sign.</p>
+
+<ul>
+  <li><strong>The structure loses far more than the dummy.</strong> The crossmember keeps 83.5% of
+  its peak at 10&nbsp;kHz and 69.2% at 5&nbsp;kHz. If the lab reports structure peaks, no rate
+  below our present 20&nbsp;kHz passes on this evidence.</li>
+  <li><strong>Where the samples fall matters as much as the rate.</strong> At 1&nbsp;kHz the
+  crossmember reads anything from 69.4 to 195.7&nbsp;<em>g</em>, depending only on which sample
+  the logger starts on. One test at 1&nbsp;kHz would not tell you which of those you had.</li>
+  <li><strong>Where my evidence runs out.</strong> This is one test of one car. A real 1&nbsp;kHz
+  logger probably filters its signal before sampling, and my thinned copy does not, so the real
+  logger may read differently (I have not checked by how much). Our own record is also a sampled
+  record, so its peaks may already be a little below the true ones.</li>
+</ul>
+
+<p><strong>Assumptions.</strong> I set the standard on the dummy, since it stands in for the
+people in the car. I used the four dummy channels along the direction of travel (X). The driver's
+head also has sideways and vertical channels. They peak at only 7.3 and 22.3&nbsp;<em>g</em>,
+against 43.2&nbsp;<em>g</em> in X, so I left them out of the standard, but they lose more: at
+5&nbsp;kHz they keep 68.4% and 87.3%. If those channels matter to the lab, 5&nbsp;kHz is not
+enough for them. The 5% standard and the list of rates
+(the usual 1, 2, 5 steps) are my choices. The chest displacement is left out, since it is not an
+acceleration.</p>
+
+<p><strong>Program.</strong> <a href="data/example/code/a2_logger_check.py" download><code>a2_logger_check.py</code></a>
+(attached) builds the slower records, prints every worst-case peak and draws the figure.</p>
+</div>
+
+<div class="aside notice"><span class="label">What to notice</span>
+<p>The rate is the first thing Alice reads, and the loss at 1&nbsp;kHz is in the same paragraph.
+The memo states its standard (no dummy peak more than 5% low at the worst start) before the
+result that depends on it. The list then tells Alice what would change the answer, which is
+probably the part purchasing will ask her about.</p>
+</div>
+
+<h2 id="a-technical-report">A Technical Report</h2>
+
+<div class="aside report"><span class="label">Example 2 &middot; Technical report</span>
+<p><strong>Data phrase:</strong> example pack (test 9793)</p>
+
+<h4>Summary</h4>
+<p>The lab should keep its present rate of 20&nbsp;kHz (20,000 samples a second). On test 9793,
+no slower rate keeps 95% of every channel's peak wherever the slower logger's samples happen to
+fall. At the proposed 1&nbsp;kHz, the crossmember sensor on the car's structure could read as
+little as 35.4% of its peak (69.37 of 195.70&nbsp;<em>g</em>), and the driver's chest as little
+as 92.6%. The first rate to fail is 10&nbsp;kHz, on the crossmember and on the sideways channel
+of the driver's head.</p>
+
+<h4>Data</h4>
+<p>Test 9793 is a New Car Assessment test of a 2017 Hyundai Elantra, run head on into a rigid
+barrier at 56.15&nbsp;km/h. All eight channels hold 7001 samples spaced
+5&nbsp;&times;&nbsp;10<sup>-5</sup>&nbsp;s apart (a sample rate of 20&nbsp;kHz). Every header
+also states a prefilter of 4000&nbsp;Hz, an analog filter applied to the signal before it was
+sampled. Accelerations are given in <em>g</em>, where one <em>g</em> is 9.81&nbsp;m/s&sup2;.
+Table 1 lists each channel's peak at the recorded rate and the share of it that a slower logger
+keeps at the worst start.</p>
+
+<table class="data">
+  <tr><th>Channel (header description)</th><th class="num">Peak at 20&nbsp;kHz</th><th class="num">At</th><th class="num">10&nbsp;kHz</th><th class="num">5&nbsp;kHz</th><th class="num">2&nbsp;kHz</th><th class="num">1&nbsp;kHz</th></tr>
+  <tr><td>V1P1 head CG X acceleration</td><td class="num">43.25&nbsp;<em>g</em></td><td class="num">68.30&nbsp;ms</td><td class="num">99.6%</td><td class="num">98.8%</td><td class="num">96.5%</td><td class="num">95.1%</td></tr>
+  <tr><td>V1P1 head CG Y acceleration</td><td class="num">7.33&nbsp;<em>g</em></td><td class="num">29.95&nbsp;ms</td><td class="num">80.6%</td><td class="num">68.4%</td><td class="num">66.5%</td><td class="num">59.5%</td></tr>
+  <tr><td>V1P1 head CG Z acceleration</td><td class="num">22.27&nbsp;<em>g</em></td><td class="num">65.90&nbsp;ms</td><td class="num">97.9%</td><td class="num">87.3%</td><td class="num">81.3%</td><td class="num">75.4%</td></tr>
+  <tr><td>V1P1 chest X acceleration</td><td class="num">54.56&nbsp;<em>g</em></td><td class="num">69.90&nbsp;ms</td><td class="num">98.6%</td><td class="num">95.8%</td><td class="num">94.4%</td><td class="num">92.6%</td></tr>
+  <tr><td>V1P1 chest X displacement</td><td class="num">31.68&nbsp;mm</td><td class="num">69.35&nbsp;ms</td><td class="num">100.0%</td><td class="num">100.0%</td><td class="num">99.8%</td><td class="num">99.4%</td></tr>
+  <tr><td>V1P1 pelvic X acceleration</td><td class="num">57.01&nbsp;<em>g</em></td><td class="num">69.30&nbsp;ms</td><td class="num">100.0%</td><td class="num">99.9%</td><td class="num">99.4%</td><td class="num">98.6%</td></tr>
+  <tr><td>V1 left rear seat crossmember X acceleration</td><td class="num">195.70&nbsp;<em>g</em></td><td class="num">52.75&nbsp;ms</td><td class="num">83.5%</td><td class="num">69.2%</td><td class="num">49.9%</td><td class="num">35.4%</td></tr>
+  <tr><td>V1P2 head CG X acceleration</td><td class="num">52.51&nbsp;<em>g</em></td><td class="num">73.75&nbsp;ms</td><td class="num">99.9%</td><td class="num">99.4%</td><td class="num">99.3%</td><td class="num">98.7%</td></tr>
+</table>
+<p>Table 1. Peak of each channel at the recorded rate, and the percentage of it read at
+four lower rates from the worst starting sample.</p>
+
+<h4>Method</h4>
+<p>A Python program, <a href="data/example/code/a2_peak_loss.py" download><code>a2_peak_loss.py</code></a>
+(listed in the appendix and submitted with this report), makes each slower record from the
+20&nbsp;kHz one. A logger running at 1/<em>k</em> of our rate takes one sample for every
+<em>k</em> of ours, so the program keeps every <em>k</em>-th sample (this is called decimation).
+It does this for every whole number <em>k</em> from 1 to 100 that divides 20,000 exactly, which
+gives 14 rates from 20&nbsp;kHz down to 200&nbsp;Hz.</p>
+
+<p>The slower logger's first sample could line up with any of our first <em>k</em> samples, and
+nothing in the record says which. The program therefore tries all <em>k</em> starts and keeps
+both the lowest peak (the worst start) and the highest (the best start). A rate passes if every
+channel keeps at least 95% of its 20&nbsp;kHz peak at the worst start. The worst start is used
+because the lab cannot choose where its samples fall. Every channel is included because the lab
+records all of them, and this report cannot say which ones its readers will use.</p>
+
+<h4>Results</h4>
+<p>Figure 1 shows the worst-start peak of every channel against rate. The dummy channels along
+the direction of travel (the driver's head X, chest, chest displacement and pelvis, and the
+passenger's head) lose at most 7.4% by 1&nbsp;kHz. The crossmember and the head's sideways (Y) and vertical (Z) channels
+lose much more, and the crossmember and the Y channel are the two that fail at 10&nbsp;kHz.</p>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r02-rep-rates.svg?v=20261015124713"
+    alt="Worst-start peak as a percentage of the 20 kHz peak against sample rate from 200 to
+    20,000 Hz on a log scale, one line per channel. Five channels stay above about 82% down to
+    200 Hz. The head Z line falls to about 64%, the head Y line to below 40%, and the crossmember
+    line to about 22%. A dotted line marks 95% and a red line marks 1000 Hz."></div>
+  <figcaption>Figure 1. Worst-start peak of all eight channels at 14 rates, as a percentage of
+  each channel's 20&nbsp;kHz peak.</figcaption>
+</figure>
+
+<p>Table 2 gives what the proposed logger would read on each channel, in the channel's own
+units. Every channel has one start that lands on its peak sample, so the best start always reads
+the full peak. The gap between the best and worst start is the part of the reading that depends
+on where the samples happen to fall.</p>
+
+<table class="data">
+  <tr><th>Channel</th><th class="num">20&nbsp;kHz peak</th><th class="num">1&nbsp;kHz, worst start</th><th class="num">1&nbsp;kHz, best start</th><th class="num">1&nbsp;kHz, start 0</th></tr>
+  <tr><td>Driver head X (<em>g</em>)</td><td class="num">43.25</td><td class="num">41.14 (95.1%)</td><td class="num">43.25</td><td class="num">41.14</td></tr>
+  <tr><td>Driver head Y (<em>g</em>)</td><td class="num">7.33</td><td class="num">4.36 (59.5%)</td><td class="num">7.33</td><td class="num">5.01</td></tr>
+  <tr><td>Driver head Z (<em>g</em>)</td><td class="num">22.27</td><td class="num">16.79 (75.4%)</td><td class="num">22.27</td><td class="num">19.45</td></tr>
+  <tr><td>Driver chest X (<em>g</em>)</td><td class="num">54.56</td><td class="num">50.53 (92.6%)</td><td class="num">54.56</td><td class="num">50.98</td></tr>
+  <tr><td>Driver chest displacement (mm)</td><td class="num">31.68</td><td class="num">31.48 (99.4%)</td><td class="num">31.68</td><td class="num">31.58</td></tr>
+  <tr><td>Driver pelvis X (<em>g</em>)</td><td class="num">57.01</td><td class="num">56.23 (98.6%)</td><td class="num">57.01</td><td class="num">56.93</td></tr>
+  <tr><td>Crossmember X (<em>g</em>)</td><td class="num">195.70</td><td class="num">69.37 (35.4%)</td><td class="num">195.70</td><td class="num">103.56</td></tr>
+  <tr><td>Passenger head X (<em>g</em>)</td><td class="num">52.51</td><td class="num">51.83 (98.7%)</td><td class="num">52.51</td><td class="num">51.95</td></tr>
+</table>
+<p>Table 2. Peak read by a 1&nbsp;kHz logger (every 20th sample) over the 20
+possible starting samples.</p>
+
+<p>Figure 2 shows why the crossmember is so sensitive. Its peak is a single sharp swing, much
+shorter than the 1&nbsp;ms between two samples of the proposed logger. The best start (sample 15)
+lands on the peak sample and reads the full 195.70&nbsp;<em>g</em>. The worst start (sample 12)
+misses the swing entirely, and its largest reading anywhere in the record is 69.37&nbsp;<em>g</em>.</p>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r02-rep-crossmember.svg?v=20261015124713"
+    alt="Crossmember acceleration in g from 40 to 70 ms after impact. The gray 20 kHz trace has a
+    sharp swing down to about -196 g near 53 ms. Blue circles, the 1 kHz samples from the best
+    start, land on the bottom of the swing. Orange squares, the 1 kHz samples from the worst
+    start, skip over it and stay between about -70 and 0 g."></div>
+  <figcaption>Figure 2. The left rear seat crossmember (10SEATLERE00ACXP) around its peak, with
+  the samples a 1&nbsp;kHz logger keeps from its best and worst starts.</figcaption>
+</figure>
+
+<h4>Errors and Anomalies</h4>
+<p><strong>Chest displacement units.</strong> The header gives meters, but the values are
+micrometers (found in assignment 1). The program shows the channel in millimeters. Its
+percentages do not depend on the units.</p>
+
+<p><strong>A slower rate can read higher than a faster one.</strong> At the worst start, the
+head's Y channel keeps 76.2% at 4000&nbsp;Hz and 68.4% at 5000&nbsp;Hz, and the chest keeps 92.6%
+at 1000&nbsp;Hz and 90.2% at 1250&nbsp;Hz. This is expected and is not a fault in the program.
+The samples kept at one rate are only a subset of those kept at a faster rate when one rate
+divides the other, so the curves in Figure 1 do not have to fall steadily.</p>
+
+<p><strong>The head's Y channel.</strong> It peaks at only 7.33&nbsp;<em>g</em>, at 29.95&nbsp;ms,
+well before the other dummy channels (65.90 to 73.75&nbsp;ms). A small, brief peak is easy to miss
+at a lower rate, which is probably why it fails at 10&nbsp;kHz along with the crossmember. I have
+not checked whether that early peak is real motion of the head or noise.</p>
+
+<p><strong>The channel named <code>vehicle_x</code>.</strong> Its header describes a sensor on
+the left rear seat crossmember, so this report uses that description. It is one point on the
+structure and not the whole car.</p>
+
+<h4>Where the Evidence Runs Out</h4>
+<ul>
+  <li>This is one test of one car. A test with a sharper or a broader peak would lose a different
+  amount at the same rate.</li>
+  <li>Keeping every <em>k</em>-th sample is a model of the cheaper logger, and no record from it
+  exists. A real logger probably has its own analog filter ahead of sampling, set for its slower
+  rate. That filter would change these numbers, probably by lowering the sharpest peaks further,
+  although I have not checked this.</li>
+  <li>The 20&nbsp;kHz record is itself sampled and filtered (prefilter 4000&nbsp;Hz). Its peaks are
+  lower bounds on the true peaks, so every percentage here is measured against a reference that
+  may already be low.</li>
+</ul>
+
+<h4>Assumptions</h4>
+<ul>
+  <li>Apart from its own filter, the slower logger would record the same values as ours at the
+  samples it keeps.</li>
+  <li>Every starting sample is equally possible, so the worst start is a case the lab could
+  actually get.</li>
+  <li>95% of the peak is my threshold, applied to every channel equally, including small ones like
+  the head's Y channel.</li>
+  <li>Impact is at time zero, as the file declares, and the chest displacement is in micrometers.</li>
+</ul>
+
+<h4>Appendix. Program</h4>
+<pre class="nb-in">"""Assignment 2: peak loss at lower sample rates, every channel of test 9793.
+
+Run this from the unzipped pack folder. A record at a lower rate is made from
+the 20 kHz one by keeping every k-th sample. Which sample the slower logger
+starts on is not known, so every start from 0 to k-1 is tried and the lowest
+peak (the worst start) and highest peak (the best start) are both kept.
+
+Prints the 20 kHz peak of each channel, the worst-start peak at each rate, and
+the lowest rate at which every channel keeps 95% of its peak. Saves
+fraction_vs_rate.svg (Figure 1) and crossmember_1khz.svg (Figure 2).
+"""
+import json
+
+import matplotlib.pyplot as plt
+
+G = 9.81                 # m/s^2 in one g
+KEEP = 0.95              # a rate passes if every channel keeps 95% of its peak
+PROPOSED = 1000          # Hz, the logger purchasing wants
+
+with open('crash/09793.json') as f:
+    test = json.load(f)
+channels = test['channels']
+
+rate_now = round(1 / channels['head_x']['dt'])
+# every whole-number step down from 20 kHz, to 200 Hz
+factors = [k for k in range(1, 101) if rate_now % k == 0]
+rates = [rate_now // k for k in factors]
+
+
+def values(key):
+    """The channel in g, or in mm for the chest displacement.
+    Its header says m, but the values are micrometers (see Errors)."""
+    ch = channels[key]
+    if key == 'chest_d':
+        return [v / 1000 for v in ch['y']], 'mm'
+    return [v / G for v in ch['y']], 'g'
+
+
+def peak(y):
+    return max(abs(v) for v in y)
+
+
+def peaks_by_start(y, k):
+    """Peak of the record that keeps every k-th sample, for each start 0..k-1."""
+    return [peak(y[start::k]) for start in range(k)]
+
+
+v, info = test['vehicle'], test['test']
+print(f"Test {test['testNo']}: {v['year']} {v['make']} {v['model']}, "
+      f"{info['config']} at {info['speed_kph']} km/h")
+print("samples, spacing (s) and prefilter (Hz) of each channel:",
+      {(ch['n'], ch['dt'], ch['prefilter_hz']) for ch in channels.values()})
+print(f"recorded rate {rate_now} Hz, {len(rates)} rates tried, {rates[0]} to {rates[-1]} Hz")
+print()
+
+# the 20 kHz peak of every channel, and when it happens
+print(f"{'key':12} {'description':34} {'peak':&gt;8} {'unit':4} {'at (ms)':&gt;8}")
+for key, ch in channels.items():
+    y, unit = values(key)
+    i = max(range(len(y)), key=lambda j: abs(y[j]))
+    t_ms = 1000 * (ch['t0'] + i * ch['dt'])
+    print(f"{key:12} {ch['comment']:34} {peak(y):8.2f} {unit:4} {t_ms:8.2f}")
+
+# worst-start peak at each rate, as a fraction of the 20 kHz peak
+worst = {}
+for key in channels:
+    y, unit = values(key)
+    full = peak(y)
+    worst[key] = [min(peaks_by_start(y, k)) / full for k in factors]
+
+print(f"\nworst-start peak as % of the 20 kHz peak")
+print(f"{'rate (Hz)':&gt;9} " + ' '.join(f"{key:&gt;11}" for key in channels))
+for i, r in enumerate(rates):
+    print(f"{r:9d} " + ' '.join(f"{100 * worst[key][i]:11.1f}" for key in channels))
+
+# the lowest rate that every channel passes, with every faster rate passing too
+lowest = rate_now
+for i, r in enumerate(rates):
+    if all(worst[key][i] &gt;= KEEP for key in channels):
+        lowest = r
+    else:
+        failing = [key for key in channels if worst[key][i] &lt; KEEP]
+        print(f"\n{r} Hz is the first rate to fail: {', '.join(failing)}")
+        break
+print(f"Lowest rate keeping {100 * KEEP:.0f}% of every peak: {lowest} Hz")
+
+# the proposed rate, worst and best start, in the channel's own units
+k = rate_now // PROPOSED
+print(f"\nAt {PROPOSED} Hz (every {k}th sample), range of peaks over the {k} starts:")
+for key in channels:
+    y, unit = values(key)
+    p = peaks_by_start(y, k)
+    print(f"  {key:12} 20 kHz {peak(y):7.2f}   worst {min(p):7.2f} ({100 * min(p) / peak(y):5.1f}%)"
+          f"   best {max(p):7.2f}   start 0 {p[0]:7.2f} {unit}")
+
+# Figure 1: worst-start fraction against rate, one line per channel
+plt.figure(figsize=(7.5, 4.5))
+for key, ch in channels.items():
+    plt.semilogx(rates, [100 * w for w in worst[key]], '.-', label=ch['comment'].title())
+plt.axhline(100 * KEEP, color='black', linestyle=':', linewidth=0.8, label='95% of the peak')
+plt.axvline(PROPOSED, color='red', linewidth=0.8, label='proposed logger, 1000 Hz')
+plt.xticks([200, 500, 1000, 2000, 5000, 10000, 20000],
+           ['200', '500', '1000', '2000', '5000', '10000', '20000'])
+plt.xlabel('sample rate (Hz, log scale)')
+plt.ylabel('worst-start peak (% of the 20 kHz peak)')
+plt.title('Peak kept at each rate, worst start, test 9793', fontsize=10)
+plt.legend(fontsize=7, loc='lower right')
+plt.tight_layout()
+plt.savefig('fraction_vs_rate.svg')
+plt.close()
+
+# Figure 2: the crossmember around its peak, and what a 1 kHz logger keeps of it
+ch = channels['vehicle_x']
+y, unit = values('vehicle_x')
+t_ms = [1000 * (ch['t0'] + i * ch['dt']) for i in range(ch['n'])]
+p = peaks_by_start(y, k)
+best_start, worst_start = p.index(max(p)), p.index(min(p))
+plt.figure(figsize=(7.5, 4))
+win = [i for i in range(ch['n']) if 40 &lt;= t_ms[i] &lt;= 70]
+plt.plot([t_ms[i] for i in win], [y[i] for i in win], color='gray', linewidth=0.8,
+         label='recorded at 20000 Hz')
+for start, mark, name in ((best_start, 'o', 'best'), (worst_start, 's', 'worst')):
+    kept = [i for i in win if (i - start) % k == 0]
+    plt.plot([t_ms[i] for i in kept], [y[i] for i in kept], mark + '-',
+             label=f'1000 Hz, {name} start (sample {start})')
+plt.xlabel('time from impact (ms)')
+plt.ylabel('acceleration (g)')
+plt.title(ch['comment'].title() + ' [' + ch['code'] + '], 40 to 70 ms',
+          fontsize=10)
+plt.legend(fontsize=8)
+plt.tight_layout()
+plt.savefig('crossmember_1khz.svg')</pre>
+</div>
+
+<div class="aside notice"><span class="label">What to notice</span>
+<p>The summary gives the rate and the loss before any method. The two tables let a reader check
+the rate against every channel, and Figure 2 shows on one channel why the starting sample
+matters. The limits have a section of their own, so a reader can find where the evidence stops
+without reading the method first.</p>
+</div>
+
+<h2 id="a-notebook">A Notebook</h2>
+
+<div class="aside report"><span class="label">Example 3 &middot; Notebook, exported to PDF</span>
+<p><strong>Assignment 2, the cheaper logger.</strong> Data phrase: example pack (test 9793)</p>
+
+<p><strong>Answer for Alice: 10&nbsp;kHz.</strong> At that rate, averaged over where the
+samples fall, every channel's peak reads within 10% of what our 20&nbsp;kHz logger reads. At the
+proposed 1&nbsp;kHz an average start reads the crossmember peak at 58.7% of its present value, and
+the worst start at 35.4% (69.4 instead of 195.7&nbsp;<em>g</em>). The dummy channels along the car
+lose less, between 0.2% and 4.7% on average. The work is below, in the order I did it.</p>
+
+<p>I did this in Google Colab with the example pack unzipped next to the notebook. I started with
+the crossmember channel, because in assignment 1 it was by far the spikiest, so I expected it to
+lose the most.</p>
+
+<pre class="nb-in">import json
+
+with open('crash/09793.json') as f:
+    test = json.load(f)
+
+ch = test['channels']['vehicle_x']
+rate = round(1 / ch['dt'])
+print(ch['comment'], ch['code'], ch['unit'])
+print('dt =', ch['dt'], 's, so the rate is', rate, 'Hz')
+
+G = 9.81
+y = [v / G for v in ch['y']]     # the crossmember in g
+full = max(abs(v) for v in y)
+i_peak = [abs(v) for v in y].index(full)
+print(f'peak at the recorded rate: {full:.1f} g, sample {i_peak}, '
+      f'{1000 * (ch["t0"] + i_peak * ch["dt"]):.2f} ms')</pre>
+<pre class="nb-out">V1 LEFT REAR SEAT CROSSMEMBER AX 10SEATLERE00ACXP m/(s*s)
+dt = 5e-05 s, so the rate is 20000 Hz
+peak at the recorded rate: 195.7 g, sample 2055, 52.75 ms</pre>
+
+<p>Our logger takes a sample every 0.00005&nbsp;s, which is 20,000 samples a second
+(20&nbsp;kHz). The cheaper logger at 1&nbsp;kHz is 20 times slower, so it would keep one of every
+20 of these samples. The crossmember peaks at 195.7&nbsp;<em>g</em> (one <em>g</em> is
+9.81&nbsp;m/s&sup2;), at sample 2055, 52.75&nbsp;ms after impact. Next, the peak when I keep
+every <em>k</em>-th sample, for a range of <em>k</em>.</p>
+
+<pre class="nb-in">import matplotlib.pyplot as plt
+
+factors = [1, 2, 4, 5, 10, 20, 25, 40, 50, 100, 200, 400]
+rates, peaks = [], []
+for k in factors:
+    rates.append(rate / k)
+    peaks.append(max(abs(v) for v in y[::k]))    # every k-th sample, from sample 0
+    print(f'{rate / k:7.0f} Hz  {peaks[-1]:6.1f} g  {100 * peaks[-1] / full:5.1f}%')
+
+plt.semilogx(rates, peaks, 'o-')
+plt.axvline(1000, color='red')
+plt.xlabel('sample rate (Hz, log scale)')
+plt.ylabel('peak read from the record (g)')
+plt.title('Crossmember peak keeping every k-th sample, from sample 0')
+plt.show()</pre>
+<pre class="nb-out">  20000 Hz   195.7 g  100.0%
+  10000 Hz   163.4 g   83.5%
+   5000 Hz   163.4 g   83.5%
+   4000 Hz   195.7 g  100.0%
+   2000 Hz   120.7 g   61.7%
+   1000 Hz   103.6 g   52.9%
+    800 Hz   120.7 g   61.7%
+    500 Hz   103.6 g   52.9%
+    400 Hz   120.7 g   61.7%
+    200 Hz   103.6 g   52.9%
+    100 Hz   103.6 g   52.9%
+     50 Hz    45.2 g   23.1%</pre>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r02-nb-1.svg?v=20261015124713"
+    alt="Crossmember peak in g against sample rate on a log scale, keeping every k-th sample from
+    sample 0. The line is jagged, reading 195.7 g at 20,000 and 4000 Hz, 163.4 g at 10,000 and
+    5000 Hz, and between about 104 and 121 g from 2000 Hz down to 100 Hz."></div>
+  <figcaption>The notebook's first plot, the crossmember peak at each rate from sample 0.</figcaption>
+</figure>
+
+<p>The peak drops as the rate drops, which I expected, but it does not drop smoothly.
+4000&nbsp;Hz reads the full 195.7&nbsp;<em>g</em> while 5000&nbsp;Hz reads 163.4&nbsp;<em>g</em>,
+so the slower rate did better. I think the reason is that <code>y[::k]</code> always starts at
+sample 0. The peak is sample 2055, which is a multiple of 5 and not of 4, so keeping every 5th
+sample (4000&nbsp;Hz) keeps it and keeping every 4th (5000&nbsp;Hz) does not. A real logger has
+no reason to start on our sample 0. To check, I tried every possible start at 1000&nbsp;Hz.</p>
+
+<pre class="nb-in">k = rate // 1000     # 20, so a 1000 Hz logger keeps one sample in 20
+at_1k = [max(abs(v) for v in y[s::k]) for s in range(k)]
+print([round(p, 1) for p in at_1k])
+print(f'lowest {min(at_1k):.1f} g, highest {max(at_1k):.1f} g, '
+      f'average {sum(at_1k) / k:.1f} g')
+
+plt.plot(range(k), at_1k, 'o')
+plt.axhline(full, color='gray', linestyle='--')
+plt.xticks(range(k))
+plt.xlabel('first sample kept (0 to 19)')
+plt.ylabel('peak read at 1000 Hz (g)')
+plt.title('Crossmember peak at 1000 Hz, for each starting sample')
+plt.show()</pre>
+<pre class="nb-out">[103.6, 118.0, 108.3, 97.6, 87.2, 120.7, 135.4, 140.9, 154.9, 141.6, 120.7, 106.8, 69.4, 70.8, 132.6, 195.7, 163.4, 79.4, 76.1, 73.8]
+lowest 69.4 g, highest 195.7 g, average 114.8 g</pre>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r02-nb-2.svg?v=20261015124713"
+    alt="Twenty dots, one for each starting sample from 0 to 19, showing the crossmember peak read
+    at 1000 Hz. They scatter between about 69 and 196 g. Only start 15 reaches the dashed line at
+    the 20 kHz peak of 195.7 g."></div>
+  <figcaption>The notebook's second plot, the 1000&nbsp;Hz peak for each of the 20 starting
+  samples.</figcaption>
+</figure>
+
+<p>That confirms it. Depending only on where the first sample falls, a 1000&nbsp;Hz logger reads
+anywhere from 69.4 to 195.7&nbsp;<em>g</em> on this crash. Start 15 hits the peak exactly (2055
+is 15 plus 102 times 20). Start 0, the one I used above, reads 103.6&nbsp;<em>g</em>. A logger
+does not know when the crash will happen, so where its samples land is luck. I am going to use
+the average over all starts (114.8&nbsp;<em>g</em> here) as what the cheaper logger would
+typically read, and keep the worst start beside it. Next, the same for every channel at five
+lower rates.</p>
+
+<pre class="nb-in">def peaks_by_start(y, k):
+    """Peak of every k-th sample, for each of the k possible starts."""
+    return [max(abs(v) for v in y[s::k]) for s in range(k)]
+
+check_rates = [10000, 5000, 2000, 1000, 500]
+typical = {}
+print('typical % of the 20 kHz peak (worst start in brackets)')
+for key, c in test['channels'].items():
+    yy = c['y']                 # a percentage does not need the units
+    top = max(abs(v) for v in yy)
+    typical[key] = []
+    line = f'{key:12}'
+    for r in check_rates:
+        p = peaks_by_start(yy, rate // r)
+        typical[key].append(100 * sum(p) / len(p) / top)
+        line += f' {typical[key][-1]:5.1f} ({100 * min(p) / top:4.1f})'
+    print(line)</pre>
+<pre class="nb-out">typical % of the 20 kHz peak (worst start in brackets)
+head_x        99.8 (99.6)  99.4 (98.8)  98.8 (96.5)  98.0 (95.1)  97.2 (94.1)
+head_y        90.3 (80.6)  80.9 (68.4)  77.3 (66.5)  71.5 (59.5)  66.4 (51.0)
+head_z        98.9 (97.9)  94.0 (87.3)  87.7 (81.3)  83.5 (75.4)  80.3 (71.9)
+chest_x       99.3 (98.6)  97.8 (95.8)  96.3 (94.4)  95.3 (92.6)  92.7 (87.1)
+chest_d      100.0 (100.0) 100.0 (100.0)  99.9 (99.8)  99.8 (99.4)  99.4 (98.9)
+pelvis_x     100.0 (100.0)  99.9 (99.9)  99.8 (99.4)  99.6 (98.6)  99.3 (98.2)
+vehicle_x     91.7 (83.5)  81.3 (69.2)  70.2 (49.9)  58.7 (35.4)  49.9 (30.0)
+pass_head_x   99.9 (99.9)  99.8 (99.4)  99.5 (99.3)  99.3 (98.7)  98.7 (97.4)</pre>
+
+<p>The numbers are percentages of each channel's own 20&nbsp;kHz peak, so I did not need to
+convert units. This also sidesteps the chest displacement, which is labeled meters but is in
+micrometers. The dummy channels along the car (<code>head_x</code>, <code>chest_x</code>,
+<code>chest_d</code>, <code>pelvis_x</code> and <code>pass_head_x</code>) keep 95% or more on
+average even at 1000&nbsp;Hz. Two channels do much worse, the crossmember and the sideways head
+channel <code>head_y</code>.</p>
+
+<p>Alice did not give a tolerance, so I picked one. A rate is good enough if, averaged over starts,
+every peak reads within 10%. 10&nbsp;kHz is the lowest rate here that passes, and only just
+(<code>head_y</code> at 90.3% and the crossmember at 91.7%). At 5&nbsp;kHz both fall to about
+81%. A plot of the same table follows.</p>
+
+<pre class="nb-in">for key, c in test['channels'].items():
+    plt.semilogx(check_rates, typical[key], 'o-', label=key)
+plt.axhline(90, color='black', linestyle=':', label='90%')
+plt.axvline(1000, color='red')
+plt.xlabel('sample rate (Hz, log scale)')
+plt.ylabel('typical peak (% of the 20 kHz peak)')
+plt.title('Average over every starting sample, all eight channels')
+plt.legend(fontsize=8)
+plt.show()</pre>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r02-nb-3.svg?v=20261015124713"
+    alt="Typical peak as a percentage of the 20 kHz peak against sample rate from 500 to 10,000 Hz
+    on a log scale, one line per channel, with a dotted line at 90% and a red line at 1000 Hz.
+    The vehicle_x and head_y lines cross below 90% between 10,000 and 5000 Hz. The head_z line
+    crosses at 2000 Hz. The other five stay above 92%."></div>
+  <figcaption>The notebook's third plot, the typical peak of all eight channels at five
+  rates below 20&nbsp;kHz.</figcaption>
+</figure>
+
+<p>The crossmember and <code>head_y</code> cross the dotted 90% line between 10 and 5&nbsp;kHz.
+Of the other six, only <code>head_z</code> drops below it, at 2000&nbsp;Hz.</p>
+
+<p><strong>Flags.</strong> A slower rate can read a higher peak than a faster one when the samples
+start at 0 (4000 against 5000&nbsp;Hz above), so one run per rate is not enough. The crossmember
+and <code>head_y</code> set my answer, and I have not checked whether the <code>head_y</code> peak
+is real motion or noise. The chest displacement units are wrong in the file, which did not matter
+here. <strong>Assumptions.</strong> Keeping every <em>k</em>-th sample stands in for the cheaper
+logger, although a real one probably filters its signal before sampling and would read
+differently (I have not checked how). Every starting sample is equally likely. The 10% tolerance
+is my choice, and a tighter one such as 5% would push the rate to 20&nbsp;kHz, because
+<code>head_y</code> keeps 90.3% at 10&nbsp;kHz. This is one test of one car, and our own record is
+also sampled, so its peaks may already be a little low.</p>
+</div>
+
+<div class="aside notice"><span class="label">What to notice</span>
+<p>The notebook keeps the step that surprised its author (a slower rate reading higher than a
+faster one) and shows how it was resolved. It is a good idea to keep a surprise like this in a
+notebook, because it is the evidence for the method that follows. The answer is stated at the
+top, and the flags and assumptions are gathered again at the end.</p>
+</div>
+
+  </main>
+
+  
+
+  <script src="js/page.js?v=20261015124713"></script>
+
+  <footer class="site-footer">
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-11">October 11, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Algorithms');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  
+  
+  
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

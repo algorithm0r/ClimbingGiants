@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 10 Notes — Algorithms</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (rust). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #9B4423;
+      --course-accent-dark: #7A350C;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Algorithms</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        <a href="syllabus.html">Syllabus</a>
+        <span class="site-nav-sep">·</span>
+        <a href="reflection-instructions.html">Reflection</a>
+        <span class="site-nav-sep">·</span>
+        <a href="meeting-instructions.html">Meeting</a>
+        <span class="site-nav-sep">·</span>
+        <a href="ai-use.html">AI Use</a>
+        <span class="site-nav-sep">·</span>
+        <a href="extra-labor.html">Extra Labor</a>
+        <span class="site-nav-sep">·</span>
+        <a href="canvas-grades.html">Canvas Grades</a>
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+        
+          
+            <a href="week-01.html">1</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-02.html">2</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-03.html">3</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-04.html">4</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-05.html">5</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-06.html">6</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-07.html">7</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-08.html">8</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-09.html">9</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <span class="week-current">10</span>
+          
+          
+        
+      </div>
+    </nav>
+
+    
+    <nav class="page-family">
+      <div class="nav-inner">
+        Week 10 —
+        <a href="week-10.html">Overview</a> ·
+        <strong>Notes</strong> ·
+        <a href="assign-10.html">Assignment</a> ·
+        <a href="solution-10.html">Solution</a>
+      </div>
+    </nav>
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+  <main data-pagefind-body class="notes">
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <h1>Week 10 Notes — NP-Completeness</h1>
+<h2 id="contents">Contents</h2>
+<ul>
+<li><a href="#np-membership-via-verifiers">NP Membership via Verifiers</a></li>
+<li><a href="#verifiers-for-classic-problems">Verifiers for Classic Problems</a></li>
+<li><a href="#polynomial-time-reductions">Polynomial-Time Reductions</a></li>
+<li><a href="#np-hardness-and-np-completeness">NP-Hardness and NP-Completeness</a></li>
+<li><a href="#sat-and-the-cook-levin-theorem">SAT and the Cook-Levin Theorem</a></li>
+<li><a href="#karps-strategy">Karp's Strategy</a></li>
+<li><a href="#clique-and-independent-set">Clique and Independent Set</a></li>
+<li><a href="#partition-and-subset-sum">Partition and Subset Sum</a></li>
+<li><a href="#vertex-cover">Vertex Cover</a></li>
+<li><a href="#what-np-completeness-means-in-practice">What NP-Completeness Means in Practice</a></li>
+<li><a href="#connections">Connections</a></li>
+</ul>
+<hr>
+<h2 id="np-membership-via-verifiers">NP Membership via Verifiers</h2>
+<p>In <a href="notes-09.html#verification-procedures">Week 9</a>, we defined NP as the class of decision problems that have a polynomial-time verification procedure. To show that a problem is in NP, we exhibit a <strong>correct verifier</strong> — an algorithm that takes the problem input $x$ and a certificate $w$ and decides yes/no in polynomial time, satisfying:</p>
+<ol>
+<li><strong>Completeness (yes → yes):</strong> If the input is a yes-instance, some certificate causes the verifier to say yes.</li>
+<li><strong>Soundness (no → no):</strong> If the input is a no-instance, no certificate causes the verifier to say yes.</li>
+</ol>
+<p>This week, we build a library of NP membership proofs, then show that these problems are among the <em>hardest</em> problems in NP — they are NP-complete.</p>
+<hr>
+<h2 id="verifiers-for-classic-problems">Verifiers for Classic Problems</h2>
+<h3 id="subset-sum">Subset Sum</h3>
+<p><strong>Problem:</strong> Given a set $S$ of positive integers and target $T$, does some subset of $S$ sum to $T$?</p>
+<p><strong>Certificate:</strong> The claimed subset $W \subseteq S$.</p>
+<pre><code>Verify(S, T, W):
+  If W ⊄ S: say no.
+  If Σ_{w ∈ W} w ≠ T: say no.
+  Say yes.
+</code></pre>
+<p><strong>Correctness:</strong></p>
+<ul>
+<li><em>Yes → yes:</em> Assume a subset exists summing to $T$; let $W$ be that subset. $W \subseteq S$ (test 1 passes) and $\sum W = T$ (test 2 passes). ✓</li>
+<li><em>No → no:</em> Assume no subset sums to $T$. Assume $W$ passes test 1 ($W \subseteq S$). Then $\sum W \neq T$ and test 2 fails. ✓</li>
+</ul>
+<p><strong>Runtime:</strong> Subset check $O(n^2)$; sum $O(n)$ — all polynomial.</p>
+<hr>
+<h3 id="knapsack-decision-version">Knapsack (Decision Version)</h3>
+<p><strong>Problem:</strong> Given $n$ items with weights $W[i]$ and values $V[i]$, capacity $C$, and threshold $t$: does some subset fit within capacity and achieve total value $\geq t$?</p>
+<p><strong>Certificate:</strong> Index set $A \subseteq \{1, \ldots, n\}$ of items to pack.</p>
+<pre><code>Verify(W, V, C, t, A):
+  If A ⊄ {1,...,n}: say no.
+  If Σ_{i ∈ A} W[i] &gt; C: say no.      // exceeds capacity
+  If Σ_{i ∈ A} V[i] &lt; t: say no.      // below value threshold
+  Say yes.
+</code></pre>
+<p><strong>Correctness:</strong></p>
+<ul>
+<li><em>Yes → yes:</em> A valid high-value subset exists; use it as $A$; it passes all three tests. ✓</li>
+<li><em>No → no:</em> Assume no valid subset achieves both constraints. Assume $A$ passes tests 1 and 2 ($A$ is a valid index set that fits in the knapsack). Then $A$ must fail the value test. ✓</li>
+</ul>
+<p><strong>Runtime:</strong> Each check is $O(n)$ — polynomial.</p>
+<hr>
+<h3 id="clique">Clique</h3>
+<p><strong>Problem:</strong> Given graph $G = (V, E)$ and integer $K$, does $G$ have a complete subgraph (clique) of size $K$?</p>
+<p><strong>Certificate:</strong> The vertex set $W$ of the claimed clique.</p>
+<pre><code>Verify(G, K, W):
+  If W ⊄ V: say no.
+  If ∃ u, v ∈ W with (u,v) ∉ E: say no.    // not complete
+  If |W| &lt; K: say no.                         // too small
+  Say yes.
+</code></pre>
+<p><strong>Common mistake:</strong> Forgetting the size test. Without it, the no → no branch fails: if $G$ has no clique of size $K$, a smaller complete subgraph might still pass the first two tests.</p>
+<p><strong>Correctness:</strong></p>
+<ul>
+<li><em>Yes → yes:</em> $G$ has a clique of size $K$; let $W$ be its vertex set. $W \subseteq V$, all pairs connected, $|W| = K$ — all tests pass. ✓</li>
+<li><em>No → no:</em> $G$ has no clique of size $K$. Assume $W \subseteq V$ with all pairs connected (tests 1 and 2 pass). Then $|W| &lt; K$ and test 3 fails. ✓</li>
+</ul>
+<hr>
+<h3 id="independent-set">Independent Set</h3>
+<p><strong>Problem:</strong> Given $G = (V, E)$ and $K$, does $G$ have an independent set of size $K$ (a subset of vertices with no edges between any two)?</p>
+<p><strong>Certificate:</strong> The claimed independent set $W$.</p>
+<p>Modify the Clique verifier — change test 2: instead of rejecting when an edge is <em>absent</em>, reject when an edge is <em>present</em>.</p>
+<pre><code>Verify(G, K, W):
+  If W ⊄ V: say no.
+  If ∃ u, v ∈ W with (u,v) ∈ E: say no.    // edge exists (bad)
+  If |W| &lt; K: say no.
+  Say yes.
+</code></pre>
+<p>The proof flows identically to Clique with &quot;complete subgraph&quot; replaced by &quot;independent set.&quot; Clique and Independent Set are nearly complement problems — their verifiers differ in exactly one test.</p>
+<hr>
+<h3 id="hamiltonian-cycle">Hamiltonian Cycle</h3>
+<p><strong>Problem:</strong> Given connected undirected graph $G = (V, E)$, does $G$ have a Hamiltonian cycle — a cycle visiting every vertex exactly once, returning to the start?</p>
+<p><strong>Why a subset certificate doesn't work:</strong> Every Hamiltonian cycle visits <em>all</em> vertices, so a subset of vertices gives no information. The hard part is the <em>ordering</em>, not which vertices are included.</p>
+<p><strong>Certificate:</strong> A <strong>permutation</strong> $W$ of $V$ — an ordering of all vertices proposing the tour.</p>
+<pre><code>Verify(G, W):
+  If W is not a permutation of V: say no.
+  For i = 1 to |V| - 1:
+    If (W[i], W[i+1]) ∉ E: say no.         // consecutive vertices must be connected
+  If (W[|V|], W[1]) ∉ E: say no.           // last vertex must connect back to first
+  Say yes.
+</code></pre>
+<p><strong>Why the last test matters:</strong> The first loop checks for a Hamiltonian <em>path</em> (visiting all vertices in a line). The final test converts it to a Hamiltonian <em>cycle</em> (closing the tour). Omitting it would accept valid paths that are not cycles.</p>
+<p><strong>Correctness:</strong></p>
+<ul>
+<li><em>Yes → yes:</em> $G$ has a Hamiltonian cycle; let $W$ be its vertex ordering. It is a permutation of $V$, all consecutive pairs have edges, and the closing edge exists. ✓</li>
+<li><em>No → no:</em> $G$ has no Hamiltonian cycle. Assume $W$ is a permutation of $V$ with all consecutive edges present (tests 1 and 2 pass). Then the closing edge $(W[n], W[1])$ cannot exist — otherwise $W$ would be a Hamiltonian cycle. Test 3 fails. ✓</li>
+</ul>
+<p><strong>Runtime:</strong> Permutation check $O(n^2)$; edge checks $O(|E|)$ — polynomial.</p>
+<hr>
+<h2 id="polynomial-time-reductions">Polynomial-Time Reductions</h2>
+<p><strong>Informal:</strong> A reduction from problem $A$ to problem $B$ is a mapping from inputs of $A$ to inputs of $B$ that preserves the yes/no answer.</p>
+<p><strong>Formal:</strong> $A \leq_P B$ ($A$ reduces to $B$ in polynomial time) means there exists a function $M$ (the mapping) such that:</p>
+<ol>
+<li>$M$ maps inputs of $A$ to inputs of $B$.</li>
+<li>If $x$ is a yes-instance of $A$, $M(x)$ is a yes-instance of $B$.</li>
+<li>If $x$ is a no-instance of $A$, $M(x)$ is a no-instance of $B$.</li>
+<li>$M$ is computable in polynomial time.</li>
+</ol>
+<p><strong>Interpretation:</strong> $A \leq_P B$ means &quot;$A$ is no harder than $B$.&quot; Any solver for $B$ can be used to solve $A$: apply $M$ to transform the input, then run the $B$ solver, and return its answer.</p>
+<p><strong>How to solve $A$ using a solver for $B$:</strong></p>
+$$\text{input } x \xrightarrow{M} M(x) \xrightarrow{B\text{-solver}} \text{answer for } M(x) = \text{answer for } x
+$$
+<p>Correctness follows from conditions 2 and 3. Runtime: polynomial (for $M$) + polynomial (for $B$ solver) = polynomial. So if $B \in P$, then $A \in P$.</p>
+<p><strong>Direction matters:</strong></p>
+<ul>
+<li>$A \leq_P B$ is used when you want to <em>use</em> a $B$-solver to solve $A$.</li>
+<li>To prove $A$ is NP-hard, you take a known NP-hard problem $B$ and show $B \leq_P A$ — that solving $A$ is at least as hard as solving $B$.</li>
+</ul>
+<hr>
+<h2 id="np-hardness-and-np-completeness">NP-Hardness and NP-Completeness</h2>
+<p><strong>NP-hard:</strong> A problem $X$ is NP-hard if every problem in NP reduces to $X$ in polynomial time.</p>
+$$\forall A \in \text{NP}: A \leq_P X
+$$
+<p>$X$ is &quot;at least as hard as the hardest problems in NP.&quot; $X$ need not itself be in NP — NP-hard problems can be even harder than NP.</p>
+<p><strong>NP-complete:</strong> A problem is NP-complete if it is:</p>
+<ol>
+<li>In NP (has a polynomial-time verifier), and</li>
+<li>NP-hard (every NP problem reduces to it).</li>
+</ol>
+<p>NP-complete problems are the hardest problems <em>within</em> NP.</p>
+<p><strong>Why this matters:</strong> If any NP-complete problem could be solved in polynomial time, then every NP problem could be solved in polynomial time (by reducing to it), which would mean P = NP. Conversely, if P ≠ NP, no NP-complete problem is in P.</p>
+<hr>
+<h2 id="sat-and-the-cook-levin-theorem">SAT and the Cook-Levin Theorem</h2>
+<p><strong>SAT (Satisfiability):</strong> Given a Boolean formula in <strong>conjunctive normal form (CNF)</strong> over variables $x_1, \ldots, x_n$, is there a truth assignment making the entire formula true?</p>
+<p><strong>CNF:</strong> An AND of <strong>clauses</strong>, where each clause is an OR of <strong>literals</strong> (a variable or its negation). Example:</p>
+$$(x_1 \lor \neg x_2 \lor x_3) \land (\neg x_1 \lor x_4) \land (x_2 \lor \neg x_3)
+$$
+<p>A formula is <strong>satisfiable</strong> if some assignment makes all clauses true; a <strong>contradiction</strong> if no such assignment exists.</p>
+<p><strong>Cook-Levin Theorem (1971):</strong> SAT is NP-complete.</p>
+<p>Proved independently by Stephen Cook (published 1971) and Leonid Levin (proved ~1969, published 1973). Cook and Karp received the Turing Award in 1982 for founding complexity theory.</p>
+<p><strong>Why SAT was first:</strong> The NP verifier definition says a problem is in NP if there exists a polynomial-time algorithm that can check a proposed solution. The structure of any NP verifier can be encoded as a Boolean formula — specifically, the question &quot;does there exist a certificate that makes the verifier accept?&quot; becomes a SAT instance. This encoding works for <em>any</em> NP problem simultaneously, establishing that every NP problem reduces to SAT at once.</p>
+<p>SAT is the entry point into NP-completeness: once SAT is NP-complete, all subsequent proofs only need to show a reduction <em>from</em> SAT (or from another NP-complete problem), not from all NP problems simultaneously.</p>
+<hr>
+<h2 id="karp-s-strategy">Karp's Strategy</h2>
+<p><strong>Transitivity of reductions:</strong> If $A \leq_P B$ and $B \leq_P C$, then $A \leq_P C$.</p>
+<p><em>Proof:</em> Compose the two mappings $M_A$ and $M_B$. $M_A$ maps $A$-inputs to $B$-inputs; $M_B$ maps $B$-inputs to $C$-inputs. The composition maps $A$-inputs to $C$-inputs and preserves yes/no through both steps. Both mappings are polynomial, so the composition is polynomial (polynomial of polynomial is polynomial). ✓</p>
+<p><strong>Karp's contribution (1972):</strong> Using Cook-Levin plus transitivity, Richard Karp proved 21 additional problems are NP-complete, each with a single reduction from a known NP-complete problem.</p>
+<p><strong>The strategy to prove $A$ is NP-complete:</strong></p>
+<ol>
+<li><strong>Show $A \in$ NP:</strong> Give a correct polynomial-time verifier.</li>
+<li><strong>Choose a known NP-complete problem $B$:</strong> Pick one whose structure relates to $A$.</li>
+<li><strong>Show $B \leq_P A$:</strong> Define a polynomial-time mapping $M$ from $B$-inputs to $A$-inputs that preserves yes/no.</li>
+</ol>
+<p>By transitivity, every problem in NP reduces to $B$ (since $B$ is NP-complete), and $B$ reduces to $A$, so every problem in NP reduces to $A$. Therefore $A$ is NP-hard. Combined with step 1, $A$ is NP-complete.</p>
+<p>Gary and Johnson (1979) catalogued over 300 NP-complete problems with proofs — a foundational reference.</p>
+<hr>
+<h2 id="clique-and-independent-set">Clique and Independent Set</h2>
+<p><strong>Complement graph $G'$:</strong> Given $G = (V, E)$, the complement $G' = (V, E')$ where $E'$ contains exactly the edges <strong>not</strong> in $E$.</p>
+<p><strong>Key observation:</strong> A clique in $G$ becomes an independent set in $G'$ (all clique edges are absent from $G'$), and vice versa.</p>
+<h3 id="clique-leq-p-independent-set">Clique $\leq_P$ Independent Set</h3>
+<p><strong>Mapping $M$:</strong> Given $(G, K)$, return $(G', K)$ where $G'$ is the complement of $G$.</p>
+<p><strong>Runtime:</strong> Computing $G'$ requires one pass over the edge set — $O(|E|)$ — polynomial. ✓</p>
+<p><strong>Correctness:</strong></p>
+<ul>
+<li><em>Yes → yes:</em> Assume $G$ has a clique of size $K$. Every edge in the clique is absent from $G'$. Those $K$ vertices have no edges between them in $G'$. $G'$ has an independent set of size $K$. ✓</li>
+<li><em>Yes → yes backwards:</em> Assume $G'$ has an independent set of size $K$. Every missing edge in that set exists in $G$. Those $K$ vertices form a complete subgraph in $G$. $G$ has a clique of size $K$. ✓</li>
+</ul>
+<p>The reverse reduction (Independent Set $\leq_P$ Clique) follows by the same argument applied to the complement of $G'$, which is $G$ again.</p>
+<p><strong>Conclusion:</strong> Clique and Independent Set are equivalent in complexity. Both are NP-complete (given that Clique was proven NP-complete via a reduction from SAT).</p>
+<hr>
+<h2 id="partition-and-subset-sum">Partition and Subset Sum</h2>
+<h3 id="partition-leq-p-subset-sum-easy-direction">Partition $\leq_P$ Subset Sum (easy direction)</h3>
+<p><strong>Mapping:</strong> Given input $S$ for Partition, return $(S, T)$ where $T = \frac{1}{2}\sum_{s \in S} s$. The set $S$ is unchanged; just compute $T$.</p>
+<p><strong>Correctness:</strong></p>
+<ul>
+<li><em>Yes → yes:</em> If $S$ can be equally partitioned, each part sums to $T$. So $S$ has a subset summing to $T$. ✓</li>
+<li><em>Yes → yes backwards:</em> If $S$ has a subset $W$ summing to $T$, then the remaining elements sum to $\sum S - T = T$. So $S$ can be equally partitioned. ✓</li>
+</ul>
+<p>This direction is easy: Partition is a special case of Subset Sum.</p>
+<h3 id="subset-sum-leq-p-partition-harder-direction">Subset Sum $\leq_P$ Partition (harder direction)</h3>
+<p><strong>Challenge:</strong> Given $(S, T)$ for Subset Sum, create a Partition instance that is yes iff $S$ has a subset summing to $T$. The target $T$ is variable; Partition's target is fixed at half the total sum. The reduction must encode $T$ into the set.</p>
+<p>Let $\Sigma = \sum_{s \in S} s$. Three cases:</p>
+<p><strong>Case 1: $T = \Sigma/2$.</strong>
+Set $S' = S$. The Partition instance directly asks if $S$ has a subset summing to $\Sigma/2 = T$. ✓</p>
+<p><strong>Case 2: $T &gt; \Sigma/2$.</strong>
+Add a new element $L = 2T - \Sigma$ to $S$ to get $S'$. Total of $S'$ is $\Sigma + L = 2T$.</p>
+<ul>
+<li><em>Yes → yes:</em> Assume subset $W \subseteq S$ sums to $T$. Then $S' \setminus W$ has sum $2T - T = T$. $S'$ can be partitioned into two equal-sum ($T$) parts. ✓</li>
+<li><em>Yes → yes backwards:</em> Assume $S'$ can be partitioned into two parts each summing to $T$. Since $L = 2T - \Sigma &gt; \Sigma - \Sigma = 0$ and $L$ can only be in one part, the other part (not containing $L$) must be entirely from $S$ and sum to $T$. ✓</li>
+</ul>
+<p><strong>Case 3: $T &lt; \Sigma/2$.</strong>
+Add $L = \Sigma - 2T$ to $S$ to get $S'$. Total of $S'$ is $2(\Sigma - T)$. Similar algebra gives the same yes/no equivalence.</p>
+<p>The added element $L$ in cases 2 and 3 is a <strong>gadget</strong> — a constructed piece of input with a specific structural property that makes the reduction work.</p>
+<p><strong>Conclusion:</strong> Subset Sum and Partition reduce to each other in both directions. They are equivalent in complexity — in some sense, the same problem viewed differently.</p>
+<hr>
+<h2 id="vertex-cover">Vertex Cover</h2>
+<p><strong>Problem:</strong> Given undirected graph $G = (V, E)$ and integer $K$, does $G$ have a <strong>vertex cover</strong> of size $K$ — a subset $V' \subseteq V$ with $|V'| \leq K$ such that every edge has at least one endpoint in $V'$?</p>
+<h3 id="vertex-cover-in-np">Vertex Cover $\in$ NP</h3>
+<p><strong>Certificate:</strong> The claimed vertex cover $W$.</p>
+<pre><code>Verify(G, K, W):
+  If W ⊄ V: say no.
+  If |W| &gt; K: say no.
+  If ∃ edge (u,v) ∈ E with u ∉ W and v ∉ W: say no.   // uncovered edge
+  Say yes.
+</code></pre>
+<p><strong>Correctness:</strong> Standard two-branch argument. ✓ <strong>Runtime:</strong> Subset check $O(n^2)$; size check $O(1)$; edge coverage $O(|E|)$ — polynomial. ✓</p>
+<h3 id="key-lemma-independent-set-vertex-cover">Key Lemma: Independent Set ↔ Vertex Cover</h3>
+<p><strong>Lemma:</strong> $V'$ is a vertex cover of $G$ if and only if $V \setminus V'$ is an independent set.</p>
+<p><em>Proof:</em></p>
+<ul>
+<li>Assume $V'$ is a vertex cover. Consider any two vertices $u, v \in V \setminus V'$. If $(u, v) \in E$, then neither $u$ nor $v$ is in $V'$, so the edge is uncovered — contradicting $V'$ being a vertex cover. Therefore no two vertices in $V \setminus V'$ share an edge; $V \setminus V'$ is an independent set. ✓</li>
+<li>Assume $I = V \setminus V'$ is an independent set. Consider any edge $(u, v) \in E$. Since $I$ has no edges, at least one of $u, v$ is not in $I$, i.e., it is in $V'$. So $V'$ covers the edge. ✓</li>
+</ul>
+<h3 id="independent-set-leq-p-vertex-cover">Independent Set $\leq_P$ Vertex Cover</h3>
+<p><strong>Mapping $M$:</strong> Given $(G, K)$ for Independent Set, return $(G, |V| - K)$ for Vertex Cover. The graph is unchanged; only the threshold changes.</p>
+<p><strong>Runtime:</strong> Computing $|V| - K$ is $O(1)$ — polynomial. ✓</p>
+<p><strong>Correctness:</strong></p>
+<ul>
+<li><em>Yes → yes:</em> Assume $G$ has an independent set $I$ of size $K$. By the lemma, $V \setminus I$ is a vertex cover of size $|V| - K$. ✓</li>
+<li><em>Yes → yes backwards:</em> Assume $G$ has a vertex cover $V'$ of size $|V| - K$. By the lemma, $V \setminus V'$ is an independent set of size $K$. ✓</li>
+</ul>
+<p><strong>Conclusion:</strong> Vertex Cover is in NP (verifier shown) and NP-hard (Independent Set $\leq_P$ Vertex Cover, and Independent Set is NP-complete). Therefore <strong>Vertex Cover is NP-complete</strong>.</p>
+<hr>
+<h2 id="what-np-completeness-means-in-practice">What NP-Completeness Means in Practice</h2>
+<p><strong>The practical interpretation:</strong> If a problem is NP-complete, no polynomial-time algorithm for it is known, and finding one would prove P = NP (resolving the biggest open problem in computer science, and likely breaking much of modern cryptography). Most researchers believe P ≠ NP, so NP-complete problems are considered inherently intractable.</p>
+<p><strong>What to do when you encounter an NP-complete problem:</strong></p>
+<ol>
+<li><strong>Exact algorithms with pseudo-polynomial runtime:</strong> DP solutions for Subset Sum and Knapsack work well when the numeric values are small (e.g., $T$ or $C$ is not too large).</li>
+<li><strong>Approximation algorithms:</strong> For many NP-complete optimization problems, polynomial-time algorithms exist that guarantee solutions within a constant factor of optimal. For Vertex Cover, a simple 2-approximation exists.</li>
+<li><strong>Fixed-parameter tractable algorithms:</strong> Some NP-complete problems become polynomial when certain parameters are fixed (e.g., Vertex Cover is solvable in $O(2^K \cdot |V|)$ — polynomial when $K$ is small).</li>
+<li><strong>Heuristics:</strong> Algorithms with no formal guarantee but good empirical performance.</li>
+<li><strong>Recognizing the problem:</strong> Knowing a problem is NP-complete saves wasted effort searching for a polynomial-time exact algorithm.</li>
+</ol>
+<p><strong>NP-complete problems in games and puzzles:</strong> Generalized Minesweeper, generalized Battleship, and many other combinatorial puzzles are NP-complete when the grid size $n$ can grow. The <em>specific</em> fixed-size instances you play are trivially solvable — NP-completeness is about what happens as $n \to \infty$.</p>
+<hr>
+<h2 id="connections">Connections</h2>
+<p>The verifier framework from <a href="notes-09.html#verification-procedures">Week 9</a> is the foundation of everything in this week. Every NP membership proof uses the same two-branch structure established there with COMPOSITES.</p>
+<p>The <strong>Partition → Subset Sum reduction</strong> was introduced informally in <a href="notes-07.html#the-partition-problem">Week 7</a> as motivation for the Partition problem. This week gives it formal treatment as a polynomial-time reduction and proves the harder direction (Subset Sum → Partition) using a gadget construction.</p>
+<p>The DP solutions to Subset Sum and Knapsack from <a href="notes-07.html">Week 7</a> are <strong>pseudo-polynomial</strong> — polynomial in the numeric value of $T$ or $C$, but exponential in the bit-length. NP-completeness explains <em>why</em> no polynomial-time exact algorithm exists (assuming P ≠ NP): these are the hardest problems in NP.</p>
+<p>The course arc from Weeks 1–10 traces a spectrum of algorithm design strategies:</p>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Weeks</th>
+<th>Representative problems</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Divide and conquer</td>
+<td>2–4</td>
+<td>Mergesort, Binary search, Karatsuba</td>
+</tr>
+<tr>
+<td>Dynamic programming</td>
+<td>6–7</td>
+<td>Fibonacci, LCS, Knapsack</td>
+</tr>
+<tr>
+<td>Greedy</td>
+<td>8–9</td>
+<td>Interval scheduling, MST, Dijkstra</td>
+</tr>
+<tr>
+<td>NP-complete (no efficient algorithm known)</td>
+<td>9–10</td>
+<td>Subset Sum, Knapsack, Vertex Cover</td>
+</tr>
+</tbody>
+</table>
+<p>Complexity theory does not just classify problems — it tells you when to stop looking for an efficient exact algorithm and when to pivot to approximations, heuristics, or pseudo-polynomial methods.</p>
+
+  </main>
+
+  
+  <script>
+    document.querySelectorAll('h2[id], h3[id]').forEach(h => {
+      const a = document.createElement('a');
+      a.className = 'anchor-link';
+      a.href = '#' + h.id;
+      a.textContent = '§';
+      a.title = 'Link to this section';
+      h.appendChild(a);
+    });
+  </script>
+  
+
+  <footer class="site-footer">
+    <span>Algorithms · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-04-20">April 20, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Algorithms');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

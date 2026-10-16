@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Labor Journal Essay — Discrete Structures</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (plum). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #6B3A72;
+      --course-accent-dark: #522D57;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Discrete Math for Computer Science</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        <a href="syllabus.html">Syllabus</a>
+        <span class="site-nav-sep">·</span>
+        <a href="reflection-instructions.html">Reflection</a>
+        <span class="site-nav-sep">·</span>
+        <a href="meeting-instructions.html">Meeting</a>
+        <span class="site-nav-sep">·</span>
+        <a href="ai-use.html">AI Use</a>
+        <span class="site-nav-sep">·</span>
+        <a href="extra-labor.html">Extra Labor</a>
+        <span class="site-nav-sep">·</span>
+        <a href="canvas-grades.html">Canvas Grades</a>
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+        
+          
+            <a href="week-01.html">1</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-02.html">2</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-03.html">3</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-04.html">4</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-05.html">5</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-06.html">6</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-07.html">7</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-08.html">8</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-09.html">9</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-10.html">10</a>
+          
+          
+        
+      </div>
+    </nav>
+
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+  <main data-pagefind-body>
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <h1>Labor Journal Essay</h1>
+<p><strong>Learning Outcomes:</strong> Writing a reflective essay will help to:</p>
+<ol>
+<li>Practice writing in a low stakes environment.</li>
+<li>Engage in deep reflection in order to improve some aspect of your learning or professional conduct.</li>
+</ol>
+<hr>
+<p><strong>Instructions:</strong></p>
+<ol>
+<li>Select a theme and sub-themes for your reflective essay.</li>
+<li>Write a one-page, point form outline for your essay.</li>
+<li>Use your outline to write a three to four page draft.</li>
+<li>Use the feedback on your draft to revise your draft.</li>
+</ol>
+<hr>
+<p><strong>Details:</strong> A labor journal essay is a personal reflective essay based on your experiences this quarter. You can use your learning logs and reflections to provide the subject matter for your essay. Reflection is a process in which you put careful thought and analysis into your experiences with the goal of self-improvement. The Gibbs' reflective cycle is a popular reflective process with six steps:</p>
+<ol>
+<li><strong>Description</strong> of the experience.</li>
+<li><strong>Feelings</strong> and thoughts about the experience.</li>
+<li><strong>Evaluation</strong> of the experience, both good and bad.</li>
+<li><strong>Analysis</strong> to make sense of the situation.</li>
+<li><strong>Conclusion</strong> about what you learned and what you could have done differently.</li>
+<li><strong>Action plan</strong> for how you would deal with similar situations in the future, or general changes you might find appropriate.</li>
+</ol>
+<p>When you are writing about your experiences in your essay, try to follow these steps to ensure you are engaging in deep reflection.</p>
+<p>Writing your essay will proceed through these stages:</p>
+<hr>
+<h3 id="1-select-a-theme">1. Select a theme</h3>
+<p>The theme of your essay is very much like a thesis in a position paper, except you are not &quot;arguing&quot; for it so much as explaining and analyzing it. Just like a thesis is the central idea of a position paper, a theme is the central idea of other kinds of essays like a reflection. You want your theme to show up in your introduction very clearly, and then again in your conclusion. You also want your theme to be a single thread that ties all the topics in your essay together, so it should be showing up here and there in your essay body as well.</p>
+<p>Some general themes I've seen in the past include: communication, compassion, time management, technical growth, problem solving techniques, and program design principles. A good theme isn't selected at random, but instead emerges from reflection on one's experiences, learning logs and weekly reflections.</p>
+<p>Once you have your general theme you should refine it into a statement that is clear, focused and detailed. Here are a few examples of strong theme statements. Please do not use these in your essay; they are meant only as examples. You should write your own based on your own experiences.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Example Theme Statements</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Engaging in regular meetings, attending office hours, and mentoring my peers allowed me to improve my communication and collaborative problem solving.</td>
+</tr>
+<tr>
+<td style="text-align:left">Logging and journaling have improved my time management, retention of material, and approach to school.</td>
+</tr>
+<tr>
+<td style="text-align:left">I have discovered more efficient study techniques of starting early, setting a schedule, and taking breaks that have led to better time management.</td>
+</tr>
+<tr>
+<td style="text-align:left">Working on the assignments has led to breakthroughs in understanding how to approach problems I initially thought were impossible.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="2-select-sub-themes">2. Select sub-themes</h3>
+<p>Sub-themes are the topics you will discuss to support your theme. You should select three sub-themes that you will want to explore in detail. Three is a good number so that you will have space to explore the details of each and you will not exceed the length limit on your essay. Each sub-theme should be discussed in a paragraph or two in your draft and final essay.</p>
+<p>Within the discussion you should share an experience from the quarter that demonstrates the sub-theme you are exploring. You should go through the six steps of reflection while planning what you want to write. The paragraph on each sub-theme might also follow these six steps — one or two sentences per step.</p>
+<hr>
+<h3 id="3-submit-your-outline">3. Submit your outline</h3>
+<p><strong>Week 4</strong> — A complete outline should be a single page, point form plan for your essay.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Outline Template</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Introduction</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">  • Theme Statement</td>
+</tr>
+<tr>
+<td style="text-align:left">  • Possible motivation</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Body 1</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">  • Sub-Theme 1</td>
+</tr>
+<tr>
+<td style="text-align:left">  • Supporting Experience</td>
+</tr>
+<tr>
+<td style="text-align:left">  • Gibbs' Cycle</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Body 2</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">  • Sub-Theme 2</td>
+</tr>
+<tr>
+<td style="text-align:left">  • Supporting Experience</td>
+</tr>
+<tr>
+<td style="text-align:left">  • Gibbs' Cycle</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Body 3</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">  • Sub-Theme 3</td>
+</tr>
+<tr>
+<td style="text-align:left">  • Supporting Experience</td>
+</tr>
+<tr>
+<td style="text-align:left">  • Gibbs' Cycle</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Conclusion</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">  • Restate Theme and Sub-Themes</td>
+</tr>
+</tbody>
+</table>
+<p>It is possible at this point of the quarter that not all experiences that will end up in your final reflection have occurred. Thus, it is fine to write your outline with alternative themes or hypothetical topics that are still developing.</p>
+<p><strong>Time Estimate:</strong> 1–2 hours</p>
+<hr>
+<h3 id="4-submit-your-draft">4. Submit your draft</h3>
+<p><strong>Week 7</strong> — Use the outline and the themes and sub-themes you have selected to write your draft labor journal essay. You should edit your draft for content, spelling and grammar. Complete drafts will have a length of 3–4 pages (900–1200 words). The purpose of submitting the draft is to get feedback from the professor so that you can improve on it. The only way to improve writing is through an iterative process of improving a draft, so you will gain the most from this process if you put as much effort as possible into your draft.</p>
+<p>Here are examples of ineffective and effective paragraphs.</p>
+<hr>
+<p><strong>Too Abstract (Ineffective)</strong></p>
+<blockquote>
+<p>Reflection is a crucial component of educational growth and metacognitive development. Through continuous consideration of one's learning journey, we can expand our understanding of complex topics and enhance our ability to connect theoretical concepts to practical applications. The labor-based grading system represents a transformative pedagogical approach that prioritizes effort over traditional assessment metrics, creating a more equitable learning environment. As educators implement such innovative strategies, they must remain aware of the delicate balance between challenging students and accommodating diverse learning styles. Embracing this reflective mindset allows for the identification of potential improvements in teaching methodologies and curriculum design. Ultimately, the synthesis of critical reflection and educational innovation can lead to profound breakthroughs in student engagement and comprehension, fostering a learning community that values personal growth alongside academic achievement.</p>
+</blockquote>
+<p><strong>Purely Narrative (Ineffective)</strong></p>
+<blockquote>
+<p>During the pandemic, I had to switch my teaching approach completely when the pandemic hit. Everything was chaotic at first. All my classes moved online, and I had to figure out how to use Zoom and Canvas in ways I never had before. During the first midterm, I noticed that many students were getting suspiciously similar answers, and realized cheating was happening more than usual. One student even accidentally included another student's name in their submission! I was really stressed about this and talked to some colleagues about what to do. Professor Dillon recommended a book about labor-based grading by Dr. Inoue. I ordered it right away and read it over the weekend. The next Monday, I announced to my algorithms class that we would be trying this new system. It took a lot of work to redesign all my assignments and explain the new system to students. Some were confused at first, but by the end of the quarter, most said they preferred it to traditional grading.</p>
+</blockquote>
+<p><strong>Balanced Reflection (Effective)</strong></p>
+<blockquote>
+<p>When the pandemic forced my classes online, I witnessed a surge in exam cheating that challenged my fundamental teaching assumptions. After discovering Dr. Inoue's work on labor-based grading, I implemented this approach first in my algorithms course and later across my curriculum. During this transition, I experienced deep anxiety as my pedagogical foundations seemed to crumble. The specific moment that crystallized this feeling was when several students submitted identical incorrect solutions from Chegg. While the pandemic created tremendous difficulties, this incident became a catalyst for positive change by forcing me to confront how problematic traditional assessment methods had been all along. These methods encouraged students to focus on grades rather than understanding. This experience triggered a broader questioning of educational practices I had taken for granted. I realized that my previous emphasis on exams was reinforcing inequality in my classroom. This journey deepened my understanding of education's true purpose — not merely transferring information, but nurturing independent learning capabilities.</p>
+</blockquote>
+<p><strong>Ideal Reflection (Effective)</strong></p>
+<blockquote>
+<p>The pandemic-driven shift to online teaching exposed fundamental flaws in my assessment approach when I discovered widespread cheating on exams. Particularly discouraging was the AI exam average of 95% on the week after we were forced online, which exposed widespread collaboration, even among students I would not expect this from. I felt both betrayed and responsible. I was angry at the situation but understanding the students' desperation. After some time to process, I recognized a silver lining: this crisis forced me to confront the limitations of traditional grading that I had ignored for years. I realized that traditional exams had always been problematic, rewarding memorization rather than understanding, creating unnecessary anxiety, and reinforcing structural inequalities among my students. I concluded that my role needed to shift from judge to mentor, focusing on process rather than product. This realization connected to broader questions about power dynamics in education and my responsibility to create equitable learning environments. Moving forward, I've redesigned my courses around weekly reflective assignments and learning logs, and I now dedicate the first ten minutes of each class to metacognitive exercises relevant for the primary tasks of the week.</p>
+</blockquote>
+<hr>
+<p>To gain credit for this extra labor you must write a draft, get feedback on the draft, and then use that feedback to write your final draft. Writing feedback on drafts takes a great deal of time. For this reason it is important that you submit your draft on time. Late drafts are placed at the back of the grading queue, delaying your feedback, and possibly making it impossible for you to complete the final draft on time. <strong>Drafts more than a week late will not be accepted.</strong></p>
+<p><strong>Time Estimate:</strong> 6–12 hours</p>
+<hr>
+<h3 id="5-submit-your-final-draft">5. Submit your final draft</h3>
+<p><strong>Week 10</strong> — Use the feedback on your draft to complete your final draft. You will receive feedback on your reflection as well as the quality of your writing. Make sure you read all feedback and take it into consideration when finishing your paper.</p>
+<p>Spend time editing your essay for spelling and grammar. Also edit it for presentation, organization, conciseness and ease of understanding. Your final draft should be the highest quality writing you can muster and be edited more than once. You are welcome to seek aid in editing your draft for spelling and grammar.</p>
+<p><strong>Time Estimate:</strong> 4–8 hours</p>
+<hr>
+<h2 id="example-essays">Example Essays</h2>
+<p>Below are two examples of labor journal essays written by students in the past who have done a great job at performing the reflection part of the assignment (their writing and organization is also very good). These are included as examples of what <strong>honest and sincere reflections</strong> look like. Both were submitted in Week 7 as drafts — while their writing quality is very high, feedback was provided on how to improve them. So these are not meant to be examples of &quot;perfect&quot; work, but rather a really good first step towards a final draft. (In particular, the first draft is a little short and the second one is a little long.) Use these as examples of <strong>reflection</strong> so that you can perform your own high quality reflection on your own learning.</p>
+<hr>
+<h3 id="example-essay-draft-1">Example Essay Draft 1</h3>
+<p>The name &quot;Computational Worlds&quot; led me to expect this class to be about learning this awesome and wonderful world of computers. The name had a Computerphile-esque vibe to it. Thus, I went onto Youtube to look up what &quot;Computational Words&quot; entails and found a playlist of demo videos made by past students. &quot;Ah, so this class is about making web games and learning Javascript,&quot; I thought to myself. Well, little did I know that web games and Javascript was not all that this class was about. Looking back, I was able to learn how to collaborate with a team, how to write evaluatively, and learn new features of Github I have never seen before.</p>
+<p>I am very grateful to have such awesome team members. One of the most important things I learned through collaboration with my teammates was compassion. To be honest, I am not great at giving constructive feedback so I tend to not say anything at all. Sometimes, I make the mistake of being too straightforward, and end up hurting my listener's feelings. Other times, I am too overly careful that I cannot get my point across and make it seem like I am avoiding the real issue. Thus, I was able to somewhat grasp a happy medium of giving feedback that is constructive — not too harsh, but at the same time, effectively gets my point across. I had to be careful with my wording and the nuance that comes with it. I noticed that one of my teammates often frames their request for improvement as a suggestion rather than a demand. It sets much a friendlier tone, yet still gets their point across.</p>
+<p>Collaborating with my teammates has also taught me how to coordinate the timing of tasks. Oftentimes, some of my teammates' tasks are dependent on my tasks, and some of mine are dependent on theirs. Thus, we had to communicate who would do which tasks first to create an initial foundation for others to work on. I also realized that my tasks were time-sensitive. If it was just me, I would be fine with procrastinating until the weekend. However, my teammates are depending on me to finish my tasks on time so it made me realize the importance of completing my tasks early. Completing tasks late could jeopardize their grades. In addition to coordinating tasks, I also learned that it is important to know your own limits. One of my teammates realized that their workload was too much for them, so they reached out to the members and asked for help.</p>
+<p>Now, I have to admit, the writing I have done in this class has got to be more than most of the classes I have taken. Moreover, the writing style I had to adopt was unlike any other classes I have taken before. It is reflective and evaluative. I am not only critiquing others but also myself. Thus, I believe that this sort of style is personal in some aspect. Usually with research papers and position essays, I seldom have to consider the audience's emotions nor reflect about my work. The writing assignments in this class, such as the reflection and the peer assessment, have made me improve my writing since I actually have to assess my wording, my nuance, and my message to my peers.</p>
+<p>In working with my teammates and others in the class, I have also learned new features from Github I have never touched before. For instance, I learned how to create a new branch and sync my local branch with a remote branch. I have also learned how to create a new pull request and let others review my code. Creating pull requests has helped coordinate the team in a more efficient manner. It wasn't until I joined the Super Mario Bros project that I learned that issues can be assigned to others on the team to help those assigned know what to work on. I find the description very nifty and it keeps me on track of my tasks.</p>
+<p>Overall, I find the main takeaway of this class to be communication. I learned how to communicate with my team members about my needs and my limits. In addition, I learned how to communicate effectively to others through writing. I learned to be aware of other's needs and limits. I learned that Github is a powerful tool in communicating and coordinating team members in a project. This class has taught me how to communicate with compassion.</p>
+<hr>
+<h3 id="example-essay-draft-2">Example Essay Draft 2</h3>
+<p>I have this memory of when I was about five years old; I'm laying upside down on the family room couch at my Grandma's house playing Pokémon Red on my Gameboy Color. It's the end of a summer day and the weather is cooling off. After playing all day, I finally set my Gameboy down and take a seat on the carpet. To keep myself occupied, I naturally place my finger on the carpet and start drawing. I've etched things in the carpet with my finger a thousand times, and the general things I draw are always the same: parallel horizontal and parallel vertical lines and consistent shapes like rectangles and hexagons. While I'm drawing lines in the carpet that summer evening, residual thoughts of Pokémon are stirring in my head. Thoughts like how characters can only move horizontally and vertically and how long it takes to level a Pokémon as it gets stronger or fights Pokémon that are lower level rather than close to its own level.</p>
+<p>For as long I can remember, a large part of how I process the world around me is through quantitative analysis and structured processes. This may sound like a dry way to look at the world, but when you apply this outlook to what you're passionate about, beautiful things can result. Take a moment to think about how a Pokémon game works. Even at a high level, movements are conceptually just horizontal and vertical movements along a 2D plane. Your inventory is a bunch of objects with a count associated with them. Your Pokémon are entities that track experience and gain abilities when certain amounts of experience points are reached. Pokémon games (and all video games) are built on fundamental rules that the developers determine and are very quantitatively implemented. And although the means of the development of a Pokémon game has this quantitative nature, the result is a game that brought happiness and fun memories to millions of people.</p>
+<p>After exploring passions and considering potential career paths throughout my life so far, I have happily arrived at working with computers. The very fundamentals of how computers were designed and how they function align with my own fundamentals. But I would say there is a lot more to me than performing computations. What should I be computing?</p>
+<p>I could write an epic about the things I dream to create, but to simplify it down to a sentence, I like to use my process-driven and analyzing nature to build abstract and complex systems that satisfy a purpose. This purpose doesn't have to be &quot;practical&quot; in the typical interpretation of the word. Even providing deep happiness for people or spending time as a human exploring the potential of my mind satisfies my definition of practical.</p>
+<p>I believe that the professional development I gained from this class can be narrowed down to two important skills. The first is the skill of working on a long-term project, and the planning, execution, and persistence required to do so. Every project I have worked on in the computer science program so far and almost all my side projects have taken at most a couple weeks, or small bits of work over a longer period to complete. The workload in this class has been large amounts of focused effort over the course of a few months, and has included a healthy distribution of learning how to do the project and actually working on the project. There were also deliverable deadlines throughout the project, so I got some experience practicing the iterative process by making realistic short and medium-term goals to reach a deliverable by its deadline, and sacrificing the depth of each function we promised to implement in order to have all of the basic functionality provided. Then part of the next section before the next deliverable would be some refactoring and improvement of previously implemented functions.</p>
+<p>The other important skill I strengthened in this course is the ability to work with a team using effective communication, fair distribution of tasks, and sticking to agreed-upon deadlines. I also gained a particularly important skill when working with a team: doing what is necessary to get on the same page with someone you don't get along with or who is hard to work with. At the beginning of the quarter, one of my team members was disrespectful towards me. They didn't care about my input or ideas, would constantly interrupt me mid-sentence, and would make an effort to make it clear he was talking to other members of the group rather than me. I'm not sure if his first impression of me made him think I was incompetent or unintelligent, or he just didn't like something about me, but it definitely made it hard to work with him. However, I just kept a good attitude, went out of my way to be nice to him anyway, stuck to doing a good job on my contributions, and let him know privately that some of the things he was doing was making it hard to achieve our goals. Our relationship and the whole team dynamic improved a lot after all of that. What I really got out of that was the experience of actually being in a situation like this. For some reason, he was invoking strong emotions early on from me, but I was rewarded for staying calm, keeping the goal in mind, and doing what I needed to in order to get us on the fast track towards it.</p>
+<p>This class has encouraged my development in a few valuable ways. I feel enriched studying a topic that is a natural expression of my fundamental self and the way I process my surroundings. I have gotten to see specific implementations of tools and algorithms that both strengthen my problem-solving ability and give me a starting point for actually working on my own projects in the future. And I have had some professional development in working on larger projects than I'm used to on a team of people who are motivated to do a quality job. From here, I'll be working on projects between now and my first job to build my resume, gain development experience, and have some fun.</p>
+
+  </main>
+
+  
+
+  <footer class="site-footer">
+    <span>Discrete Structures · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-04-20">April 20, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Discrete Structures');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>
