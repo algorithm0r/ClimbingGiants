@@ -1009,7 +1009,7 @@ function eigSym(Min) {
   return Array.from({length: n}, (_, i) => A[i][i]).sort((a, b) => b - a);
 }
 
-/* the normal equations, built and solved exactly as page 17 describes */
+/* the normal equations, built and solved exactly as page 16 describes */
 function normalFit(xs, ys, deg) {
   const n = deg + 1;
   const G = Array.from({length: n}, (_, i) =>

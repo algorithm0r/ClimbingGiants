@@ -1,4 +1,4 @@
-/* Generated bundle: kit, the the-error-minimum demo, this deck's
+/* Generated bundle: kit, the smoothing demo, this deck's
    figures, the slide runtime, the presenter tools, page.js.
    Do not edit. */
 
@@ -968,133 +968,77 @@ function realNoiseRaw(n, sd = 1) {
   return scaleTo(out, sd);
 }
 
-/* The U-curve, measured. sin x differentiated at x = 1, where the true answer is
-   cos 1 and the error is therefore computable rather than estimated. */
+/* The smoothing trade, on a signal whose truth is known. Widen the window and
+   watch the noise fall and the peak follow it down. */
 
-const X0 = 1.0, TRUE = Math.cos(X0);
-const HS = logspace(1e-17, 1, 340);
+const DT = 1e-3, N = 1000;
+const T = linspace(0, 1 - DT, N);
+const CLEAN = new Float64Array(N);
+for (let i = 0; i < N; i++) CLEAN[i] = Math.sin(2 * Math.PI * 2 * T[i]);
 
-const errForward = h => Math.abs((Math.sin(X0 + h) - Math.sin(X0)) / h - TRUE);
-const errCentral = h => Math.abs((Math.sin(X0 + h) - Math.sin(X0 - h)) / (2 * h) - TRUE);
+const EPS = realNoise(N, 0.01);      /* real accelerometer noise, scaled */
+const NOISY = new Float64Array(N);
+for (let i = 0; i < N; i++) NOISY[i] = CLEAN[i] + EPS[i];
 
-/* the two terms of the model, so the measured curve can be compared against the
-   prediction rather than merely described by it */
-const EPS = Number.EPSILON;                       // 2.22e-16
-const truncF = h => 0.5 * Math.abs(Math.sin(X0)) * h;          // |f''|/2 * h
-const truncC = h => Math.abs(Math.cos(X0)) / 6 * h * h;        // |f'''|/6 * h^2
-const round1 = h => EPS * Math.abs(Math.sin(X0)) / h;
-
-/* Search decade steps, not the fine grid used for the plot.
-   On the rounding branch the error swings by orders of magnitude between
-   neighbouring h, because it depends on the exact bit pattern of two nearly
-   equal numbers. A fine grid therefore finds a lucky cancellation rather than
-   the minimum, and reports an accuracy that cannot be reproduced. */
-const DECADES = Array.from({length: 18}, (_, k) => Math.pow(10, -k));
-function best(fn) {
-  let bv = Infinity, bh = null;
-  for (const h of DECADES) { const e = fn(h); if (e > 0 && e < bv) { bv = e; bh = h; } }
-  return {h: bh, e: bv};
-}
-
-/* a step as 3.2×10⁻⁶, for the slider and the readouts */
-const sci = (v, dp = 1) => {
-  if (v === 0) return '0';
-  const e = Math.floor(Math.log10(Math.abs(v)) + 1e-12), m = v / Math.pow(10, e);
-  return (e === 0 ? m.toFixed(dp) : m.toFixed(dp) + '×10' + supNum(e)).replace('-', '−');
-};
-const HU = logspace(1e-16, 1, 241);
+/* the error against the truth, at every odd width, so the minimum is found
+   rather than asserted */
+const WIDTHS = [];
+for (let w = 1; w <= 151; w += 2) WIDTHS.push(w);
+const CURVE = WIDTHS.map(w => {
+  const ys = w === 1 ? NOISY : movingAverage(NOISY, w);
+  let sq = 0;
+  for (let i = 0; i < N; i++) { const e = ys[i] - CLEAN[i]; sq += e * e; }
+  return Math.sqrt(sq / N);
+});
+const BESTW = WIDTHS[CURVE.indexOf(Math.min(...CURVE))];
 
 mountDemo({
-  /* the lecture's opening slider. Left: sin x with its tangent line at x = 1
-     taken away, over two steps either side, so the red chord through the two
-     samples has exactly the central difference's error as its slope. At a big
-     step (near 1) the curve's lopsided bend tilts the chord (truncation); at a
-     small one the curve is the doubles' own rounding, a sawtooth about 6e-17
-     high, and the chord tilts with it (rounding). Right: that error at every
-     step, with this step ringed. */
-  step: {
-    controls: [{key: 'lg', label: 'step h', min: -15, max: 0, step: 0.05, value: -1,
-                fmt: v => sci(Math.pow(10, v))}],
+  smooth: {
+    setting: 'A 2&nbsp;Hz sine of amplitude 1 at 1&nbsp;kHz with σ&nbsp;=&nbsp;0.01 noise, ' +
+             'smoothed by a centred moving average. The ghost is the noise-free signal.',
+    source: {kind: 'mixed', text: 'A constructed 2&nbsp;Hz sine carrying <strong>real instrument noise</strong> from the pre-impact window of channel 093, so the smoothing is removing noise an accelerometer actually produced. NHTSA test 10642, 2019 BMW&nbsp;X5 into a rigid barrier at 15.65&nbsp;m/s, TRC of Ohio, 7 January 2019.'},
+    caption: 'Above: the smoothed record against the truth. Below: the error against the truth at ' +
+             'every window width, with the current one marked. The minimum is found by search, ' +
+             'not predicted — nothing about the arithmetic determines where it is.',
+    controls: [{key: 'w', label: 'window width', min: 1, max: 151, step: 2, value: 11, dp: 0,
+                unit: 'samples'}],
     panels: [
-      {label: 'sin x minus its tangent line at x = 1', unit: '', height: 330, xAxis: true,
-       xLabel: 'x − 1, in steps of h', xUnit: '', xScale: 1},
-      {label: 'error in the central difference', unit: '', height: 330, xAxis: true,
-       xLabel: 'step h', xUnit: '', xScale: 1, xLog: true, yLog: true, yClamp: [1e-14, 0.5]}],
-    readouts: [{key: 'cd', label: 'central difference'}, {key: 'tr', label: 'true slope, cos 1'},
-               {key: 'err', label: 'error'}],
-    compute(s) {
-      const h = Math.pow(10, s.lg), S1 = Math.sin(X0);
-      /* x is a double too, so at tiny steps it takes only a few values */
-      const dev = x => Math.sin(x) - S1 - TRUE * (x - X0);
-      const u = new Float64Array(401), d = new Float64Array(401);
-      for (let i = 0; i < 401; i++) { const x = X0 + (-2 + i / 100) * h; u[i] = (x - X0) / h; d[i] = dev(x); }
-      const a = dev(X0 - h), b = dev(X0 + h);
-      /* keep the tangent line, zero here, on the panel */
-      let lo = Math.min(0, ...d), hi = Math.max(0, ...d);
-      const pad = (hi - lo) * 0.12 || 1e-16; const yr = [lo - pad, hi + pad];
-      const cd = (Math.sin(X0 + h) - Math.sin(X0 - h)) / (2 * h);
-      return {
-        panels: [
-          {x: u, y: d, range: [-2, 2], opts: {
-            yRange: yr, hlines: [{y: 0, cls: 'ghost', text: 'the tangent line'}],
-            curves: [{x: [-1, 1], y: [a, b], cls: 'pred'}],
-            marks: [{t: -1, y: a, text: 'the two samples', anchor: 'end', dx: -10, dy: -10}, {t: 1, y: b}]}},
-          {x: HU, y: HU.map(errCentral), range: [1e-16, 1], opts: {
-            marks: [{t: h, y: Math.max(errCentral(h), 1e-14), ring: true}]}}],
-        readouts: {cd: cd.toFixed(10), tr: TRUE.toFixed(10), err: sci(Math.abs(cd - TRUE))}
-      };
-    }
-  },
-  ucurve: {
-    setting: 'The error in a numerical derivative of sin&thinsp;<em>x</em> at <em>x</em>&nbsp;=&nbsp;1, ' +
-             'against the step size. Both axes logarithmic, spanning seventeen decades.',
-    source: {kind: 'constructed', text: 'sin&thinsp;<em>x</em> at <em>x</em>&nbsp;=&nbsp;1. The errors are against cos&nbsp;1, and the left-hand branch is this machine&rsquo;s double-precision arithmetic.'},
-    caption: 'The dotted red line is the two-term model — truncation plus rounding — not a fit to ' +
-             'the measured points. Where the measured curve leaves it on the left, the arithmetic ' +
-             'has stopped being able to resolve the subtraction at all.',
-    segments: [{key: 'rule', label: 'rule', value: 'central', options: [
-      {value: 'forward', label: 'Forward'}, {value: 'central', label: 'Central'},
-      {value: 'both', label: 'Both'}]}],
-    panels: [{label: 'absolute error in the derivative', unit: '', height: 280,
-              xAxis: true, xLabel: 'step size h', xUnit: '', xScale: 1,
-              xLog: true, yLog: true}],
+      {label: 'smoothed signal', unit: '', height: 165},
+      {label: 'error against the truth', unit: '', height: 150, xAxis: true,
+       xLabel: 'window width', xUnit: 'samples', xScale: 1}
+    ],
     readouts: [
-      {key: 'best',  label: 'best h, decade steps'},
-      {key: 'err',   label: 'error there'},
-      {key: 'pred',  label: 'h predicted'},
-      {key: 'worst', label: 'error at h = 10⁻¹⁶'},
-      {key: 'coarse',label: 'error at h = 0.1'}
+      {key: 'w',     label: 'width'},
+      {key: 'err',   label: 'error against truth'},
+      {key: 'peak',  label: 'peak, true 1.0000'},
+      {key: 'noise', label: 'noise reduced by'},
+      {key: 'best',  label: 'best width, by search'}
     ],
     compute(s) {
-      const fwd = HS.map(errForward), cen = HS.map(errCentral);
-      const showBoth = s.rule === 'both';
-      const main = s.rule === 'forward' ? fwd : cen;
-      const ghost = showBoth ? fwd : (s.rule === 'forward' ? null : null);
-      const b = best(s.rule === 'forward' ? errForward : errCentral);
-      const model = s.rule === 'forward'
-        ? h => truncF(h) + round1(h)
-        : h => truncC(h) + round1(h);
-      const predH = s.rule === 'forward'
-        ? Math.sqrt(EPS) : Math.cbrt(EPS);
-      const at = (fn, h) => fn(h);
+      const w = Math.max(1, Math.round(s.w) | 1);
+      const ys = w === 1 ? NOISY : movingAverage(NOISY, w);
+      let sq = 0, peak = 0;
+      for (let i = 0; i < N; i++) {
+        const e = ys[i] - CLEAN[i]; sq += e * e;
+        peak = Math.max(peak, Math.abs(ys[i]));
+      }
+      const err = Math.sqrt(sq / N);
+      const wi = WIDTHS.indexOf(w);
       return {
-        panels: [{
-          x: HS, y: showBoth ? cen : main, ghost: showBoth ? fwd : null,
-          range: [1e-17, 1],
-          opts: {
-            pred: model,
-            label: showBoth ? 'absolute error — central solid, forward dashed'
-                            : 'absolute error in the derivative',
-            marks: [{t: b.h, y: b.e, cast: 'x',
-                     text: 'best decade h = ' + b.h.toExponential(0), dx: 8, dy: -10}]
-          }
-        }],
+        panels: [
+          {x: T, y: ys, ghost: CLEAN, range: [0, 1]},
+          {x: Float64Array.from(WIDTHS), y: Float64Array.from(CURVE),
+           range: [1, 151],
+           opts: {marks: [{t: w, y: CURVE[wi < 0 ? 0 : wi], cast: 'x',
+                           text: 'w = ' + w, dx: 8, dy: -9}],
+                  rings: [{x: BESTW, y: Math.min(...CURVE), text: 'best ' + BESTW}]}}
+        ],
         readouts: {
-          best: b.h.toExponential(0),
-          err: b.e.toExponential(2),
-          pred: predH.toExponential(1) + (s.rule === 'forward' ? '  (√ε)' : '  (ε^⅓)'),
-          worst: at(s.rule === 'forward' ? errForward : errCentral, 1e-16).toExponential(2),
-          coarse: at(s.rule === 'forward' ? errForward : errCentral, 0.1).toExponential(2)
+          w: w + ' samples',
+          err: err.toFixed(5),
+          peak: peak.toFixed(4),
+          noise: '×' + (1 / Math.sqrt(w)).toFixed(2),
+          best: BESTW + ' samples'
         }
       };
     }
@@ -1102,41 +1046,73 @@ mountDemo({
 });
 
 /* ---------------------------------------------------------------------------
-   fig-cancel — where the digits go. The table above prints the two values; what
-   it cannot show is which digits the subtraction destroys. Sixteen cells per
-   number, the shared leading run greyed, the survivors in gold.
+   fig-month — the cost of a wide window, on something nobody needs a formula
+   for. A year of daily temperatures smoothed over a month: the jitter goes,
+   and so does the night it froze, which was the whole question.
 --------------------------------------------------------------------------- */
 (() => {
-  const host = document.querySelector('#fig-cancel .fig-body');
+  const host = document.querySelector('#fig-month .fig-body');
   if (!host) return;
-  const N = 16, SHARED = 11, W = 0.86;
-  const cell = (i, y, cls) => ({cls, pts: [
-    {x: i + (1 - W) / 2, y: y}, {x: i + (1 + W) / 2, y: y},
-    {x: i + (1 + W) / 2, y: y + 0.62}, {x: i + (1 - W) / 2, y: y + 0.62}]});
-  const row = (y, cls) => {
-    const out = [];
-    for (let i = 0; i < N; i++) out.push(cell(i, y, i < SHARED ? 'ghost' : cls));
-    return out;
-  };
+  const M = 365, FREEZE = 296, W = 31;
+  const X = [], DAY = [];
+  let seed = 7;
+  const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff - 0.5;
+  for (let i = 0; i < M; i++) {
+    X.push(i);
+    let v = 11 - 12 * Math.cos(2 * Math.PI * (i - 15) / M) + 4.2 * rnd();
+    if (i === FREEZE) v = -4.4;          /* the night it froze */
+    DAY.push(v);
+  }
+  const SM = [];
+  for (let i = 0; i < M; i++) {
+    let s = 0, c = 0;
+    for (let k = -(W - 1) / 2; k <= (W - 1) / 2; k++) {
+      const j = i + k;
+      if (j >= 0 && j < M) { s += DAY[j]; c++; }
+    }
+    SM.push(s / c);
+  }
   diagram(host, {
-    w: 460, h: 196, xRange: [-4.6, N], yRange: [-0.7, 3.1], axes: false,
-    alt: 'Two sixteen-digit numbers drawn as rows of cells. The first eleven cells of '
-       + 'each are shaded alike, and only the last five differ. The difference keeps '
-       + 'only those five.',
-    areas: [].concat(row(2.2, 'fill'), row(1.3, 'fill'),
-                     [cell(11, 0.2, 'fill'), cell(12, 0.2, 'fill'), cell(13, 0.2, 'fill'),
-                      cell(14, 0.2, 'fill'), cell(15, 0.2, 'fill')]),
+    w: 460, h: 208, xRange: [0, M - 1], yRange: [-7, 27], zero: true, axes: false,
+    alt: 'A year of daily temperatures with a smoothed curve through them. A single '
+       + 'very cold night is visible in the daily record and absent from the smoothed one.',
+    curves: [{x: X, y: DAY, cls: 'ghost'}, {x: X, y: SM, cls: 'trace'}],
+    drops: [{x: FREEZE, y: -4.4}],
+    points: [{x: FREEZE, y: -4.4}, {x: FREEZE, y: SM[FREEZE], cls: 'miss', r: 4}],
     notes: [
-      {x: -4.4, y: 2.38, anchor: 'start', text: 'f(x+h)'},
-      {x: -4.4, y: 1.48, anchor: 'start', text: 'f(x-h)'},
-      {x: -4.4, y: 0.38, anchor: 'start', text: 'difference'},
-      {x: SHARED / 2, y: 2.98, anchor: 'middle', cls: 'hi',
-       text: 'the first eleven digits agree'},
-      {x: 13.5, y: 2.98, anchor: 'middle', cls: 'hi', text: 'five differ'},
-      {x: 13.5, y: -0.52, anchor: 'middle',
-       text: 'five digits are all that is left'}
+      {x: FREEZE - 8, y: -6.2, anchor: 'end', cls: 'hi', text: 'the night it froze'},
+      {x: 8, y: 25, anchor: 'start', text: 'a 31-day average'}
     ]
   });
+})();
+
+/* ---------------------------------------------------------------------------
+   fig-twopass — why running it twice removes the lag. The forward pass moves
+   the pulse late; the backward pass, running over the forward pass's own
+   output, moves it back by the same amount. The cancellation is algebraic.
+--------------------------------------------------------------------------- */
+(() => {
+  const host = document.querySelector('#fig-twopass .fig-body');
+  if (!host) return;
+  const M = 260, PK = 0.36, WID = 0.13, LAG = 0.11;
+  const X = [], pulse = (t, c) => {
+    const u = (t - c) / WID;
+    return Math.exp(-u * u);
+  };
+  for (let i = 0; i < M; i++) X.push(i / (M - 1));
+  const at = c => X.map(t => pulse(t, c));
+  const cells = diagramRow(host, 3);
+  const panel = (cell, ys, title, mark, note) => diagram(cell, {
+    xRange: [0, 1], yRange: [-0.28, 1.2], title: title, axes: false,
+    alt: 'A pulse, the same pulse delayed by one filter pass, and the same pulse '
+       + 'returned to its original position by a second pass run backwards.',
+    curves: [{x: X, y: at(PK), cls: 'ghost'}, {x: X, y: ys, cls: 'trace'}],
+    drops: [{x: mark, y: 1}],
+    notes: [{x: 0.5, y: -0.2, anchor: 'middle', cls: 'hi', text: note}]
+  });
+  panel(cells[0], at(PK), 'the record', PK, 'peak where it happened');
+  panel(cells[1], at(PK + LAG), 'forward pass', PK + LAG, 'late by the lag');
+  panel(cells[2], at(PK), 'then backward', PK, 'back where it started');
 })();
 
 /* Whiteboards: math worked out on a slide as if written by hand (the
@@ -1327,80 +1303,106 @@ setTimeout(() => {
   });
 }, 0);
 
-/* Lecture 11's own figures. The subject is a function we compute, where we
-   choose h, so the error has to be measured against a known answer: sin x at
-   x = 1, whose derivative is cos 1. Every point is computed live in doubles,
-   so the jagged left-hand branch is the machine's own rounding, not a model.
+/* Lecture 11's own figures.
 
-   Checked: central minimum at h = 1e-5 (error 1.11e-11), forward at 1e-8
-   (2.97e-9); predicted h_best 1.0e-5 (central) and 2.1e-8 (forward), with
-   eps^(1/3) = 6.1e-6 and eps^(1/2) = 1.5e-8. At h = 1e-16 the central error is
-   1.48e-2 and the forward difference returns 0.
+   The best-width search needs a known true signal, so it reuses the notes
+   page's own construction from the smoothing demo module bundled ahead of this
+   file: CLEAN (a 2 Hz sine at 1 kHz), NOISY (CLEAN plus real accelerometer
+   noise scaled to 0.01), WIDTHS (odd widths 1 to 151) and CURVE (RMS error at
+   each). Everything else is the crash record, test 10642 channel 093,
+   h = 8e-5 s. Checked against the file:
+     raw peak -1540.6 m/s^2 at 10.80 ms; pre-impact sd 2.377
+     9-sample average: peak -968.3, sd 1.204 (half the noise, 37% off the peak)
+     CFC 600 one pass: peak -1391.0 at 11.04 ms; two passes: -1283.8 at 10.80
    Hosts are found by data-fig so a figure can sit under more than one claim. */
 (() => {
   const each = (name, draw) =>
     document.querySelectorAll('[data-fig="' + name + '"] .fig-body').forEach(draw);
-  const X = 1, TRUE = Math.cos(1), EPS = 2.220446049250313e-16;
-  const fwd = h => Math.abs((Math.sin(X + h) - Math.sin(X)) / h - TRUE);
-  const cen = h => Math.abs((Math.sin(X + h) - Math.sin(X - h)) / (2 * h) - TRUE);
-  const hs = logspace(1e-16, 0.1, 301);
-  const opt = {xAxis: true, xLabel: 'step h', xUnit: '', xScale: 1, xLog: true, yLog: true};
+  const any = (...names) => names.some(n => document.querySelector('[data-fig="' + n + '"]'));
 
-  /* truncation, shown: the measured central-difference error at seven steps
-     from 0.1 to 0.001 as dots, and the first dropped term (h^2/6) cos 1 as a
-     dashed line through them. At 0.1: 9.001e-4 measured, 9.005e-4 predicted;
-     by 0.001 they agree to five digits. */
-  each('l11-trunc', host => {
-    const steps = [0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001];
-    const line = logspace(8e-4, 0.12, 60);
-    panel(host, {label: 'error in the central difference of sin x at x = 1', unit: '', height: 280,
-                 ...opt, yClamp: [5e-8, 2e-3]})(
-      Float64Array.from(steps), Float64Array.from(steps.map(cen)), null, [8e-4, 0.12], {
-        dots: true, dotR: 6,
-        curves: [{x: line, y: line.map(h => h * h / 6 * Math.cos(1)), cls: 'ghost'}],
-        marks: [{t: 0.1, y: cen(0.1), text: 'h = 0.1: 9.001×10⁻⁴ measured, 9.005×10⁻⁴ predicted',
-                 dx: -12, dy: 4, anchor: 'end'}]
+  /* what each halving of the noise costs: 1/sqrt(w) against w */
+  each('l12-halving', host => {
+    const ws = linspace(1, 420, 420), f = ws.map(w => 1 / Math.sqrt(w));
+    panel(host, {label: 'noise left, as a fraction', unit: '', height: 260, xAxis: true,
+                 xLabel: 'window width w', xUnit: 'samples', xScale: 1, yClamp: [0, 0.55]})(
+      ws, f, null, [0, 420], {
+        marks: [{t: 25, y: 0.2, cast: 'both', text: 'w = 25: a fifth', dx: 10, dy: -10},
+                {t: 100, y: 0.1, cast: 'both', text: 'w = 100: a tenth', dx: 10, dy: -10},
+                {t: 400, y: 0.05, cast: 'both', text: 'w = 400: a twentieth', dx: -10, dy: -12, anchor: 'end'}]
       });
   });
 
-  /* rounding, shown: below 1e-7 the measured error follows a fixed storage
-     error of about 1e-16 divided by 2h. At 1e-12: 5e-5 predicted, 1.2e-5
-     measured. */
-  each('l11-round', host => {
-    const left = hs.filter(h => h <= 1e-6);
-    panel(host, {label: 'error in the central difference of sin x at x = 1', unit: '', height: 280,
-                 ...opt, yClamp: [1e-14, 0.5]})(hs, hs.map(cen), null, [1e-16, 0.1], {
-      curves: [{x: left, y: left.map(h => 1e-16 / (2 * h)), cls: 'ghost'}],
-      marks: [{t: 1e-12, y: 1e-16 / 2e-12, text: '10⁻¹⁶ ÷ 2h: 5×10⁻⁵ at h = 10⁻¹²', dx: 12, dy: -12}]
+  /* the best width, on the page's sine: error against width, and the noise
+     reduction that keeps improving */
+  const sigma = (() => { let s = 0; for (let i = 0; i < NOISY.length; i++) s += (NOISY[i] - CLEAN[i]) ** 2;
+                         return Math.sqrt(s / NOISY.length); })();
+  const W = Float64Array.from(WIDTHS), E = Float64Array.from(CURVE);
+  const best = Math.min(...CURVE);
+  each('l12-err', host => {
+    panel(host, {label: 'RMS error against the true sine', unit: '', height: 270, xAxis: true,
+                 xLabel: 'window width w', xUnit: 'samples', xScale: 1, yClamp: [0, 0.075]})(
+      W, E, null, [1, 101], {
+        marks: [{t: BESTW, y: best, text: 'smallest at w = ' + BESTW, dx: 10, dy: -12}],
+        hlines: [{y: CURVE[0], cls: 'limit', text: 'no smoothing'}]
+      });
+  });
+  /* on a log axis, so the falling noise is visible beside the error */
+  each('l12-trap', host => {
+    panel(host, {label: 'error and noise left', unit: '', height: 270, xAxis: true,
+                 xLabel: 'window width w', xUnit: 'samples', xScale: 1, yLog: true, yClamp: [5e-4, 0.1]})(
+      W, E, null, [1, 101], {
+        curves: [{x: W, y: W.map(w => sigma / Math.sqrt(w)), cls: 'pred'}],
+        marks: [{t: 101, y: CURVE[WIDTHS.indexOf(101)], text: 'error against the truth', dx: -10, dy: -10, anchor: 'end'},
+                {t: 101, y: sigma / Math.sqrt(101), text: 'noise left, σ/√w', dx: -10, dy: -10, anchor: 'end'}]
+      });
+  });
+
+  /* the peak against width, true value 1 */
+  each('l12-peak', host => {
+    const peaks = WIDTHS.map(w => {
+      const ys = w === 1 ? NOISY : movingAverage(NOISY, w);
+      let p = 0; for (let i = 0; i < ys.length; i++) p = Math.max(p, Math.abs(ys[i])); return p;
     });
-  });
-
-  /* the model: C h^2 falling, eps|f|/h rising, and their sum */
-  each('l11-terms', host => {
-    const C = Math.cos(1) / 6, F = Math.sin(1);
-    const tr = hs.map(h => C * h * h), ro = hs.map(h => EPS * F / h), sum = hs.map((h, i) => tr[i] + ro[i]);
-    const hb = Math.cbrt(EPS * F / (2 * C));
-    panel(host, {label: 'error for sin x at x = 1, from the two terms', unit: '', height: 290, ...opt, yClamp: [1e-14, 0.5]})(
-      hs, sum, null, [1e-16, 0.1], {
-        curves: [{x: hs, y: tr, cls: 'pred'}, {x: hs, y: ro, cls: 'ghost'}],
-        marks: [{t: 1e-3, y: C * 1e-6, text: 'truncation, C h²', dx: 10, dy: 22},
-                {t: 1e-13, y: EPS * F / 1e-13, text: 'rounding, ε|f| / h', dx: 12, dy: 4},
-                {t: hb, y: C * hb * hb + EPS * F / hb, cast: 'x', text: 'the sum is smallest here', dx: 12, dy: -10}]
+    panel(host, {label: 'peak of the smoothed sine', unit: '', height: 270, xAxis: true,
+                 xLabel: 'window width w', xUnit: 'samples', xScale: 1, yClamp: [0.9, 1.04]})(
+      W, Float64Array.from(peaks), null, [1, 151], {
+        hlines: [{y: 1, cls: 'limit', text: 'true peak, 1.0000'}],
+        marks: [{t: 9, y: peaks[WIDTHS.indexOf(9)], text: 'w = 9: ' + peaks[WIDTHS.indexOf(9)].toFixed(4), dx: 10, dy: -10}]
       });
   });
 
-  /* both rules measured: each one's best decade, the slopes of the two
-     truncation branches on the right, and the one rounding branch they share
-     on the left */
-  each('l11-both', host => {
-    panel(host, {label: 'error in the derivative of sin x at x = 1', unit: '', height: 300,
-                 ...opt, yClamp: [1e-14, 0.5]})(hs, hs.map(cen), null, [1e-16, 0.1], {
-      curves: [{x: hs, y: hs.map(fwd), cls: 'pred'}],
-      marks: [{t: 1e-5, y: cen(1e-5), cast: 'x', text: 'central, best near 10⁻⁵', dx: 12, dy: 28},
-              {t: 1e-8, y: fwd(1e-8), cast: 'x', text: 'forward, best near 10⁻⁸', dx: -10, dy: 26, anchor: 'end'},
-              {t: 3e-4, y: cen(3e-4), text: 'central, slope 2', dx: 14, dy: 24},
-              {t: 1e-3, y: fwd(1e-3), text: 'forward, slope 1', dx: -10, dy: -10, anchor: 'end'},
-              {t: 1e-13, y: cen(1e-13), text: 'both rules, slope −1', dx: 12, dy: -12}]
+  if (!any('l12-crash', 'l12-twopass')) return;
+  fetch('data/test10642-crossmember-x.json').then(r => r.json()).then(d => {
+    const H = d.dt, a = Float64Array.from(d.a);
+    const t = Float64Array.from({length: d.n}, (_, i) => d.t0 + i * H);
+    const peakOf = y => { let k = 0; for (let i = 1; i < y.length; i++) if (y[i] < y[k]) k = i; return k; };
+
+    /* the impact spike, raw and after a 9-sample average */
+    each('l12-crash', host => {
+      const s9 = movingAverage(a, 9), kr = peakOf(a), k9 = peakOf(s9);
+      panel(host, {label: 'acceleration', unit: 'm/s²', height: 280, xAxis: true,
+                   xLabel: 'time', xUnit: 'ms', xScale: 1000, yClamp: [-1700, 400]})(
+        t, s9, a, [0.006, 0.016], {
+          marks: [{t: t[kr], y: a[kr], text: 'raw: −1541', dx: 10, dy: 4},
+                  {t: t[k9], y: s9[k9], text: '9-sample average: −968', dx: 10, dy: 4}]
+        });
+    });
+
+    /* one pass of the CFC 600 filter moves the peak late; the backward pass
+       moves it back */
+    each('l12-twopass', host => {
+      const one = cfcOnce(a, 600, H), two = cfc(a, 600, H);
+      const k1 = peakOf(one), k2 = peakOf(two);
+      /* only the zoomed window, so the kit does not thin the curve to every
+         fifth sample */
+      const i0 = Math.floor((0.0095 - d.t0) / H), i1 = Math.ceil((0.0125 - d.t0) / H) + 1;
+      panel(host, {label: 'acceleration', unit: 'm/s²', height: 280, xAxis: true,
+                   xLabel: 'time', xUnit: 'ms', xScale: 1000, yClamp: [-1700, 400]})(
+        t, two, a, [0.0095, 0.0125], {
+          curves: [{x: t.slice(i0, i1), y: one.slice(i0, i1), cls: 'pred'}],
+          marks: [{t: t[k1], y: one[k1], cast: 'x', text: 'one pass: ' + (t[k1] * 1000).toFixed(2) + ' ms', dx: 10, dy: 4},
+                  {t: t[k2], y: two[k2], cast: 'x', text: 'two passes: ' + (t[k2] * 1000).toFixed(2) + ' ms', dx: -10, dy: 4, anchor: 'end'}]
+        });
     });
   });
 })();

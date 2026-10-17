@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lecture 11 — The error minimum in step size</title>
+<title>Lecture 11 — Smoothing</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261015124713">
-<link rel="stylesheet" href="css/demos.css?v=20261015124713">
+<link rel="stylesheet" href="css/blocks.css?v=20261016224447">
+<link rel="stylesheet" href="css/demos.css?v=20261016224447">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -690,179 +690,119 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <section class="deck-slide part">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
-    <p class="say">The best step size for a computed derivative</p>
+    <p class="say">Smoothing a record before differentiating it</p>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>All right, welcome. So in this video I want to pick up from the last two, where we were differentiating records, the basketball and the crash. And in a record the step size h isn't ours to choose. It's the time between samples, 0.04 seconds for the ball, 0.08 milliseconds for the crash, and the noise in the record set how well we could do.</p><p>Now a lot of the time we differentiate something we compute ourselves instead, a formula, or a model, or the output of a program. Then there are no samples, we can evaluate it wherever we like, and h is a choice. So the obvious question is how small to make it, and that's what we'll work out. So let's take a look.</p>">
+<section class="deck-slide full" data-notes="<p>All right, welcome. So in the last video we found that differentiating a record multiplies its noise by one over h times root two, and the fix I mentioned was to take some of the noise out first. So in this video I want to do that, and see what it costs, because it does cost something. So let's take a look.</p><p>Here's the payoff first, on the crash record. Before impact, the central difference had sixteen and a half thousand meters per second cubed of noise. Average each sample with the four on each side first, and that drops to about forty-four hundred. So about a quarter. And it drops more than the acceleration's own noise does, because the fast wiggles that differencing blows up are exactly the ones the average takes out.</p><p>And the cost is on the right. The biggest spike in the record, at the moment of impact, shrinks from 1541 meters per second squared to 968. So we lost more than a third of the peak.</p>">
   <div class="head">
-    <p class="say">For a function we compute, <span class="def">the step size $h$ is ours to choose</span>.</p>
+    <p class="say">Smoothing cuts the noise in a derivative, and <span class="def">it also cuts the peaks</span>.</p>
+    <p class="sub">The crash record, with each sample averaged with the 4 samples on each side.</p>
   </div>
   <div class="stage">
     <div class="pcards c2">
-      <div class="pcard"><span class="tag">measured</span><b>A record</b>
-        <span>$h$ is the time between samples, 0.04&nbsp;s for the ball. The noise sets the limit.</span></div>
-      <div class="pcard gold"><span class="tag">computed</span><b>A function we compute</b>
-        <span>We can evaluate it anywhere, so $h$ is a choice.</span></div>
+      <div class="pcard"><span class="tag">the gain</span><b>16,507 &rarr; 4,434&nbsp;m/s&sup3;</b>
+        <span>The noise in the jerk before impact falls to about a quarter.</span></div>
+      <div class="pcard gold"><span class="tag">the cost</span><b>&minus;1,541 &rarr; &minus;968&nbsp;m/s&sup2;</b>
+        <span>The impact peak loses 37% of its size.</span></div>
     </div>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>So let's try it on a function where we know the answer, so we can measure the error exactly. The derivative of sine at x equals one is cosine of one, and we'll take the central difference and move the step around with this slider.</p><p>Now on the left I've taken sine and subtracted its tangent line at one. Why do that? Well, the tangent line has the slope we want, so whatever is left over is what the formula has to deal with. And the red chord joins the two samples the central difference uses, so its slope is exactly the error. On the right is that error for every step, and both axes are log scales, and the circle is wherever the slider is.</p><p>So let's start big, h equals one. The curve is lopsided, the chord tilts, and the error is almost a tenth. Now make h smaller. The chord levels out and the circle slides down the right-hand branch, just like the order said it would, a hundred times less error for every ten times smaller step.</p><p>And somewhere around ten to the minus five that stops. Keep going, let's say to ten to the minus nine, and the thing on the left isn't a curve anymore. It's a sawtooth about ten to the minus sixteen from top to bottom, and that's more or less the last digit of every sine the computer stored. The chord tilts with the sawtooth, and the error is back up to three times ten to the minus nine. Those sharp dips on the right are steps where the two samples happen to land at the same height on the sawtooth, so that's just luck, and we can't really count on it.</p><p>So for sine, smaller is better only down to about ten to the minus five. So in this video I want to look at why there's a turning point at all, and how we might find it.</p>">
-  <div class="head">
-    <p class="say">For $\sin x$ at $x = 1$, steps below about $10^{-5}$ <span class="def">make the error larger</span>.</p>
-    <p class="sub">Left: $\sin x$ with its tangent line at $x = 1$ taken away. The red chord&rsquo;s slope is the error.</p>
-  </div>
-  <div class="stage">
-    <!-- the step slider: sin x less its tangent (the chord's slope is the error), and the error at every step -->
-    <style>.deck-slide cg-demo[case="step"] .cgd-plots{display:grid; grid-template-columns:1fr 1fr; gap:1.2vw}</style>
-    <cg-demo case="step" set="lg=-1"></cg-demo>
   </div>
 </section>
 
 <section class="deck-slide part">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
-    <p class="say">Truncation error, from the formula</p>
+    <p class="say">The moving average</p>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Okay. So there are two errors here, and they sort of pull in opposite directions. And we already have the first one, from lecture nine. When we subtracted the two Taylor expansions, the even powers cancelled, and dividing by 2h left the derivative plus h squared over six times f triple prime, plus smaller terms.</p><p>So the formula keeps the derivative and throws the rest away. What we call that is truncation error, the error we'd still have on a machine that kept every digit. It's there because the formula is an abbreviation, and truncated is literal, the error is the bit we cut off.</p>">
+<section class="deck-slide full" data-notes="<p>Okay. So the simplest smoother there is, is what we call a moving average. We replace every sample by the mean of the w samples centered on it, w for the width of the window. So with a width of nine, each sample becomes the average of itself and the four on each side.</p><p>That's it, that's the whole idea. And two things follow from it, and they pull against each other.</p>">
   <div class="head">
-    <p class="say">From lecture 9, the central difference is the derivative <span class="def">plus a truncation error</span>.</p>
+    <p class="say">A <span class="term">moving average</span> replaces each sample by <span class="def">the mean of the $w$ samples around it</span>.</p>
   </div>
   <div class="stage">
     <div class="work">
-      $$\frac{f(x+h) - f(x-h)}{2h} \;=\; \underbrace{f'(x)}_{\text{kept}} \;+\; \underbrace{\textcolor{#8A6508}{\tfrac{h^2}{6}f'''(x) + \dots}}_{\text{truncated}}$$
+      $$\tilde y_i \;=\; \frac{1}{w}\sum_{k=-(w-1)/2}^{(w-1)/2} y_{i+k} \qquad\qquad w = 9:\quad \tilde y_i = \frac{y_{i-4} + \dots + y_i + \dots + y_{i+4}}{9}$$
     </div>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>And I like this next bit, because it's a prediction we can actually check. For sine, the third derivative is minus cosine, so the first term we threw away is h squared over six times cosine of one.</p><p>The dots are the measured errors of the central difference at seven step sizes, from a tenth down to a thousandth. And the dashed line is that first dropped term. And they sit right on it. At a tenth, the measured error is 9.001 times ten to the minus four, and the dropped term says 9.005. Further down they agree to four or five digits.</p><p>And on its own, truncation says one thing to us, make h as small as you possibly can.</p>">
+<section class="deck-slide full" data-notes="<p>So the first one. Averaging w independent values, each with standard deviation sigma, gives a value with standard deviation sigma over root w, at least if the samples are independent. That's the same square root we met in week three when we were accumulating, only this time we're using it on purpose.</p><p>And that square root is what makes this expensive. A window of 25 leaves a fifth of the noise, because root 25 is 5. Say we want half that, a tenth. We need root w to double, so w goes up four times, to 100. And the halving after that costs a window of 400. So each halving costs four times the width of the one before.</p>">
   <div class="head">
-    <p class="say">The first dropped term <span class="def">predicts the measured error</span>.</p>
-    <p class="sub">Dots: measured error. Dashed: $\tfrac{h^2}{6}\cos 1$, the first dropped term for $\sin x$.</p>
+    <p class="say">For independent samples, each halving of the noise costs <span class="def">four times the width</span>.</p>
+    <p class="sub">Averaging $w$ independent samples leaves noise $\sigma/\sqrt{w}$.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="l11-trunc"><div class="fig-body"></div></figure>
+    <figure class="figure wide" data-fig="l12-halving"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So the second thing, and this is the one that hurts. The signal goes down too.</p><p>The average of a curve over a window isn't the value at the center, unless the curve happens to be straight there. So wherever it bends, and that's at every peak and every trough, the average gets pulled toward the surroundings, and the peak comes out lower than it really is.</p><p>So think about a temperature record. Smooth a year of daily temperatures over a month, and we take out all the daily jitter. And we also take out the night it froze, which might have been the only thing anybody wanted to know, and the smoothed curve probably won't show it.</p>">
+  <div class="head">
+    <p class="say">Averaging usually lowers a peak <span class="def">toward the values around it</span>.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide legible" id="fig-month"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>And here's that happening on the crash record, zoomed in on the impact. The grey dashed line is the raw record, and the solid line is the 9-sample average.</p><p>Nine samples is only 0.72 milliseconds, which sounds tiny. But the spike at impact is about that narrow, so the average spreads it over its neighbors. The raw peak is minus 1541, and the average comes out at minus 968.</p><p>And the noise before impact went from 2.377 down to 1.204, so about half. Root nine would say a third, but these samples aren't independent, that's the correlation from lecture ten again, so the average takes out less.</p>">
+  <div class="head">
+    <p class="say">A 9-sample average roughly halves the noise and <span class="def">cuts the crash peak by 37%</span>.</p>
+    <p class="sub">Half and not a third (as $\sqrt{9}$ would give), because neighboring samples are correlated.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l12-crash"><div class="fig-body"></div></figure>
   </div>
 </section>
 
 <section class="deck-slide part">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
-    <p class="say">Rounding error, from the machine</p>
+    <p class="say">The best window width</p>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Right. The second error is the one that bites, and what we call it is rounding error. And I want to start with a cat.</p><p>Let's say we want to weigh the cat, and the cat will not sit on the scale. So we weigh ourselves, 70.4 kilos, then we pick up the cat and weigh again, 74.9, and subtract. The cat is 4.5 kilos. Now the scale reads to a tenth of a kilo, so each weighing had three good digits in it, and the answer has two. Nothing went wrong. We just subtracted two numbers that were nearly the same, and the 7 they shared at the front cancelled out.</p><p>And it gets worse the smaller the thing we're weighing. Let's say it's the hamster. Seventy point four, then seventy point five, so the hamster is a tenth of a kilo. But each reading could be off by up to five hundredths, so that tenth could really be anything from about nothing to two tenths. One digit, and we can't trust it.</p><p>And the mouse is twenty grams. So both weighings read 70.4, and the mouse comes out at exactly zero. Everything cancelled.</p><p>And keep the mouse in mind, because we're going to see the computer do exactly that.</p>">
+<section class="deck-slide full" data-notes="<p>Right, so is there a best width? To measure that we need to know the true signal, which the crash record can't tell us. So this is a constructed signal, a 2 hertz sine wave, amplitude one, sampled at a kilohertz. And the noise on it is real, it's the accelerometer noise from the crash record, scaled to a standard deviation of 0.01.</p><p>We smooth it at every odd width and compare against the clean sine, using the typical size of the error across the whole record, what we call the RMS error, the root of the mean squared difference. And the error falls, it reaches a minimum at a width of nine, and then it climbs. By a width of 101 it's about seven times worse than not smoothing at all.</p>">
   <div class="head">
-    <p class="say">The closer the two weighings, <span class="def">the less of the answer survives</span>.</p>
-    <p class="sub">A bathroom scale that reads to 0.1&nbsp;kg.</p>
+    <p class="say">Against a known signal, the error is <span class="def">smallest at $w = 9$</span>.</p>
+    <p class="sub">A 2&nbsp;Hz sine sampled at 1,000&nbsp;Hz, carrying real accelerometer noise scaled to $\sigma = 0.01$.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l12-err"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Now the trap, and I'd really like us to see this one. This plot has a log scale going up, so the small numbers show. The red dotted line is what sigma over root w would leave if the samples were independent. And it keeps falling. Every wider window removes more noise, all the way out.</p><p>So the thing we chose smoothing for keeps getting better, while the thing we actually wanted, the error against the truth, turns around at nine and gets worse. And somebody watching the plot of the smoothed record just sees it getting smoother, so it kind of looks like progress.</p>">
+  <div class="head">
+    <p class="say">The noise keeps falling while <span class="def">the error turns back up</span>.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l12-trap"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>And this is where the damage lands. This is the peak of the smoothed sine, and the true peak is exactly one.</p><p>It just falls as the window widens. At nine it's 1.0014, a little high because of the noise. And it crosses the true value between 13 and 15, and that's a coincidence of this signal and this noise, it's not a width to choose. By 101 it's 0.93.</p>">
+  <div class="head">
+    <p class="say">The peak falls <span class="def">with every widening</span>.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l12-peak"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Okay, so that gives us this. The whole-record error is smallest at nine, and the peak is closest to the truth a bit wider, around thirteen, where it happens to cross one. Going wider takes out a bit more noise everywhere and flattens the peak a bit more, and across the whole record the flattening wins, while right at the peak the two happen to cancel. And that crossing is luck, so I wouldn't lean on it.</p><p>So there's probably no best width on its own. It depends on what we're going to report. So we pick the width for the number we report, and we say which one we picked.</p>">
+  <div class="head">
+    <p class="say">The best width depends on <span class="def">the quantity you report</span>.</p>
   </div>
   <div class="stage">
     <div class="pcards c3">
-      <div class="pcard"><span class="tag">74.9 &minus; 70.4</span><b>Cat: 4.5&nbsp;kg</b>
-        <span>Two digits survive.</span></div>
-      <div class="pcard"><span class="tag">70.5 &minus; 70.4</span><b>Hamster: 0.1&nbsp;kg</b>
-        <span>One digit, and either reading could be off by 0.05.</span></div>
-      <div class="pcard gold"><span class="tag">70.4 &minus; 70.4</span><b>Mouse: 0.0&nbsp;kg</b>
-        <span>A 20&nbsp;g mouse vanishes. Nothing survives.</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>And the computer does exactly the same thing, just with more digits. A double, that's the standard number in Python and MATLAB, holds about sixteen significant digits.</p><p>So here's our central difference at h equals ten to the minus twelve, with every digit printed. Sine of one plus h and sine of one minus h. And the grey part, the first eleven digits after the point, is the same in both. So when we subtract, all of that cancels, just like the 70 on the scale, and what's left comes from the last few digits.</p><p>And the subtraction itself is exact. The trouble is that each sine was already rounded to sixteen digits when it was stored, and those last digits are exactly where that rounding lives. So the difference is mostly rounding.</p><p>Divide by 2h and we get 0.54029. The true answer is 0.54030. So out of all those digits, only three of the answer are right.</p>">
-  <div class="head">
-    <p class="say">At $h = 10^{-12}$ the derivative keeps <span class="def">only 3 correct digits</span>.</p>
-    <p class="sub">A <code class="ide">double</code> (the standard number in Python and MATLAB) keeps about 16 significant digits.</p>
-  </div>
-  <div class="stage">
-    <!-- the type name set as an editor would show it -->
-    <style>.deck-slide code.ide{font:500 .92em/1 Consolas,"Cascadia Code","Courier New",monospace; color:#0000ff;
-      background:#f5f5f5; border:1px solid #e3e3e3; border-radius:4px; padding:.08em .3em}</style>
-    <div class="work" style="font-size:calc(var(--stage-text) * .8)">
-      $$\begin{aligned}
-      \sin(1+h) &= 0.\textcolor{#b9b0a0}{84147098480}843685\\
-      \sin(1-h) &= 0.\textcolor{#b9b0a0}{84147098480}735627\\[4pt]
-      \text{difference} &= 0.000000000001080580\\[4pt]
-      \text{difference} \div 2h &= \textcolor{#8A6508}{0.54029}00\ldots \qquad \cos 1 = 0.5403023\ldots
-      \end{aligned}$$
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>So let's put a number on that rounding. Each stored sine is off by about ten to the minus sixteen, that's sixteen digits on a number near one, and what we call that precision is machine epsilon, epsilon for short, 2.2 times ten to the minus sixteen.</p><p>Now that error doesn't get smaller when h does. It's set by the size of the sines, not by the step. But the formula divides it by 2h. So at ten to the minus twelve, ten to the minus sixteen over 2 times ten to the minus twelve is 5 times ten to the minus five. And the measured error there is 1.2 times ten to the minus five, so the same size, a little smaller because the rounding doesn't always land the worst way.</p><p>And that's the dashed line on the plot, ten to the minus sixteen over 2h. The measured errors on the left follow it, and every time h gets ten times smaller, the error gets ten times bigger.</p>">
-  <div class="head">
-    <p class="say">A fixed storage error divided by $2h$ <span class="def">grows as $h$ shrinks</span>.</p>
-    <p class="sub">Each stored sine is off by about $10^{-16}$, whatever the step.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="l11-round"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide part">
-  <div class="head">
-    <p class="course">Computational Physical Modeling</p>
-    <p class="say">The step size that makes the total error smallest</p>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>Okay. So now we can write the two together. The total error, I'm going to call it E, is roughly C h squared, that's truncation, where C is the h squared over six times f triple prime from before, so for sine at one it's a sixth of cosine of one. Plus epsilon times the size of f over h, that's rounding.</p><p>This plot is those two terms for sine at x equals one. Truncation is the red dotted line, falling as h gets smaller. Rounding is the grey dashed one, rising as h gets smaller. And their sum, the solid curve, has a minimum somewhere in between, roughly where the two lines cross.</p><p>And any smooth function we compute gives the same V shape. Its own constants just slide the two lines up or down, which moves where the bottom is.</p>">
-  <div class="head">
-    <p class="say">The total error is truncation <span class="def">plus rounding</span>, so it has a minimum.</p>
-    <p class="sub">Drawn for $\sin x$ at $x = 1$. Other functions shift the two lines.</p>
-  </div>
-  <div class="stage">
-    <div class="work" style="font-size:calc(var(--stage-text) * .7)">
-      $$E(h) \;\approx\; \underbrace{C h^2}_{\text{truncation}} \;+\; \underbrace{\frac{\varepsilon |f|}{h}}_{\text{rounding}}$$
-    </div>
-    <figure class="figure wide" data-fig="l11-terms"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>So how do we find the bottom of that curve? Well, at the bottom the curve is flat for a moment, its slope is zero. So we take the derivative of E with respect to h, and set it to zero. This is the same move you used in calculus to find the lowest point of any curve.</p><p>And we do it one term at a time. The first term is C h squared, so its derivative is 2 C h. The second one is epsilon f times h to the minus one, so by the power rule its derivative is minus one times epsilon f times h to the minus two. That's the minus sign and the h squared on the bottom.</p>">
-  <div class="head">
-    <p class="say">At the minimum, <span class="def">the slope of $E$ is zero</span>.</p>
-    <p class="sub">Differentiate each term with the power rule.</p>
-  </div>
-  <div class="stage">
-    <div class="work">
-      $$\begin{aligned}
-      E(h) &= C h^2 \;+\; \varepsilon|f|\,h^{-1}\\[6pt]
-      \frac{dE}{dh} &= 2Ch \;-\; \varepsilon|f|\,h^{-2} \;=\; \textcolor{#8A6508}{2Ch - \frac{\varepsilon|f|}{h^2}}
-      \end{aligned}$$
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>Now set that to zero. That says the two terms balance, 2 C h equals epsilon f over h squared.</p><p>Multiply both sides by h squared to get the h's together, and we get 2 C h cubed equals epsilon f. Divide by 2C, and h cubed is epsilon f over 2C. And take the cube root of both sides, and that's the best step.</p><p>So the best step is the cube root of a small number, and that's maybe the main thing to take away. Epsilon is the only really small thing in there, so the best step goes as the cube root of epsilon.</p>">
-  <div class="head">
-    <p class="say">Setting the slope to zero and solving <span class="def">gives the best step</span>.</p>
-  </div>
-  <div class="stage">
-    <div class="work">
-      $$\begin{aligned}
-      2Ch &= \frac{\varepsilon|f|}{h^2} &&\text{the two terms balance}\\[6pt]
-      2C\,h^3 &= \varepsilon|f| &&\text{multiply both sides by } h^2\\[6pt]
-      h_{\text{best}} &= \textcolor{#8A6508}{\left(\frac{\varepsilon|f|}{2C}\right)^{1/3}} &&\text{divide by } 2C\text{, take the cube root}
-      \end{aligned}$$
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>So let's put the numbers in for sine at x equals one, one at a time.</p><p>C is a sixth of cosine of one, which is 0.0901. The size of f is sine of one, 0.841. Epsilon is 2.2 times ten to the minus sixteen, so epsilon times f is 1.87 times ten to the minus sixteen. Two C is 0.180. So the ratio is 1.04 times ten to the minus fifteen.</p><p>And the cube root of that is 1.0 times ten to the minus five. Which is right where the curve turned around at the start.</p>">
-  <div class="head">
-    <p class="say">For $\sin x$ at $x = 1$, the best step size is <span class="def">about $10^{-5}$</span>.</p>
-  </div>
-  <div class="stage">
-    <div class="work" style="font-size:calc(var(--stage-text) * .85)">
-      $$\begin{aligned}
-      C &= \tfrac{1}{6}\cos 1 = 0.0901 & |f| &= \sin 1 = 0.841\\[6pt]
-      \varepsilon|f| &= (2.2\times10^{-16})(0.841) = 1.87\times10^{-16} & 2C &= 0.180\\[6pt]
-      \frac{\varepsilon|f|}{2C} &= 1.04\times10^{-15} & h_{\text{best}} &= (1.04\times10^{-15})^{1/3} = \textcolor{#8A6508}{1.0\times10^{-5}}
-      \end{aligned}$$
+      <div class="pcard"><span class="tag">the whole trace</span><b>$w = 9$</b>
+        <span>Smallest RMS error against the true sine.</span></div>
+      <div class="pcard"><span class="tag">the peak only</span><b>A little wider</b>
+        <span>Near $w = 13$ the peak reads 1.0001, though that crossing is luck.</span></div>
+      <div class="pcard gold"><span class="tag">always</span><b>Report both</b>
+        <span>Give the width and the quantity it was chosen for.</span></div>
     </div>
   </div>
 </section>
@@ -870,32 +810,70 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <section class="deck-slide part">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
-    <p class="say">Both rules, measured</p>
+    <p class="say">The filter in the crash test standard</p>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So let's go and measure it for both rules. Same sine, same point. The solid line is the central difference and the red dotted line is the forward difference.</p><p>The forward difference has its best step at about ten to the minus eight. The same argument for it gives a square root instead of a cube root, because its truncation error goes as h and not h squared, and that predicts about 2 times ten to the minus eight. And the central difference has its best step at about ten to the minus five, where we predicted 1.0 times ten to the minus five. So both land within about a factor of two, which is what an argument like this is good for.</p><p>Now read the plot from the right. Over there truncation is in charge. The central branch has slope two, so a factor of ten in h is a factor of a hundred in error, and the forward branch has slope one.</p><p>And over on the left, rounding is in charge, and the error goes as one over h, slope minus one. That left-hand branch is very nearly the same line for both rules. So it looks like that comes from the arithmetic, whichever formula we use, because the rounding left after the subtraction is about epsilon times the size of f either way. A better formula moves the right-hand branch down and the minimum to the right, and it probably can't do much for us on the left.</p><p>And remember the mouse. Go all the way down to ten to the minus sixteen and the forward difference returns exactly zero, because one plus ten to the minus sixteen rounds back to exactly one. Both weighings came out the same, and the answer vanished.</p>">
+<section class="deck-slide full" data-notes="<p>Okay. Now everything so far specified a smoother by its width, average nine samples. Measurement standards do it the other way round, by frequency. Keep what's slower than about 180 wiggles a second close to full size, and cut down what's a lot faster. The standard calls that 180 the channel frequency class, CFC 180 for short. And there are two reasons for doing it by frequency, and both of them matter for the assignment.</p><p>First, the physics usually comes to us as a rate. What we want to keep is whatever the thing we're measuring responds to, say the crash dummy's chest, and that's a rate. There's no number of samples that means that.</p><p>And second, a width doesn't travel. Nine samples is 0.72 milliseconds at twelve and a half kilohertz, and it's 9 milliseconds at one kilohertz. So the same code does two different things to two recordings of the same event. But a cut around 180 hertz means the same thing on both.</p>">
   <div class="head">
-    <p class="say">Each rule&rsquo;s best step is near its prediction, and below it <span class="def">both rise together as $1/h$</span>.</p>
-    <p class="sub">Predicted: about 2&times;10&#8315;&#8312; for forward, 1.0&times;10&#8315;&#8309; for central.</p>
+    <p class="say">A standard names its filter <span class="def">by frequency</span>.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="l11-both"><div class="fig-body"></div></figure>
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">the physics</span><b>Stated as a rate</b>
+        <span>A body responds to how fast a load changes, so the filter is given in hertz.</span></div>
+      <div class="pcard"><span class="tag">across records</span><b>A width in samples</b>
+        <span>Nine samples is 0.72&nbsp;ms at 12,500&nbsp;Hz and 9&nbsp;ms at 1,000&nbsp;Hz.</span></div>
+    </div>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So here's what to do with a function we compute.</p><p>So the first thing I'd do is estimate the best step. It depends on epsilon, the size of the function and its third derivative, and none of that needs any data. So we can work it out before we've computed anything, at least roughly.</p><p>Prefer the higher-order rule. At their best, the central difference is about 270 times more accurate than the forward difference, for the same two evaluations of the function.</p><p>And then check the step. Halve h and watch the answer. For the central difference, while the change keeps shrinking by about four each time, we're on the truncation branch and still winning. When it stops shrinking and starts jumping around, we've gone past the minimum, so use the step before.</p><p>And for a record, most of this doesn't really apply, because h is fixed by the sampling and the noise sets the limit.</p><p>So hopefully that gives you an idea why the best step isn't the smallest one. And in the next two videos we'll look at what we can do about the noise in a record. Thanks a lot for watching and we'll see you in the next video.</p>">
+<section class="deck-slide full" data-notes="<p>So the crash standard, SAE J211, asks for a particular filter, what we call a Butterworth low-pass. Low-pass means it keeps the slow content and cuts down the fast. Butterworth is a family that keeps the content well below the class very close to its true size. One pass of it is what we call a two-pole filter, and running it forward and then back, which we'll see in a minute, makes it four-pole, and the poles are how steeply it cuts.</p><p>And the shape of the arithmetic is different from a moving average. Each output comes from the newest few inputs and from the last two outputs it already produced, so it feeds its own results back in. That gets a sharp cut-off from five numbers, where a moving average would need maybe hundreds.</p><p>And those five coefficients come from the class and the sample interval, and from nothing else. The formulas are on the notes page. Deriving them is filter design and it's outside this course, but using them isn't. And two people who implement it correctly get identical output, which is probably the main reason for putting a filter in a standard.</p>">
   <div class="head">
-    <p class="say">Estimate the best step size, then <span class="def">check it by halving $h$</span>.</p>
+    <p class="say">The SAE J211 filter <span class="def">reuses its own previous outputs</span>.</p>
+    <p class="sub">Five coefficients, set only by the filter class and the sample interval.</p>
+  </div>
+  <div class="stage">
+    <div class="work">
+      $$y_i \;=\; a_0 x_i + a_1 x_{i-1} + a_2 x_{i-2} \;+\; \textcolor{#8A6508}{b_1 y_{i-1} + b_2 y_{i-2}}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>And there's a check I'd use every time, because five coefficients and two feedback terms leave a lot of room for a sign error, and a wrong filter usually still produces a plausible-looking curve.</p><p>Feed the filter a constant. A low-pass filter has to pass a constant through unchanged, because a constant has no fast content to remove. So filter an array of ones, and we should get ones back.</p><p>In terms of the coefficients, that says a-nought plus a-one plus a-two, over one minus b-one minus b-two, equals one. For the classes on this record it comes out within about two parts in ten to the fourteen, so compare against one with a tolerance, not with equality.</p>">
+  <div class="head">
+    <p class="say">A low-pass filter must <span class="def">pass a constant unchanged</span>.</p>
+    <p class="sub">Filter an array of 1.0, and (once it settles) 1.0 should come back.</p>
+  </div>
+  <div class="stage">
+    <div class="work">
+      $$\frac{a_0 + a_1 + a_2}{1 - b_1 - b_2} \;=\; \textcolor{#8A6508}{1}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Now one pass of that filter delays the signal, and the delay is the whole of the next video. Here it is on the crash record at class 600. The grey dashed line is the raw record. The red dotted line is one pass, and its peak lands at 11.04 milliseconds instead of 10.80.</p><p>The standard's answer is to run the filter forward over the record, then run it again backward over its own output. The backward pass delays by the same amount in the other direction, so the two cancel, and the solid line's peak is back at 10.80.</p><p>And the cost is that the result isn't what we call causal any more. A causal filter only uses the past. A value at 11 milliseconds now depends on samples recorded after it. That's fine for a record that's already on disk, and impossible for an airbag computer that has to decide during the crash.</p>">
+  <div class="head">
+    <p class="say">A second, backward pass <span class="def">cancels the first pass&rsquo;s delay</span>.</p>
+    <p class="sub">The crash record at filter class 600.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l12-twopass"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>And one last constraint. The class you ask for and the rate you recorded at aren't independent. A filter that keeps everything below some frequency is a promise about content at that frequency, and a record can't make that promise above half its sample rate, which is the Nyquist limit from week two.</p><p>The coefficient formulas enforce that by themselves. At a sample rate below about 4.16 times the class, they break down and the output stops being a smoothed version of anything. Why four and not two? Well, the filter is built around a frequency about twice the class, and that has to stay under half the sample rate. So class 1000 needs at least about 4,155 samples a second, and class 180 needs about 748.</p><p>Our crash channel is recorded at 12,500, so every class in the standard is available. But that stops being true the moment we throw samples away. Downsample the record to 1 kilohertz and class 180 still works, and class 1000 can't be built at all.</p><p>So hopefully that gives you a feel for what smoothing buys and what it costs. In the next video we look at the delay a single pass introduces, and why it can quietly move the answer. Thanks a lot for watching and we'll see you in the next video.</p>">
+  <div class="head">
+    <p class="say">A filter class (CFC, named in hertz) needs a sample rate <span class="def">above about 4.16 times the class</span>.</p>
   </div>
   <div class="stage">
     <div class="pcards c3">
-      <div class="pcard"><span class="tag">estimate</span><b>Before computing</b>
-        <span>The best step depends on $\varepsilon$ and the function, not on data, so it can usually be worked out first.</span></div>
-      <div class="pcard"><span class="tag">prefer</span><b>The central difference</b>
-        <span>At its best it is roughly 270 times more accurate than the forward difference at its best.</span></div>
-      <div class="pcard gold"><span class="tag">do</span><b>Halve $h$ and watch</b>
-        <span>For central, the change between halvings shrinks about 4 times. When it stops shrinking, use the previous $h$.</span></div>
+      <div class="pcard"><span class="tag">class 1000</span><b>At least 4,155&nbsp;Hz</b>
+        <span>Below that, the coefficient formulas break down.</span></div>
+      <div class="pcard"><span class="tag">class 180</span><b>At least 748&nbsp;Hz</b>
+        <span>A record downsampled to 1,000&nbsp;Hz still supports it.</span></div>
+      <div class="pcard gold"><span class="tag">our record</span><b>12,500&nbsp;Hz</b>
+        <span>Every class in the standard is available on it.</span></div>
     </div>
   </div>
 </section>
@@ -907,6 +885,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <div class="deck-notes"></div>
 
 
-<script type="module" src="js/bundle/lecture-11.js?v=20261015124713"></script>
+<script type="module" src="js/bundle/lecture-11.js?v=20261016224447"></script>
 </body>
 </html>

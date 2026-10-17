@@ -1104,7 +1104,7 @@ mountDemo({
               'reports values the pipeline actually produced.'
             : (usePct && Math.abs(inside / n - lvl) < 0.02
                 ? 'A percentile interval contains the stated fraction of the draws by ' +
-                  'construction. That is not evidence that it covers the truth — page 33 ' +
+                  'construction. That is not evidence that it covers the truth — page 32 ' +
                   'checks that separately.'
                 : (!usePct
                     ? 'Stated as ' + lvlName + ', this interval actually contains ' +

@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Week 4, Noise and Filtering — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261015124713">
-  <link rel="stylesheet" href="css/demos.css?v=20261015124713">
+  <link rel="stylesheet" href="css/blocks.css?v=20261016224447">
+  <link rel="stylesheet" href="css/demos.css?v=20261016224447">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -840,9 +840,6 @@
           <a href="differentiation-amplifies-noise.html">Amplified noise</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="the-error-minimum.html">The error minimum</a>
-        
-          <span class="site-nav-sep">·</span>
           <a href="smoothing.html">Smoothing</a>
         
           <span class="site-nav-sep">·</span>
@@ -910,14 +907,13 @@
     <div class="eyebrow">Week 4 · Noise and Filtering</div>
 <h1>Week 4, Noise and Filtering</h1>
 
-<p>Differentiation is integration run backwards. Integration averages noise down, and differencing amplifies it. This week covers the amplification, the step size that balances it against truncation error, and smoothing as the usual response. It closes on the filter that SAE J211 requires for crash data, which is where the course first meets a decision that a standard has already made.</p>
+<p>Differentiation is integration run backwards. Integration averages noise down, and differencing amplifies it. This week covers the amplification, and smoothing as the usual response. It closes on the filter that SAE J211 requires for crash data, which is where the course first meets a decision that a standard has already made.</p>
 
 <h2 id="learning-objectives">Learning Objectives</h2>
 
 <ul>
   <li>Estimate a derivative by forward, backward and central differences, and state the order of each.</li>
   <li>Predict how much a given level of noise is amplified by differencing at a given step.</li>
-  <li>Find the step size that minimises the total error, and recognise both branches on a log-log plot.</li>
   <li>Apply the filter SAE J211 specifies for a channel, and say why the standard specifies that one.</li>
   <li>Explain why the filter is run forward and backward, and what running it once would cost.</li>
 </ul>
@@ -930,10 +926,9 @@
   <tr><th>#</th><th>Page</th><th>Summary</th></tr>
   <tr><td>9</td><td><a href="finite-differences.html">Finite differences</a></td><td>Forward, backward and central, and what each costs in accuracy</td></tr>
   <tr><td>10</td><td><a href="differentiation-amplifies-noise.html">Differentiation amplifies noise</a></td><td>Dividing by the step multiplies whatever noise survived the subtraction</td></tr>
-  <tr><td>11</td><td><a href="the-error-minimum.html">The error minimum in step size</a> <span title="the week's anchor">&#9733;</span></td><td>Truncation falls and rounding rises, so the best step is not the smallest</td></tr>
-  <tr><td>12</td><td><a href="smoothing.html">Smoothing</a></td><td>Averaging the noise down and the signal with it</td></tr>
-  <tr><td>13</td><td><a href="phase-lag.html">Phase lag</a></td><td>A filter run once moves every event later and says nothing about it</td></tr>
-  <tr><td>14</td><td><a href="why-a-standard-exists.html">The filter class is part of the measurement</a> <span title="the week's anchor">&#9733;</span></td><td>Where the disagreement comes from, and what SAE J211 settles</td></tr>
+  <tr><td>11</td><td><a href="smoothing.html">Smoothing</a></td><td>Averaging the noise down and the signal with it</td></tr>
+  <tr><td>12</td><td><a href="phase-lag.html">Phase lag</a></td><td>A filter run once moves every event later and says nothing about it</td></tr>
+  <tr><td>13</td><td><a href="why-a-standard-exists.html">The filter class is part of the measurement</a> <span title="the week's anchor">&#9733;</span></td><td>Where the disagreement comes from, and what SAE J211 settles</td></tr>
 </table>
 
 <h2 id="videos">Videos</h2>
@@ -971,7 +966,7 @@ example pack, each in a different style.</p>
 
   
 
-  <script src="js/page.js?v=20261015124713"></script>
+  <script src="js/page.js?v=20261016224447"></script>
 
   <footer class="site-footer">
     <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-16">October 16, 2026</time>.</span>

@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Solving the normal equations — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261015124713">
-  <link rel="stylesheet" href="css/demos.css?v=20261015124713">
+  <link rel="stylesheet" href="css/blocks.css?v=20261016224447">
+  <link rel="stylesheet" href="css/demos.css?v=20261016224447">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -986,7 +986,7 @@ does it by default and does not ask.</p>
 
 <h2 id="limits-of-the-closed-form">Limits of the Closed Form</h2>
 
-<p>Page 17 lists what a linear-in-parameters model buys: no starting guess, no iteration, no
+<p>Page 16 lists what a linear-in-parameters model buys: no starting guess, no iteration, no
 convergence to check, and the global minimum. All of that is true, and all of it is about the
 <em>search</em>. The solve that follows the search has a failure mode of its own. A matrix is
 <strong>ill-conditioned</strong> when small changes in its entries produce large changes in the
@@ -1062,9 +1062,9 @@ was for.</p>
   <li><strong>Reading values off the curve, inside the data.</strong> Robust. Interpolating a
   calibration at 340&nbsp;&deg;C survives conditioning that has destroyed the coefficients.</li>
   <li><strong>Reporting or interpreting a coefficient.</strong> Fragile, and this is usually the
-  point, because page 15 says the parameters are what the model <em>means</em>. A fitted gravity, a decay constant and a stiffness are all coefficients, and they go first.</li>
+  point, because page 14 says the parameters are what the model <em>means</em>. A fitted gravity, a decay constant and a stiffness are all coefficients, and they go first.</li>
   <li><strong>Evaluating outside the data.</strong> Worst of all, because extrapolation is where
-  the near-cancelling directions stop cancelling, and page 34 shows what distance does to an
+  the near-cancelling directions stop cancelling, and page 33 shows what distance does to an
   error in a coefficient.</li>
 </ul>
 
@@ -1108,10 +1108,10 @@ second method.</p>
   ask.</li>
   <li><strong>Keep the degree low.</strong> Most of the conditioning problem is a symptom of
   asking
-  for more parameters than the data supports, which page 36 shows is also a modelling
+  for more parameters than the data supports, which page 35 shows is also a modelling
   mistake.</li>
   <li><strong>Check by substitution.</strong> Put the coefficients back and compute
-  $A^{\!\top}\!Ac - A^{\!\top}\!y$. It is cheap, and a large result is proof of trouble, though a small one is not proof of its absence, for the reason page 20 gives.</li>
+  $A^{\!\top}\!Ac - A^{\!\top}\!y$. It is cheap, and a large result is proof of trouble, though a small one is not proof of its absence, for the reason page 19 gives.</li>
 </ol>
 
 <div class="check">
@@ -1134,7 +1134,7 @@ in order of effort:</p>
      them.</li>
      <li><strong>Ask whether you need that many parameters.</strong> A condition number of
      10&#8313; on a polynomial fit usually means the degree is higher than the data supports,
-     which page 36 shows is a modelling problem before it is an arithmetic one.</li>
+     which page 35 shows is a modelling problem before it is an arithmetic one.</li>
      </ol>
      <p>And report the digits you have and not the digits the computer printed. Sixteen were returned.
 Seven were earned.</p></div></details></li>
@@ -1195,11 +1195,11 @@ error outside it reported separately.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/solving-the-normal-equations.js?v=20261015124713"></script>
+  <script type="module" src="js/bundle/solving-the-normal-equations.js?v=20261016224447"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-09-23">September 23, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-16">October 16, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

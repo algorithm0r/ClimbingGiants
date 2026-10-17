@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Order of accuracy, measured — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261015124713">
-  <link rel="stylesheet" href="css/demos.css?v=20261015124713">
+  <link rel="stylesheet" href="css/blocks.css?v=20261016224447">
+  <link rel="stylesheet" href="css/demos.css?v=20261016224447">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -1022,16 +1022,12 @@ can read off a run without knowing what the run contains. The first ratio coming
 against a promised 4.0 is worth noticing and not worth worrying about, because it is the
 coarsest step and the furthest from the asymptotic regime. If it had been 3.8 and then 3.5 and
 then 3.0, that would be a different story.</p></div></details></li>
-    <li>The ratios go 4.0, 4.0, 3.1, 1.4, 0.9 as you keep halving. What is happening at the end,
-    and
-    which week-4 page is it?
+    <li>The ratios go 4.0, 4.0, 3.1, 1.4, 0.9 as you keep halving. What is happening at the end?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>The method has stopped being the limiting factor and <strong>rounding error has taken
 over</strong>. The ratios fall away from 4, then through 1, and a ratio below 1 means the error
-is <em>growing</em> as the step shrinks. This is <strong>the error minimum</strong>, page 11, in
-a different setting. There it was a finite difference: truncation falling with <em>h</em>,
-rounding rising as 1/<em>h</em>, and a best step in between. Here it is a stepping method:
-truncation falling as <em>h</em>&sup2;, and rounding accumulating over the 1/<em>h</em> steps
-needed to cross the interval.</p>
+is <em>growing</em> as the step shrinks. Truncation is still falling as <em>h</em>&sup2;, but
+rounding accumulates over the 1/<em>h</em> steps needed to cross the interval, and at a small
+enough step it is the larger of the two. So there is a best step somewhere in between.</p>
      <p>The practical reading is the same. The best answer available was at the ratio of 3.1 or just
 before, and everything after that was work spent making the result worse. The way to know is to
 watch the ratio and not the answer. The answer gives no sign.</p></div></details></li>
@@ -1079,11 +1075,11 @@ and RK4 on an equation you write, with the order measured from the run and not q
   </script>
   
 
-  <script type="module" src="js/bundle/order-of-accuracy-measured.js?v=20261015124713"></script>
+  <script type="module" src="js/bundle/order-of-accuracy-measured.js?v=20261016224447"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-09-23">September 23, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-16">October 16, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

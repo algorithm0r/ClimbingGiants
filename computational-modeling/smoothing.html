@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smoothing — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261015124713">
-  <link rel="stylesheet" href="css/demos.css?v=20261015124713">
+  <link rel="stylesheet" href="css/blocks.css?v=20261016224447">
+  <link rel="stylesheet" href="css/demos.css?v=20261016224447">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -840,9 +840,6 @@
           <a href="differentiation-amplifies-noise.html">Amplified noise</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="the-error-minimum.html">The error minimum</a>
-        
-          <span class="site-nav-sep">·</span>
           <strong>Smoothing</strong>
         
           <span class="site-nav-sep">·</span>
@@ -1213,23 +1210,11 @@ end</pre>
   <div class="code-hint">Hover a highlighted line for a description of what it does.</div>
 </div>
 
-<h2 id="comparison-with-the-step-size-minimum">Comparison with the Step-Size Minimum</h2>
+<h2 id="the-width-is-a-decision">The Width Is a Decision</h2>
 
-<p>This is the second U-curve in the course. Side by side:</p>
-
-<table class="data">
-  <tr><th></th><th>Step size (<a href="the-error-minimum.html">the error minimum</a>)</th><th>Smoothing width</th></tr>
-  <tr><td>falls as the parameter grows</td><td>rounding error</td><td>noise</td></tr>
-  <tr><td>rises as the parameter grows</td><td>truncation error</td><td>signal distortion</td></tr>
-  <tr><td>the minimum is at</td><td>ε<sup>1/3</sup>, computable in advance</td>
-      <td>a width that depends on the signal</td></tr>
-</table>
-
-<p>The step-size minimum can be predicted
-because both terms are properties of the arithmetic. The smoothing minimum cannot, because the
-distortion term depends on how sharply the signal bends, which is a property of the thing being
-measured and is not known in advance. The minimum in the table above is 9 for this sine, measured on the whole
-record. For a
+<p>The smoothing minimum cannot be predicted, because the distortion term depends on how sharply
+the signal bends, which is a property of the thing being measured and is not known in advance.
+The minimum in the table above is 9 for this sine, measured on the whole record. For a
 sharper signal it is narrower, and there is no formula that will tell you. What follows is that
 the width is a decision, made by a person, that changes the reported answer. That is the
 situation the next two pages are about.</p>
@@ -1271,19 +1256,6 @@ experiment would cancel at a different width, and you would have no way to find 
 already knowing the true peak. It is also unjustifiable to a reader. "I chose <em>w</em> = 17"
 invites the question "why", and the honest answer is "because it gave 1.0000", which is the same
 as having no method at all.</p></div></details></li>
-    <li>Why can the step-size minimum be predicted in advance when the smoothing minimum
-    cannot?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Because both terms of the step-size error are known in advance and one term of the smoothing
-error is not. For a finite difference, truncation goes as
-<em>h</em>&sup2;<em>f</em>&Prime;&prime; and rounding as &epsilon;|<em>f</em>|/<em>h</em>. Both
-are expressible in machine epsilon and derivatives of a function you have, so the optimum can be
-written down, roughly (3&epsilon;|<em>f</em>|/|<em>f</em>&Prime;&prime;|)<sup>1/3</sup>, before
-running anything.</p>
-     <p>For smoothing, the noise term is known, at &sigma;/&radic;<em>w</em>, but the other term is
-<strong>how much of the true signal a window of width <em>w</em> removes</strong>, and that
-depends on the shape of the signal you are trying to recover. If you knew that, you would not be
-filtering. The optimum exists and can only be approached from the outside, by holding something
-back or by comparing against an independent measurement.</p></div></details></li>
   </ol>
 </div>
 
@@ -1312,11 +1284,11 @@ class, one pass or forward-and-backward, with the peak and the integral reported
   </script>
   
 
-  <script type="module" src="js/bundle/smoothing.js?v=20261015124713"></script>
+  <script type="module" src="js/bundle/smoothing.js?v=20261016224447"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-11">October 11, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-16">October 16, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

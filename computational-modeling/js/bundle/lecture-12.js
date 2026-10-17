@@ -1,4 +1,4 @@
-/* Generated bundle: kit, the smoothing demo, this deck's
+/* Generated bundle: kit, the phase-lag demo, this deck's
    figures, the slide runtime, the presenter tools, page.js.
    Do not edit. */
 
@@ -968,77 +968,65 @@ function realNoiseRaw(n, sd = 1) {
   return scaleTo(out, sd);
 }
 
-/* The smoothing trade, on a signal whose truth is known. Widen the window and
-   watch the noise fall and the peak follow it down. */
+/* A pulse whose peak time is known by construction, filtered one way and both
+   ways. The lag is measured against the known time, not estimated from the
+   difference between two filtered curves. */
 
-const DT = 1e-3, N = 1000;
-const T = linspace(0, 1 - DT, N);
-const CLEAN = new Float64Array(N);
-for (let i = 0; i < N; i++) CLEAN[i] = Math.sin(2 * Math.PI * 2 * T[i]);
+const DT = 8e-5, N = 4000;
+const T = linspace(0, (N - 1) * DT, N);
+const T0 = 0.020, DUR = 0.020, TPEAK = T0 + DUR / 2;      // peak at exactly 30 ms
+const PULSE = new Float64Array(N);
+for (let i = 0; i < N; i++)
+  PULSE[i] = (T[i] >= T0 && T[i] <= T0 + DUR) ? Math.sin(Math.PI * (T[i] - T0) / DUR) : 0;
 
-const EPS = realNoise(N, 0.01);      /* real accelerometer noise, scaled */
-const NOISY = new Float64Array(N);
-for (let i = 0; i < N; i++) NOISY[i] = CLEAN[i] + EPS[i];
-
-/* the error against the truth, at every odd width, so the minimum is found
-   rather than asserted */
-const WIDTHS = [];
-for (let w = 1; w <= 151; w += 2) WIDTHS.push(w);
-const CURVE = WIDTHS.map(w => {
-  const ys = w === 1 ? NOISY : movingAverage(NOISY, w);
-  let sq = 0;
-  for (let i = 0; i < N; i++) { const e = ys[i] - CLEAN[i]; sq += e * e; }
-  return Math.sqrt(sq / N);
-});
-const BESTW = WIDTHS[CURVE.indexOf(Math.min(...CURVE))];
+const peakTime = y => {
+  let bi = 0;
+  for (let i = 1; i < N; i++) if (Math.abs(y[i]) > Math.abs(y[bi])) bi = i;
+  return T[bi];
+};
 
 mountDemo({
-  smooth: {
-    setting: 'A 2&nbsp;Hz sine of amplitude 1 at 1&nbsp;kHz with σ&nbsp;=&nbsp;0.01 noise, ' +
-             'smoothed by a centred moving average. The ghost is the noise-free signal.',
-    source: {kind: 'mixed', text: 'A constructed 2&nbsp;Hz sine carrying <strong>real instrument noise</strong> from the pre-impact window of channel 093, so the smoothing is removing noise an accelerometer actually produced. NHTSA test 10642, 2019 BMW&nbsp;X5 into a rigid barrier at 15.65&nbsp;m/s, TRC of Ohio, 7 January 2019.'},
-    caption: 'Above: the smoothed record against the truth. Below: the error against the truth at ' +
-             'every window width, with the current one marked. The minimum is found by search, ' +
-             'not predicted — nothing about the arithmetic determines where it is.',
-    controls: [{key: 'w', label: 'window width', min: 1, max: 151, step: 2, value: 11, dp: 0,
-                unit: 'samples'}],
-    panels: [
-      {label: 'smoothed signal', unit: '', height: 165},
-      {label: 'error against the truth', unit: '', height: 150, xAxis: true,
-       xLabel: 'window width', xUnit: 'samples', xScale: 1}
-    ],
+  lag: {
+    setting: 'A half-sine pulse 20&nbsp;ms wide whose peak is at exactly 30.000&nbsp;ms by ' +
+             'construction, sampled at 12.5&nbsp;kHz. The true peak time is therefore known and ' +
+             'the lag is measured, not inferred.',
+    source: {kind: 'constructed', text: 'A half-sine pulse whose peak is at exactly 30.000&nbsp;ms by construction, so the lag is measured against a known time. The filter is the one SAE&nbsp;J211 specifies.'},
+    caption: 'The solid curve is the filter you have selected; the ghost is the unfiltered pulse. ' +
+             'The amber line marks the true peak at 30.000&nbsp;ms, and the marker is where the ' +
+             'filtered peak actually lands.',
+    controls: [{key: 'lc', label: 'CFC class', min: 0, max: 3, step: 1, value: 2, dp: 0,
+                fmt: v => ['1000', '600', '180', '60'][Math.round(v)]}],
+    segments: [{key: 'pass', label: 'passes', value: 'one', options: [
+      {value: 'one', label: 'One pass'},
+      {value: 'two', label: 'Forward then backward'}]}],
+    panels: [{label: 'filtered pulse', unit: '', height: 240, xAxis: true,
+              xLabel: 'time', xUnit: 'ms', xScale: 1000, lens: true, lensZoom: 12}],
     readouts: [
-      {key: 'w',     label: 'width'},
-      {key: 'err',   label: 'error against truth'},
-      {key: 'peak',  label: 'peak, true 1.0000'},
-      {key: 'noise', label: 'noise reduced by'},
-      {key: 'best',  label: 'best width, by search'}
+      {key: 'class', label: 'CFC class'},
+      {key: 'true',  label: 'true peak'},
+      {key: 'meas',  label: 'filtered peak'},
+      {key: 'lag',   label: 'shift'},
+      {key: 'res',   label: 'sample interval'}
     ],
     compute(s) {
-      const w = Math.max(1, Math.round(s.w) | 1);
-      const ys = w === 1 ? NOISY : movingAverage(NOISY, w);
-      let sq = 0, peak = 0;
-      for (let i = 0; i < N; i++) {
-        const e = ys[i] - CLEAN[i]; sq += e * e;
-        peak = Math.max(peak, Math.abs(ys[i]));
-      }
-      const err = Math.sqrt(sq / N);
-      const wi = WIDTHS.indexOf(w);
+      const klass = [1000, 600, 180, 60][Math.round(s.lc)];
+      const y = s.pass === 'one' ? cfcOnce(PULSE, klass, DT) : cfc(PULSE, klass, DT);
+      const tp = peakTime(y);
+      const lag = (tp - TPEAK) * 1000;
       return {
-        panels: [
-          {x: T, y: ys, ghost: CLEAN, range: [0, 1]},
-          {x: Float64Array.from(WIDTHS), y: Float64Array.from(CURVE),
-           range: [1, 151],
-           opts: {marks: [{t: w, y: CURVE[wi < 0 ? 0 : wi], cast: 'x',
-                           text: 'w = ' + w, dx: 8, dy: -9}],
-                  rings: [{x: BESTW, y: Math.min(...CURVE), text: 'best ' + BESTW}]}}
-        ],
+        panels: [{x: T, y, ghost: PULSE, range: [0.012, 0.055],
+          opts: {
+            label: 'CFC ' + klass + (s.pass === 'one' ? ', one pass' : ', forward then backward'),
+            rings: [{x: TPEAK, y: 0, text: 'true peak 30.000 ms'}],
+            marks: [{t: tp, y: y[Math.round(tp / DT)], cast: 'x',
+                     text: (tp * 1000).toFixed(3) + ' ms', dx: 8, dy: -9}]
+          }}],
         readouts: {
-          w: w + ' samples',
-          err: err.toFixed(5),
-          peak: peak.toFixed(4),
-          noise: '×' + (1 / Math.sqrt(w)).toFixed(2),
-          best: BESTW + ' samples'
+          class: 'CFC ' + klass,
+          true: '30.000 ms',
+          meas: (tp * 1000).toFixed(3) + ' ms',
+          lag: (lag >= 0 ? '+' : '−') + Math.abs(lag).toFixed(3) + ' ms',
+          res: (DT * 1000).toFixed(3) + ' ms'
         }
       };
     }
@@ -1046,73 +1034,39 @@ mountDemo({
 });
 
 /* ---------------------------------------------------------------------------
-   fig-month — the cost of a wide window, on something nobody needs a formula
-   for. A year of daily temperatures smoothed over a month: the jitter goes,
-   and so does the night it froze, which was the whole question.
+   fig-thermo — causality producing lag, without the word causality. A heavy
+   bulb climbs rather than jumps, and on the way up it reports a temperature
+   from a moment ago. Nothing is broken about the thermometer.
 --------------------------------------------------------------------------- */
 (() => {
-  const host = document.querySelector('#fig-month .fig-body');
+  const host = document.querySelector('#fig-thermo .fig-body');
   if (!host) return;
-  const M = 365, FREEZE = 296, W = 31;
-  const X = [], DAY = [];
-  let seed = 7;
-  const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff - 0.5;
+  const M = 300, TAU = 0.11, T0 = 0.28;
+  const X = [], STEP = [], READ = [];
   for (let i = 0; i < M; i++) {
-    X.push(i);
-    let v = 11 - 12 * Math.cos(2 * Math.PI * (i - 15) / M) + 4.2 * rnd();
-    if (i === FREEZE) v = -4.4;          /* the night it froze */
-    DAY.push(v);
+    const t = i / (M - 1);
+    X.push(t);
+    STEP.push(t < T0 ? 0 : 1);
+    READ.push(t < T0 ? 0 : 1 - Math.exp(-(t - T0) / TAU));
   }
-  const SM = [];
-  for (let i = 0; i < M; i++) {
-    let s = 0, c = 0;
-    for (let k = -(W - 1) / 2; k <= (W - 1) / 2; k++) {
-      const j = i + k;
-      if (j >= 0 && j < M) { s += DAY[j]; c++; }
-    }
-    SM.push(s / c);
-  }
+  /* where the reading first reaches half: the lag you would measure off a peak */
+  const half = T0 + TAU * Math.log(2);
   diagram(host, {
-    w: 460, h: 208, xRange: [0, M - 1], yRange: [-7, 27], zero: true, axes: false,
-    alt: 'A year of daily temperatures with a smoothed curve through them. A single '
-       + 'very cold night is visible in the daily record and absent from the smoothed one.',
-    curves: [{x: X, y: DAY, cls: 'ghost'}, {x: X, y: SM, cls: 'trace'}],
-    drops: [{x: FREEZE, y: -4.4}],
-    points: [{x: FREEZE, y: -4.4}, {x: FREEZE, y: SM[FREEZE], cls: 'miss', r: 4}],
+    w: 460, h: 208, xRange: [0, 1], yRange: [-0.22, 1.22], axes: false,
+    alt: 'A step change in temperature and a thermometer reading that climbs '
+       + 'towards it, reaching half the step a little after the step happened.',
+    curves: [{x: X, y: STEP, cls: 'ghost'}, {x: X, y: READ, cls: 'trace'}],
+    drops: [{x: T0, y: 1}, {x: half, y: 0.5}],
+    points: [{x: half, y: 0.5}],
+    leads: [{from: [T0, 0.5], to: [half, 0.5], cls: 'lead'}],
     notes: [
-      {x: FREEZE - 8, y: -6.2, anchor: 'end', cls: 'hi', text: 'the night it froze'},
-      {x: 8, y: 25, anchor: 'start', text: 'a 31-day average'}
+      {x: 0.02, y: 1.12, anchor: 'start', text: 'the water'},
+      {x: 0.97, y: 0.62, anchor: 'end', text: 'the reading'},
+      {x: (T0 + half) / 2, y: 0.36, anchor: 'middle', cls: 'hi', text: 'lag'},
+      {x: 0.5, y: -0.14, anchor: 'middle',
+       text: 'the bulb cannot know about heat it has not absorbed yet'}
     ]
   });
-})();
-
-/* ---------------------------------------------------------------------------
-   fig-twopass — why running it twice removes the lag. The forward pass moves
-   the pulse late; the backward pass, running over the forward pass's own
-   output, moves it back by the same amount. The cancellation is algebraic.
---------------------------------------------------------------------------- */
-(() => {
-  const host = document.querySelector('#fig-twopass .fig-body');
-  if (!host) return;
-  const M = 260, PK = 0.36, WID = 0.13, LAG = 0.11;
-  const X = [], pulse = (t, c) => {
-    const u = (t - c) / WID;
-    return Math.exp(-u * u);
-  };
-  for (let i = 0; i < M; i++) X.push(i / (M - 1));
-  const at = c => X.map(t => pulse(t, c));
-  const cells = diagramRow(host, 3);
-  const panel = (cell, ys, title, mark, note) => diagram(cell, {
-    xRange: [0, 1], yRange: [-0.28, 1.2], title: title, axes: false,
-    alt: 'A pulse, the same pulse delayed by one filter pass, and the same pulse '
-       + 'returned to its original position by a second pass run backwards.',
-    curves: [{x: X, y: at(PK), cls: 'ghost'}, {x: X, y: ys, cls: 'trace'}],
-    drops: [{x: mark, y: 1}],
-    notes: [{x: 0.5, y: -0.2, anchor: 'middle', cls: 'hi', text: note}]
-  });
-  panel(cells[0], at(PK), 'the record', PK, 'peak where it happened');
-  panel(cells[1], at(PK + LAG), 'forward pass', PK + LAG, 'late by the lag');
-  panel(cells[2], at(PK), 'then backward', PK, 'back where it started');
 })();
 
 /* Whiteboards: math worked out on a slide as if written by hand (the
@@ -1305,103 +1259,73 @@ setTimeout(() => {
 
 /* Lecture 12's own figures.
 
-   The best-width search needs a known true signal, so it reuses the notes
-   page's own construction from the smoothing demo module bundled ahead of this
-   file: CLEAN (a 2 Hz sine at 1 kHz), NOISY (CLEAN plus real accelerometer
-   noise scaled to 0.01), WIDTHS (odd widths 1 to 151) and CURVE (RMS error at
-   each). Everything else is the crash record, test 10642 channel 093,
-   h = 8e-5 s. Checked against the file:
-     raw peak -1540.6 m/s^2 at 10.80 ms; pre-impact sd 2.377
-     9-sample average: peak -968.3, sd 1.204 (half the noise, 37% off the peak)
-     CFC 600 one pass: peak -1391.0 at 11.04 ms; two passes: -1283.8 at 10.80
+   Lag needs an event whose time is known, so the measurement uses the notes
+   page's construction: a half-sine pulse 20 ms wide starting at 20 ms, peak
+   at exactly 30.000 ms, sampled at 12,500 Hz. Checked: one pass puts the peak
+   at 30.08 (CFC 1000), 30.16 (600), 30.64 (180), 31.84 ms (60); forward then
+   backward puts it at 30.000 ms for every class.
+   The crash record, test 10642 channel 093: CFC 600 one pass peaks at
+   11.04 ms (-1391.0), forward-backward at 10.80 ms (-1283.8).
    Hosts are found by data-fig so a figure can sit under more than one claim. */
 (() => {
   const each = (name, draw) =>
     document.querySelectorAll('[data-fig="' + name + '"] .fig-body').forEach(draw);
   const any = (...names) => names.some(n => document.querySelector('[data-fig="' + n + '"]'));
+  const T = 8e-5, N = 1000;
+  const t = Float64Array.from({length: N}, (_, i) => i * T);
+  const pulse = t.map(s => (s >= 0.02 && s <= 0.04) ? Math.sin(Math.PI * (s - 0.02) / 0.02) : 0);
+  const argmax = y => { let k = 0; for (let i = 1; i < y.length; i++) if (y[i] > y[k]) k = i; return k; };
+  const ms = s => (s * 1000).toFixed(2) + ' ms';
 
-  /* what each halving of the noise costs: 1/sqrt(w) against w */
-  each('l12-halving', host => {
-    const ws = linspace(1, 420, 420), f = ws.map(w => 1 / Math.sqrt(w));
-    panel(host, {label: 'noise left, as a fraction', unit: '', height: 260, xAxis: true,
-                 xLabel: 'window width w', xUnit: 'samples', xScale: 1, yClamp: [0, 0.55]})(
-      ws, f, null, [0, 420], {
-        marks: [{t: 25, y: 0.2, cast: 'both', text: 'w = 25: a fifth', dx: 10, dy: -10},
-                {t: 100, y: 0.1, cast: 'both', text: 'w = 100: a tenth', dx: 10, dy: -10},
-                {t: 400, y: 0.05, cast: 'both', text: 'w = 400: a twentieth', dx: -10, dy: -12, anchor: 'end'}]
-      });
-  });
-
-  /* the best width, on the page's sine: error against width, and the noise
-     reduction that keeps improving */
-  const sigma = (() => { let s = 0; for (let i = 0; i < NOISY.length; i++) s += (NOISY[i] - CLEAN[i]) ** 2;
-                         return Math.sqrt(s / NOISY.length); })();
-  const W = Float64Array.from(WIDTHS), E = Float64Array.from(CURVE);
-  const best = Math.min(...CURVE);
-  each('l12-err', host => {
-    panel(host, {label: 'RMS error against the true sine', unit: '', height: 270, xAxis: true,
-                 xLabel: 'window width w', xUnit: 'samples', xScale: 1, yClamp: [0, 0.075]})(
-      W, E, null, [1, 101], {
-        marks: [{t: BESTW, y: best, text: 'smallest at w = ' + BESTW, dx: 10, dy: -12}],
-        hlines: [{y: CURVE[0], cls: 'limit', text: 'no smoothing'}]
-      });
-  });
-  /* on a log axis, so the falling noise is visible beside the error */
-  each('l12-trap', host => {
-    panel(host, {label: 'error and noise left', unit: '', height: 270, xAxis: true,
-                 xLabel: 'window width w', xUnit: 'samples', xScale: 1, yLog: true, yClamp: [5e-4, 0.1]})(
-      W, E, null, [1, 101], {
-        curves: [{x: W, y: W.map(w => sigma / Math.sqrt(w)), cls: 'pred'}],
-        marks: [{t: 101, y: CURVE[WIDTHS.indexOf(101)], text: 'error against the truth', dx: -10, dy: -10, anchor: 'end'},
-                {t: 101, y: sigma / Math.sqrt(101), text: 'noise left, σ/√w', dx: -10, dy: -10, anchor: 'end'}]
-      });
-  });
-
-  /* the peak against width, true value 1 */
-  each('l12-peak', host => {
-    const peaks = WIDTHS.map(w => {
-      const ys = w === 1 ? NOISY : movingAverage(NOISY, w);
-      let p = 0; for (let i = 0; i < ys.length; i++) p = Math.max(p, Math.abs(ys[i])); return p;
+  /* the known pulse and one pass of CFC 60 */
+  each('l13-pulse', host => {
+    const one = cfcOnce(pulse, 60, T), k1 = argmax(one);
+    panel(host, {label: 'pulse', unit: '', height: 270, xAxis: true, xLabel: 'time', xUnit: 'ms',
+                 xScale: 1000, yClamp: [-0.1, 1.2]})(t, one, pulse, [0.015, 0.05], {
+      marks: [{t: 0.03, y: 1, cast: 'x', text: 'true peak, 30.00 ms', dx: -10, dy: -10, anchor: 'end'},
+              {t: t[k1], y: one[k1], cast: 'x', text: 'one pass, CFC 60: ' + ms(t[k1]), dx: 10, dy: -10}]
     });
-    panel(host, {label: 'peak of the smoothed sine', unit: '', height: 270, xAxis: true,
-                 xLabel: 'window width w', xUnit: 'samples', xScale: 1, yClamp: [0.9, 1.04]})(
-      W, Float64Array.from(peaks), null, [1, 151], {
-        hlines: [{y: 1, cls: 'limit', text: 'true peak, 1.0000'}],
-        marks: [{t: 9, y: peaks[WIDTHS.indexOf(9)], text: 'w = 9: ' + peaks[WIDTHS.indexOf(9)].toFixed(4), dx: 10, dy: -10}]
+  });
+
+  /* lag against class, one pass, read to the nearest sample */
+  each('l13-lags', host => {
+    const classes = [60, 180, 600, 1000];
+    const lags = classes.map(c => (t[argmax(cfcOnce(pulse, c, T))] - 0.03) * 1000);
+    panel(host, {label: 'lag of the peak, one pass', unit: 'ms', height: 270, xAxis: true,
+                 xLabel: 'filter class (CFC)', xUnit: '', xScale: 1, xLog: true, yClamp: [-0.2, 2.2]})(
+      Float64Array.from(classes), Float64Array.from(lags), null, [40, 2500], {
+        dots: true, dotR: 6,
+        hlines: [{y: 0, cls: 'limit'}],
+        marks: classes.map((c, i) => ({t: c, y: lags[i], text: 'CFC ' + c + ': ' + lags[i].toFixed(2) + ' ms',
+                                        dx: c >= 600 ? -6 : 10, dy: c === 1000 ? -14 : c === 600 ? -30 : -10,
+                                        anchor: c >= 600 ? 'end' : 'start'}))
       });
   });
 
-  if (!any('l12-crash', 'l12-twopass')) return;
+  /* one pass and forward-backward on the same pulse */
+  each('l13-pulse2', host => {
+    const one = cfcOnce(pulse, 60, T), two = cfc(pulse, 60, T), k2 = argmax(two);
+    panel(host, {label: 'pulse', unit: '', height: 270, xAxis: true, xLabel: 'time', xUnit: 'ms',
+                 xScale: 1000, yClamp: [-0.1, 1.2]})(t, two, pulse, [0.015, 0.05], {
+      curves: [{x: t, y: one, cls: 'pred'}],
+      marks: [{t: t[k2], y: two[k2], cast: 'x', text: 'forward then backward: ' + ms(t[k2]), dx: -10, dy: -12, anchor: 'end'}]
+    });
+  });
+
+  if (!any('l13-crash')) return;
   fetch('data/test10642-crossmember-x.json').then(r => r.json()).then(d => {
     const H = d.dt, a = Float64Array.from(d.a);
-    const t = Float64Array.from({length: d.n}, (_, i) => d.t0 + i * H);
-    const peakOf = y => { let k = 0; for (let i = 1; i < y.length; i++) if (y[i] < y[k]) k = i; return k; };
-
-    /* the impact spike, raw and after a 9-sample average */
-    each('l12-crash', host => {
-      const s9 = movingAverage(a, 9), kr = peakOf(a), k9 = peakOf(s9);
-      panel(host, {label: 'acceleration', unit: 'm/s²', height: 280, xAxis: true,
-                   xLabel: 'time', xUnit: 'ms', xScale: 1000, yClamp: [-1700, 400]})(
-        t, s9, a, [0.006, 0.016], {
-          marks: [{t: t[kr], y: a[kr], text: 'raw: −1541', dx: 10, dy: 4},
-                  {t: t[k9], y: s9[k9], text: '9-sample average: −968', dx: 10, dy: 4}]
-        });
-    });
-
-    /* one pass of the CFC 600 filter moves the peak late; the backward pass
-       moves it back */
-    each('l12-twopass', host => {
-      const one = cfcOnce(a, 600, H), two = cfc(a, 600, H);
-      const k1 = peakOf(one), k2 = peakOf(two);
-      /* only the zoomed window, so the kit does not thin the curve to every
-         fifth sample */
+    const tc = Float64Array.from({length: d.n}, (_, i) => d.t0 + i * H);
+    const argmin = y => { let k = 0; for (let i = 1; i < y.length; i++) if (y[i] < y[k]) k = i; return k; };
+    each('l13-crash', host => {
+      const one = cfcOnce(a, 600, H), two = cfc(a, 600, H), k1 = argmin(one), k2 = argmin(two);
       const i0 = Math.floor((0.0095 - d.t0) / H), i1 = Math.ceil((0.0125 - d.t0) / H) + 1;
       panel(host, {label: 'acceleration', unit: 'm/s²', height: 280, xAxis: true,
                    xLabel: 'time', xUnit: 'ms', xScale: 1000, yClamp: [-1700, 400]})(
-        t, two, a, [0.0095, 0.0125], {
-          curves: [{x: t.slice(i0, i1), y: one.slice(i0, i1), cls: 'pred'}],
-          marks: [{t: t[k1], y: one[k1], cast: 'x', text: 'one pass: ' + (t[k1] * 1000).toFixed(2) + ' ms', dx: 10, dy: 4},
-                  {t: t[k2], y: two[k2], cast: 'x', text: 'two passes: ' + (t[k2] * 1000).toFixed(2) + ' ms', dx: -10, dy: 4, anchor: 'end'}]
+        tc, two, a, [0.0095, 0.0125], {
+          curves: [{x: tc.slice(i0, i1), y: one.slice(i0, i1), cls: 'pred'}],
+          marks: [{t: tc[k1], y: one[k1], cast: 'x', text: 'one pass: ' + ms(tc[k1]), dx: 10, dy: 4},
+                  {t: tc[k2], y: two[k2], cast: 'x', text: 'two passes: ' + ms(tc[k2]), dx: -10, dy: 4, anchor: 'end'}]
         });
     });
   });

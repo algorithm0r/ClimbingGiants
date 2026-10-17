@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lecture 13 — Phase lag</title>
+<title>Lecture 13 — The filter class is part of the measurement</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261015124713">
-<link rel="stylesheet" href="css/demos.css?v=20261015124713">
+<link rel="stylesheet" href="css/blocks.css?v=20261016224447">
+<link rel="stylesheet" href="css/demos.css?v=20261016224447">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -690,127 +690,153 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <section class="deck-slide part">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
-    <p class="say">The delay in a one-pass filter</p>
+    <p class="say">Choosing the filter class for a crash measurement</p>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>All right, welcome. So at the end of the last video we saw that one pass of the crash standard's filter delays the signal, and I left it there. In this video I want to pick that up, because the delay is real, and there's nothing in the output to tell you it happened. So let's take a look.</p><p>Here's the crash record again at filter class 600. The grey dashed line is the raw record, the red dotted line is one pass of the filter, and the solid line is forward and then backward. The one-pass peak lands at 11.04 milliseconds. The two-pass peak is at 10.80, which is where the raw spike is.</p><p>So one pass moved the peak about a quarter of a millisecond later. And if all we had was that red line, nothing about it would tell us.</p>">
+<section class="deck-slide full" data-notes="<p>All right, welcome. So we've spent this whole week filtering records, and I've been quietly saying CFC 180 and CFC 1000 as though somebody handed us those numbers. In this video I want to ask where they come from, and whether we get to pick. And this is the last video of week four, so let's take a look.</p><p>Here's the crossmember record from week three, with the pre-impact offset taken out, filtered forward and backward at each of the four classes, and we ask it two questions. What was the peak acceleration, and what was the change in velocity.</p><p>The peak, on the left, goes 1540, 1484, 1284, 630, 485. So from as recorded down to class 60 that's a factor of about 3.2, from the same record, depending on a number we typed. And the change in velocity, on the right, is minus 17.51, minus 17.51, minus 17.51, minus 17.51, minus 17.53. It moves by about nine hundredths of a percent across the whole lot. So the change in velocity is robust, and the peak probably needs its class.</p><p>And one small thing, the acceleration is negative, the car's slowing down, so by the peak I mean the biggest size, ignoring the sign.</p>">
   <div class="head">
-    <p class="say">One pass at CFC 600 puts the crash peak <span class="def">0.24&nbsp;ms late</span>.</p>
-    <p class="sub">Raw record dashed, one pass dotted, forward then backward solid.</p>
+    <p class="say">From as recorded to CFC 60 the peak falls <span class="def">3.2 times</span>, and &Delta;v moves <span class="def">0.09%</span>.</p>
+    <p class="sub">Filtered forward and backward. The peak is the largest size, ignoring the sign.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="l13-crash"><div class="fig-body"></div></figure>
+    <figure class="figure wide legible" data-fig="l14-twoq"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So here's what that looks like on the record itself. The grey dashed line is the record as recorded. The red dotted line is class 1000, the lightest, and the solid line is class 60, the heaviest.</p><p>At class 1000 the narrow spike at 10.8 milliseconds is still there, a little shorter, 1484. At class 60 it's gone, and the biggest thing left is a broad, slow dip about 53 milliseconds in, 485.</p>">
+  <div class="head">
+    <p class="say">A heavier filter <span class="def">removes the narrow spike</span> at 10.8&nbsp;ms.</p>
+    <p class="sub">As recorded dashed, CFC 1000 dotted, CFC 60 solid.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l14-classes"><div class="fig-body"></div></figure>
   </div>
 </section>
 
 <section class="deck-slide part">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
-    <p class="say">Why a one-pass filter lags</p>
+    <p class="say">Why a low-pass filter shrinks a peak</p>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Okay. So look at the filter again. Every output sample is built from the input at that instant, inputs before it, and outputs before it. It only ever looks backward. And what we call a filter like that is causal, because each output only depends on things that have already happened.</p><p>And for an airbag computer that's not a choice. During the crash it can't see the future.</p>">
+<section class="deck-slide full" data-notes="<p>So why? Well, a low-pass filter takes out the fast content and keeps the slow. So the shrinking peak is a side effect of what a spike is made of.</p><p>A tall, brief spike needs fast content, because that's the only thing that can go up and come back down inside a millisecond. So if we filter at class 180, we take out most of what built that spike, and down it comes. Here it's zoomed in. As recorded, the spike reaches 1540. At class 180, at the same moment, it's a gentle dip.</p><p>And a broad, slow feature is made of slow content, so the same filter kind of mostly leaves it alone.</p>">
   <div class="head">
-    <p class="say">A <span class="term">causal</span> filter uses <span class="def">only the present and the past</span>.</p>
+    <p class="say">A narrow spike is made of <span class="def">fast content</span>, which a low-pass filter removes.</p>
+    <p class="sub">The impact spike, zoomed. As recorded dashed, CFC 180 solid.</p>
   </div>
   <div class="stage">
-    <div class="work">
-      $$y_{\textcolor{#8A6508}{i}} \;=\; a_0 x_{\textcolor{#8A6508}{i}} + a_1 x_{\textcolor{#8A6508}{i-1}} + a_2 x_{\textcolor{#8A6508}{i-2}} + b_1 y_{\textcolor{#8A6508}{i-1}} + b_2 y_{\textcolor{#8A6508}{i-2}}$$
-    </div>
+    <figure class="figure wide" data-fig="l14-zoom"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So a filter that can only see the past has to wait before it can react to anything. When the input rises sharply, the output at that instant is still mostly made of earlier, lower samples, so it rises later.</p><p>And the picture I'd keep is a thermometer with a big heavy bulb. We plunge it into hot water, the grey step, and it doesn't jump, it climbs. At every moment on the way up it's telling us about a temperature from a little while ago. And nothing's broken about the thermometer. It just can't know about heat it hasn't absorbed yet.</p>">
+<section class="deck-slide full" data-notes="<p>And here's why the change in velocity barely moves. Delta-v is the integral, the area under the whole record. And what the filter takes off the top of a spike, it spreads into the shoulders on either side. So the area stays almost the same, even though the maximum doesn't.</p><p>And integration is itself a kind of smoothing, we saw that in week three, so a quantity built by integrating doesn't care much about the fast content in the first place.</p>">
   <div class="head">
-    <p class="say">A causal filter reports each moment <span class="def">a little late</span>, like a thermometer.</p>
+    <p class="say">The filter moves area into the shoulders, so <span class="def">&Delta;v hardly changes</span>.</p>
+    <p class="sub">&minus;17.5091&nbsp;m/s as recorded, &minus;17.5120 at CFC 180.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide legible" id="fig-thermo"><div class="fig-body"></div></figure>
+    <figure class="figure wide" data-fig="l14-zoom"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Okay. Now look at when the peak happens. 10.80 milliseconds as recorded, and at 1000, and at 600. Then 24.00 at class 180, and 53.04 at class 60.</p><p>Now this looks exactly like the phase lag from the last video, and it isn't. These are all forward-backward filtered, so there's no lag in any of them. What's happened is the peak has moved to a different feature of the record. The spike at 10.8 milliseconds has been filtered away, and now the biggest thing left is some other, broader event later on.</p><p>So at class 60 the number we report comes from a different moment in the crash, about 53 milliseconds in.</p>">
+  <div class="head">
+    <p class="say">At CFC 180 and 60 the reported peak is <span class="def">a different moment in the crash</span>.</p>
+    <p class="sub">Forward-backward, so no lag. CFC 180 dotted, CFC 60 solid.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l14-moved"><div class="fig-body"></div></figure>
   </div>
 </section>
 
 <section class="deck-slide part">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
-    <p class="say">Measuring the lag on a pulse with a known peak</p>
+    <p class="say">What decides the class</p>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Now there's a problem with measuring this on the crash record. We don't have an independent clock that says when the peak really happened.</p><p>So we measure it on something where we know the answer, because we built it. A half-sine pulse, 20 milliseconds wide, starting at 20 milliseconds, sampled at the crash record's rate. So its peak is at exactly 30.000 milliseconds. That's the grey dashed curve.</p><p>And the solid line is one pass of the class 60 filter, the heaviest one, meaning it smooths the most. Its peak comes out at 31.84. So that's nearly two milliseconds late.</p>">
+<section class="deck-slide full" data-notes="<p>Okay. So which class is right?</p><p>What decides it is what we call the bandwidth of the thing being measured, the range of frequencies it actually responds to.</p><p>Say somebody asks how rough a road is. A truck and a bicycle give completely different answers, and neither of them is wrong, because they respond to different things. The bicycle feels every stone. The truck doesn't notice a stone, and it very much notices a dip. So how rough the road is probably depends on what's driving over it.</p><p>And it's the same with a crash. A peak used to estimate an injury needs the bandwidth the body responds to. A peak used to check a mounting bracket needs the bandwidth the bracket responds to. Those are different numbers, and both of them are knowable, and neither is in our file, because they're facts about the physical system.</p>">
   <div class="head">
-    <p class="say">On a pulse that peaks at 30.00&nbsp;ms, one pass of CFC 60 <span class="def">peaks at 31.84&nbsp;ms</span>.</p>
-    <p class="sub">A constructed half-sine pulse (dashed) and one pass of CFC 60 (solid).</p>
+    <p class="say">The right class is set by <span class="def">what the measured thing responds to</span>.</p>
+    <p class="sub">That range of frequencies is its <span class="term">bandwidth</span>.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="l13-pulse"><div class="fig-body"></div></figure>
+    <figure class="figure wide legible" id="fig-road"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So here's the lag for every class in the standard, one pass each, on that same pulse. And one note first. They're read to the nearest sample, and at twelve and a half kilohertz a sample is 0.08 milliseconds, which is why every one is a neat multiple of 0.08. That's the limit from week two again, a peak can only be located as precisely as the sampling allows.</p><p>So class 1000 is 0.08 of a millisecond. 600 is 0.16. 180 is 0.64. And 60 is 1.84. So the lag grows as the class goes down, roughly by the factor the class falls by, though at 1000 and 600 that's only one and two samples, so those two are coarse.</p><p>And on the crash record class 600 lagged 0.24, not 0.16. The lag depends a little on the shape of the signal, and the crash spike is much sharper than this pulse, so both numbers are fair.</p>">
+<section class="deck-slide full" data-notes="<p>And the record can't tell us its own class. There are three shortcuts that are tempting, and none of them gets there.</p><p>The record as recorded isn't the truth. It's already been through the lab's 2000 hertz filter, which it needed so the sampling wouldn't alias, that's the filter from lecture ten.</p><p>A lighter filter isn't automatically more faithful, because some of what it keeps is the sensor and its mounting vibrating, and that's the instrument's behavior, not the car's.</p><p>And a heavier filter isn't automatically safer, because it takes out real structure along with the artifacts, and it can't tell the two apart.</p>">
   <div class="head">
-    <p class="say">Lower classes smooth more <span class="def">and lag longer</span>.</p>
-    <p class="sub">One pass. Forward then backward lags 0&nbsp;ms at every class (to the nearest sample, 0.08&nbsp;ms).</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="l13-lags"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>And now the fix. Run the filter forward, then run it again backward over its own output. The backward pass delays by the same amount in the other direction, so the two cancel.</p><p>The red dotted line is one pass again, late. The solid line is forward then backward, and its peak is at 30.00 milliseconds, right on the true peak. And that holds for every class, to the nearest sample, because the backward pass undoes the forward pass's delay.</p>">
-  <div class="head">
-    <p class="say">Forward then backward puts the peak <span class="def">back at 30.00&nbsp;ms</span>.</p>
-    <p class="sub">CFC 60. One pass dotted, forward then backward solid, the true pulse dashed.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="l13-pulse2"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide part">
-  <div class="head">
-    <p class="course">Computational Physical Modeling</p>
-    <p class="say">What the second pass costs</p>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>Okay. So if running it twice fixes the lag, why would anybody run it once? Well, because the second pass runs from the end of the record back to the beginning. So every output sample now depends on samples that come after it.</p><p>And that's fine for a record sitting on a disk. It's impossible for a controller acting in real time. So the airbag computer during the crash gets one pass and lives with the lag, and we get two passes afterwards. So the airbag and the lab filter the same signal differently, because only the lab has the whole record.</p>">
-  <div class="head">
-    <p class="say">The second pass removes the lag <span class="def">by using later samples</span>.</p>
-  </div>
-  <div class="stage">
-    <div class="pcards c2">
-      <div class="pcard"><span class="tag">one pass</span><b>Causal, with a lag</b>
-        <span>Uses only the present and the past, so it works in real time (an airbag computer, during the crash).</span></div>
-      <div class="pcard gold"><span class="tag">forward then backward</span><b>No lag, not causal</b>
-        <span>Uses samples from later in the record, so it works only on a stored record.</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>Now each pass applies the same two-pole filter, so running it twice applies four poles altogether, and four poles is what the class actually specifies. So it's the single pass that's the odd one out.</p><p>Look at the crash record again. One pass peaks at minus 1391, and the two-pass version peaks at minus 1284. So they don't just differ in timing, they differ in size, because two passes filter more.</p><p>So if we compare a one-pass output with a two-pass output and call the whole difference lag, we can be wrong, because the extra filtering can move the peak too. That's why we measured the lag on the pulse, where we compared one pass against a peak we knew.</p>">
-  <div class="head">
-    <p class="say">Two passes also <span class="def">smooth more than one</span>.</p>
-    <p class="sub">Four poles, as the class specifies. One pass peaks at &minus;1,391&nbsp;m/s&sup2;, two at &minus;1,284.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="l13-crash"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>So when does the lag actually change our answer? Well, exactly when a time is part of the answer.</p><p>So anything we report that's a when. The time of a peak. When something crossed a threshold. And the interval between two channels, which I'd flag especially. If two channels were filtered at different classes, they've been shifted by different amounts, so the gap between them in the output isn't the gap that happened.</p><p>And it doesn't matter for an area. Shifting a curve in time and smoothing it both leave the area under it about the same, so the change in velocity is about the same either way. On the crash record it's minus 17.586 raw and minus 17.587 after one pass at class 600.</p><p>So hopefully that gives you a sense of why the standard's filter is run twice, and what the second pass costs. In the next video we finish week four by asking which class to use, and why the answer changes the number we report. Thanks a lot for watching and we'll see you in the next video.</p>">
-  <div class="head">
-    <p class="say">The lag matters <span class="def">whenever a time is part of the answer</span>.</p>
+    <p class="say">The class comes from <span class="def">what the number is for</span>, outside the record.</p>
   </div>
   <div class="stage">
     <div class="pcards c3">
-      <div class="pcard gold"><span class="tag">matters</span><b>The time of a peak</b>
-        <span>One pass reports it late, by 1.84&nbsp;ms at CFC 60 on the test pulse.</span></div>
-      <div class="pcard gold"><span class="tag">matters</span><b>An interval between channels</b>
-        <span>Channels at different classes are shifted by different amounts.</span></div>
-      <div class="pcard"><span class="tag">does not matter</span><b>An area, such as &Delta;v</b>
-        <span>&minus;17.586&nbsp;m/s raw and &minus;17.587 after one pass at CFC 600.</span></div>
+      <div class="pcard"><span class="tag">as recorded</span><b>Already filtered</b>
+        <span>The lab's 2,000&nbsp;Hz filter ran before sampling.</span></div>
+      <div class="pcard"><span class="tag">lighter</span><b>Keeps the instrument too</b>
+        <span>The sensor and its mounting vibrate, and that motion stays in.</span></div>
+      <div class="pcard"><span class="tag">heavier</span><b>Removes real structure too</b>
+        <span>It removes real crash events along with the sensor&rsquo;s own vibration.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide part">
+  <div class="head">
+    <p class="course">Computational Physical Modeling</p>
+    <p class="say">SAE J211 fixes the class in advance</p>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So SAE J211 fixes the class for each measurement, in advance, for everybody.</p><p>Head acceleration for HIC, the head injury criterion, is class 1000, because the head responds to fast content, and HIC is sensitive to it. Chest acceleration is 180, because the chest doesn't really respond much above a few hundred hertz. Vehicle structure, when we're going to integrate it for velocity, is 180 before integrating, and that one's a slightly different reason, it keeps the integral clean, and as we just saw it barely moves the answer either way. And belt and barrier loads are 60, and I like that reason. Load cells vibrate at their own frequency, what we call ringing, and that vibration isn't the load we're after.</p><p>So each class comes from what that body part, or that part of the car, actually responds to.</p>">
+  <div class="head">
+    <p class="say">SAE J211 assigns <span class="def">a class to each measurement</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c4">
+      <div class="pcard"><span class="tag">CFC 1000</span><b>Head, for HIC</b>
+        <span>The head responds to fast content (HIC, the head injury criterion).</span></div>
+      <div class="pcard"><span class="tag">CFC 180</span><b>Chest</b>
+        <span>The chest responds mostly below a few hundred hertz.</span></div>
+      <div class="pcard"><span class="tag">CFC 180</span><b>Structure, for velocity</b>
+        <span>Smooths the record and changes &Delta;v by under 0.02%.</span></div>
+      <div class="pcard"><span class="tag">CFC 60</span><b>Belt and barrier loads</b>
+        <span>Load cells vibrate at their own frequency, and CFC 60 removes that vibration.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>And that makes class 1000 correct for head acceleration, in a way that matters. If we filter a head channel at class 60, we remove the content HIC is computed from, so the HIC number comes out wrong.</p><p>Now part of this is a convention, and I want to be fair about which part. A committee working from the same physics might have written 900 or 1100, and the standard would probably work just as well. It couldn't have written 60, because the bandwidth of the head isn't a matter of opinion. So the physics fixes the class, roughly, and the convention fixes the exact number.</p><p>And fixing the exact number buys the second thing a standard is for. Two labs testing the same car get numbers they can compare, and a regulatory limit means one thing.</p>">
+  <div class="head">
+    <p class="say">The physics sets the class roughly, and J211 <span class="def">fixes the exact number</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">the physics</span><b>Not 60 for a head</b>
+        <span>CFC 60 removes the content HIC is computed from.</span></div>
+      <div class="pcard"><span class="tag">the convention</span><b>1000, not 900 or 1100</b>
+        <span>Either would likely work as well, so J211 picks one.</span></div>
+      <div class="pcard gold"><span class="tag">the payoff</span><b>Comparable numbers</b>
+        <span>Two labs testing the same car can compare results.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So here's what to do with all of that.</p><p>When you report a peak from a filtered record, report the class with it, because without the class the number is incomplete. A peak of 630 and a peak of 1484 can both be correct for this record.</p><p>When there's a standard, it's done the engineering for you, so use its class. And most problems don't come with a standard, so then you choose the class from what the number is for, what bandwidth that thing responds in, and you write down why, so somebody else can repeat it or disagree with it.</p><p>So hopefully that gives you an idea why the filter is part of the measurement, and that's the end of week four. Next week we start fitting models to data. Thanks a lot for watching and we'll see you in the next video.</p>">
+  <div class="head">
+    <p class="say">Report a filtered peak <span class="def">together with its class</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c3">
+      <div class="pcard gold"><span class="tag">always</span><b>Name the class</b>
+        <span>A peak of 630 and a peak of 1484 both describe this record.</span></div>
+      <div class="pcard"><span class="tag">with a standard</span><b>Use its class</b>
+        <span>J211 has already matched the class to the measurement.</span></div>
+      <div class="pcard"><span class="tag">without one</span><b>Choose from the goal</b>
+        <span>Find the bandwidth of what the number is for, and say why.</span></div>
     </div>
   </div>
 </section>
@@ -822,6 +848,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <div class="deck-notes"></div>
 
 
-<script type="module" src="js/bundle/lecture-13.js?v=20261015124713"></script>
+<script type="module" src="js/bundle/lecture-13.js?v=20261016224447"></script>
 </body>
 </html>
