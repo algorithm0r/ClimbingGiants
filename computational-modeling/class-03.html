@@ -1,0 +1,1775 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Class 3 — Assignment 2, then impact speed and crush</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="css/blocks.css?v=20261017141252">
+<link rel="stylesheet" href="css/demos.css?v=20261017141252">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+/* The deck's own styling, inlined here because none of it belongs to the notes
+   pages and build.py sorts styles.css into layers this would not fit. The
+   variables are the site's own values, copied so the deck cannot drift. */
+:root{
+  /* Stage content comes in two sizes and only two. Every block that
+     carries prose uses the first, every block that carries code uses the
+     second, so a table on one slide and a list on the next are set alike. */
+  --claim:      clamp(2.1rem, min(4.5vw, 8.4vh), 4.5rem);
+  --stage-text: clamp(1.25rem, min(2.65vw, 4.1vh), 2.65rem);
+  --stage-code: clamp(1.1rem, min(2.35vw, 3.5vh), 2.35rem);
+  --gutter:     3.5vw;
+  --card:#FFFFFF; --subtle:#EEE9E0; --ink:#1A1A1A; --warm-gray:#5A5550;
+  --course-accent:#5F7038; --course-accent-dark:#47542A;
+  /* Two emphasis colours, both already carrying meaning on the site.
+     term: the thing being named or defined, and the subject of the claim.
+     def:  what is said about it -- the verb phrase, or the definition.
+     Both are a step lighter than the notes pages use them, because against
+     near-black ink at this size the darker green read as black. Measured:
+     the term is 48.5 dE from the ink rather than 35.8, and both still clear
+     5.3 contrast on white, which survives a washed-out projector. */
+  --term:#5F7038; --def:#8A6508;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--card); color:var(--ink); overflow:hidden;
+  font-family:"Segoe UI",-apple-system,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+body.blank .deck-slide{visibility:hidden}
+
+/* Nothing on a slide is hidden, so a slide is simply centred: text alone sits
+   in the middle, and text with a figure finds its own balance. The stage keeps
+   a floor so a figure arriving with its data does not shift what is above it. */
+.deck-slide{
+  position:fixed; inset:0; display:none; padding:4vh var(--gutter) 5vh;
+  flex-direction:column; justify-content:center; align-items:center; gap:2.4vh;
+}
+.deck-slide.on{display:flex}
+
+.deck-slide .head{text-align:center; width:100%; max-width:100%}
+.deck-slide .say{
+  margin:0 auto; text-align:center;
+  font-size:var(--claim); line-height:1.1; font-weight:600;
+  /* one measure for every claim, so the margins do not change slide to
+     slide and a line wraps only because it is long */
+  letter-spacing:-.015em; max-width:100%;
+  /* a claim that does wrap splits into even lines, not a line and one word */
+  text-wrap:balance;
+}
+.term{color:var(--term)}
+.def{color:var(--def)}
+
+.deck-slide .sub{
+  /* auto side margins, or the box sits left of centre whenever max-width is
+     narrower than the slide and only the text inside it is centred */
+  margin:1.2rem auto 0; font-size:var(--stage-text); line-height:1.4;
+  color:var(--warm-gray); max-width:100%; text-align:center; font-weight:400;
+}
+.deck-slide .sub code{font-size:1.02em; color:var(--def); font-weight:600}
+.deck-slide .stage{
+  width:100%; max-width:100%; margin:0 auto;
+  display:flex; flex-direction:column; justify-content:center;
+}
+/* .full used to widen a capped stage. Nothing is capped now, so it only
+   marks a slide that carries one. */
+/* Only a figure or a demo needs its space held: both arrive with their data
+   after first paint, and without a floor the claim above them jumps when they
+   do. Text in the stage is there from the start and can size itself. */
+.deck-slide .stage:has(.figure),
+.deck-slide .stage:has(cg-demo){min-height:38vh}
+/* A table or a block of arithmetic reads as part of the claim when it sits as
+   close to it as a figure does, so those get a little more air above them. */
+.deck-slide .stage:has(.tbl),
+.deck-slide .stage:has(.work){margin-top:1.6vh}
+/* A notes-page figure on a projector. Three things, and the third is the one
+   that bites: blocks.css caps .figure.narrow at 32rem, which is a text
+   column's width and not a slide's; the SVGs carry a viewBox and no fixed
+   size, so widening the box is the whole of the scaling they need; and the
+   stage is a flex column, where auto side margins do centre a box but also
+   cancel its stretch, collapsing it onto the SVG's own 300px. align-self
+   centres a flex item without giving up its width. */
+.deck-slide .stage .figure{
+  margin:0; border:0; background:none; align-self:center; width:100%;
+}
+/* A narrow figure is a squarish one, about 3:2, so its width is also capped
+   by the screen's height; otherwise on a laptop it stands taller than the
+   stage and pushes its own title up under the claim. */
+.deck-slide .stage .figure.narrow{max-width:min(62rem,74vw,100vh)}
+/* A wide figure, about 5:2, that shares the stage with a line of math. Full
+   width would stand too tall under two lines of claim on a laptop, so its
+   width is capped by the screen's height too, at a looser ratio. */
+.deck-slide .stage .figure.wide{max-width:min(100%,130vh)}
+/* A notes-page row of small diagrams, each drawn in a 300-unit viewBox, sets
+   its labels at about 11px on a projector. Opted into per figure, because a
+   label placed for 10.5px text can collide once it is larger. */
+.deck-slide .figure.legible .cgs text{font-size:15px}
+.deck-slide .figure.legible .cgs text.cgs-title{font-size:15px}
+/* Point cards in a video deck, the class-02 style: a row of bordered cards under
+   the claim, each a small tag, a bold title and one sentence. For a claim that
+   needs a few items of text under it. Sized from the stage text; the class decks
+   keep their own rules below. */
+body:not(.inclass) .deck-slide .pcards{display:grid; gap:1.2vw; width:100%; margin-top:1vh;
+  font-size:calc(var(--stage-text) * .74); line-height:1.32; text-align:left}
+body:not(.inclass) .deck-slide .pcards.c2{grid-template-columns:repeat(2, minmax(0,1fr))}
+body:not(.inclass) .deck-slide .pcards.c3{grid-template-columns:repeat(3, minmax(0,1fr))}
+body:not(.inclass) .deck-slide .pcards.c4{grid-template-columns:repeat(4, minmax(0,1fr))}
+body:not(.inclass) .deck-slide .pcard{border:1px solid #d9d3c7; border-radius:5px; background:#fff;
+  padding:1.8vh 1.1vw; display:flex; flex-direction:column; gap:.8vh; min-width:0}
+body:not(.inclass) .deck-slide .pcard .tag{align-self:flex-start; font-size:.62em; font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase; padding:.15em .5em; border-radius:3px;
+  background:var(--subtle); color:var(--warm-gray)}
+body:not(.inclass) .deck-slide .pcard > b{color:var(--course-accent-dark); font-size:1.15em; line-height:1.15}
+body:not(.inclass) .deck-slide .pcard > span{color:var(--warm-gray)}
+body:not(.inclass) .deck-slide .pcard.gold{background:#fbf6ea; border-color:#d9c08a}
+body:not(.inclass) .deck-slide .pcard.gold > b{color:#8A6508}
+body:not(.inclass) .deck-slide .pcard.gold .tag{background:#f1e4c4; color:#8A6508}
+/* A figure with its formula beside it. The figure is squarish, so side by side
+   is the only way both fit under a claim; its width is capped by the screen's
+   height for the same reason a narrow figure's is. */
+.deck-slide .figmath{
+  display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:3vw; align-items:center; width:100%;
+}
+.deck-slide .figmath .figure{max-width:min(100%,92vh); justify-self:end}
+.deck-slide .figmath .work{margin:0; justify-self:start; font-size:calc(var(--stage-text) * .88)}
+/* A video carries its own size and does not scale to a viewBox, and the sweep
+   video across a full stage would stand 685 tall, which with a claim above it
+   does not fit a laptop. It stays at its own width, or smaller. */
+.deck-slide .stage .fig-body video{
+  width:100%; max-width:min(72rem,94vw); height:auto; max-height:62vh;
+  margin:0 auto;
+}
+.deck-slide .stage figcaption,.deck-slide .stage .source{display:none}
+.deck-slide .stage cg-demo{display:block; margin:0}
+/* The notes demo carries its setting, caption, source and whole header. A
+   slide has room for the plot, the channel buttons and the six rows. */
+.deck-slide .stage .cgd-setting,
+.deck-slide .stage .cgd-caption,
+.deck-slide .stage .source{display:none}
+/* Lecture 1's channel demo shows only the six header rows it is about. That
+   is a property of that demo, not of decks, so it is opted into. Without the
+   scope it also hid lecture 2's state table, whose rows carry no such class. */
+.deck-slide .stage.six-only .cgd-table tr:not(.six){display:none}
+.deck-slide .stage .cgd{border:0; background:none}
+.deck-slide .stage .cgd-table{border-top:1px solid #ece7dd}
+
+/* A demo's tooling, at lecture size. demos.css sets these for a notes page
+   read at arm's length: .7rem readout labels and an 11px axis. On a projector,
+   and worse in a recording downscaled to 1080p, they are the smallest text on
+   the slide -- and on the decimate demo they are the whole point of it, since
+   "peak read" against "peak at full rate" is the claim. The plot needs nothing;
+   only the chrome around it does.
+
+   Sized from --stage-code so this tracks the viewport like every other size in
+   the deck, rather than fixing a pixel count that is right on one screen. Note
+   .stage.big already applies zoom:1.4, so the rendered size is 1.4x these. */
+.deck-slide .stage .cgd-controls{padding:1rem 1.2rem}
+.deck-slide .stage .cgd-controls label{font-size:calc(var(--stage-code) * .55)}
+.deck-slide .stage .cgd-val{font-size:calc(var(--stage-code) * .55)}
+/* the slider is dragged on camera, so it gets room to be seen moving */
+.deck-slide .stage .cgd-controls input[type=range]{width:min(300px, 22vw)}
+.deck-slide .stage .cgd-readouts{padding:.9rem 1.2rem}
+.deck-slide .stage .cgd-readouts .k{font-size:calc(var(--stage-code) * .48)}
+.deck-slide .stage .cgd-readouts .v{font-size:calc(var(--stage-code) * .72)}
+/* axis numbers and the two axis titles, which are set in SVG user units */
+.deck-slide .stage .cgp text{font-size:15px}
+.deck-slide .stage .cgp text.ylab,
+.deck-slide .stage .cgp text.mk{font-size:15px}
+/* A demo built for a page can be far too small on a projector, and its own
+   sizes are in rem so a parent font-size will not reach them. Scale the whole
+   element instead, on the slides that need it. */
+.deck-slide .stage.big cg-demo{zoom:1.4}
+/* zoom is a fixed number, so it has to step down as the screen gets shorter,
+   or the demo runs off the bottom of a laptop screen */
+@media (max-height:860px){ .deck-slide .stage.big cg-demo{zoom:1.2} }
+@media (max-height:720px){ .deck-slide .stage.big cg-demo{zoom:1.0} }
+@media (max-height:620px){ .deck-slide .stage.big cg-demo{zoom:.85} }
+/* A demo with several stacked panels (acceleration, velocity, displacement)
+   is too tall to zoom. Each panel is capped by the screen's height instead,
+   and keeps its aspect, so the stack narrows and centers. */
+.deck-slide .stage.tall .cgd-plots svg{max-height:15vh}
+/* the controls and readouts still need lecture size, so they get the zoom the
+   whole demo gets on a .big stage, stepped down the same way */
+.deck-slide .stage.tall .cgd-controls,
+.deck-slide .stage.tall .cgd-readouts{zoom:1.4}
+/* a laptop screen has no height to spare once the claim wraps: the controls
+   drop to their own size and the plots give up a little more */
+@media (max-height:860px){ .deck-slide .stage.tall .cgd-controls,
+  .deck-slide .stage.tall .cgd-readouts{zoom:1.0}
+  .deck-slide .stage.tall .cgd-plots svg{max-height:13vh} }
+
+.deck-slide.part{background:var(--course-accent-dark); color:#fff; grid-template-rows:1fr}
+.deck-slide.part .course{
+  font-size:clamp(1.4rem,min(2.7vw,5vh),2.7rem); letter-spacing:.05em;
+  text-transform:uppercase; opacity:.82; margin:0 0 1.1rem; font-weight:600;
+  text-align:center; line-height:1.1;
+}
+/* A divider is a title, so it is set larger than a claim and spans the slide
+   like one. At this size the longest title in the course, 44 characters, runs
+   to two lines and everything shorter fits on one. */
+.deck-slide.part .say{
+  color:#fff; max-width:100%; font-size:clamp(2.4rem,min(5.1vw,9.4vh),5.1rem);
+  line-height:1.08;
+}
+
+/* raw file text, and arithmetic worked on the slide */
+.deck-slide .raw{
+  font-family:"SF Mono",Consolas,monospace; text-align:left; display:table;
+  margin:0 auto; font-size:var(--stage-code); line-height:1.45;
+  color:#3f3b36;
+}
+.deck-slide .raw .k{color:var(--term); font-weight:600}
+.deck-slide .raw .v{color:var(--def)}
+.deck-slide .raw .dim{color:#a8a294}
+/* worked arithmetic, set by KaTeX. The aligned environment does the spacing,
+   so there is no hand padding and no monospace face to fake a column. */
+.deck-slide .work{margin:0 auto; font-size:var(--stage-text)}
+.deck-slide .work .katex-display{margin:0}
+/* two display equations under one claim need air between them, or the
+   second one's numerator lands on the first one's denominator */
+.deck-slide .work .katex-display + .katex-display{margin-top:.8em}
+
+/* A hover note on one piece of code. display rather than visibility, because a
+   hidden absolutely-positioned box still counts towards a scroll container's
+   overflow and a slide clips what leaves it. */
+.deck-slide .tip{cursor:help; border-bottom:1px dotted var(--warm-gray)}
+.deck-slide .tip::after{
+  /* to the right of the call, not under it, so the note never covers the
+     lines it is talking about */
+  content:attr(data-note); position:absolute; left:calc(100% + 1.6rem); top:50%;
+  transform:translateY(-50%);
+  z-index:60; display:none; width:max-content; max-width:30ch;
+  background:#1d1b18; color:#e8e4dc; padding:.6rem .85rem; border-radius:4px;
+  font-family:"Segoe UI",-apple-system,system-ui,sans-serif; font-weight:400;
+  font-size:.64em; line-height:1.45; white-space:normal; text-align:left;
+  box-shadow:0 6px 18px rgba(0,0,0,.18);
+}
+.deck-slide .tip:hover{background:#fdf5db}
+.deck-slide .tip:hover::after{display:block}
+
+/* Working on paper beside the same working as a program, row for row, so a
+   hand step and the line that carries it sit on one line of the slide. */
+.deck-slide .pair{
+  display:grid; grid-template-columns:auto auto; gap:.35rem 3rem;
+  margin:1.6vh auto 0; text-align:left; align-items:baseline; position:relative;
+  font-size:var(--stage-code);
+}
+.deck-slide .pair .ph{
+  color:var(--warm-gray); font-size:.72em; letter-spacing:.07em;
+  text-transform:uppercase; font-weight:600; padding-bottom:.3rem;
+}
+.deck-slide .pair .hand{font-family:Georgia,"Times New Roman",serif; color:#3f3b36}
+.deck-slide .pair .code{font-family:"SF Mono",Consolas,monospace; white-space:pre;
+  color:#3f3b36}
+.deck-slide .pair .code .k{color:var(--term); font-weight:600}
+.deck-slide .pair .code .v{color:var(--def)}
+
+/* Code and what there is to say about it, on one slide. A comment belongs on
+   the line it is about, so the two panels share grid rows. */
+.deck-slide .panels{
+  display:grid; grid-template-columns:auto 1fr; gap:.15rem 2.6rem;
+  margin:1.6vh auto 0; text-align:left; align-items:baseline; position:relative;
+  font-size:var(--stage-code);
+}
+.deck-slide .panels .code{
+  font-family:"SF Mono",Consolas,monospace; white-space:pre; color:#3f3b36;
+}
+.deck-slide .panels .code .k{color:var(--term); font-weight:600}
+.deck-slide .panels .code .v{color:var(--def)}
+.deck-slide .panels .code .dim{color:#a8a294}
+.deck-slide .panels .note{color:var(--warm-gray); font-size:.86em; line-height:1.35}
+
+/* a two-by-two, for a division that runs the same way in two domains */
+.deck-slide .grid2{
+  display:grid; grid-template-columns:auto 1fr 1fr; gap:.7rem 2.4rem;
+  font-size:var(--stage-text); margin:0 auto; text-align:left;
+  align-items:baseline;
+}
+.deck-slide .grid2 .hd{color:var(--warm-gray); font-size:.78em; letter-spacing:.06em;
+  text-transform:uppercase; font-weight:600}
+.deck-slide .grid2 .rw{color:var(--term); font-weight:600}
+.deck-slide .grid2 .cell{color:var(--ink)}
+
+/* a name and what is under it */
+.deck-slide .names{
+  display:grid; grid-template-columns:auto 1fr; gap:1.2rem 1.8rem;
+  font-size:var(--stage-text); margin:0 auto; text-align:left;
+  align-items:baseline;
+}
+.deck-slide .names .nm{font-family:"SF Mono",Consolas,monospace; color:var(--term);
+  font-weight:600}
+.deck-slide .names .val{font-family:"SF Mono",Consolas,monospace; color:var(--ink)}
+.deck-slide .names .how{color:var(--warm-gray); font-size:.82em}
+
+/* a small table of names, as the by-hand calculation leaves them */
+.deck-slide .tbl{border-collapse:collapse; margin:0 auto;
+  font-size:var(--stage-text)}
+.deck-slide .tbl th{text-align:left; font-size:.72em; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--warm-gray); padding:0 1.6rem .5rem 0;
+  font-weight:600}
+.deck-slide .tbl td{padding:.34rem 1.6rem .34rem 0; vertical-align:baseline}
+.deck-slide .tbl td:first-child{font-family:"SF Mono",Consolas,monospace;
+  color:var(--term); font-weight:600}
+.deck-slide .tbl td:nth-child(2){color:var(--def); font-weight:600}
+.deck-slide .tbl td:nth-child(3){color:var(--warm-gray);
+  font-family:"SF Mono",Consolas,monospace; font-size:.86em}
+
+/* The three rules above describe one table: a name, what it holds, where it
+   came from. A table whose columns are all the same kind of thing opts out of
+   them, or the columns stop looking comparable, which is the whole reason it
+   is on the slide. .key marks the column the claim is about. */
+.deck-slide .tbl.nums td{font-variant-numeric:tabular-nums}
+/* every value column alike: one font, one size, one weight. Styling column 2
+   and column 3 separately set a three-column table's numbers in two fonts. */
+.deck-slide .tbl.nums td:nth-child(n+2){color:var(--warm-gray); font-weight:400;
+  font-family:"SF Mono",Consolas,monospace; font-size:1em}
+.deck-slide .tbl.nums td.key{color:var(--def); font-weight:600}
+
+/* A record of photographs, shown as the record it is. The strip leaves a
+   gutter between frames on purpose: the gutter is the part of the event nobody
+   photographed, which is the whole reason the figure is on the slide. */
+.deck-slide .strip img{display:block; width:100%; height:auto}
+
+/* Two frames either side of one interval, with the interval named between
+   them at a size that says it matters. */
+.deck-slide .frames{
+  display:flex; align-items:center; justify-content:center; gap:2.4vw;
+  width:100%;
+}
+.deck-slide .frames figure{margin:0; text-align:center}
+.deck-slide .frames img{
+  display:block; width:100%; max-width:27vw; max-height:54vh; height:auto;
+}
+/* the stage hides figcaptions, because a notes-page caption is prose the slide
+   has already said. These are not that: they are the timestamps, and they are
+   the point of the pair. */
+.deck-slide .stage .frames figcaption{
+  display:block; margin-top:.55rem; font-size:var(--stage-code);
+  color:var(--warm-gray); font-family:"SF Mono",Consolas,monospace;
+}
+/* The interval nothing was recorded or computed in. Not scoped to one layout:
+   the frame pair and the two-run pair both use it. */
+.deck-slide .gapmark{
+  font-size:var(--stage-text); color:var(--def); font-weight:600;
+  text-align:center; line-height:1.2; white-space:nowrap; flex:0 0 auto;
+}
+.deck-slide .gapmark span{
+  display:block; font-size:.58em; color:var(--warm-gray); font-weight:400;
+  margin-top:.4rem; white-space:normal; max-width:14ch; margin-inline:auto;
+}
+
+/* A photograph that is not ours, with the credit its licence requires. The
+   stage hides .source because a notes-page source block is prose; a credit
+   line is four words and has to be visible wherever the image is. */
+.deck-slide .stage .credit{
+  display:block; margin:.7rem auto 0; text-align:center;
+  font-size:calc(var(--stage-code) * .62); color:var(--warm-gray);
+  font-weight:400; line-height:1.4;
+}
+.deck-slide .stage .portrait img{
+  display:block; margin:0 auto; width:auto; height:auto;
+  max-height:52vh; max-width:100%;
+}
+
+/* Two runs of a sweep, side by side, with the unswept interval between them.
+   Wider and shorter than the frame pair, because a settled hill is a wide
+   flat thing. Each run is a looping clip, rendered on one shared view box. */
+.deck-slide .runs{
+  display:flex; align-items:center; justify-content:center; gap:1.6vw;
+  width:100%;
+}
+.deck-slide .runs figure{margin:0; text-align:center; flex:0 1 auto}
+.deck-slide .runs img, .deck-slide .runs video{display:block; width:100%; max-width:38vw; height:auto}
+.deck-slide .stage .runs figcaption{
+  display:block; margin-top:.6rem; font-size:calc(var(--stage-text) * .8);
+  color:var(--ink); line-height:1.35;
+}
+.deck-slide .stage .runs figcaption b{color:var(--term); font-weight:600}
+.deck-slide .stage .runs figcaption span{
+  display:block; color:var(--warm-gray); font-size:.86em; margin-top:.15rem;
+}
+
+/* Two columns of prose under one claim: a question on the left and what came
+   of it on the right, each with a heading of its own. */
+.deck-slide .duo{
+  display:grid; grid-template-columns:1fr 1fr; gap:1.2vh 3.2vw;
+  width:100%; text-align:left; font-size:var(--stage-text);
+}
+/* a portrait beside the prose about it */
+.deck-slide .duo.photo{grid-template-columns:auto minmax(0,1fr); align-items:start}
+.deck-slide .duo.photo figure{margin:0}
+.deck-slide .duo.photo img{
+  display:block; width:100%; max-width:min(22vw,320px); height:auto;
+}
+.deck-slide .stage .duo.photo figcaption{
+  display:block; margin-top:.5rem; text-align:center;
+  font-size:calc(var(--stage-code) * .62); color:var(--warm-gray);
+}
+.deck-slide .duo.photo h3:not(:first-child){margin-top:1.1rem}
+.deck-slide .duo h3{
+  margin:0 0 .5rem; font-size:.82em; font-weight:600; color:var(--term);
+  letter-spacing:.04em; text-transform:uppercase;
+}
+.deck-slide .duo p{margin:0 0 .7rem; line-height:1.35}
+.deck-slide .duo p:last-child{margin-bottom:0}
+.deck-slide .duo em{font-style:normal; color:var(--def); font-weight:600}
+/* not .aside: that is a site-wide block in blocks.css and it arrives with a
+   background. This is one quiet line under a claim. */
+.deck-slide .duo .footnote{color:var(--warm-gray); font-size:.86em}
+
+/* A signal chain: boxes with arrows between them, left to right. */
+.deck-slide .chain{
+  display:flex; align-items:stretch; justify-content:center; gap:.8vw;
+  width:100%; font-size:calc(var(--stage-text) * .84);
+}
+.deck-slide .chain > div{flex:0 1 auto; text-align:center}
+.deck-slide .chain .box{
+  border:1px solid #d9d2c4; border-radius:5px; padding:.7rem .9rem;
+  display:flex; flex-direction:column; justify-content:center; height:100%;
+}
+.deck-slide .chain .box b{display:block; color:var(--term); font-weight:600}
+.deck-slide .chain .box span{
+  display:block; color:var(--warm-gray); font-size:.8em; margin-top:.3rem;
+  line-height:1.3;
+}
+.deck-slide .chain .arrow{
+  display:flex; align-items:center; color:var(--warm-gray);
+  font-size:1.4em; padding:0 .1vw;
+}
+/* one box in the chain is where the damage is done */
+.deck-slide .chain .box.here{border-color:var(--def); border-width:2px}
+.deck-slide .chain .mark{
+  display:block; margin-top:.5rem; color:var(--def); font-weight:600;
+  font-size:.78em;
+}
+
+/* the six fields: the name, then what it settles, in plain words */
+.deck-slide .fields{
+  list-style:none; margin:0 auto; padding:0; display:grid; gap:.7rem;
+  font-size:var(--stage-text); text-align:left; max-width:58ch;
+}
+.deck-slide .fields b{color:var(--term); font-weight:600}
+.deck-slide .fields span{color:var(--warm-gray)}
+/* A one-word term is separated from its definition by its colour alone, which
+   is enough. A term several words long is not: it runs straight into the
+   definition and the eye has nowhere to break. Those go in two columns, opted
+   into, since most lists do not need it. */
+.deck-slide .fields.cols{grid-template-columns:auto 1fr; gap:.8rem 1.8rem;
+  max-width:74ch}
+.deck-slide .fields.cols li{display:contents}
+.deck-slide .fields.cols b{text-align:right}
+
+.deck-bar{position:fixed; left:0; right:0; bottom:0; height:3px; background:var(--subtle); z-index:40}
+.deck-bar > i{display:block; height:100%; width:0; background:var(--course-accent)}
+.deck-num{
+  position:fixed; right:1.6vw; bottom:1.6vh; font-size:.85rem; color:var(--warm-gray);
+  z-index:40; font-variant-numeric:tabular-nums;
+}
+.deck-notes{
+  position:fixed; left:0; right:0; bottom:0; max-height:38vh; overflow:auto;
+  display:none; padding:1.1rem 2rem 1.6rem; z-index:50;
+  background:#1d1b18; color:#e8e4dc; font-size:1rem; line-height:1.55;
+  border-top:3px solid var(--course-accent);
+}
+body.notes-on .deck-notes{display:block}
+.deck-notes p{margin:0 0 .6rem; max-width:80ch}
+.deck-help{
+  position:fixed; left:1.6vw; bottom:1.4vh; font-size:.76rem; color:var(--warm-gray);
+  z-index:40; opacity:.5;
+}
+/* Presenter tools. All of it is inert until p or d is pressed, so a student
+   who never presses either sees the deck exactly as it was. */
+
+/* The ink sits above the slide and below the notes panel, so opening the
+   notes covers a drawing rather than the other way round. pointer-events is
+   set from script: off while not inking, or the canvas would eat the clicks
+   that advance and the ones a demo wants. */
+.deck-ink{position:fixed; inset:0; z-index:45; pointer-events:none}
+/* b blanks the screen. A drawing is part of what is on the screen. */
+body.blank .deck-ink{visibility:hidden}
+
+/* The pointer. A mouse arrow is a few dark pixels and disappears on a
+   recording scaled to half size, so while presenting the system cursor is
+   hidden and this stands in for it. Amber with a white ring: the slides are
+   near-white and the dividers are dark green, and neither the term green nor
+   the def gold can be seen against both. */
+body.pointing, body.inking{cursor:none}
+.deck-dot{
+  --dot:clamp(14px, 2.2vh, 26px);
+  position:fixed; left:0; top:0; width:var(--dot); height:var(--dot);
+  margin:calc(var(--dot) / -2) 0 0 calc(var(--dot) / -2);
+  border-radius:50%; background:#E8A33D; border:2px solid #FFF;
+  box-shadow:0 0 0 1px rgba(0,0,0,.35), 0 2px 10px rgba(0,0,0,.35);
+  z-index:70; pointer-events:none; display:none;
+}
+body.pointing .deck-dot, body.inking .deck-dot{display:block}
+/* While inking the dot takes the pen's colour, so the nib says what it will
+   draw before it draws it. Smaller, because it is a nib and not a pointer. */
+body.inking .deck-dot{--dot:clamp(9px, 1.3vh, 15px)}
+
+/* Which mode is on, and what the keys are once it is. Sits where the help
+   line sits, one line above it. */
+.deck-hud{
+  position:fixed; left:1.6vw; bottom:calc(1.4vh + 1.5rem); z-index:40;
+  font-size:.76rem; color:var(--warm-gray); display:flex; align-items:center;
+  gap:.45rem; pointer-events:none;
+}
+.deck-hud:empty{display:none}
+.deck-hud i{
+  width:.62rem; height:.62rem; border-radius:50%; background:#E8A33D;
+  box-shadow:0 0 0 1px rgba(0,0,0,.2);
+}
+.deck-hud span{opacity:.55; margin-left:.35rem}
+
+@media print{
+  body{overflow:visible}
+  .deck-slide{position:static; display:flex; page-break-after:always; height:100vh}
+  .deck-bar,.deck-num,.deck-help,.deck-notes{display:none}
+  .deck-ink,.deck-dot,.deck-hud{display:none}
+}
+/* ---------------------------------------------------------------------------
+   In-class decks (front matter deck: "class"). The video decks above make one
+   claim per slide for a recording; a class deck delivers information to a room
+   that can read, so a slide carries a topic label and dense, scannable blocks:
+   cards in columns, compact tables, short lists. Everything is scoped to
+   body.inclass so the video decks are untouched.
+--------------------------------------------------------------------------- */
+body.inclass{--ic-text:clamp(1.1rem, min(2.05vw, 3.6vh), 2.2rem)}
+body.inclass .deck-slide:not(.part){justify-content:flex-start; align-items:stretch;
+  padding:4.5vh var(--gutter) 5vh; gap:2.2vh}
+body.inclass .deck-slide:not(.part) .head{text-align:left;
+  border-bottom:3px solid var(--course-accent); padding-bottom:1vh}
+body.inclass .deck-slide:not(.part) .say{text-align:left; margin:0;
+  font-size:clamp(1.5rem, min(2.9vw, 5.2vh), 2.9rem); text-wrap:wrap}
+body.inclass .deck-slide .kicker{display:block; font-size:.42em; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--warm-gray); font-weight:600; margin-bottom:.35vh}
+body.inclass .deck-slide .stage{font-size:var(--ic-text); line-height:1.38;
+  justify-content:flex-start; flex:1; min-height:0}
+/* cards in two or three columns */
+body.inclass .cols{display:grid; gap:1.6vh 2vw; align-items:start; width:100%}
+body.inclass .cols.c2{grid-template-columns:repeat(2, minmax(0,1fr))}
+body.inclass .cols.c3{grid-template-columns:repeat(3, minmax(0,1fr))}
+body.inclass .card{background:#f7f9f1; border-left:5px solid var(--course-accent);
+  padding:1.3vh 1.2vw 1.4vh; border-radius:3px}
+body.inclass .card h3{margin:0 0 .6vh; font-size:1.08em; color:var(--course-accent-dark)}
+body.inclass .card p{margin:0 0 .6vh}
+body.inclass .card ul, body.inclass .stage > ul{margin:0; padding-left:1.15em}
+body.inclass .card li, body.inclass .stage > ul li{margin:.25vh 0}
+body.inclass .card .dim{color:var(--warm-gray)}
+body.inclass .card.gold{background:#fbf6ea; border-left-color:#B8860B}
+body.inclass .card.gold h3{color:#8A6508}
+/* compact tables */
+body.inclass .ic-tbl{border-collapse:collapse; width:100%; font-size:.95em}
+body.inclass .ic-tbl th{text-align:left; font-size:.78em; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--warm-gray); border-bottom:2px solid var(--course-accent); padding:.4vh .8vw .4vh 0}
+body.inclass .ic-tbl td{padding:.45vh .8vw .45vh 0; border-bottom:1px solid #e6e0d4; vertical-align:top}
+body.inclass .ic-tbl td.n{font-variant-numeric:tabular-nums; color:var(--def); font-weight:600}
+/* a figure beside text */
+body.inclass .figside{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
+  gap:2vw; align-items:start; width:100%}
+body.inclass .figside img, body.inclass .figside video{width:100%; height:auto; display:block;
+  max-height:58vh; object-fit:contain; border:1px solid #e6e0d4}
+body.inclass .wideimg{width:100%; max-height:30vh; object-fit:contain; display:block; margin-top:1.2vh}
+body.inclass .src{font-size:.72em; color:var(--warm-gray); margin-top:.6vh}
+/* a "moment to arrive" slide (Five for Flourishing): the image, full screen */
+body.inclass .deck-slide.arrive{padding:0; justify-content:center; align-items:center; background:#000}
+body.inclass .deck-slide.arrive img{max-width:100vw; max-height:100vh; width:auto; height:auto; display:block}
+/* a sparse overview: one line and a row of pictures to talk over */
+body.inclass .lead{font-size:1.35em; line-height:1.3; margin:1vh 0 3vh; color:var(--ink)}
+body.inclass .trio{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:2vw; align-items:end}
+body.inclass .trio figure{margin:0}
+body.inclass .trio img{width:100%; height:34vh; object-fit:contain; display:block; border:1px solid #e6e0d4; background:#fff}
+body.inclass .trio figcaption{text-align:center; color:var(--course-accent-dark); font-weight:600; margin-top:1vh}
+/* a dense roster slide: smaller text, section headings between card rows */
+body.inclass .stage.tight{font-size:calc(var(--ic-text) * .74); line-height:1.28}
+body.inclass .stage.tight .card{padding:.9vh .9vw}
+body.inclass .stage.tight .card h3{margin-bottom:.3vh}
+body.inclass .stage.tight .cols{gap:1vh 1.2vw}
+body.inclass .sec{margin:1vh 0 .6vh; font-size:1em; color:var(--warm-gray);
+  text-transform:uppercase; letter-spacing:.06em}
+body.inclass .stage.tight .sec:first-child{margin-top:0}
+body.inclass .qr{display:flex; gap:1.4vw; align-items:center}
+body.inclass .qr p{margin:0 0 .6vh; font-weight:600}
+body.inclass .card .ico{height:1.15em; width:auto; vertical-align:-.2em; margin-right:.25em}
+/* a point slide, after the TCSS 490 decks: no title bar, the main point centred as the
+   heading with a grey line under it, and the content centred below */
+body.inclass .deck-slide.point:not(.part){padding-top:9vh; gap:3vh}
+body.inclass .deck-slide.point:not(.part) .head{text-align:center; border-bottom:0; padding-bottom:0}
+body.inclass .deck-slide.point:not(.part) .say{text-align:center; text-wrap:balance;
+  font-size:clamp(1.8rem, min(3.6vw, 6.4vh), 3.6rem)}
+/* a point slide with a figure: a smaller heading leaves the figure room, since the fit
+   script cannot shrink a figure, only the text beside it */
+body.inclass .deck-slide.point.compact:not(.part){padding-top:5vh; gap:2vh}
+body.inclass .deck-slide.point.compact:not(.part) .say{font-size:clamp(1.5rem, min(3vw, 5.4vh), 3rem)}
+/* point cards, after the TCSS 490 decks: a row of bordered cards under the slide's
+   main point, each a small tag, a title and one sentence */
+body.inclass .pcards{display:grid; gap:1.2vw; width:100%; margin-top:1vh}
+body.inclass .pcards.c3{grid-template-columns:repeat(3, minmax(0,1fr))}
+body.inclass .pcards.c4{grid-template-columns:repeat(4, minmax(0,1fr))}
+body.inclass .pcard{border:1px solid #d9d3c7; border-radius:5px; background:#fff;
+  padding:1.8vh 1.1vw; display:flex; flex-direction:column; gap:.8vh; min-width:0}
+body.inclass .pcard .tag{align-self:flex-start; font-size:.62em; font-weight:700; letter-spacing:.06em;
+  text-transform:uppercase; padding:.15em .5em; border-radius:3px; background:var(--subtle); color:var(--warm-gray)}
+body.inclass .pcard > b{color:var(--course-accent-dark); font-size:1.15em; line-height:1.15}
+body.inclass .pcard > span, body.inclass .pcard > p{color:var(--warm-gray); line-height:1.32; margin:0}
+body.inclass .pcard ul, body.inclass .pcard ol{margin:0; padding-left:1.15em; color:var(--warm-gray); line-height:1.32}
+body.inclass .pcard li{margin:.3vh 0}
+body.inclass .pcard li b{color:var(--ink)}
+body.inclass .pcard .vote{margin-top:.4vh}
+/* one gold card among plain ones */
+body.inclass .pcard.gold{background:#fbf6ea; border-color:#d9c08a}
+body.inclass .pcard.gold > b{color:#8A6508}
+body.inclass .pcard.gold .tag{background:#f1e4c4; color:#8A6508}
+body.inclass .pcol{display:flex; flex-direction:column; gap:1.2vh; min-width:0}
+body.inclass .pcards.c1{grid-template-columns:minmax(0,1fr)}
+body.inclass .pcards.c2{grid-template-columns:repeat(2, minmax(0,1fr))}
+body.inclass .pcard .q{color:var(--ink); font-style:italic}
+/* the row of point cards that says what to do */
+body.inclass .pcards.do .pcard{background:#fbf6ea; border-color:#d9c08a}
+body.inclass .pcards.do .pcard > b{color:#8A6508}
+body.inclass .pcards.do .tag{background:#f1e4c4; color:#8A6508}
+/* a quieter row of point cards under the main row */
+body.inclass .pcards.minor{font-size:.78em; margin-top:1.6vh}
+body.inclass .pcards.minor .pcard{background:#f7f6f2; border-color:#e6e0d4; padding:1.2vh 1vw}
+body.inclass .pcards.minor .pcard > b{color:var(--warm-gray)}
+/* the learning-group roster: one card per group, names listed down the card so a
+   student scans for their own while the details beside it are reviewed */
+body.inclass .groups{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:1vh .8vw; align-content:start}
+body.inclass .gcard{background:#f7f9f1; border-top:4px solid var(--course-accent); border-radius:3px;
+  padding:.8vh .7vw .9vh; font-size:.86em; line-height:1.28}
+body.inclass .gcard h4{margin:0 0 .4vh; font-size:1.08em; color:var(--course-accent-dark)}
+body.inclass .gcard h4 span{font-weight:400; color:var(--warm-gray); font-size:.8em; margin-left:.3em}
+body.inclass .gcard ul{list-style:none; margin:0; padding:0}
+body.inclass .gcard li{margin:0; white-space:nowrap}
+/* a day-by-day timeline, set large: it is the whole slide */
+body.inclass .timeline{font-size:1.15em}
+body.inclass .timeline td{padding:1.6vh 1.5vw 1.6vh 0}
+body.inclass .timeline td:first-child{white-space:nowrap; width:1%; color:var(--course-accent-dark)}
+body.inclass .stage a{color:var(--course-accent-dark)}
+body.inclass .qr img{width:22vh; height:22vh; display:block}
+/* class 2: figure hosts, channel legend chips, vote cards, and an amber kicker
+   for the slides where the room does something */
+body.inclass .c2fig{width:100%}
+body.inclass .c2fig > svg{display:block; width:100%; height:auto; max-height:62vh}
+body.inclass .c2fig.half > svg{max-height:31vh}
+body.inclass .c2fig .cgd .cgp:not(.c2chart) text{font-size:15px}
+body.inclass .c2key b{display:inline-block; width:.75em; height:.75em; border-radius:50%; vertical-align:-.05em}
+body.inclass .c2key b.head{background:#5F7038}
+body.inclass .c2key b.cross{background:#b0443a}
+body.inclass .c2key b.amber{background:#b8860b}
+body.inclass .c2key b.sq{border-radius:1px}
+body.inclass .c2key i.amber{border-color:#b8860b}
+body.inclass .c2key i.faint{border-color:#cfc8bb}
+body.inclass .card .c2fig{margin:.4vh 0 .6vh}
+body.inclass .c2row{display:grid; grid-template-columns:1fr 1fr; gap:1.2vw; margin-top:.6vh}
+body.inclass .c2row svg{display:block; width:100%; height:auto; max-height:30vh}
+body.inclass .c2fig .cgd{margin:0}
+body.inclass .c2key{display:inline-flex; align-items:center; gap:.35em; margin-right:1.1em; font-weight:600}
+body.inclass .c2key i{display:inline-block; width:1.8em; border-top:3px solid}
+body.inclass .c2key i.head{border-color:#5F7038}
+body.inclass .c2key i.cross{border-color:#b0443a}
+body.inclass .c2key i.chest{border-top-style:dashed; border-color:#3A5F8A}
+body.inclass .c2key i.neck{border-top-style:dotted; border-color:#b8860b}
+body.inclass .vote{display:grid; grid-template-columns:1fr; gap:.8vh; margin-top:1vh}
+body.inclass .vote div{display:flex; align-items:center; gap:1vw; border:2px solid var(--course-accent); border-radius:6px; padding:.6vh 1vw; background:#fff}
+body.inclass .vote b{font-size:1.4em; color:var(--course-accent-dark); min-width:1.2em}
+body.inclass .kicker.act{color:#8A6508}
+/* a slide being measured by the fit script below: laid out, never seen */
+body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
+</style>
+</head>
+<body class="inclass" data-pagefind-ignore="all">
+
+
+<section class="deck-slide arrive">
+  <img src="data/img/f4f/f4f-03.png?v=20261017141252" width="1920" height="1080"
+       alt="Mindfulness practice. As you wait for class to begin, consider this invitation to try +2 Breathing: 1. Bring your awareness to your breath, paying close attention to each inhale and exhale. 2. Count, in seconds, the length of your inhale and exhale. 3. Try to extend your exhale to be 2 seconds longer than your inhale. 4. Continue with this exercise for 1 to 2 minutes. 5. Observe how this brief practice affects you as you prepare for class to begin. Beside it, a photograph of cherry blossoms against a blue sky.">
+</section>
+
+<section class="deck-slide part">
+  <div class="head">
+    <p class="course">TME 310 &middot; Computational Physical Modeling</p>
+    <p class="say">Class 3</p>
+  </div>
+</section>
+
+<!-- ============================================================ assignment 2
+     An exercise on a cold AI attempt at Assignment 2. Two rounds, four slides
+     each: read a paragraph and ask questions, what we asked, edit it together in
+     the box on the slide, then our edit. Paragraphs are quoted exactly from the
+     report (test 10642, the week 2 notes' demo test, which no phrase assigns).
+     Working files: Teaching/TME 310 - Computational Modelling/grading/A2-report-B-*.html -->
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">I asked <span class="term">Claude Opus 5.5</span> to do Assignment 2, so we can read its report and flag what needs editing.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c4">
+      <div class="pcard"><span class="tag">while we read</span><b>Do we understand it?</b>
+        <span>Say it back in your own words.</span></div>
+      <div class="pcard"><span class="tag">while we read</span><b>Where does it come from?</b>
+        <span>The program, the notes, or a choice the author made.</span></div>
+      <div class="pcard"><span class="tag">while we read</span><b>Could we explain it to Alice?</b>
+        <span>Why it holds, and why it matters to her.</span></div>
+      <div class="pcard"><span class="tag">while we read</span><b>What new question does it raise?</b>
+        <span>Write it down even if nobody can answer it yet.</span></div>
+    </div>
+    <p class="src">The whole report is on the site: <a href="ai-report-02.html">first draft</a>, <a href="ai-report-02-annotated.html">annotated</a> and <a href="ai-report-02-edited.html">edited</a>.</p>
+  </div>
+</section>
+
+<!-- ---------------------------------------------------------------- round 1 -->
+
+<section class="deck-slide point" data-fill="0.95">
+  <div class="head">
+    <p class="say">Round 1 &middot; Read it, ask, then <span class="term">edit</span> it together.</p>
+    <p class="sub">How the report made a 1&nbsp;kHz record from a 12&#8239;500 a second test.</p>
+  </div>
+  <div class="stage tight">
+    <textarea class="edit" spellcheck="false" aria-label="Round 1 paragraph to edit" style="width:100%; height:44vh; box-sizing:border-box; font:inherit; font-size:1.05em; line-height:1.45; padding:1.4vh 1.2vw; border:2px solid var(--def); border-radius:6px; background:#fff; color:var(--ink); resize:none">Rates that do not divide 12,500. At 6,250 Hz the logger keeps every 2nd sample, which is exact. At 1,000 Hz one of its intervals is 12.5 of ours, so its samples fall between ours. I gave each of its samples the value of our sample taken at or just before that instant (at most 0.08 ms early), so its gaps alternate between 12 and 13 of our samples. This gives 25 different possible starts at 1 kHz. I checked this choice against a second model (a straight line between our two neighbouring samples) and the worst-start percentages moved by at most 1.7 points, with no change to any pass or fail (Assumptions, below).</textarea>
+    <div class="pcards c4 minor">
+      <div class="pcard"><b>Do we understand it?</b></div>
+      <div class="pcard"><b>Where does it come from?</b></div>
+      <div class="pcard"><b>Can we explain it?</b></div>
+      <div class="pcard"><b>What new questions?</b></div>
+    </div>
+    <p class="src">Click in the box to type. Arrow keys move the cursor while you type, and a click outside the box goes to the next slide.</p>
+  </div>
+</section>
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">Round 1 &middot; <span class="term">Our</span> edit keeps every 12th and every 13th sample.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">the edited memo</span>
+        <p style="font-size:1.05em; line-height:1.45; margin:.6vh 0">A 1 kHz logger would take one sample for every 12.5 of ours, and I cannot keep half a sample. So I kept every 12th sample, which makes a 1,042 Hz logger, and every 13th, which makes a 962 Hz one. The two rates bracket 1 kHz, and I report the worse of the two as the 1 kHz number.</p></div>
+      <div class="pcard"><span class="tag">the same verdict</span><b>Worst start, % of peak</b>
+        <table class="ic-tbl">
+          <tr><td></td><td>every 12th (1&#8239;042 a second)</td><td>every 13th (962 a second)</td><td>the report's model (1&#8239;000)</td></tr>
+          <tr><td>Crossmember</td><td class="n">50.6</td><td class="n">54.9</td><td class="n">52.5</td></tr>
+          <tr><td>Driver head Z</td><td class="n">93.9</td><td class="n">93.0</td><td class="n">93.0</td></tr>
+          <tr><td>Driver head Y</td><td class="n">93.7</td><td class="n">93.7</td><td class="n">93.8</td></tr>
+        </table></div>
+    </div>
+    <div class="pcards c2 do">
+      <div class="pcard"><span class="tag">what changed</span><b>Two whole steps</b>
+        <span>Keeping every 12th or 13th sample uses only values we recorded, with the method from the week 2 notes.</span></div>
+      <div class="pcard"><span class="tag">what changed</span><b>One rule for the numbers</b>
+        <span>Reporting the worse of the two keeps every 1&nbsp;kHz number on the cautious side.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------------------------------------------------------------- round 2 -->
+
+<section class="deck-slide point" data-fill="0.95">
+  <div class="head">
+    <p class="say">Round 2 &middot; Read it, ask, then <span class="term">edit</span> it together.</p>
+    <p class="sub">Two paragraphs from the evidence section, built on the method from round 1.</p>
+  </div>
+  <div class="stage tight">
+<div class="pcards c2" style="grid-template-columns:3fr 2fr">
+      <div class="pcard" style="padding:0; border:0; background:none">    <textarea class="edit" spellcheck="false" aria-label="Round 2 paragraphs to edit" style="width:100%; height:44vh; box-sizing:border-box; font:inherit; font-size:.85em; line-height:1.45; padding:1.4vh 1.2vw; border:2px solid var(--def); border-radius:6px; background:#fff; color:var(--ink); resize:none">At 6,250 Hz (every 2nd sample) the worst a logger can do is skip the single peak sample. It then reads the sample next to it, −1,503 m/s², which is the 2.4% loss in the answer. Below 6,250 Hz it can skip two samples in a row, and the next one down is −1,333 m/s² (86.5%).
+
+Figure 3 checks the gap between the rates in Table 1. Every rate from 6,250 Hz up keeps 97.6% of the crossmember peak, and every rate from 6,000 Hz down fails. So the boundary on this test is between 6,000 and 6,250 Hz, and a 10 kHz logger would do no better and no worse than a 6.25 kHz one.</textarea></div>
+      <div class="pcard"><span class="tag">the report's figure 3</span>
+        <img src="data/example/figures/ai02-report-fig3.png?v=20261017141252" width="1200" height="675" style="display:block; width:100%; height:auto; max-height:46vh; object-fit:contain" alt="Worst-start peak as a percentage of the 12,500 Hz peak at every rate from 500 to 12,500 samples a second in steps of 250. The black crossmember line climbs in steps, sits at 86.5% from about 4,250 to 6,000, jumps to 97.6% at 6,250 and stays flat to 12,250. The blue line, the lowest dummy channel, stays above 95% from about 1,250 up. A red line marks the proposed 1,000 Hz logger and a green line the recommended 6,250 Hz."></div>
+    </div>
+    <div class="pcards c4 minor">
+      <div class="pcard"><b>Do we understand it?</b></div>
+      <div class="pcard"><b>Where does it come from?</b></div>
+      <div class="pcard"><b>Can we explain it?</b></div>
+      <div class="pcard"><b>What new questions?</b></div>
+    </div>
+    <p class="src">Click in the box to type. Arrow keys move the cursor while you type, and a click outside the box goes to the next slide.</p>
+  </div>
+</section>
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">Round 2 &middot; <span class="term">Our</span> edit reports only rates from every k-th sample.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c1">
+      <div class="pcard"><span class="tag">the edited memo</span>
+        <p style="font-size:1.05em; line-height:1.45; margin:.6vh 0">The next slower rate I could make was every 3rd sample, 4,167 samples a second, and it fails, so the limit is probably somewhere between the two. I could not make any rate between 6,250 and our present 12,500 from our record, so I have not checked a logger in that range (a 10 kHz logger, for instance).</p>
+        <p style="font-size:1.05em; line-height:1.45; margin:.6vh 0"><b>Whole steps only.</b> I could only make rates of 12,500 divided by a whole number. For this reason I cannot say where between 4,167 and 6,250 samples a second the limit falls.</p></div>
+    </div>
+    <div class="pcards c3 do">
+      <div class="pcard"><span class="tag">what changed</span><b>Rates from every k-th sample</b>
+        <span>Every 2nd sample (6&#8239;250 a second) passes from any start, and every 3rd sample (4&#8239;167 a second) fails from its worst start.</span></div>
+      <div class="pcard"><span class="tag">what changed</span><b>The limit as a range</b>
+        <span>Of the rates we can get this way, the change from pass to fail falls between 4&#8239;167 and 6&#8239;250.</span></div>
+      <div class="pcard"><span class="tag">what changed</span><b>10&nbsp;kHz named</b>
+        <span>It is listed as untested, so Alice can ask for it to be checked.</span></div>
+    </div>
+    <p class="src">The whole report is on the site: <a href="ai-report-02.html">first draft</a>, <a href="ai-report-02-annotated.html">annotated</a> and <a href="ai-report-02-edited.html">edited</a>.</p>
+  </div>
+</section>
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">Questions from <span class="term">week 2</span>, before we start Assignment 3.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">week 2</span><b>What we covered</b>
+        <ul>
+          <li>Program shape II, branching and encapsulation</li>
+          <li>Stopping a loop against a tolerance, a bound and a budget</li>
+          <li>Discrete evaluation, and why a peak read from samples is a lower bound</li>
+          <li>Aliasing, a fast cycle recorded as a slower one</li>
+          <li>Assignment 2, sample rate and peak loss</li>
+        </ul></div>
+      <div class="pcard gold"><span class="tag">reminders</span><b>Late, incomplete, stuck</b>
+        <ul>
+          <li><b>Late work is accepted.</b> It counts toward the late column of the grading table.</li>
+          <li><b>Incomplete work can be resubmitted.</b> It comes back with a comment, and the resubmission counts as late.</li>
+          <li><b>If you are stuck or have a question, please reach out</b> on Discord, at the open session with the TA, or by appointment with me.</li>
+        </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ extra labors -->
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">The first stage of each extra labor is due <span class="term">Sunday, November 1</span>.</p>
+    <p class="sub">Each completed labor adds +0.3 to your base grade, up to a maximum of 4.0.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c4">
+      <div class="pcard"><span class="tag">10&ndash;20 hours</span><b>Slope stability lab</b>
+        <span>A proposal with your definition of damage and your search plan.</span></div>
+      <div class="pcard"><span class="tag">10&ndash;20 hours</span><b>Labor journal essay</b>
+        <span>A one&#8209;page outline with your theme and three sub&#8209;themes.</span></div>
+      <div class="pcard"><span class="tag">15&ndash;25 hours</span><b>Literature survey</b>
+        <span>Eight relevant articles found through Google Scholar, each with a brief description.</span></div>
+      <div class="pcard"><span class="tag">20&ndash;30 hours</span><b>Course project</b>
+        <span>A one&#8209;page (300 word) proposal covering the question, the data, and what would count as an answer.</span></div>
+    </div>
+    <p class="src">Stage 2 is due in week 7 and stage 3 in week 10. Please see <a href="extra-labor.html">Extra labor</a> for detailed labor instructions.</p>
+  </div>
+</section>
+
+<!-- ============================================================ slope stability lab
+     The two clips are runs 5 and 10 of the lab's read-only example class (the
+     test round), a 2.6 MPa slope at 1.0 g and 3.0 g, copied from mint's
+     data_example/runs/<id>/clip.mp4. No current student's slope is shown. -->
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">The <span class="term">slope stability lab</span> asks for the largest shaking your slope can be sure to survive.</p>
+    <p class="sub">Carol has to decide whether a county road needs work before the next big earthquake, and a simulation of the slope stands in for the real one.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">example slope &middot; 1.0&nbsp;g &middot; holds</span>
+        <video src="data/img/lab-example-hold.mp4?v=20261017141252" poster="data/img/lab-example-hold.png?v=20261017141252"
+               autoplay loop muted playsinline width="1280" height="358" style="width:100%; height:auto; display:block"
+               aria-label="A simulated rock slope of grains in coloured horizontal bands, shaken by an earthquake. The bands stay level and the slope stands."></video>
+        <span>The bands stay level, and every survey marker stays on the slope.</span></div>
+      <div class="pcard"><span class="tag">the same slope &middot; 3.0&nbsp;g &middot; damaged</span>
+        <video src="data/img/lab-example-fail.mp4?v=20261017141252" poster="data/img/lab-example-fail.png?v=20261017141252"
+               autoplay loop muted playsinline width="1280" height="358" style="width:100%; height:auto; display:block"
+               aria-label="The same slope shaken three times harder. A dark crack opens down from the crest and grains roll off the left toe."></video>
+        <span>A crack opens down from the crest, and grains roll off the left toe.</span></div>
+    </div>
+    <div class="pcards c3 do">
+      <div class="pcard"><span class="tag">week 4 &middot; Sunday, Nov 1</span><b>Proposal</b>
+        <span>Your definition of damage, your search plan, what &ldquo;sure&rdquo; will mean, and how you will spend your 40 runs. Submit it on the lab page before your first new run.</span></div>
+      <div class="pcard"><span class="tag">week 7 &middot; Sunday, Nov 22</span><b>Preliminary report</b>
+        <span>Every run so far and what it showed, what you would change about your proposal, and how you will use the rest of your budget.</span></div>
+      <div class="pcard"><span class="tag">week 10 &middot; Sunday, Dec 13</span><b>Final report</b>
+        <span>The largest PGA your slope can be sure to survive, with the evidence, and an account of every run. Your answer joins the class results.</span></div>
+    </div>
+    <p class="src">Camera clips from the lab&rsquo;s example class (bond strength 2.6&nbsp;MPa), with the bands coloured by starting height. Each stage is a PDF with your data phrase at the top. Please see <a href="extra-labor-slope.html">Slope stability lab</a> for detailed labor instructions.</p>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">The proposal is a plan for your <span class="term">measurements</span>.</p>
+    <p class="sub">Each of these choices is yours to make and defend, and they are written down before your first new run.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c4">
+      <div class="pcard"><span class="tag">what to read</span><b>Instruments</b>
+        <span>Survey stations, inclinometers, crack gauges, accelerometers, a rockfall counter and a post-event survey. Each one has a field counterpart that engineers use on real slopes.</span>
+        <span>Please see the lab&rsquo;s <a href="https://dem.climbinggiants.com/guide.html" target="_blank">field guide</a>.</span></div>
+      <div class="pcard"><span class="tag">what counts</span><b>Damage</b>
+        <span>A threshold on one or more readings, such as permanent movement, a crack at the crest, rockfall onto the road, or a slip surface. A 2002 California committee screened slope movement at 5&nbsp;cm and 15&nbsp;cm.</span>
+        <span>Please see <a href="https://dem.climbinggiants.com/guide-damage.html" target="_blank">Defining damage</a>.</span></div>
+      <div class="pcard"><span class="tag">where to run</span><b>Search</b>
+        <span>Bracket the edge with one run that holds and one that fails, then bisect. Narrowing a 1&nbsp;g bracket to 0.01&nbsp;g takes 7 runs, provided damage switches on only once.</span>
+        <span>Week 7: <a href="bisection.html">Bisection</a> and <a href="root-finding-fails.html">Root finding fails</a>.</span></div>
+      <div class="pcard"><span class="tag">how sure</span><b>Repeats</b>
+        <span>Test whether a repeat run at the same setting gives the same reading. What &ldquo;sure&rdquo; means sets how many repeats you need, so plan the two together.</span>
+        <span>Week 3: <a href="bias-and-noise.html">Bias and noise</a>.</span></div>
+    </div>
+    <p class="src">Screening values from T.&nbsp;F. Blake, R.&nbsp;A. Hollingsworth and J.&nbsp;P. Stewart (eds.), <a href="https://www.tugraz.at/fileadmin/user_upload/Institute/IAG/Files/32_Landslide_Mitigation-DMG_SP117.pdf" target="_blank">Recommended Procedures for Implementation of DMG Special Publication 117</a> (SCEC, 2002).</p>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">The <span class="term">labor journal essay</span> reflects on your own learning this quarter.</p>
+    <p class="sub">Your learning logs and reflections supply the material, and Gibbs&rsquo; reflective cycle gives it depth.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">week 4 &middot; Sunday, Nov 1</span><b>Outline</b>
+        <ul>
+          <li><b>One page.</b> Write a point-form plan for the whole essay.</li>
+          <li><b>Theme.</b> State one theme and three sub-themes, with an experience from the quarter for each.</li>
+          <li><b>Still developing.</b> Hypothetical topics are fine, since some of your experiences have not happened yet.</li>
+        </ul></div>
+      <div class="pcard"><span class="tag">week 7 &middot; Sunday, Nov 22</span><b>Draft</b>
+        <ul>
+          <li><b>Length.</b> Write 3&ndash;4 pages (900&ndash;1200 words), edited for content, spelling and grammar.</li>
+          <li><b>Sub-themes.</b> Give each one a paragraph or two that takes one experience through Gibbs&rsquo; six steps.</li>
+          <li><b>Complete.</b> Make the draft as complete as you can, since that is what the feedback works on.</li>
+        </ul></div>
+      <div class="pcard"><span class="tag">week 10 &middot; Sunday, Dec 13</span><b>Final essay</b>
+        <ul>
+          <li><b>Revise.</b> Use the feedback on both your reflection and your writing.</li>
+          <li><b>Edit.</b> Edit more than once, for spelling, grammar, organization and conciseness.</li>
+          <li><b>Help.</b> You are welcome to seek help editing for spelling and grammar.</li>
+        </ul></div>
+    </div>
+    <div class="pcards c3 do">
+      <div class="pcard"><span class="tag">from past essays</span><b>Material</b>
+        <ul>
+          <li><b>Ordinary weeks.</b> Learning group meetings were the most common experience (about 1 in 10 sub-themes), followed by schedule changes, the deadline crunch, and work and family.</li>
+          <li><b>Your logs.</b> It is a good idea to read them back first and compare a week that went badly with one that went well.</li>
+        </ul></div>
+      <div class="pcard"><span class="tag">from past essays</span><b>Moments and feelings</b>
+        <ul>
+          <li><b>One moment.</b> Sub-themes built on a specific moment (&ldquo;I opened the week 3 assignment at 7:40 on Sunday night&rdquo;) went further than ones built on a general habit.</li>
+          <li><b>Feelings.</b> About 1 in 6 sub-themes named no feeling at all. Name more than one, and say when each happened.</li>
+        </ul></div>
+      <div class="pcard"><span class="tag">from past essays</span><b>Action plans</b>
+        <ul>
+          <li><b>The weakest step.</b> About a third of sub-themes had no plan, and many ended with &ldquo;I will start earlier.&rdquo;</li>
+          <li><b>Checkable.</b> Name a situation and what you will do when it comes up, such as &ldquo;try explaining one example out loud before each meeting.&rdquo;</li>
+        </ul></div>
+    </div>
+    <p class="src">From 363 essays written in my courses, 2022&ndash;2026. Please see <a href="labor-journal-essay-guide.html">Writing the Labor Journal Essay</a> for more, with an example essay, and <a href="extra-labor-essay.html">Labor journal essay</a> for detailed labor instructions.</p>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">The <span class="term">literature survey</span> takes you deeper into one topic than the course can go.</p>
+    <p class="sub">A narrow topic you find interesting will typically serve you better than a broad one.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">week 4 &middot; Sunday, Nov 1</span><b>Article list</b>
+        <ul>
+          <li><b>Eight articles.</b> Find eight relevant articles through Google Scholar.</li>
+          <li><b>Each entry.</b> Give the bibliography entry from Scholar&rsquo;s &ldquo;Cite&rdquo; link, a link to the article, and its key result in your own words.</li>
+          <li><b>Your words.</b> No cut-and-paste from the article or AI.</li>
+        </ul>
+        <p class="q">Example search: a domain, a sub-domain and a problem, such as &ldquo;vehicle crashworthiness&rdquo;, &ldquo;digital filter design&rdquo; and &ldquo;filter cutoff selection&rdquo;.</p></div>
+      <div class="pcard"><span class="tag">week 7 &middot; Sunday, Nov 22</span><b>Three summaries</b>
+        <ul>
+          <li><b>Three articles.</b> Choose three from your list and write a one-page summary of each.</li>
+          <li><b>Each summary.</b> Give the key result and any additional results in your own words, the model and experiment in 1&ndash;3 paragraphs, and a list of open questions.</li>
+          <li><b>Template.</b> A summary template is in Canvas.</li>
+        </ul>
+        <p class="q">Example open question: &ldquo;Would the cutoff the authors chose still hold for a test recorded at a lower sample rate?&rdquo;</p></div>
+      <div class="pcard"><span class="tag">week 10 &middot; Sunday, Dec 13</span><b>Revision and reflection</b>
+        <ul>
+          <li><b>Revise.</b> Revise the three summaries using the feedback.</li>
+          <li><b>Reflect.</b> Add a one-page reflection on how the papers connect to what you already knew, and where they changed your thinking.</li>
+        </ul>
+        <p class="q">Example: &ldquo;Before these papers I thought the filter in the standard was a fixed fact. Reading how its cutoff was chosen showed me it was a judgment made from data.&rdquo;</p></div>
+    </div>
+    <p class="src">Please see <a href="extra-labor-survey.html">Literature survey</a> for detailed labor instructions and a full example summary.</p>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">The <span class="term">course project</span> answers one question with data you find or measure yourself.</p>
+    <p class="sub">A model states how the system behaves and predicts something you did not use to build it.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">week 4 &middot; Sunday, Nov 1</span><b>Proposal, about 300 words</b>
+        <ul>
+          <li><b>The question.</b> Write one sentence, specific enough that a number answers it.</li>
+          <li><b>The data.</b> Say what you will use, how much there is, and whether you already have it.</li>
+          <li><b>The answer and the risk.</b> Say what form the answer will take, and give one honest paragraph on what could go wrong.</li>
+        </ul>
+        <p class="q">Example: &ldquo;What is the drag coefficient of my model rocket, fitted to a video track of its launch, with an interval?&rdquo;</p></div>
+      <div class="pcard"><span class="tag">week 7 &middot; Sunday, Nov 22</span><b>Draft</b>
+        <ul>
+          <li><b>Real output.</b> Include results produced from actual data, however rough.</li>
+          <li><b>What went wrong.</b> Say what has already gone wrong and what you did about it, since that is usually where the feedback helps.</li>
+        </ul>
+        <p class="q">Example: a plot with unlabelled axes and a result you do not yet believe is a good week 7 submission.</p></div>
+      <div class="pcard"><span class="tag">week 10 &middot; Sunday, Dec 13</span><b>Report or video</b>
+        <ul>
+          <li><b>Form.</b> Submit a 3&ndash;4 page report (900&ndash;1200 words) plus figures, or an 8&ndash;12 minute video.</li>
+          <li><b>Content.</b> State the question, the data, the method, every choice and why, and the result with an interval.</li>
+          <li><b>Cost and limits.</b> Re-run one choice a different way to show what it costs, and say what you do not know.</li>
+        </ul>
+        <p class="q">Example: &ldquo;Fitting every other frame moved the drag coefficient by 8%.&rdquo;</p></div>
+    </div>
+    <p class="src">Please see <a href="extra-labor-project.html">Course project</a> for detailed labor instructions.</p>
+  </div>
+</section>
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">Please talk to me about your extra labor <span class="term">this week</span>.</p>
+    <p class="sub">The purpose is to catch a topic that will not work before you have spent twenty hours on it.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">the rules</span><b>Three stages</b>
+        <ul>
+          <li><b>All three count.</b> To get credit for a staged labor you must complete every stage.</li>
+          <li><b>One week late at most.</b> Late stages go to the back of the grading queue, which may delay your feedback.</li>
+          <li><b>No penalty if dropped.</b> You may stop a labor at any stage, and it does not count against you.</li>
+        </ul></div>
+      <div class="pcard gold"><span class="tag">no stages</span><b>Two other ways up</b>
+        <ul>
+          <li><b>AI use record.</b> Work your assignments with the course tutor under your own name. It is also +0.3, with nothing to submit and no extra time. Remember to sign in when you use the chatbot, or the work is not credited to you.</li>
+          <li><b>Extra problems.</b> Each one is +0.1, any time, with no late penalty. However, a correct answer is required.</li>
+        </ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide part">
+  <div class="head">
+    <p class="course">TME 310 &middot; Computational Physical Modeling</p>
+    <p class="say">Break &middot; 10 minutes</p>
+  </div>
+</section>
+
+<!-- ============================================================ the request -->
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">Alice wants to know whether the <span class="term">accelerometer</span> agrees with the lab's speed.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">the request</span><b>Alice, on the instrumentation</b>
+        <span><em>"The accelerometers ought to be able to tell me how fast the car was going when it hit the barrier, and the lab measured that separately with its own equipment. Those two numbers should agree. Do they? Also, how far did the passenger compartment travel after the car hit the wall?"</em></span></div>
+      <div class="pcard gold"><span class="tag">Assignment 3</span><b>What Alice needs back</b>
+        <ul>
+          <li><b>Yes or no</b>, in a sentence, at the top</li>
+          <li><b>The two numbers</b> and the gap between them</li>
+          <li><b>What accounts for the gap</b></li>
+          <li><b>The crush</b>, in millimetres</li>
+        </ul></div>
+      <div class="pcard"><span class="tag">before the next slide</span><b>What questions do you need to answer to better understand this problem?</b>
+        <span>With your group, list them.</span></div>
+    </div>
+    <p class="src">Today we work the problem on NHTSA test 9808 (a 2016 Honda Civic), which is held back from the phrase assignment. Every figure comes from it unless the figure says otherwise.</p>
+  </div>
+</section>
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">The file holds one of the two speeds, so we will have to <span class="term">make the other</span>.</p>
+    <p class="sub">Seven questions, in the order we take them today.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c4">
+      <div class="pcard"><span class="tag">step 1</span><b>Where is the lab's speed?</b>
+        <span>The file, read the way Assignment 1 read it.</span></div>
+      <div class="pcard"><span class="tag">step 2</span><b>Which channel measures the car?</b>
+        <span>The channel headers, and the time vector from week 1.</span></div>
+      <div class="pcard"><span class="tag">step 3</span><b>How do we turn an acceleration into a change in speed?</b>
+        <span><a href="area-under-a-curve.html">Area under a curve</a> and <a href="cumulative-integration.html">Cumulative integration</a>.</span></div>
+      <div class="pcard"><span class="tag">step 4</span><b>How do we turn a $\Delta v$ into a $v$?</b>
+        <span><a href="the-constant-of-integration.html">The constant of integration</a>.</span></div>
+      <div class="pcard"><span class="tag">step 5</span><b>Could our methods be responsible for the gap?</b>
+        <span><a href="bias-and-noise.html">Bias and noise</a>.</span></div>
+      <div class="pcard"><span class="tag">step 6</span><b>How far did the passenger compartment travel?</b>
+        <span>The velocity from step 4, integrated again with <a href="cumulative-integration.html">Cumulative integration</a>.</span></div>
+      <div class="pcard"><span class="tag">step 7</span><b>Does the answer make sense?</b>
+        <span>P&oacute;lya's fourth step, looking back (class 2).</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ step 1 -->
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">The lab's speed is in the file's <span class="term">test description</span>, in km/h.</p>
+    <p class="sub">Step 1 of 7 &middot; Where is the lab's speed?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); position:relative">
+      <div class="pcol">
+      <div class="pcard"><span class="tag">what we found</span><b>The top of the crash file</b>
+<pre style="font-family:Consolas,'SF Mono',monospace; font-size:.78em; line-height:1.45; margin:.6vh 0 0; white-space:pre-wrap">"testNo": 9808,
+"vehicle": {"make": "HONDA", "model": "CIVIC", "year": 2016},
+"test": {"type": "OPTIONAL NEW CAR ASSESSMENT TEST",
+         "config": "VEHICLE INTO BARRIER",
+         <b>"speed_kph": 56.17</b>, "angle": 0},
+"channels": { ... }</pre></div>
+      </div>
+      <div class="pcol">
+        <div class="pcard"><span class="tag">what we learn</span><b>56.17&nbsp;km/h is 15.60&nbsp;m/s</b>
+          <span>The accelerometer records m/s&sup2;, so anything we compute from it will come out in m/s. Dividing by 3.6 puts the lab's number in the same units.</span></div>
+        <div class="pcard gold"><span class="tag">next</span><b>The other number is not in the file</b>
+          <span>No channel records a speed.</span></div>
+      </div>
+      <!-- The unit conversion, worked as on a whiteboard each time the slide is
+           shown. The problem goes up first. Each thought is written, its
+           conclusion is written under it, circled and moved to a shelf under the
+           right-hand cards, and the thought is erased. The shelf's two factors
+           are then used to solve the problem (the beats are in class-03-figs.js). The board is absolutely positioned
+           in the white space under both columns, so the deck's fit script sizes
+           the cards without it. Without the script (print, thumbnails, reduced
+           motion) the board shows its finished state. -->
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&amp;display=swap">
+      <style>
+        .c3wb{position:absolute; left:0; right:0; top:100%; height:30vh;
+              font-family:Caveat,"Segoe Print","Bradley Hand",cursive;
+              font-size:1.18em; line-height:1.05; color:#222; pointer-events:none}
+        .c3wb .it{position:absolute; left:0; top:0; white-space:nowrap}
+        .c3wb .ink{display:flex; align-items:center; gap:.3em}
+        .c3wb .note{color:#1f4e9c}
+        .c3wb .fr{display:inline-flex; flex-direction:column; align-items:center; margin:0 .1em}
+        .c3wb .fr > span + span{border-top:2px solid currentColor; padding:0 .15em}
+        .c3wb .x{position:relative; display:inline-block}
+        .c3wb .x::after{content:""; position:absolute; left:-15%; right:-15%; top:52%;
+                        border-top:2.5px solid #c0392b; transform:rotate(-24deg); transform-origin:left center}
+        .c3wb .x:not(.on)::after{transform:rotate(-24deg) scaleX(0)}
+        .c3wb .stack{display:inline-grid}
+        .c3wb .stack > span{grid-area:1/1; text-align:center}
+        @property --a{syntax:"<angle>"; inherits:false; initial-value:360deg}
+        .c3wb .ring{position:absolute; left:-9%; top:-16%; width:118%; height:132%;
+                    border:2.5px solid #2e7d32; border-radius:50%; transform:rotate(-4deg);
+                    -webkit-mask:conic-gradient(from 200deg, #000 var(--a), transparent 0);
+                    mask:conic-gradient(from 200deg, #000 var(--a), transparent 0)}
+        .c3wb .cc{padding:.1em .35em}
+        .c3wb [data-k="prob"] .ring{left:-6%; top:-55%; width:112%; height:210%; transform:rotate(-2deg)}
+      </style>
+      <div class="c3wb" data-board="units" aria-label="Working: 1000 m in 1 km, so 1000 m over 1 km is 1. 60 s in a minute and 60 minutes in an hour, so 3600 s in 1 h, and 1 h over 3600 s is 1. Then 56.17 km/h times 1000 m over 1 km times 1 h over 3600 s, with km and h cancelling, is 56.17 times 1000 m over 3600 s, which is 15.60 m/s.">
+        <div class="it" data-k="prob"><span class="ink">56.17 km/h =
+          <span class="stack"><span class="q" data-k="q">?</span><span class="a" data-k="ans">15.60</span></span> m/s</span>
+          <span class="ring" data-k="ring0"></span></div>
+        <div class="it note" data-k="t1"><span class="ink">1000 m in 1 km</span></div>
+        <div class="it cc" data-k="c1"><span class="ink"><span class="fr"><span>1000 m</span><span>1 km</span></span> = 1</span>
+          <span class="ring" data-k="ring1"></span></div>
+        <div class="it note" data-k="t2a"><span class="ink">60 s in a minute, 60 minutes in an hour</span></div>
+        <div class="it note" data-k="t2b"><span class="ink">so 3600 s in 1 h</span></div>
+        <div class="it cc" data-k="c2"><span class="ink"><span class="fr"><span>1 h</span><span>3600 s</span></span> = 1</span>
+          <span class="ring" data-k="ring2"></span></div>
+        <div class="it" data-k="ch"><span class="ink">56.17 <span class="fr"><span><span class="x" data-k="x1">km</span></span><span><span class="x" data-k="x3">h</span></span></span>
+          &times; <span class="fr"><span>1000 m</span><span>1 <span class="x" data-k="x2">km</span></span></span>
+          &times; <span class="fr"><span>1 <span class="x" data-k="x4">h</span></span><span>3600 s</span></span></span></div>
+        <div class="it" data-k="res"><span class="ink">= <span class="fr"><span>56.17 &times; 1000 m</span><span>3600 s</span></span> = 15.60 m/s</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ step 2 -->
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">Seven of the eight channels are on the dummies, and one is on the <span class="term">car</span>.</p>
+    <p class="sub">Step 2 of 7 &middot; Which channel measures the car?</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">what we found</span><b>The header comment on each channel</b>
+        <ul>
+          <li>DRIVER HEAD X, Y and Z</li>
+          <li>DRIVER CHEST X, and DRIVER CHEST DISPLACEMENT</li>
+          <li>DRIVER PELVIS X</li>
+          <li>PASSENGER HEAD X</li>
+          <li><b>LEFT REAR SEAT CROSSMEMBER X</b></li>
+        </ul></div>
+      <div class="pcol">
+        <div class="pcard"><span class="tag">what we learn</span><b>A dummy moves inside the car</b>
+          <span>In class 2 the driver's head started to slow about 20&nbsp;ms after the car did. Alice asked about the car, so we want the sensor bolted to its structure.</span></div>
+        <div class="pcard gold"><span class="tag">next</span><b>A plot before we use it</b>
+          <span>We have not looked at this channel yet, and its time vector tells us which sample is the impact.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">The record starts 50&nbsp;ms <span class="term">before contact</span>.</p>
+    <p class="sub">Step 2 of 7 &middot; Which channel measures the car?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
+      <div class="c2fig" data-c3="request"></div>
+      <div class="pcol">
+        <div class="pcard"><span class="tag">what we found</span><b>The time vector</b>
+          <span>The header gives <code>t0</code>&nbsp;=&nbsp;&minus;0.05&nbsp;s and <code>dt</code>&nbsp;=&nbsp;0.0001&nbsp;s. Time zero is contact, so contact is sample 500 (0.05&nbsp;/&nbsp;0.0001).</span></div>
+        <div class="pcard"><span class="tag">what we learn</span><b>Two parts to the record</b>
+          <span>Before contact the car is towed at a steady speed and the trace sits near zero. After contact it swings to nearly 1000&nbsp;m/s&sup2; for about 80&nbsp;ms.</span></div>
+        <div class="pcard gold"><span class="tag">next</span><b>From acceleration to speed</b>
+          <span>Acceleration is the rate at which the speed changes, so adding it up over time should tell us how much the speed changed.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ step 3 -->
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">The area under an acceleration curve is a <span class="term">change in velocity</span>.</p>
+    <p class="sub">Step 3 of 7 &middot; A reminder from calculus.</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)">
+      <div>
+        <div class="c2fig" data-c3="area"></div>
+        <p class="src">A drawn pulse, not measured. Area below the axis counts as negative.</p>
+      </div>
+      <div class="pcol">
+        <div class="pcard"><span class="tag">from calculus</span><b>$\int_a^b f(x)\,dx = F(b) - F(a)$</b>
+          <span>The signed area between $f$ and the axis, where $F' = f$ (the fundamental theorem).</span></div>
+        <div class="pcard"><span class="tag">in the crash test</span><b>$\int_0^{t_1} a(t)\,dt = v(t_1) - v(0)$</b>
+          <span>Since $a = dv/dt$, the velocity is an antiderivative of the acceleration. The area under the acceleration record is the change in velocity.</span></div>
+        <div class="pcard gold"><span class="tag">units</span><b>m/s&sup2; &times; s = m/s</b>
+          <span>Each strip of area is a height (m/s&sup2;) times a width (s), so the area is a velocity. Since $v = dx/dt$, the area under a velocity is a distance.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">An integral of sampled data adds up the area of a <span class="term">shape</span> fitted between each pair of samples.</p>
+    <p class="sub">Step 3 of 7 &middot; A reminder from the notes.</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)">
+      <div style="position:relative">
+        <div class="c2fig" data-c3="rules"></div>
+        <p class="src">A drawn curve, not measured. Area below the axis counts as negative. The full page is <a href="area-under-a-curve.html">Area under a curve</a>.</p>
+        <!-- T - R worked on a whiteboard (the beats are in class-03-figs.js): the
+             two sums are written, their shared middle terms struck out, the
+             difference circled and put on the first line, then the derivation is
+             erased and the Civic's numbers worked in its place. It hangs below the
+             figure, out of the fit script's measurement. -->
+        <style>
+          .c3tr{position:absolute; top:100%; left:0; margin-top:1.2vh; pointer-events:none;
+                font-family:Caveat,"Segoe Print","Bradley Hand",cursive; font-size:1.45em; line-height:1.1; color:#222}
+          .c3tr .row{display:flex; align-items:center; gap:.3em; white-space:nowrap; padding:.25vh 0; position:relative}
+          .c3tr .note{color:#1f4e9c}
+          .c3tr .x{position:relative; display:inline-block}
+          .c3tr .x::after{content:""; position:absolute; left:-4%; right:-4%; top:55%;
+                          border-top:2.5px solid #c0392b; transform:rotate(-7deg); transform-origin:left center}
+          .c3tr .x:not(.on)::after{transform:rotate(-7deg) scaleX(0)}
+          .c3tr .stack{display:inline-grid}
+          .c3tr .stack > span{grid-area:1/1}
+          .c3tr .ringed{position:relative; padding:0 .3em}
+          .c3tr .ring{position:absolute; left:-4%; top:-30%; width:108%; height:160%;
+                      border:2.5px solid #2e7d32; border-radius:50%; transform:rotate(-2deg);
+                      -webkit-mask:conic-gradient(from 200deg, #000 var(--a), transparent 0);
+                      mask:conic-gradient(from 200deg, #000 var(--a), transparent 0)}
+          /* the derivation and the Civic's numbers share one space */
+          .c3tr .area{display:grid}
+          .c3tr .area > .blk{grid-area:1/1}
+        </style>
+        <div class="c3tr" data-board="tminusr" data-strike="-7deg" aria-label="Working: T minus R. T is h times one half f zero plus f one through f n minus one plus one half f n. R is h times f zero plus f one through f n minus one. The middle terms are the same in both and cancel, so T minus R is h over 2 times f of x n minus f of x zero. On the Civic, h is 0.0001 s, the acceleration is 1.14 m/s squared at contact and 13.81 at the end, so T minus R is 0.00063 m/s.">
+          <div class="row"><span data-k="lhs">T &minus; R =</span>
+            <span class="stack"><span data-k="q">?</span><span data-k="ans">(h/2)[f(x<sub>n</sub>) &minus; f(x<sub>0</sub>)]</span></span></div>
+          <div class="area">
+            <div class="blk" data-k="derive">
+              <div class="row"><span data-k="tr">T = h[ &frac12;f<sub>0</sub> + <span class="x" data-k="xt">f<sub>1</sub> + &hellip; + f<sub>n&minus;1</sub></span> + &frac12;f<sub>n</sub> ]</span></div>
+              <div class="row"><span data-k="rr">R = h[ f<sub>0</sub> + <span class="x" data-k="xr">f<sub>1</sub> + &hellip; + f<sub>n&minus;1</sub></span> ]</span>
+                <span class="note" data-k="note">&larr; same middle terms</span></div>
+              <div class="row"><span data-k="d1">T &minus; R = h[ &frac12;f<sub>n</sub> &minus; &frac12;f<sub>0</sub> ] =</span>
+                <span class="ringed"><span data-k="d2">(h/2)[f(x<sub>n</sub>) &minus; f(x<sub>0</sub>)]</span><span class="ring" data-k="ringd"></span></span></div>
+            </div>
+            <div class="blk">
+              <div class="row"><span class="note" data-k="c1">On the Civic: h = 0.0001 s</span></div>
+              <div class="row"><span class="note" data-k="c2">f(x<sub>0</sub>) = 1.14, f(x<sub>n</sub>) = 13.81 m/s&sup2;</span></div>
+              <div class="row"><span data-k="c3a">T &minus; R = (0.0001/2)(13.81 &minus; 1.14) =</span>
+                <span class="ringed"><span data-k="c3b">0.00063 m/s</span><span class="ring" data-k="ringc"></span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pcol">
+        <div class="pcard"><span class="tag">rectangles</span><b>$R = h \sum_{i=0}^{n-1} f(x_i)$</b>
+          <span>Each panel's area is its width <i>h</i> times its left-hand sample. The error falls in proportion to <i>h</i>.</span></div>
+        <div class="pcard"><span class="tag">trapezoids</span><b>$T = h\left[\frac{f(x_0)}{2} + f(x_1) + \dots + f(x_{n-1}) + \frac{f(x_n)}{2}\right]$</b>
+          <span>Each panel's area is <i>h</i> times the average of its two samples, so the end samples count half. The error falls with <i>h</i>&sup2;, so halving <i>h</i> quarters it.</span></div>
+        <div class="pcard gold"><span class="tag">on a measured record</span><b><i>h</i> is the sample interval</b>
+          <span>The header sets it (0.1&nbsp;ms on the Civic), so it cannot be made smaller. The trapezoid rule costs one extra add and multiply, so it is the usual choice.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Which trapezoid sum is <span class="term">too small</span>, which is too large, and which is a mix?</p>
+    <p class="sub">Step 3 of 7 &middot; How do we turn an acceleration into a change in speed?</p>
+  </div>
+  <div class="stage tight">
+    <div class="c2fig" data-c3="traps"></div>
+    <p class="src">One drawn curve, three stretches of it, two trapezoids on each.</p>
+    <div class="pcards c1">
+      <div class="pcard gold"><span class="tag">predict &middot; vote</span><b>Match each to A, B or C</b>
+        <span>Too small, too large, or a mix of the two.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">A trapezoid sum is too small where the curve <span class="term">bends down</span>, and too large where it bends up.</p>
+    <p class="sub">Step 3 of 7 &middot; How do we turn an acceleration into a change in speed?</p>
+  </div>
+  <div class="stage tight">
+    <div class="c2fig" data-c3="trapsReveal"></div>
+    <p class="src"><span class="c2key"><b class="head"></b>area the sum misses</span><span class="c2key"><b class="cross"></b>area the sum adds</span> The errors are against the exact area of the drawn curve, exp(&minus;<i>x</i>&sup2;).</p>
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">C</span><b>Bends down, too small</b>
+        <span>Each chord lies under the curve, so every panel misses a sliver.</span></div>
+      <div class="pcard"><span class="tag">B</span><b>Bends up, too large</b>
+        <span>Each chord lies over the curve, so every panel adds a sliver.</span></div>
+      <div class="pcard gold"><span class="tag">A</span><b>Bends both ways, a mix</b>
+        <span>The two kinds of sliver partly cancel. The crash record bends both ways many times, and its panels are 0.1&nbsp;ms wide.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">The running total is the car's <span class="term">change in velocity</span>, $\Delta v$, and it ends at &minus;16.74&nbsp;m/s.</p>
+    <p class="sub">Step 3 of 7 &middot; How do we turn an acceleration into a change in speed?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
+      <div class="c2fig" data-c3="dv"></div>
+      <div class="pcol">
+        <div class="pcard"><span class="tag">what we found</span><b>A change, not a velocity</b>
+          <span>The running total (with its leading zero, so it lines up with the time vector) is zero at contact because it counts only the change since then. It is negative because the car is slowing.</span></div>
+        <div class="pcard"><span class="tag">what we learn</span><b>It passes the lab's speed</b>
+          <span>The change reaches the lab's 15.60&nbsp;m/s at 77&nbsp;ms, peaks at &minus;18.18&nbsp;m/s at 119&nbsp;ms, and ends at &minus;16.74.</span></div>
+        <div class="pcard gold"><span class="tag">next</span><b>From $\Delta v$ to $v$</b>
+          <span>The car was not at rest at contact, so the change alone is not its velocity.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ step 4 -->
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">What speed should we add to the $\Delta v$ to get the car's <span class="term">velocity</span>?</p>
+    <p class="sub">Step 4 of 7 &middot; How do we turn a $\Delta v$ into a $v$?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
+      <div class="c2fig" data-c3="vote"></div>
+      <div class="pcol">
+        <div class="pcard"><span class="tag">predict &middot; vote</span><b>One number to add</b>
+          <span>The running total starts at zero at contact. The car's velocity at contact was not zero.</span>
+          <div class="vote">
+            <div><b>A</b>Zero</div>
+            <div><b>B</b>The tow speed, the lab's 15.60&nbsp;m/s</div>
+            <div><b>C</b><span>The largest &Delta;<i>v</i>, 18.18&nbsp;m/s</span></div>
+            <div><b>D</b><span>The total &Delta;<i>v</i>, 16.74&nbsp;m/s</span></div>
+          </div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">With the tow speed added, the car <span class="term">stops at 77&nbsp;ms</span>, bounces backward, and is still moving when the record ends.</p>
+    <p class="sub">Step 4 of 7 &middot; How do we turn a $\Delta v$ into a $v$?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
+      <div class="c2fig" data-c3="vel"></div>
+      <div class="pcol">
+        <div class="pcard"><span class="tag">77&nbsp;ms</span><b>It stops</b>
+          <span>The velocity reaches zero, and the compartment is as far into the crush as it gets.</span></div>
+        <div class="pcard"><span class="tag">119&nbsp;ms &middot; A</span><b>It bounces backward</b>
+          <span>The car moves away from the barrier, fastest at 2.58&nbsp;m/s.</span></div>
+        <div class="pcard"><span class="tag">300&nbsp;ms &middot; B</span><b>It has not stopped</b>
+          <span>The car is still going backward at 1.13&nbsp;m/s when the record ends. That is the gap between the total $\Delta v$ and the tow speed.</span></div>
+        <div class="pcard gold"><span class="tag">next</span><b>Is the gap real?</b>
+          <span>Or could our methods be responsible for it?</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ step 5 -->
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Each recorded sample is the <span class="term">signal</span> plus an offset plus noise.</p>
+    <p class="sub">Step 5 of 7 &middot; A reminder from the notes.</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)">
+      <div>
+        <div class="c2fig" data-c3="parts"></div>
+        <p class="src">Drawn, not measured, with the offset made large enough to see. The full page is <a href="bias-and-noise.html">Bias and noise</a>.</p>
+      </div>
+      <div class="pcol">
+        <div class="pcard"><span class="tag">the record</span><b><i>a<sub>i</sub></i>&nbsp;=&nbsp;<i>s<sub>i</sub></i>&nbsp;+&nbsp;<i>b</i>&nbsp;+&nbsp;<i>&epsilon;<sub>i</sub></i></b>
+          <span>The signal <i>s</i> is the motion we want. The offset <i>b</i> is the same in every sample, and the noise <i>&epsilon;</i> differs from sample to sample. Only the sum is recorded.</span></div>
+        <div class="pcard"><span class="tag">what can be done</span><b>One is a number, one is a spread</b>
+          <span>Integrated, the offset gives $\int_0^T b\,dt = bT$, one number. The noise partly cancels as it is summed.</span></div>
+        <div class="pcard gold"><span class="tag">next</span><b>Where <i>s</i> is zero</b>
+          <span>Before contact the car is towed at a steady speed, so the record there holds only <i>b</i>&nbsp;+&nbsp;<i>&epsilon;</i>.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Before contact the record should read zero, and its average is <span class="term">&minus;0.043&nbsp;m/s&sup2;</span>.</p>
+    <p class="sub">Step 5 of 7 &middot; Could our methods be responsible for the gap?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)">
+      <div style="position:relative">
+        <div class="c2fig" data-c3="pre"></div>
+        <p class="src">What we found: the mean is the offset, and the scatter about it is the noise, with a standard deviation of 1.75&nbsp;m/s&sup2;.</p>
+        <!-- the offset's and the noise's sums worked with the Civic's numbers
+             (the beats are in class-03-figs.js); hung below the figure, out of
+             the fit script's measurement -->
+        <style>
+          .c3sm{position:absolute; top:100%; left:0; margin-top:1vh; pointer-events:none;
+                font-family:Caveat,"Segoe Print","Bradley Hand",cursive; font-size:1.3em; line-height:1.1; color:#222}
+          .c3sm .row{display:flex; align-items:center; gap:.3em; white-space:nowrap; padding:.2vh 0}
+          .c3sm .note{color:#1f4e9c}
+          .c3sm .ringed{position:relative; padding:0 .3em}
+          .c3sm .ring{position:absolute; left:-4%; top:-30%; width:108%; height:160%;
+                      border:2.5px solid #2e7d32; border-radius:50%; transform:rotate(-2deg);
+                      -webkit-mask:conic-gradient(from 200deg, #000 var(--a), transparent 0);
+                      mask:conic-gradient(from 200deg, #000 var(--a), transparent 0)}
+        </style>
+        <div class="c3sm" data-board="sums" aria-label="Working: b is minus 0.043 m/s squared and T is 0.30 s, so bT is minus 0.043 times 0.30, which is minus 0.013 m/s. Sigma is 1.75 m/s squared and delta t is 0.0001 s, so sigma times the square root of delta t times T is 1.75 times the square root of 0.0001 times 0.30, about 0.010 m/s.">
+          <div class="row"><span class="note" data-k="n1">b = &minus;0.043 m/s&sup2;, T = 0.30 s</span></div>
+          <div class="row"><span data-k="o1">bT = &minus;0.043 &times; 0.30 =</span>
+            <span class="ringed"><span data-k="o2">&minus;0.013 m/s</span><span class="ring" data-k="ro"></span></span></div>
+          <div class="row"><span class="note" data-k="n2">&sigma; = 1.75 m/s&sup2;, &Delta;t = 0.0001 s</span></div>
+          <div class="row"><span data-k="s1">&sigma;&radic;(&Delta;t&thinsp;T) = 1.75 &times; &radic;(0.0001 &times; 0.30)</span></div>
+          <div class="row" style="padding-left:2.2em"><span class="ringed"><span data-k="s2">&asymp; 0.010 m/s</span><span class="ring" data-k="rs"></span></span></div>
+        </div>
+      </div>
+      <div class="pcol">
+        <div class="pcard"><span class="tag">what we learn</span><b>The three sums, from contact to the end</b>
+          <span>$\Delta t\sum a_i = \Delta t\sum s_i + \Delta t\sum b + \Delta t\sum \varepsilon_i$</span>
+          <ul>
+            <li><b>Signal.</b> $\Delta t\sum s_i = \Delta v$, the change we want.</li>
+            <li><b>Offset.</b> $n b\,\Delta t = bT$, growing with the record's length.</li>
+            <li><b>Noise.</b> Partly cancels, typically $\sigma\sqrt{\Delta t\,T}$.</li>
+          </ul>
+          <span>On the Civic each is about 1% of the 1.13&nbsp;m/s gap.</span></div>
+        <div class="pcard gold"><span class="tag">next</span><b>Can we take them out?</b>
+          <span>The offset and the noise behave differently when they are summed.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">The offset can be <span class="term">subtracted</span>, because it is the same in every sample.</p>
+    <p class="sub">Step 5 of 7 &middot; Could our methods be responsible for the gap?</p>
+  </div>
+  <div class="stage tight">
+    <div class="work">
+      $$\begin{aligned}
+        b &\approx \text{the mean before contact} = \textcolor{#8A6508}{-0.043\ \text{m/s}^2} \\[4pt]
+        a_i - b &= s_i + \varepsilon_i
+      \end{aligned}$$
+    </div>
+    <div class="figside" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
+      <div class="c2fig" data-c3="pre"></div>
+      <div class="c2fig" data-c3="preOff"></div>
+    </div>
+    <div class="pcards c1 do">
+      <div class="pcard"><span class="tag">next</span><b>What does removing it change?</b>
+        <span>The values we found in step 4, before and after.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">Removing the offset moves each value by about <span class="term">0.01&nbsp;m/s</span>, and the car still bounces back.</p>
+    <p class="sub">Step 5 of 7 &middot; Could our methods be responsible for the gap?</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c4">
+      <div class="pcard"><span class="tag">the total &Delta;<i>v</i></span><b>&minus;16.75 &rarr; &minus;16.74&nbsp;m/s</b>
+        <span>The offset, &minus;0.043&nbsp;m/s&sup2; over the 0.30&nbsp;s after contact, had added <i>bT</i>&nbsp;=&nbsp;&minus;0.013&nbsp;m/s.</span></div>
+      <div class="pcard"><span class="tag">the stop</span><b>77.1 &rarr; 77.1&nbsp;ms</b>
+        <span>The velocity still reaches zero at the same sample, and the crush is still 674&nbsp;mm.</span></div>
+      <div class="pcard"><span class="tag">119&nbsp;ms &middot; A</span><b>&minus;2.59 &rarr; &minus;2.58&nbsp;m/s</b>
+        <span>The car still bounces backward from the barrier.</span></div>
+      <div class="pcard"><span class="tag">300&nbsp;ms &middot; B</span><b>&minus;1.15 &rarr; &minus;1.13&nbsp;m/s</b>
+        <span>The car is still moving backward when the record ends.</span></div>
+    </div>
+    <div class="pcards c1 do">
+      <div class="pcard"><span class="tag">what we conclude</span><b>The gap is in the test, not in our methods</b>
+        <span>The offset explains about 1% of the 1.13&nbsp;m/s gap, and the noise about as much. Neither explains the bounce or the car not having stopped, so our conclusion from step 4 stands.</span></div>
+    </div>
+    <p class="src">The Civic (test 9808), integrated with the trapezoid rule from contact, before and after subtracting the mean of the 50&nbsp;ms before contact. The figures on the earlier slides already used the corrected record.</p>
+  </div>
+</section>
+
+<!-- ============================================================ step 6 -->
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Where does the crush <span class="term">start</span>, and where does it end?</p>
+    <p class="sub">Step 6 of 7 &middot; How far did the passenger compartment travel?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
+      <div class="c2fig" data-c3="crushq"></div>
+      <div class="pcol">
+        <div class="pcard"><span class="tag">the curves</span><b>Three of the vote's answers</b>
+          <span class="c2key"><i class="head"></i>B the tow speed</span>
+          <span class="c2key"><i class="cross"></i>C the largest &Delta;v</span>
+          <span class="c2key"><i class="amber"></i>D the total &Delta;v</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point compact" data-fill="0.97">
+  <div class="head">
+    <p class="say">How do we get the <span class="term">crush</span> from this cumulative integral?</p>
+    <p class="sub">Step 6 of 7 &middot; How far did the passenger compartment travel?</p>
+  </div>
+  <div class="stage">
+    <div class="c2fig" data-c3="dist" style="width:76%; margin:0 auto"></div>
+  </div>
+</section>
+
+<section class="deck-slide point compact" data-fill="0.97">
+  <div class="head">
+    <p class="say">The crush is the <span class="term">area</span> under the velocity from start to end.</p>
+    <p class="sub">Step 6 of 7 &middot; How far did the passenger compartment travel?</p>
+  </div>
+  <div class="stage">
+    <!-- the controls are what the room watches on this slide, so they are set
+         larger than the deck's default; the plots are shortened to make room -->
+    <style>
+      .deck-slide .stage .c3big .cgd{display:grid; grid-template-columns:minmax(0,1.8fr) minmax(0,1fr);
+                  grid-template-rows:auto 1fr; column-gap:1.2vw; align-items:start}
+      .deck-slide .stage .c3big .cgd-plots{grid-column:1; grid-row:1 / span 2; padding:0}
+      .deck-slide .stage .c3big .cgd-controls{grid-column:2; grid-row:1; padding:.8rem 1rem;
+                           flex-direction:column; align-items:stretch; gap:.9rem}
+      .deck-slide .stage .c3big .cgd-controls label{font-size:2.5vh; min-width:0}
+      .deck-slide .stage .c3big .cgd-controls input[type=range]{width:auto; flex:1; min-width:0; height:3vh}
+      .deck-slide .stage .c3big .cgd-val{font-size:2.5vh; min-width:5.2em}
+      .deck-slide .stage .c3big .cgd-seg{display:grid; grid-template-columns:1fr 1fr; gap:.5rem}
+      .deck-slide .stage .c3big .cgd-seg button{font-size:2.2vh; padding:.7em .4em}
+      .deck-slide .stage .c3big .cgd-readouts{grid-column:2; grid-row:2; padding:.6rem 1rem; border-top:0}
+      .deck-slide .stage .c3big .cgd-readouts .k{font-size:1.8vh}
+      .deck-slide .stage .c3big .cgd-readouts .v{font-size:3.4vh}
+    </style>
+    <div class="c2fig c3big" data-c3="crush"></div>
+  </div>
+</section>
+
+<!-- ============================================================ step 7 -->
+
+<section class="deck-slide point compact" data-fill="0.97">
+  <div class="head">
+    <p class="say">We checked each result against a <span class="term">second way</span> of getting it.</p>
+    <p class="sub">Step 7 of 7 &middot; Does the answer make sense?</p>
+  </div>
+  <div class="stage">
+    <div class="c2fig" data-c3="checks" style="width:80%; margin:0 auto"></div>
+    <p class="src" style="text-align:center">Also checked: removing the offset moves the crush by 0.1&nbsp;mm, as &frac12;<i>bT</i>&sup2; predicts (0.13&nbsp;mm), and a steady stop in 674&nbsp;mm takes 18.4&nbsp;<i>g</i>.</p>
+  </div>
+</section>
+
+<!-- ============================================================ your report -->
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">Each step left a <span class="term">choice</span> that your report should state.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">Assignment 3</span><b>The seven steps, and the choice at each</b>
+        <ol>
+          <li><b>The lab's speed.</b> Its units too.</li>
+          <li><b>The channel.</b> Why you chose it.</li>
+          <li><b>The rule.</b> Rectangles or trapezoids.</li>
+          <li><b>The constant.</b> Which one you used, and where it came from.</li>
+          <li><b>The offset, and where you read the change.</b> Whether you removed the offset, how much it mattered, and why you read at A or B.</li>
+          <li><b>The crush.</b> Which distance you report, and where the integral starts.</li>
+          <li><b>The checks.</b> Which ones you ran, and what they showed.</li>
+        </ol></div>
+      <div class="pcard gold"><span class="tag">Assignment 3</span><b>Where your evidence runs out</b>
+        <ul>
+          <li>One sensor, on one crossmember, stands for the whole compartment.</li>
+          <li>Nothing in the file measures the car's motion after it leaves the barrier on its own.</li>
+          <li>The channel is unfiltered. SAE J211 assigns it a filter before it is integrated (week 4).</li>
+          <li>The lab's speed has an uncertainty of its own, and the file does not give it.</li>
+        </ul>
+        <span>Please see the <a href="reports-03.html">example reports</a>.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ outside crash testing -->
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">An integrated measurement usually needs a <span class="term">constant</span> from outside the record, and a second measurement to check it.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">a city water tower</span><b>Water from a flow meter</b>
+        <div class="c2fig" data-c3="tower"></div>
+        <span>The meter on the pipe gives only the change. The level gauge at midnight supplies the constant, and its later readings (dots) check the running total.</span></div>
+      <div class="pcard"><span class="tag">Air Canada 143, 1983</span><b>Fuel from a fuel-flow meter</b>
+        <div class="c2fig" data-c3="fuel"></div>
+        <span>The fuel computer subtracted the measured burn from the 22,300&nbsp;kg it was given. After a pounds-for-kilograms mistake, about 10,100&nbsp;kg was aboard, and the tank gauges that would have caught it were not working.</span></div>
+      <div class="pcard"><span class="tag">Seattle's SR 99 tunnel</span><b>Position from a phone</b>
+        <div class="c2fig" data-c3="tunnel"></div>
+        <span>A phone that integrated its accelerometer twice from the GPS fix at the entrance would be 427&nbsp;m off at the exit with the Civic's offset. The fix at the exit is the check, and the new constant.</span></div>
+    </div>
+    <p class="src">The fuel loads are from published accounts of the 1983 accident; the burn rate, the tower's flows and the 72&nbsp;km/h through the 2.83&nbsp;km tunnel are made up.</p>
+  </div>
+</section>
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">Assignment 3 is due <span class="term">Sunday, October 25</span>, at 11:59&nbsp;pm.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">this week</span><b>In Canvas</b>
+        <ul>
+          <li>Assignment 3, impact speed and crush distance</li>
+          <li>Quiz 3</li>
+          <li>Reflection 3</li>
+          <li>Meeting 3 minutes</li>
+        </ul></div>
+      <div class="pcard gold"><span class="tag">today</span><b>Before you leave</b>
+        <ul>
+          <li>Do steps 1 and 2 on your own test.</li>
+          <li>Integrate your crossmember once, and read the gap at A and at B.</li>
+          <li>Write one sentence to Alice: yes or no, and the one thing that could change it.</li>
+        </ul></div>
+    </div>
+  </div>
+</section>
+
+
+<div class="deck-bar"><i></i></div>
+<div class="deck-num">1</div>
+<div class="deck-help">&larr; &rarr; move &nbsp;·&nbsp; n notes &nbsp;·&nbsp; b blank &nbsp;·&nbsp; p pointer &nbsp;·&nbsp; d draw</div>
+<div class="deck-notes"></div>
+
+
+<script>
+/* Size the text on in-class slides. One fixed size leaves the sparse slides half
+   empty; sizing each slide to fill makes the text jump from slide to slide. So
+   each slide's largest fitting size is found (by bisection, content filling at
+   most FILL of the space below the title), the deck takes the median of those,
+   and every slide uses that shared size unless its own content needs smaller.
+   Slides other than the current one are display:none and measure as zero, so
+   each is shown unseen (.fitting) while it is measured. */
+(function () {
+  var FILL = 0.85, CAP_VH = 7;
+  /* the stage is a fixed-height flex item, so its own scrollHeight never drops
+     below its height; what counts is how far down the last block reaches */
+  function fits(st) {
+    var top = st.getBoundingClientRect().top, bottom = top;
+    for (var c = st.firstElementChild; c; c = c.nextElementSibling)
+      bottom = Math.max(bottom, c.getBoundingClientRect().bottom);
+    /* a slide whose figure cannot shrink may claim more of the space with
+       data-fill on its section, or its text is squeezed to the minimum */
+    var sl = st.closest(".deck-slide"), fill = parseFloat(sl && sl.dataset.fill) || FILL;
+    if (bottom - top > st.clientHeight * fill || st.scrollWidth > st.clientWidth + 1) return false;
+    /* a name on a group card stays on one line, so the text stops growing
+       before the longest name would overrun its card */
+    var names = st.querySelectorAll(".gcard li");
+    for (var i = 0; i < names.length; i++)
+      if (names[i].scrollWidth > names[i].clientWidth + 1) return false;
+    return true;
+  }
+  function measure(sl, fn) {
+    var on = sl.classList.contains("on");
+    if (!on) sl.classList.add("fitting");
+    var r = fn();
+    if (!on) sl.classList.remove("fitting");
+    return r;
+  }
+  function largest(st) {
+    st.style.fontSize = "";
+    var base = parseFloat(getComputedStyle(st).fontSize);
+    var lo = base * 0.5, hi = Math.max(base, innerHeight * CAP_VH / 100);
+    st.style.fontSize = hi + "px";
+    if (fits(st)) return hi;
+    for (var i = 0; i < 14; i++) {
+      var mid = (lo + hi) / 2;
+      st.style.fontSize = mid + "px";
+      if (fits(st)) lo = mid; else hi = mid;
+    }
+    return lo;
+  }
+  function fitAll() {
+    var stages = [], sizes = [];
+    document.querySelectorAll(".deck-slide:not(.part):not(.arrive)").forEach(function (sl) {
+      var st = sl.querySelector(".stage");
+      if (!st) return;
+      stages.push(st);
+      sizes.push(measure(sl, function () { return largest(st); }));
+    });
+    if (!sizes.length) return;
+    var sorted = sizes.slice().sort(function (a, b) { return a - b; });
+    var shared = sorted[Math.floor((sorted.length - 1) / 2)];
+    stages.forEach(function (st, i) { st.style.fontSize = Math.min(shared, sizes[i]) + "px"; });
+  }
+  addEventListener("load", fitAll);
+  /* refit once the new size has settled (entering full screen fires resize
+     before the layout has its final height) */
+  var raf = 0;
+  addEventListener("resize", function () {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(function () { raf = requestAnimationFrame(fitAll); });
+  });
+  if (document.fonts) document.fonts.ready.then(fitAll);
+})();
+</script>
+
+<script type="module" src="js/bundle/class-03.js?v=20261017141252"></script>
+</body>
+</html>
