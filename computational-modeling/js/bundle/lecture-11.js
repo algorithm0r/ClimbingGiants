@@ -1314,11 +1314,17 @@ setTimeout(() => {
      raw peak -1540.6 m/s^2 at 10.80 ms; pre-impact sd 2.377
      9-sample average: peak -968.3, sd 1.204 (half the noise, 37% off the peak)
      CFC 600 one pass: peak -1391.0 at 11.04 ms; two passes: -1283.8 at 10.80
+     jerk (central difference) over the 625 pre-impact samples: sd 16,507 raw,
+     4,434 after the 9-sample average, the average taken over the whole record
    Hosts are found by data-fig so a figure can sit under more than one claim. */
 (() => {
   const each = (name, draw) =>
     document.querySelectorAll('[data-fig="' + name + '"] .fig-body').forEach(draw);
   const any = (...names) => names.some(n => document.querySelector('[data-fig="' + n + '"]'));
+  /* a short caption above one cell of a figure row, as lecture 10 has */
+  const cap = (cell, text) => { const p = document.createElement('div');
+    p.style.cssText = 'text-align:center; color:#5A5550; font-size:1.05em; margin:0 0 .2em';
+    p.textContent = text; cell.appendChild(p); return p; };
 
   /* what each halving of the noise costs: 1/sqrt(w) against w */
   each('l12-halving', host => {
@@ -1371,11 +1377,82 @@ setTimeout(() => {
       });
   });
 
-  if (!any('l12-crash', 'l12-twopass')) return;
+  if (!any('l11-payoff', 'l12-crash', 'l12-twopass')) return;
   fetch('data/test10642-crossmember-x.json').then(r => r.json()).then(d => {
     const H = d.dt, a = Float64Array.from(d.a);
     const t = Float64Array.from({length: d.n}, (_, i) => d.t0 + i * H);
     const peakOf = y => { let k = 0; for (let i = 1; i < y.length; i++) if (y[i] < y[k]) k = i; return k; };
+
+    /* the payoff, in the order it was done: the record raw and after the
+       9-sample average, then each one differenced. The gain is in the 50 ms
+       before impact, which the impact dwarfs, so each row puts a zoom of that
+       stretch beside the record. panel() always spans its full width, so both
+       plots are drawn here, in one svg per row, with the kit's classes. */
+    each('l11-payoff', host => {
+      const s9 = movingAverage(a, 9), n = d.n;
+      const jr = new Float64Array(n).fill(NaN), js = new Float64Array(n).fill(NaN);
+      for (let i = 1; i < n - 1; i++) {
+        jr[i] = (a[i + 1] - a[i - 1]) / (2 * H); js[i] = (s9[i + 1] - s9[i - 1]) / (2 * H);
+      }
+      const NS = 'http://www.w3.org/2000/svg', W = 900, HT = 185, T = 34, B = HT - 38;
+      const minus = v => String(v).replace('-', '−');
+      const row = (label, top) => {
+        const svg = document.createElementNS(NS, 'svg');
+        svg.setAttribute('viewBox', '0 0 ' + W + ' ' + HT); svg.setAttribute('class', 'cgp');
+        svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', label);
+        if (!top) svg.style.marginTop = '1em';
+        host.appendChild(svg); return svg;
+      };
+      const el = (svg, tag, at, text) => { const e = document.createElementNS(NS, tag);
+        for (const k in at) e.setAttribute(k, at[k]); if (text) e.textContent = text; svg.appendChild(e); return e; };
+      /* one time-series plot in the box L..R, T..B; t in seconds, drawn in ms */
+      const plot = (svg, {L, R, x0, x1, lo, hi, yt, fy, xt, idx, raw, sm, scale = 1, band, marks = []}) => {
+        const X = v => L + (v - x0) / (x1 - x0) * (R - L), Y = v => T + (hi - v) / (hi - lo) * (B - T);
+        if (band) { el(svg, 'rect', {class: 'band', x: X(band[0]), y: T, width: X(band[1]) - X(band[0]), height: B - T});
+                    el(svg, 'line', {class: 'bandedge', x1: X(band[1]), x2: X(band[1]), y1: T, y2: B}); }
+        for (const v of yt) { el(svg, 'line', {class: 'grid', x1: L, x2: R, y1: Y(v), y2: Y(v)});
+          el(svg, 'text', {x: L - 8, y: Y(v) + 5, 'text-anchor': 'end', class: 'tick'}, fy(v)); }
+        for (const v of xt) el(svg, 'text', {x: X(v), y: B + 18, 'text-anchor': 'middle', class: 'tick'}, minus(Math.round(v * 1000)));
+        el(svg, 'text', {x: R, y: B + 34, 'text-anchor': 'end', class: 'tick'}, 'time (ms)');
+        el(svg, 'line', {class: 'zero', x1: L, x2: R, y1: Y(0), y2: Y(0)});
+        const line = ys => idx.map((i, k) => (k ? 'L' : 'M') + X(t[i]).toFixed(2) + ' ' +
+                                              Y(Math.max(lo, Math.min(hi, ys[i] / scale))).toFixed(2)).join('');
+        el(svg, 'path', {class: 'ghost', d: line(raw), style: 'stroke-width:1'});
+        el(svg, 'path', {class: 'trace', d: line(sm)});
+        for (const m of marks) {
+          el(svg, 'circle', {class: 'dot', cx: X(m.t), cy: Y(m.y), r: 3.5});
+          el(svg, 'text', {x: X(m.t) - 10, y: Y(m.y) + 5, 'text-anchor': 'end', class: 'mk'}, m.text);
+        }
+      };
+      const span = (lo, hi) => { const r = []; for (let i = 1; i < n - 1; i++) if (t[i] >= lo && t[i] <= hi) r.push(i); return r; };
+      const full = span(-0.05, 0.1), pre = span(-0.05, 0);
+      const absmax = (ys, ix) => ix.reduce((m, i) => Math.max(m, Math.abs(ys[i])), 0);
+      const left = {L: 78, R: 470, x0: -0.05, x1: 0.1, xt: [-0.05, 0, 0.05, 0.1], idx: full, band: [-0.05, 0]};
+      const right = {L: 584, R: 884, x0: -0.05, x1: 0, xt: [-0.05, -0.04, -0.03, -0.02, -0.01, 0], idx: pre};
+      /* the zoom sits in a frame the colour of the band it magnifies */
+      const frame = (svg, title) => {
+        el(svg, 'rect', {x: 506, y: 2, width: 392, height: HT - 4, rx: 4, fill: '#f6f7f2', stroke: '#c3d2ac'});
+        el(svg, 'text', {x: 518, y: 22, class: 'mk'}, title);
+      };
+
+      const kr = peakOf(a), k9 = peakOf(s9);
+      const r1 = row('acceleration, raw and smoothed, with the 50 ms before impact zoomed in', true);
+      el(r1, 'text', {x: 0, y: 14, class: 'ylab'}, '1. smooth the acceleration (m/s²)');
+      plot(r1, {...left, lo: -1700, hi: 700, yt: [-1500, -1000, -500, 0, 500], fy: minus, raw: a, sm: s9,
+                marks: [{t: t[kr], y: a[kr], text: 'raw −1541'}, {t: t[k9], y: s9[k9], text: 'smoothed −968'}]});
+      frame(r1, 'before impact, zoomed in (m/s²)');
+      const ma = absmax(a, pre) * 1.05;
+      plot(r1, {...right, lo: -ma, hi: ma, yt: [-5, 0, 5], fy: minus, raw: a, sm: s9});
+
+      const r2 = row('the jerk from each, with the 50 ms before impact zoomed in', false);
+      el(r2, 'text', {x: 0, y: 14, class: 'ylab'}, '2. difference each one: the jerk (×10⁶ m/s³)');
+      const mj = absmax(jr, full) / 1e6 * 1.05;
+      plot(r2, {...left, lo: -mj, hi: mj, yt: [-5, 0, 5], fy: minus, raw: jr, sm: js, scale: 1e6});
+      frame(r2, 'before impact: noise 16,507 → 4,434 m/s³');
+      const mp = absmax(jr, pre) * 1.05;
+      plot(r2, {...right, lo: -mp, hi: mp, yt: [-50000, 0, 50000],
+                fy: v => minus(v.toLocaleString('en-US')), raw: jr, sm: js});
+    });
 
     /* the impact spike, raw and after a 9-sample average */
     each('l12-crash', host => {
@@ -1458,9 +1535,9 @@ if (slides.length) {
   });
 
   /* a click advances, so a remote that sends one works, but not when the click
-     was meant for a demo control */
+     was meant for a demo control or a box the class is typing into */
   addEventListener('click', e => {
-    if (e.target.closest('cg-demo, a, button, input, label, .deck-notes')) return;
+    if (e.target.closest('cg-demo, a, button, input, label, textarea, [contenteditable], .deck-notes')) return;
     go(1);
   });
 

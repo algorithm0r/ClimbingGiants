@@ -1465,9 +1465,9 @@ if (slides.length) {
   });
 
   /* a click advances, so a remote that sends one works, but not when the click
-     was meant for a demo control */
+     was meant for a demo control or a box the class is typing into */
   addEventListener('click', e => {
-    if (e.target.closest('cg-demo, a, button, input, label, .deck-notes')) return;
+    if (e.target.closest('cg-demo, a, button, input, label, textarea, [contenteditable], .deck-notes')) return;
     go(1);
   });
 

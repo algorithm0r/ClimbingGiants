@@ -6,8 +6,8 @@
 <title>Lecture 12 — Phase lag</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261016224447">
-<link rel="stylesheet" href="css/demos.css?v=20261016224447">
+<link rel="stylesheet" href="css/blocks.css?v=20261017141252">
+<link rel="stylesheet" href="css/demos.css?v=20261017141252">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -711,9 +711,10 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Okay. So look at the filter again. Every output sample is built from the input at that instant, inputs before it, and outputs before it. It only ever looks backward. And what we call a filter like that is causal, because each output only depends on things that have already happened.</p><p>And for an airbag computer that's not a choice. During the crash it can't see the future.</p>">
+<section class="deck-slide full" data-notes="<p>Okay. So look at the filter again. Every output sample is built from the input at that instant, inputs before it, and outputs before it. It only ever looks backward. And what we call a filter like that is causal, because each output only depends on things that have already happened.</p><p>And for an airbag computer that's not a choice. During the crash it can't see the future.</p><p>Now the moving average from the last video wasn't like that. It looked the same number of samples forward as back, so there was nothing to wait for, and it had no delay. So the delay probably comes from only looking one way, and one pass of the crash standard's filter only looks one way.</p>">
   <div class="head">
     <p class="say">A <span class="term">causal</span> filter uses <span class="def">only the present and the past</span>.</p>
+    <p class="sub">The centred moving average used samples on both sides, so it had no delay.</p>
   </div>
   <div class="stage">
     <div class="work">
@@ -758,9 +759,9 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>And now the fix. Run the filter forward, then run it again backward over its own output. The backward pass delays by the same amount in the other direction, so the two cancel.</p><p>The red dotted line is one pass again, late. The solid line is forward then backward, and its peak is at 30.00 milliseconds, right on the true peak. And that holds for every class, to the nearest sample, because the backward pass undoes the forward pass's delay.</p>">
+<section class="deck-slide full" data-notes="<p>Okay, so how do we get rid of that delay? Run the filter forward, then run the same filter, same class, same coefficients, backward over its own output. Why the same one? Well, the backward pass delays by the same amount, but backward in time, and the simplest way to get the same amount is to use the same filter. So the two delays cancel.</p><p>The red dotted line is one pass again, late. The solid line is forward then backward, and its peak is at 30.00 milliseconds, right on the true peak. And that holds for every class, to the nearest sample, because the backward pass undoes the forward pass's delay.</p>">
   <div class="head">
-    <p class="say">Forward then backward puts the peak <span class="def">back at 30.00&nbsp;ms</span>.</p>
+    <p class="say">Running the same filter backward puts the peak <span class="def">back at 30.00&nbsp;ms</span>.</p>
     <p class="sub">CFC 60. One pass dotted, forward then backward solid, the true pulse dashed.</p>
   </div>
   <div class="stage">
@@ -822,6 +823,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <div class="deck-notes"></div>
 
 
-<script type="module" src="js/bundle/lecture-12.js?v=20261016224447"></script>
+<script type="module" src="js/bundle/lecture-12.js?v=20261017141252"></script>
 </body>
 </html>

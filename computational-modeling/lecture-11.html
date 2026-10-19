@@ -6,8 +6,8 @@
 <title>Lecture 11 — Smoothing</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261016224447">
-<link rel="stylesheet" href="css/demos.css?v=20261016224447">
+<link rel="stylesheet" href="css/blocks.css?v=20261017141252">
+<link rel="stylesheet" href="css/demos.css?v=20261017141252">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -694,18 +694,13 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>All right, welcome. So in the last video we found that differentiating a record multiplies its noise by one over h times root two, and the fix I mentioned was to take some of the noise out first. So in this video I want to do that, and see what it costs, because it does cost something. So let's take a look.</p><p>Here's the payoff first, on the crash record. Before impact, the central difference had sixteen and a half thousand meters per second cubed of noise. Average each sample with the four on each side first, and that drops to about forty-four hundred. So about a quarter. And it drops more than the acceleration's own noise does, because the fast wiggles that differencing blows up are exactly the ones the average takes out.</p><p>And the cost is on the right. The biggest spike in the record, at the moment of impact, shrinks from 1541 meters per second squared to 968. So we lost more than a third of the peak.</p>">
+<section class="deck-slide full" data-notes="<p>All right, welcome. So in the last video we found that differentiating a record multiplies its noise by one over h times root two, and the fix I mentioned was to take some of the noise out first. So in this video I want to do that, and see what it costs, because it does cost something. So let's take a look.</p><p>Here's the payoff first, on the crash record. Before impact, the central difference had sixteen and a half thousand meters per second cubed of noise. Average each sample with the four on each side first, and that drops to about forty-four hundred. So about a quarter. And it drops more than the acceleration's own noise does, because the fast wiggles that differencing blows up are exactly the ones the average takes out.</p><p>And the cost is at the impact. The biggest spike in the record, at the moment of impact, shrinks from 1541 meters per second squared to 968. So we lost more than a third of the peak.</p>">
   <div class="head">
     <p class="say">Smoothing cuts the noise in a derivative, and <span class="def">it also cuts the peaks</span>.</p>
     <p class="sub">The crash record, with each sample averaged with the 4 samples on each side.</p>
   </div>
   <div class="stage">
-    <div class="pcards c2">
-      <div class="pcard"><span class="tag">the gain</span><b>16,507 &rarr; 4,434&nbsp;m/s&sup3;</b>
-        <span>The noise in the jerk before impact falls to about a quarter.</span></div>
-      <div class="pcard gold"><span class="tag">the cost</span><b>&minus;1,541 &rarr; &minus;968&nbsp;m/s&sup2;</b>
-        <span>The impact peak loses 37% of its size.</span></div>
-    </div>
+    <figure class="figure wide" data-fig="l11-payoff"><div class="fig-body"></div></figure>
   </div>
 </section>
 
@@ -729,8 +724,8 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 
 <section class="deck-slide full" data-notes="<p>So the first one. Averaging w independent values, each with standard deviation sigma, gives a value with standard deviation sigma over root w, at least if the samples are independent. That's the same square root we met in week three when we were accumulating, only this time we're using it on purpose.</p><p>And that square root is what makes this expensive. A window of 25 leaves a fifth of the noise, because root 25 is 5. Say we want half that, a tenth. We need root w to double, so w goes up four times, to 100. And the halving after that costs a window of 400. So each halving costs four times the width of the one before.</p>">
   <div class="head">
-    <p class="say">For independent samples, each halving of the noise costs <span class="def">four times the width</span>.</p>
-    <p class="sub">Averaging $w$ independent samples leaves noise $\sigma/\sqrt{w}$.</p>
+    <p class="say">Make the window four times as wide and <span class="def">the noise halves</span>.</p>
+    <p class="sub">Average $w$ independent samples and the noise falls from $\sigma$ (sigma) to $\sigma/\sqrt{w}$.</p>
   </div>
   <div class="stage">
     <figure class="figure wide" data-fig="l12-halving"><div class="fig-body"></div></figure>
@@ -852,10 +847,10 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Now one pass of that filter delays the signal, and the delay is the whole of the next video. Here it is on the crash record at class 600. The grey dashed line is the raw record. The red dotted line is one pass, and its peak lands at 11.04 milliseconds instead of 10.80.</p><p>The standard's answer is to run the filter forward over the record, then run it again backward over its own output. The backward pass delays by the same amount in the other direction, so the two cancel, and the solid line's peak is back at 10.80.</p><p>And the cost is that the result isn't what we call causal any more. A causal filter only uses the past. A value at 11 milliseconds now depends on samples recorded after it. That's fine for a record that's already on disk, and impossible for an airbag computer that has to decide during the crash.</p>">
+<section class="deck-slide full" data-notes="<p>Now one pass of that filter delays the signal. Why does this one delay when the moving average didn't? Well, the moving average looked the same number of samples forward as back, so it had nothing to wait for. This one is built in order from the start of the record, so it only ever sees the past. And that delay is what we're going to look at in the next video. Here it is on the crash record at class 600. The grey dashed line is the raw record. The red dotted line is one pass, and its peak lands at 11.04 milliseconds instead of 10.80.</p><p>The standard's answer is to run the filter forward over the record, then run the same filter again, same class, same coefficients, backward over its own output. The backward pass delays by the same amount in the other direction, so the two cancel, and the solid line's peak is back at 10.80. And the backward pass smooths a second time too, so two passes take out a bit more than one, and that's where the four poles come from.</p><p>And the cost is that the result isn't what we call causal any more. A causal filter only uses the past. A value at 11 milliseconds now depends on samples recorded after it. That's fine for a record that's already on disk, and impossible for an airbag computer that has to decide during the crash.</p>">
   <div class="head">
     <p class="say">A second, backward pass <span class="def">cancels the first pass&rsquo;s delay</span>.</p>
-    <p class="sub">The crash record at filter class 600.</p>
+    <p class="sub">The same filter at class 600, run forward and then backward over the crash record.</p>
   </div>
   <div class="stage">
     <figure class="figure wide" data-fig="l12-twopass"><div class="fig-body"></div></figure>
@@ -885,6 +880,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <div class="deck-notes"></div>
 
 
-<script type="module" src="js/bundle/lecture-11.js?v=20261016224447"></script>
+<script type="module" src="js/bundle/lecture-11.js?v=20261017141252"></script>
 </body>
 </html>

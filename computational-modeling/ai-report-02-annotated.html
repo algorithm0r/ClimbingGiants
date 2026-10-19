@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude&#39;s report, annotated · Assignment 2 — Computational Physical Modeling</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
+  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (olive). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #5F7038;
+      --course-accent-dark: #47542A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    /* ── Week page video and class cards (media-cards.js) ── */
+    .media-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+      gap: 0.9rem;
+      margin: 1rem 0;
+    }
+    .media-card {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-top: 4px solid var(--course-accent);
+      border-radius: 4px;
+      padding: 0.75rem 0.9rem 0.85rem;
+    }
+    .media-card.class { border-top-color: #C8860A; }
+    .media-card p { margin: 0; }
+    .mc-kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .mc-title { font-weight: 600; line-height: 1.3; margin: 0.25rem 0 0.35rem !important; }
+    .mc-sub { font-size: 0.85rem; color: #5A5550; line-height: 1.4; }
+    .mc-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.7rem; }
+    .mc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--course-accent);
+      border-radius: 3px;
+      text-decoration: none;
+      color: var(--course-accent-dark);
+    }
+    a.mc-btn:visited { color: var(--course-accent-dark); }
+    a.mc-btn:hover { background: #F0EDE7; }
+    .mc-btn svg { width: 1em; height: 1em; flex: none; }
+    .mc-btn.primary, a.mc-btn.primary:visited { background: var(--course-accent); color: #fff; }
+    a.mc-btn.primary:hover { background: var(--course-accent-dark); }
+    .mc-btn.pending { border-style: dashed; border-color: #b8b2a8; color: #5A5550; }
+    .mc-total { font-size: 0.9rem; color: #5A5550; }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+    /* the remembered data phrase; filled in by page.js */
+    .cg-phrase { display: inline-flex; align-items: center; gap: .3rem; margin-right: .6rem;
+      font-size: .82rem; flex-shrink: 0; }
+    /* The header row is a fixed 780px. The title, the toggle, "Your data", Search and
+       "Report a problem" only just fit in it, so the chip shows the label alone (the
+       phrase is in the link's title and on the data page) and Search shows its icon.
+       An earlier chip that held the phrase and was allowed to shrink squeezed the
+       label down to "Yo" on a classroom projector. */
+    .cg-phrase a { color: rgba(230,238,222,.92); text-decoration: none; white-space: nowrap; }
+    .header-links .search-btn .sb-label { display: none; }
+    .header-links button.report-btn { white-space: nowrap; }
+    /* the title keeps its own width */
+    .site-header-top .site-title { white-space: nowrap; flex-shrink: 0; }
+    .site-header-top .header-links { min-width: 0; margin-left: 1rem; }
+    @media (max-width: 780px) {
+      /* below the 780px row: the report button's short form, as on phones */
+      .header-links .report-btn .rb-full { display: none; }
+      .header-links .report-btn .rb-short { display: inline; }
+      .cg-phrase { margin-right: .2rem; }
+    }
+    .cg-phrase a:hover { color: #fff; text-decoration: underline; }
+    .cg-phrase button { background: none; border: none; cursor: pointer; padding: 0 .2rem;
+      color: rgba(230,238,222,.7); font: inherit; font-size: 1rem; line-height: 1; }
+    .cg-phrase button:hover { color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* Two rules the other course sites do not define. The header's top
+       row carries a report button beside the title, and a page with a
+       wide demo in it needs more than the reading measure. */
+    .site-header-top { border-bottom: 1px solid rgba(200,222,180,0.15); }
+    main.wide { max-width: 1180px; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Computational Physical Modeling</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <span class="cg-phrase" id="cg-phrase"></span>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        
+          <a href="syllabus.html">Syllabus</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="notes.html">Notes</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reports.html">Examples</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reflection.html">Reflection</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="meeting.html">Meeting</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="ai-use.html">AI Use</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="tools.html">Tools</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="workbench.html">Workbench</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="extra-labor.html">Extra Labor</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="canvas-grades.html">Canvas Grades</a>
+          
+        
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+          
+          
+          
+          <a href="week-01.html">1</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-02.html">2</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-03.html">3</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-04.html">4</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          <span class="week-gap" title="Week 5 is a break week">5<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <a href="week-06.html">6</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-07.html">7</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-08.html">8</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-09.html">9</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-10.html">10</a>
+          
+        
+      </div>
+    </nav>
+
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+
+  <main data-pagefind-body>
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <style>
+mark.ai-cut{background:rgba(155,68,35,.08);text-decoration:line-through;text-decoration-color:rgba(155,68,35,.75)}
+.ai-tag.ai-cut{background:rgba(155,68,35,.14)}
+mark.ai-reworded{background:rgba(58,95,138,.10);border-bottom:2px dotted #3A5F8A !important}
+.ai-tag.ai-reworded{background:rgba(58,95,138,.16)}
+mark.ai-ask,.ai-tag.ai-ask{background:#F0D090}
+mark.ai-course,.ai-tag.ai-course{background:rgba(168,200,144,.55)}
+mark.ai-practice,.ai-tag.ai-practice{background:rgba(107,58,114,.16)}
+mark[class^="ai-"]{color:inherit;padding:0 .1em;border-bottom:2px solid rgba(45,80,22,.30)}
+mark[class^="ai-"] a{color:inherit;text-decoration:none}
+mark[class^="ai-"] sup{font-weight:700;margin-left:.15em}
+.ai-tag{display:inline-block;font-size:.78rem;font-weight:600;padding:.05rem .5rem;border-radius:.8rem;margin:0 .3rem .2rem 0}
+ol.ai-notes{list-style:none;padding:0}
+ol.ai-notes li{border-top:1px solid rgba(45,80,22,.15);padding:.7rem 0}
+ol.ai-notes p{margin:.35rem 0 0}
+.ai-back{font-weight:700;margin-right:.4rem}
+</style>
+<div class="eyebrow"><a href="reports-02.html">Example reports &middot; Assignment 2</a></div>
+<h1>Claude's report, annotated &middot; Assignment 2</h1>
+<p>Claude&rsquo;s first draft, with fifteen passages marked. Each mark links to a note below, and each note is one of three kinds: <span class="ai-tag ai-ask">Beyond what Alice asked</span> <span class="ai-tag ai-course">Beyond the course so far</span> <span class="ai-tag ai-practice">Not what an engineer would hand over</span>. The numbers we rechecked match the program&rsquo;s output, so most of the marks are about the words around them (notes 13 and v are the exceptions).</p>
+<p>Some of the report will be hard to follow after week 2, because it uses methods the course has not covered. When that happens, it is a good idea to question the words on the page before you doubt your own understanding. Ask where the step comes from and look for the report&rsquo;s reason for it. If there is none, leave it out of your own report. Several notes below say this where it applies.</p>
+<p>Lettered marks show what the <a href="ai-report-02-edited.html">edited</a> memo did with the passages the numbered notes do not cover: <span class="ai-tag ai-cut">Cut in the edit</span> <span class="ai-tag ai-reworded">Reworded in the edit</span>. Each one links to a short note below, and the notes on reworded passages say how they changed.</p>
+<p class="ai-nav">Claude's report for Assignment 2: <a href="ai-report-02.html">first draft</a> &middot; <strong>annotated</strong> &middot; <a href="ai-report-02-edited.html">edited</a></p>
+<div class="aside report"><span class="label">Claude Opus 5.5 &middot; first draft, marked</span>
+<p><strong>Data phrase: lantern meadow quartz otter</strong> (crash test 10642)</p>
+<h1>Assignment 2 · Sample Rate and Peak Loss</h1>
+<p>To: Alice Re: The 1 kHz logger from purchasing</p>
+<h2 id="answer">Answer</h2>
+<p><strong><mark class="ai-practice" id="m1"><a href="#n1">I recommend 6,250 samples a second (6.25 kHz) as the lowest rate the lab accepts.</a><sup>1</sup></mark></strong> At that rate, on our test, no peak reads more than 2.4% low wherever the logger's samples happen to fall: <mark class="ai-reworded" id="ea"><a href="#fa">the crossmember on the car's structure reads 153.2 g instead of 157.0 g, and every dummy measurement stays within 0.6% of its present value</a><sup>a</sup></mark>.</p>
+<p><mark class="ai-reworded" id="eb"><a href="#fb">The proposed 1 kHz logger (1,000 samples a second) gives up much more.</a><sup>b</sup></mark> On the same test it could read the crossmember peak <strong>47.5% low</strong> <mark class="ai-reworded" id="ec"><a href="#fc">(157.0 g read as 82.5 g, that is 1,540 m/s² read as 809 m/s²)</a><sup>c</sup></mark>, and the dummy peaks up to <strong>7.0% low</strong> (the driver's head, vertical, 22.6 g read as 21.1 g). Which of those readings you get depends only on where the logger's first sample happens to fall, and nothing in a 1 kHz record tells you which one you got.</p>
+<p>Our present logger records at <strong>12,500 samples a second</strong> (one sample every 0.08 ms). That is the spacing stored in the test file, and it is 12.5 times the proposed rate.</p>
+<h2 id="the-evidence">The evidence</h2>
+<p>The evidence is one test from our own records: NHTSA test 10642, a 2019 BMW X5 driven into a barrier. <mark class="ai-cut" id="ed"><a href="#fd">The file holds eight channels (seven on the crash dummies, one on the car), each with 4,501 samples from 50 ms before impact to 310 ms after it, all at 12,500 samples a second and all passed through a 2,000 Hz filter before they were sampled (the header's "prefilter").</a><sup>d</sup></mark></p>
+<p>The cheaper logger is not here, so <mark class="ai-reworded" id="ee"><a href="#fe">I built the record it would have made out of the one we have, and read the peaks again.</a><sup>e</sup></mark> A logger at a lower rate keeps only some of our samples. Two things are not known and both are handled in the program (<a href="data/example/code/ai02_peak_loss.py" download><code>a2_peak_loss.py</code></a>):</p>
+<ul>
+<li><strong>Where its first sample falls.</strong> It could line up with any of our samples, so I tried every possible start and kept the lowest peak (the <em>worst start</em>) as well as the highest. The lab cannot choose where a logger's samples fall in a crash, so I judge each rate by its worst start.</li>
+<li><strong>Rates that do not divide 12,500.</strong> At 6,250 Hz the logger keeps every 2nd sample, which is exact. <mark class="ai-reworded" id="ef"><a href="#ff">At 1,000 Hz one of its intervals is 12.5 of ours, so its samples fall between ours.</a><sup>f</sup></mark> <mark class="ai-course" id="m2"><a href="#n2">I gave each of its samples the value of our sample taken at or just before that instant</a><sup>2</sup></mark> (at most 0.08 ms early), so its gaps alternate between 12 and 13 of our samples. <mark class="ai-cut" id="eg"><a href="#fg">This gives 25 different possible starts at 1 kHz.</a><sup>g</sup></mark> <mark class="ai-course" id="m3"><a href="#n3">I checked this choice against a second model (a straight line between our two neighbouring samples)</a><sup>3</sup></mark> and the worst-start percentages moved by at most 1.7 points, with no change to any pass or fail (Assumptions, below).</li>
+</ul>
+<p><strong>My standard:</strong> a rate is acceptable if <em>every</em> channel keeps at least 95% of its present peak at the worst start. I included the crossmember as well as the dummy, because the lab records both and I do not know which ones its reports use. <mark class="ai-course" id="m4"><a href="#n4">The program removes each channel's small pre-impact offset before reading peaks</a><sup>4</sup></mark> and converts to g (1 g = 9.81 m/s²).</p>
+<figure class="figure"><div class="fig-body"><img src="data/example/figures/ai02-report-fig1.png?v=20261017141252" alt="Figure 1"></div></figure>
+<p><strong>Figure 1.</strong> The lowest peak a slower logger could read (worst start), as a percentage of the peak our 12,500 Hz logger read, <mark class="ai-reworded" id="eh"><a href="#fh">for each of the eight channels of test 10642, at 11 rates from 250 to 10,000 samples a second (log scale)</a><sup>h</sup></mark>. The dotted line is the 95% standard, the red line the proposed 1,000 Hz logger, the green line the recommended 6,250 Hz.</p>
+<p><strong>Table 1.</strong> Worst-start peak as a percentage of the 12,500 Hz peak. <mark class="ai-ask" id="m5"><a href="#n5">A star marks rates that divide 12,500 exactly (every k-th sample kept, no model needed).</a><sup>5</sup></mark></p>
+<table class="data">
+<thead>
+<tr>
+<th>Channel (peak at 12,500 Hz)</th>
+<th>10,000</th>
+<th>6,250*</th>
+<th>5,000</th>
+<th>2,500*</th>
+<th>2,000</th>
+<th>1,250*</th>
+<th><strong>1,000</strong></th>
+<th>500*</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Driver head X (47.93 g)</td>
+<td>99.7</td>
+<td>99.7</td>
+<td>99.6</td>
+<td>99.2</td>
+<td>98.9</td>
+<td>98.9</td>
+<td><strong>98.9</strong></td>
+<td>98.0</td>
+</tr>
+<tr>
+<td>Driver head Y (6.23 g)</td>
+<td>100.0</td>
+<td>100.0</td>
+<td>100.0</td>
+<td>99.0</td>
+<td>97.9</td>
+<td>95.8</td>
+<td><strong>93.8</strong></td>
+<td>83.3</td>
+</tr>
+<tr>
+<td>Driver head Z (22.64 g)</td>
+<td>99.4</td>
+<td>99.4</td>
+<td>99.2</td>
+<td>97.5</td>
+<td>96.1</td>
+<td>95.2</td>
+<td><strong>93.0</strong></td>
+<td>89.4</td>
+</tr>
+<tr>
+<td>Driver chest X (48.04 g)</td>
+<td>99.9</td>
+<td>99.9</td>
+<td>99.6</td>
+<td>99.0</td>
+<td>98.8</td>
+<td>97.3</td>
+<td><strong>97.6</strong></td>
+<td>97.0</td>
+</tr>
+<tr>
+<td>Driver chest deflection (32.80 mm)</td>
+<td>100.0</td>
+<td>100.0</td>
+<td>100.0</td>
+<td>99.9</td>
+<td>99.9</td>
+<td>99.7</td>
+<td><strong>99.6</strong></td>
+<td>98.7</td>
+</tr>
+<tr>
+<td>Driver pelvis X (52.05 g)</td>
+<td>99.8</td>
+<td>99.8</td>
+<td>99.5</td>
+<td>99.4</td>
+<td>99.0</td>
+<td>98.8</td>
+<td><strong>97.4</strong></td>
+<td>96.0</td>
+</tr>
+<tr>
+<td>Passenger head X (56.63 g)</td>
+<td>100.0</td>
+<td>99.8</td>
+<td>99.8</td>
+<td>99.6</td>
+<td>98.4</td>
+<td>98.1</td>
+<td><strong>98.1</strong></td>
+<td>97.3</td>
+</tr>
+<tr>
+<td>Crossmember X, structure (157.03 g)</td>
+<td>97.6</td>
+<td>97.6</td>
+<td><strong>86.5</strong></td>
+<td>76.4</td>
+<td>57.9</td>
+<td>51.5</td>
+<td><strong>52.5</strong></td>
+<td>41.7</td>
+</tr>
+</tbody>
+</table>
+<p>The dummy channels lose little at any rate down to about 2,000 Hz. <mark class="ai-reworded" id="ei"><a href="#fi">The crossmember is the one that sets the answer. It keeps 97.6% at 6,250 Hz and above, and drops to 86.5% at 5,000 Hz, so 5,000 Hz is the first rate to fail.</a><sup>i</sup></mark></p>
+<p><strong>Table 2.</strong> <mark class="ai-ask" id="m6"><a href="#n6">What the proposed 1,000 Hz logger would read, over its 25 possible starts, in each channel's own units.</a><sup>6</sup></mark></p>
+<table class="data">
+<thead>
+<tr>
+<th>Channel</th>
+<th>12,500 Hz</th>
+<th>1,000 Hz, worst start</th>
+<th>1,000 Hz, best start</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Driver head X (g)</td>
+<td>47.93</td>
+<td>47.38 (98.9%)</td>
+<td>47.93</td>
+</tr>
+<tr>
+<td>Driver head Y (g)</td>
+<td>6.23</td>
+<td>5.84 (93.8%)</td>
+<td>6.23</td>
+</tr>
+<tr>
+<td>Driver head Z (g)</td>
+<td>22.64</td>
+<td>21.06 (93.0%)</td>
+<td>22.64</td>
+</tr>
+<tr>
+<td>Driver chest X (g)</td>
+<td>48.04</td>
+<td>46.91 (97.6%)</td>
+<td>48.04</td>
+</tr>
+<tr>
+<td>Driver chest deflection (mm)</td>
+<td>32.80</td>
+<td>32.67 (99.6%)</td>
+<td>32.80</td>
+</tr>
+<tr>
+<td>Driver pelvis X (g)</td>
+<td>52.05</td>
+<td>50.69 (97.4%)</td>
+<td>52.05</td>
+</tr>
+<tr>
+<td>Passenger head X (g)</td>
+<td>56.63</td>
+<td>55.58 (98.1%)</td>
+<td>56.63</td>
+</tr>
+<tr>
+<td>Crossmember X (g)</td>
+<td>157.03</td>
+<td>82.51 (52.5%)</td>
+<td>157.03</td>
+</tr>
+</tbody>
+</table>
+<p><mark class="ai-cut" id="ej"><a href="#fj">The best start always reads the full peak, because one start always lands on the peak sample. The gap between the two columns is the part of the reading decided by luck.</a><sup>j</sup></mark></p>
+<p><mark class="ai-cut" id="ek"><a href="#fk">Figure 2 shows why the crossmember is so sensitive.</a><sup>k</sup></mark> Its peak is a single sharp swing about 11 ms after impact, from −297 to −1,540 and back to −407 m/s² over 8 of our sample intervals (0.64 ms), which is shorter than the 1 ms between two samples of the proposed logger. One start lands on the bottom of the swing. The worst start steps over it entirely, and its largest reading anywhere in the record is 82.5 g.</p>
+<figure class="figure"><div class="fig-body"><img src="data/example/figures/ai02-report-fig2.png?v=20261017141252" alt="Figure 2"></div></figure>
+<p><strong>Figure 2.</strong> <mark class="ai-cut" id="el"><a href="#fl">Left rear crossmember acceleration (g) from 0 to 30 ms after impact, test 10642.</a><sup>l</sup></mark> The grey line is our 12,500 Hz record. Blue circles are the samples a 1,000 Hz logger keeps from its best start, orange squares those from its worst start.</p>
+<p><mark class="ai-cut" id="em"><a href="#fm">At 6,250 Hz (every 2nd sample) the worst a logger can do is skip the single peak sample. It then reads the sample next to it, −1,503 m/s², which is the 2.4% loss in the answer.</a><sup>m</sup></mark> <mark class="ai-practice" id="m7"><a href="#n7">Below 6,250 Hz it can skip two samples in a row</a><sup>7</sup></mark>, and the next one down is −1,333 m/s² (86.5%).</p>
+<figure class="figure"><div class="fig-body"><img src="data/example/figures/ai02-report-fig3.png?v=20261017141252" alt="Figure 3"></div></figure>
+<p><strong>Figure 3.</strong> <mark class="ai-cut" id="en"><a href="#fn">Worst-start peak (% of the 12,500 Hz peak) at every rate from 500 to 12,500 samples a second in steps of 250, for the crossmember and for whichever dummy channel is lowest at that rate, test 10642.</a><sup>n</sup></mark></p>
+<p><mark class="ai-cut" id="eo"><a href="#fo">Figure 3 checks the gap between the rates in Table 1. Every rate from 6,250 Hz up keeps 97.6% of the crossmember peak, and every rate from 6,000 Hz down fails.</a><sup>o</sup></mark> <mark class="ai-course" id="m8"><a href="#n8">So the boundary on this test is between 6,000 and 6,250 Hz, and a 10 kHz logger would do no better and no worse than a 6.25 kHz one.</a><sup>8</sup></mark></p>
+<h2 id="what-would-change-the-answer">What would change the answer</h2>
+<ul>
+<li><strong>If the lab does not report structure peaks.</strong> <mark class="ai-ask" id="m9"><a href="#n9">On the dummy channels alone, the lowest passing rate I tried is 1,250 Hz</a><sup>9</sup></mark> (and 2,000 Hz on the usual 1, 2, 5 steps). 1 kHz still fails, narrowly, on the driver's head (vertical 93.0%, sideways 93.8%). With a 10% standard instead of 5% and the dummy alone, 1 kHz would pass on this test. <mark class="ai-cut" id="ep"><a href="#fp">That choice is the lab's, and it is the one thing in this report that could make the proposed logger acceptable.</a><sup>p</sup></mark></li>
+<li><strong><mark class="ai-ask" id="m10"><a href="#n10">If the crossmember swing is not real</a><sup>10</sup></mark></strong> (Errors, below), the same dummy-only answer applies.</li>
+</ul>
+<h2 id="where-the-evidence-runs-out">Where the evidence runs out</h2>
+<ul>
+<li><strong>One test, one car, one structure sensor.</strong> <mark class="ai-reworded" id="eq"><a href="#fq">A car with a sharper swing would lose more at the same rate, and one with a broader one less.</a><sup>q</sup></mark> I have no basis for saying how typical this test is.</li>
+<li><strong>A thinned record is a model of the cheaper logger.</strong> No record from it exists. A real 1 kHz logger can only represent content up to 500 Hz, so it would need its own filter, set well below that, ahead of its converter. Our record holds content up to its 2,000 Hz prefilter. <mark class="ai-reworded" id="er"><a href="#fr">A real logger's filter would probably lower the sharpest peaks further, so the 1 kHz numbers here are probably not the worst it would do.</a><sup>r</sup></mark> I have not checked this.</li>
+<li><strong>Our own record is a sampled record.</strong> Every peak in it is a lower bound on the true peak, <mark class="ai-cut" id="es"><a href="#fs">and the crossmember swing is only a few of our samples wide (−949, −1,333, −1,540, −1,503, −1,262 m/s²), so its true peak could be higher than 1,540 m/s²</a><sup>s</sup></mark>. Every percentage here is measured against a reference that may already be low, and our 12,500 Hz logger had its own unknown start.</li>
+<li><strong>Rates between our samples.</strong> <mark class="ai-practice" id="m11"><a href="#n11">Every rate from 6,250 to 12,250 Hz gives the same answer on this record</a><sup>11</sup></mark>, because each can skip at most one of our samples in a row. <mark class="ai-reworded" id="et"><a href="#ft">How a 7 or 10 kHz logger would fare between our 0.08 ms samples is not in the record.</a><sup>t</sup></mark> The step from 86.5% to 97.6% at 6,250 Hz is a property of our spacing; a real logger's loss would change more gradually.</li>
+<li><strong>Peak only.</strong> <mark class="ai-cut" id="eu"><a href="#fu">I looked at the largest value on each channel.</a><sup>u</sup></mark> I have not checked what the lower rate does to anything computed from the whole record (<mark class="ai-ask" id="m12"><a href="#n12">later quantities such as crush distance or injury criteria</a><sup>12</sup></mark> may lose more or less).</li>
+</ul>
+<h2 id="errors-and-anomalies">Errors and anomalies</h2>
+<ul>
+<li><strong>Chest deflection units.</strong> The header gives metres, but the peak value is −32,798, <mark class="ai-reworded" id="ev"><a href="#fv">which would be 32.8 m of chest deflection</a><sup>v</sup></mark>. The values are micrometres (32.8 mm), and the program reports millimetres. The percentages do not depend on the units.</li>
+<li><strong>The crossmember swing.</strong> <mark class="ai-cut" id="ew"><a href="#fw">Its consecutive samples differ by up to 579 m/s², against at most 32 m/s² on any dummy channel</a><sup>w</sup></mark>, and it peaks at 10.8 ms, well before any dummy peak (57 to 84 ms). A 0.6 ms swing is within what a 2,000 Hz filter passes, <mark class="ai-practice" id="m13"><a href="#n13">so I have treated it as real motion of the structure</a><sup>13</sup></mark>. It is the one feature that sets my rate, so if it turns out to be a sensor artefact, the dummy-only answer above applies.</li>
+<li><strong>The driver's head Y peak comes late.</strong> Its largest value, 6.23 g, is at 278.6 ms, near the end of the record (310 ms) and long after every other dummy peak. <mark class="ai-cut" id="ex"><a href="#fx">The largest value before 150 ms is 5.58 g, at 88.7 ms.</a><sup>x</sup></mark> I have not checked whether the late peak is real head motion or noise. It is small, and it is one of the two dummy channels that fail at 1 kHz.</li>
+<li><strong>A slower rate can read higher than a faster one.</strong> <mark class="ai-reworded" id="ey"><a href="#fy">At the worst start, 1,000 Hz keeps more of the crossmember (52.5%) and the chest (97.6%) than 1,250 Hz does (51.5% and 97.3%), and in Figure 3 2,500 Hz (76.4%) beats 3,000 Hz (66.9%).</a><sup>y</sup></mark> This is expected, not a fault: the samples kept at one rate are not a subset of those kept at a faster one unless one rate divides the other.</li>
+<li><strong>Small offsets before impact.</strong> <mark class="ai-cut" id="ez"><a href="#fz">Every acceleration channel has a non-zero mean before impact (−0.67 to +0.87 m/s²), which I removed.</a><sup>z</sup></mark> Leaving it in moves no worst-start percentage at 1 kHz by more than 0.1 point.</li>
+<li><strong><mark class="ai-ask" id="m14"><a href="#n14">Check on the program.</a><sup>14</sup></mark></strong> For the crossmember, the program's start-0, worst and best peaks at 3,125, 1,250, 500 and 250 Hz (for example 793.2 m/s² worst at 1,250 Hz and 421.0 m/s² worst at 250 Hz) match the table for this same channel in the course notes on discrete evaluation.</li>
+</ul>
+<h2 id="assumptions">Assumptions</h2>
+<ul>
+<li>Apart from its rate, the cheaper logger records the same values ours does at the instants it samples <mark class="ai-reworded" id="eaa"><a href="#faa">(same sensors, no filter of its own)</a><sup>aa</sup></mark>. See "Where the evidence runs out".</li>
+<li>Every starting position is equally possible, so the worst start is a case the lab could get.</li>
+<li><mark class="ai-cut" id="eab"><a href="#fab">At rates that do not divide 12,500 (10,000, 5,000, 2,000 and 1,000 Hz and the fine sweep), the logger's sample takes the value of our sample at or just before its instant.</a><sup>ab</sup></mark> With a straight line between our samples instead, the worst-start percentages change by at most 1.7 points (crossmember at 5,000 Hz, 86.5% against 88.2%; at 1,000 Hz, 52.5% against 51.1%), and no pass or fail changes.</li>
+<li>The 95% standard, applied to every channel equally, is my choice. Alice did not give one.</li>
+<li><mark class="ai-ask" id="m15"><a href="#n15">The rates tried are the usual 1, 2, 5 steps plus every rate that divides 12,500 exactly, and a sweep every 250 Hz</a><sup>15</sup></mark> from 500 to 12,500 Hz.</li>
+<li>Time zero is impact, as the file declares (records start at −50 ms). <mark class="ai-cut" id="eac"><a href="#fac">The offset removed is the mean of each channel over those 50 ms.</a><sup>ac</sup></mark> One g is 9.81 m/s². The chest deflection is in micrometres.</li>
+</ul>
+<h2 id="program">Program</h2>
+<p><code>a2_peak_loss.py</code> (submitted with this report) reads <code>pack/crash/10642.json</code>, prints every number above (its output is saved in <code>run_output.txt</code>) and draws the three figures. <mark class="ai-cut" id="ead"><a href="#fad">It runs in about a minute with Python 3, numpy and matplotlib.</a><sup>ad</sup></mark></p>
+</div>
+<h2 id="notes">Notes</h2>
+<ol class="ai-notes">
+<li id="n1"><a class="ai-back" href="#m1">1</a> <span class="ai-tag ai-practice">Not what an engineer would hand over</span><p>Alice has to pass this rate to purchasing, who will compare it with the loggers they can buy. 6,250 samples a second comes from halving our own logger's rate, so a logger for sale may not offer it. Writing the answer as a minimum (at least 6,250 samples a second) gives purchasing something they can check a product against.</p></li>
+<li id="n2"><a class="ai-back" href="#m2">2</a> <span class="ai-tag ai-course">Beyond the course so far</span><span class="ai-tag ai-practice">Not what an engineer would hand over</span><p>If this sentence is hard to follow, that is a fair reaction. The week 2 notes make a slower record by keeping every k-th sample, and they do not say what to do when k would be 12.5. At each of the slower logger's sample times, the report reads the last of our samples before it, and the notes below call this the hold-last-sample method. The report describes it in one sentence, with no source and no picture. When a step in a report is new to you, ask where it comes from and whether the report shows that it works. A method you can explain from the notes is to keep every 12th and every 13th sample, which gives rates just above and just below 1 kHz. In our rerun it gives the same verdict.</p></li>
+<li id="n3"><a class="ai-back" href="#m3">3</a> <span class="ai-tag ai-course">Beyond the course so far</span><p>Interpolation, filling in values between samples (here with a straight line), comes later in the course. The week 2 notes mention it once, to say that the line adds no information about what happened between the samples. The idea of the check is reasonable: if two different guesses about the in-between values give nearly the same answer, the answer probably does not depend much on which of the two you pick. However, Alice would need both guesses explained, and the notes do not explain either one yet.</p></li>
+<li id="n4"><a class="ai-back" href="#m4">4</a> <span class="ai-tag ai-course">Beyond the course so far</span><span class="ai-tag ai-ask">Beyond what Alice asked</span><p>Removing the offset (the "pre-trigger baseline" under the week 2 decimation figure) is covered in week 3, so this sentence may not make sense yet. The report's own check further down says it changes no 1 kHz result by more than 0.1 percentage point. Since it changes nothing Alice needs, it is a good idea to leave it out.</p></li>
+<li id="n5"><a class="ai-back" href="#m5">5</a> <span class="ai-tag ai-ask">Beyond what Alice asked</span><span class="ai-tag ai-practice">Not what an engineer would hand over</span><p>This table mixes two kinds of number. Columns with a star come from keeping every k-th sample, the method in the week 2 notes. Columns without a star come from the method in note 2. Only a small star tells them apart, so a reader may not notice that the 5,000 column comes from a method the report never checks against the notes. The table also has eight rate columns, and Alice needs the rates on either side of the answer and the proposed 1 kHz.</p></li>
+<li id="n6"><a class="ai-back" href="#m6">6</a> <span class="ai-tag ai-ask">Beyond what Alice asked</span><p>Table 2 repeats Table 1's 1 kHz column in other units. Its best-start column is the full peak in every row, because one of its starts lands on the peak sample, as with every k-th sample in the week 2 notes. As a result the table gives Alice nothing new.</p></li>
+<li id="n7"><a class="ai-back" href="#m7">7</a> <span class="ai-tag ai-practice">Not what an engineer would hand over</span><p>The week 2 notes say that between two samples the record tells us nothing. This sentence treats our samples as if they were the whole crash. A real logger samples the crash, and its samples can fall anywhere between ours. Keeping every k-th sample has the same limit, and the edited memo says so under Where the Evidence Runs Out.</p></li>
+<li id="n8"><a class="ai-back" href="#m8">8</a> <span class="ai-tag ai-course">Beyond the course so far</span><span class="ai-tag ai-practice">Not what an engineer would hand over</span><span class="ai-tag ai-ask">Beyond what Alice asked</span><p>This tries rates 250 samples a second apart, using the hold-last-sample method in note 2. The week 2 notes say that a sweep you choose can be refined, while a recorded test has only the samples it has. Trying more rates adds no samples to our record, so the exact rate where the result changes from pass to fail comes from the method, as the report itself says further down (note 11). Alice also did not ask for the boundary this precisely.</p></li>
+<li id="n9"><a class="ai-back" href="#m9">9</a> <span class="ai-tag ai-ask">Beyond what Alice asked</span><p>Three alternative answers follow. Saying what would change the answer is a good idea, and the example memo does it in a short list. Here the three alternatives take more space than the one rate Alice asked for.</p></li>
+<li id="n10"><a class="ai-back" href="#m10">10</a> <span class="ai-tag ai-ask">Beyond what Alice asked</span><p>This answers an “if” question Alice did not ask, and the test record cannot settle it.</p></li>
+<li id="n11"><a class="ai-back" href="#m11">11</a> <span class="ai-tag ai-practice">Not what an engineer would hand over</span><p>This is the caveat for the boundary in Figure 3, three sections after the claim. Someone who stops reading at Figure 3 will probably take the boundary as a finding. It is a good idea to keep a caveat in the same paragraph as the claim it limits.</p></li>
+<li id="n12"><a class="ai-back" href="#m12">12</a> <span class="ai-tag ai-ask">Beyond what Alice asked</span><span class="ai-tag ai-course">Beyond the course so far</span><p>Crush distance and injury criteria come later in the course, so these words probably mean little yet. Alice did not ask about them either, so they can go.</p></li>
+<li id="n13"><a class="ai-back" href="#m13">13</a> <span class="ai-tag ai-practice">Not what an engineer would hand over</span><p>The recommended rate rests on one sharp swing in the crossmember at 10.8 ms, much shorter and earlier than anything on the dummy. Class 2 asked you to find the strangest feature of each plot and say something about it, and this swing is probably the strangest feature here. The report argues that a swing this short could get through the 2,000 Hz prefilter. That shows the record could hold it, though not whether the swing is motion of the structure or a fault in the sensor. Week 4 covers how a lab treats a channel like this before reading its peak. For now the report does what it should, which is to flag the swing and say the rate depends on it. In addition, the 579 m/s² jump between neighbouring samples that the report quotes at the start of its paragraph is at 20.6 ms, outside the swing at 10.8 ms. The flag should quote the largest jump inside the swing, which is 461 m/s².</p></li>
+<li id="n14"><a class="ai-back" href="#m14">14</a> <span class="ai-tag ai-ask">Beyond what Alice asked</span><p>This check is worth running, and its place is in the program or a notebook, since Alice cannot use it.</p></li>
+<li id="n15"><a class="ai-back" href="#m15">15</a> <span class="ai-tag ai-ask">Beyond what Alice asked</span><p>These are three overlapping lists of rates, and two of them need the method in note 2. The list made only by keeping every k-th sample, with every 12th and 13th standing in for 1 kHz, gives the same recommended rate in our rerun.</p></li>
+</ol>
+<h2 id="what-the-edit-changed">What the Edit Changed</h2>
+<ol class="ai-notes">
+<li id="fa"><a class="ai-back" href="#ea">a</a> <span class="ai-tag ai-reworded">Reworded in the edit</span><p>In the edit the rest of this paragraph tells Alice where the limit is, with “The next slower rate I could make was every 3rd sample, 4,167 samples a second, and it fails, so the limit is probably somewhere between the two.”</p></li>
+<li id="fb"><a class="ai-back" href="#eb">b</a> <span class="ai-tag ai-reworded">Reworded in the edit</span><p>The edit reads “The proposed 1 kHz logger would give up a lot more.” We do not have the 1 kHz logger, so what it gives up is a prediction from our own record.</p></li>
+<li id="fc"><a class="ai-back" href="#ec">c</a> <span class="ai-tag ai-reworded">Reworded in the edit</span><p>The edit reads “49% low, at 79.5 g instead of 157.0 g.” The number changed because the edit stands in for 1 kHz with every 12th sample (1,042 a second) and every 13th (962 a second), and uses the worse of the two (every 12th, for the crossmember).</p></li>
+<li id="fd"><a class="ai-back" href="#ed">d</a> <span class="ai-tag ai-cut">Cut in the edit</span><p>Alice does not need the layout of the file to act on the rate.</p></li>
+<li id="fe"><a class="ai-back" href="#ee">e</a> <span class="ai-tag ai-reworded">Reworded in the edit</span><p>The edit reads “I made the record it would have taken by keeping every k-th sample of ours. I then read each peak again.” The new wording says how the slower record was made.</p></li>
+<li id="ff"><a class="ai-back" href="#ef">f</a> <span class="ai-tag ai-reworded">Reworded in the edit</span><p>The edit reads “A 1 kHz logger takes one sample for every 12.5 of ours, which is not a whole number. For this reason I bracketed it with every 12th sample and every 13th sample.”</p></li>
+<li id="fg"><a class="ai-back" href="#eg">g</a> <span class="ai-tag ai-cut">Cut in the edit</span><p>One slower sample spans 12.5 of ours, so the hold-last-sample pattern in note 2 repeats every 25 of our samples, which is where its 25 starts come from. Every 12th and every 13th sample have 12 and 13 starts.</p></li>
+<li id="fh"><a class="ai-back" href="#eh">h</a> <span class="ai-tag ai-reworded">Reworded in the edit</span><p>The edit redraws Figure 1 with only the rates made by keeping every k-th sample.</p></li>
+<li id="fi"><a class="ai-back" href="#ei">i</a> <span class="ai-tag ai-reworded">Reworded in the edit</span><p>The edit reads “On this test the crossmember is the only channel that fails at 4,167 samples a second, so it sets the lowest rate.” The report's 5,000 Hz number came from the hold-last-sample method in note 2.</p></li>
+<li id="fj"><a class="ai-back" href="#ej">j</a> <span class="ai-tag ai-cut">Cut in the edit</span><p>This explains Table 2, which the edit cut.</p></li>
+<li id="fk"><a class="ai-back" href="#ek">k</a> <span class="ai-tag ai-cut">Cut in the edit</span><p>Figure 2 and its paragraph were cut, and the edit mentions the swing in one flag.</p></li>
+<li id="fl"><a class="ai-back" href="#el">l</a> <span class="ai-tag ai-cut">Cut in the edit</span><p>Figure 2 was cut.</p></li>
+<li id="fm"><a class="ai-back" href="#em">m</a> <span class="ai-tag ai-cut">Cut in the edit</span><p>This paragraph explains the boundary found with the hold-last-sample method (notes 2 and 8 above), which the edit dropped.</p></li>
+<li id="fn"><a class="ai-back" href="#en">n</a> <span class="ai-tag ai-cut">Cut in the edit</span><p>Figure 3 was cut.</p></li>
+<li id="fo"><a class="ai-back" href="#eo">o</a> <span class="ai-tag ai-cut">Cut in the edit</span><p>Figure 3 was cut, along with the boundary it was used to find.</p></li>
+<li id="fp"><a class="ai-back" href="#ep">p</a> <span class="ai-tag ai-cut">Cut in the edit</span><p>The edit keeps one sentence on the dummy-only case and leaves out the 10% standard from earlier in this section.</p></li>
+<li id="fq"><a class="ai-back" href="#eq">q</a> <span class="ai-tag ai-reworded">Reworded in the edit</span><p>The edit reads “A test with a sharper or broader peak would probably lose a different amount at the same rate.” We have one test, so it cannot tell us whether another test would lose more or less.</p></li>
+<li id="fr"><a class="ai-back" href="#er">r</a> <span class="ai-tag ai-reworded">Reworded in the edit</span><p>The edit reads “So the real logger may read differently, and I have not checked by how much.” The edit does not predict which way the filter would move the peak, since we have not checked it. The example technical report guesses that it would lower the sharpest peaks, and says it has not checked either.</p></li>
+<li id="fs"><a class="ai-back" href="#es">s</a> <span class="ai-tag ai-cut">Cut in the edit</span><p>The edit keeps the general point, that every peak in our sampled record is a lower bound on the true peak.</p></li>
+<li id="ft"><a class="ai-back" href="#et">t</a> <span class="ai-tag ai-reworded">Reworded in the edit</span><p>In the edit this moved to the first paragraph, as “I could not make any rate between 6,250 and our present 12,500 from our record, so I have not checked a logger in that range (a 10 kHz logger, for instance).”</p></li>
+<li id="fu"><a class="ai-back" href="#eu">u</a> <span class="ai-tag ai-cut">Cut in the edit</span><p>Alice asked only about peaks, so the edit leaves out the quantities other than peaks, which the report did not check.</p></li>
+<li id="fv"><a class="ai-back" href="#ev">v</a> <span class="ai-tag ai-reworded">Reworded in the edit</span><p>The report says 32,798 m would be 32.8 m, which is an arithmetic error, since 32,798 m is about 33 km. The edit corrects it to “which would be a chest deflection of about 33 km.”</p></li>
+<li id="fw"><a class="ai-back" href="#ew">w</a> <span class="ai-tag ai-cut">Cut in the edit</span><p>The 579 m/s² step is at 20.6 ms, outside the swing at 10.8 ms (note 13 above), so the edit leaves it out.</p></li>
+<li id="fx"><a class="ai-back" href="#ex">x</a> <span class="ai-tag ai-cut">Cut in the edit</span><p>The edit keeps the late peak and when it happens.</p></li>
+<li id="fy"><a class="ai-back" href="#ey">y</a> <span class="ai-tag ai-reworded">Reworded in the edit</span><p>The edit reads “In Figure 1 the crossmember keeps 54.9% at every 13th sample but 50.6% at every 12th.” The example now uses the rates the memo actually reports.</p></li>
+<li id="fz"><a class="ai-back" href="#ez">z</a> <span class="ai-tag ai-cut">Cut in the edit</span><p>The edit does not remove the offset (note 4 above).</p></li>
+<li id="faa"><a class="ai-back" href="#eaa">aa</a> <span class="ai-tag ai-reworded">Reworded in the edit</span><p>The edit reads “Apart from its own filter, the cheaper logger records the same values ours does.” This matches the limit in the edited memo that a real logger probably filters its signal before sampling.</p></li>
+<li id="fab"><a class="ai-back" href="#eab">ab</a> <span class="ai-tag ai-cut">Cut in the edit</span><p>This assumption belongs to the hold-last-sample method (note 2 above), which the edit dropped.</p></li>
+<li id="fac"><a class="ai-back" href="#eac">ac</a> <span class="ai-tag ai-cut">Cut in the edit</span><p>The edit does not remove the offset (note 4 above).</p></li>
+<li id="fad"><a class="ai-back" href="#ead">ad</a> <span class="ai-tag ai-cut">Cut in the edit</span><p>The edit's sentence about the program says only what the program does.</p></li>
+</ol>
+
+  </main>
+
+  
+
+  <script src="js/page.js?v=20261017141252"></script>
+
+  <footer class="site-footer">
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-17">October 17, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Algorithms');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  
+  
+  
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

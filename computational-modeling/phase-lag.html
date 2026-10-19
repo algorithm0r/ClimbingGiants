@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Phase lag — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261016224447">
-  <link rel="stylesheet" href="css/demos.css?v=20261016224447">
+  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
+  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -921,8 +921,8 @@
 
 <h2 id="why-a-causal-filter-lags">Why a Causal Filter Lags</h2>
 
-<p>A filter computes each output sample from input samples at or before that instant. The <dfn
-data-g="cfc">CFC</dfn> filter used in crash work is typical:</p>
+<p>One pass of the <dfn data-g="cfc">CFC</dfn> filter used in crash work computes each output
+sample from samples at or before that instant:</p>
 
 $$y_i = a_0 x_i + a_1 x_{i-1} + a_2 x_{i-2} + b_1 y_{i-1} + b_2 y_{i-2}$$
 
@@ -932,6 +932,11 @@ controller or a control loop has nothing else available to it. The consequence f
 immediately. When the input rises sharply the output at that instant is still mostly made of
 earlier, lower samples, so it rises later, and the sharper the feature and the heavier the
 filter, the further behind the output falls.</p>
+
+<p>The centred moving average on <a href="smoothing.html">the smoothing page</a> is not causal. It
+uses as many samples after each point as before it, so it weighs the future and the past alike
+and has no delay to correct. The lag on this page comes from looking in one direction, and one
+pass of the CFC filter looks in one direction only.</p>
 
 <figure class="figure mini" id="fig-thermo">
   <div class="fig-body"></div>
@@ -958,8 +963,9 @@ starting at 20 ms, with its peak at exactly 30.000 ms.</p>
 </table>
 
 <p>The lag grows as the filter gets heavier, by roughly the factor the cut-off falls by. The
-forward-backward column is 30.000 ms in every row, exactly and not approximately, because the
-two passes shift by the same amount in opposite directions and the cancellation is algebraic.
+forward-backward column is 30.000 ms in every row, exactly and not approximately. The backward
+pass is the same filter at the same class, with the same coefficients, so it shifts by the same
+amount as the forward pass in the opposite direction and the cancellation is algebraic.
 These lags are quoted to the nearest sample, which at 12.5 kHz is 0.08 ms. That quantisation is
 why the numbers are exact multiples of 0.08, and it is the same limit <a href="discrete-evaluation.html">discrete evaluation</a>
 describes, since a peak is located only as precisely as the sampling allows.</p>
@@ -1085,7 +1091,7 @@ class, one pass or forward-and-backward, with the peak and the integral reported
   </script>
   
 
-  <script type="module" src="js/bundle/phase-lag.js?v=20261016224447"></script>
+  <script type="module" src="js/bundle/phase-lag.js?v=20261017141252"></script>
   
 
   <footer class="site-footer">

@@ -1730,6 +1730,112 @@ setTimeout(() => {
           text: C === T.lab ? '+ ' + C.toFixed(2) + ', the lab' : '+ ' + C}))});
     },
 
+    /* the vote's four constants, each added to the running total. C and D take
+       the colours of the A and B read points later, since C is at rest at A
+       and D is at rest at the end */
+    vote(host, D) {
+      const T = D[9808], end = T.n - 1;
+      const opts = [{C: 0, k: 'A  zero', cls: 'c2-grey'},
+                    {C: T.lab, k: 'B  tow speed', cls: 'c2-head'},
+                    {C: -T.dv[T.imin], k: 'C  largest Δv', cls: 'c2-cross'},
+                    {C: -T.dv[end], k: 'D  total Δv', cls: 'c2-amber'}];
+      const series = opts.map(o => {
+        const r = win(T.t, T.dv.map(d => o.C + d), -0.01, T.t[end]);
+        return {x: r.t, y: r.y, cls: o.cls};
+      });
+      chart(host, {h: 460, padR: 130, y: {lo: -20, hi: 20, ticks: [-20, -10, 0, 10, 20], zero: true,
+          label: 'Civic crossmember, the running total plus each answer (m/s)'},
+        x: {lo: -0.01, hi: T.t[end], fmt: ms, label: 'time (ms)'},
+        series,
+        /* B, C and D end within 3 m/s of each other, so their labels are spread:
+           C above its line, D on it, B below */
+        labels: opts.map((o, i) => ({x: T.t[end], y: o.C + T.dv[end], dx: 8,
+          dy: [5, 22, -6, 6][i], cls: 'c2lab', text: o.k}))});
+    },
+
+    /* acceleration, velocity and distance on one time axis from the start of
+       the record, for the question of where the crush starts and ends. The
+       velocity and distance carry the vote's B, C and D (zero and the
+       offset-left-in curve were cut: zero wrecked the scale, and the offset
+       sat on top of B); the distance is integrated from the first sample, so
+       it already holds the approach at contact. */
+    crushq(host, D) {
+      const T = D[9808], n = T.n, a = T.t[0], b = T.t[n - 1];
+      const vs = [{v: T.dv.map(d => T.lab + d), cls: 'c2-head'},
+                  {v: T.dv.map(d => d - T.dv[T.imin]), cls: 'c2-cross'},
+                  {v: T.dv.map(d => d - T.dv[n - 1]), cls: 'c2-amber'}];
+      const X = {lo: a, hi: b + 0.004, fmt: ms};
+      chart(host, {h: 150, padT: 24, y: {lo: -1000, hi: 600, ticks: [-1000, 0], zero: true,
+          label: 'acceleration (m/s²)'}, x: X,
+        series: [{x: T.t, y: T.y, cls: 'c2-head'}]});
+      chart(host, {h: 150, padT: 24, y: {lo: -5, hi: 20, ticks: [0, 10, 20], zero: true,
+          label: 'velocity (m/s)'}, x: X,
+        series: vs.map(s => ({x: T.t, y: s.v, cls: s.cls}))});
+      chart(host, {h: 190, padT: 24, y: {lo: 0, hi: 2.2, ticks: [0, 1, 2],
+          label: 'distance from the start of the record (m)'}, x: {...X, label: 'time (ms)'},
+        series: vs.map(s => ({x: T.t, y: cumulative(s.v, T.dt), cls: s.cls}))});
+    },
+
+    /* step 7: acceleration, velocity and distance on one time axis, labelled
+       with what each check found. Every number is computed here from the
+       record, so the labels cannot drift from the data. */
+    checks(host, D) {
+      const T = D[9808], n = T.n, a = T.t[0], b = T.t[n - 1], end = n - 1;
+      const m = motion(T, T.lab), v = m.v, xs = cumulative(v, T.dt).map(q => 1000 * q);
+      const s = m.stop, ts = T.t[s], ta = T.t[T.imin], tb = T.t[end];
+      const app = xs[T.i0], peak = xs[s], xe = xs[end], crush = peak - app, back = peak - xe;
+      const avg = -T.lab / ts, g = 9.81, one = x => Float64Array.of(x);
+      const X = {lo: a, hi: b + 0.004, fmt: ms};
+      /* the two lines are named once, on the top panel, so the lower panels'
+         labels have the space under them */
+      const lines = [{x: 0, text: 'contact', anchor: 'start', dx: 6},
+                     {x: ts, text: Math.round(ts * 1000) + ' ms', anchor: 'start', dx: 6}];
+      const bare = lines.map(l => ({x: l.x}));
+      const lab = (x, y, text, o = {}) => ({x, y, text, cls: 'c2lab', ...o});
+      chart(host, {h: 150, padT: 24, y: {lo: -1000, hi: 600, ticks: [-1000, 0], zero: true,
+          label: 'acceleration (m/s²)'}, x: X, vlines: lines,
+        series: [{x: T.t, y: T.y, cls: 'c2-faint'},
+                 {x: Float64Array.of(0, ts), y: Float64Array.of(avg, avg), cls: 'c2-cross'}],
+        labels: [lab(a + 0.002, -620, 'towed: mean ' + MINUS(T.b.toFixed(3)) + ', the offset'),
+                 lab(ts, avg, 'average ' + MINUS(Math.round(avg)) + ' m/s² (' + (-avg / g).toFixed(1) + ' g)',
+                     {dx: 8, dy: 5})]});
+      chart(host, {h: 160, padT: 24, y: {lo: -5, hi: 20, ticks: [0, 10, 20], zero: true,
+          label: 'velocity, from the tow speed (m/s)'}, x: X, vlines: bare,
+        series: [{x: T.t, y: v, cls: 'c2-head'},
+                 {x: one(ts), y: one(0), line: false, dots: 'c2p-grey', r: 7},
+                 {x: one(ta), y: one(v[T.imin]), line: false, dots: 'c2p-cross', r: 7},
+                 {x: one(tb), y: one(v[end]), line: false, dots: 'c2p-amber', r: 7}],
+        labels: [lab(a + 0.002, T.lab, 'the tow speed, ' + T.lab.toFixed(2) + ' m/s', {dy: -8}),
+                 lab(ts, 0, 'stops', {dx: 8, dy: -8}),
+                 lab(ta, v[T.imin], 'back at ' + Math.abs(v[T.imin]).toFixed(2) + ' m/s', {dx: 10, dy: -10}),
+                 lab(tb, v[end], 'still moving back at ' + Math.abs(v[end]).toFixed(2) + ' m/s',
+                     {dy: -10, anchor: 'end'})]});
+      chart(host, {h: 190, padT: 24, y: {lo: 0, hi: 1700, ticks: [0, 500, 1000, 1500],
+          label: 'distance from the first sample (mm)'}, x: {...X, label: 'time (ms)'}, vlines: bare,
+        series: [{x: T.t, y: xs, cls: 'c2-head'},
+                 {x: one(0), y: one(app), line: false, dots: 'c2p-grey', r: 7},
+                 {x: one(ts), y: one(peak), line: false, dots: 'c2p-cross', r: 7},
+                 {x: one(tb), y: one(xe), line: false, dots: 'c2p-amber', r: 7}],
+        labels: [lab(0, app, Math.round(app) + ' mm: ' + T.lab.toFixed(2) + ' m/s for 50 ms, a straight line',
+                     {dx: 10, dy: 18}),
+                 lab(ts, peak, 'peak: ' + Math.round(crush) + ' mm of crush', {dx: 10, dy: -10}),
+                 lab(tb, xe, Math.round(xe).toLocaleString('en-US') + ' mm = ' + Math.round(app) + ' + ' +
+                     Math.round(crush) + ' ' + MINUS('-') + ' ' + Math.round(back) + ' moved back',
+                     {dy: 24, anchor: 'end'})]});
+    },
+
+    /* the same 50 ms with the offset subtracted, for the side-by-side on the
+       subtraction slide. At this scale the dashed mean barely moves. */
+    preOff(host, D) {
+      const T = D[9808], r = win(T.t, T.y, -0.05, 0);
+      chart(host, {h: 430, y: {lo: -9, hi: 9, ticks: [-8, -4, 0, 4, 8], zero: true,
+          label: 'Civic crossmember before contact (m/s²), offset subtracted'},
+        x: {lo: -0.05, hi: 0, fmt: ms, label: 'time (ms)'},
+        hlines: [{y: 0}],
+        series: [{x: r.t, y: r.y, cls: 'c2-faint', dots: 'c2p-head', r: 2.2}],
+        labels: [{x: -0.0495, y: 7.4, text: 'dashed: the mean, 0.000 m/s²', cls: 'c2lab'}]});
+    },
+
     /* the 50 ms before contact, where the car is towed and should read zero */
     pre(host, D) {
       const T = D[9808], r = win(T.t, T.raw, -0.05, 0);
@@ -1762,19 +1868,23 @@ setTimeout(() => {
 
     /* distance since contact from that velocity */
     dist(host, D) {
-      const T = D[9808], m = motion(T, T.lab), end = T.n - 1;
-      const xmm = m.x.map(q => 1000 * q), r = win(T.t, xmm, -0.005, T.t[end]);
-      const tp = T.t[m.imax], xp = xmm[m.imax], te = T.t[end], xe = xmm[end];
-      chart(host, {h: 460, y: {lo: -100, hi: 800, ticks: [0, 200, 400, 600, 800], zero: true,
-          label: 'Civic crossmember, distance since contact (mm)'},
-        x: {lo: -0.005, hi: te + 0.008, fmt: ms, label: 'time (ms)'},
-        series: [{x: r.t, y: r.y, cls: 'c2-head'},
-                 {x: Float64Array.of(tp), y: Float64Array.of(xp), line: false, dots: 'c2p-cross', r: 10},
-                 {x: Float64Array.of(te), y: Float64Array.of(xe), line: false, dots: 'c2p-amber', r: 10}],
-        labels: [{x: tp, y: xp, dy: -18, anchor: 'middle', cls: 'c2lab',
-                  text: Math.round(xp) + ' mm at ' + Math.round(tp * 1000) + ' ms'},
-                 {x: te, y: xe, dy: 36, anchor: 'end', cls: 'c2lab',
-                  text: Math.round(xe) + ' mm at the end'}]});
+      /* the question slide before the crush demo: the velocity from the tow
+         speed and its cumulative integral from the first sample, not reset to
+         zero at contact, offset removed */
+      const T = D[9808], n = T.n, a = T.t[0], b = T.t[n - 1];
+      const v = T.dv.map(d => T.lab + d);
+      /* dashed lines at contact and at the stop, where the velocity first reaches zero */
+      const ts = T.t[motion(T, T.lab).stop];
+      const X = {lo: a, hi: b + 0.004, fmt: ms},
+            contact = [{x: 0, text: 'contact', anchor: 'start', dx: 6},
+                       {x: ts, text: 'stops, ' + Math.round(ts * 1000) + ' ms', anchor: 'start', dx: 6}];
+      chart(host, {h: 200, padT: 24, y: {lo: -5, hi: 20, ticks: [0, 10, 20], zero: true,
+          label: 'Civic crossmember velocity, from the tow speed (m/s)'}, x: X, vlines: contact,
+        series: [{x: T.t, y: v, cls: 'c2-head'}]});
+      chart(host, {h: 240, padT: 24, y: {lo: 0, hi: 1.6, ticks: [0, 0.5, 1, 1.5],
+          label: 'its cumulative integral, from the first sample (m)'}, x: {...X, label: 'time (ms)'},
+        vlines: contact,
+        series: [{x: T.t, y: cumulative(v, T.dt), cls: 'c2-head'}]});
     },
 
     /* the change in velocity since contact, against the lab's speed */
@@ -1819,32 +1929,61 @@ setTimeout(() => {
     },
 
     /* outside crash testing: three small constructed figures */
-    nav(host, D) {
-      const b = Math.abs(D[9808].b), X = Float64Array.from({length: 61}, (_, i) => i);
-      chart(host, {w: 440, h: 230, padL: 52, y: {lo: 0, hi: 90, ticks: [0, 40, 80], label: 'position error (m)'},
-        x: {lo: 0, hi: 60, ticks: [0, 20, 40, 60], label: 'time (s)'},
-        series: [{x: X, y: X.map(t => 0.5 * b * t * t), cls: 'c2-cross'}],
-        labels: [{x: 60, y: 0.5 * b * 3600, dx: -6, dy: -10, anchor: 'end', cls: 'c2lab',
-                  text: Math.round(0.5 * b * 3600) + ' m'}]});
+    /* Air Canada 143 (1983): the fuel computer subtracted the measured burn
+       from the 22,300 kg it was given, while about 10,100 kg was aboard. The
+       loads are from the accident; the steady 5,000 kg/h burn is made up. */
+    fuel(host) {
+      const burn = 5000, X = Float64Array.from({length: 61}, (_, i) => i / 20);
+      const told = 22300, real = 10100, tEmpty = real / burn;
+      chart(host, {w: 440, h: 230, padL: 64, y: {lo: 0, hi: 24000, ticks: [0, 10000, 20000],
+          label: 'fuel on board (kg)'},
+        x: {lo: 0, hi: 3, ticks: [0, 1, 2, 3], label: 'time (h)'},
+        series: [{x: X, y: X.map(t => told - burn * t), cls: 'c2-head'},
+                 {x: X, y: X.map(t => t <= tEmpty ? real - burn * t : NaN), cls: 'c2-cross'},
+                 {x: Float64Array.of(tEmpty), y: Float64Array.of(0), line: false, dots: 'c2p-cross', r: 6}],
+        labels: [{x: 1.5, y: told - 1.5 * burn, dy: -14, anchor: 'start', cls: 'c2lab', text: 'the computer'},
+                 {x: 0.08, y: real, dy: -10, cls: 'c2lab', text: 'the tanks'},
+                 {x: tEmpty, y: 0, dx: 10, dy: -8, cls: 'c2lab', text: 'both engines stop'}]});
     },
-    battery(host) {
-      /* a 0.05 A offset counted for four days, the count reset at each full charge */
-      const X = [], Y = [];
-      for (let d = 0; d < 4; d++) for (let h = 0; h <= 24; h++) { X.push(24 * d + h); Y.push(0.05 * h); }
-      chart(host, {w: 440, h: 230, padL: 52, y: {lo: 0, hi: 1.5, ticks: [0, 0.6, 1.2], label: 'counting error (Ah)'},
-        x: {lo: 0, hi: 96, ticks: [0, 24, 48, 72, 96], label: 'time (h)'},
-        series: [{x: Float64Array.from(X), y: Float64Array.from(Y), cls: 'c2-cross'}],
-        labels: [{x: 24, y: 1.2, dx: -4, dy: -10, anchor: 'end', text: 'full: reset', cls: 'c2lab'}]});
+    /* a city water tower over one day: a flow meter on its pipe, and a level
+       gauge read at midnight (the constant) and every six hours (the check).
+       The flows are made up: pumps fill it overnight, the morning and evening
+       demand draw it down. The dashed curve is the same flow from a wrong start. */
+    tower(host) {
+      const net = h => h < 6 ? 120 : h < 9 ? -160 : h < 17 ? -25 : h < 21 ? -90 : 70;
+      const X = [], V = [];
+      let v = 1500;
+      for (let k = 0; k <= 240; k++) {
+        const h = k / 10;
+        if (k) v += net(h - 0.05) * 0.1;
+        X.push(h); V.push(v);
+      }
+      const T = Float64Array.from(X), Vt = Float64Array.from(V);
+      const gx = Float64Array.of(0, 6, 12, 18, 24), gy = gx.map(h => Vt[Math.round(h * 10)]);
+      chart(host, {w: 440, h: 230, padL: 64, y: {lo: 600, hi: 2400, ticks: [1000, 1500, 2000],
+          label: 'water in the tower (m³)'},
+        x: {lo: 0, hi: 24, ticks: [0, 6, 12, 18, 24], label: 'time (h)'},
+        series: [{x: T, y: Vt.map(q => q - 500), cls: 'c2-faint'},
+                 {x: T, y: Vt, cls: 'c2-head'},
+                 {x: gx, y: gy, line: false, dots: 'c2p-amber', r: 6}],
+        labels: [{x: 9, y: 2250, cls: 'c2lab', text: 'dots: the level gauge'},
+                 {x: 24, y: Vt[240] - 500, dx: -4, dy: 18, anchor: 'end', cls: 'c2lab', text: 'started at 1,000'}]});
     },
-    tank(host) {
-      /* one flow record, 1 + sin(t/2) m³ per hour, integrated from three
-         starting volumes */
-      const X = Float64Array.from({length: 241}, (_, i) => i / 10);
-      const vol = t => t + 2 * (1 - Math.cos(t / 2));
-      chart(host, {w: 440, h: 230, padL: 52, y: {lo: 0, hi: 60, ticks: [0, 20, 40, 60], label: 'volume (m³)'},
-        x: {lo: 0, hi: 24, ticks: [0, 8, 16, 24], label: 'time (h)'},
-        series: [10, 20, 30].map((v0, k) => ({x: X, y: X.map(t => v0 + vol(t)),
-          cls: ['c2-head', 'c2-amber', 'c2-cross'][k]}))});
+    /* a phone that integrated its accelerometer twice through Seattle's SR 99
+       tunnel (2.83 km) at a made-up 72 km/h, with the Civic's offset: the error
+       grows as bt²/2 from the GPS fix at the entrance until the fix at the exit */
+    tunnel(host, D) {
+      const b = Math.abs(D[9808].b), len = 2830, vel = 20, tIn = len / vel;
+      const X = Float64Array.from({length: 191}, (_, i) => i - 10);
+      const err = t => t < 0 || t > tIn ? 0 : 0.5 * b * t * t, eExit = 0.5 * b * tIn * tIn;
+      chart(host, {w: 440, h: 230, padL: 64, y: {lo: 0, hi: 500, ticks: [0, 200, 400],
+          label: 'position error (m)'},
+        x: {lo: -10, hi: 180, ticks: [0, 60, 120, 180], label: 'time (s)'},
+        vlines: [{x: 0, text: 'in', anchor: 'start', dx: 4}, {x: tIn, text: 'out', anchor: 'start', dx: 4}],
+        series: [{x: X, y: X.map(err), cls: 'c2-cross'},
+                 {x: Float64Array.of(tIn), y: Float64Array.of(eExit), line: false, dots: 'c2p-cross', r: 6}],
+        labels: [{x: tIn, y: eExit, dx: -10, dy: 4, anchor: 'end', cls: 'c2lab',
+                  text: Math.round(eExit) + ' m off'}]});
     },
   };
 
@@ -1904,7 +2043,14 @@ setTimeout(() => {
 
   function dvChart(host, T, marks) {
     const r = win(T.t, T.dv, -0.01, T.t[T.n - 1]), end = T.n - 1;
-    const series = [{x: r.t, y: r.y, cls: 'c2-head'}], labels = [];
+    const series = [{x: r.t, y: r.y, cls: 'c2-head'}], labels = [], vlines = [];
+    if (!marks) {
+      /* where the running total first reaches the lab's speed (77 ms on the Civic),
+         the same sample the velocity slide later calls the stop */
+      const s = motion(T, T.lab).stop;
+      series.push({x: Float64Array.of(T.t[s]), y: Float64Array.of(T.dv[s]), line: false, dots: 'c2p-grey', r: 8});
+      vlines.push({x: T.t[s], text: Math.round(T.t[s] * 1000) + ' ms', anchor: 'start', dx: 6});
+    }
     if (marks) {
       series.push({x: Float64Array.of(T.t[T.imin]), y: Float64Array.of(T.dv[T.imin]), line: false, dots: 'c2p-cross', r: 10});
       series.push({x: Float64Array.of(T.t[end]), y: Float64Array.of(T.dv[end]), line: false, dots: 'c2p-amber', r: 10});
@@ -1924,42 +2070,55 @@ setTimeout(() => {
     chart(host, {h: 460, y: {lo: -23, hi: 2, ticks: [-20, -15, -10, -5, 0], zero: true,
         label: 'Civic crossmember, change in velocity since contact (m/s)'},
       x: {lo: -0.01, hi: T.t[end] + 0.008, fmt: ms, label: 'time (ms)'},
-      hlines: [{y: -T.lab, left: true, text: 'the lab\'s speed, ' + T.lab.toFixed(2) + ' m/s, reversed'}],
-      series, labels});
+      hlines: [{y: -T.lab, left: true, text: 'the lab\'s speed, ' + MINUS('-' + T.lab.toFixed(2)) + ' m/s'}],
+      vlines, series, labels});
   }
 
   /* -------------------------------------------------------- the live demo */
   const DEMOS = {
 
-    /* velocity and distance from a constant the room picks */
-    constant(host, D) {
-      const T = D[9808], lab = T.lab, rest = -T.dv[T.n - 1], a = -0.01, b = T.t[T.n - 1];
-      const C0 = {lab, rest, zero: 0};
+    /* the crush as the area under the velocity between a start and an end:
+       the velocity from the tow speed, offset removed, and its cumulative
+       integral from the first sample. The buttons put a slider on one of the
+       four candidate points; area below zero (the car moving back) is shaded
+       red, since it subtracts. */
+    crush(host, D) {
+      const T = D[9808], n = T.n, t = T.t;
+      const v = T.dv.map(d => T.lab + d), x = cumulative(v, T.dt), stop = motion(T, T.lab).stop;
+      const at = ms => Math.max(0, Math.min(n - 1, Math.round((ms / 1000 - t[0]) / T.dt)));
+      const msOf = i => +(t[i] * 1000).toFixed(1);
+      const SNAP = {first: ['s', 0], contact: ['s', T.i0], stop: ['e', stop], last: ['e', n - 1]};
       return {
-        setting: 'The Civic\'s change in velocity, with a constant added, and that velocity integrated ' +
-                 'again from contact.',
-        segments: [{key: 'src', label: 'constant', value: 'lab', options: [
-          {value: 'lab', label: 'the lab\'s speed'}, {value: 'rest', label: 'at rest at the end'},
-          {value: 'zero', label: 'zero'}]}],
-        controls: [{key: 'd', label: 'move it by', min: -0.5, max: 0.5, step: 0.05, value: 0, dp: 2, unit: 'm/s'}],
-        panels: [{label: 'velocity', unit: 'm/s', height: 150, xAxis: true, yClamp: [-19, 19]},
-                 {label: 'distance since contact', unit: 'mm', height: 150, xAxis: true}],
-        readouts: [{key: 'C', label: 'constant'}, {key: 'stop', label: 'velocity reaches zero'},
-                   {key: 'xmax', label: 'largest distance'}, {key: 'xend', label: 'distance at the end'}],
+        controls: [{key: 's', label: 'start', min: -50, max: 300, step: 0.1, value: -50, dp: 1, unit: 'ms'},
+                   {key: 'e', label: 'end', min: -50, max: 300, step: 0.1, value: msOf(n - 1), dp: 1, unit: 'ms'}],
+        buttons: [{key: 'first', label: 'start at the first sample'}, {key: 'contact', label: 'start at contact'},
+                  {key: 'stop', label: 'end at the stop'}, {key: 'last', label: 'end at the last sample'}],
+        panels: [{label: 'velocity, from the tow speed', unit: 'm/s', height: 270, xAxis: true, yClamp: [-5, 20]},
+                 {label: 'distance from the first sample', unit: 'm', height: 270, xAxis: true, yClamp: [0, 1.6]}],
+        readouts: [{key: 'area', label: 'area, start to end'}, {key: 'stop', label: 'velocity reaches zero'}],
         source: SOURCE,
         compute(st) {
-          const C = C0[st.src] + st.d, m = motion(T, C);
-          const v = win(T.t, m.v, a, b), x = win(T.t, m.x.map(q => 1000 * q), a, b);
-          const vm = m.stop >= 0 ? [{t: T.t[m.stop], y: 0, ring: true}] : [];
-          const xm = [{t: T.t[m.imax], y: 1000 * m.x[m.imax], ring: true}];
+          if (st.fired && SNAP[st.fired]) {
+            const [k, i] = SNAP[st.fired];
+            st[k] = msOf(i);
+            st.root.querySelector(`input[data-c="${k}"]`).value = st[k];
+          }
+          const i0 = at(st.s), i1 = at(st.e), lo = Math.min(i0, i1), hi = Math.max(i0, i1);
+          const step = Math.max(1, Math.floor((hi - lo) / 400)), pos = [], neg = [];
+          for (let i = lo; ; i = Math.min(hi, i + step)) {
+            pos.push({x: t[i], y: Math.max(0, v[i])}); neg.push({x: t[i], y: Math.min(0, v[i])});
+            if (i === hi) break;
+          }
+          const close = q => [{x: t[lo], y: 0}, ...q, {x: t[hi], y: 0}];
+          const range = [t[0], t[n - 1]];
           return {
-            panels: [{x: v.t, y: v.y, range: [a, b], opts: {marks: vm, hlines: [{y: 0, cls: 'limit'}]}},
-                     {x: x.t, y: x.y, range: [a, b], opts: {marks: xm}}],
+            panels: [{x: t, y: v, range, opts: {polys: hi > lo
+                       ? [{pts: close(pos), cls: 'poly'}, {pts: close(neg), cls: 'poly-over'}] : []}},
+                     {x: t, y: x, range, opts: {bands: [{x0: t[lo], x1: t[hi]}],
+                       marks: [{t: t[i0], y: x[i0], cast: 'y', ring: true}, {t: t[i1], y: x[i1], cast: 'y', ring: true}]}}],
             readouts: {
-              C: C.toFixed(2) + ' m/s',
-              stop: m.stop >= 0 ? (T.t[m.stop] * 1000).toFixed(1) + ' ms' : 'not in the record',
-              xmax: Math.round(1000 * m.x[m.imax]) + ' mm at ' + (T.t[m.imax] * 1000).toFixed(1) + ' ms',
-              xend: Math.round(1000 * m.x[T.n - 1]) + ' mm'}};
+              area: Math.round(1000 * (x[i1] - x[i0])) + ' mm',
+              stop: (t[stop] * 1000).toFixed(1) + ' ms'}};
         },
       };
     },
@@ -2131,9 +2290,9 @@ if (slides.length) {
   });
 
   /* a click advances, so a remote that sends one works, but not when the click
-     was meant for a demo control */
+     was meant for a demo control or a box the class is typing into */
   addEventListener('click', e => {
-    if (e.target.closest('cg-demo, a, button, input, label, .deck-notes')) return;
+    if (e.target.closest('cg-demo, a, button, input, label, textarea, [contenteditable], .deck-notes')) return;
     go(1);
   });
 
