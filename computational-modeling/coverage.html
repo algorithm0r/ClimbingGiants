@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Coverage — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -917,21 +917,21 @@
   you were.</p>
 </div>
 
-<h2 id="only-the-rate-can-be-checked">Only the Rate Can Be Checked</h2>
+<h2 id="only-the-rate-can-be-checked">Checking the Rate</h2>
 
-<p>Reporting <em>d</em> = 59 ± 114 cm at 90% confidence is three separate statements, being a
+<p>Reporting <em>d</em> = 82 ± 114 cm at 90% confidence is three separate statements, being a
 value, a half-width, and a rate. The rate is the part that can be checked. It cannot be checked
 on one case. A single interval either contains the truth or does not, and either outcome is
 consistent with any confidence level, because the claim is about a population of cases. So the
-check needs a population: run the same procedure many times on situations where the answer is
-known, and count.</p>
+check needs a population of cases. Run the same procedure many times on situations where the
+answer is known, and count.</p>
 
 $$\text{coverage} = \frac{\text{intervals containing the truth}}{\text{intervals}}$$
 
 <p>If the reported level is 90% and the coverage comes out at 88%, the interval is doing what it
-claimed, and if it comes out at 4% it is not an interval at all.</p>
+claimed, and if it comes out at 4% the label is wrong.</p>
 
-<h2 id="140-shots-through-one-pipeline">140 Shots Through One Pipeline</h2>
+<h2 id="140-shots-through-one-pipeline">The 140-Shot Test</h2>
 
 <p>140 real three-point attempts, each tracked at 25&nbsp;Hz. For every one of them the same
 pipeline runs: take the first ten frames after release, least-squares fit a parabola in height
@@ -955,7 +955,7 @@ made. Every step of that is defensible, and it is close to what a careful studen
 unprompted. It
 gives a median 90% interval 88&nbsp;cm wide.</p>
 
-<h2 id="how-often-the-interval-contains-the-answer">How Often the Interval Contains the Answer</h2>
+<h2 id="how-often-the-interval-contains-the-answer">Measured Coverage</h2>
 
 <p>The demo runs the whole pipeline on all 140 shots and counts how often each interval contains
 the answer. The diagonal is what the stated level promises.</p>
@@ -965,19 +965,19 @@ the answer. The diagonal is what the stated level promises.</p>
 
 <p>Against a claimed 90% the intervals cover about <strong>51%</strong>, and against a claimed 50%
 they cover <strong>6%</strong>. Every level is short, and the shortfall is worst where the claim
-is weakest, which is the opposite of what a merely noisy estimate would do.</p>
+is weakest, which is the opposite of what a merely noisy estimate would typically do.</p>
 
-<h2 id="the-two-obvious-repairs">The Two Obvious Repairs</h2>
+<h2 id="the-two-obvious-repairs">Two Repairs</h2>
 
 <p><strong>Use a better noise estimate.</strong> The residual scatter of a ten-frame fit is
-1.64&nbsp;cm, while the tracker's measured per-frame noise is 3.07&nbsp;cm: the fit absorbed
-about half the noise into its three free parameters, so the residual understates it by a factor
-of two. Substituting the measured value nearly doubles the median interval width, from
+1.64&nbsp;cm, while the tracker's measured per-frame noise is 3.07&nbsp;cm. The fit appears to have
+absorbed about half the noise into its three free parameters, so the residual understates it by a
+factor of nearly two. Substituting the measured value nearly doubles the median interval width, from
 88&nbsp;cm to 159&nbsp;cm. Coverage barely moves: 52% to 56%, measured separately over the same
 140 shots.</p>
 
-<p><strong>Widen the interval.</strong> Raise the assumed noise further and coverage does not
-improve, it collapses, and at four times the measured noise a claimed 90% interval covers
+<p><strong>Widen the interval.</strong> Raise the assumed noise further and coverage falls,
+and at four times the measured noise a claimed 90% interval covers
 <strong>11%</strong>.</p>
 
 <table class="data">
@@ -988,43 +988,42 @@ improve, it collapses, and at four times the measured noise a claimed 90% interv
   <tr><td class="num">&times;6</td><td class="num">6%</td></tr>
 </table>
 
-<h2 id="every-failure-falls-on-the-same-side">Every Failure Falls on the Same Side</h2>
+<h2 id="every-failure-falls-on-the-same-side">One-Sided Failures</h2>
 
 <p>The readout that explains the table is the one counting which side the failures fall on.
 <strong>Not one of them is above the interval.</strong> At the measured noise, 68 of 140 answers
 lie below the lower bound and none lie above it. The obvious diagnosis is that the interval is
-too narrow. The measurement says it is in the wrong place.</p>
+too narrow, though the one-sided failures say it is in the wrong place.</p>
 
 <p>The quantity reported is a <em>distance</em> from the centre of the hoop, and a distance cannot
-be negative. Perturbing the frames moves the predicted crossing point in some direction, and any
-direction increases its distance from a point it was already near. So the resampled distribution
+be negative. Perturbing the frames moves the predicted crossing point in some direction, and most
+directions increase its distance from a point it was already near. So the resampled distribution
 is pushed away from zero, and its 5th percentile, the lower bound, rises with the noise. The
 median lower bound is 15&nbsp;cm at the measured noise and rises with it, while the median
 answer stays at 16&nbsp;cm. Widening the assumed noise walks the interval off the answer.</p>
 
 <div class="aside">
-  <span class="label">A reported quantity can have the wrong shape</span>
-  <p>None of this would happen if the pipeline reported the crossing <em>point</em> and the interval
+  <span class="label">The shape of a reported quantity</span>
+  <p>The one-sided failures would not happen if the pipeline reported the crossing <em>point</em> and the interval
 were a region in the plane. The bias arrives with the decision to summarise a two-dimensional
 position as one non-negative number, and that choice is made for good reasons, since it is the
-quantity anyone cares about. It carries a consequence nobody sees until coverage is counted.</p>
+quantity anyone cares about. Its cost only shows when coverage is counted.</p>
 </div>
 
-<h2 id="resampling-propagates-only-what-it-was-given">Resampling Propagates Only What It Was Given</h2>
+<h2 id="resampling-propagates-only-what-it-was-given">Unmodelled Error Sources</h2>
 
 <p>Resampling propagates the uncertainty of the source it is given, and nothing else. This pipeline
 was handed the tracking noise, so that is what it propagated. It was not told that a parabola
 ignores air resistance, and the data say the omission is real. Fitting gravity freely across
 these shots returns a median of <strong>9.49&nbsp;m/s&sup2;</strong> against a true 9.81, which
-is drag showing up as a deficit in the fitted curvature. It was never told that the release
+is most likely drag showing up as a deficit in the fitted curvature. It was never told that the release
 frame was chosen and not measured, nor that the answer it is scored against is itself a fit with
 its own uncertainty of about 2.3&nbsp;cm. Every one of those is an error source the interval
 never saw, so the interval cannot include them, and coverage is what makes their absence
-visible. The gap between 90% claimed and 51% achieved is the size of everything the analysis
-left out, and it is measurable without knowing what any of those things are. An interval is a
-claim about a rate, and the rate is checkable wherever the truth is known. A method that is 51%
-correct when it claims 90% is a different proposition from one that is 88% correct, even though
-neither reports anything about itself that would tell the two apart.</p>
+visible. The gap between 90% claimed and 51% achieved is a measure of what the analysis left
+out or got wrong, and it is measurable without knowing what those things are. A method that is
+51% correct when it claims 90% and one that is 88% correct carry the same label, so only a
+coverage check tells them apart.</p>
 
 <h2 id="in-code">In Code</h2>
 
@@ -1088,7 +1087,7 @@ end</pre>
 
 <p>Nothing in it is specific to this problem. It needs a procedure that reports an interval and a
 supply of cases whose answers are known, which is why coverage may be checked on any pipeline
-that reports an uncertainty at all.</p>
+that reports an uncertainty.</p>
 
 <div class="check">
   <span class="label">Check</span>
@@ -1099,26 +1098,26 @@ that reports an uncertainty at all.</p>
 <strong>stop calling it a 95% interval.</strong> The measured number is 48%, that is now the
 honest label, and it is more useful than the nominal one because it was checked. What not to do
 is reach for a multiplier. Widening the interval until the count comes out right treats the
-symptom, and page 32's own measurement shows why that can fail. If the failures are all on one
-side, the interval is misplaced and not merely too narrow, and inflating it makes coverage
+symptom, and the measurement on this page shows why that can fail. If the failures are all on one
+side, the interval is misplaced and not merely too narrow, and inflating it can make coverage
 worse. So report both numbers, then look at <em>where</em> the 104 failures fell. All on one
 side is a bias and points at something unmodelled. Split evenly is a width problem, and then the
 shortfall is telling you how much of your uncertainty the procedure never saw.</p></div></details></li>
     <li>A colleague argues their interval must be right because their residuals are very small.
     Using the table above, say in one sentence what is wrong with that argument.
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Small residuals say the model reproduces the data it was fitted to, and the table shows
-intervals built from exactly such residuals covering about half of what they claim, so the
+intervals built from such residuals covering about half of what they claim, so the
 argument uses a measure of fit as though it were a measure of error. The residual is measured
-against data you have. The error against a truth you do not. Worse, it can run backwards. A
-model with enough parameters absorbs the noise, so its residuals shrink <em>and</em> the
-interval built from them narrows, and the fit that looks best by this argument is the one whose
-interval is most over-confident.</p></div></details></li>
+against data you have, and the error against a truth you do not. In fact a model with enough
+parameters absorbs the noise, so its residuals shrink <em>and</em> the
+interval built from them narrows, so the fit that looks best by this argument is likely the one
+whose interval is most over-confident.</p></div></details></li>
     <li>You have no cases with known answers. Name one way you could still obtain a set of cases
     on
     which coverage is checkable.
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Hold data back.</strong> Fit on part of what you have and treat the rest as unknown. The
-held-out values are known to you and not to the procedure, which is all coverage needs. This is
-the cheapest option and needs no new measurements. Three others, roughly in order of cost:</p>
+held-out values are known to you and not to the procedure, which is all coverage needs. This needs
+no new measurements. Three others, roughly from most to least costly:</p>
      <ul>
      <li><strong>Measure a subset better.</strong> A slower, more accurate instrument on twenty
      cases gives twenty references good enough to check against.</li>
@@ -1130,7 +1129,7 @@ the cheapest option and needs no new measurements. Three others, roughly in orde
      and not one that is wrong physically.</li>
      </ul>
      <p>The first three are checks against reality. The fourth is a check against your assumptions,
-which is worth having provided nobody forgets which it is.</p></div></details></li>
+which is still useful as long as it is reported as one.</p></div></details></li>
   </ol>
 </div>
 
@@ -1142,7 +1141,7 @@ page is listed here.</p>
 <dl class="glossary"></dl>
 
 <p class="deeper">Go deeper: <a href="workbench.html?tool=spread">the workbench</a>. perturb a
-record many times and watch the distribution of whatever you report from it. Which is where an
+record many times and watch the distribution of whatever you report from it. This is where an
 interval comes from when no formula gives one.</p>
 
   </main>
@@ -1160,11 +1159,11 @@ interval comes from when no formula gives one.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/coverage.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/coverage.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-16">October 16, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-20">October 20, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

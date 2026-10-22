@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lecture 11 — Smoothing</title>
+<title>Lecture 11 — Smoothing noise from a channel</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-<link rel="stylesheet" href="css/demos.css?v=20261017141252">
+<link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+<link rel="stylesheet" href="css/demos.css?v=20261022093533">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -690,7 +690,7 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <section class="deck-slide part">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
-    <p class="say">Smoothing a record before differentiating it</p>
+    <p class="say">Smoothing noise from a channel</p>
   </div>
 </section>
 
@@ -704,100 +704,28 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide part">
+<section class="deck-slide full" data-notes="<p>Okay. So the simplest smoother there is, is what we call a moving average. We replace every sample by the mean of the w samples centred on it, w for the width of the window. So with a width of nine, each sample becomes the average of itself and the four on each side.</p><p>And here's what the width does, on the crossmember spike. Each strip is the same raw record, the grey dashed line, smoothed at a different width. Five samples, that's 0.4 milliseconds, takes the spike from minus 1541 to minus 1318. Nine samples takes it to minus 968. And by 25 samples, two milliseconds, the spike is down to under a third of its depth, minus 477. So the wider the window, the smoother the trace, and the lower the peak.</p><p>And the first question is how much noise it takes out.</p>">
   <div class="head">
-    <p class="course">Computational Physical Modeling</p>
-    <p class="say">The moving average</p>
+    <p class="say">A <span class="term">moving average</span> replaces each sample by <span class="def">the mean of the $w$ samples centred on it</span>.</p>
+    <p class="sub">The crossmember spike at three widths $w$, raw dashed.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l11-widths"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Okay. So the simplest smoother there is, is what we call a moving average. We replace every sample by the mean of the w samples centered on it, w for the width of the window. So with a width of nine, each sample becomes the average of itself and the four on each side.</p><p>That's it, that's the whole idea. And two things follow from it, and they pull against each other.</p>">
+<section class="deck-slide full" data-notes="<p>So how much noise does it take out? Well, we can work it out in three lines. Say each sample's noise has size sigma, and the samples are independent.</p><p>First we add up the w samples. Like in the last video, the variances add, so the sum has variance w times sigma squared, and its standard deviation is the square root of that, sigma root w.</p><p>Then the average divides that sum by w, so the noise divides by w too. And sigma root w over w is sigma over root w.</p><p>And that square root is what makes this expensive. To halve the noise, root w has to double, so w has to go up four times. A window of 25 leaves a fifth of the noise, 100 leaves a tenth, and 400 a twentieth. So each halving costs four times the width of the one before.</p><p>Now that's for independent samples. On our crash record neighbouring samples move together, like we saw in the last video, so a nine-sample average only halves the noise, where root nine would say a third.</p>">
   <div class="head">
-    <p class="say">A <span class="term">moving average</span> replaces each sample by <span class="def">the mean of the $w$ samples around it</span>.</p>
+    <p class="say">Make the window four times as wide and <span class="def">the noise halves</span>.</p>
+    <p class="sub">Average $w$ independent samples, each with noise $\sigma$ (sigma).</p>
   </div>
   <div class="stage">
     <div class="work">
-      $$\tilde y_i \;=\; \frac{1}{w}\sum_{k=-(w-1)/2}^{(w-1)/2} y_{i+k} \qquad\qquad w = 9:\quad \tilde y_i = \frac{y_{i-4} + \dots + y_i + \dots + y_{i+4}}{9}$$
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>So the first one. Averaging w independent values, each with standard deviation sigma, gives a value with standard deviation sigma over root w, at least if the samples are independent. That's the same square root we met in week three when we were accumulating, only this time we're using it on purpose.</p><p>And that square root is what makes this expensive. A window of 25 leaves a fifth of the noise, because root 25 is 5. Say we want half that, a tenth. We need root w to double, so w goes up four times, to 100. And the halving after that costs a window of 400. So each halving costs four times the width of the one before.</p>">
-  <div class="head">
-    <p class="say">Make the window four times as wide and <span class="def">the noise halves</span>.</p>
-    <p class="sub">Average $w$ independent samples and the noise falls from $\sigma$ (sigma) to $\sigma/\sqrt{w}$.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="l12-halving"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>So the second thing, and this is the one that hurts. The signal goes down too.</p><p>The average of a curve over a window isn't the value at the center, unless the curve happens to be straight there. So wherever it bends, and that's at every peak and every trough, the average gets pulled toward the surroundings, and the peak comes out lower than it really is.</p><p>So think about a temperature record. Smooth a year of daily temperatures over a month, and we take out all the daily jitter. And we also take out the night it froze, which might have been the only thing anybody wanted to know, and the smoothed curve probably won't show it.</p>">
-  <div class="head">
-    <p class="say">Averaging usually lowers a peak <span class="def">toward the values around it</span>.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide legible" id="fig-month"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>And here's that happening on the crash record, zoomed in on the impact. The grey dashed line is the raw record, and the solid line is the 9-sample average.</p><p>Nine samples is only 0.72 milliseconds, which sounds tiny. But the spike at impact is about that narrow, so the average spreads it over its neighbors. The raw peak is minus 1541, and the average comes out at minus 968.</p><p>And the noise before impact went from 2.377 down to 1.204, so about half. Root nine would say a third, but these samples aren't independent, that's the correlation from lecture ten again, so the average takes out less.</p>">
-  <div class="head">
-    <p class="say">A 9-sample average roughly halves the noise and <span class="def">cuts the crash peak by 37%</span>.</p>
-    <p class="sub">Half and not a third (as $\sqrt{9}$ would give), because neighboring samples are correlated.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="l12-crash"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide part">
-  <div class="head">
-    <p class="course">Computational Physical Modeling</p>
-    <p class="say">The best window width</p>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>Right, so is there a best width? To measure that we need to know the true signal, which the crash record can't tell us. So this is a constructed signal, a 2 hertz sine wave, amplitude one, sampled at a kilohertz. And the noise on it is real, it's the accelerometer noise from the crash record, scaled to a standard deviation of 0.01.</p><p>We smooth it at every odd width and compare against the clean sine, using the typical size of the error across the whole record, what we call the RMS error, the root of the mean squared difference. And the error falls, it reaches a minimum at a width of nine, and then it climbs. By a width of 101 it's about seven times worse than not smoothing at all.</p>">
-  <div class="head">
-    <p class="say">Against a known signal, the error is <span class="def">smallest at $w = 9$</span>.</p>
-    <p class="sub">A 2&nbsp;Hz sine sampled at 1,000&nbsp;Hz, carrying real accelerometer noise scaled to $\sigma = 0.01$.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="l12-err"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>Now the trap, and I'd really like us to see this one. This plot has a log scale going up, so the small numbers show. The red dotted line is what sigma over root w would leave if the samples were independent. And it keeps falling. Every wider window removes more noise, all the way out.</p><p>So the thing we chose smoothing for keeps getting better, while the thing we actually wanted, the error against the truth, turns around at nine and gets worse. And somebody watching the plot of the smoothed record just sees it getting smoother, so it kind of looks like progress.</p>">
-  <div class="head">
-    <p class="say">The noise keeps falling while <span class="def">the error turns back up</span>.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="l12-trap"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>And this is where the damage lands. This is the peak of the smoothed sine, and the true peak is exactly one.</p><p>It just falls as the window widens. At nine it's 1.0014, a little high because of the noise. And it crosses the true value between 13 and 15, and that's a coincidence of this signal and this noise, it's not a width to choose. By 101 it's 0.93.</p>">
-  <div class="head">
-    <p class="say">The peak falls <span class="def">with every widening</span>.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="l12-peak"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>Okay, so that gives us this. The whole-record error is smallest at nine, and the peak is closest to the truth a bit wider, around thirteen, where it happens to cross one. Going wider takes out a bit more noise everywhere and flattens the peak a bit more, and across the whole record the flattening wins, while right at the peak the two happen to cancel. And that crossing is luck, so I wouldn't lean on it.</p><p>So there's probably no best width on its own. It depends on what we're going to report. So we pick the width for the number we report, and we say which one we picked.</p>">
-  <div class="head">
-    <p class="say">The best width depends on <span class="def">the quantity you report</span>.</p>
-  </div>
-  <div class="stage">
-    <div class="pcards c3">
-      <div class="pcard"><span class="tag">the whole trace</span><b>$w = 9$</b>
-        <span>Smallest RMS error against the true sine.</span></div>
-      <div class="pcard"><span class="tag">the peak only</span><b>A little wider</b>
-        <span>Near $w = 13$ the peak reads 1.0001, though that crossing is luck.</span></div>
-      <div class="pcard gold"><span class="tag">always</span><b>Report both</b>
-        <span>Give the width and the quantity it was chosen for.</span></div>
+      $$\begin{aligned}
+      \operatorname{sd}\!\left(y_1 + \dots + y_w\right) &\;=\; \sqrt{\sigma^2 + \dots + \sigma^2} \;=\; \sigma\sqrt{w} && \text{variances add} \\[6pt]
+      \operatorname{sd}\!\left(\frac{y_1 + \dots + y_w}{w}\right) &\;=\; \frac{\sigma\sqrt{w}}{w} \;=\; \textcolor{#8A6508}{\frac{\sigma}{\sqrt{w}}} && \text{divide by } w \\[6pt]
+      \frac{\sigma}{\sqrt{4w}} &\;=\; \frac{1}{2}\,\frac{\sigma}{\sqrt{w}} && \text{width} \times 4
+      \end{aligned}$$
     </div>
   </div>
 </section>
@@ -805,70 +733,50 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <section class="deck-slide part">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
-    <p class="say">The filter in the crash test standard</p>
+    <p class="say">Averaging only the past</p>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Okay. Now everything so far specified a smoother by its width, average nine samples. Measurement standards do it the other way round, by frequency. Keep what's slower than about 180 wiggles a second close to full size, and cut down what's a lot faster. The standard calls that 180 the channel frequency class, CFC 180 for short. And there are two reasons for doing it by frequency, and both of them matter for the assignment.</p><p>First, the physics usually comes to us as a rate. What we want to keep is whatever the thing we're measuring responds to, say the crash dummy's chest, and that's a rate. There's no number of samples that means that.</p><p>And second, a width doesn't travel. Nine samples is 0.72 milliseconds at twelve and a half kilohertz, and it's 9 milliseconds at one kilohertz. So the same code does two different things to two recordings of the same event. But a cut around 180 hertz means the same thing on both.</p>">
+<section class="deck-slide full" data-notes="<p>Okay. So the average we've been using is centred. To smooth the sample at 10.8 milliseconds, it uses the four samples before it and the four after it. And that's fine for a record that's already on disk.</p><p>Now say the averaging has to happen during the crash, in the airbag computer for instance. It doesn't have the samples after now, because they haven't happened yet. So let's average what it does have, the sample now and the four before it. That reaches back exactly as far as the centred average does, it just doesn't look forward.</p><p>And here's what that does. The grey dashed line is the raw record, with the spike at 10.80 milliseconds. The solid line is that one-sided average, and its peak lands at 10.96. So that's two samples late, 0.16 milliseconds. And looking at the solid line alone, we'd have no way to tell it's late.</p>">
   <div class="head">
-    <p class="say">A standard names its filter <span class="def">by frequency</span>.</p>
+    <p class="say">Averaging the sample and the 4 before it puts the peak <span class="def">0.16&nbsp;ms late</span>.</p>
+    <p class="sub">Raw dashed, one-sided 5-sample average solid.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l11-oneway"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So can we get the timing back? Well, if we have the whole record, yes. We run the same average again, the sample and the four before it, but backward, from the end of the record to the beginning, over the output of the first pass.</p><p>Why does that work? Well, going backward, the four samples before each point are the four that come later in time. So the second pass moves everything earlier by the same two samples, and the two shifts cancel. The dotted line is one pass, late. The solid line is both passes, and its peak is back at 10.80.</p>">
+  <div class="head">
+    <p class="say">Running the same average backward <span class="def">puts the peak back at 10.80&nbsp;ms</span>.</p>
+    <p class="sub">One pass dotted, forward then backward solid, raw dashed.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l11-twoway"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Now look at how far the two passes reach. The forward pass looks four samples back, and the backward pass looks four samples forward. So between them they use the same nine samples as the centred average.</p><p>So does it look like the centred average? Well, not quite. The dotted line is the centred nine, peaking at minus 968. The two passes peak at minus 1169. Same nine samples, but they don't count them equally. The middle sample counts five times, its neighbours four, then three, two, one. So the two passes lean on the middle, and they keep more of the peak. And they keep a bit more of the noise too, about 1.4 before impact where the centred nine leaves 1.2.</p>">
+  <div class="head">
+    <p class="say">Two one-sided passes use the same 9 samples, <span class="def">weighted toward the middle</span>.</p>
+    <p class="sub">Weights 1, 2, 3, 4, 5, 4, 3, 2, 1 (solid) against 9 equal weights (dotted). Raw dashed.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="l11-vs9"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Okay, so here's why we'd use the one-sided version at all. A forward pass only needs the samples taken so far, so it can run while the samples are coming in, in the airbag computer for instance. The price is a delay, two samples here.</p><p>And when the timing matters, we run the same average back over the output, and that puts the timing right. The catch is that the backward pass needs the four samples after each point, so it has to wait until they've been recorded, and it smooths a second time.</p><p>And this comes up right away, because the filter in J211, the crash measurement standard, only uses the samples before each point too, and the recipe in J211's appendix runs it forward and then backward.</p><p>So hopefully that gives you a sense of what a smoother that only sees the past costs us. In the next video we take the standard's filter and apply it to our crash record. Thanks a lot for watching and we'll see you in the next video.</p>">
+  <div class="head">
+    <p class="say">A forward pass works as the samples arrive, and <span class="def">a backward pass puts the timing right</span>.</p>
   </div>
   <div class="stage">
     <div class="pcards c2">
-      <div class="pcard"><span class="tag">the physics</span><b>Stated as a rate</b>
-        <span>A body responds to how fast a load changes, so the filter is given in hertz.</span></div>
-      <div class="pcard"><span class="tag">across records</span><b>A width in samples</b>
-        <span>Nine samples is 0.72&nbsp;ms at 12,500&nbsp;Hz and 9&nbsp;ms at 1,000&nbsp;Hz.</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>So the crash standard, SAE J211, asks for a particular filter, what we call a Butterworth low-pass. Low-pass means it keeps the slow content and cuts down the fast. Butterworth is a family that keeps the content well below the class very close to its true size. One pass of it is what we call a two-pole filter, and running it forward and then back, which we'll see in a minute, makes it four-pole, and the poles are how steeply it cuts.</p><p>And the shape of the arithmetic is different from a moving average. Each output comes from the newest few inputs and from the last two outputs it already produced, so it feeds its own results back in. That gets a sharp cut-off from five numbers, where a moving average would need maybe hundreds.</p><p>And those five coefficients come from the class and the sample interval, and from nothing else. The formulas are on the notes page. Deriving them is filter design and it's outside this course, but using them isn't. And two people who implement it correctly get identical output, which is probably the main reason for putting a filter in a standard.</p>">
-  <div class="head">
-    <p class="say">The SAE J211 filter <span class="def">reuses its own previous outputs</span>.</p>
-    <p class="sub">Five coefficients, set only by the filter class and the sample interval.</p>
-  </div>
-  <div class="stage">
-    <div class="work">
-      $$y_i \;=\; a_0 x_i + a_1 x_{i-1} + a_2 x_{i-2} \;+\; \textcolor{#8A6508}{b_1 y_{i-1} + b_2 y_{i-2}}$$
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>And there's a check I'd use every time, because five coefficients and two feedback terms leave a lot of room for a sign error, and a wrong filter usually still produces a plausible-looking curve.</p><p>Feed the filter a constant. A low-pass filter has to pass a constant through unchanged, because a constant has no fast content to remove. So filter an array of ones, and we should get ones back.</p><p>In terms of the coefficients, that says a-nought plus a-one plus a-two, over one minus b-one minus b-two, equals one. For the classes on this record it comes out within about two parts in ten to the fourteen, so compare against one with a tolerance, not with equality.</p>">
-  <div class="head">
-    <p class="say">A low-pass filter must <span class="def">pass a constant unchanged</span>.</p>
-    <p class="sub">Filter an array of 1.0, and (once it settles) 1.0 should come back.</p>
-  </div>
-  <div class="stage">
-    <div class="work">
-      $$\frac{a_0 + a_1 + a_2}{1 - b_1 - b_2} \;=\; \textcolor{#8A6508}{1}$$
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>Now one pass of that filter delays the signal. Why does this one delay when the moving average didn't? Well, the moving average looked the same number of samples forward as back, so it had nothing to wait for. This one is built in order from the start of the record, so it only ever sees the past. And that delay is what we're going to look at in the next video. Here it is on the crash record at class 600. The grey dashed line is the raw record. The red dotted line is one pass, and its peak lands at 11.04 milliseconds instead of 10.80.</p><p>The standard's answer is to run the filter forward over the record, then run the same filter again, same class, same coefficients, backward over its own output. The backward pass delays by the same amount in the other direction, so the two cancel, and the solid line's peak is back at 10.80. And the backward pass smooths a second time too, so two passes take out a bit more than one, and that's where the four poles come from.</p><p>And the cost is that the result isn't what we call causal any more. A causal filter only uses the past. A value at 11 milliseconds now depends on samples recorded after it. That's fine for a record that's already on disk, and impossible for an airbag computer that has to decide during the crash.</p>">
-  <div class="head">
-    <p class="say">A second, backward pass <span class="def">cancels the first pass&rsquo;s delay</span>.</p>
-    <p class="sub">The same filter at class 600, run forward and then backward over the crash record.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="l12-twopass"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>And one last constraint. The class you ask for and the rate you recorded at aren't independent. A filter that keeps everything below some frequency is a promise about content at that frequency, and a record can't make that promise above half its sample rate, which is the Nyquist limit from week two.</p><p>The coefficient formulas enforce that by themselves. At a sample rate below about 4.16 times the class, they break down and the output stops being a smoothed version of anything. Why four and not two? Well, the filter is built around a frequency about twice the class, and that has to stay under half the sample rate. So class 1000 needs at least about 4,155 samples a second, and class 180 needs about 748.</p><p>Our crash channel is recorded at 12,500, so every class in the standard is available. But that stops being true the moment we throw samples away. Downsample the record to 1 kilohertz and class 180 still works, and class 1000 can't be built at all.</p><p>So hopefully that gives you a feel for what smoothing buys and what it costs. In the next video we look at the delay a single pass introduces, and why it can quietly move the answer. Thanks a lot for watching and we'll see you in the next video.</p>">
-  <div class="head">
-    <p class="say">A filter class (CFC, named in hertz) needs a sample rate <span class="def">above about 4.16 times the class</span>.</p>
-  </div>
-  <div class="stage">
-    <div class="pcards c3">
-      <div class="pcard"><span class="tag">class 1000</span><b>At least 4,155&nbsp;Hz</b>
-        <span>Below that, the coefficient formulas break down.</span></div>
-      <div class="pcard"><span class="tag">class 180</span><b>At least 748&nbsp;Hz</b>
-        <span>A record downsampled to 1,000&nbsp;Hz still supports it.</span></div>
-      <div class="pcard gold"><span class="tag">our record</span><b>12,500&nbsp;Hz</b>
-        <span>Every class in the standard is available on it.</span></div>
+      <div class="pcard"><span class="tag">forward pass</span><b>Works as the samples arrive</b>
+        <span>It needs only the samples so far, so it can run during the crash, 2 samples late here.</span></div>
+      <div class="pcard"><span class="tag">backward pass</span><b>Puts the timing right</b>
+        <span>It needs the 4 samples after each point, so it runs once they are recorded, and it smooths again.</span></div>
     </div>
   </div>
 </section>
@@ -880,6 +788,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <div class="deck-notes"></div>
 
 
-<script type="module" src="js/bundle/lecture-11.js?v=20261017141252"></script>
+<script type="module" src="js/bundle/lecture-11.js?v=20261022093533"></script>
 </body>
 </html>

@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Order of accuracy, measured — Computational Physical Modeling</title>
+  <title>Order of accuracy — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -834,7 +834,7 @@
         <a href="week-08.html">Overview</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="from-a-rate-to-a-trajectory.html">Rate to trajectory</a>
+          <a href="from-a-rate-to-a-trajectory.html">Euler&#39;s method</a>
         
           <span class="site-nav-sep">·</span>
           <a href="state-as-a-vector.html">State as a vector</a>
@@ -902,18 +902,18 @@
   <main data-pagefind-body class="wide">
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <div class="eyebrow">Week 8 · Time Stepping</div>
-<h1>Order of accuracy, measured</h1>
+<h1>Order of accuracy</h1>
 
 <div class="claim">
   <span class="label">Claim</span>
   <p class="exact">A method's <dfn data-g="convergence-order">order</dfn> $p$ is the exponent in
   error $\propto h^p$. It is measured by halving the step and taking the ratio of successive errors. A ratio of 2 is order 1, of 4 is order 2, of 16 is order 4. The measurement requires no theory,
-  and it is a check on the implementation as much as a property of the method.</p>
+  and it checks the implementation as well as measuring a property of the method.</p>
   <p class="plain">Halve the step, see what the error does. If it does not do what the method
   promises, something is wrong, and it is usually your code and not the method.</p>
 </div>
 
-<h2 id="halving-the-step-and-reading-the-ratio">Halving the Step and Reading the Ratio</h2>
+<h2 id="halving-the-step-and-reading-the-ratio">Measuring the Order</h2>
 
 <p>If error $\approx Ch^p$ then halving $h$ divides the error by $2^p$:</p>
 
@@ -922,8 +922,86 @@ $$\frac{E(h)}{E(h/2)} \;\approx\; 2^p
   p \;\approx\; \log_2 \frac{E(h)}{E(h/2)}$$
 
 <p>Two runs give an estimate, and three or more give an estimate plus evidence that it has settled.
-The ratios matter more than the errors do, because a sequence of ratios converging on 4.00 is a
-strong statement where a single ratio of 3.7 is not.</p>
+The ratios matter more than the errors do, because a sequence of ratios converging on 4.00 is
+strong evidence and a single ratio of 3.7 is weak evidence.</p>
+
+<h2 id="heun-s-method-and-rk4">Heun's Method and RK4</h2>
+
+<p>Euler takes the rate at the start of a step and uses it for the whole step. Heun's method and
+RK4 evaluate the rate at more than one point inside the step and step with a weighted average of
+those evaluations. Each evaluation is called a slope, meaning the rate function $f$ evaluated at
+some time and some state (writing the state as $s$, as the code on page 25 does).</p>
+
+<p>Heun's method takes two slopes. The first is Euler's, $k_1 = f(t, s)$. The second is taken at
+the end of the step, at the state Euler would have reached, $k_2 = f(t + h,\ s + h k_1)$, and the
+step uses their average:</p>
+
+$$s_{\text{next}} \;=\; s + \tfrac{h}{2}\,(k_1 + k_2)$$
+
+<p>This is the trapezoid rule from week 3 applied to the rate, the average of the two ends times
+the width, with the far end estimated by an Euler step because it is not yet known.</p>
+
+<p><dfn data-g="rk4">RK4</dfn> (the fourth-order Runge-Kutta method) takes four slopes, one at the start of the step, two at its midpoint
+and one at its end. Each slope is used to reach the point where the next one is taken:</p>
+
+$$\begin{aligned}
+k_1 &= f(t,\ s) \\
+k_2 &= f(t + \tfrac{h}{2},\ s + \tfrac{h}{2}k_1) \\
+k_3 &= f(t + \tfrac{h}{2},\ s + \tfrac{h}{2}k_2) \\
+k_4 &= f(t + h,\ s + h k_3)
+\end{aligned}
+\qquad\qquad
+s_{\text{next}} \;=\; s + \tfrac{h}{6}\,(k_1 + 2k_2 + 2k_3 + k_4)$$
+
+<p>With the slopes taken at these points, the weights 1, 2, 2 and 1 make the error fall as $h^4$,
+which the table in the next section measures.</p>
+
+<p>The table gives one step of $h$ = 0.1&nbsp;s on the basketball problem from the next section
+(released 3.4520&nbsp;m up with a vertical speed of 4.7428&nbsp;m/s, with quadratic drag). The slopes of
+the height are the vertical speed at each evaluation point, which gravity and drag reduce as the
+step goes on.</p>
+
+<table class="data">
+  <tr><th>Method</th><th>Slopes of the height (m/s)</th><th class="num">height after 0.1&nbsp;s</th>
+      <th class="num">error</th></tr>
+  <tr><td>Euler</td><td>4.742800</td><td class="num">3.926280&nbsp;m</td>
+      <td class="num">+51.1&nbsp;mm</td></tr>
+  <tr><td>Heun</td><td>4.742800, 3.717505</td><td class="num">3.875015&nbsp;m</td>
+      <td class="num">&minus;0.21&nbsp;mm</td></tr>
+  <tr><td>RK4</td><td>4.742800, 4.230152, 4.233372, 3.723899</td><td class="num">3.875229&nbsp;m</td>
+      <td class="num">&minus;0.00004&nbsp;mm</td></tr>
+</table>
+
+<p>The reference is RK4 at $h = 10^{-5}$, which reaches 3.875229&nbsp;m. Euler uses only the
+release speed and so overshoots. Heun averages the speed at the start with an estimate at the
+end, and RK4 adds two estimates at the midpoint. In code each is the Euler stepper from page 25
+with its update line replaced by the lines that take the slopes:</p>
+
+<pre data-lang="python">def heun(f, s0, t0, dt, n):
+    s = np.array(s0, dtype=float)
+    out = np.empty((n + 1, s.size))
+    out[0] = s
+    for k in range(n):
+        t = t0 + k*dt
+        k1 = f(t, s)
+        k2 = f(t + dt, s + dt*k1)
+        s = s + dt/2 * (k1 + k2)
+        out[k + 1] = s
+    return out
+
+def rk4(f, s0, t0, dt, n):
+    s = np.array(s0, dtype=float)
+    out = np.empty((n + 1, s.size))
+    out[0] = s
+    for k in range(n):
+        t = t0 + k*dt
+        k1 = f(t, s)
+        k2 = f(t + dt/2, s + dt/2*k1)
+        k3 = f(t + dt/2, s + dt/2*k2)
+        k4 = f(t + dt, s + dt*k3)
+        s = s + dt/6 * (k1 + 2*k2 + 2*k3 + k4)
+        out[k + 1] = s
+    return out</pre>
 
 <h2 id="three-methods-on-one-problem">Three Methods on One Problem</h2>
 
@@ -955,19 +1033,19 @@ run compared against it.</p>
       <td></td><td class="num"><strong>p = 4</strong></td></tr>
 </table>
 
-<p>Read the ratio columns down. Each settles and stays, at 2.00, 4.00, and about 16, and those are
-the orders measured, with no derivation needed to obtain them.</p>
+<p>Read the ratio columns down. Each settles and stays, at 2.00, 4.00, and about 16, and those
+ratios give measured orders of 1, 2 and 4, with no derivation needed to obtain them.</p>
 
 <p>RK4's last ratio is 15.7 against a promised 16.0, and halving the step once more takes it to
-12.6. That looks like the method losing order, when it is the error arriving at the rounding
-floor, a few times 10<sup>&minus;13</sup>&nbsp;m, where there is no truncation error left to
-halve. The demo goes one step finer than this table so that the floor is visible and not merely
-described.</p>
+12.6. That is the error arriving at the rounding floor (a few times
+10<sup>&minus;13</sup>&nbsp;m), where rounding is larger than the truncation error left to halve,
+and not the method losing order. The demo goes one step finer than this table so that the floor
+is visible.</p>
 
 <p>Read the error columns across instead, at $h = 0.0125$. Euler is off by 5.9 cm, Heun by 27
-micrometres, and RK4 by 0.11 nanometres. Heun costs two rate evaluations per step and RK4 costs
-four, so at equal cost RK4 is still ahead by many orders of magnitude, which is the same
-currency argument as week 7 arriving in a different subject.</p>
+micrometres, and RK4 by 0.11 nanometres. At equal cost (Heun takes two rate evaluations per step
+and RK4 four) RK4 is still ahead by many orders of magnitude (the same currency
+argument as week 7).</p>
 
 <cg-demo case="order"></cg-demo>
 
@@ -977,22 +1055,22 @@ currency argument as week 7 arriving in a different subject.</p>
 out at $4\times10^{-16}$ at every step size, with ratios of about 1. That is not a broken
 implementation. The drag-free solution is a quadratic in $t$, and RK4 integrates polynomials up
 to cubic <strong>exactly</strong>, so its only error was floating-point rounding and the
-measurement was reading the arithmetic and not the method. A convergence test therefore needs a
+measurement showed only that rounding. So a convergence test needs a
 problem the method cannot solve exactly, which usually means one whose solution is not a
 low-degree polynomial. Adding drag was enough here.</p>
 
 <div class="aside">
-  <span class="label">What the reference has to be</span>
+  <span class="label">The reference solution</span>
   <p>Measuring an error needs a truth, and there are three sources of one, in descending order of how
 much they are worth. First an exact analytical solution, then the same integrator at a much
 finer step, and then a different, higher-order integrator.</p>
-  <p>The second is used above, and its danger is that the reference shares any bug the runs have. A
-convergence study may therefore return a perfect order of 4 for an implementation that is
+  <p>The second is used above, and its danger is that the reference shares any bug the runs have. This
+means a convergence study may return an order of 4 for an implementation that is
 consistently solving the wrong equation, because the errors converge on the reference and the
 reference is wrong too. Where an exact solution exists, use it.</p>
 </div>
 
-<h2 id="a-mismatched-order-points-at-a-bug">A Mismatched Order Points at a Bug</h2>
+<h2 id="a-mismatched-order-points-at-a-bug">Mismatched Orders</h2>
 
 <p>A measured order that matches the method is evidence that the implementation is right, and it is
 one of the few such checks available. An order that does not match points at something specific:</p>
@@ -1006,7 +1084,8 @@ one of the few such checks available. An order that does not match points at som
       problem is solved exactly</td></tr>
 </table>
 
-<p>The last row is the drag-free case above. An order better than promised feels like good news,
+<p>The drag-free case above is the extreme of the last row's cause, with the problem solved
+exactly and only rounding left. An order better than promised feels like good news,
 and it is usually a sign that the test is not measuring what it claims to.</p>
 
 <div class="check">
@@ -1016,28 +1095,28 @@ and it is usually a sign that the test is not measuring what it claims to.</p>
     5.2×10⁻⁴. What is the order, and what method might this be?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Order 2.</strong> The ratios are 8.0/2.1 = 3.8 and 2.1/0.52 = 4.0, and log&#8322;4 = 2.
 Any order-2 method fits, whether <strong>Heun</strong> in this week, the trapezoid rule in week
-3, the central difference in week 4, or midpoint quadrature. They are unrelated algorithms that
-share an exponent, which is the useful thing about measuring order, since it is a property you
-can read off a run without knowing what the run contains. The first ratio coming out at 3.8
-against a promised 4.0 is worth noticing and not worth worrying about, because it is the
+3, the central difference in week 4, or midpoint quadrature. They are different algorithms that
+share an exponent, so order is a property you can read off a run without knowing what the run
+contains. The first ratio coming out at 3.8
+against a promised 4.0 is expected, because it is the
 coarsest step and the furthest from the asymptotic regime. If it had been 3.8 and then 3.5 and
-then 3.0, that would be a different story.</p></div></details></li>
+then 3.0, the falling ratios would need explaining.</p></div></details></li>
     <li>The ratios go 4.0, 4.0, 3.1, 1.4, 0.9 as you keep halving. What is happening at the end?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>The method has stopped being the limiting factor and <strong>rounding error has taken
 over</strong>. The ratios fall away from 4, then through 1, and a ratio below 1 means the error
 is <em>growing</em> as the step shrinks. Truncation is still falling as <em>h</em>&sup2;, but
 rounding accumulates over the 1/<em>h</em> steps needed to cross the interval, and at a small
 enough step it is the larger of the two. So there is a best step somewhere in between.</p>
-     <p>The practical reading is the same. The best answer available was at the ratio of 3.1 or just
-before, and everything after that was work spent making the result worse. The way to know is to
-watch the ratio and not the answer. The answer gives no sign.</p></div></details></li>
+     <p>The best answer available was at the step just before the ratio of 0.9, and after the ratio of
+3.1 each halving bought very little. The way to know is to watch the ratio, since the answer itself
+gives no sign.</p></div></details></li>
     <li>You measure order 4 for a method you know is order 2. Name two explanations and say how
     you
     would distinguish them.
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>The test problem is too easy.</strong> If the exact solution is a low-degree polynomial,
 the order-2 error term can vanish identically and a higher term is left to dominate. A drag-free
-projectile is a quadratic in time, and several methods integrate it exactly, so measuring "order
-4" there is measuring nothing.</p>
+projectile is a quadratic in time, and several methods integrate it exactly, so any order measured
+there reflects only rounding.</p>
      <p><strong>The reference is not independent.</strong> If the "exact" answer is the same method at a
 small step, part of the error is common to both and cancels in the subtraction, flattering the
 apparent order.</p>
@@ -1045,7 +1124,7 @@ apparent order.</p>
 drag so the solution is no longer a polynomial. If the order drops to 2, it was the first.
 <strong>Change the reference</strong>. Use a closed form, or a different method entirely, at a
 fine step. If the order drops, it was the second.</p>
-     <p>An order that comes out better than the method's is never good news. It always means the
+     <p>An order that comes out better than the method's is usually a warning. It most likely means the
 measurement is not measuring what it claims.</p></div></details></li>
   </ol>
 </div>
@@ -1075,11 +1154,11 @@ and RK4 on an equation you write, with the order measured from the run and not q
   </script>
   
 
-  <script type="module" src="js/bundle/order-of-accuracy-measured.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/order-of-accuracy-measured.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-16">October 16, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-22">October 22, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

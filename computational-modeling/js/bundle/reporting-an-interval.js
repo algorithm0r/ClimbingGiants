@@ -6,7 +6,7 @@ const svgEl = (n, a = {}) => { const e = document.createElementNS('http://www.w3
   for (const k in a) e.setAttribute(k, a[k]); return e; };
 
 /* cumulative trapezoid: s[i] is the integral from the start up to sample i.
-   Shared because pages 5-8 and 25 all build one. */
+   Shared because pages 5-8 and 24 all build one. */
 function integrate(y, dt) {
   const s = new Float64Array(y.length);
   for (let i = 1; i < y.length; i++) s[i] = s[i-1] + (y[i] + y[i-1]) * 0.5 * dt;
@@ -1104,7 +1104,7 @@ mountDemo({
               'reports values the pipeline actually produced.'
             : (usePct && Math.abs(inside / n - lvl) < 0.02
                 ? 'A percentile interval contains the stated fraction of the draws by ' +
-                  'construction. That is not evidence that it covers the truth — page 32 ' +
+                  'construction. That is not evidence that it covers the truth — page 31 ' +
                   'checks that separately.'
                 : (!usePct
                     ? 'Stated as ' + lvlName + ', this interval actually contains ' +

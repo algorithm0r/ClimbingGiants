@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Extrapolation amplifies uncertainty — Computational Physical Modeling</title>
+  <title>Extrapolation and uncertainty — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -902,7 +902,7 @@
   <main data-pagefind-body class="wide">
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <div class="eyebrow">Week 9 · Uncertainty Propagation</div>
-<h1>Extrapolation amplifies uncertainty</h1>
+<h1>Extrapolation and uncertainty</h1>
 
 <div class="claim">
   <span class="label">Claim</span>
@@ -910,14 +910,13 @@
   <dfn data-g="extrapolation">extrapolated</dfn> beyond the data used to fit, because a small
   change
   in a fitted parameter is multiplied by that distance, linearly for a slope,
-  quadratically for a curvature. Inside the fitted region the curve is held from both sides.
-  Outside
-  it, only from one.</p>
-  <p class="plain">  A fitted curve is pinned where the data are, and past the last point it is only guessing. It
-  guesses worse the further it goes.</p>
+  quadratically for a curvature. Inside the fitted region the curve is held from both sides,
+  and outside it only from one.</p>
+  <p class="plain">  A fitted curve is pinned where the data are, and past the last point it is only guessing, and
+  guessing worse the further it goes.</p>
 </div>
 
-<h2 id="how-the-spread-grows-with-distance">How the Spread Grows with Distance</h2>
+<h2 id="how-the-spread-grows-with-distance">Growth of the Spread with Distance</h2>
 
 <p>Take a fitted parabola $y = a + bt + ct^2$ with the parameters uncertain by $\delta a$, $\delta
 b$, $\delta c$. At a time $t$ beyond the data the prediction moves by</p>
@@ -959,23 +958,24 @@ thing that changes down the table is how far the fit has to reach.</p>
 </table>
 
 <p>The <dfn data-g="resampling">resampled</dfn> interval narrows by a factor of about
-<strong>480</strong> across the table. The noise did not change, the model form did not change,
-and the event predicted did not change, so the reach is the whole of the difference.</p>
+<strong>480</strong> across the table. Since the noise, the model form and the event predicted were
+all held fixed, the reach is the whole of the difference.</p>
 
-<p>The top row is the one that should worry a reader. At 5.2&times; extrapolation the interval runs
-from 38&nbsp;cm to 48&nbsp;m. The hoop is 45&nbsp;cm across, so the prediction is consistent
-with the ball passing through the net and with it leaving the building. Six frames is a fifth of
-a second of flight, and it is not enough to say anything at all.</p>
+<p>At 5.2&times; extrapolation (the top row) the interval runs from 38&nbsp;cm to 48&nbsp;m. The
+hoop is 45&nbsp;cm across, so the prediction runs from a near miss to the ball leaving the
+building. Six frames is a fifth of a second of flight, and that is too little to locate the
+crossing usefully.</p>
 
-<p>Two features of these intervals invite smoothing over, and both are real. They are
+<p>These intervals have two features that are easy to smooth over. They are
 <strong>strongly skewed</strong>, the upper tail runs far further than the lower, which is why
-the dataset is scored on median error and not on mean. And at short spans the whole interval can
+the dataset is scored on median error and not on mean. At short spans the whole interval can also
 sit <em>above</em> the unperturbed estimate, because the reported quantity is a distance from
-the hoop centre. Noise in any direction increases a distance, so the resampled distribution is
-pushed away from zero and cannot be centred on the estimate. An interval written as a symmetric
+the hoop centre. When the estimate lies near the hoop centre, noise in almost any direction increases
+the distance, so the resampled distribution is pushed away from zero and is not centred on the
+estimate. An interval written as a symmetric
 &plusmn; hides both.</p>
 
-<h2 id="fixing-the-curvature-the-physics-knows">Fixing the Curvature the Physics Knows</h2>
+<h2 id="fixing-the-curvature-the-physics-knows">Practice for Extrapolation</h2>
 
 <ol class="plain">
   <li><strong>State the range the model is trusted over.</strong> A fitted model is reported with
@@ -984,21 +984,21 @@ pushed away from zero and cannot be centred on the estimate. An interval written
   take deliberately.</li>
   <li><strong>Extend the data, not the model.</strong> Two more frames covering the region
   of
-  interest is worth more than any improvement to the fit. This is usually cheaper than it
+  interest is usually worth more than an improvement to the fit. This is usually cheaper than it
   sounds.</li>
   <li><strong>Never extrapolate with a high-degree model.</strong> Week 6's degree-10 interpolant
   swings wildly inside the data. Outside it, the leading term dominates and the curve leaves the
-  plot. Low degree extrapolates badly. High degree extrapolates uselessly.</li>
+  plot. A low-degree model extrapolates badly, and a high-degree one uselessly.</li>
   <li><strong>Quote the interval, not the value.</strong> An extrapolated point estimate is the
   part
   of the result that carries the least information about how far it can be trusted.</li>
 </ol>
 
 <div class="aside">
-  <span class="label">Where the physics helps</span>
+  <span class="label">A curvature fixed by physics</span>
   <p>The fit above has three free parameters, though the physics fixes one of them. The curvature is
 $-g/2$, and $g$ is known to far better than the fit can measure it from ten frames.</p>
-  <p>Imposing that removes the $\delta c\,t^2$ term entirely, which is the one that grows fastest.
+  <p>Imposing that removes the $\delta c\,t^2$ term, which is the one that grows fastest.
 Fitting only the release height and speed, with the curvature fixed, gives a much tighter
 extrapolation from the same ten frames, because the model has been told something the data did
 not have to supply. That is generally the best available move, and it is only available when the
@@ -1012,18 +1012,17 @@ form came from physics and not from convenience.</p>
     error grow, and of a slope error?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Slope error: &times;2. Curvature error: &times;4.</strong> A slope error
 <em>&delta;b</em> displaces the prediction by <em>&delta;b&thinsp;&middot; d</em>, linear in the
-distance extrapolated, while a curvature error <em>&delta;a</em> displaces it by
-<em>&delta;a&thinsp;&middot;&thinsp;d</em>&sup2;. That is why the fitted gravity matters so much
+distance extrapolated, while a curvature error <em>&delta;c</em> displaces it by
+<em>&delta;c&thinsp;&middot;&thinsp;d</em>&sup2;. That is why the fitted gravity matters so much
 on a short window. Curvature is usually the hardest parameter to determine from a few points,
 being the highest-order term, so it is the one the noise attacks first and the one whose error
-is squared on the way out. It also says what to do about it, since nothing improves a curvature
-error like seeing more of the arc, which both determines it better and shortens the distance it
-is multiplied over.</p></div></details></li>
-    <li>Your interval at 2.9× extrapolation is ±71 cm and you need ±10 cm. Give two ways to get
+is squared on the way out. It also says what to do about it, since seeing more of the arc both
+determines the curvature better and shortens the distance its error is multiplied over.</p></div></details></li>
+    <li>Your interval at 2.9× extrapolation is ±98 cm and you need ±10 cm. Give two ways to get
     there and say which you would try first.
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Fit more frames</strong>, which shortens the extrapolation. <strong>Reduce the tracking
 noise</strong>, which shrinks everything proportionally.</p>
-     <p>Try the first, and it is not close. The table on this page goes from &plusmn;98&nbsp;cm at ten
+     <p>Try the first, since the difference is large. The table on this page goes from &plusmn;98&nbsp;cm at ten
 frames to &plusmn;12&nbsp;cm at sixteen, a factor of eight, for six more frames and no new
 equipment. Getting the same factor from the noise would need a tracker eight times more accurate
 than 3&nbsp;cm, which is a procurement problem and not an analysis one. The reason the first
@@ -1032,35 +1031,35 @@ multiplied by distance squared, and adding frames improves both factors at once.
 that the frames may not be yours to spend. If the task is to predict from the first ten frames,
 then ten is the problem, and the honest response is the wide interval and not a narrow one
 obtained by ignoring it.</p></div></details></li>
-    <li>The last row still has a ±13 cm interval even though the fit sees nearly three times as
+    <li>The last row still has a ±5 cm interval even though the fit sees three times as
     many
     frames as the first. What sets that floor, and what would you have to change to get below it?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>The floor is set by <strong>the extrapolation that remains</strong>. Even at eighteen frames the
 fit stops about 0.35&nbsp;s before the ball reaches the hoop, so the tracker's 3&nbsp;cm of
-per-frame noise is still being propagated through a lever, a shorter one than before, and not a
-short one. Underneath that sits the noise itself, which no amount of fitting removes.</p>
+per-frame noise is still being propagated through a lever that is shorter than before but still
+long. Underneath that sits the noise itself, which no amount of fitting removes.</p>
      <p>To get below it you have to change the problem and not the arithmetic. <strong>See frames closer
 to the crossing</strong>, so there is less to extrapolate. <strong>Reduce the per-frame
 noise.</strong> Or <strong>add information the fit does not have</strong>, as in a known release
 height, a drag coefficient measured elsewhere, a physical constraint that removes a free
 parameter and with it the uncertainty that parameter carried. The last of these is the general
-rule. Every free parameter is bought with data, and a parameter you can pin down from physics is
-uncertainty you no longer have to pay for.</p></div></details></li>
+rule. Each free parameter has to be estimated from data, so pinning one down from physics removes the
+uncertainty it would have carried.</p></div></details></li>
     <li>At six frames the 5th percentile of the resamples lies above the unperturbed estimate.
     Explain
     how that can happen, and say what it implies about reporting this quantity as a value ± a
     half-width.
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>The reported quantity is a <strong>distance</strong>, so it is non-negative, and the unperturbed
 prediction happens to land close to the hoop centre. Perturbing the frames moves the predicted
-crossing point in some direction on the floor, and <em>any</em> direction takes it further from
-a point it was already near. Almost every draw therefore comes out larger than the unperturbed
+crossing point in some direction on the floor, and almost <em>any</em> direction takes it further
+from a point it was already near. As a result almost every draw comes out larger than the unperturbed
 value, and the 5th percentile of the draws can sit above it. The distribution is not centred on
 the estimate, and it is not a matter of having taken too few draws. Taking more sharpens the
 same displaced shape. So a value &plusmn; a half-width is <strong>the wrong form for this
 quantity</strong>. It asserts a centring that does not hold and a symmetry that does not hold,
 and at short windows it produces intervals that do not contain their own point estimate, which
-reads as an arithmetic mistake and is not one.</p>
-     <p>Report percentiles. And if the underlying two-dimensional crossing point is what matters, report
+can look like an arithmetic mistake, though it is not one.</p>
+     <p>Report percentiles. If the underlying two-dimensional crossing point is what matters, report
 a region in the plane, where the distribution <em>is</em> roughly centred and the awkwardness
 disappears. It was introduced by summarising a position as one non-negative number.</p></div></details></li>
   </ol>
@@ -1074,7 +1073,7 @@ page is listed here.</p>
 <dl class="glossary"></dl>
 
 <p class="deeper">Go deeper: <a href="workbench.html?tool=spread">the workbench</a>. perturb a
-record many times and watch the distribution of whatever you report from it. Which is where an
+record many times and watch the distribution of whatever you report from it. This is where an
 interval comes from when no formula gives one.</p>
 
   </main>
@@ -1092,11 +1091,11 @@ interval comes from when no formula gives one.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/extrapolation-amplifies.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/extrapolation-amplifies.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-09-29">September 29, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-20">October 20, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

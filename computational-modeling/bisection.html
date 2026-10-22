@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bisection — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -834,7 +834,7 @@
         <a href="week-07.html">Overview</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="conditions-become-roots.html">Conditions become roots</a>
+          <a href="conditions-become-roots.html">Conditions as roots</a>
         
           <span class="site-nav-sep">·</span>
           <strong>Bisection</strong>
@@ -843,10 +843,10 @@
           <a href="newton-and-secant.html">Newton and secant</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="root-finding-fails.html">Four ways it fails</a>
+          <a href="root-finding-fails.html">Root-finding failures</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="evaluations-are-the-currency.html">Evaluations</a>
+          <a href="evaluations-are-the-currency.html">Evaluation cost</a>
         
           <span class="site-nav-sep">·</span>
           <a href="windowed-optimum.html">Windowed optimum</a>
@@ -915,18 +915,17 @@
   <p class="exact">If $f$ is continuous and $f(a)$ and $f(b)$ have opposite signs, a root lies
   between them. Evaluating $f$ at the midpoint and keeping whichever half still shows a sign
   change
-  halves the interval containing the root, at a cost of one evaluation. The remaining uncertainty
-  is
-  known exactly at every step, and convergence does not depend on the function.</p>
+  halves the interval containing the root, at a cost of one evaluation. The remaining uncertainty is known at every step, and the rate of convergence does not depend on
+  the function.</p>
   <p class="plain">  Two points with opposite signs trap a root between them, so you halve, keep the half that
-  still   traps it, and repeat. It cannot fail and it is never fast.</p>
+  still   traps it, and repeat. Given a true bracket on a continuous function it cannot fail, and it is never fast.</p>
 </div>
 
-<h2 id="brackets-and-their-guarantee">Brackets and Their Guarantee</h2>
+<h2 id="brackets-and-their-guarantee">Brackets</h2>
 
 <p>A <dfn data-g="bracket">bracket</dfn> is a pair $[a, b]$ with $f(a)f(b) < 0$. The intermediate
 value theorem then guarantees a root inside, provided $f$ is continuous, which is the assumption
-that page 23's pole example violates. Each step evaluates the midpoint $m$ and replaces $a$ or
+that page 22's pole example violates. Each step evaluates the midpoint $m$ and replaces $a$ or
 $b$ with it, whichever keeps the signs opposite, so the bracket is halved and it still contains
 a root. Two things follow, and they are what distinguish bisection from every other method in
 this week:</p>
@@ -934,11 +933,10 @@ this week:</p>
 <ul class="plain">
   <li><strong>The uncertainty is known, not estimated.</strong> After $k$ steps the root is
   inside an
-  interval of width $(b-a)/2^k$, and that is a fact and not a hope. No other method here can
-  say
-  where the root is <em>not</em>.</li>
+  interval of width $(b-a)/2^k$. No other method this week gives a guaranteed interval for the
+  root.</li>
   <li><strong>The rate does not depend on the function.</strong> Well-behaved or vicious, the
-  interval halves every step. That is bisection's guarantee and also its ceiling.</li>
+  interval halves every step. This is bisection's guarantee, though it also means bisection is never faster.</li>
 </ul>
 
 <h2 id="evaluations-per-digit">Evaluations per Digit</h2>
@@ -958,9 +956,8 @@ $$k \;=\; \left\lceil \log_2 \frac{W}{\tau} \right\rceil$$
   <tr><td class="num">1000</td><td class="num">10⁻⁶</td><td class="num">30</td></tr>
 </table>
 
-<p>Doubling the precision in decimal places costs about 3.3 more evaluations, whatever the
-function, and twelve digits from a bracket of width 1 costs 40. That is a lot compared with
-Newton's four or five, and nothing at all compared with a method that does not converge.</p>
+<p>Each additional decimal place costs about 3.3 more evaluations, whatever the function, and twelve digits from a bracket of width 1 costs 40. That is a lot compared with
+Newton's four or five, though far fewer than a method that does not converge.</p>
 
 <cg-demo case="bisect"></cg-demo>
 
@@ -970,7 +967,7 @@ Newton's four or five, and nothing at all compared with a method that does not c
 method does not solve. Three approaches:</p>
 
 <ol class="plain">
-  <li><strong>Plot $f$.</strong> Cheap, reliable, and it also shows how many roots there are. The
+  <li><strong>Plot $f$.</strong> Cheap, usually reliable, and it also shows roughly how many roots there are. The
   previous page's argument.</li>
   <li><strong>Scan.</strong> Evaluate on a grid and look for adjacent points of opposite sign.
   This
@@ -984,12 +981,11 @@ method does not solve. Three approaches:</p>
 
 <p>The scan costs one evaluation per point and finds every root it can see. The demo opens on a
 case where it sees nothing, with thirteen points across a 4 m beam, a target of 11.20 kN·m, and
-two perfectly ordinary roots at 1.400 m and 1.600 m that the scan does not report at all. Both
+two ordinary roots at 1.400 m and 1.600 m that the scan does not report. Both
 roots lie inside the single interval from 1.333 to 1.667 m. $f$ is negative at both of its ends,
-so there is no sign change to find, and the scan returns exactly what it would return for a beam
-that never reaches 11.20 kN·m anywhere. That is the even-number-of-roots property from the aside
-below, met in the field: one root inside an interval flips the sign and is found, while two flip
-it twice and disappear together.</p>
+so there is no sign change to find, and the scan returns what it would return for a beam that never reaches 11.20 kN·m anywhere. This is
+the even-number-of-roots property from the aside below. One root inside an interval flips the sign
+and is found, while two flip it twice and leave no sign change.</p>
 
 <p><strong>Now walk the scan-point slider up from nine.</strong> The outcome alternates:</p>
 
@@ -1002,22 +998,19 @@ it twice and disappear together.</p>
   <tr><td class="num">14</td><td class="num">0.308 m</td><td>both</td></tr>
 </table>
 
-<p>The spacing falls monotonically down that table and the outcome does not. Spacing alone looks
-like the deciding factor, when what decides it is whether a grid point happens to fall
+<p>The spacing falls monotonically down that table and the outcome does not. What decides it is whether a grid point happens to fall
 <em>between</em> the two roots. The nine-point scan is the coarsest in the table and succeeds,
 because its grid includes 1.5 m, which sits between them, and the thirteen-point scan is finer
 and fails because its grid does not. So refining a scan does not monotonically improve its
 chance of finding a pair. A finer scan may miss what a coarser one caught, and no single scan
-can tell you which case you are in. The defence is the one week 2 gives: refine and compare, and
-read "nothing found" as a statement about the scan and not about the beam.</p>
+can tell you which case you are in. The defence is the one week 2 gives, which is to refine and compare, and to read "nothing found" as a statement about the scan and not about the beam.</p>
 
 <div class="aside">
   <span class="label">An odd number of roots</span>
   <p>A sign change means an <em>odd</em> number of roots in the interval, which is not the same as
 one. Bisection on an interval containing three roots converges to one of them and never mentions
 the other two. The converse is the one that bites, because no sign change means an <em>even</em>
-number of roots, and that includes two. The whole-flight bracket on page 23 fails for exactly
-this reason, on a function with two perfectly ordinary roots inside it.</p>
+number of roots, and that includes two. The whole-flight bracket on page 22 fails for this reason, on a function with two ordinary roots inside it.</p>
 </div>
 
 <h2 id="in-code">In Code</h2>
@@ -1078,8 +1071,7 @@ about <strong>18 evaluations</strong>. Each step halves the interval, so you nee
 4&thinsp;/&thinsp;2<sup><em>n</em></sup> &le; 10<sup>&minus;4</sup>&nbsp;m, giving
 2<sup><em>n</em></sup> &ge; 40&thinsp;000 and <em>n</em> &ge; log&#8322;40&thinsp;000 = 15.3, so
 16.</p>
-     <p>If the function were ten times more expensive, the count would be <strong>exactly the
-same</strong>. Bisection consults only the <em>sign</em> of <em>f</em>, so its step count is set
+     <p>If the function were ten times more expensive, the count would be <strong>the same</strong>. Bisection consults only the <em>sign</em> of <em>f</em>, so its step count is set
 by the ratio of the starting width to the required width and by nothing else. The shape of the
 function and its cost are both irrelevant. The wall-clock time goes up tenfold and the number of
 evaluations does not move. That predictability is what you are buying, since you can promise the
@@ -1089,20 +1081,17 @@ bracket.</p></div></details></li>
     answer, exactly.
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>2<sup>&minus;30</sup>, which is 9.31&nbsp;&times;&nbsp;10<sup>&minus;10</sup>.</strong>
 Thirty halvings of a unit interval leave a bracket of width 2<sup>&minus;30</sup>, and the root
-is somewhere in it. Reporting the midpoint, the answer is &plusmn;2<sup>&minus;31</sup>. This is
-a genuine bound and not an estimate, which is unusual. It comes from the intermediate value
-theorem and not from a convergence argument, so it holds for any continuous <em>f</em> whatever,
-with no assumption about smoothness and no asymptotic regime to be in, nothing to check. Newton
-can be far more accurate than this after three steps and cannot tell you so.</p></div></details></li>
+is somewhere in it. Reporting the midpoint, the answer is &plusmn;2<sup>&minus;31</sup>. This is a guaranteed bound, which is unusual. It comes from the intermediate value theorem, so it
+holds for any continuous <em>f</em>, with no assumption about smoothness and no asymptotic regime
+to be in. Newton may be far more accurate than this after three steps, though it cannot guarantee
+a bound.</p></div></details></li>
     <li>Your scan over 50 points finds no sign change. Give two different explanations.
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>There is no root in the range.</strong> The plainest reading, and often correct.</p>
      <p><strong>There is an even number of roots between two adjacent scan points.</strong> Two
-crossings inside one interval return the sign to where it started, so the scan sees nothing. A
-sign change detects an <em>odd</em> number of roots. Pairs are invisible to it.</p>
-     <p>A third, worth knowing because no scan of any fineness will fix it: a root of even multiplicity,
-where <em>f</em> touches zero and turns back without crossing. There the sign never changes at
-all, and bracketing methods cannot find it in principle. Which is the double-root case on page
-24. To separate the first two, refine the grid or offset it by half a step. To find the third,
+crossings inside one interval return the sign to where it started, so the scan sees nothing. A sign change detects an <em>odd</em> number of roots, so a pair is invisible to it.</p>
+     <p>A third explanation is a root of even multiplicity, where <em>f</em> touches zero and turns back
+without crossing, and no scan of any fineness will fix it. There the sign never changes, and
+bracketing methods cannot find it in principle. This is the double-root case on page 22. To separate the first two, refine the grid or offset it by half a step. To find the third,
 look for minima of |<em>f</em>| instead of sign changes.</p></div></details></li>
   </ol>
 </div>
@@ -1132,11 +1121,11 @@ bisection, secant and Newton on any signal, counting evaluations.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/bisection.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/bisection.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-16">October 16, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-22">October 22, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

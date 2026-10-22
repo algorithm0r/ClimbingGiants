@@ -1,4 +1,4 @@
-/* Generated bundle: kit, the phase-lag demo, this deck's
+/* Generated bundle: kit, the why-a-standard-exists demo, this deck's
    figures, the slide runtime, the presenter tools, page.js.
    Do not edit. */
 
@@ -7,7 +7,7 @@ const svgEl = (n, a = {}) => { const e = document.createElementNS('http://www.w3
   for (const k in a) e.setAttribute(k, a[k]); return e; };
 
 /* cumulative trapezoid: s[i] is the integral from the start up to sample i.
-   Shared because pages 5-8 and 25 all build one. */
+   Shared because pages 5-8 and 24 all build one. */
 function integrate(y, dt) {
   const s = new Float64Array(y.length);
   for (let i = 1; i < y.length; i++) s[i] = s[i-1] + (y[i] + y[i-1]) * 0.5 * dt;
@@ -968,65 +968,64 @@ function realNoiseRaw(n, sd = 1) {
   return scaleTo(out, sd);
 }
 
-/* A pulse whose peak time is known by construction, filtered one way and both
-   ways. The lag is measured against the known time, not estimated from the
-   difference between two filtered curves. */
+/* One real record, five filter classes, two quantities. The peak moves by a
+   factor of three; the integral does not move at all. */
 
-const DT = 8e-5, N = 4000;
-const T = linspace(0, (N - 1) * DT, N);
-const T0 = 0.020, DUR = 0.020, TPEAK = T0 + DUR / 2;      // peak at exactly 30 ms
-const PULSE = new Float64Array(N);
-for (let i = 0; i < N; i++)
-  PULSE[i] = (T[i] >= T0 && T[i] <= T0 + DUR) ? Math.sin(Math.PI * (T[i] - T0) / DUR) : 0;
-
-const peakTime = y => {
-  let bi = 0;
-  for (let i = 1; i < N; i++) if (Math.abs(y[i]) > Math.abs(y[bi])) bi = i;
-  return T[bi];
-};
+let REC = null;
 
 mountDemo({
-  lag: {
-    setting: 'A half-sine pulse 20&nbsp;ms wide whose peak is at exactly 30.000&nbsp;ms by ' +
-             'construction, sampled at 12.5&nbsp;kHz. The true peak time is therefore known and ' +
-             'the lag is measured, not inferred.',
-    source: {kind: 'constructed', text: 'A half-sine pulse whose peak is at exactly 30.000&nbsp;ms by construction, so the lag is measured against a known time. The filter is the one SAE&nbsp;J211 specifies.'},
-    caption: 'The solid curve is the filter you have selected; the ghost is the unfiltered pulse. ' +
-             'The amber line marks the true peak at 30.000&nbsp;ms, and the marker is where the ' +
-             'filtered peak actually lands.',
-    controls: [{key: 'lc', label: 'CFC class', min: 0, max: 3, step: 1, value: 2, dp: 0,
-                fmt: v => ['1000', '600', '180', '60'][Math.round(v)]}],
-    segments: [{key: 'pass', label: 'passes', value: 'one', options: [
-      {value: 'one', label: 'One pass'},
-      {value: 'two', label: 'Forward then backward'}]}],
-    panels: [{label: 'filtered pulse', unit: '', height: 240, xAxis: true,
-              xLabel: 'time', xUnit: 'ms', xScale: 1000, lens: true, lensZoom: 12}],
+  classes: {
+    data: async () => {
+      const d = await (await fetch('data/test10642-crossmember-x.json')).json();
+      const n = d.n, dt = d.dt, a = Float64Array.from(d.a), t = new Float64Array(n);
+      for (let i = 0; i < n; i++) t[i] = d.t0 + i * dt;
+      let b = 0, c = 0;
+      for (let i = 0; i < n; i++) if (t[i] < 0) { b += a[i]; c++; }
+      b /= c;
+      for (let i = 0; i < n; i++) a[i] -= b;
+      REC = {n, dt, t, a};
+      return {};
+    },
+    setting: 'Left rear seat crossmember, longitudinal, baseline corrected. Filtered ' +
+             'forward-and-backward, so nothing here is phase lag.',
+    source: {kind: 'measured', text: 'Channel 093, filtered by the SAE&nbsp;J211 CFC classes. NHTSA test 10642, 2019 BMW&nbsp;X5 into a rigid barrier at 15.65&nbsp;m/s, TRC of Ohio, 7 January 2019. The record already carries the laboratory&rsquo;s 2000&nbsp;Hz anti-alias prefilter.'},
+    caption: 'The ghost is the record as stored. The marker is the largest sample of the filtered ' +
+             'trace — watch it jump to a different feature between CFC 600 and CFC 180.',
+    controls: [{key: 'lc', label: 'filter', min: 0, max: 4, step: 1, value: 0, dp: 0,
+                fmt: v => ['as recorded', 'CFC 1000', 'CFC 600', 'CFC 180', 'CFC 60'][Math.round(v)]}],
+    panels: [{label: 'acceleration', unit: 'm/s²', height: 250, xAxis: true,
+              xLabel: 'time', xUnit: 'ms', xScale: 1000}],
     readouts: [
-      {key: 'class', label: 'CFC class'},
-      {key: 'true',  label: 'true peak'},
-      {key: 'meas',  label: 'filtered peak'},
-      {key: 'lag',   label: 'shift'},
-      {key: 'res',   label: 'sample interval'}
+      {key: 'f',     label: 'filter'},
+      {key: 'peak',  label: 'peak acceleration'},
+      {key: 'tpeak', label: 'time of peak'},
+      {key: 'dv',    label: 'change in velocity'},
+      {key: 'pdrop', label: 'peak, against unfiltered'},
+      {key: 'ddrop', label: 'Δv, against unfiltered'}
     ],
     compute(s) {
-      const klass = [1000, 600, 180, 60][Math.round(s.lc)];
-      const y = s.pass === 'one' ? cfcOnce(PULSE, klass, DT) : cfc(PULSE, klass, DT);
-      const tp = peakTime(y);
-      const lag = (tp - TPEAK) * 1000;
+      const K = [null, 1000, 600, 180, 60][Math.round(s.lc)];
+      const y = K === null ? REC.a : cfc(REC.a, K, REC.dt);
+      let bi = 0;
+      for (let i = 1; i < REC.n; i++) if (Math.abs(y[i]) > Math.abs(y[bi])) bi = i;
+      const dv = integrate(y, REC.dt)[REC.n - 1];
+      /* the unfiltered reference, computed once per render but cheap enough */
+      let ri = 0;
+      for (let i = 1; i < REC.n; i++) if (Math.abs(REC.a[i]) > Math.abs(REC.a[ri])) ri = i;
+      const rawPeak = Math.abs(REC.a[ri]);
+      const rawDv = integrate(REC.a, REC.dt)[REC.n - 1];
       return {
-        panels: [{x: T, y, ghost: PULSE, range: [0.012, 0.055],
-          opts: {
-            label: 'CFC ' + klass + (s.pass === 'one' ? ', one pass' : ', forward then backward'),
-            rings: [{x: TPEAK, y: 0, text: 'true peak 30.000 ms'}],
-            marks: [{t: tp, y: y[Math.round(tp / DT)], cast: 'x',
-                     text: (tp * 1000).toFixed(3) + ' ms', dx: 8, dy: -9}]
-          }}],
+        panels: [{x: REC.t, y, ghost: K === null ? null : REC.a, range: [-0.005, 0.12],
+          opts: {marks: [{t: REC.t[bi], y: y[bi], cast: 'x',
+                          text: Math.abs(y[bi]).toFixed(1) + ' m/s² at ' +
+                                (REC.t[bi] * 1000).toFixed(2) + ' ms', dx: 8, dy: -10}]}}],
         readouts: {
-          class: 'CFC ' + klass,
-          true: '30.000 ms',
-          meas: (tp * 1000).toFixed(3) + ' ms',
-          lag: (lag >= 0 ? '+' : '−') + Math.abs(lag).toFixed(3) + ' ms',
-          res: (DT * 1000).toFixed(3) + ' ms'
+          f: K === null ? 'as recorded' : 'CFC ' + K,
+          peak: Math.abs(y[bi]).toFixed(1) + ' m/s²',
+          tpeak: (REC.t[bi] * 1000).toFixed(2) + ' ms',
+          dv: dv.toFixed(4).replace('-', '−') + ' m/s',
+          pdrop: (100 * Math.abs(y[bi]) / rawPeak).toFixed(1) + '%',
+          ddrop: (100 * dv / rawDv).toFixed(2) + '%'
         }
       };
     }
@@ -1034,39 +1033,30 @@ mountDemo({
 });
 
 /* ---------------------------------------------------------------------------
-   fig-thermo — causality producing lag, without the word causality. A heavy
-   bulb climbs rather than jumps, and on the way up it reports a temperature
-   from a moment ago. Nothing is broken about the thermometer.
+   fig-road — bandwidth without the word. The same road under two vehicles: the
+   bicycle responds to the stones, the truck responds to the dip and walks over
+   the stones. Which one is right about 'rough' is not a property of the road.
 --------------------------------------------------------------------------- */
 (() => {
-  const host = document.querySelector('#fig-thermo .fig-body');
+  const host = document.querySelector('#fig-road .fig-body');
   if (!host) return;
-  const M = 300, TAU = 0.11, T0 = 0.28;
-  const X = [], STEP = [], READ = [];
+  const M = 260, X = [], SLOW = [], ROUGH = [];
   for (let i = 0; i < M; i++) {
     const t = i / (M - 1);
     X.push(t);
-    STEP.push(t < T0 ? 0 : 1);
-    READ.push(t < T0 ? 0 : 1 - Math.exp(-(t - T0) / TAU));
+    SLOW.push(0.34 * Math.sin(2 * Math.PI * 1.15 * t - 0.6));
+    ROUGH.push(SLOW[i] + 0.10 * Math.sin(2 * Math.PI * 17 * t));
   }
-  /* where the reading first reaches half: the lag you would measure off a peak */
-  const half = T0 + TAU * Math.log(2);
-  diagram(host, {
-    w: 460, h: 208, xRange: [0, 1], yRange: [-0.22, 1.22], axes: false,
-    alt: 'A step change in temperature and a thermometer reading that climbs '
-       + 'towards it, reaching half the step a little after the step happened.',
-    curves: [{x: X, y: STEP, cls: 'ghost'}, {x: X, y: READ, cls: 'trace'}],
-    drops: [{x: T0, y: 1}, {x: half, y: 0.5}],
-    points: [{x: half, y: 0.5}],
-    leads: [{from: [T0, 0.5], to: [half, 0.5], cls: 'lead'}],
-    notes: [
-      {x: 0.02, y: 1.12, anchor: 'start', text: 'the water'},
-      {x: 0.97, y: 0.62, anchor: 'end', text: 'the reading'},
-      {x: (T0 + half) / 2, y: 0.36, anchor: 'middle', cls: 'hi', text: 'lag'},
-      {x: 0.5, y: -0.14, anchor: 'middle',
-       text: 'the bulb cannot know about heat it has not absorbed yet'}
-    ]
+  const cells = diagramRow(host, 2);
+  const panel = (cell, ys, title, note) => diagram(cell, {
+    xRange: [0, 1], yRange: [-0.62, 0.68], title: title, zero: true, axes: false,
+    alt: 'The same road profile in both panels, with one vehicle following every '
+       + 'small bump and the other following only the long dip.',
+    curves: [{x: X, y: ROUGH, cls: 'ghost'}, {x: X, y: ys, cls: 'trace'}],
+    notes: [{x: 0.5, y: -0.55, anchor: 'middle', cls: 'hi', text: note}]
   });
+  panel(cells[0], ROUGH, 'a bicycle', 'feels every stone');
+  panel(cells[1], SLOW, 'a truck', 'feels the dip, not the stones');
 })();
 
 /* Whiteboards: math worked out on a slide as if written by hand (the
@@ -1257,75 +1247,152 @@ setTimeout(() => {
   });
 }, 0);
 
-/* Lecture 12's own figures.
-
-   Lag needs an event whose time is known, so the measurement uses the notes
-   page's construction: a half-sine pulse 20 ms wide starting at 20 ms, peak
-   at exactly 30.000 ms, sampled at 12,500 Hz. Checked: one pass puts the peak
-   at 30.08 (CFC 1000), 30.16 (600), 30.64 (180), 31.84 ms (60); forward then
-   backward puts it at 30.000 ms for every class.
-   The crash record, test 10642 channel 093: CFC 600 one pass peaks at
-   11.04 ms (-1391.0), forward-backward at 10.80 ms (-1283.8).
+/* Lecture 12's own figures, all on the crash record, test 10642 channel 093.
+   The class sweep subtracts the pre-impact offset as in week 3 and filters
+   forward then backward at each class. Checked against the file:
+     as recorded  peak 1540.4 m/s^2 at 10.80 ms   dv -17.5091 m/s
+     CFC 1000     1484.2 at 10.80                 -17.5090
+     CFC 600      1283.6 at 10.80                 -17.5093
+     CFC 180       630.3 at 24.00                 -17.5120
+     CFC 60        484.8 at 53.04                 -17.5251
+   The peak falls by a factor of 3.2; dv moves by 0.09%.
+   Time scales: 95% of dv done by 65.4 ms; the spike is 0.45 ms wide at
+   half depth, interpolated between samples.
+   The raw record at CFC 600: one pass peaks at 11.04 ms (-1391.0), forward
+   then backward at 10.80 ms (-1283.8).
    Hosts are found by data-fig so a figure can sit under more than one claim. */
 (() => {
   const each = (name, draw) =>
     document.querySelectorAll('[data-fig="' + name + '"] .fig-body').forEach(draw);
   const any = (...names) => names.some(n => document.querySelector('[data-fig="' + n + '"]'));
-  const T = 8e-5, N = 1000;
-  const t = Float64Array.from({length: N}, (_, i) => i * T);
-  const pulse = t.map(s => (s >= 0.02 && s <= 0.04) ? Math.sin(Math.PI * (s - 0.02) / 0.02) : 0);
-  const argmax = y => { let k = 0; for (let i = 1; i < y.length; i++) if (y[i] > y[k]) k = i; return k; };
-  const ms = s => (s * 1000).toFixed(2) + ' ms';
-
-  /* the known pulse and one pass of CFC 60 */
-  each('l13-pulse', host => {
-    const one = cfcOnce(pulse, 60, T), k1 = argmax(one);
-    panel(host, {label: 'pulse', unit: '', height: 270, xAxis: true, xLabel: 'time', xUnit: 'ms',
-                 xScale: 1000, yClamp: [-0.1, 1.2]})(t, one, pulse, [0.015, 0.05], {
-      marks: [{t: 0.03, y: 1, cast: 'x', text: 'true peak, 30.00 ms', dx: -10, dy: -10, anchor: 'end'},
-              {t: t[k1], y: one[k1], cast: 'x', text: 'one pass, CFC 60: ' + ms(t[k1]), dx: 10, dy: -10}]
-    });
-  });
-
-  /* lag against class, one pass, read to the nearest sample */
-  each('l13-lags', host => {
-    const classes = [60, 180, 600, 1000];
-    const lags = classes.map(c => (t[argmax(cfcOnce(pulse, c, T))] - 0.03) * 1000);
-    panel(host, {label: 'lag of the peak, one pass', unit: 'ms', height: 270, xAxis: true,
-                 xLabel: 'filter class (CFC)', xUnit: '', xScale: 1, xLog: true, yClamp: [-0.2, 2.2]})(
-      Float64Array.from(classes), Float64Array.from(lags), null, [40, 2500], {
-        dots: true, dotR: 6,
-        hlines: [{y: 0, cls: 'limit'}],
-        marks: classes.map((c, i) => ({t: c, y: lags[i], text: 'CFC ' + c + ': ' + lags[i].toFixed(2) + ' ms',
-                                        dx: c >= 600 ? -6 : 10, dy: c === 1000 ? -14 : c === 600 ? -30 : -10,
-                                        anchor: c >= 600 ? 'end' : 'start'}))
+  /* what each class keeps, as a function of frequency: the two-pass gain
+     |H|^2 of J211's coefficients at the record's sample interval. Checked:
+     CFC 60 keeps 0.949 at 60 Hz, 0.708 (half power) near 100 Hz, 0.029 at
+     300 Hz; the others have the same shape, slid along */
+  each('l12-response', host => {
+    const T = 8e-5, CL = [60, 180, 600, 1000];
+    const gain = (c, f) => {
+      const wd = 2 * Math.PI * c * 2.0775, wa = Math.tan(wd * T / 2), D = 1 + Math.SQRT2 * wa + wa * wa;
+      const a0 = wa * wa / D, a1 = 2 * a0, a2 = a0, b1 = -2 * (wa * wa - 1) / D, b2 = (-1 + Math.SQRT2 * wa - wa * wa) / D;
+      const w = 2 * Math.PI * f * T, c1 = Math.cos(w), s1 = Math.sin(w), c2 = Math.cos(2 * w), s2 = Math.sin(2 * w);
+      const nr = a0 + a1 * c1 + a2 * c2, ni = -(a1 * s1 + a2 * s2);
+      const dr = 1 - b1 * c1 - b2 * c2, di = b1 * s1 + b2 * s2;
+      return (nr * nr + ni * ni) / (dr * dr + di * di);
+    };
+    const fs = logspace(10, 6000, 600);
+    const curves = CL.slice(1).map(c => ({x: fs, y: fs.map(f => gain(c, f)), cls: 'trace'}));
+    panel(host, {label: 'fraction of amplitude kept', unit: '', height: 290, xAxis: true,
+                 xLabel: 'frequency', xUnit: 'Hz', xScale: 1, xLog: true, yClamp: [0, 1.08]})(
+      fs, fs.map(f => gain(60, f)), null, [10, 6000], {
+        curves,
+        marks: CL.map(c => { let f = c; while (gain(c, f) > 0.5) f *= 1.002;
+          return c === 600 ? {t: f, y: gain(c, f), text: 'CFC ' + c, dx: -8, dy: -6, anchor: 'end'}
+                          : {t: f, y: gain(c, f), text: 'CFC ' + c, dx: 8, dy: -6}; })
       });
   });
 
-  /* one pass and forward-backward on the same pulse */
-  each('l13-pulse2', host => {
-    const one = cfcOnce(pulse, 60, T), two = cfc(pulse, 60, T), k2 = argmax(two);
-    panel(host, {label: 'pulse', unit: '', height: 270, xAxis: true, xLabel: 'time', xUnit: 'ms',
-                 xScale: 1000, yClamp: [-0.1, 1.2]})(t, two, pulse, [0.015, 0.05], {
-      curves: [{x: t, y: one, cls: 'pred'}],
-      marks: [{t: t[k2], y: two[k2], cast: 'x', text: 'forward then backward: ' + ms(t[k2]), dx: -10, dy: -12, anchor: 'end'}]
-    });
-  });
+  if (!any('l14-twoq', 'l12-classes', 'l12-crash', 'l12-scales')) return;
 
-  if (!any('l13-crash')) return;
   fetch('data/test10642-crossmember-x.json').then(r => r.json()).then(d => {
-    const H = d.dt, a = Float64Array.from(d.a);
-    const tc = Float64Array.from({length: d.n}, (_, i) => d.t0 + i * H);
+    const H = d.dt, n = d.n;
+    const t = Float64Array.from({length: n}, (_, i) => d.t0 + i * H);
     const argmin = y => { let k = 0; for (let i = 1; i < y.length; i++) if (y[i] < y[k]) k = i; return k; };
-    each('l13-crash', host => {
-      const one = cfcOnce(a, 600, H), two = cfc(a, 600, H), k1 = argmin(one), k2 = argmin(two);
+    const ms = s => (s * 1000).toFixed(2) + ' ms';
+
+    /* forward then backward against one pass, on the raw record */
+    const raw = Float64Array.from(d.a);
+    each('l12-crash', host => {
+      const one = cfcOnce(raw, 600, H), two = cfc(raw, 600, H), k1 = argmin(one), k2 = argmin(two);
       const i0 = Math.floor((0.0095 - d.t0) / H), i1 = Math.ceil((0.0125 - d.t0) / H) + 1;
       panel(host, {label: 'acceleration', unit: 'm/s²', height: 280, xAxis: true,
                    xLabel: 'time', xUnit: 'ms', xScale: 1000, yClamp: [-1700, 400]})(
-        tc, two, a, [0.0095, 0.0125], {
-          curves: [{x: tc.slice(i0, i1), y: one.slice(i0, i1), cls: 'pred'}],
-          marks: [{t: tc[k1], y: one[k1], cast: 'x', text: 'one pass: ' + ms(tc[k1]), dx: 10, dy: 4},
-                  {t: tc[k2], y: two[k2], cast: 'x', text: 'two passes: ' + ms(tc[k2]), dx: -10, dy: 4, anchor: 'end'}]
+        t, two, raw, [0.0095, 0.0125], {
+          curves: [{x: t.slice(i0, i1), y: one.slice(i0, i1), cls: 'pred'}],
+          marks: [{t: t[k1], y: one[k1], cast: 'x', text: 'one pass: ' + ms(t[k1]), dx: 10, dy: 4},
+                  {t: t[k2], y: two[k2], cast: 'x', text: 'two passes: ' + ms(t[k2]), dx: -10, dy: 4, anchor: 'end'}]
+        });
+    });
+
+    /* the class sweep, with the offset taken out */
+    let b = 0, c = 0;
+    for (let i = 0; i < n; i++) if (t[i] < 0) { b += d.a[i]; c++; }
+    b /= c;
+    const a = Float64Array.from(d.a, v => v - b);
+    const CLASSES = [1000, 600, 180, 60];
+    const rows = [{name: 'as recorded', y: a}, ...CLASSES.map(k => ({name: 'CFC ' + k, y: cfc(a, k, H)}))];
+    const dv = y => { let s = 0; for (let i = 1; i < y.length; i++) s += (y[i] + y[i - 1]) / 2 * H; return s; };
+    rows.forEach(r => { r.k = argmin(r.y); r.peak = -r.y[r.k]; r.tpk = t[r.k]; r.dv = dv(r.y); });
+    /* an extra curve, cut to the plotted window so the kit draws every sample */
+    const win = (y, t0, t1) => {
+      const i0 = Math.max(0, Math.floor((t0 - d.t0) / H)), i1 = Math.min(n, Math.ceil((t1 - d.t0) / H) + 1);
+      return {x: t.slice(i0, i1), y: y.slice(i0, i1)};
+    };
+
+    /* the two questions, side by side: peak against class, and dv against class */
+    each('l14-twoq', host => {
+      const [l, r] = diagramRow(host, 2), bw = 0.32;
+      const bars = (vals, cls) => vals.map((v, i) => ({cls,
+        pts: [{x: i - bw, y: 0}, {x: i + bw, y: 0}, {x: i + bw, y: v}, {x: i - bw, y: v}]}));
+      const xl = rows.map((r, i) => ({x: i, y: 0, dy: 14, anchor: 'middle',
+                                       text: i ? String(CLASSES[i - 1]) : 'raw'}));
+      diagram(l, {
+        w: 300, h: 230, xRange: [-0.6, 4.6], yRange: [-180, 1800],
+        title: 'peak acceleration (m/s²)',
+        alt: 'Bars of the peak at each class: 1540, 1484, 1284, 630 and 485.',
+        areas: bars(rows.map(r => r.peak), 'fill'),
+        notes: [...xl, ...rows.map((r, i) => ({x: i, y: r.peak, dy: -5, anchor: 'middle',
+                                                text: Math.round(r.peak)}))]
+      });
+      diagram(r, {
+        w: 300, h: 230, xRange: [-0.6, 4.6], yRange: [-2.1, 21],
+        title: 'change in velocity, −Δv (m/s)',
+        alt: 'Bars of the change in velocity at each class, all 17.51 to 17.53.',
+        areas: bars(rows.map(r => -r.dv), 'tri'),
+        notes: [...xl, ...rows.map((r, i) => ({x: i, y: -r.dv, dy: -5, anchor: 'middle',
+                                                text: (-r.dv).toFixed(2)}))]
+      });
+    });
+
+    /* the two time scales on the offset-removed record: where 95% of dv is
+       done, and the spike's width at half its depth */
+    each('l12-scales', host => {
+      const v = new Float64Array(n);
+      for (let i = 1; i < n; i++) v[i] = v[i - 1] + (a[i] + a[i - 1]) / 2 * H;
+      const i0 = t.findIndex(s => s >= 0);
+      let i95 = i0; while (i95 < n - 1 && Math.abs(v[i95] - v[i0]) < 0.95 * Math.abs(v[n - 1] - v[i0])) i95++;
+      const k = argmin(a); let l = k, r = k;
+      while (l > 0 && a[l] < a[k] / 2) l--;
+      while (r < n - 1 && a[r] < a[k] / 2) r++;
+      /* interpolate each half-depth crossing between its two samples, so the
+         width is not padded out to the samples either side (0.45 ms, not 0.56) */
+      const h = a[k] / 2;
+      const tl = t[l] + (h - a[l]) / (a[l + 1] - a[l]) * H, tr = t[r - 1] + (h - a[r - 1]) / (a[r] - a[r - 1]) * H;
+      const ms1 = s => (s * 1000).toFixed(0) + ' ms', w = (tr - tl) * 1000;
+      panel(host, {label: 'acceleration, the first 100 ms', unit: 'm/s²', height: 160, xAxis: true,
+                   xLabel: 'time', xUnit: 'ms', xScale: 1000, yClamp: [-1650, 450]})(
+        t, a, null, [0, 0.1], {
+          bands: [{x0: 0, x1: t[i95]}],
+          marks: [{t: t[i95], y: 0, text: '95% of Δv by ' + ms1(t[i95]), dx: 8, dy: -10}]
+        });
+      host.lastElementChild.style.marginBottom = '.6em';
+      panel(host, {label: 'the spike, zoomed', unit: 'm/s²', height: 160, xAxis: true,
+                   xLabel: 'time', xUnit: 'ms', xScale: 1000, yClamp: [-1650, 450]})(
+        t, a, null, [0.0095, 0.0125], {
+          bands: [{x0: tl, x1: tr}],
+          marks: [{t: tr, y: h, text: 'about ' + w.toFixed(2) + ' ms wide at half depth', dx: 10, dy: 4}]
+        });
+    });
+
+    /* the two structural classes on the record, first 80 ms: CFC 600 for a
+       component, CFC 60 for comparing vehicles */
+    each('l12-classes', host => {
+      const c600 = rows[2], c60 = rows[4];
+      panel(host, {label: 'acceleration', unit: 'm/s²', height: 280, xAxis: true,
+                   xLabel: 'time', xUnit: 'ms', xScale: 1000, yClamp: [-1650, 450]})(
+        t, c60.y, a, [0, 0.08], {
+          curves: [{...win(c600.y, 0, 0.08), cls: 'pred'}],
+          marks: [{t: c600.tpk, y: c600.y[c600.k], text: 'CFC 600: ' + Math.round(c600.peak) + ' at ' + ms(c600.tpk), dx: 10, dy: 4},
+                  {t: c60.tpk, y: c60.y[c60.k], text: 'CFC 60: ' + Math.round(c60.peak) + ' at ' + ms(c60.tpk), dx: 10, dy: 20}]
         });
     });
   });

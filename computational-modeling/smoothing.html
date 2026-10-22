@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smoothing — Computational Physical Modeling</title>
+  <title>Smoothing and phase lag — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -840,10 +840,7 @@
           <a href="differentiation-amplifies-noise.html">Amplified noise</a>
         
           <span class="site-nav-sep">·</span>
-          <strong>Smoothing</strong>
-        
-          <span class="site-nav-sep">·</span>
-          <a href="phase-lag.html">Phase lag</a>
+          <strong>Smoothing and lag</strong>
         
           <span class="site-nav-sep">·</span>
           <a href="why-a-standard-exists.html">Filter class</a>
@@ -905,16 +902,21 @@
   <main data-pagefind-body class="wide">
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <div class="eyebrow">Week 4 · Noise and Filtering</div>
-<h1>Smoothing</h1>
+<h1>Smoothing and phase lag</h1>
 
 <div class="claim">
   <span class="label">Claim</span>
-  <p class="exact">  Smoothing replaces each sample by a weighted combination of its neighbours, which reduces the
-  noise by averaging it and generally reduces the signal by averaging that too. The total
-  error
-  against the true signal therefore has a minimum at a finite window width. Too narrow leaves noise, and too wide removes the thing being measured.</p>
+  <p class="exact">Smoothing replaces each sample by a weighted combination of its neighbours, which reduces the
+  noise by averaging it and generally reduces the signal by averaging that too. The total error
+  against the true signal therefore has a minimum at a finite window width. Too narrow leaves noise, and too wide removes the thing being measured.
+  A frequency-specified filter, such as the standard's, applied once in the direction of increasing time, also shifts events later.
+  The shift is the <dfn data-g="phase-lag">phase lag</dfn>, it grows as the cut-off frequency is
+  lowered, and it is present in the output with nothing to mark it. Applying the same filter a
+  second time in reverse produces an equal shift in the opposite direction, and the two cancel
+  exactly.</p>
   <p class="plain">Smoothing is a trade. It buys a reduction in noise with a distortion of the signal, and there
-  is usually a width that buys the most for the least.</p>
+  is usually a width that buys the most for the least. A filter that only knows the past has to wait before it can react, and running it backwards
+  afterwards undoes the waiting, at the price of a filter that uses the future.</p>
 </div>
 
 <h2 id="the-simplest-smoother">The Simplest Smoother</h2>
@@ -997,13 +999,38 @@ noise everywhere and flattens the peak a little more, and for this signal the fi
 smaller than the second across the record as a whole, while at the single instant of the peak the
 two happen to cancel more completely.</p>
 
-<p>That is the same lesson as the CFC classes two pages on, arriving early. <strong>"Best" is not a
+<p>That is the same lesson as the filter classes on the next page, arriving early. <strong>"Best" is not a
 property of the width. It is a property of the width and the question together.</strong> If you
 are reporting the whole trace, $w = 9$ is the better choice here. If you are reporting the peak
 and nothing else, a wider window is. Choose the width against the quantity you are going to
 report, and say which one you chose.</p>
 
 <cg-demo case="smooth"></cg-demo>
+
+<h2 id="the-width-is-a-decision">The Width Is a Decision</h2>
+
+<p>The smoothing minimum cannot be predicted, because the distortion term depends on how sharply
+the signal bends, which is a property of the thing being measured and is not known in advance.
+The minimum in the table above is 9 for this sine, measured on the whole record. For a
+sharper signal it is narrower, and there is no formula that will tell you. What follows is that
+the width is a decision, made by a person, that changes the reported answer.</p>
+
+<p>The rest of this page follows the standard's filter, which is specified by frequency instead of
+by width, and the delay that comes from filtering in one direction, with the second pass that
+removes it. <a href="why-a-standard-exists.html">The filter class page</a> returns to the
+decision on this page, how hard to smooth, for crash data, where the class is set by what the
+measurement is for.</p>
+
+<div class="aside">
+  <span class="label">A moving average is a crude filter</span>
+  <p>A rectangular window is the simplest weighting and not a good one. It responds to some
+frequencies it should reject and rejects some it should pass. Better weightings, such as
+Gaussian, Savitzky-Golay and Butterworth, trade a little more computation for a much cleaner
+separation.</p>
+  <p>The trade-off this page describes survives all of them. Every smoother reduces noise by mixing
+neighbouring samples, and most therefore distort anything that varies within the
+region they mix over. The shape of the U-curve changes. Its existence does not.</p>
+</div>
 
 <h2 id="the-standard-s-filter">The Standard's Filter</h2>
 
@@ -1056,10 +1083,7 @@ $$b_1 = \frac{-2(\omega_a^2 - 1)}{1 + \sqrt{2}\,\omega_a + \omega_a^2}, \qquad
   b_2 = \frac{-1 + \sqrt{2}\,\omega_a - \omega_a^2}{1 + \sqrt{2}\,\omega_a + \omega_a^2}$$
 
 <p class="plain">Every output sample needs the two before it, so the samples have to be produced in order. A
-moving average may be computed at any sample you like, in any order, and this one cannot.
-Produced in order from the start of the record, each output is built only from samples at or
-before it. The centred moving average used as many samples after each point as before it, and
-this filter uses none after, and because it sees only one side a single pass runs late.</p>
+moving average may be computed at any sample you like, in any order, and this one cannot.</p>
 
 <div class="aside">
   <span class="label">Checking your implementation</span>
@@ -1076,16 +1100,58 @@ this filter uses none after, and because it sees only one side a single pass run
   that removes nothing should return what it was given.</p>
 </div>
 
-<h3 id="forward-backward-filtering">Forward-Backward Filtering</h3>
+<h2 id="phase-lag">Why a Causal Filter Lags</h2>
 
-<p>One pass delays the signal, because it sees only the samples before each output, and
-<a href="phase-lag.html">phase lag</a> is about how invisible that delay usually is in the output.
-The centred moving average needed no correction, since it looked equally far in both directions.
-The standard's answer for this filter is to run it forward over the record and then run the same
+<p>One pass of the standard's filter computes each output sample from samples at or before that
+instant. Every term on the right of the rule above is at time $i$ or earlier. Such a filter is called causal, and the
+constraint is a physical one and not a choice, because a real-time filter in an airbag
+controller or a control loop has nothing else available to it. The consequence follows
+immediately. When the input rises sharply the output at that instant is still mostly made of
+earlier, lower samples, so it rises later, and the sharper the feature and the heavier the
+filter, the further behind the output falls.</p>
+
+<p>The centred moving average at the start of this page is not causal. It
+uses as many samples after each point as before it, so it weighs the future and the past alike
+and has no delay to correct. The lag comes from looking in one direction, and one
+pass of the CFC filter looks in one direction only.</p>
+
+<figure class="figure mini" id="fig-thermo">
+  <div class="fig-body"></div>
+  <figcaption>The grey step is the water the thermometer was plunged into. The solid trace is
+  what the thermometer reads. At every instant on the way up it is reporting a temperature from
+  a little while earlier, and nothing about the instrument is broken: it cannot respond to heat
+  it has not yet absorbed. A filter that can only see the samples before it is in the same
+  position.</figcaption>
+</figure>
+
+<h2 id="measuring-the-lag">Measuring the Lag</h2>
+
+<p>On a real record there is usually no independently known event time to measure against, so the lag has
+to be measured on a signal whose timing is known by construction: a half-sine pulse 20 ms wide,
+starting at 20 ms, with its peak at exactly 30.000 ms.</p>
+
+<table class="data">
+  <tr><th>Filter</th><th class="num">peak, one pass</th><th class="num">lag</th>
+      <th class="num">peak, forward then backward</th></tr>
+  <tr><td>CFC 1000</td><td class="num">30.080 ms</td><td class="num">+0.080 ms</td><td class="num">30.000 ms</td></tr>
+  <tr><td>CFC 600</td><td class="num">30.160 ms</td><td class="num">+0.160 ms</td><td class="num">30.000 ms</td></tr>
+  <tr><td>CFC 180</td><td class="num">30.640 ms</td><td class="num">+0.640 ms</td><td class="num">30.000 ms</td></tr>
+  <tr><td>CFC 60</td><td class="num">31.840 ms</td><td class="num">+1.840 ms</td><td class="num">30.000 ms</td></tr>
+</table>
+
+<p>The lag grows as the filter gets heavier, by roughly the factor the cut-off falls by. The
+forward-backward column is 30.000 ms in every row, exactly and not approximately.
+These lags are quoted to the nearest sample, which at 12.5 kHz is 0.08 ms. That quantisation is
+why the numbers are exact multiples of 0.08, and it is the same limit <a href="discrete-evaluation.html">discrete evaluation</a>
+describes, since a peak is located only as precisely as the sampling allows.</p>
+
+<cg-demo case="lag"></cg-demo>
+
+<h2 id="forward-backward-filtering">Forward-Backward Filtering</h2>
+
+<p>The standard's answer for this filter is to run it forward over the record and then run the same
 filter (the same class, and so the same coefficients) backward over its own output. The second
-pass delays by the same amount in the opposite direction, so the two shifts cancel exactly. It
-also filters a second time, so two passes remove more than one, and that combined result is the
-four-pole filter the class specifies. The cost is that the result is no longer causal, because a
+pass delays by the same amount in the opposite direction, so the two shifts cancel exactly. The cost is that the result is no longer causal, because a
 value at 30&nbsp;ms now depends on samples recorded at 80&nbsp;ms. That is legitimate for a
 record already on disk and impossible for a controller acting in real time, which is why the
 same signal is filtered differently by an airbag computer during the crash and by an analyst
@@ -1099,69 +1165,6 @@ afterwards.</p>
   exactly. The cost is that the third panel needed samples from later in the record to produce
   its value at any given instant.</figcaption>
 </figure>
-
-<h3 id="the-minimum-rate">The Minimum Rate</h3>
-
-<p>The class you ask for and the rate you recorded at are not independent, and the constraint
-between them is one you have already met. A filter set to keep everything below some frequency is
-a promise about content at that frequency, and a record cannot make that promise above its
-<dfn data-g="nyquist">Nyquist frequency</dfn>, which is half its sample rate. Asking for a class
-above Nyquist is asking the record to preserve something it was never able to represent.</p>
-
-<p>The formula enforces this by itself. The $\tan$ in the coefficients passes through infinity at
-$\omega_d T/2 = \pi/2$, and putting $\omega_d = 2\pi \cdot \mathrm{CFC} \cdot 2.0775$ into
-that gives the limit directly:</p>
-
-$$\frac{\omega_d T}{2} < \frac{\pi}{2}
-  \quad\Longrightarrow\quad
-  f_s \;>\; 2 \times 2.0775 \times \mathrm{CFC} \;=\; 4.155\,\mathrm{CFC}$$
-
-<p>The 2.0775 is the standard's own conversion from the class number to the design frequency the
-coefficients are built around. Taking it as given, the rule to carry into the assignment is that
-the sample rate must exceed about 4.16 times the class:</p>
-
-<table class="data">
-  <tr><th>class</th><th class="num">CFC 1000</th><th class="num">CFC 600</th>
-      <th class="num">CFC 180</th><th class="num">CFC 60</th></tr>
-  <tr><td>cannot be built below</td><td class="num">4155 Hz</td><td class="num">2493 Hz</td>
-      <td class="num">748 Hz</td><td class="num">249 Hz</td></tr>
-</table>
-
-<p>Below that rate the coefficients do not degrade gracefully. They change sign, and the output
-stops being a smoothed version of anything. Nobody imposed this as a rule and the algebra forces
-it, so it sets a floor on the logger before any argument about accuracy has begun.</p>
-
-<p>The crash channel is recorded at 12&thinsp;500&nbsp;Hz, which supports classes up to about
-CFC 3000, so every class in the standard is available on it and the constraint never binds.
-It binds the moment you reduce the rate. A record thinned as in
-<a href="discrete-evaluation.html">discrete evaluation</a> to 1&nbsp;kHz still supports CFC 180
-and can no longer be filtered at CFC 1000 at all, which is worth checking before you decimate
-anything you intend to filter afterwards.</p>
-
-<div class="check"><p><strong>Check.</strong> A colleague filters a 10&nbsp;kHz record at CFC 1000
-in a single forward pass, reads off the time of the peak, and reports it. What is wrong with the
-time, and would comparing it against the unfiltered record reveal it?
-
-    <details class="ans"><summary><span>Answer</span></summary><div class="body">
-    <p><strong>The reported time is late.</strong> A single pass delays every feature, so the peak in
-the output sits after the peak in the record. The standard's second, backward pass exists to
-remove exactly this.</p>
-    <p>Comparing against the unfiltered record does reveal it, and that is the one
-comparison worth making, because the delay is visible only against something that has not been
-through the filter. What will not reveal it is any check done inside the filtered signal. The
-shape is intact, the peak is smooth and well formed, and every interval between features is
-preserved. A delay shifts everything equally, so nothing internal to the output is inconsistent
-with anything else in it. On a crash record the shift is a fraction of a millisecond at CFC 1000
-and grows as the class falls, which is small enough to survive review and large enough to matter
-when the number being reported is a time.</p>
-    </div></details></p></div>
-
-<div class="aside standard"><span class="label">The standard</span>
-<p>Which class to use is not an open question on a crash record. <strong>SAE J211-1</strong> Table
-1 assigns one to each kind of measurement: CFC 1000 for head acceleration, CFC 180 for thorax
-spine, CFC 60 for vehicle structure being compared between vehicles and CFC 180 for the same
-structure being integrated. See <a href="standards.html">The standards behind the crash
-data</a>.</p></div>
 
 <h3 id="in-code">In Code</h3>
 
@@ -1220,30 +1223,100 @@ end</pre>
   <div class="code-hint">Hover a highlighted line for a description of what it does.</div>
 </div>
 
-<h2 id="the-width-is-a-decision">The Width Is a Decision</h2>
+<h2 id="the-cost-of-two-passes">The Cost of Two Passes</h2>
 
-<p>The smoothing minimum cannot be predicted, because the distortion term depends on how sharply
-the signal bends, which is a property of the thing being measured and is not known in advance.
-The minimum in the table above is 9 for this sine, measured on the whole record. For a
-sharper signal it is narrower, and there is no formula that will tell you. What follows is that
-the width is a decision, made by a person, that changes the reported answer.</p>
+<p>The two side by side:</p>
 
-<p>The next two pages follow the standard's filter from here. <a href="phase-lag.html">Phase
-lag</a> covers the delay that comes from filtering in one direction, and the second pass that
-removes it. <a href="why-a-standard-exists.html">The filter class page</a> returns to the
-decision on this page, how hard to smooth, for crash data, where the class is set by what the
-measurement is for.</p>
+<table class="data">
+  <tr><th></th><th>One pass</th><th>Forward then backward</th></tr>
+  <tr><td>timing</td><td>lags</td><td>no shift</td></tr>
+  <tr><td>uses future samples</td><td>no</td><td>yes</td></tr>
+  <tr><td>usable in real time</td><td>yes</td><td>no</td></tr>
+  <tr><td>usable on a stored record</td><td>yes</td><td>yes</td></tr>
+  <tr><td>effective sharpness</td><td>two poles</td><td>four poles, which is what the class specifies</td></tr>
+</table>
 
-<div class="aside">
-  <span class="label">A moving average is a crude filter</span>
-  <p>A rectangular window is the simplest weighting and not a good one. It responds to some
-frequencies it should reject and rejects some it should pass. Better weightings, such as
-Gaussian, Savitzky-Golay and Butterworth, trade a little more computation for a much cleaner
-separation.</p>
-  <p>The trade-off this page describes survives all of them. Every smoother reduces noise by mixing
-neighbouring samples, and most therefore distort anything that varies within the
-region they mix over. The shape of the U-curve changes. Its existence does not.</p>
-</div>
+<p>The last row is the one that catches people. Each pass applies the same two-pole filter, so
+running it twice applies four poles in total. Four poles is what the class specifies, so it is
+the single-pass version that is the odd one out: a one-pass CFC 180 leaves more high-frequency
+content in the record than a CFC 180 is meant to. The two are not the same filter with the
+timing fixed.</p>
+
+<p>So a one-pass CFC 180 and a forward-backward CFC 180 differ in two ways at once: the lag, and
+the amount of filtering. If you compare their outputs and attribute the whole difference to the
+lag, you will be wrong by however much the extra two poles removed. To see the lag on its own,
+compare the forward-backward output against the same output shifted, or against a one-pass
+filter designed to have the sharpness the two passes actually produce.</p>
+
+<div class="aside standard"><span class="label">The standard</span>
+<p>Running the filter twice is not a refinement someone thought of. <strong>SAE J211-1</strong>
+requires it, and the reason is the lag. A single pass moves every event later and
+leaves nothing in the output to say so. See <a href="standards.html">The standards behind the
+crash data</a>.</p></div>
+
+<h2 id="when-the-lag-changes-the-answer">When the Lag Changes the Answer</h2>
+
+<p>The lag changes the answer exactly when a time is part of the answer.</p>
+
+<ul class="plain">
+  <li><strong>It matters</strong> for anything that reports when: the time of a peak, the
+  interval between two events on differently filtered channels, the moment an airbag should fire.
+  A 0.64 ms error is meaningless in one context and disqualifying in another.</li>
+  <li><strong>It does not matter</strong> for an integral over the whole record. Shifting a curve
+  in
+  time does not change the area under it, so Δ<em>v</em> is unaffected by the lag, though it is
+  affected by the filtering itself, which is the next page.</li>
+</ul>
+
+<p>Two channels filtered at different classes are shifted by different amounts, so any comparison
+between them acquires a timing error equal to the difference. That is a mistake that produces
+plausible numbers, and it is the reason a standard specifies the class per measurement instead
+of leaving it to whoever is analysing.</p>
+
+<h2 id="the-minimum-rate">The Minimum Rate</h2>
+
+<p>The class you ask for and the rate you recorded at are not independent, and the constraint
+between them is one you have already met. A filter set to keep everything below some frequency is
+a promise about content at that frequency, and a record cannot make that promise above its
+<dfn data-g="nyquist">Nyquist frequency</dfn>, which is half its sample rate. Asking for a class
+above Nyquist is asking the record to preserve something it was never able to represent.</p>
+
+<p>The coefficient formula in the standard's filter enforces this by itself. The $\tan$ in the coefficients passes through infinity at
+$\omega_d T/2 = \pi/2$, and putting $\omega_d = 2\pi \cdot \mathrm{CFC} \cdot 2.0775$ into
+that gives the limit directly:</p>
+
+$$\frac{\omega_d T}{2} < \frac{\pi}{2}
+  \quad\Longrightarrow\quad
+  f_s \;>\; 2 \times 2.0775 \times \mathrm{CFC} \;=\; 4.155\,\mathrm{CFC}$$
+
+<p>The 2.0775 is the standard's own conversion from the class number to the design frequency the
+coefficients are built around. Taking it as given, the rule to carry into the assignment is that
+the sample rate must exceed about 4.16 times the class:</p>
+
+<table class="data">
+  <tr><th>class</th><th class="num">CFC 1000</th><th class="num">CFC 600</th>
+      <th class="num">CFC 180</th><th class="num">CFC 60</th></tr>
+  <tr><td>cannot be built below</td><td class="num">4155 Hz</td><td class="num">2493 Hz</td>
+      <td class="num">748 Hz</td><td class="num">249 Hz</td></tr>
+</table>
+
+<p>Below that rate the coefficients do not degrade gracefully. They change sign, and the output
+stops being a smoothed version of anything. Nobody imposed this as a rule and the algebra forces
+it, so it sets a floor on the logger before any argument about accuracy has begun.</p>
+
+<p>The crash channel is recorded at 12&thinsp;500&nbsp;Hz, which supports classes up to about
+CFC 3000, so every class in the standard is available on it and the constraint never binds.
+It binds the moment you reduce the rate. A record thinned as in
+<a href="discrete-evaluation.html">discrete evaluation</a> to 1&nbsp;kHz still supports CFC 180
+and can no longer be filtered at CFC 1000 at all, which is worth checking before you decimate
+anything you intend to filter afterwards.</p>
+
+<div class="aside standard"><span class="label">The standard</span>
+<p>Which class to use is not an open question on a crash record. <strong>SAE J211-1</strong> Table
+1 assigns one to each kind of measurement: CFC 1000 for head acceleration, CFC 180 for thorax
+spine, CFC 60 for vehicle structure being compared between vehicles and CFC 180 for the same
+structure being integrated. See <a href="standards.html">The standards behind the crash
+data</a>.</p></div>
 
 <div class="check">
   <span class="label">Check</span>
@@ -1260,17 +1333,69 @@ feature, so the averaging is no longer acting only on the noise. Compare the smo
 against the unsmoothed one. If it has dropped, the window is eating signal, and the drop is the
 part of the "improvement" you paid for. Noise reduction is measurable and free to quote. Signal
 attenuation has to be looked for.</p></div></details></li>
-    <li>Between <em>w</em> = 11 and <em>w</em> = 25 there is a width at which the smoothed peak is
-    exactly 1.0000. Why would choosing that width be a mistake?
+    <li>Between <em>w</em> = 11 and <em>w</em> = 25 the smoothed peak passes through the true 1.0000, and
+    <em>w</em> = 13 comes closest (1.0001). Why would choosing that width be a mistake?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Because you would be choosing the parameter to reproduce the answer, and the answer then stops
 being evidence for anything.</p>
      <p>Two errors are moving in opposite directions as <em>w</em> grows. Noise is being suppressed and
 signal is being flattened. At one width they happen to cancel. That cancellation is a property
 of this record, this noise realisation and this peak. A different sample of the same
 experiment would cancel at a different width, and you would have no way to find it without
-already knowing the true peak. It is also unjustifiable to a reader. "I chose <em>w</em> = 17"
-invites the question "why", and the honest answer is "because it gave 1.0000", which is the same
+already knowing the true peak. It is also unjustifiable to a reader. "I chose <em>w</em> = 13"
+invites the question "why", and the honest answer is "because it gave 1.0001", which is the same
 as having no method at all.</p></div></details></li>
+    <li>A colleague filters a 10&nbsp;kHz record at CFC 1000
+in a single forward pass, reads off the time of the peak, and reports it. What is wrong with the
+time, and would comparing it against the unfiltered record reveal it?
+
+    <details class="ans"><summary><span>Answer</span></summary><div class="body">
+    <p><strong>The reported time is late.</strong> A single pass delays every feature, so the peak in
+the output sits after the peak in the record. The standard's second, backward pass exists to
+remove exactly this.</p>
+    <p>Comparing against the unfiltered record does reveal it, and that is the one
+comparison worth making, because the delay is visible only against something that has not been
+through the filter. What will not reveal it is any check done inside the filtered signal. The
+shape is intact, the peak is smooth and well formed, and every interval between features is
+preserved. A delay shifts everything equally, so nothing internal to the output is inconsistent
+with anything else in it. On a crash record the shift is a fraction of a millisecond at CFC 1000
+and grows as the class falls, which is small enough to survive review and large enough to matter
+when the number being reported is a time.</p>
+    </div></details></li>
+    <li>You filter a channel at CFC 180 in one pass and read the peak at 24.64 ms. What is your
+    best
+    estimate of the true peak time, and how confident are you in it?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>The true peak is earlier than 24.64&nbsp;ms, and the way to say how much earlier
+is to measure it and not look it up: <strong>filter the same record again
+forward-and-backward</strong> and read the peak from that. The two passes shift by equal and
+opposite amounts, so the second reading carries no lag, and the difference between them is this
+filter's delay on this record. On the record tabulated on the next page that comparison gives
+24.0&nbsp;ms, so the lag is about 0.6&nbsp;ms.</p>
+     <p>A heavier filter can
+change which feature is the largest, which is the next page. Confidence in the magnitude is
+much lower, because the delay depends on the class, on the implementation, and on the shape of
+the pulse. That asymmetry is worth reporting as it stands. "no later than 24.64&nbsp;ms, and
+about 0.6&nbsp;ms before it" says more than a single number.</p></div></details></li>
+    <li>Why can a real-time controller not use the forward-backward method?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Because the backward pass runs from the end of the record, and a controller has no end. To
+filter sample <em>i</em> in reverse you need the samples after it, and in real time those have
+not happened yet. Forward-backward filtering is the same filter run twice, and the cancellation is
+bought entirely with knowledge of the future, which is available to an analyst working on a
+finished record and never to a controller, so the controller must accept the lag and design
+around it, which is why control engineers care about phase margin, and why an airbag decision is
+made on a one-pass filter with its delay budgeted for.</p></div></details></li>
+    <li>Two channels are filtered at CFC 600 and CFC 60, both one pass, and you report the
+    interval
+    between their peaks. What error have you introduced, and in which direction?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>You have introduced a spurious difference in timing, because the two channels
+have been delayed by different amounts. The heavier filter lags more, so CFC&nbsp;60 is delayed
+substantially more than CFC&nbsp;600.</p>
+     <p>The direction follows from which event you put where. The CFC&nbsp;60 peak is pushed later than
+it truly is, so if that is the second of the two events, the reported interval is
+too long. If it is the first, the interval is too short, and it can be driven
+through zero and reverse the apparent order of two events. The obvious fix is to correct for the
+delays afterwards, though the better one is to remove the asymmetry altogether, by filtering
+both channels at the same class or by filtering both forward-and-backward. Any
+comparison of timing across channels requires identical processing on each.</p></div></details></li>
   </ol>
 </div>
 
@@ -1299,11 +1424,11 @@ class, one pass or forward-and-backward, with the peak and the integral reported
   </script>
   
 
-  <script type="module" src="js/bundle/smoothing.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/smoothing.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-16">October 16, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-22">October 22, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

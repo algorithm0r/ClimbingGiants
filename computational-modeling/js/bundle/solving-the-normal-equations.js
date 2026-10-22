@@ -6,7 +6,7 @@ const svgEl = (n, a = {}) => { const e = document.createElementNS('http://www.w3
   for (const k in a) e.setAttribute(k, a[k]); return e; };
 
 /* cumulative trapezoid: s[i] is the integral from the start up to sample i.
-   Shared because pages 5-8 and 25 all build one. */
+   Shared because pages 5-8 and 24 all build one. */
 function integrate(y, dt) {
   const s = new Float64Array(y.length);
   for (let i = 1; i < y.length; i++) s[i] = s[i-1] + (y[i] + y[i-1]) * 0.5 * dt;
@@ -1009,7 +1009,7 @@ function eigSym(Min) {
   return Array.from({length: n}, (_, i) => A[i][i]).sort((a, b) => b - a);
 }
 
-/* the normal equations, built and solved exactly as page 16 describes */
+/* the normal equations, built and solved exactly as page 15 describes */
 function normalFit(xs, ys, deg) {
   const n = deg + 1;
   const G = Array.from({length: n}, (_, i) =>

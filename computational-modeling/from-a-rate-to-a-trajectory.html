@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>From a rate to a trajectory — Computational Physical Modeling</title>
+  <title>Euler&#39;s method — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -834,7 +834,7 @@
         <a href="week-08.html">Overview</a>
         
           <span class="site-nav-sep">·</span>
-          <strong>Rate to trajectory</strong>
+          <strong>Euler&#39;s method</strong>
         
           <span class="site-nav-sep">·</span>
           <a href="state-as-a-vector.html">State as a vector</a>
@@ -902,7 +902,7 @@
   <main data-pagefind-body class="wide">
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <div class="eyebrow">Week 8 · Time Stepping</div>
-<h1>From a rate to a trajectory</h1>
+<h1>Euler's method</h1>
 
 <div class="claim">
   <span class="label">Claim</span>
@@ -912,12 +912,11 @@
   the rate times a small step, and repeat. That is <dfn data-g="eulers-method">Euler's
   method</dfn>, and it is the cumulative integral
   of week 3 with the integrand recomputed at every step and not read from a record.</p>
-  <p class="plain">You do not have the rate as a list of numbers any more. You have a rule that
-  gives
-  the rate from where you are, so you have to go there before you can ask.</p>
+  <p class="plain">Now the rate comes from a rule that uses the current state, so you have to
+  reach a state before you can compute the rate there.</p>
 </div>
 
-<h2 id="the-difference-from-week-3">The Difference from Week 3</h2>
+<h2 id="the-difference-from-week-3">Comparison with Week 3</h2>
 
 <p>In week 3 the acceleration was a recorded array, so every value was available before any
 integration started and the whole cumulative sum could be formed in one pass. Here the rate is a
@@ -954,30 +953,29 @@ every subsequent step inherits the mistake.</p>
   <tr><td class="num">0.0125</td><td class="num">6.13×10⁻²</td><td class="num">2.00</td></tr>
 </table>
 
-<p>Three figures, not four: an independent Python implementation of the same method agrees with the
-demo to three and differs in the fourth, because the two accumulate the same sum in a different
-order. Quoting a digit that two correct implementations disagree about would be claiming
-precision that is not there. Halving the step halves the error, so Euler is first order, and
-that is poor. An error of 0.49 m at $h = 0.1$ on a flight that peaks at 3.97 m is not a small
-correction, and reaching a millimetre would need a step of about 25 microseconds, which is 40
-000 steps for one second of flight. The instinct is to take a smaller step, and the remedy is
-usually a better rule. Week 8's later pages are about what "better" costs and how to check that
+<p>The table quotes three figures because an independent Python implementation of the same method
+agrees with the demo to three and differs in the fourth (the two accumulate the same sum in a
+different order). Quoting a digit that two correct implementations disagree about would be claiming
+precision that is not there. Halving the step halves the error, so Euler is first order, which is
+a slow rate of improvement. An error of 0.49 m at $h = 0.1$ on a flight that peaks at 3.97 m is not a small
+correction, and reaching a millimetre would need a step of about 200 microseconds, which is about
+5 000 steps for one second of flight. A smaller step does reduce the error, though a better rule
+usually reduces it at much lower cost. Week 8's later pages are about what "better" costs and how to check that
 you have it.</p>
 
 <div class="aside">
-  <span class="label">Why Euler always undershoots here</span>
+  <span class="label">The sign of Euler's error</span>
   <p>The projectile's height is <dfn data-g="concave">concave</dfn>, so the curve bends downwards everywhere. Euler follows the
 tangent at the left of each step, and a tangent to a concave curve lies above it, so every step
-overshoots the height and the accumulated result is too high. The error has a consistent sign
-and not a random one. It is not noise and it does not average out. A hundred steps do not partly
-cancel the way a hundred noise samples do, they add up in the same direction, which is the
-difference between this and week 3's √n.</p>
+overshoots the height and the accumulated result is too high. The error has a consistent sign,
+so it does not average out the way noise does. A hundred noise samples partly cancel, which gave
+week 3's √n, while a hundred Euler steps add up in the same direction.</p>
 </div>
 
 <h2 id="choosing-the-step">Choosing the Step</h2>
 
-<p>In week 3 the interval was the instrument's and was fixed, while here it is yours, and choosing
-it is the work:</p>
+<p>In week 3 the instrument fixed the interval, while here you choose the step, and the choice
+has a cost either way:</p>
 
 <ul class="plain">
   <li>Too large and the answer is wrong, possibly wildly.</li>
@@ -990,37 +988,36 @@ it is the work:</p>
 
 <p>What can be done is measure: halve the step, see whether the answer moves, and stop when halving
 it again changes nothing you care about. That is a <dfn data-g="convergence-study">convergence
-study</dfn>, and it is the honest way to defend a step size when there is no exact answer to
+study</dfn>, and it is the usual way to defend a step size when there is no exact answer to
 compare against.</p>
 
 <div class="check">
   <span class="label">Check</span>
   <ol>
-    <li>Euler with <em>h</em> = 0.02 gives 3.19 m and with <em>h</em> = 0.01 gives 3.25 m.
+    <li>Euler with <em>h</em> = 0.02 gives 3.41 m and with <em>h</em> = 0.01 gives 3.36 m.
     Estimate
     the answer at <em>h</em> = 0, and say what property of the method you used.
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>3.31&nbsp;m.</strong></p>
      <p>Euler is first order, so the error is proportional to <em>h</em>. Writing <em>I</em>(<em>h</em>)
-= <em>I</em> + <em>Ch</em>, the two runs give <em>I</em> + 0.02<em>C</em> = 3.19 and <em>I</em>
-+ 0.01<em>C</em> = 3.25. Subtracting, 0.01<em>C</em> = &minus;0.06, and <em>I</em> =
-2&thinsp;&times;&thinsp;3.25 &minus; 3.19 = <strong>3.31&nbsp;m</strong>.</p>
-     <p>The property used is <strong>first-order convergence</strong>, and it is the whole of the step.
-Note the extrapolation is <em>outside</em> the two values, not between them. Both runs are on
+= <em>I</em> + <em>Ch</em>, the two runs give <em>I</em> + 0.02<em>C</em> = 3.41 and <em>I</em>
++ 0.01<em>C</em> = 3.36. Subtracting, 0.01<em>C</em> = 0.05, and <em>I</em> =
+2&thinsp;&times;&thinsp;3.36 &minus; 3.41 = <strong>3.31&nbsp;m</strong>.</p>
+     <p>The property used is <strong>first-order convergence</strong>. The extrapolation lies
+<em>outside</em> the two values. Both runs are on
 the same side of the answer, so the estimate is further out than either. Averaging them, the
-instinct when two runs disagree, gives 3.22 and is worse than the finer run alone. The same
-manoeuvre with a factor of 4 in place of 2 is the trapezoid extrapolation on page 5. What
-changes between them is only the order.</p></div></details></li>
+instinct when two runs disagree, gives 3.39 and is worse than the finer run alone. The same
+manoeuvre with a factor of 4 in place of 2 is the trapezoid extrapolation on page 5.</p></div></details></li>
     <li>Why does an error in one Euler step affect every later step, when an error in one panel
     of a
     week-3 integral does not?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Because of what each step is computed <em>from</em>.</p>
      <p>A quadrature panel is computed from the data. The area of panel 40 depends on the samples at
 panel 40 and on nothing else. The panels are independent terms in a sum, so an error in one is
-an error in one, and the total is off by that amount and no more. Errors add.</p>
+an error in one, and the total is off by that amount and no more.</p>
      <p>An Euler step is computed from <strong>the result of the previous step</strong>. The state at
 step 40 is the starting point for step 41, so an error made at step 40 displaces the trajectory,
 and every subsequent step is taken from the wrong place, evaluating the rate at a state the
-system never occupied. Errors propagate, and can grow. This is the structural difference between
+system never occupied. The errors propagate, and they can grow. This is the structural difference between
 quadrature and time stepping, and it is why an ODE solver can be unstable and a quadrature rule
 cannot. It is also why the global error of an order-<em>p</em> method is
 <em>h</em><sup><em>p</em></sup> and not <em>h</em><sup><em>p</em>+1</sup>: the local error per
@@ -1032,10 +1029,10 @@ won.</p></div></details></li>
 lies <em>below</em> the curve everywhere except where it touches, so each step lands low, and
 the errors are of one sign, so they accumulate and do not cancel. For a concave solution the
 tangent lies above and Euler overestimates. The rule is that <strong>Euler errs on the side away
-from the curvature</strong>, and the sign of the error is knowable in advance from the sign of
-<em>y</em>&Prime; without running anything. Which is a useful thing to have. A method whose
-error has a consistent sign can be bracketed. Run it and something that errs the other way, and
-the answer is between them, and that is a much stronger statement than an error estimate.</p></div></details></li>
+from the curvature</strong>, and while <em>y</em>&Prime; keeps one sign the sign of the error is
+knowable in advance without running anything. A method whose error has a consistent sign can be
+bracketed. If you run it and a method that errs the other way, the answer is between them, and
+that is often a stronger statement than an error estimate.</p></div></details></li>
   </ol>
 </div>
 
@@ -1102,11 +1099,11 @@ and RK4 on an equation you write, with the order measured from the run and not q
   </script>
   
 
-  <script type="module" src="js/bundle/from-a-rate-to-a-trajectory.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/from-a-rate-to-a-trajectory.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-16">October 16, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-21">October 21, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

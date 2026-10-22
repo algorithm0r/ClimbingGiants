@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Week 7, Root Finding and Search — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -834,7 +834,7 @@
         <strong>Overview</strong>
         
           <span class="site-nav-sep">·</span>
-          <a href="conditions-become-roots.html">Conditions become roots</a>
+          <a href="conditions-become-roots.html">Conditions as roots</a>
         
           <span class="site-nav-sep">·</span>
           <a href="bisection.html">Bisection</a>
@@ -843,10 +843,10 @@
           <a href="newton-and-secant.html">Newton and secant</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="root-finding-fails.html">Four ways it fails</a>
+          <a href="root-finding-fails.html">Root-finding failures</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="evaluations-are-the-currency.html">Evaluations</a>
+          <a href="evaluations-are-the-currency.html">Evaluation cost</a>
         
           <span class="site-nav-sep">·</span>
           <a href="windowed-optimum.html">Windowed optimum</a>
@@ -910,7 +910,7 @@
     <div class="eyebrow">Week 7 · Root Finding and Search</div>
 <h1>Week 7, Root Finding and Search</h1>
 
-<p>A great many engineering questions turn out to be the same question in different words. Where does this quantity reach that value? This week turns questions of that shape into root-finding problems and solves them. It also covers the four ways a root finder returns a number confidently and wrongly, which is the part worth your attention, because none of the four announces itself. The week closes on the head injury criterion, which is defined as the best value any admissible window achieves and so cannot be read off the signal directly (it has to be searched for).</p>
+<p>Many engineering questions turn out to be the same question in different words, which is where a quantity reaches a given value. This week turns questions of that shape into root-finding problems and solves them. It also covers the four ways a root finder returns a number confidently and wrongly, and it needs care because none of the four announces itself. The week closes on the head injury criterion, which is defined as the best value any admissible window achieves and so cannot be read off the signal directly (it has to be searched for).</p>
 
 <h2 id="learning-objectives">Learning Objectives</h2>
 
@@ -924,16 +924,16 @@
 
 <h2 id="content">Content</h2>
 
-<p>Read them in order. The starred page is the one the week is built around, and the others lead up to it or follow from it.</p>
+<p>Read them in order. The starred pages are the ones the week is built around, and the others lead up to them or follow from them.</p>
 
 <table class="data">
   <tr><th>#</th><th>Page</th><th>Summary</th></tr>
-  <tr><td>20</td><td><a href="conditions-become-roots.html">Conditions become roots by subtraction</a></td><td>Turning “where does g equal c” into “where is f zero”</td></tr>
-  <tr><td>21</td><td><a href="bisection.html">Bisection</a></td><td>The guarantee a bracket buys, and what it costs in evaluations</td></tr>
-  <tr><td>22</td><td><a href="newton-and-secant.html">Newton and the secant method</a></td><td>Faster, with three assumptions hiding in the speed</td></tr>
-  <tr><td>23</td><td><a href="root-finding-fails.html">Four ways root finding fails</a> <span title="the week's anchor">&#9733;</span></td><td>Four ways a routine returns a number that is not the answer</td></tr>
-  <tr><td>24</td><td><a href="evaluations-are-the-currency.html">Evaluations are the currency</a></td><td>Counting evaluations, not iterations</td></tr>
-  <tr><td>25</td><td><a href="windowed-optimum.html">A constrained optimum over a window</a> <span title="the week's anchor">&#9733;</span></td><td>A quantity defined as the best any admissible window achieves</td></tr>
+  <tr><td>19</td><td><a href="conditions-become-roots.html">Conditions as roots</a></td><td>Writing a condition as a root problem</td></tr>
+  <tr><td>20</td><td><a href="bisection.html">Bisection</a></td><td>Brackets, halving and the cost per digit</td></tr>
+  <tr><td>21</td><td><a href="newton-and-secant.html">Newton and the secant method</a></td><td>Tangent and secant steps without a bracket</td></tr>
+  <tr><td>22</td><td><a href="root-finding-fails.html">Root-finding failures</a> <span title="the week's anchor">&#9733;</span></td><td>Four failures and the checks that catch them</td></tr>
+  <tr><td>23</td><td><a href="evaluations-are-the-currency.html">Evaluation cost</a></td><td>Comparing methods by evaluations</td></tr>
+  <tr><td>24</td><td><a href="windowed-optimum.html">A constrained optimum over a window</a> <span title="the week's anchor">&#9733;</span></td><td>The head injury criterion as a search over windows</td></tr>
 </table>
 
 <h2 id="assignment">Assignment</h2>
@@ -955,10 +955,10 @@ example pack, each in a different style.</p>
 
   
 
-  <script src="js/page.js?v=20261017141252"></script>
+  <script src="js/page.js?v=20261022093533"></script>
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-16">October 16, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-22">October 22, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

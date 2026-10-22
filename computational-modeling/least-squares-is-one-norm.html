@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Least squares is one choice of norm — Computational Physical Modeling</title>
+  <title>Least squares and the choice of norm — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -837,7 +837,7 @@
           <a href="model-form-and-parameters.html">Model form</a>
         
           <span class="site-nav-sep">·</span>
-          <strong>One choice of norm</strong>
+          <strong>Choice of norm</strong>
         
           <span class="site-nav-sep">·</span>
           <a href="linearity-in-the-parameters.html">Linear in parameters</a>
@@ -908,7 +908,7 @@
   <main data-pagefind-body class="wide">
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <div class="eyebrow">Week 6 · Least Squares Fitting</div>
-<h1>Least squares is one choice of norm</h1>
+<h1>Least squares and the choice of norm</h1>
 
 <div class="claim">
   <span class="label">Claim</span>
@@ -918,10 +918,10 @@
   the
   same model, and each is optimal under its own rule.</p>
   <p class="plain">  "Best fit" sounds like a property of the data, when it is a property of the data together with
-  the rule you chose for what "best" means. The rule is yours.</p>
+  the rule you chose (and the choice is yours) for what "best" means.</p>
 </div>
 
-<h2 id="the-norm-decides-which-fit-wins">The Norm Decides Which Fit Wins</h2>
+<h2 id="the-norm-decides-which-fit-wins">Norms of the Residual Vector</h2>
 
 <p>A fit produces a <dfn data-g="residual">residual</dfn> at each data point: the gap between the
 measurement and the model. With $m$ points that is $m$ numbers, and no set of parameters makes
@@ -964,8 +964,8 @@ known here, so each fit can be judged against it as well as against its own rule
 
 <p>Read the three bold entries. Each fit is the best there is <em>under its own rule</em>, since no
 line has a smaller Σ|r| than the norm-1 line, none a smaller Σr² than the least-squares line,
-and none a smaller worst case than the minimax line. None of the three is wrong, and they
-disagree.</p>
+and none a smaller worst case than the minimax line. None of the three is wrong, though
+they give three different lines.</p>
 
 <p>Now read the slopes against the truth of 1.500. Norm 1 gives 1.502 and norm ∞ gives 1.510, while
 least squares gives 1.614, off by 7.6%. Squaring the residuals means the outlier, nine times
@@ -974,40 +974,44 @@ tilts to reduce it. The intercepts show the opposite failure. Norm ∞ gives 4.8
 2.000, because it cares only about the worst point and will move the entire line to shave the
 maximum by a little.</p>
 
-<h2 id="choosing-a-norm-from-what-the-residuals-mean">Choosing a Norm from What the Residuals Mean</h2>
+<h2 id="choosing-a-norm-from-what-the-residuals-mean">Choosing a Norm</h2>
 
-<p>The rule to choose follows from what the residuals mean, not from convention:</p>
+<p>The rule to choose follows from what the residuals mean:</p>
 
 <ul class="plain">
   <li><strong>Norm 2</strong> when the scatter is ordinary measurement noise, roughly symmetric,
   with no bad points. It is the maximum-likelihood answer if the noise is Gaussian, it has a
-  closed-form solution for a linear model, and it is differentiable. Which is why every library
-  defaults to it.</li>
+  closed-form solution for a linear model, and it is differentiable. This is why most libraries
+  default to it.</li>
   <li><strong>Norm 1</strong> when bad points are expected and should not be allowed to dominate.
   It is robust. An outlier counts in proportion to its size and not to its square. The cost is no
   closed form and a solution that can be non-unique.</li>
   <li><strong>Norm ∞</strong> when the worst case is the engineering requirement, such as a tolerance
   that
   must be met everywhere, an approximation guaranteed within a bound. It is the right rule for a
-  specification and the wrong one for noisy data.</li>
+  specification, though usually a poor one for noisy data.</li>
 </ul>
 
 <div class="aside">
-  <span class="label">Why least squares is the default</span>
+  <span class="label">Least squares as the default</span>
+  <details class="ans"><summary><span>Optional, open to read</span></summary><div class="body">
   <p>For a model linear in its parameters, minimising Σr² gives a system of linear equations with a
 closed-form solution, so there is no iteration, no starting guess, and no convergence to check.
-Neither of the other two norms has that property. That is a real advantage, and a computational
-one, though no statistical claim comes with it. It explains why least squares became the
-default, and it does not make it the right rule for a given set of data.</p>
+Neither of the other two norms has that property. This is a computational advantage, though no
+statistical claim comes with it. It likely explains why least squares became the default, though
+it does not make it the right rule for a given set of data.</p>
+</div></details>
 </div>
 
-<h2 id="the-choice-is-part-of-the-answer">The Choice Is Part of the Answer</h2>
+<h2 id="the-choice-is-part-of-the-answer">Reporting the Norm</h2>
 
-<p>Because the choice changes the answer, it is part of the answer. A slope of 1.614 and a slope of
+<details class="ans"><summary><span>Optional, open to read</span></summary><div class="body">
+<p>The choice changes the answer, so it has to be reported with the answer. A slope of 1.614 and a slope of
 1.502 come from the same ten points, and a reader given only the number has no way to tell which
 question was asked. This is the same obligation as the filter class in week 4, arriving in a
 different subject. That is, a decision the data cannot make, which changes the result, is stated
 with the result.</p>
+</div></details>
 
 <div class="check">
   <span class="label">Check</span>
@@ -1020,9 +1024,9 @@ with the result.</p>
 least squares chases outliers, since a residual three times larger is nine times as urgent.</p>
      <p><strong>Norm &infin;: entirely.</strong> Only the largest residual enters, so the 3 determines
 the value and the 1 has <em>no influence at all</em>. The ratio is not a number here, because
-the second residual could be anything from 0 to 3 without changing the objective. Three
-defensible answers to "how much worse is a residual of 3 than a residual of 1", from the same
-two numbers.</p></div></details></li>
+the second residual could be anything from 0 to 3 without changing the objective. So the
+same two numbers give three defensible answers to "how much worse is a residual of 3 than a
+residual of 1".</p></div></details></li>
     <li>You are fitting a calibration curve that must be within ±0.02 of every measured point
     across
     its range. Which norm states that requirement, and why is least squares the wrong tool?
@@ -1032,7 +1036,7 @@ bound on the <em>worst</em> point, and that is the only norm that optimises the 
 one deviation of 0.05 to buy twenty improvements of 0.01 is a win by its objective and a failed
 calibration by yours. A fit can have an excellent RMS and violate the specification at a point,
 and the RMS will not mention it.</p>
-     <p>The practical consequence is this. If you fit by least squares anyway, and you might, because it
+     <p>If you fit by least squares anyway, and you might, because it
 is what every library offers, then check <code>max(abs(residuals))</code> afterwards. The RMS is
 the wrong number for that requirement. The check has to be in the norm the requirement is
 written in, whatever the fit was done in.</p></div></details></li>
@@ -1042,11 +1046,11 @@ written in, whatever the fit was done in.</p></div></details></li>
 few.</p>
      <p>The two norms weight outliers very differently, squared against absolute, so they agree closely
 when the residuals are well-behaved and diverge when a small number of points are far out. A 7%
-gap in slope is that signature. It says the least-squares answer is being steered by a few
-points, and the 1-norm answer is not. What you find determines what to do, and the fit cannot
-tell you which. If the outlying points are transcription errors or a failed sensor, remove them
-and refit. If they are real measurements of real behaviour, they are the most informative points
-you have and the model form is what needs to change.</p></div></details></li>
+gap in slope is likely that signature. It suggests the least-squares answer is being steered by a few
+points, and the 1-norm answer is not. What you find there decides what to do, and the fit
+cannot tell you which case you are in. If the outlying points are transcription errors or a failed sensor, remove them
+and refit. If they are real measurements of real behaviour, they may be the most informative
+points you have, and the model form is what needs to change.</p></div></details></li>
   </ol>
 </div>
 
@@ -1076,11 +1080,11 @@ outside it reported separately.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/least-squares-is-one-norm.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/least-squares-is-one-norm.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-09-23">September 23, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-21">October 21, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

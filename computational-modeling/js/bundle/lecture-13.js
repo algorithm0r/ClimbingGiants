@@ -1,4 +1,4 @@
-/* Generated bundle: kit, the why-a-standard-exists demo, this deck's
+/* Generated bundle: kit, the model-form-and-parameters demo, this deck's
    figures, the slide runtime, the presenter tools, page.js.
    Do not edit. */
 
@@ -7,7 +7,7 @@ const svgEl = (n, a = {}) => { const e = document.createElementNS('http://www.w3
   for (const k in a) e.setAttribute(k, a[k]); return e; };
 
 /* cumulative trapezoid: s[i] is the integral from the start up to sample i.
-   Shared because pages 5-8 and 25 all build one. */
+   Shared because pages 5-8 and 24 all build one. */
 function integrate(y, dt) {
   const s = new Float64Array(y.length);
   for (let i = 1; i < y.length; i++) s[i] = s[i-1] + (y[i] + y[i-1]) * 0.5 * dt;
@@ -968,64 +968,159 @@ function realNoiseRaw(n, sd = 1) {
   return scaleTo(out, sd);
 }
 
-/* One real record, five filter classes, two quantities. The peak moves by a
-   factor of three; the integral does not move at all. */
+/* Polynomials of rising degree on ten noisy points from a parabola. The residual
+   falls all the way to zero; the error against the true curve does not. */
 
-let REC = null;
+const NPTS = 10;
+const XD = linspace(0, 1, NPTS);
+const TRUE = x => 2.0 + 3.0 * x - 4.0 * x * x;
+const EPS = realNoise(NPTS, 0.08);   /* real accelerometer noise, scaled */
+const YD = new Float64Array(NPTS);
+for (let i = 0; i < NPTS; i++) YD[i] = TRUE(XD[i]) + EPS[i];
+
+const XF = linspace(-0.03, 1.03, 220);
+const YT = XF.map(TRUE);
+
+/* least squares on a polynomial basis, by normal equations with Gaussian
+   elimination. Ill-conditioned at high degree, which is part of the point. */
+function polyfit(x, y, deg) {
+  const n = deg + 1;
+  const A = Array.from({length: n}, () => new Float64Array(n + 1));
+  for (let r = 0; r < n; r++) {
+    for (let c = 0; c < n; c++) {
+      let s = 0;
+      for (let i = 0; i < x.length; i++) s += Math.pow(x[i], r + c);
+      A[r][c] = s;
+    }
+    let s = 0;
+    for (let i = 0; i < x.length; i++) s += y[i] * Math.pow(x[i], r);
+    A[r][n] = s;
+  }
+  for (let k = 0; k < n; k++) {
+    let p = k;
+    for (let i = k + 1; i < n; i++) if (Math.abs(A[i][k]) > Math.abs(A[p][k])) p = i;
+    [A[k], A[p]] = [A[p], A[k]];
+    if (Math.abs(A[k][k]) < 1e-300) continue;
+    for (let i = 0; i < n; i++) {
+      if (i === k) continue;
+      const f = A[i][k] / A[k][k];
+      for (let c = k; c <= n; c++) A[i][c] -= f * A[k][c];
+    }
+  }
+  const c = new Float64Array(n);
+  for (let k = 0; k < n; k++) c[k] = A[k][k] === 0 ? 0 : A[k][n] / A[k][k];
+  return c;
+}
+const polyval = (c, x) => { let s = 0; for (let k = c.length - 1; k >= 0; k--) s = s * x + c[k]; return s; };
+
+/* One shot from the example pack (held back, so in no student's data): shot 700,
+   frames 8-38 of free flight, 25 Hz, time from frame 8. SHOT_D is the horizontal
+   distance from the hoop and SHOT_Z the height, both in metres, as recorded. */
+const SHOT_H = 0.04;
+const SHOT_T = Array.from({length: 31}, (_, i) => i * SHOT_H);
+const SHOT_D = [7.9054, 7.6249, 7.3730, 7.1166, 6.8507, 6.5963, 6.3330, 6.1048, 5.8236, 5.5750, 5.3412, 5.0792, 4.8344, 4.5811, 4.3325, 4.0536, 3.8338, 3.5966, 3.3265, 3.0730, 2.8377, 2.5786, 2.3472, 2.0915, 1.8832, 1.6246, 1.3825, 1.1429, 0.9050, 0.6659, 0.4235];
+const SHOT_Z = [3.2687, 3.5030, 3.7425, 3.9280, 4.1173, 4.2554, 4.4051, 4.5764, 4.6591, 4.7882, 4.9001, 4.9535, 4.9812, 5.0164, 5.0502, 5.0666, 5.0734, 5.0374, 4.9993, 4.9507, 4.8083, 4.7967, 4.6564, 4.5164, 4.4659, 4.2496, 4.1735, 4.0146, 3.7636, 3.5551, 3.4273];
+
+/* vertical velocity by central difference, at the 29 interior frames */
+const VEL_T = [], VEL_V = [];
+for (let i = 1; i < SHOT_Z.length - 1; i++) {
+  VEL_T.push(i * SHOT_H);
+  VEL_V.push((SHOT_Z[i + 1] - SHOT_Z[i - 1]) / (2 * SHOT_H));
+}
+const G_KNOWN = 9.81;
+/* v = v0 - g t two ways: both parameters fitted, or g held and only v0 fitted.
+   Holding g moves -g t to the data side, v + g t = v0, and the least-squares
+   v0 is then the mean of v + g t. */
+function velFit(mode) {
+  const n = VEL_T.length;
+  let st = 0, sv = 0, stt = 0, stv = 0;
+  for (let i = 0; i < n; i++) {
+    st += VEL_T[i]; sv += VEL_V[i]; stt += VEL_T[i] * VEL_T[i]; stv += VEL_T[i] * VEL_V[i];
+  }
+  let g, v0;
+  if (mode === 'fixed') { g = G_KNOWN; v0 = (sv + g * st) / n; }
+  else { const b = (n * stv - st * sv) / (n * stt - st * st); g = -b; v0 = (sv - b * st) / n; }
+  let sr = 0;
+  for (let i = 0; i < n; i++) { const e = VEL_V[i] - (v0 - g * VEL_T[i]); sr += e * e; }
+  return {g, v0, rms: Math.sqrt(sr / n)};
+}
 
 mountDemo({
-  classes: {
-    data: async () => {
-      const d = await (await fetch('data/test10642-crossmember-x.json')).json();
-      const n = d.n, dt = d.dt, a = Float64Array.from(d.a), t = new Float64Array(n);
-      for (let i = 0; i < n; i++) t[i] = d.t0 + i * dt;
-      let b = 0, c = 0;
-      for (let i = 0; i < n; i++) if (t[i] < 0) { b += a[i]; c++; }
-      b /= c;
-      for (let i = 0; i < n; i++) a[i] -= b;
-      REC = {n, dt, t, a};
-      return {};
-    },
-    setting: 'Left rear seat crossmember, longitudinal, baseline corrected. Filtered ' +
-             'forward-and-backward, so nothing here is phase lag.',
-    source: {kind: 'measured', text: 'Channel 093, filtered by the SAE&nbsp;J211 CFC classes. NHTSA test 10642, 2019 BMW&nbsp;X5 into a rigid barrier at 15.65&nbsp;m/s, TRC of Ohio, 7 January 2019. The record already carries the laboratory&rsquo;s 2000&nbsp;Hz anti-alias prefilter.'},
-    caption: 'The ghost is the record as stored. The marker is the largest sample of the filtered ' +
-             'trace — watch it jump to a different feature between CFC 600 and CFC 180.',
-    controls: [{key: 'lc', label: 'filter', min: 0, max: 4, step: 1, value: 0, dp: 0,
-                fmt: v => ['as recorded', 'CFC 1000', 'CFC 600', 'CFC 180', 'CFC 60'][Math.round(v)]}],
-    panels: [{label: 'acceleration', unit: 'm/s²', height: 250, xAxis: true,
-              xLabel: 'time', xUnit: 'ms', xScale: 1000}],
+  degree: {
+    setting: 'Ten points from <em>y</em> = 2 + 3<em>x</em> − 4<em>x</em>², with noise of ' +
+             'σ&nbsp;=&nbsp;0.08. The true form is a parabola: degree 2.',
+    source: {kind: 'mixed', text: 'A constructed parabola, so the true form is known, carrying <strong>real instrument noise</strong> from the pre-impact window of channel 093. NHTSA test 10642, 2019 BMW&nbsp;X5 into a rigid barrier at 15.65&nbsp;m/s, TRC of Ohio, 7 January 2019.'},
+    caption: 'The ghost is the true curve. Raise the degree past 2 and the fit passes closer to ' +
+             'every point while moving further from the curve the points came from.',
+    controls: [{key: 'deg', label: 'polynomial degree', min: 0, max: 9, step: 1, value: 2, dp: 0}],
+    panels: [{label: 'y', unit: '', height: 250, xAxis: true, xLabel: 'x', xUnit: '', xScale: 1}],
     readouts: [
-      {key: 'f',     label: 'filter'},
-      {key: 'peak',  label: 'peak acceleration'},
-      {key: 'tpeak', label: 'time of peak'},
-      {key: 'dv',    label: 'change in velocity'},
-      {key: 'pdrop', label: 'peak, against unfiltered'},
-      {key: 'ddrop', label: 'Δv, against unfiltered'}
+      {key: 'deg',  label: 'degree'},
+      {key: 'np',   label: 'free parameters'},
+      {key: 'res',  label: 'RMS residual'},
+      {key: 'err',  label: 'RMS error vs the truth'},
+      {key: 'verdict', label: ''}
     ],
     compute(s) {
-      const K = [null, 1000, 600, 180, 60][Math.round(s.lc)];
-      const y = K === null ? REC.a : cfc(REC.a, K, REC.dt);
-      let bi = 0;
-      for (let i = 1; i < REC.n; i++) if (Math.abs(y[i]) > Math.abs(y[bi])) bi = i;
-      const dv = integrate(y, REC.dt)[REC.n - 1];
-      /* the unfiltered reference, computed once per render but cheap enough */
-      let ri = 0;
-      for (let i = 1; i < REC.n; i++) if (Math.abs(REC.a[i]) > Math.abs(REC.a[ri])) ri = i;
-      const rawPeak = Math.abs(REC.a[ri]);
-      const rawDv = integrate(REC.a, REC.dt)[REC.n - 1];
+      const deg = Math.round(s.deg);
+      const c = polyfit(XD, YD, deg);
+      let sr = 0;
+      for (let i = 0; i < NPTS; i++) { const e = YD[i] - polyval(c, XD[i]); sr += e * e; }
+      const res = Math.sqrt(sr / NPTS);
+      const yf = XF.map(v => polyval(c, v));
+      let se = 0;
+      for (let i = 0; i < XF.length; i++) { const e = yf[i] - YT[i]; se += e * e; }
+      const err = Math.sqrt(se / XF.length);
       return {
-        panels: [{x: REC.t, y, ghost: K === null ? null : REC.a, range: [-0.005, 0.12],
-          opts: {marks: [{t: REC.t[bi], y: y[bi], cast: 'x',
-                          text: Math.abs(y[bi]).toFixed(1) + ' m/s² at ' +
-                                (REC.t[bi] * 1000).toFixed(2) + ' ms', dx: 8, dy: -10}]}}],
+        panels: [{x: XF, y: Float64Array.from(yf), ghost: Float64Array.from(YT),
+          range: [-0.03, 1.03],
+          opts: {label: 'degree ' + deg + ' fit, against the true parabola',
+                 rings: [...XD].map((v, i) => ({x: v, y: YD[i]}))}}],
         readouts: {
-          f: K === null ? 'as recorded' : 'CFC ' + K,
-          peak: Math.abs(y[bi]).toFixed(1) + ' m/s²',
-          tpeak: (REC.t[bi] * 1000).toFixed(2) + ' ms',
-          dv: dv.toFixed(4).replace('-', '−') + ' m/s',
-          pdrop: (100 * Math.abs(y[bi]) / rawPeak).toFixed(1) + '%',
-          ddrop: (100 * dv / rawDv).toFixed(2) + '%'
+          deg: String(deg),
+          np: (deg + 1) + ' of ' + NPTS + ' points',
+          res: res.toFixed(5),
+          err: err.toFixed(5),
+          verdict: deg < 2 ? 'too few — the form cannot bend'
+                 : deg === 2 ? 'the form the data came from'
+                 : 'fitting the noise'
+        }
+      };
+    }
+  },
+  vel: {
+    setting: 'The vertical velocity of one shot, by central difference of its heights, and ' +
+             'the line <em>v</em> = <em>v</em>₀ − <em>gt</em> fitted to it two ways: with ' +
+             '<em>g</em> fitted from the data, or with <em>g</em> held at 9.81&nbsp;m/s² and ' +
+             'only <em>v</em>₀ fitted.',
+    source: {kind: 'measured', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz. One missed three-point attempt by Stephen Curry, Golden State at the Clippers, 19 November 2015, from the example pack, frames 8&ndash;38 of free flight.'},
+    caption: 'The solid line is the selected fit and the ghost is the other one. The dots are ' +
+             'the same 29 velocities in both, so any difference between the two fits is in the ' +
+             'line and not in the data.',
+    segments: [{key: 'fit', label: 'gravity', value: 'free', options: [
+      {value: 'free', label: 'Fitted'}, {value: 'fixed', label: 'Held at 9.81'}]}],
+    panels: [{label: 'vertical velocity', unit: 'm/s', height: 250, xAxis: true,
+              xLabel: 'time', xUnit: 's', xScale: 1}],
+    readouts: [
+      {key: 'v0',  label: 'intercept'},
+      {key: 'g',   label: 'slope'},
+      {key: 'how', label: ''},
+      {key: 'rms', label: 'RMS residual'}
+    ],
+    compute(s) {
+      const mode = s.fit === 'fixed' ? 'fixed' : 'free';
+      const f = velFit(mode), o = velFit(mode === 'fixed' ? 'free' : 'fixed');
+      const X = linspace(-0.02, 1.22, 2);
+      return {
+        panels: [{x: X, y: X.map(t => f.v0 - f.g * t), ghost: X.map(t => o.v0 - o.g * t),
+          range: [-0.02, 1.22],
+          opts: {yRange: [-7, 7], label: 'vertical velocity',
+                 scatter: [{x: VEL_T, y: VEL_V, r: 3}]}}],
+        readouts: {
+          v0:  'v₀ = ' + f.v0.toFixed(2) + ' m/s',
+          g:   '−g = −' + f.g.toFixed(2) + ' m/s²',
+          how: mode === 'fixed' ? 'g held at 9.81' : 'g fitted from the data',
+          rms: f.rms.toFixed(3) + ' m/s'
         }
       };
     }
@@ -1033,30 +1128,106 @@ mountDemo({
 });
 
 /* ---------------------------------------------------------------------------
-   fig-road — bandwidth without the word. The same road under two vehicles: the
-   bicycle responds to the stones, the truck responds to the dip and walks over
-   the stones. Which one is right about 'rough' is not a property of the road.
+   fig-line — a line of best fit, twice. The same least-squares line fitted to
+   one shot's distance from the hoop, where the form has a reason, and to its
+   height, where it has none. Example pack (held back), shot 700, frames 8-38,
+   time from frame 8. Fits computed here, so the drawn lines are the fits.
 --------------------------------------------------------------------------- */
 (() => {
-  const host = document.querySelector('#fig-road .fig-body');
+  const host = document.querySelector('#fig-line .fig-body');
   if (!host) return;
-  const M = 260, X = [], SLOW = [], ROUGH = [];
-  for (let i = 0; i < M; i++) {
-    const t = i / (M - 1);
-    X.push(t);
-    SLOW.push(0.34 * Math.sin(2 * Math.PI * 1.15 * t - 0.6));
-    ROUGH.push(SLOW[i] + 0.10 * Math.sin(2 * Math.PI * 17 * t));
-  }
+  const T = SHOT_T, D = SHOT_D, Z = SHOT_Z;
+  const line = y => {
+    const n = T.length;
+    let st = 0, sy = 0, stt = 0, sty = 0;
+    for (let i = 0; i < n; i++) { st += T[i]; sy += y[i]; stt += T[i] * T[i]; sty += T[i] * y[i]; }
+    const b = (n * sty - st * sy) / (n * stt - st * st);
+    return {a: (sy - b * st) / n, b};
+  };
+  const fd = line(D), fz = line(Z);
+  const ends = f => ({x: [-0.03, 1.23], y: [f.a - 0.03 * f.b, f.a + 1.23 * f.b]});
   const cells = diagramRow(host, 2);
-  const panel = (cell, ys, title, note) => diagram(cell, {
-    xRange: [0, 1], yRange: [-0.62, 0.68], title: title, zero: true, axes: false,
-    alt: 'The same road profile in both panels, with one vehicle following every '
-       + 'small bump and the other following only the long dip.',
-    curves: [{x: X, y: ROUGH, cls: 'ghost'}, {x: X, y: ys, cls: 'trace'}],
-    notes: [{x: 0.5, y: -0.55, anchor: 'middle', cls: 'hi', text: note}]
+
+  diagram(cells[0], {
+    w: 320, h: 190, xRange: [-0.05, 1.25], yRange: [-0.6, 8.6],
+    title: 'distance from the hoop',
+    alt: 'Thirty-one points falling steadily from about 7.9 metres to 0.4 metres over '
+       + '1.2 seconds, with a straight line through them that every point sits on.',
+    curves: [ends(fd)],
+    points: D.map((y, i) => ({x: T[i], y, r: 2.6})),
+    notes: [
+      {x: 0.05, y: 8.0, anchor: 'start', dx: 6, text: 'a = ' + fd.a.toFixed(2) + ' m'},
+      {x: 0.62, y: 5.6, anchor: 'start', dx: 8, cls: 'hi',
+       text: 'b = −' + Math.abs(fd.b).toFixed(2) + ' m/s'},
+      {x: 1.2, y: -0.35, anchor: 'end', text: '1.2 s'}
+    ]
   });
-  panel(cells[0], ROUGH, 'a bicycle', 'feels every stone');
-  panel(cells[1], SLOW, 'a truck', 'feels the dip, not the stones');
+
+  diagram(cells[1], {
+    w: 320, h: 190, xRange: [-0.05, 1.25], yRange: [2.95, 5.45],
+    title: 'height above the floor',
+    alt: 'Thirty-one points rising from 3.3 metres to a peak of 5.1 metres and falling to '
+       + '3.4 metres, with a nearly flat straight line fitted through them that misses '
+       + 'both ends by about a metre.',
+    curves: [ends(fz)],
+    points: Z.map((y, i) => ({x: T[i], y, r: 2.6})),
+    leads: [{from: [0, Z[0]], to: [0, fz.a], cls: 'level'},
+            {from: [0.04, 5.12], to: [0, fz.a + 0.04]}],
+    notes: [
+      {x: 0.04, y: 5.16, anchor: 'start', dx: 3, text: 'a = ' + fz.a.toFixed(2) + ' m'},
+      {x: 0.62, y: 4.2, anchor: 'middle', cls: 'hi',
+       text: 'b = ' + fz.b.toFixed(2) + ' m/s'},
+      {x: 0.03, y: 3.2, anchor: 'start', dx: 6, text: 'misses by ' + (fz.a - Z[0]).toFixed(2) + ' m'},
+      {x: 1.2, y: 3.08, anchor: 'end', text: '1.2 s'}
+    ]
+  });
+})();
+
+/* ---------------------------------------------------------------------------
+   fig-release — finding free flight. Example pack (held back), shot 1092: the
+   vertical speed by frame from the central difference over four frames, and
+   the release found by the rule on the page (step back from the apex while
+   the speed one or two frames earlier was higher). The dashed line falls at
+   g dt per frame from the release. Computed here from data/example/train.json.
+--------------------------------------------------------------------------- */
+(async () => {
+  const host = document.querySelector('#fig-release .fig-body');
+  if (!host) return;
+  let d;
+  try { d = await (await fetch('data/example/train.json')).json(); }
+  catch (e) { return; }
+  const s = d.shots.find(q => q.id === 1092);
+  if (!s) return;
+  const t = s.t, z = s.z, n = t.length;
+  const vz = new Array(n).fill(NaN);
+  for (let i = 2; i < n - 2; i++) vz[i] = (z[i + 2] - z[i - 2]) / (t[i + 2] - t[i - 2]);
+  let r = 0;
+  for (let i = 1; i < n; i++) if (z[i] > z[r]) r = i;
+  while (r > 3 && (vz[r - 1] > vz[r] || vz[r - 2] > vz[r])) r--;
+  let end = 0;
+  while (end < n && Math.hypot(s.x[end] - s.hoop_x, s.y[end] - s.hoop_y) >= 1.0) end++;
+  const G = 9.81, dt = t[1] - t[0];
+  const idx = [];
+  for (let i = 2; i <= end; i++) idx.push(i);
+  diagram(host, {
+    w: 660, h: 250, xRange: [1, end + 1], yRange: [-5.2, 7.0], zero: true,
+    title: 'vertical speed (m/s) by frame, shot 1092',
+    alt: 'Vertical speed at each frame. It dips, then climbs to a peak of '
+       + vz[r].toFixed(2) + ' metres per second at frame ' + r + ', then falls along a straight '
+       + 'dashed line to about minus four metres per second at frame ' + end + '.',
+    curves: [{x: [r, end], y: [vz[r], vz[r] - G * dt * (end - r)], cls: 'ghost'}],
+    leads: [{from: [r, -5.2], to: [r, 7.0], cls: 'level'},
+            {from: [end, -5.2], to: [end, 7.0], cls: 'level'}],
+    points: idx.map(i => ({x: i, y: vz[i], r: 3})),
+    notes: [
+      {x: r, y: 6.5, anchor: 'middle', cls: 'hi', text: 'release, frame ' + r},
+      {x: end, y: 6.5, anchor: 'end', dx: -4, text: 'within 1 m of the hoop, frame ' + end},
+      {x: 5, y: 1.7, anchor: 'middle', text: 'in the hand'},
+      {x: 1.3, y: 0.35, anchor: 'start', text: '0 m/s'},
+      {x: r + 9, y: vz[r] - G * dt * 9 + 1.1, anchor: 'start',
+       text: 'falls ' + (G * dt).toFixed(2) + ' m/s a frame'}
+    ]
+  });
 })();
 
 /* Whiteboards: math worked out on a slide as if written by hand (the
@@ -1247,101 +1418,157 @@ setTimeout(() => {
   });
 }, 0);
 
-/* Lecture 13's own figures, all on the crash record, test 10642 channel 093,
-   with the pre-impact offset subtracted as in week 3 (the notes page's table
-   does the same), filtered forward then backward at each class. Checked:
-     as recorded  peak 1540.4 m/s^2 at 10.80 ms   dv -17.5091 m/s
-     CFC 1000     1484.2 at 10.80                 -17.5090
-     CFC 600      1283.6 at 10.80                 -17.5093
-     CFC 180       630.3 at 24.00                 -17.5120
-     CFC 60        484.8 at 53.04                 -17.5251
-   The peak falls by a factor of 3.2; dv moves by 0.09%.
+/* Lecture 13's own figures. Everything is computed here from the notes page's
+   demo module (SHOT_T/SHOT_D/SHOT_Z, the shot 700 frames from the example pack,
+   and XD/YD/polyfit for the degree demo), so a slide and the page cannot
+   disagree. Checked against the page:
+     distance  a = 7.84 m, b = -6.22 m/s, RMS 2.9 cm, max 6.7 cm
+     height    a = 4.41 m, b = 0.05 m/s, max miss 1.14 m, first frame 3.27 m
+     degree    RMS residual 0.50175 (0), 0.07368 (2), 0.00005 (9)
+               RMS error    0.45785 (0), 0.01748 (2), 0.44195 (9)
    Hosts are found by data-fig so a figure can sit under more than one claim. */
 (() => {
   const each = (name, draw) =>
     document.querySelectorAll('[data-fig="' + name + '"] .fig-body').forEach(draw);
-  const any = (...names) => names.some(n => document.querySelector('[data-fig="' + n + '"]'));
-  if (!any('l14-twoq', 'l14-classes', 'l14-zoom', 'l14-moved')) return;
+  const T = SHOT_T, D = SHOT_D, Z = SHOT_Z;
+  const line = y => {
+    const n = T.length;
+    let st = 0, sy = 0, stt = 0, sty = 0;
+    for (let i = 0; i < n; i++) { st += T[i]; sy += y[i]; stt += T[i] * T[i]; sty += T[i] * y[i]; }
+    const b = (n * sty - st * sy) / (n * stt - st * st);
+    return {a: (sy - b * st) / n, b};
+  };
+  const fd = line(D), fz = line(Z);
+  const ends = f => ({x: [-0.03, 1.23], y: [f.a - 0.03 * f.b, f.a + 1.23 * f.b]});
+  const dots = y => y.map((v, i) => ({x: T[i], y: v, r: 3}));
 
-  fetch('data/test10642-crossmember-x.json').then(r => r.json()).then(d => {
-    const H = d.dt, n = d.n;
-    const t = Float64Array.from({length: n}, (_, i) => d.t0 + i * H);
-    let b = 0, c = 0;
-    for (let i = 0; i < n; i++) if (t[i] < 0) { b += d.a[i]; c++; }
-    b /= c;
-    const a = Float64Array.from(d.a, v => v - b);
-    const CLASSES = [1000, 600, 180, 60];
-    const rows = [{name: 'as recorded', y: a}, ...CLASSES.map(k => ({name: 'CFC ' + k, y: cfc(a, k, H)}))];
-    const argmin = y => { let k = 0; for (let i = 1; i < y.length; i++) if (y[i] < y[k]) k = i; return k; };
-    const dv = y => { let s = 0; for (let i = 1; i < y.length; i++) s += (y[i] + y[i - 1]) / 2 * H; return s; };
-    rows.forEach(r => { r.k = argmin(r.y); r.peak = -r.y[r.k]; r.tpk = t[r.k]; r.dv = dv(r.y); });
-    const ms = s => (s * 1000).toFixed(2) + ' ms';
-    /* an extra curve, cut to the plotted window so the kit draws every sample */
-    const win = (y, t0, t1) => {
-      const i0 = Math.max(0, Math.floor((t0 - d.t0) / H)), i1 = Math.min(n, Math.ceil((t1 - d.t0) / H) + 1);
-      return {x: t.slice(i0, i1), y: y.slice(i0, i1)};
-    };
-
-    /* the two questions, side by side: peak against class, and dv against class */
-    each('l14-twoq', host => {
-      const [l, r] = diagramRow(host, 2), bw = 0.32;
-      const bars = (vals, cls) => vals.map((v, i) => ({cls,
-        pts: [{x: i - bw, y: 0}, {x: i + bw, y: 0}, {x: i + bw, y: v}, {x: i - bw, y: v}]}));
-      const xl = rows.map((r, i) => ({x: i, y: 0, dy: 14, anchor: 'middle',
-                                       text: i ? String(CLASSES[i - 1]) : 'raw'}));
-      diagram(l, {
-        w: 300, h: 230, xRange: [-0.6, 4.6], yRange: [-180, 1800],
-        title: 'peak acceleration (m/s²)',
-        alt: 'Bars of the peak at each class: 1540, 1484, 1284, 630 and 485.',
-        areas: bars(rows.map(r => r.peak), 'fill'),
-        notes: [...xl, ...rows.map((r, i) => ({x: i, y: r.peak, dy: -5, anchor: 'middle',
-                                                text: Math.round(r.peak)}))]
-      });
-      diagram(r, {
-        w: 300, h: 230, xRange: [-0.6, 4.6], yRange: [-2.1, 21],
-        title: 'change in velocity, −Δv (m/s)',
-        alt: 'Bars of the change in velocity at each class, all 17.51 to 17.53.',
-        areas: bars(rows.map(r => -r.dv), 'tri'),
-        notes: [...xl, ...rows.map((r, i) => ({x: i, y: -r.dv, dy: -5, anchor: 'middle',
-                                                text: (-r.dv).toFixed(2)}))]
-      });
+  /* the shot as tracked, before any fit */
+  each('lec13-shot', host => {
+    const [l, r] = diagramRow(host, 2);
+    diagram(l, {
+      w: 300, h: 200, xRange: [-0.05, 1.25], yRange: [-0.6, 8.6],
+      title: 'distance from the hoop (m)',
+      alt: 'Thirty-one points falling from 7.9 meters to 0.4 meters over 1.2 seconds.',
+      points: dots(D),
+      notes: [{x: 0.05, y: 7.9, anchor: 'start', dx: 6, text: '7.91 m'},
+              {x: 1.2, y: 0.42, anchor: 'end', dx: -8, dy: 13, text: '0.42 m'}]
     });
-
-    /* the record at the lightest and heaviest classes, first 80 ms */
-    each('l14-classes', host => {
-      const lo = rows[1], hi = rows[4];
-      panel(host, {label: 'acceleration', unit: 'm/s²', height: 280, xAxis: true,
-                   xLabel: 'time', xUnit: 'ms', xScale: 1000, yClamp: [-1650, 450]})(
-        t, hi.y, a, [0, 0.08], {
-          curves: [{...win(lo.y, 0, 0.08), cls: 'pred'}],
-          marks: [{t: lo.tpk, y: lo.y[lo.k], text: 'CFC 1000: ' + Math.round(lo.peak) + ' at ' + ms(lo.tpk), dx: 10, dy: 4},
-                  {t: hi.tpk, y: hi.y[hi.k], text: 'CFC 60: ' + Math.round(hi.peak) + ' at ' + ms(hi.tpk), dx: 10, dy: 20}]
-        });
+    diagram(r, {
+      w: 300, h: 200, xRange: [-0.05, 1.25], yRange: [2.95, 5.45],
+      title: 'height above the floor (m)',
+      alt: 'Thirty-one points rising from 3.27 meters to 5.07 meters and falling to 3.43 meters.',
+      points: dots(Z),
+      notes: [{x: 0, y: Z[0], anchor: 'start', dx: 8, dy: 4, text: '3.27 m'},
+              {x: 0.64, y: 5.07, anchor: 'middle', dy: -10, text: '5.07 m'},
+              {x: 1.2, y: Z[30], anchor: 'end', dx: -8, dy: 4, text: '3.43 m'}]
     });
+  });
 
-    /* the spike, zoomed, raw against CFC 180: what comes off the top goes
-       into the shoulders */
-    each('l14-zoom', host => {
-      const r180 = rows[3];
-      panel(host, {label: 'acceleration', unit: 'm/s²', height: 280, xAxis: true,
-                   xLabel: 'time', xUnit: 'ms', xScale: 1000, yClamp: [-1650, 450]})(
-        t, r180.y, a, [0.006, 0.016], {
-          marks: [{t: rows[0].tpk, y: -rows[0].peak, text: 'as recorded: ' + Math.round(rows[0].peak), dx: 10, dy: 4},
-                  {t: 0.0108, y: r180.y[Math.round((0.0108 - d.t0) / H)], text: 'CFC 180 at the same moment', dx: 10, dy: -10}]
-        });
+  /* the 29 vertical velocities with the fit of v = v0 - g t that data-mode
+     names (free or fixed), solid; with g held, the free fit is the dashed
+     ghost, as in the page's demo. */
+  document.querySelectorAll('[data-fig="lec13-vel"]').forEach(fig => {
+    const host = fig.querySelector('.fig-body');
+    const held = fig.dataset.mode === 'fixed';
+    const f = velFit(held ? 'fixed' : 'free'), o = velFit(held ? 'free' : 'fixed');
+    const X = [-0.02, 1.22];
+    diagram(host, {
+      w: 440, h: 230, xRange: [-0.05, 1.25], yRange: [-7, 7], zero: true,
+      title: 'vertical velocity (m/s), against time (s)',
+      alt: 'Twenty-nine velocities scattered about a falling straight line, from about '
+         + 'plus 6 meters per second to minus 6' + (held ? ', with the other fit dashed almost on top of it.' : '.'),
+      /* the other fit is drawn only once the slides have introduced it */
+      curves: [...(held ? [{x: X, y: X.map(t => o.v0 - o.g * t), cls: 'ghost'}] : []),
+               {x: X, y: X.map(t => f.v0 - f.g * t)}],
+      points: VEL_T.map((t, i) => ({x: t, y: VEL_V[i], r: 3})),
+      notes: [{x: 0.02, y: f.v0, anchor: 'start', dx: 8, dy: -10,
+               text: 'v₀ = ' + f.v0.toFixed(2) + ' m/s'},
+              {x: 0.7, y: f.v0 - f.g * 0.7, anchor: 'start', dx: 14, dy: -14, cls: 'hi',
+               text: (held ? 'g held at ' : 'g = ') + f.g.toFixed(2) + ' m/s²'},
+              {x: 1.2, y: 6.2, anchor: 'end', text: 'RMS residual ' + f.rms.toFixed(3) + ' m/s'}]
     });
+  });
 
-    /* where the reported peak lands at CFC 180 and 60, against the spike */
-    each('l14-moved', host => {
-      const r180 = rows[3], r60 = rows[4];
-      panel(host, {label: 'acceleration', unit: 'm/s²', height: 280, xAxis: true,
-                   xLabel: 'time', xUnit: 'ms', xScale: 1000, yClamp: [-1650, 450]})(
-        t, r60.y, a, [0, 0.08], {
-          curves: [{...win(r180.y, 0, 0.08), cls: 'pred'}],
-          marks: [{t: rows[0].tpk, y: -rows[0].peak, cast: 'x', text: 'the spike, ' + ms(rows[0].tpk), dx: 10, dy: 4},
-                  {t: r180.tpk, y: r180.y[r180.k], cast: 'x', text: 'CFC 180 peak, ' + ms(r180.tpk), dx: 10, dy: 18},
-                  {t: r60.tpk, y: r60.y[r60.k], cast: 'x', text: 'CFC 60 peak, ' + ms(r60.tpk), dx: 10, dy: 18}]
-        });
+  /* the straight line through the distances, which has a reason */
+  each('lec13-dist', host => {
+    diagram(host, {
+      w: 440, h: 230, xRange: [-0.05, 1.25], yRange: [-0.6, 8.6],
+      title: 'distance from the hoop (m), against time (s)',
+      alt: 'The thirty-one distances with a straight line through them; every point sits on the line.',
+      curves: [ends(fd)],
+      points: dots(D),
+      notes: [{x: 0.02, y: 8.1, anchor: 'start', dx: 6, text: 'a = ' + fd.a.toFixed(2) + ' m'},
+              {x: 0.62, y: 5.3, anchor: 'start', dx: 10, cls: 'hi',
+               text: 'b = −' + Math.abs(fd.b).toFixed(2) + ' m/s'},
+              {x: 1.2, y: -0.35, anchor: 'end', text: '1.2 s'}]
+    });
+  });
+
+  /* the same line through the heights, with each point's miss drawn in */
+  each('lec13-height', host => {
+    const sticks = Z.map((v, i) => ({from: [T[i], v], to: [T[i], fz.a + fz.b * T[i]], cls: 'alt'}));
+    diagram(host, {
+      w: 440, h: 230, xRange: [-0.05, 1.25], yRange: [2.95, 5.45],
+      title: 'height above the floor (m), against time (s)',
+      alt: 'The thirty-one heights with a nearly flat line through them. Red sticks join each '
+         + 'point to the line: below it at both ends, above it through the middle.',
+      leads: sticks,
+      curves: [ends(fz)],
+      points: dots(Z),
+      notes: [{x: 0.02, y: fz.a + 0.02 * fz.b, anchor: 'start', dx: 6, dy: -14,
+               text: 'a = ' + fz.a.toFixed(2) + ' m'},
+              {x: 0.05, y: 3.12, anchor: 'start', dx: 4, cls: 'hi',
+               text: 'misses by ' + (fz.a - Z[0]).toFixed(2) + ' m'},
+              {x: 0.62, y: 4.25, anchor: 'middle', text: 'b = ' + fz.b.toFixed(2) + ' m/s'},
+              {x: 1.2, y: 3.08, anchor: 'end', text: '1.2 s'}]
+    });
+  });
+
+  /* the same ten points at degree 2 and degree 9, against the true parabola.
+     Degree 9 swings outside the frame near the ends, so the drawn curve is
+     held to the frame and the swing reads as leaving it. */
+  const fitCurve = (deg, lo, hi) => {
+    const c = polyfit(XD, YD, deg);
+    return {x: XF, y: XF.map(v => Math.max(lo, Math.min(hi, polyval(c, v))))};
+  };
+  each('lec13-deg', host => {
+    const cells = diagramRow(host, 2), Y0 = 0.6, Y1 = 3.2;
+    [2, 9].forEach((deg, k) => diagram(cells[k], {
+      w: 300, h: 200, xRange: [-0.05, 1.05], yRange: [Y0, Y1],
+      title: 'degree ' + deg + ', ' + (deg + 1) + ' parameters'
+           + (deg === 2 ? ', on the true curve' : ', through every point'),
+      alt: deg === 2
+        ? 'Ten points with a parabola fitted through them, lying on the dashed true curve.'
+        : 'Ten points with a degree-9 polynomial through every one, swinging away from the dashed true curve between them.',
+      curves: [{x: XF, y: YT, cls: 'ghost'}, fitCurve(deg, Y0, Y1)],
+      points: [...XD].map((v, i) => ({x: v, y: YD[i], r: 3.2}))
+    }));
+  });
+
+  /* residual and error against degree, labelled where the lines end */
+  each('lec13-curve', host => {
+    const degs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    const res = [], err = [];
+    for (const deg of degs) {
+      const c = polyfit(XD, YD, deg);
+      let sr = 0;
+      for (let i = 0; i < NPTS; i++) { const e = YD[i] - polyval(c, XD[i]); sr += e * e; }
+      let se = 0;
+      for (let i = 0; i < XF.length; i++) { const e = polyval(c, XF[i]) - YT[i]; se += e * e; }
+      res.push(Math.sqrt(sr / NPTS)); err.push(Math.sqrt(se / XF.length));
+    }
+    diagram(host, {
+      w: 440, h: 215, xRange: [-0.4, 11.2], yRange: [-0.07, 0.56],
+      title: 'RMS size against polynomial degree',
+      alt: 'Two lines against degree 0 to 9. The residual falls from 0.50 to 0.00005. The error '
+         + 'against the true curve falls to 0.017 at degree 2 and climbs back to 0.44 at degree 9.',
+      curves: [{x: degs, y: res}, {x: degs, y: err, cls: 'alt'}],
+      points: [...degs.map(d => ({x: d, y: res[d], r: 3})),
+               ...degs.map(d => ({x: d, y: err[d], r: 3, cls: 'miss'}))],
+      notes: [...degs.map(d => ({x: d, y: -0.07, dy: 13, anchor: 'middle', text: String(d)})),
+              {x: 9.25, y: res[9], anchor: 'start', dx: 4, text: 'residual ' + res[9].toFixed(5)},
+              {x: 9.25, y: err[9], anchor: 'start', dx: 4, cls: 'hi', text: 'error ' + err[9].toFixed(3)},
+              {x: 2, y: err[2], anchor: 'start', dx: 6, dy: 15, cls: 'hi', text: 'error ' + err[2].toFixed(4)}]
     });
   });
 })();

@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Class 3, Critical Judgment, Extra Labors and Impact Speed and Crush — Computational Physical Modeling</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (olive). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #5F7038;
+      --course-accent-dark: #47542A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    /* ── Week page video and class cards (media-cards.js) ── */
+    .media-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+      gap: 0.9rem;
+      margin: 1rem 0;
+    }
+    .media-card {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-top: 4px solid var(--course-accent);
+      border-radius: 4px;
+      padding: 0.75rem 0.9rem 0.85rem;
+    }
+    .media-card.class { border-top-color: #C8860A; }
+    .media-card p { margin: 0; }
+    .mc-kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .mc-title { font-weight: 600; line-height: 1.3; margin: 0.25rem 0 0.35rem !important; }
+    .mc-sub { font-size: 0.85rem; color: #5A5550; line-height: 1.4; }
+    .mc-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.7rem; }
+    .mc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--course-accent);
+      border-radius: 3px;
+      text-decoration: none;
+      color: var(--course-accent-dark);
+    }
+    a.mc-btn:visited { color: var(--course-accent-dark); }
+    a.mc-btn:hover { background: #F0EDE7; }
+    .mc-btn svg { width: 1em; height: 1em; flex: none; }
+    .mc-btn.primary, a.mc-btn.primary:visited { background: var(--course-accent); color: #fff; }
+    a.mc-btn.primary:hover { background: var(--course-accent-dark); }
+    .mc-btn.pending { border-style: dashed; border-color: #b8b2a8; color: #5A5550; }
+    .mc-total { font-size: 0.9rem; color: #5A5550; }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+    /* the remembered data phrase; filled in by page.js */
+    .cg-phrase { display: inline-flex; align-items: center; gap: .3rem; margin-right: .6rem;
+      font-size: .82rem; flex-shrink: 0; }
+    /* The header row is a fixed 780px. The title, the toggle, "Your data", Search and
+       "Report a problem" only just fit in it, so the chip shows the label alone (the
+       phrase is in the link's title and on the data page) and Search shows its icon.
+       An earlier chip that held the phrase and was allowed to shrink squeezed the
+       label down to "Yo" on a classroom projector. */
+    .cg-phrase a { color: rgba(230,238,222,.92); text-decoration: none; white-space: nowrap; }
+    .header-links .search-btn .sb-label { display: none; }
+    .header-links button.report-btn { white-space: nowrap; }
+    /* the title keeps its own width */
+    .site-header-top .site-title { white-space: nowrap; flex-shrink: 0; }
+    .site-header-top .header-links { min-width: 0; margin-left: 1rem; }
+    @media (max-width: 780px) {
+      /* below the 780px row: the report button's short form, as on phones */
+      .header-links .report-btn .rb-full { display: none; }
+      .header-links .report-btn .rb-short { display: inline; }
+      .cg-phrase { margin-right: .2rem; }
+    }
+    .cg-phrase a:hover { color: #fff; text-decoration: underline; }
+    .cg-phrase button { background: none; border: none; cursor: pointer; padding: 0 .2rem;
+      color: rgba(230,238,222,.7); font: inherit; font-size: 1rem; line-height: 1; }
+    .cg-phrase button:hover { color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* Two rules the other course sites do not define. The header's top
+       row carries a report button beside the title, and a page with a
+       wide demo in it needs more than the reading measure. */
+    .site-header-top { border-bottom: 1px solid rgba(200,222,180,0.15); }
+    main.wide { max-width: 1180px; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Computational Physical Modeling</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <span class="cg-phrase" id="cg-phrase"></span>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        
+          <a href="syllabus.html">Syllabus</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="notes.html">Notes</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reports.html">Examples</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reflection.html">Reflection</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="meeting.html">Meeting</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="ai-use.html">AI Use</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="tools.html">Tools</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="workbench.html">Workbench</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="extra-labor.html">Extra Labor</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="canvas-grades.html">Canvas Grades</a>
+          
+        
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+          
+          
+          
+          <a href="week-01.html">1</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-02.html">2</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <span class="week-current">3</span>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-04.html">4</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          <span class="week-gap" title="Week 5 is a break week">5<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <a href="week-06.html">6</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-07.html">7</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-08.html">8</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-09.html">9</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-10.html">10</a>
+          
+        
+      </div>
+    </nav>
+
+    
+    <nav class="page-family">
+      <div class="nav-inner">
+        Week 3,
+        <a href="week-03.html">Overview</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="area-under-a-curve.html">Area under a curve</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="cumulative-integration.html">Cumulative integration</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="the-constant-of-integration.html">The constant</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="bias-and-noise.html">Bias and noise</a>
+        
+        <span class="site-nav-sep">·</span>
+        <a href="assign-03.html">Assignment</a>
+      </div>
+    </nav>
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+
+  <main data-pagefind-body>
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <div class="eyebrow">Week 3 · Class recap</div>
+<h1>Class 3, Critical Judgment, Extra Labors and Impact Speed and Crush</h1>
+
+<p>Class 3 · Tuesday, October 20, 2026 · Chris Marriott</p>
+
+<div class="aside"><span class="label">About this recap</span>
+<p>This page summarizes a class in a University of Washington course. The recording links need a
+UW login and only work for students enrolled in that class.</p>
+<p><a href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e" target="_blank" rel="noopener">Watch the recording</a> (1:56:38). The
+<a href="class-03.html">slides</a> are on the site.</p>
+</div>
+
+<h2 id="lecture-preview-0-02">Lecture Preview <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=2" target="_blank" rel="noopener">0:02</a></h2>
+
+<p>The first half of class used Claude's Assignment 2 report to practice critical judgment, then
+walked through the extra labors. The second half worked through the problem in
+<a href="assign-03.html">Assignment 3</a>. The order was:</p>
+
+<ol>
+  <li>The welcome slide, and a check on the pace of the course.</li>
+  <li>Critical judgment, practiced on Claude's Assignment 2 report.</li>
+  <li>The extra labors. The Slope Stability Lab, the Labor Journal Essay, the Literature Survey,
+  the Course Project and the AI use record.</li>
+  <li>Career fairs and other events that can earn credit.</li>
+  <li>Assignment 3. The request, and the questions to ask before starting.</li>
+  <li>Integrating samples. Rectangles, trapezoids and the change in velocity.</li>
+  <li>The constant of integration, the offset, and the crush.</li>
+  <li>Where your evidence runs out, and two places the same integration shows up.</li>
+</ol>
+
+<h2 id="admin-notes-3-09">Admin Notes <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=189" target="_blank" rel="noopener">3:09</a></h2>
+
+<p>Pace. Chris asked whether the course is going too fast, too slow or just right. A couple of
+students said a little too fast, and nobody said too slow. Week 5 is a scheduled break with no
+deliverables. You can use it to study for midterms in other courses, finish an incomplete, work on
+an extra labor, or get ahead. Until then, please reach out to Chris or your learning group with
+questions.</p>
+
+<p>Career fair. UW Tacoma's career fair is on Wednesday, October 21 (engineering and technology)
+and Thursday, October 22 (all industries). Please see the Canvas announcement for the +0.3 extra
+labor that goes with it.</p>
+
+<h2 id="the-welcome-slide-0-02">The Welcome Slide <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=2" target="_blank" rel="noopener">0:02</a></h2>
+
+<p>The welcome slide invites you to try a short breathing exercise. Chris practices meditation at
+home and has found it helpful. He described it as training your mind to focus, much like reps at
+the gym train a muscle. If you practice keeping your focus on one thing while distractions come and
+go, it may get easier to stay on what you want to learn or work on.</p>
+
+<h2 id="critical-judgment-on-claude-s-report-4-37">Critical Judgment on Claude's Report <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=277" target="_blank" rel="noopener">4:37</a></h2>
+
+<p>Last week looked back at your Assignment 2 work through one lens, and this week used another.
+Chris gave Claude Assignment 2 and asked it to do the homework. The class then read its report with
+critical judgment, one of the AI maxims. The aim is to build the same judgment for your own work
+and for work from colleagues.</p>
+
+<p>Critical here means reading as a critic. That is, assume every line has something wrong with it
+and ask four questions <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=351" target="_blank" rel="noopener">5:51</a>.</p>
+
+<ul>
+  <li>Do we understand it? This question tests the writing. You might be able to work out what
+  Claude meant, but the writer's job is to be clear enough that anyone can follow without extra
+  work.</li>
+  <li>Where does it come from? A number or a claim needs a source.</li>
+  <li>Could we explain it to Alice? If your boss comes around the corner and asks about something
+  in your report, you want to say what it means and where you got it.</li>
+  <li>What new question does it raise? Questions like "what units is this in?" usually show up
+  when the first two answers are weak. Jot them down even if you cannot answer them.</li>
+</ul>
+
+<p>The site has Claude's <a href="ai-report-02.html">original report</a>, an
+<a href="ai-report-02-annotated.html">annotated version</a> and the
+<a href="ai-report-02-edited.html">edited version</a>. The original holds more than it should,
+including two tables that say almost the same thing and a figure that adds little. Some of the
+annotations came from asking Claude to flag things the course has not covered, things Alice did not
+ask for, and things a working engineer would not use. The rest are Chris's own cuts and rewordings,
+since the point is for you to practice the judgment yourself. The edited version
+answers what Alice asked without the extra noise.</p>
+
+<h3 id="the-1-khz-paragraph-10-46">The 1&nbsp;kHz Paragraph <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=646" target="_blank" rel="noopener">10:46</a></h3>
+
+<p>Chris read one of the report's worst paragraphs aloud and said what he was thinking as he went.
+It opens with "Rates that do not divide 12,500.", which is not a sentence (it has no verb), and
+reads like a heading. Partway through it reaches "25 different possible starts at 1 kHz" with no
+word on where the 25 came from, and the rest of the paragraph builds on that point. Chris's first
+rewrite of the opening was a sentence that says what the paragraph is about. Since 1,000 does not
+divide 12,500 exactly, that rate cannot be tested with a simple decimation.</p>
+
+<p>12,500 divided by 1,000 is 12.5, and decimation can keep every 12th sample or every 13th but
+not every 12.5th <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=986" target="_blank" rel="noopener">16:26</a>.
+Chris drew the first 25 samples. Every 12th lands on 12 and 24, every 13th on 13 and 26, and the
+sample a 1&nbsp;kHz logger would want after two steps is the 25th, which does exist. Claude's method
+alternates gaps of 12 and 13 so it lands on 25. It may give a better answer, and as a computer
+scientist Chris finds it clever. However, it is not a standard method, the course has not covered
+it, and Alice did not ask for it. If Alice asks why you used it, you would need a reason she can
+check.</p>
+
+<p>Claude then checked its method against a second model, a straight line between two neighboring
+samples <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=1253" target="_blank" rel="noopener">20:53</a>.
+Checking a method you are unsure of is usually a good idea. Drawing a line between points to
+estimate what happens between them is interpolation (extrapolation is outside the points), a
+standard engineering technique that the course covers in Week 6
+(<a href="interpolation-and-regression.html">Interpolation and regression</a>). The line plots
+from Week 1 already did this, connecting samples with straight lines. Claude's check goes beyond
+what was asked, and anything beyond the request needs its own justification in your report.</p>
+
+<div class="aside"><span class="label">Student question</span>
+<p>Q: Should the fix be telling Claude to use a different technique? <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=1384" target="_blank" rel="noopener">23:04</a></p>
+<p>A: Yes. The wording is fine, so the fix is in the method Claude used.</p>
+</div>
+
+<p>The edited version keeps every 12th sample (a 1,042&nbsp;Hz logger) and every 13th (a
+962&nbsp;Hz logger), which bracket 1&nbsp;kHz, and reports the worse of the two
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=1421" target="_blank" rel="noopener">23:41</a>.
+Taking the worse case is a conservative rule (a requirement is usually checked against the worst
+outcome), and next week's standards work the same way.</p>
+
+<div class="aside"><span class="label">Student question</span>
+<p>Q: How do you decide which of the two is worse? <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=1509" target="_blank" rel="noopener">25:09</a></p>
+<p>A: By the measure you are evaluating, here how much of the peak survives. You might expect the
+slower 962&nbsp;Hz rate to always be worse. However, you are decimating your data and not running
+real loggers, so either one might happen to keep the better samples, and you evaluate both and take
+the worse.</p>
+</div>
+
+<p>On the crossmember, every 12th sample kept 50.6% of the peak and every 13th kept 54.9%, so the
+faster rate was the worse one there. The simple method reached the same decisions as Claude's more
+complicated one, so it is the one to report.</p>
+
+<h3 id="the-6-250-hz-paragraph-and-figure-3-27-48">The 6,250&nbsp;Hz Paragraph and Figure 3 <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=1668" target="_blank" rel="noopener">27:48</a></h3>
+
+<p>At 6,250&nbsp;Hz (every second sample) the worst a logger can do is skip the single peak sample
+and read the one next to it. Claude probably meant that the neighbors are close to the peak, but it
+did not say so. It then gives &minus;1,503&nbsp;m/s&sup2; as "the 2.4% loss" and &minus;1,333&nbsp;m/s&sup2; as
+86.5%, with no word on where those numbers come from. Chris worked out that they come from the
+dots in a figure. If a number comes from a figure, say so and point Alice to it, so she does not
+have to work it out herself.</p>
+
+<p>Figure 3 plots rates between 12,500 and 6,250&nbsp;Hz. Decimation cannot make any of those rates
+(12,500 divided by 2 is 6,250, and you cannot keep every 1.5th sample), and the method Claude used
+effectively copied the same value across all of them. The figure adds nothing that the first figure
+and the prose had not already said, so Chris cut it (Table 2 likewise repeats Table 1). Expect some
+class time each week on the previous week's homework. Bring your questions about it, and Chris will
+share what he noticed.</p>
+
+<h2 id="extra-labors-33-08">Extra Labors <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=1988" target="_blank" rel="noopener">33:08</a></h2>
+
+<p>The course uses labor-based grading. Each week has four labors (the assignment, the quiz, the
+meeting minutes and the reflection), and completing all of them earns a base grade of 3.1, a B.
+There are two kinds of boost on top of that.</p>
+
+<p>The first is the basketball problem in each assignment. There are nine, each is worth +0.1 (so
+all nine reach 4.0), and each can be submitted any week with no penalty. Chris recommends not
+leaving them all for the last week, and Week 5 is a good time to try a couple.</p>
+
+<div class="aside"><span class="label">Lecture correction</span>
+<p>Class described the +0.1 as earned by putting energy into the problem. An extra problem has a
+right answer and a wrong one, so it needs a correct answer to earn the boost (please see
+<a href="extra-labor.html">Extra labors</a>). The rest stands, and you can submit any time before
+the end of the quarter without penalty.</p>
+</div>
+
+<p>The second is a larger project worth +0.3 <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=2081" target="_blank" rel="noopener">34:41</a>.
+These usually take the whole quarter and come in three parts, due in Week 4 (roughly an outline or
+proposal), Week 7 (a draft or first version) and Week 10 (the final version). The first part is due
+next week, which is why class covered them now. Please see the <a href="extra-labor.html">Extra
+labors</a> page for all of them.</p>
+
+<h3 id="slope-stability-lab-38-09">Slope Stability Lab <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=2289" target="_blank" rel="noopener">38:09</a></h3>
+
+<p>The lab uses Chris's discrete element simulator of a slope in an earthquake (about 10 to 20
+hours over the quarter). Carol is worried about a county road below a rock slope when the next
+earthquake comes, and your task is to find the most shaking the slope can take without damage.</p>
+
+<p>First you decide what damage means, and the helper pages describe how civil engineers judge it
+(Chris highlighted two signals).</p>
+
+<ul>
+  <li>Survey stations. These sit on a slope to measure its slow everyday settling, and they keep
+  reporting during an earthquake. If one stops reporting (buried or carried downhill), engineers
+  usually take that as a sign of damage.</li>
+  <li>Rockfall. Boulders that reach the bottom are counted (a catch fence or a camera does this on
+  a real slope), and the simulator counts them for you. You decide whether one rock counts as
+  damage, or ten.</li>
+</ul>
+
+<p>The week 4 proposal asks what damage means, how you will find where damage begins, how you will
+know you are sure, and how you plan to spend your budget
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=2497" target="_blank" rel="noopener">41:37</a>.
+The simulations run on an old GPU in Chris's apartment (each run warms it up), so you get 40 runs.
+If you need more, request them with the form and say what they are for, as you would ask whoever
+set an engineering budget. Chris expects 40 to be enough and will approve every request.</p>
+
+<p>The damage tool lets you combine conditions, such as the slope moving more than 5&nbsp;cm (a
+screen used in California, which also uses 15&nbsp;cm) or at least two rockfalls. Then put your
+definition in your own words.</p>
+
+<p>For the method, each proposal gets a bond strength (how strong the slope is) and a range of
+peak ground acceleration from 0 to 5&nbsp;g to test
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=2666" target="_blank" rel="noopener">44:26</a>.
+Every bond strength from 1 to 8 was tested to hold under its own weight with no shaking. At 0&nbsp;g
+you know the slope is safe, and you assume 5&nbsp;g is not. Test halfway (2.5&nbsp;g), keep the
+half where the change from safe to damaged must lie, and repeat until you find the line. The
+example class on the help page shows this pattern, and you can load and watch other students' runs.
+Each run also returns its seismograph, survey station and surface data, though your damage
+definition already decides the result.</p>
+
+<div class="aside"><span class="label">Added after class</span>
+<p>The live run in class failed <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=3001" target="_blank" rel="noopener">50:01</a>.
+The simulation itself ran. The weakest slope at 5&nbsp;g was destroyed so completely that every
+survey station was carried off, and the step that checks whether the slope came to rest had no
+station left to read. The cause was found and corrected the same evening (live on the lab server
+from 9:13&nbsp;PM, October 20). A run like this now completes and reports the stations
+as lost. Failed runs are refunded, so it did not use any of the 40-run budget. If one of your runs
+fails this way, run it again.</p>
+</div>
+
+<h3 id="labor-journal-essay-51-32">Labor Journal Essay <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=3092" target="_blank" rel="noopener">51:32</a></h3>
+
+<p>This one is popular with Chris's CS students, since the effort is what earns the credit. The
+essay is about your own quarter, so you already know the content. You get feedback on your writing
+and on your reflection, and students who take it seriously often improve both.</p>
+
+<p>Common topics are learning groups, schedules and deadline crunches, and work or family
+priorities. A reflection usually works best when it is tied to a real moment ("On Tuesday I got home from
+Assignment 3 and I was really stressed") and says how you felt. The guide points you to Gibbs'
+reflective cycle. Describe an event, say how you felt, evaluate it (good, bad or both), analyze what
+could have gone differently, draw a conclusion, and end with an action plan for next time.</p>
+
+<p>This week you need a theme, a few sub-themes and a point-form outline. The big lift is the
+draft in Week 7, and in Week 10 you revise it from Chris's feedback. Please see
+<a href="extra-labor-essay.html">Labor Journal Essay</a>.</p>
+
+<h3 id="literature-survey-55-09">Literature Survey <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=3309" target="_blank" rel="noopener">55:09</a></h3>
+
+<p>This may suit students thinking about graduate school or research, where much of the work is
+reading papers. This week, use Google Scholar to find eight articles. Read the title, and if it
+sounds interesting read the abstract (a one or two paragraph summary at the start of the paper) to
+decide whether it belongs on your list. One area gives you more depth, though sampling two or three
+areas is fine if you are still exploring. In Week 7 you write a one-page summary of three of them,
+and in Week 10 a one-page reflection on what you learned, with any fixes to the summaries (usually a
+missing bibliography). Chris is open to any topic in civil or mechanical engineering, and his
+feedback is mostly on scope. Please see <a href="extra-labor-survey.html">Literature Survey</a>.</p>
+
+<h3 id="course-project-57-55">Course Project <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=3475" target="_blank" rel="noopener">57:55</a></h3>
+
+<p>The course already has three projects (the crash test data, the basketball data and the slope).
+If you would rather analyze data from another area with this quarter's tools, propose your own,
+with a proposal, a draft and a final version. Chris recommends checking your idea with him first.
+His feedback is about scope, and he would rather you pick something smaller you can finish.</p>
+
+<p>Chris gave two examples. One of his graduate students, a mechanical engineer, did a rocketry project in
+this course (Kerbal Space Program is a game with real enough physics to try rocket designs). A
+rocket gets lighter as it burns fuel, so the same thrust gives it more acceleration, and modeling
+whether a design with its fuel load reaches orbit is a set of differential equations (the course
+reaches them in Week 8). You do not need to know how to solve it to propose it. The other is your
+phone, whose sensors take physical measurements with the same problems as ours. Chris
+logs his GPS position every 10 seconds, and the noisy, sampled track does not always stay on the
+road. The accelerometer could also record a (crash-free) drive.</p>
+
+<h3 id="ai-use-record-63-46">AI Use Record <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=3826" target="_blank" rel="noopener">63:46</a></h3>
+
+<p>Using the chatbot on the course site for your homework earns +0.3. You need to sign in so Chris
+can tell it was you, and he does not use your chats for anything except this credit. Once signed in
+you can still switch to anonymous for a chat, and that chat is not recorded as yours. Please see
+<a href="ai-use.html">AI Use</a>.</p>
+
+<h3 id="career-fairs-and-other-events-64-54">Career Fairs and Other Events <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=3894" target="_blank" rel="noopener">64:54</a></h3>
+
+<p>The career fair is a good way to start networking toward a job after you graduate, and it earns
+credit. Take a selfie at your favorite booth and post it on Canvas. Chris wants to give credit for
+other contributions to the engineering community too (running a club contest, for instance), so if
+you think something is worth credit, ask. He also runs a programming competition in November, and
+competing or helping run it both count.</p>
+
+<h2 id="assignment-3-the-request-74-01">Assignment 3, the Request <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=4441" target="_blank" rel="noopener">74:01</a></h2>
+
+<p>Alice writes that the accelerometers ought to tell her how fast the car was going when it hit the
+barrier, and the lab measured that separately with its own equipment, so she wants to know whether
+those two numbers agree. She also asks how far the passenger compartment traveled after the car hit
+the wall. The first question is a double check, since if integrating the data recovers the lab's
+speed you can be more confident in your methods. The second asks how much of the car was crushed. The front is
+designed to crush so that the middle, where the people are, does not.</p>
+
+<p>The class worked on P&oacute;lya's first step, understanding the problem, by listing questions
+to ask <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=4595" target="_blank" rel="noopener">76:35</a>.
+Where is the lab's number? How do you get a velocity from an acceleration (integrate), and how do you
+integrate samples instead of a function f(x)? How do you get from velocity to the crush, which is a
+displacement (integrate again)?</p>
+
+<p>Integrating acceleration gives the change in velocity, &Delta;v, and not the velocity itself
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=4808" target="_blank" rel="noopener">80:08</a>. To turn
+&Delta;v into v you add a known velocity, such as the initial one. You need to make that correction
+before integrating again, or the second integral is not the displacement you want.</p>
+
+<p>Chris's list of questions, which the rest of class answered in order, was where to find the lab
+speed, which channel is on the car, how to turn acceleration into a change in speed, how to turn
+&Delta;v into v, whether anything in the method might add error, how to find the crush, and whether
+it all makes sense (P&oacute;lya's look-back step)
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=4881" target="_blank" rel="noopener">81:21</a>.
+The class worked the problem on the Civic (test 9808), which is held back from the phrase
+assignment.</p>
+
+<h2 id="the-lab-speed-and-the-channel-83-11">The Lab Speed and the Channel <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=4991" target="_blank" rel="noopener">83:11</a></h2>
+
+<p>The lab speed is in the header file, in km/h. Most of the work is in m/s, so convert it (56.17
+km/h is 15.60&nbsp;m/s on the Civic). Most packs likely have a similar speed, though you should
+check your own file.</p>
+
+<p>Most of the sensors are on the dummies, and you want the car's motion and not a dummy's head or
+chest. On Chris's test the only channel attached to the car is the crossmember under the rear seat,
+the channel with the fast features and ringing from last week. If your pack has more than one
+channel on the car, you can pick another.</p>
+
+<p>Before time zero the car is on the tow line and the acceleration should be zero, which it nearly
+is apart from some noise <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=5094" target="_blank" rel="noopener">84:54</a>.
+Time zero is the moment the car first touches the wall, as the lab defines it. The trace stays near
+zero for a sliver after that and then looks like a car hitting a wall.</p>
+
+<h2 id="rectangles-and-trapezoids-85-58">Rectangles and Trapezoids <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=5158" target="_blank" rel="noopener">85:58</a></h2>
+
+<p>Integration is the area between the curve and the axis. The acceleration is mostly negative, so
+the sum will be too. With samples, you build the area from shapes whose area is easy to compute. A
+rectangle has the step size as its width (the spacing in the header, 0.1&nbsp;ms on the Civic) and
+a sample's value as its height. Some rectangles come out too small and others too large. Adding the
+triangle on top of each makes a trapezoid, which is just as easy to compute and has much less error.
+When you have the choice use trapezoids (rectangles come first mostly because they are easier to
+understand). Please see <a href="area-under-a-curve.html">Area under a curve</a>.</p>
+
+<p>For rectangles, whether a piece is too small or too large depends on whether the curve is going
+up or down. For trapezoids it depends on how the curve bends
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=5329" target="_blank" rel="noopener">88:49</a>.
+Where it bends down the trapezoid is too small, and where it bends up the trapezoid is too large. In
+computer science you often want a strict lower or upper bound, while in engineering you want to be
+close to the true value. On a curve that bends both ways the errors partly cancel.</p>
+
+<h2 id="the-change-in-velocity-90-38">The Change in Velocity <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=5438" target="_blank" rel="noopener">90:38</a></h2>
+
+<p>The running sum of the trapezoids (the first one, then the first two, then the first three, and
+so on) gives the whole &Delta;v curve. Please see <a href="cumulative-integration.html">Cumulative
+integration</a>. On the Civic, &Delta;v starts at zero and falls. It reaches &minus;15.60&nbsp;m/s
+(the tow speed) at 77&nbsp;ms, which is when the car should be stopped. It keeps going, reaches its
+lowest point (&minus;18.18&nbsp;m/s) at 119&nbsp;ms, and then comes back up.</p>
+
+<p>One story that may explain this is that the car stops at 77&nbsp;ms and bounces off the wall, so
+the stretch to 119&nbsp;ms is the car accelerating backward, and after that friction slows it. With the full record
+it should come to rest back at the tow-speed line, and the record ends before it does. Whether that
+story is real, or an error in the data that has not been accounted for yet, is the next thing to
+check.</p>
+
+<h3 id="choosing-the-constant-93-59">Choosing the Constant <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=5639" target="_blank" rel="noopener">93:59</a></h3>
+
+<p>The class compared three constants to add to &Delta;v (the tow speed from the header, the peak
+of &Delta;v, and its final value). The tow speed is the right one, since it is an independent
+measurement of the starting velocity. Please see <a href="the-constant-of-integration.html">The
+constant of integration</a>. With it added, the velocity starts at 15.60&nbsp;m/s, crosses zero at
+77&nbsp;ms, goes negative as the car bounces back, and has not returned to zero when the record
+ends. Without an independent measurement of the bounce this is still a story, though checks like
+the offset below can make the uncertainty small.</p>
+
+<h2 id="the-offset-96-06">The Offset <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=5766" target="_blank" rel="noopener">96:06</a></h2>
+
+<p>A recorded signal is the truth plus a small constant offset (every reading a little too high,
+say) plus random noise. You cannot remove the noise, but you can remove the offset, since it is the
+same in every reading. On the tow line the acceleration should be zero, so every wobble there is
+instrument error (an assumption, since the car might move a little). The average of that quiet
+period estimates the offset, which you subtract from every sample in the channel. What remains is noise,
+usually described by its standard deviation. Please see <a href="bias-and-noise.html">Bias and
+noise</a>.</p>
+
+<p>On the Civic the offset was small compared to the noise, so the corrected trace looks the same as
+the uncorrected one. The total &Delta;v moved from &minus;16.75 to &minus;16.74&nbsp;m/s, the stop
+stayed at 77&nbsp;ms, and every value checked moved by at most 0.02&nbsp;m/s. That is well within
+tolerance (under 1%), so the offset does not explain the bounce, and the story holds up a little
+better.</p>
+
+<h2 id="the-crush-100-30">The Crush <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=6030" target="_blank" rel="noopener">100:30</a></h2>
+
+<p>The crush starts when the car touches the wall, at time zero. The stop is the guess at 77&nbsp;ms,
+where the velocity crosses zero. Integrating the velocity gives the displacement. Before contact it
+rises in a straight line with a slope of 15.60&nbsp;m/s (constant velocity), at contact it starts to
+curve over, and at its peak the car is as far forward as it goes before moving back. That peak is
+also at 77&nbsp;ms, so two signals agree on the stop (a double confirmation, and in engineering you
+usually want two).</p>
+
+<p>The cumulative sum already holds the area from the start up to every point
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=6218" target="_blank" rel="noopener">103:38</a>.
+Chris drew it on the board, with A the area up to the start of the crush and B the area up to its
+end, so the area between them is C&nbsp;=&nbsp;B&nbsp;&minus;&nbsp;A (674&nbsp;mm on the Civic).</p>
+
+<p>Leave out the tow speed and the displacement curve comes out the wrong shape
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=6344" target="_blank" rel="noopener">105:44</a>.
+With either wrong constant the crush is too long and the peak may be in the wrong place. With one of
+them the car keeps moving forward after it stops, as if drilling into the wall, which is not
+physically possible and so points back to the wrong constant.</p>
+
+<p>Chris annotated the figures to close the look-back step
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=6438" target="_blank" rel="noopener">107:18</a>.
+Contact is at zero, the stop is at 77&nbsp;ms (confirmed two ways), the crush is the area between
+them, and the offset did not change the answer. The summary for your homework
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=6495" target="_blank" rel="noopener">108:15</a>
+is as follows.</p>
+
+<ol>
+  <li>The lab speed. It is in the header (probably about 56&nbsp;km/h, or 15.6&nbsp;m/s), and you
+  should check your own.</li>
+  <li>The channel. One attached to the car and not a dummy.</li>
+  <li>The rule. Trapezoids, for less error.</li>
+  <li>The constant. The tow speed from the header, an independent measurement of the starting
+  velocity.</li>
+  <li>The offset. Average the quiet period before contact and subtract it. It did not change the
+  answer on the Civic and probably will not on yours, but Chris has not seen everyone's data, so
+  check.</li>
+  <li>The crush. From contact at zero to the end of contact (where the velocity crosses zero, or the
+  peak of the displacement), the area between them.</li>
+  <li>The look back. Make sure it all makes sense to you, so you can stand behind your report.</li>
+</ol>
+
+<p>Please see the <a href="reports-03.html">example reports</a>.</p>
+
+<h2 id="where-your-evidence-runs-out-110-33">Where Your Evidence Runs Out <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=6633" target="_blank" rel="noopener">110:33</a></h2>
+
+<p>Your report should say where your evidence runs out, and for this problem that includes the
+following.</p>
+
+<ul>
+  <li>One sensor, on one crossmember, stands for the whole compartment. A real crash test has many
+  more sensors on the car (Chris left most of them out of your data), and a real analysis would
+  probably integrate several and average them or pick the most accurate.</li>
+  <li>Nothing in the file measures the car's motion after it leaves the barrier. The bounce is part
+  of the story but has no independent confirmation (a distance at the end of the trial in the
+  header would help).</li>
+  <li>The channel is unfiltered, though crash test standards ask you to filter a channel before you
+  integrate it. Week 4 covers that filter, why it is applied and how, so this may change.</li>
+  <li>The lab's speed has an uncertainty of its own, and the file does not say how it was measured
+  or how far off it might be.</li>
+  <li>The samples may not be exactly evenly spaced. Engineers usually treat that timing error as
+  error in the measured values instead.</li>
+</ul>
+
+<div class="aside"><span class="label">Technically</span>
+<p>Class described the standard as filtering your data down to a rate that makes sense, and linked
+it to last week's decimation. Those are different operations, since decimation keeps every so many
+samples and so lowers the sample rate. The filter SAE J211 assigns a channel removes content faster than
+that channel's class and leaves the sample rate as it is. <a href="week-04.html">Week 4</a> covers
+the filter properly.</p>
+</div>
+
+<h2 id="the-same-integration-elsewhere-113-33">The Same Integration Elsewhere <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=6813" target="_blank" rel="noopener">113:33</a></h2>
+
+<p>Integrating gives a change, and you need a constant from outside the record to turn it into a
+value. A flow meter on a pipe integrates to the change in volume, for instance, and not the volume
+itself.</p>
+
+<p>Air Canada Flight 143 in 1983 tracked its fuel this way
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=6840" target="_blank" rel="noopener">114:00</a>.
+The fuel computer subtracted the measured burn from the 22,300&nbsp;kg it was given. After a
+pounds-for-kilograms mistake about 10,100&nbsp;kg was aboard, and the tank gauges that would have
+caught it were not working. The constant of integration was wrong, so the running total was too
+high the whole flight, and the fuel ran out. This is one reason engineers state what they know and
+how uncertain it is.</p>
+
+<div class="aside"><span class="label">Lecture correction</span>
+<p>Class said the plane crashed. Both engines stopped, though the crew glided it to a landing at
+Gimli, Manitoba, and everyone on board survived.</p>
+</div>
+
+<p>The second example is a phone in Seattle's SR&nbsp;99 tunnel
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=fa60ec18-a2b7-443a-badc-b4e90152410e&amp;start=6904" target="_blank" rel="noopener">115:04</a>.
+The phone has a GPS fix at the entrance. Inside, it can only estimate its position from its own
+sensors, and with nothing to correct it the error grows. At the exit a new GPS fix resets it. That
+fix is an independent measurement, so it checks the estimate and supplies the new constant.</p>
+
+  </main>
+
+  
+
+  <script src="js/page.js?v=20261022093533"></script>
+
+  <footer class="site-footer">
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-20">October 20, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Algorithms');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  
+  
+  
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

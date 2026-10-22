@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Conditions become roots by subtraction — Computational Physical Modeling</title>
+  <title>Conditions as roots — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -834,7 +834,7 @@
         <a href="week-07.html">Overview</a>
         
           <span class="site-nav-sep">·</span>
-          <strong>Conditions become roots</strong>
+          <strong>Conditions as roots</strong>
         
           <span class="site-nav-sep">·</span>
           <a href="bisection.html">Bisection</a>
@@ -843,10 +843,10 @@
           <a href="newton-and-secant.html">Newton and secant</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="root-finding-fails.html">Four ways it fails</a>
+          <a href="root-finding-fails.html">Root-finding failures</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="evaluations-are-the-currency.html">Evaluations</a>
+          <a href="evaluations-are-the-currency.html">Evaluation cost</a>
         
           <span class="site-nav-sep">·</span>
           <a href="windowed-optimum.html">Windowed optimum</a>
@@ -908,7 +908,7 @@
   <main data-pagefind-body class="wide">
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <div class="eyebrow">Week 7 · Root Finding and Search</div>
-<h1>Conditions become roots by subtraction</h1>
+<h1>Conditions as roots</h1>
 
 <div class="claim">
   <span class="label">Claim</span>
@@ -936,31 +936,29 @@
 
 $$f(x) \;=\; g(x) - c \qquad\text{or}\qquad f(x) \;=\; \sigma_1(x) - \sigma_2(x)$$
 
-<p>This is not a technique so much as a convention. Root finders are written to look for zero
+<p>Moving everything to one side is a convention. Root finders are written to look for zero
 because zero is the one target that needs no extra argument, and every other target is reached
 by subtraction.</p>
 
-<h2 id="subtraction-not-a-ratio">Subtraction, Not a Ratio</h2>
+<h2 id="subtraction-not-a-ratio">Subtraction and Ratio Forms</h2>
 
-<p>The same condition can be written as a ratio, and the temptation is real when comparing a demand
-against a capacity:</p>
+<p>The same condition can be written as a ratio, which is tempting when comparing a demand against a capacity:</p>
 
 $$g_{\text{ratio}}(x) \;=\; \frac{c}{g(x)} - 1$$
 
 <p>It vanishes wherever the subtraction form vanishes, so it has the same roots. It also has a <dfn
 data-g="pole">pole</dfn> wherever $g(x) = 0$, though, and a function may change sign across a
-pole without having a root there. That difference is what page 23's second failure is made of,
+pole without having a root there. That difference is what page 22's second failure is made of,
 and it is the reason to prefer the subtraction even though both forms are algebraically correct.</p>
 
-<h2 id="plotting-first">Plotting First</h2>
+<h2 id="plotting-first">Plotting the Function</h2>
 
 <p>Once $f$ is defined it can be evaluated anywhere, and a few hundred evaluations across the
 domain cost almost nothing. Here is what the plot shows that a returned number does not:</p>
 
 <ul class="plain">
   <li><strong>How many roots there are.</strong> A routine returns one regardless.</li>
-  <li><strong>Roughly where they are.</strong> Which is what a bracket or a starting guess
-  needs.</li>
+  <li><strong>Roughly where they are.</strong> This is what a bracket or a starting guess needs.</li>
   <li><strong>Whether any are near a pole or a flat spot.</strong> Both are visible immediately
   and
   neither is visible in a result.</li>
@@ -969,7 +967,7 @@ domain cost almost nothing. Here is what the plot shows that a returned number d
 <cg-demo case="convert"></cg-demo>
 <div class="source measured"><span class="tag">Measured</span><span>Eight three-point arcs, drawn from a curated, outcome-balanced set of 1,016 shots from 508 games. SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz, via <a href="https://github.com/linouk23/NBA-Player-Movements" target="_blank" rel="noopener">linouk23/NBA-Player-Movements</a>, with play-by-play joined from <a href="https://github.com/shufinskiy/nba_data" target="_blank" rel="noopener">shufinskiy/nba_data</a>. The selection, windowing and unit conversion are this course&rsquo;s own.</span></div>
 
-<h2 id="which-root-actually-happened">Which Root Actually Happened</h2>
+<h2 id="which-root-actually-happened">The Physical Root</h2>
 
 <p>$f$ has roots wherever the algebra puts them, including outside the region the model describes.
 The parabola above crosses 3.048&nbsp;m twice, and <strong>only one of those crossings
@@ -978,7 +976,7 @@ in this set are, the median release being 3.59&nbsp;m against a 3.048&nbsp;m rim
 root is at &minus;0.079&nbsp;s, a time before the ball left the hand, where the fitted parabola
 is an extrapolation backwards into a region the model was never fitted to and the ball was not
 yet in free flight. Nothing about that root looks wrong. It satisfies $f(t) = 0$ to machine
-precision, and a routine handed a bracket reaching back past $t = 0$ will return it and report
+precision, and a routine handed a bracket reaching back past $t = 0$ can return it and report
 success without qualification. Three filters, applied in this order:</p>
 
 <ol class="plain">
@@ -1000,28 +998,28 @@ question you asked.</p>
   <ol>
     <li>Write "the factor of safety falls to 1.5" as a root problem, in the subtraction form, and
     say what the pole would be if you wrote it as a ratio.
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Subtraction:</strong> <em>f</em>(<em>x</em>) = FS(<em>x</em>) &minus;&nbsp;1.5, with FS
-= capacity&thinsp;/&thinsp;demand. Roots of <em>f</em> are the values where the factor of safety
-is exactly 1.5.</p>
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Subtraction:</strong> <em>f</em>(<em>x</em>) = capacity(<em>x</em>)
+&minus;&nbsp;1.5&nbsp;&times;&nbsp;demand(<em>x</em>). Roots of <em>f</em> are the values where the
+factor of safety, capacity&thinsp;/&thinsp;demand, is exactly 1.5.</p>
      <p><strong>As a ratio:</strong> <em>f</em>(<em>x</em>) = FS(<em>x</em>)/1.5 &minus; 1, or
-capacity/(1.5&nbsp;&times;&nbsp;demand) &minus; 1. The pole is wherever the <strong>demand goes
+FS(<em>x</em>) &minus; 1.5, or capacity/(1.5&nbsp;&times;&nbsp;demand) &minus; 1. All three divide by
+the demand. The pole is wherever the <strong>demand goes
 to zero</strong>, such as an unloaded station or a section where the bending moment changes
-sign. That is worth avoiding. FS &rarr; &infin; there, and <em>f</em> changes sign across the
-pole without passing through zero, so a bracketing method sees the sign change, converges tidily
+sign. That is worth avoiding. Where the demand changes sign, FS jumps from +&infin; to &minus;&infin;,
+and <em>f</em> changes sign across the pole without passing through zero, so a bracketing method sees the sign change, converges tidily
 on the pole, and reports a location where the structure is <em>safest</em> as the place it
 fails.</p></div></details></li>
     <li>A plot of your <em>f</em> crosses zero three times over the domain. What do you do before
     calling a root finder?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Decide which root you want, and bracket that one alone.</strong> A root finder returns
-one value. Handed an interval containing three roots, which one it returns is decided by the
-bracket or the starting point and not by the question, so the choice is made either way and the
-only thing at issue is whether you make it or the arithmetic does. Concretely, scan the domain
+one value. If it is handed an interval containing three roots, the bracket or the starting point decides
+which one it returns, so it is a good idea to make that choice yourself. Concretely, scan the domain
 on a grid, find the intervals where the sign changes, and call the routine once on each with its
 own bracket. Then apply the filters, asking which roots are in the physical domain, which are in
-the range the model is valid over, and which one the question asks about. And check the count,
-because three crossings on a plot is three crossings <em>the plot resolved</em>. A pair closer
-together than the plotting resolution is invisible on it, and the scan that brackets them is
-what would find them.</p></div></details></li>
+the range the model is valid over, and which one the question asks about. Finally, check the count,
+because a plot only shows the crossings <em>it can resolve</em>. A pair closer together than the
+plotting resolution is invisible on it, and only a scan on a grid finer than their spacing would
+find them.</p></div></details></li>
     <li>A routine returns a root at <em>x</em> = 7.8 m on a 6 m beam. Which of the three filters
     caught it, and could the routine have caught it itself?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>The domain filter</strong>, which asks whether the answer is in the region the model
@@ -1030,7 +1028,7 @@ evaluated where it means nothing.</p>
      <p>Could the routine have caught it? <strong>Yes, but only if it had been told.</strong> A
 bracketing method given [0,&nbsp;6] cannot return 7.8, because the domain is built into the
 bracket and the guarantee enforces it. Newton takes no bracket, so nothing constrains where it
-goes, and it will converge happily on a root of the extended formula. The general point is that
+goes, and it may converge on a root of the extended formula. The general point is that
 the domain is not in the function. <em>f</em> is a piece of algebra that happily evaluates at
 7.8, and the fact that beams end is information the routine does not have unless it is passed
 in, as a bracket, or as the bound in the loop condition on page 3.</p></div></details></li>
@@ -1062,11 +1060,11 @@ bisection, secant and Newton on any signal, counting evaluations.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/conditions-become-roots.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/conditions-become-roots.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-16">October 16, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-22">October 22, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

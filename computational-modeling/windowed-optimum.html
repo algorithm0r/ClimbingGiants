@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>A constrained optimum over a window — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -834,7 +834,7 @@
         <a href="week-07.html">Overview</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="conditions-become-roots.html">Conditions become roots</a>
+          <a href="conditions-become-roots.html">Conditions as roots</a>
         
           <span class="site-nav-sep">·</span>
           <a href="bisection.html">Bisection</a>
@@ -843,10 +843,10 @@
           <a href="newton-and-secant.html">Newton and secant</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="root-finding-fails.html">Four ways it fails</a>
+          <a href="root-finding-fails.html">Root-finding failures</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="evaluations-are-the-currency.html">Evaluations</a>
+          <a href="evaluations-are-the-currency.html">Evaluation cost</a>
         
           <span class="site-nav-sep">·</span>
           <strong>Windowed optimum</strong>
@@ -917,7 +917,7 @@
   <dfn data-g="prefix-sum">prefix sum</dfn> built once reduces each candidate window's integral
   to a
   single subtraction.</p>
-  <p class="plain">  Nothing in the signal is the answer. The answer is the best that any allowed stretch of the
+  <p class="plain">  The answer is the best value that any allowed stretch of the
   signal achieves, so the stretches have to be searched.</p>
 </div>
 
@@ -955,7 +955,7 @@ number from the same record:</p>
   keep
   it below 700.</dd>
   <dt>HIC<sub>36</sub></dt>
-  <dd>$w$ = 36 ms. The older limit, still quoted, and always the larger of the two because it
+  <dd>$w$ = 36 ms. The older limit, still quoted, and never the smaller of the two because it
   permits every window the 15 ms limit permits and more.</dd>
 </dl>
 
@@ -966,18 +966,18 @@ length to $w$ removes everything above a diagonal band:</p>
 
 <p>The record used here is the driver head <dfn data-g="resultant">resultant</dfn> from the same
 2019 BMW X5 barrier test used earlier in the course, sampled at 12 500 Hz with 4 501 samples.
-Under a 15 ms limit that is <strong>824 109</strong> admissible windows. The number matters,
-because the search is over all of them.</p>
+Under a 15 ms limit that is <strong>824 109</strong> admissible windows, and the search is
+over all of them.</p>
 
 <div class="aside">
-  <span class="label">What the record has already been through</span>
+  <span class="label">Prior processing of the record</span>
   <p>The three head accelerometer axes were baseline-corrected on the pre-impact window, then
 combined into a resultant and divided by 9.80665 to put the trace in <em>g</em>. Both steps come
 from earlier weeks, and both of them change the answer.</p>
   <p>One step has been skipped, though. SAE J211 requires head acceleration to pass a <dfn
 data-g="cfc">CFC 1000</dfn> filter before HIC is computed, and this record carries only the
-laboratory's 2000 Hz anti-alias prefilter. The numbers below are therefore correct for the
-record as stored, and they are not the numbers that would be submitted to a regulator.</p>
+laboratory's 2000 Hz anti-alias prefilter. The numbers below are correct for the
+record as stored, though they are not the numbers that would be submitted to a regulator.</p>
 </div>
 
 <h2 id="manual-and-automatic-search">Manual and Automatic Search</h2>
@@ -987,12 +987,12 @@ the maximum, evaluated for the window you have placed, and then you run the sear
 
 <cg-demo case="hic"></cg-demo>
 
-<p>Placing the window by eye over the peak gets close and it does not get there. The peak resultant
+<p>Placing the window by eye over the peak gets close, though it falls short of the optimum. The peak resultant
 is 48.7 <em>g</em> at 78.6 ms, though the optimal window does not centre on it, because the
 score rewards a sustained high average and so settles slightly earlier where the trace is broad,
 and not where it is tallest.</p>
 
-<h2 id="an-hic-of-208-against-a-limit-of-700">An HIC of 208 Against a Limit of 700</h2>
+<h2 id="an-hic-of-208-against-a-limit-of-700">Results for the Test Record</h2>
 
 <table class="data">
   <tr><th>Quantity</th><th class="num">HIC<sub>15</sub></th><th class="num">HIC<sub>36</sub></th></tr>
@@ -1005,13 +1005,13 @@ and not where it is tallest.</p>
 
 <p>Against the FMVSS 208 limit of 700, an HIC<sub>15</sub> of 208 passes with a wide margin.</p>
 
-<h2 id="the-best-window-is-always-the-longest-allowed">The Best Window Is Always the Longest Allowed</h2>
+<h2 id="the-best-window-is-always-the-longest-allowed">The Length Limit</h2>
 
-<p>Both optimal windows are exactly as long as they are allowed to be, at 14.96 ms against a 15 ms
+<p>Both optimal windows are as long as the limit allows, at 14.96 ms against a 15 ms
 limit and 36.00 ms against 36 ms. That is not a coincidence of this record. It means the maximum
 does not sit in the interior of the admissible set. The search pushes against the boundary and
 stops because it is told to. Whenever a constrained optimum lands on its constraint, the
-reported value depends on where the constraint was placed. Removing the length limit entirely
+reported value depends on where the constraint was placed. Removing the length limit
 and searching every window in the record gives:</p>
 
 <table class="data">
@@ -1021,23 +1021,23 @@ and searching every window in the record gives:</p>
   <tr><td>none</td><td class="num">394.0</td><td class="num">55.52 – 94.96 ms</td><td class="num">39.44 ms</td></tr>
 </table>
 
-<p>The unconstrained optimum is interior, at 39.44 ms, chosen by the record and not by the limit.
+<p>The unconstrained optimum is interior, at 39.44 ms, so the record alone sets its length.
 Beyond it the score falls again, because extending the window adds low-acceleration samples that
-pull the mean down faster than the extra length pushes the product up. So the limit is not there
-to make the problem well posed. The problem is well posed without it. The limit is there because
+pull the mean down faster than the extra length pushes the product up. So the problem is well posed without
+the limit, and the limit is there because
 the criterion is a statement about head loading sustained over a particular duration, and 15 ms
 is the duration the standard is about. It is a modelling decision written into the definition,
-and the factor of nearly two between HIC<sub>15</sub> and HIC<sub>36</sub> on the same record is
-the size of that decision.</p>
+and on this record that decision changes the answer by a factor of nearly two
+(HIC<sub>15</sub> against HIC<sub>36</sub>).</p>
 
 <div class="aside standard"><span class="label">The standard</span>
-<p>The limit is not a parameter. <strong>FMVSS 208</strong> S6.2 fixes it. HIC is computed over any
+<p><strong>FMVSS 208</strong> S6.2 fixes the limit. HIC is computed over any
 interval no longer than <strong>15 ms</strong>, on the resultant acceleration at the head centre
 of gravity, and must not exceed <strong>700</strong> for the 50th percentile male. An earlier
 version of the rule used 36 ms against 1000, and numbers from the two are not comparable. See <a
 href="standards.html">The standards behind the crash data</a>.</p></div>
 
-<h2 id="avoiding-recomputation">Avoiding Recomputation</h2>
+<h2 id="avoiding-recomputation">Prefix Sums</h2>
 
 <p>Each candidate window needs $\int_{t_1}^{t_2} a\,\mathrm{d}t$. Computing that separately for
 every window repeats almost all of the work, because neighbouring windows share almost all of
@@ -1057,7 +1057,7 @@ the two readouts confirm that the subtraction and the direct sum agree to every 
 They are the same quantity computed two ways.</p>
 
 <p>Widen the window and watch the last two readouts. The direct sum needs one term per sample, so
-its cost grows with the window. The subtraction needs one operation whatever the length. At a 15
+its cost grows with the window. The subtraction needs one operation for any window length. At a 15
 ms window that is 188 samples against 1, and at 60 ms it is 750 against 1. The saving is
 countable for this record and this limit:</p>
 
@@ -1143,6 +1143,42 @@ end</pre>
 window over which a quantity is <em>worst</em> is found by the identical procedure with the
 comparison reversed, and several criteria in other fields are defined that way.</p>
 
+<h2 id="timing-the-search">Timing the Search</h2>
+
+<p>To time a search, read a clock before the call and again after it. Python's
+<code>time.perf_counter()</code> reads a clock whose resolution is typically finer than a
+microsecond, so the difference between the two readings is the time the call took:</p>
+
+<pre data-lang="python">import time
+
+start = time.perf_counter()
+score, t1, t2 = windowed_optimum(t, a, 0.015 + 1e-9)
+elapsed = time.perf_counter() - start</pre>
+
+<p>The limit is written as 0.015&nbsp;s plus a nanosecond because the window lengths are computed
+as differences of floating-point times. On the record below, the window from 60.85 to 75.85&nbsp;ms
+comes out at 0.015000000000000013&nbsp;s, a hair over 0.015, so a limit of exactly
+<code>0.015</code> drops it and the search returns 150.38 on the window one sample earlier.
+Comparing <code>j - i &gt; 300</code> in place of <code>T &gt; wmax</code> counts the limit in
+samples and avoids the problem as well.</p>
+
+<p>The example pack's crash, test 9793 (a 2017 Hyundai Elantra), records the driver's head at
+20&nbsp;000 samples a second, 7001 samples in all. A 15&nbsp;ms limit admits windows up to 300
+sample intervals long, and with a window starting at every sample (those before the impact
+included) the search examines 2&nbsp;055&nbsp;150 of them. On the machine that produced this page
+(Python 3.11) it returns HIC<sub>15</sub> = 150.39 on the window from 60.85 to 75.85&nbsp;ms in
+0.69&nbsp;s, the median of three runs that agreed to within 0.01&nbsp;s. MATLAB's
+<code>tic</code> and <code>toc</code> and JavaScript's <code>performance.now()</code> do the
+same job.</p>
+
+<p>The time for many searches is the time for one multiplied by the number of searches. Two
+hundred tests like this one would take about 200&nbsp;&times;&nbsp;0.69&nbsp;s, or 2.3 minutes.
+Without the limit the same record has 24&nbsp;503&nbsp;500 windows, twelve times as many, and one
+search took 8.47&nbsp;s (returning 334.02, which is not HIC<sub>15</sub>), so two hundred would
+take about 28 minutes. The time per window, about a third of a microsecond here, depends on the
+machine and the language, while the count does not. For this reason it is a good idea to report
+both.</p>
+
 <div class="check">
   <span class="label">Check</span>
   <ol>
@@ -1156,9 +1192,9 @@ HIC36, so HIC36's search includes HIC15's winner as a candidate and cannot retur
 value.</p>
      <p>A maximum over a larger feasible set is never smaller. No property of the record is needed.
 Smoothness, shape and the particular numbers 389.4 and 208.2 are all irrelevant. It is a fact
-about constrained optimisation. Which also means the pair carries information. HIC36 = HIC15
-says the best window is shorter than 15&nbsp;ms and the looser limit bought nothing. Here it did
-not, so the optimum sits somewhere between.</p></div></details></li>
+about constrained optimisation. This also means the pair carries information. HIC36 = HIC15
+says the best window is shorter than 15&nbsp;ms and the looser limit bought nothing. Here HIC36 is
+larger, so the best window is longer than 15&nbsp;ms.</p></div></details></li>
     <li>The optimal 15 ms window is 69.92 to 84.88 ms, and the peak acceleration is at 78.6 ms.
     Why is the peak not at the centre of the window?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Because the window is positioned to maximise a functional of the <em>average</em> over its
@@ -1167,9 +1203,9 @@ length, and the record is not symmetric about its peak.</p>
 1.2&nbsp;ms late. The optimum is where the marginal contributions at the two ends balance.
 Extending the leading edge adds whatever acceleration is there, and the trailing edge likewise,
 and the window settles where those are equal. If the record rises more slowly than it falls, the
-balance point sits to one side of the maximum. This is what makes it a search and not a lookup.
-"Find the peak and take 15&nbsp;ms around it" is a different and slightly smaller answer, and
-there is no way to write the right answer as a rule about the peak.</p></div></details></li>
+balance point sits to one side of the maximum. For this reason the window has to be found by searching.
+"Find the peak and take 15&nbsp;ms around it" gives a different and slightly smaller answer, and
+in general the right answer cannot be written as a rule about the peak.</p></div></details></li>
     <li>You are asked for the same quantity on a record ten times as long, at the same sample rate
     and window limit. By what factor does the search cost grow, with the prefix sum and without
     it?
@@ -1180,12 +1216,13 @@ there is no way to write the right answer as a rule about the peak.</p></div></d
 subtraction, so the total is O(<em>nk</em>). Without it each costs a sum of up to <em>k</em>
 terms, so the total is O(<em>nk</em>&sup2;). Both are linear in <em>n</em>, and ten times the
 record is ten times the work either way. What the prefix sum buys is the
-<strong>constant</strong>, and it is a large one: <em>k</em> at 12.5&nbsp;kHz over 15&nbsp;ms is
-about 188, so the naive search does roughly 188 times the arithmetic.</p>
-     <p>The distinction is worth holding onto. A change that divides the work by 187 is enormously
-valuable and is not an improvement in growth rate, and the two are often confused. If the window
+<strong>constant</strong>, and it is a large one. <em>k</em> at 12.5&nbsp;kHz over 15&nbsp;ms is
+about 188, and the average window is about half that long, so the naive search does roughly 93
+times the arithmetic (the factor in the table above).</p>
+     <p>A change that divides the work by 93 is very valuable, though it is not an improvement in
+growth rate, and the two are often confused. If the window
 limit scaled with the record, <em>k</em> would grow with <em>n</em> and the prefix sum would
-change the growth from cubic to quadratic, a different kind of win.</p></div></details></li>
+change the growth from cubic to quadratic.</p></div></details></li>
   </ol>
 </div>
 
@@ -1214,11 +1251,11 @@ constrained windowed optimum with the exponent and the window limit both free.</
   </script>
   
 
-  <script type="module" src="js/bundle/windowed-optimum.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/windowed-optimum.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-09-23">September 23, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-21">October 21, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

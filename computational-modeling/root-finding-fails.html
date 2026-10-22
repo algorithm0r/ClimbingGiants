@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Four ways root finding fails — Computational Physical Modeling</title>
+  <title>Root-finding failures — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -834,7 +834,7 @@
         <a href="week-07.html">Overview</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="conditions-become-roots.html">Conditions become roots</a>
+          <a href="conditions-become-roots.html">Conditions as roots</a>
         
           <span class="site-nav-sep">·</span>
           <a href="bisection.html">Bisection</a>
@@ -843,10 +843,10 @@
           <a href="newton-and-secant.html">Newton and secant</a>
         
           <span class="site-nav-sep">·</span>
-          <strong>Four ways it fails</strong>
+          <strong>Root-finding failures</strong>
         
           <span class="site-nav-sep">·</span>
-          <a href="evaluations-are-the-currency.html">Evaluations</a>
+          <a href="evaluations-are-the-currency.html">Evaluation cost</a>
         
           <span class="site-nav-sep">·</span>
           <a href="windowed-optimum.html">Windowed optimum</a>
@@ -908,7 +908,7 @@
   <main data-pagefind-body class="wide">
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <div class="eyebrow">Week 7 · Root Finding and Search</div>
-<h1>Four ways root finding fails</h1>
+<h1>Root-finding failures</h1>
 
 <div class="claim">
   <span class="label">Claim</span>
@@ -929,7 +929,7 @@ is narrow:</p>
   <li><dfn data-g="bisection">Bisection</dfn> promises that its returned value lies inside an
   interval it maintained, and that $f$ changed sign across that interval at every step. It offers
   this only if it is handed a <dfn data-g="bracket">bracket</dfn> to begin with.</li>
-  <li><dfn data-g="newtons-method">Newton's method</dfn> promises nothing at all in advance. It
+  <li><dfn data-g="newtons-method">Newton's method</dfn> promises nothing in advance. It
   returns the value at which its stopping test happened to be satisfied.</li>
 </ul>
 
@@ -977,7 +977,7 @@ $$y(t) = 3.4520 + 4.7428\,t - 4.9153\,t^2, \qquad
 <p>The fitted curvature corresponds to $g = 9.831$ m/s&sup2;, which is the measurement's own answer
 and not an assumed one. The ball is released at <strong>3.452 m</strong>, above the 3.048&nbsp;m
 hoop, as 99% of the three-pointers in this set are, the median release being 3.59&nbsp;m. So
-$f(0) = +0.404$: the shot starts already above the rim. A downward parabola still has two roots,
+$f(0) = +0.404$, which means the shot starts above the rim. A downward parabola still has two roots,
 and here they are:</p>
 
 <table class="data">
@@ -991,10 +991,10 @@ where the fitted parabola, extended backwards past the frames it was fitted to, 
 crossed rim height if the ball had been in free flight before release, which it was not, because
 it was still in someone's hand. Three consequences follow, and the demo shows all three:</p>
 
-<p><strong>The domain is doing the work, and the routine cannot.</strong> Hand bisection the
+<p><strong>Only the domain separates the two roots, and the routine does not know it.</strong> Hand bisection the
 flight, $[0,\,1.5]$ s, where $f(0) = +0.404$ and $f(1.5) = -3.541$ have opposite signs, so it
-brackets, converges, and returns 1.0437&nbsp;s, which is the right answer. It works because the
-lower limit was set to release, and it works for that reason alone.</p>
+brackets, converges, and returns 1.0437&nbsp;s, which is the right answer. It works only because the
+lower limit was set to release.</p>
 
 <p><strong>Widen the bracket and it stops working.</strong> On $[-0.4,\,1.5]$ both ends are
 negative, so bisection refuses to start on a function with two roots inside the interval it was
@@ -1017,8 +1017,8 @@ moment</dfn> between the supports is</p>
 
 $$M(x) = 15x - 5x^2 \quad \text{kN}\cdot\text{m}$$
 
-<p>Where along the beam is the moment 8 kN·m? Written as a root problem by subtraction, as on the
-<a href="newton-and-secant.html">previous page</a>:</p>
+<p>Where along the beam is the moment 8 kN·m? Written as a root problem by subtraction, as on
+<a href="conditions-become-roots.html">page 19</a>:</p>
 
 $$f(x) = M(x) - 8$$
 
@@ -1027,7 +1027,7 @@ ratio, which is a natural enough thing to do when you are comparing a demand aga
 
 $$g(x) = \frac{8}{M(x)} - 1$$
 
-<p>$g$ and $f$ vanish at exactly the same places. $M$ passes through zero at $x = 3$ m, though,
+<p>$g$ and $f$ vanish at the same places. $M$ passes through zero at $x = 3$ m, though,
 because this beam has an overhang and so has a <dfn data-g="contraflexure">point of
 contraflexure</dfn> between the supports, and at that point $g$ has a pole. Take the bracket
 $[2.4,\,3.7]$, where $g(2.4) = +0.111$ and $g(3.7) = -1.618$, which is a sign change. Bisection
@@ -1037,21 +1037,21 @@ halving, and it returns</p>
 $$x = 3.00000000\ \text{m}$$
 
 <p>The bending moment there is zero. In the subtraction form the residual is $M(3) - 8 = -8$ kN·m,
-which is the entire target and not a small remainder, and in the ratio form it is larger still,
+which is the full size of the target, and in the ratio form it is larger still,
 because $g$ is dividing by a moment of order $10^{-10}$, so $|g|$ at the returned point is about
-$6 imes10^{10}$. Either way the value announces itself the moment anyone evaluates the function
-there. That is, the sign change was real and the root was not. Handed the same bracket, the
+$6\times10^{10}$. Either way the value announces itself the moment anyone evaluates the function
+there. That is, the sign change came from the pole, and there is no root at the returned point. Handed the same bracket, the
 subtraction form refuses, because $f(2.4) = -0.800$ and $f(3.7) = -20.950$ have the same sign.
-Two algebraically equivalent statements of one physical condition, and only one of them invents
-a bracket.</p>
+The two forms state the same physical condition, and only the ratio form produces a bracket
+with no root in it.</p>
 
 <div class="aside">
-  <span class="label">Where the pole came from</span>
+  <span class="label">Origin of the pole</span>
   <p>Nothing in the beam is discontinuous. $M(x)$ is a smooth parabola over the whole span and the
-physical question has two perfectly ordinary answers, so the pole was introduced by the
-dividing, which was a step taken for convenience. This is the general shape of the failure:
-rearranging an equation preserves its roots but not its sign structure, and bracketing methods
-read sign structure.</p>
+physical question has two ordinary answers, so the pole was introduced by the
+dividing, which was a step taken for convenience. This is the general shape of the failure. A
+rearrangement like this one keeps the roots and can still change the sign structure, and
+bracketing methods read sign structure.</p>
 </div>
 
 <cg-demo case="pole"></cg-demo>
@@ -1122,35 +1122,35 @@ accurate.</p>
 <p>The cost shows up as well. Both this case and case&nbsp;1 are Newton applied to a parabola, at
 the same tolerance. Case&nbsp;1 finishes in <strong>7</strong> function evaluations. This one
 takes <strong>23</strong>. The dots in the demo bunch up as they approach the touch point and do
-not leap onto it, which is what the extra evaluations are being spent on: at a simple root
+not leap onto it, which is what the extra evaluations are being spent on. At a simple root
 Newton roughly doubles the number of correct digits each step, and at a double root it gains a
 fixed fraction of the remaining error instead.</p>
 
 <cg-demo case="double"></cg-demo>
 
-<h2 id="three-questions-that-catch-all-four">Three Questions That Catch All Four</h2>
+<h2 id="three-questions-that-catch-all-four">Three Checks</h2>
 
-<p>All four failures survive the routine's own test and all four are caught by three questions
-asked afterwards. None of them requires knowing the answer.</p>
+<p>All four failures survive the routine's own test, and all four are caught by three questions,
+two asked afterwards and one before. None of them requires knowing the answer.</p>
 
 <ol class="plain">
   <li><strong>Evaluate $f$ at the returned value and look at it.</strong> Case 2 fails here
   immediately. The residual is 8 kN·m against a target of 8 kN·m.</li>
   <li><strong>Ask whether the value is in the domain.</strong> Case 3 fails here, because −4.246 m is not
   a point on a beam running from 0 to 6 m. This check is a comparison against the physical setup,
-  not against the mathematics, and it is the one no routine can perform for you.</li>
+  not against the mathematics, and no routine can make it unless you give it the domain.</li>
   <li><strong>Plot $f$ over the whole domain before solving.</strong> Cases 1 and 4 are both
   visible in a single plot, with two crossings in one, a curve that touches and turns back in the
   other, and neither is visible in a returned number.</li>
 </ol>
 
-<p>The third is the cheapest of the three and the one most often skipped. A plot costs a few
-hundred function evaluations. Case 2's bracket cost 34 evaluations to produce a wrong answer
+<p>The third costs the most of the three and is likely the one most often skipped. A plot costs a
+few hundred function evaluations. Case 2's bracket cost 36 evaluations to produce a wrong answer
 that looked converged to eight decimal places.</p>
 
 <h2 id="in-code">In Code</h2>
 
-<p>The verification, and not the solver. Given whatever a routine returned, these are the three
+<p>This is the verification code, and it runs after the solver. Given whatever a routine returned, these are the three
 checks above, in the order above.</p>
 
 <div class="codetabs" id="code1">
@@ -1210,7 +1210,7 @@ end</pre>
 of the three checks pass. What disqualifies it is that the problem has no times before release.
 That test exists only because someone wrote down what the domain was. Had the bracket started at
 <var>t</var> = 0 the routine would have returned the right answer and the check would have been
-redundant. Which is the usual relationship between a safeguard and the bug it prevents.</p>
+redundant. That is the usual relationship between a safeguard and the bug it prevents.</p>
 
 <div class="check">
   <span class="label">Check</span>
@@ -1220,7 +1220,7 @@ redundant. Which is the usual relationship between a safeguard and the bug it pr
     2.4999 and 2.5001 and find both values negative. What has the routine found, and what should
     you
     expect of the accuracy?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>It has found <strong>a double root</strong>, meaning a point where <em>f</em> touches zero and
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>It has most likely found <strong>a double root</strong>, meaning a point where <em>f</em> touches zero and
 turns back without crossing. Both neighbours being negative rules out a simple root, at which
 they would have opposite signs.</p>
      <p>The accuracy is <strong>far worse than the residual suggests</strong>. Near a double root
@@ -1230,7 +1230,7 @@ they would have opposite signs.</p>
 <strong>10<sup>&minus;6</sup></strong> for <em>C</em> of order 1. <strong>Half the digits are
 gone</strong>, and the stopping test, which measures |<em>f</em>|, cannot see it.</p>
      <p>Two consequences. Bisection cannot find this root at all, because there is no sign change to
-bracket. And Newton, which does converge here, drops from quadratic to linear, so it needs many
+bracket. Newton, which does converge here, drops from quadratic to linear, so it needs many
 more steps than usual for an answer that is much less accurate than usual.</p></div></details></li>
     <li>You are solving <var>P</var>(x) = <var>P</var><sub>allow</sub> for a column. Give the two
     formulations by subtraction and by ratio, and say which one you would hand to bisection and
@@ -1246,8 +1246,8 @@ division introduces a pole wherever it vanishes, and a sign change across a pole
 The subtraction also keeps the units of <em>P</em>, so a tolerance on |<em>f</em>| is a
 tolerance in kN and means something physical. Divide, and the tolerance becomes dimensionless
 and its size has to be reasoned about separately.</p>
-     <p>The general rule. Never introduce a division you were not given. It cannot add a root and it can
-add a pole.</p></div></details></li>
+     <p>As a general rule, avoid introducing a division you were not given, since it cannot add a root
+and it can add a pole.</p></div></details></li>
     <li>Newton returns a value outside the domain of your problem in three steps, with a residual
     of
     10⁻¹⁰. Is the routine faulty? What would you change to get a usable answer?
@@ -1264,9 +1264,8 @@ claimed any. Three changes, in order of what they cost:</p>
      <li><strong>Use a bracketing or hybrid method.</strong> Then the domain is the bracket and
      leaving it is not possible.</li>
      </ol>
-     <p>The residual of 10<sup>&minus;10</sup> is the part to sit with. It is excellent, and it is
-excellent about the wrong thing. It is a number that certifies the answer satisfies the
-equation, on a page about how many ways that is not enough.</p></div></details></li>
+     <p>The residual of 10<sup>&minus;10</sup> shows that the answer satisfies the equation, and the
+four cases above show that this alone does not make it the answer to your problem.</p></div></details></li>
   </ol>
 </div>
 
@@ -1295,11 +1294,11 @@ bisection, secant and Newton on any signal, counting evaluations.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/root-finding-fails.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/root-finding-fails.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-09-23">September 23, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-22">October 22, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

@@ -6,7 +6,7 @@ const svgEl = (n, a = {}) => { const e = document.createElementNS('http://www.w3
   for (const k in a) e.setAttribute(k, a[k]); return e; };
 
 /* cumulative trapezoid: s[i] is the integral from the start up to sample i.
-   Shared because pages 5-8 and 25 all build one. */
+   Shared because pages 5-8 and 24 all build one. */
 function integrate(y, dt) {
   const s = new Float64Array(y.length);
   for (let i = 1; i < y.length; i++) s[i] = s[i-1] + (y[i] + y[i-1]) * 0.5 * dt;
@@ -1086,6 +1086,89 @@ mountDemo({
     }
   }
 });
+
+/* ---------------------------------------------------------------------------
+   fig-heldout — two models scored on frames they were not fitted to. Example
+   pack (held back), 23 shots (shot 325 left out, its tracking runs in straight
+   steps). Each shot's free flight (page 13's rules) is split in half; gravity fitted
+   and gravity held at 9.81 are both fitted to the first half and scored by
+   RMS on the second. Computed here from data/example/train.json.
+--------------------------------------------------------------------------- */
+(async () => {
+  const host = document.querySelector('#fig-heldout .fig-body');
+  if (!host) return;
+  let d;
+  try { d = await (await fetch('data/example/train.json')).json(); }
+  catch (e) { return; }
+  const G = 9.81;
+  const release = (t, z) => {
+    const n = t.length, vz = new Array(n).fill(NaN);
+    for (let i = 2; i < n - 2; i++) vz[i] = (z[i + 2] - z[i - 2]) / (t[i + 2] - t[i - 2]);
+    let i = 0;
+    for (let k = 1; k < n; k++) if (z[k] > z[i]) i = k;
+    while (i > 3 && (vz[i - 1] > vz[i] || vz[i - 2] > vz[i])) i--;
+    return i;
+  };
+  const solve = (A, b) => {                 /* small dense system, Gaussian elimination */
+    const n = b.length, M = A.map((r, i) => [...r, b[i]]);
+    for (let k = 0; k < n; k++) {
+      let p = k;
+      for (let i = k + 1; i < n; i++) if (Math.abs(M[i][k]) > Math.abs(M[p][k])) p = i;
+      [M[k], M[p]] = [M[p], M[k]];
+      for (let i = k + 1; i < n; i++) {
+        const f = M[i][k] / M[k][k];
+        for (let c = k; c <= n; c++) M[i][c] -= f * M[k][c];
+      }
+    }
+    const x = new Array(n).fill(0);
+    for (let i = n - 1; i >= 0; i--) {
+      let s = M[i][n];
+      for (let c = i + 1; c < n; c++) s -= M[i][c] * x[c];
+      x[i] = s / M[i][i];
+    }
+    return x;
+  };
+  const lsq = (cols, y) => {                /* normal equations for a few columns */
+    const p = cols.length;
+    const A = cols.map(a => cols.map(b => a.reduce((s, v, i) => s + v * b[i], 0)));
+    const b = cols.map(a => a.reduce((s, v, i) => s + v * y[i], 0));
+    return solve(A, b);
+  };
+  const fitFree = (t, z) => lsq([t.map(() => 1), t, t.map(v => v * v)], z);
+  const fitHeld = (t, z) => {
+    const c = lsq([t.map(() => 1), t], z.map((v, i) => v + 0.5 * G * t[i] * t[i]));
+    return [c[0], c[1], -G / 2];
+  };
+  const rms = (c, t, z) => 100 * Math.sqrt(t.reduce((s, v, i) =>
+    s + (c[0] + c[1] * v + c[2] * v * v - z[i]) ** 2, 0) / t.length);
+  const pts = [];
+  for (const s of d.shots) {
+    if (s.id === 325) continue;
+    let end = 0;
+    while (Math.hypot(s.x[end] - s.hoop_x, s.y[end] - s.hoop_y) >= 1.0) end++;
+    const r = release(s.t, s.z);
+    const t = s.t.slice(r, end), z = s.z.slice(r, end), h = Math.floor(t.length / 2);
+    const tf = t.slice(0, h), zf = z.slice(0, h), tp = t.slice(h), zp = z.slice(h);
+    pts.push({free: rms(fitFree(tf, zf), tp, zp), held: rms(fitHeld(tf, zf), tp, zp)});
+  }
+  host.dataset.n = pts.length;               /* read back by the page check */
+  const L = v => Math.log10(v);
+  diagram(host, {
+    w: 660, h: 330, xRange: [L(0.8), L(60)], yRange: [L(0.8), L(60)],
+    title: 'RMS error on the unseen second half (cm), log scales',
+    alt: 'Twenty-three points, one per shot, with the error holding gravity across and the '
+       + 'error fitting gravity up. Most points sit above the equal-error diagonal.',
+    leads: [{from: [L(0.8), L(0.8)], to: [L(60), L(60)], cls: 'ghost'}],
+    points: pts.map(p => ({x: L(p.held), y: L(p.free), r: 3.4})),
+    notes: [
+      {x: L(1), y: L(1), anchor: 'start', dy: -8, text: '1 cm'},
+      {x: L(10), y: L(10), anchor: 'start', dx: 6, text: '10 cm, equal error'},
+      {x: L(1.0), y: L(40), anchor: 'start', cls: 'hi', text: 'above the line: holding g did better'},
+      {x: L(55), y: L(0.95), anchor: 'end', text: 'gravity held at 9.81 \u2192'},
+      {x: L(0.85), y: L(55), anchor: 'start', dy: 14, text: '\u2191 gravity fitted'}
+    ]
+  });
+})();
 
 /* ---- code: highlighting + per-line notes ---- */
 const RULES={

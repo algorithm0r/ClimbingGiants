@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Residual structure — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -839,6 +839,9 @@
           <span class="site-nav-sep">·</span>
           <a href="fit-error-and-prediction-error.html">Fit and prediction error</a>
         
+          <span class="site-nav-sep">·</span>
+          <a href="fleet-comparison.html">Fleet comparison</a>
+        
         <span class="site-nav-sep">·</span>
         <a href="assign-10.html">Assignment</a>
       </div>
@@ -913,7 +916,7 @@
 <p>If the model form is right and the errors are ordinary measurement noise, the residuals should
 look like the noise did: independent, symmetric about zero, with no relationship to $x$.
 Specifically, nothing about $r_i$ should be predictable from $x_i$ or from $r_{i-1}$. That gives
-a test that needs no reference and no truth: plot the residuals against $x$ and look. The eye is
+a test that needs no reference and no truth, which is to plot the residuals against $x$ and look. The eye is
 usually good at this, better than at reading a fitted curve, because a fitted curve drawn
 through data hides small systematic gaps that a residual plot magnifies to full height.</p>
 
@@ -938,9 +941,10 @@ through data hides small systematic gaps that a residual plot magnifies to full 
 </table>
 
 <p>The second row is the common one and it is easy enough to see once you look for it. A straight
-line fitted to gently curved data gives residuals that are positive at both ends and negative in
-the middle, which is a smile, and the fit may be within 1% everywhere while the smile is still a
-statement that the data curve and the model does not.</p>
+line fitted to gently curved data gives residuals of one sign at both ends and the other sign in
+the middle (a frown for the demo's data, which curve downward, and a smile for data that curve
+upward), and the fit may be within 1% everywhere while the pattern is still a statement that the
+data curve and the model does not.</p>
 
 <h2 id="size-versus-structure">Size Versus Structure</h2>
 
@@ -951,15 +955,15 @@ statement that the data curve and the model does not.</p>
   systematic. The remaining error is <em>predictable</em>, which means it can be removed by
   improving the model, and it will not average out over more data, because it is not random.</li>
   <li><strong>Large, and structureless.</strong> The model is capturing what is there and the
-  measurement is noisy. More data will help. A better model form will not.</li>
+  measurement is noisy. More data will help, and a better model form will not.</li>
 </ul>
 
-<p>Structure is therefore the more actionable of the two, and it is the one a single summary
-number, whether R², RMS residual or χ², throws away. Every one of those collapses the residual
-vector to a magnitude, which is exactly the information that does not matter here.</p>
+<p>Thus structure is the more actionable of the two, and it is the one a single summary number
+(R², RMS residual or χ²) throws away. Every one of those collapses the residual vector to a
+magnitude, and magnitude is not what this diagnosis uses.</p>
 
 <div class="aside">
-  <span class="label">The run test, when the eye is not enough</span>
+  <span class="label">The run test</span>
   <p>With few points, or when a judgement has to be defensible, count sign changes. For $n$ residuals
 with no structure the number of runs of consecutive same-signed values should be around $n/2 +
 1$, and far fewer than that means the residuals are clustered by sign, which is what a
@@ -968,8 +972,8 @@ positive then five negative, is a strong signal, and it can be reported as a num
 an impression.</p>
   <p><strong>It tests one thing.</strong> In the demo the adequate case gives 13 runs and the gently
 curved case gives 3, so the diagnoses are opposite where the residuals differ in size by only a
-third (0.269 against 0.359). But the fanning case gives 12 runs and the single-outlier case 11.
-Neither disturbs the <em>order</em> of the signs at all, so the run count is blind to both. The
+third (0.269 against 0.359). However, the fanning case gives 12 runs and the single-outlier case 11.
+Neither disturbs the <em>order</em> of the signs, so the run count is blind to both. The
 second readout beside it, the largest residual divided by the RMS, is what catches the outlier,
 at 4.6× against about 2.4× for every other case.</p>
 </div>
@@ -982,14 +986,13 @@ at 4.6× against about 2.4× for every other case.</p>
     good? What would you do next?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>No.</strong> A smile is structure, and structure means the model form cannot follow the
 data. The 0.3% is irrelevant to that conclusion, which would be the same at 0.003%. What the
-pattern says specifically is that the model is too low in the middle and too high at both ends,
-or the reverse. That is missing curvature, and the residuals have drawn a picture of the term
+pattern says specifically is that the model is too high in the middle and too low at both ends. That is missing curvature, and the residuals have drawn a picture of the term
 that is absent. So the next step is <strong>to change the model form and not to improve the
 fit</strong>. Add the quadratic term the smile is asking for, refit, and look at the residuals
 again, where they should now be scatter. If a new pattern appears, that is the next missing
 term. What not to do is report 0.3% and move on. The fit is being used at values of <em>x</em>
 where the smile is largest, and there the model is wrong by a knowable amount in a knowable
-direction, which is a worse position to be in than being wrong at random.</p></div></details></li>
+direction (an error that will not average out).</p></div></details></li>
     <li>Residuals fan out with <em>x</em>. Name the assumption that has failed and one way to
     address it.
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Constant variance</strong>, meaning that every point carries the same size of error. A
@@ -1001,7 +1004,7 @@ need to be.</p>
      <p>To address it: <strong>weighted least squares</strong>, with each point weighted by
 1/&sigma;(<em>x</em>)&sup2;, where &sigma;(<em>x</em>) comes from the fan you just observed. Or
 <strong>transform</strong>. If the scatter is proportional to the value, fitting on
-log&thinsp;<em>y</em> makes it constant, which is the same argument as page 16's. Either way the
+log&thinsp;<em>y</em> makes it constant, which is the same argument as page 15's. Either way the
 parameters change, and so does their uncertainty. A fan left unaddressed usually means the
 reported confidence in the fitted slope is wrong.</p></div></details></li>
     <li>Why does a single number like R² not answer any question this page asks?
@@ -1011,10 +1014,10 @@ a perfect smile and a fit whose residuals are random scatter can have <em>identi
 R&sup2;. One has a wrong model form and the other does not, and the number cannot tell them
 apart because it never looks at the order the residuals come in, so shuffle them and R&sup2; is
 unchanged. It also moves the wrong way under added parameters. R&sup2; cannot decrease when a
-parameter is added, whether or not the parameter means anything, so it rewards exactly the
-over-fitting page 35 is about. The plot answers all of it and takes one line to make. That is
-the trade every summary statistic offers, which is a number you can put in a table, in exchange
-for the dimension the failure lives in.</p></div></details></li>
+parameter is added, whether or not the parameter means anything, so it rewards the
+over-fitting page 34 is about. The plot answers all of it and takes one line to make. That is
+the trade a summary statistic offers, a number you can put in a table in exchange for the order
+of the residuals, which is where this failure shows.</p></div></details></li>
   </ol>
 </div>
 
@@ -1044,11 +1047,11 @@ outside it reported separately.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/residual-structure.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/residual-structure.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-16">October 16, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-22">October 22, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

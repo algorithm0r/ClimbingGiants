@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>State as a vector — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -834,7 +834,7 @@
         <a href="week-08.html">Overview</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="from-a-rate-to-a-trajectory.html">Rate to trajectory</a>
+          <a href="from-a-rate-to-a-trajectory.html">Euler&#39;s method</a>
         
           <span class="site-nav-sep">·</span>
           <strong>State as a vector</strong>
@@ -908,12 +908,12 @@
   <span class="label">Claim</span>
   <p class="exact">A stepping method advances a state whose rate depends only on the state itself.
   A second-order equation is put into that form by making the first derivative part of the state. The pair (position, velocity) advances as one object, and its rate is (velocity, acceleration).
-  Every method in this week then applies unchanged, whatever the size of the state.</p>
+  Every method in this week then applies unchanged to a state of any size.</p>
   <p class="plain">Carry the velocity along as part of what you are tracking, and a second-order
   problem becomes a first-order one with two numbers in it instead of one.</p>
 </div>
 
-<h2 id="the-problem-with-second-order">The Problem with Second Order</h2>
+<h2 id="the-problem-with-second-order">Second-Order Equations</h2>
 
 <p>Newton's second law gives an acceleration, so mechanics produces equations like</p>
 
@@ -934,18 +934,16 @@ second entry's rate is the acceleration, which the equation gives:</p>
 $$\dot{\mathbf{s}} \;=\; \begin{bmatrix} \dot x \\ \dot v \end{bmatrix}
   \;=\; \begin{bmatrix} v \\ \dfrac{-c v - k x}{m} \end{bmatrix}$$
 
-<p>The right-hand side depends only on $x$ and $v$, which is to say only on the state, and that is
-the whole requirement. The equation is now first order in a two-component state. Euler applied
+<p>The right-hand side depends only on $x$ and $v$. That is, it depends only on the state, which is
+the one requirement. The equation is now first order in a two-component state. Euler applied
 to it is the same one line as before, done to both components at once:</p>
 
 $$\mathbf{s}_{k+1} \;=\; \mathbf{s}_k + h\,\dot{\mathbf{s}}(\mathbf{s}_k)$$
 
 <h2 id="driven-systems">Driven Systems</h2>
 
-<p>A spring left alone is not what mechanics usually hands you. Something is normally pushing, and
-in a crash test the something is the car.</p>
-
-<p>An occupant is held to the car by a belt. The car hits the barrier and stops, the occupant keeps
+<p>Mechanics usually hands you a spring with something pushing on it, and in a crash test the
+something is the car. An occupant is held to the car by a belt. The car hits the barrier and stops, the occupant keeps
 going, and the belt stretches. What it pulls back with depends on how far the occupant has moved
 <em>relative to the car</em> and how fast they are still moving relative to it. That is a spring
 and a damper again, measured between two things that are both moving. Write $u$ for the
@@ -959,22 +957,22 @@ $$m\ddot{u} + c\dot{u} + k u \;=\; -m\,a_{\text{car}}(t)$$
 $$\dot{\mathbf{s}} \;=\; \begin{bmatrix} \dot u \\ \dot w \end{bmatrix}
   \;=\; \begin{bmatrix} w \\ \dfrac{-c w - k u}{m} - a_{\text{car}}(t) \end{bmatrix}$$
 
-<p class="plain">Forcing adds a term to the acceleration, and it adds nothing at all to the state.</p>
+<p class="plain">Forcing adds a term to the acceleration and leaves the size of the state unchanged.</p>
 
 <p>On a real barrier test, a 75&nbsp;kg occupant on a belt of 296&nbsp;kN/m with
 2.8&nbsp;kN&middot;s/m of damping travels about 105&nbsp;mm relative to the car before coming
-back, and that is the number the restraint has to deliver inside the space available.</p>
+back. The restraint has to keep that travel inside the space available.</p>
 
 <h3 id="a-time-dependent-rate">A Time-Dependent Rate</h3>
 
 <p>One thing has changed that the equation does not show. Every rate so far has been a function of
 the state alone, so that handing it $x$ and $v$ returns the derivative, while this one needs
 $a_{\text{car}}(t)$, and that is a recorded array, sampled every 0.1&nbsp;ms or every
-0.05&nbsp;ms, whatever the lab's logger was set to. So the rate function has to be given the
-time as well as the state, and it has to answer for times that fall between samples. Take a step
-equal to the record's own sample interval and the question never comes up, though halve the
-step, which is exactly what showing an answer has settled requires, and every second evaluation
-lands between two recorded values.</p>
+0.05&nbsp;ms (depending on how the lab's logger was set). So the rate function has to be given the
+time as well as the state, and it has to answer for times that fall between samples. If you take
+a step equal to the record's own sample interval the question never comes up. If you halve the
+step (which showing an answer has settled requires) every second evaluation lands between two
+recorded values.</p>
 
 <div class="check"><p><strong>Check.</strong> A stepper is run on the occupant at half the
 record's sample interval. The driving acceleration is looked up by rounding the time to the
@@ -987,15 +985,15 @@ across each sample interval.</p>
     <p><strong>You would not notice from the output.</strong> The trajectory is smooth, the travel is
 the right order of magnitude, and halving the step again changes the answer only slightly, so a
 convergence check of the kind this week asks for is passed. The run does converge, though it
-converges on the solution to a slightly different problem, which is the failure page 28 warns
+converges on the solution to a slightly different problem, which is the failure page 27 warns
 about when it says a reference may share the bug it is meant to catch. Interpolating between the
 two nearest samples instead removes it, and which interpolation you use matters a good deal less
-than using one at all.</p>
+than using one.</p>
     </div></details></p></div>
 
 <h2 id="the-definition-of-state">The Definition of State</h2>
 
-<p>The rule is mechanical: <strong>the state must contain everything the rate depends on.</strong>
+<p>The rule is mechanical. <strong>The state must contain everything the rate depends on.</strong>
 Anything the rate needs and the state lacks has to be added, and anything the rate never uses
 does not belong.</p>
 
@@ -1015,15 +1013,32 @@ $$a_x = -k\,|\mathbf{v}|\,v_x, \qquad a_y = -g - k\,|\mathbf{v}|\,v_y$$
 
 <p>and $|\mathbf{v}| = \sqrt{v_x^2 + v_y^2}$. The horizontal acceleration depends on the vertical
 velocity. The two directions cannot be integrated separately, because neither one's rate is a
-function of that direction alone. Which is exactly what "the rate depends on the state" means
+function of that direction alone. This is what "the rate depends on the state" means
 when the state has more than one entry.</p>
+
+<div class="aside">
+  <span class="label">A value for k</span>
+  <p>The constant collects the air and the ball, $k = \rho C_D A / (2m)$, where $\rho$ is the
+density of the air, $A = \pi r^2$ is the ball's cross-section, $m$ is its mass and $C_D$ is its
+drag coefficient. $C_D$ is the only one of these with no value set by a rule or a table, so it
+comes from experiment. Zhang, Zhu, Li and Hong measured it for size 7 match balls in a wind
+tunnel ("Experimental investigation on the aerodynamic drag of basketballs", <em>iScience</em>
+29(8), 115873, 2026). Above about 6&nbsp;m/s, which is most of a shot's flight, it settles
+between 0.3 and 0.4. The ball's radius is in the header of the
+shots file (0.1195&nbsp;m, so $A$ = 0.0449&nbsp;m²), and FIBA's equipment rules put a size 7 ball
+between 580 and 620&nbsp;g (Official Basketball Rules 2026, Basketball Equipment, Table 1). Air at
+20&nbsp;°C and sea-level pressure has a density of 1.20&nbsp;kg/m³. Together these give $k$
+between 0.013 and 0.019 per metre (0.016 for $C_D$ = 0.35 and 600&nbsp;g), so at 9&nbsp;m/s
+drag decelerates the ball at about 1.3&nbsp;m/s², or 13% of $g$. The demos on these pages use
+$k$ = 0.012 (a $C_D$ of about 0.27 for a 600&nbsp;g ball), a little below that range.</p>
+</div>
 
 <cg-demo case="state"></cg-demo>
 
 <h2 id="in-code">In Code</h2>
 
-<p>The consequence in practice is that the method never mentions the physics and the physics never
-mentions the method. One function defines the system. Another advances any system.</p>
+<p>In practice the code splits in two, with one function that defines the system and another that
+advances any system it is given.</p>
 
 <div class="codetabs" id="code1">
   <div class="tabs" role="tablist">
@@ -1066,9 +1081,9 @@ const step = (f, t, s, h) =>
 </div>
 
 <p>That separation is why library solvers all take the same argument, which is a function returning
-the rate of a state. <code>scipy.integrate.solve_ivp</code> and MATLAB's <code>ode45</code> want
-exactly the function above, and putting a problem into this form is most of the work of using
-them.</p>
+the rate of a state. <code>scipy.integrate.solve_ivp</code> and MATLAB's <code>ode45</code> take
+a function of the same shape, and putting a problem into this form is usually most of the work of
+using them.</p>
 
 <div class="check">
   <span class="label">Check</span>
@@ -1079,8 +1094,8 @@ them.</p>
      <p><strong>s</strong> = (&theta;, &omega;), where &omega; = &theta;&#775;. and the rate of the
 state is d<strong>s</strong>/d<em>t</em> = (&omega;, &minus;(<em>g</em>/<em>L</em>)
 sin&thinsp;&theta;).</p>
-     <p>The first component is the definition of &omega; and the second is the physics. That is the
-whole rewrite. A second-order equation in one variable becomes a first-order system in two, at
+     <p>The first component is the definition of &omega; and the second is the physics, and that is
+the rewrite. A second-order equation in one variable becomes a first-order system in two, at
 the cost of carrying the derivative as a variable in its own right. Nothing about the stepping
 method changes. The same <code>step</code> that advanced a scalar advances this, because it only
 ever asked for a state and a rate.</p></div></details></li>
@@ -1091,13 +1106,14 @@ ever asked for a state and a rate.</p></div></details></li>
 couples the two directions. Two separate loops can only use each component's own speed, so each
 axis is decelerated as though the other were stationary. Since |<strong>v</strong>| is never
 smaller than either component, the decoupled version <strong>always underestimates the
-drag</strong>. The ball flies too far and too flat, and the error is one-signed, so it
+drag</strong>. The ball flies too far and too high, and the error is one-signed, so it
 accumulates.</p>
-     <p>Worst <strong>at the apex, for the vertical equation</strong>. There <em>v<sub>y</sub></em>
-passes through zero while the ball is still moving fast horizontally, so the true vertical drag
-is small but non-zero and the decoupled model puts it at exactly zero, so the ratio between them
-is unbounded. For the horizontal equation the worst points are launch and landing, where the
-vertical component dominates. The tell in a result. Fitted drag that comes out different on the
+     <p>Worst <strong>near the apex, for the vertical equation</strong>. There
+<em>v<sub>y</sub></em> passes through zero while the ball is still moving fast horizontally, so
+the decoupled vertical drag (proportional to <em>v<sub>y</sub></em>&sup2;) shrinks much faster
+than the true one (proportional to |<strong>v</strong>|<em>v<sub>y</sub></em>), and the ratio
+between them grows without bound. For the horizontal equation the worst points are typically
+launch and landing, where the vertical component is largest. The tell in a result. Fitted drag that comes out different on the
 way up and the way down, for a coefficient that is a property of the ball.</p></div></details></li>
     <li>Two masses connected by a spring, each free to move in one direction. How large is the
     state, and what is the rate of each component?
@@ -1112,7 +1128,7 @@ law. The spring pulls the two masses towards each other when stretched, so the f
 and opposite, and the accelerations differ by the mass ratio.</p>
      <p>The rule generalises: <strong>two components per degree of freedom</strong> for a second-order
 system. Six masses in three dimensions is a state of 36, and the stepping code is unchanged.
-Which is the reason for writing it against a state vector and not against named variables.</p></div></details></li>
+This is the reason for writing it against a state vector and not against named variables.</p></div></details></li>
   </ol>
 </div>
 
@@ -1141,11 +1157,11 @@ and RK4 on an equation you write, with the order measured from the run and not q
   </script>
   
 
-  <script type="module" src="js/bundle/state-as-a-vector.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/state-as-a-vector.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-16">October 16, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-22">October 22, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

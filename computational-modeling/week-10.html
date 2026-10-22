@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Week 10, Validation and Reporting — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -839,6 +839,9 @@
           <span class="site-nav-sep">·</span>
           <a href="fit-error-and-prediction-error.html">Fit and prediction error</a>
         
+          <span class="site-nav-sep">·</span>
+          <a href="fleet-comparison.html">Fleet comparison</a>
+        
         <span class="site-nav-sep">·</span>
         <a href="assign-10.html">Assignment</a>
       </div>
@@ -898,14 +901,14 @@
     <div class="eyebrow">Week 10 · Validation and Reporting</div>
 <h1>Week 10, Validation and Reporting</h1>
 
-<p>The last week is about deciding whether a model is good enough, and saying so in a way someone else can check. Residuals are read for their shape and not for their size, because a small residual left over from a model of the wrong form is still a model of the wrong form. The error that matters is measured on data the model never saw, which is usually larger than the error you measured while fitting (sometimes a good deal larger).</p>
+<p>The last week is about deciding whether a model is good enough, and saying so in a way someone else can check. Residuals are read for their shape and not for their size, because a model of the wrong form can still leave small residuals. The error that matters for prediction is measured on data the model never saw, and it is usually larger than the error you measured while fitting (sometimes a good deal larger).</p>
 
 <h2 id="learning-objectives">Learning Objectives</h2>
 
 <ul>
   <li>Read residuals for structure, and name what a pattern in them is telling you.</li>
   <li>Hold data back from a fit and measure prediction error against it.</li>
-  <li>Say why adding parameters always lowers the fit error and eventually raises the prediction error.</li>
+  <li>Say why adding parameters never raises the fit error and, past some point, usually raises the prediction error.</li>
   <li>Write up an analysis so that someone else can reproduce it and disagree with it.</li>
 </ul>
 
@@ -915,8 +918,9 @@
 
 <table class="data">
   <tr><th>#</th><th>Page</th><th>Summary</th></tr>
-  <tr><td>34</td><td><a href="residual-structure.html">Residual structure</a></td><td>Read residuals for their shape, not their size</td></tr>
-  <tr><td>35</td><td><a href="fit-error-and-prediction-error.html">Fit error and prediction error</a> <span title="the week's anchor">&#9733;</span></td><td>Measured on the data you fitted, and on data you held back</td></tr>
+  <tr><td>33</td><td><a href="residual-structure.html">Residual structure</a></td><td>Reading patterns in residuals</td></tr>
+  <tr><td>34</td><td><a href="fit-error-and-prediction-error.html">Fit error and prediction error</a> <span title="the week's anchor">&#9733;</span></td><td>Held-out testing and model selection</td></tr>
+  <tr><td>35</td><td><a href="fleet-comparison.html">Fleet comparison</a></td><td>Placing one test among others run the same way</td></tr>
 </table>
 
 <h2 id="assignment">Assignment</h2>
@@ -938,10 +942,10 @@ example pack, each in a different style.</p>
 
   
 
-  <script src="js/page.js?v=20261017141252"></script>
+  <script src="js/page.js?v=20261022093533"></script>
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-16">October 16, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-22">October 22, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Interpolation and regression — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -837,7 +837,7 @@
           <a href="model-form-and-parameters.html">Model form</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="least-squares-is-one-norm.html">One choice of norm</a>
+          <a href="least-squares-is-one-norm.html">Choice of norm</a>
         
           <span class="site-nav-sep">·</span>
           <a href="linearity-in-the-parameters.html">Linear in parameters</a>
@@ -917,13 +917,12 @@
   <dfn data-g="regression">Regression</dfn> constructs one that does not, and is not meant to.
   The two are applied to the same
   inputs and encode opposite assumptions about them. Interpolation assumes the values are exact,
-  regression assumes they carry error. Choosing wrongly produces a confident curve that is wrong
-  between the points.</p>
+  regression assumes they carry error. Choosing wrongly can produce a confident curve that is wrong between the points.</p>
   <p class="plain">  Going through every point is a virtue if the points are exact and a fault if they are noisy,
   and   the data do not say which they are.</p>
 </div>
 
-<h2 id="exact-values-or-values-with-noise">Exact Values, or Values with Noise</h2>
+<h2 id="exact-values-or-values-with-noise">Exact and Noisy Values</h2>
 
 <table class="data">
   <tr><th></th><th>Interpolation</th><th>Regression</th></tr>
@@ -936,8 +935,8 @@
 </table>
 
 <p>The third row is the mechanical difference and the second is the one that decides. An
-interpolating curve has exactly enough freedom to hit every point, so it must hit them, while a
-regression has less freedom and cannot, and what it does instead is average.</p>
+interpolating curve has exactly enough freedom to hit every point, so it must hit them. A
+regression has less freedom and usually cannot, so it averages.</p>
 
 <h2 id="interpolation-versus-regression">Interpolation Versus Regression</h2>
 
@@ -959,53 +958,55 @@ one treats the noise.</p>
 </table>
 
 <p>Both interpolants have a residual of exactly zero and neither is the most accurate. The
-regression, which honours none of the points, is closest to the curve they came from, at
-twenty-four times closer than the interpolant that passes through every one of them, and its
-residual of 0.0185 looks like a defect when it is roughly the noise the fit declined to follow.
+regression, which honours none of the points, is closest to the curve they came from (twenty-four
+times closer than the interpolant that passes through every one of them). Its residual of 0.0185
+is roughly the noise the fit declined to follow.
 That makes the residual an estimate of σ, which is a good deal more useful than a zero. Nothing
 in the eleven points themselves distinguishes the cases. The interpolants' zero residual is not
 evidence in their favour, and the regression's non-zero residual is not evidence against it. The
-ranking above is only available because the truth is known here, and on your own data it will
-not be.</p>
+ranking above is only available because the truth is known here, which on your own data it
+usually will not be.</p>
 
 <div class="aside">
   <span class="label">Runge's phenomenon</span>
   <p>The swings of the degree-10 interpolant above are it following the noise. A high-degree
-interpolant will also misbehave near the ends with <em>exact</em> data, though. Carl Runge
+interpolant can also misbehave near the ends with <em>exact</em> data, though. Carl Runge
 showed in 1901 that interpolating $1/(1 + 25x^2)$ at equally spaced points gives an error that
 grows without limit as points are added. Adding data makes it worse, which is the opposite of
-what intuition offers, and it is why high-degree polynomial interpolation is not used in
+what intuition offers, and it is why high-degree polynomial interpolation is rarely used in
 practice. Splines, which are low-degree polynomials on each interval joined smoothly, are what
 is used instead, and they do not have the problem.</p>
 </div>
 
-<h2 id="interpolation-done-properly">Interpolation Done Properly</h2>
+<h2 id="interpolation-done-properly">Kinds of Interpolation</h2>
 
-<p>When the values genuinely are exact, as in a tabulated material property or a lookup table from
+<details class="ans"><summary><span>Optional, open to read</span></summary><div class="body">
+<p>When the values are exact, as in a tabulated material property or a lookup table from
 a standard, interpolation is the right operation and the only question is which kind:</p>
 
 <ul class="plain">
   <li><strong>Linear.</strong> Join adjacent points with straight lines. Cannot oscillate, has a
-  kink at every point, and the error is bounded by the curvature times the spacing squared. Almost
+  kink at every point, and the error is bounded by the second derivative times the spacing squared. Almost
   always the right first choice.</li>
   <li><strong><dfn data-g="spline">Cubic spline</dfn>.</strong> A cubic on each interval, matched
   in value and first two
-  derivatives at the joins. Smooth and local, so moving one point changes the curve near it and not at the far end, and free of Runge's problem.</li>
+  derivatives at the joins. Smooth and local, so moving one point changes the curve mostly near it and very little at the far end, and free of Runge's problem.</li>
   <li><strong>Single high-degree polynomial.</strong> One polynomial through all $n$ points.
   Global,
-  oscillatory, and worse the more points you have. Almost never what you want.</li>
+  oscillatory, and on equally spaced points worse the more points you have. Almost never what you want.</li>
 </ul>
+</div></details>
 
-<h2 id="choosing-by-provenance-not-by-fit">Choosing by Provenance, Not by Fit</h2>
+<h2 id="choosing-by-provenance-not-by-fit">Choosing by Provenance</h2>
 
-<p>The question is never "which fits better", because the interpolant always fits better by
-construction, and the comparison is meaningless. The question is <strong>where did these numbers
+<p>Asking "which fits better" does not help, because the interpolant always fits the points at
+least as well by construction. The question is <strong>where did these numbers
 come from</strong>:</p>
 
 <ul class="plain">
   <li>Read off an instrument, tracked from video, sampled from a sensor. They carry error, and a
   curve that honours each one exactly is honouring the error too. Regress.</li>
-  <li>Taken from a table of standard values, or computed exactly from a formula. They carry no error, and a curve that misses them is losing information you had. Interpolate.</li>
+  <li>Taken from a table of standard values, or computed exactly from a formula. They are treated as exact, and a curve that misses them is losing information you had. Interpolate.</li>
 </ul>
 
 <p>The failure mode is interpolating measured data because the zero residual looks like success,
@@ -1016,10 +1017,9 @@ which is the same misreading as the previous page arriving through a different d
   <ol>
     <li>You are given eleven points and a curve through all eleven, with residuals of zero. What
     does that tell you about the curve's accuracy between the points?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Nothing at all.</strong> An interpolant is constructed to pass through every point. Zero
-residuals are the definition of the method and not a result of it, and they would be zero for
-any eleven points whatsoever. Between the points the curve is unconstrained by the data and
-controlled entirely by the model form. For a degree-ten polynomial on equally spaced nodes, what
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Nothing.</strong> An interpolant is constructed to pass through every point. Zero
+residuals follow from the definition of the method, so they would be zero for any eleven points.
+Between the points the curve is unconstrained by the data and controlled by the model form. For a degree-ten polynomial on equally spaced nodes, what
 it does between them is likely to be bad and worst near the ends, with swings far larger than
 anything in the data, from a curve that matches every measurement exactly. To say anything about
 accuracy between the points you need something the fit cannot supply, such as a held-out point,
@@ -1032,26 +1032,26 @@ judgement for the compiler's. Use a low-order local interpolant, linear or cubic
 neighbouring entries, not one polynomial through the whole table.</p>
      <p><strong>Regress</strong> your own measurements. A thermocouple reading carries noise, so the
 values are draws around the true property, and a curve forced through every one of them is a
-curve fitted to your noise. Fitting a smooth low-order model averages the error out and will
-predict better at 340&nbsp;&deg;C than any of your individual points would.</p>
-     <p>The mathematics is identical and the assumption is opposite. Interpolation says the values are
+curve fitted to your noise. Fitting a smooth low-order model averages much of the error out and will
+likely predict better at 340&nbsp;&deg;C than any of your individual points would.</p>
+     <p>The two methods use similar mathematics and make opposite assumptions. Interpolation says the values are
 exact and regression says they carry error, and which of the two is true is a fact about where
-the numbers came from. It is also the one thing the numbers themselves do not record.</p></div></details></li>
+the numbers came from. The numbers themselves do not record it.</p></div></details></li>
     <li>Adding more points makes a high-degree polynomial interpolant worse. Explain to a
     colleague
     why that is not a contradiction.
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Because adding a point does not add data to a fixed model, it <strong>changes the
-model</strong>. With <em>n</em> points the interpolant is the polynomial of degree
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Adding a point to an interpolant <strong>changes the model</strong> as well as adding
+data. With <em>n</em> points the interpolant is the polynomial of degree
 <em>n</em>&nbsp;&minus;&nbsp;1, so every extra point makes it one degree more flexible.</p>
-     <p>The comparison being imagined is "more data, same model, better answer", which is true. What is
-actually happening is "more data, more flexible model", and the added flexibility costs more
+     <p>The comparison being imagined is "more data, same model, better answer", which is true. What happens
+here is "more data, more flexible model", and the added flexibility costs more
 than the added information is worth. On equally spaced nodes the extra degrees go into
-oscillation near the ends, and the error there grows without limit as points are added. Both
+oscillation near the ends, and for a function like Runge's the error there grows without limit as points are added. Both
 fixes restore the intuition. <strong>Fix the degree</strong> and regress, and more points then
-genuinely improve a model of unchanged flexibility. Or <strong>choose where to sample</strong>,
-clustering the nodes towards the ends as Chebyshev points do, and the interpolant converges as
-more points are added. "More data is better" is a statement about estimating fixed parameters.
-It was never a statement about models that grow.</p></div></details></li>
+improve a model of unchanged flexibility. Or <strong>choose where to sample</strong>,
+clustering the nodes towards the ends as Chebyshev points do, and for a smooth function the
+interpolant converges as more points are added. "More data is better" applies to estimating a
+fixed set of parameters, and does not apply to a model that grows with the data.</p></div></details></li>
   </ol>
 </div>
 
@@ -1081,11 +1081,11 @@ outside it reported separately.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/interpolation-and-regression.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/interpolation-and-regression.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-09-23">September 23, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-21">October 21, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

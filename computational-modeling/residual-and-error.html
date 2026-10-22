@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Residual and error are different quantities — Computational Physical Modeling</title>
+  <title>Residual and error — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -837,7 +837,7 @@
           <a href="model-form-and-parameters.html">Model form</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="least-squares-is-one-norm.html">One choice of norm</a>
+          <a href="least-squares-is-one-norm.html">Choice of norm</a>
         
           <span class="site-nav-sep">·</span>
           <a href="linearity-in-the-parameters.html">Linear in parameters</a>
@@ -908,7 +908,7 @@
   <main data-pagefind-body class="wide">
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <div class="eyebrow">Week 6 · Least Squares Fitting</div>
-<h1>Residual and error are different quantities</h1>
+<h1>Residual and error</h1>
 
 <div class="claim">
   <span class="label">Claim</span>
@@ -920,7 +920,7 @@
   minimises the first of those, and nothing has minimised the second.</p>
 </div>
 
-<h2 id="residual-and-error-defined">Residual and Error Defined</h2>
+<h2 id="residual-and-error-defined">Definitions</h2>
 
 <table class="data">
   <tr><th></th><th>Residual</th><th>Error</th></tr>
@@ -931,15 +931,14 @@
   <tr><td>gets smaller with more parameters</td><td>always</td><td>only up to a point</td></tr>
 </table>
 
-<p>The third row is the one to hold on to. The residual is small because an algorithm was told to
-make it small. A small residual reads as evidence about the truth. What it reports is that the
-algorithm did its job.</p>
+<p>The residual is small because an algorithm was told to make it small. A small residual is easy
+to read as evidence about the truth, though what it reports is that the algorithm did its job.</p>
 
-<h2 id="how-far-apart-they-get-on-140-shots">How Far Apart They Get, on 140 Shots</h2>
+<h2 id="how-far-apart-they-get-on-140-shots">Residual and Error on 140 Shots</h2>
 
 <p>140 real three-point attempts. Each one gets a parabola fitted to its first few frames after
 release, extrapolated to the plane of the hoop at 3.048&nbsp;m, and compared against the answer.
-Every arc has been screened for genuine free flight, so nothing in what follows is a tracking
+Every arc has been screened for free flight, so what follows is unlikely to be a tracking
 artefact. One point per shot: how well the fit matched its own frames, against how far it
 landed.</p>
 
@@ -955,23 +954,23 @@ landed.</p>
   <tr><td class="num">14</td><td class="num">0.52 s</td><td class="num">2.06 cm</td><td class="num">12 cm</td><td class="num">+0.232</td></tr>
 </table>
 
-<p><strong>The correlation is zero.</strong> At ten frames it is &minus;0.003 across 140 shots, so
-knowing how closely a fit passed through the points it was given tells you nothing at all about
+<p><strong>The correlation is essentially zero.</strong> At ten frames it is &minus;0.003 across 140 shots, so
+knowing how closely a fit passed through the points it was given tells you almost nothing about
 how far its prediction will land from the answer.</p>
 
-<p>The demo marks the two extremes, and at ten frames they say it plainly. The
+<p>The demo marks the two extremes at ten frames. The
 <strong>tightest</strong> fit in the whole set, residual 0.53&nbsp;cm, a fifth of the tracker's
 own noise, lands 5&nbsp;cm from the answer. The <strong>loosest</strong> fit, residual
 4.88&nbsp;cm, nine times worse by the only measure available at the time, lands 7&nbsp;cm from
-the answer. Two centimetres apart, on fits that look like different species. Elsewhere in the
+the answer. Their errors are two centimetres apart, on fits that look like different species. Elsewhere in the
 same cloud, a fit of 0.81&nbsp;cm, the fourth tightest of the 140, lands 186&nbsp;cm out.</p>
 
-<p>Read the table down and something else appears. The median residual <em>rises</em> from 1.26 to
+<p>The median residual <em>rises</em> from 1.26 to
 2.06&nbsp;cm as more frames are fitted, while the median error <em>falls</em> from 110 to
 12&nbsp;cm. More data makes the fit look worse and the prediction better, because a short window
-lets the parabola bend to the noise. The one number that improves is the one nobody can see.</p>
+lets the parabola bend to the noise. The number that improves is the error, which on real data nobody can see.</p>
 
-<h2 id="the-fit-is-judged-only-where-the-data-are">The Fit Is Judged Only Where the Data Are</h2>
+<h2 id="the-fit-is-judged-only-where-the-data-are">Sources of the Gap</h2>
 
 <p>Three mechanisms, and they compound:</p>
 
@@ -985,8 +984,9 @@ is uncertain by a little. Multiplied by the square of a distance three and a hal
 observed span, a little becomes a lot. That amplification is the subject of week 9.</p>
 
 <p><strong>The residual has been made small on purpose.</strong> Adding parameters drives it toward
-zero regardless of whether the model is right, and page 14's demo shows the residual reaching
-0.00002 at degree 9 while the error against the truth reaches 0.244, the largest it has been.</p>
+zero regardless of whether the model is right, and page 13's demo shows the residual reaching
+0.00005 at degree 9 while the error against the truth climbs back to 0.442, twenty-five times
+its value at degree 2.</p>
 
 <h2 id="the-uses-of-the-residual">The Uses of the Residual</h2>
 
@@ -995,7 +995,7 @@ zero regardless of whether the model is right, and page 14's demo shows the resi
 <ul class="plain">
   <li><strong>Is the model form wrong?</strong> Structure in the residuals, a run of positives
   then
-  a run of negatives, says the form cannot follow the data, whatever its size. That is week
+  a run of negatives, usually means the form cannot follow the data, whatever its size. That is week
   10.</li>
   <li><strong>Is a point bad?</strong> One residual far larger than the rest points at the data and not at the model.</li>
   <li><strong>How noisy is the measurement?</strong> With a correct form, the residual scatter
@@ -1004,9 +1004,10 @@ zero regardless of whether the model is right, and page 14's demo shows the resi
 
 <h2 id="residual-versus-prediction-error">Residual Versus Prediction Error</h2>
 
-<p>The residual is one number about the fit, while what you take <em>off</em> the fit is a
-different question, and the two may disagree completely. Here is one fitted curve on a measured
-crash pulse, asked for three quantities. Polynomial fits over the 150&nbsp;ms pulse, measured
+<details class="ans"><summary><span>Optional, open to read</span></summary><div class="body">
+<p>The residual is one number about the fit, and what you take <em>off</em> the fit can behave
+very differently. Here are polynomial fits to a measured crash pulse, each asked for three
+quantities. Polynomial fits over the 150&nbsp;ms pulse, measured
 against the record on ten tests:</p>
 
 <table class="data">
@@ -1022,24 +1023,25 @@ against the record on ten tests:</p>
       <td class="num">17%</td><td class="num">11%</td></tr>
 </table>
 
-<p>A fit whose residual is one seventh of the peak, a curve that visibly misses the data and
-obvious on the plot, reproduces the integral to four decimal places and gets the peak wrong by a
+<p>A fit whose residual is one seventh of the peak (a curve that visibly misses the data, obvious
+on the plot) reproduces the integral to four decimal places and gets the peak wrong by a
 factor of five.</p>
 
-<p class="plain">The residual barely moved down that row, and what changed everything was what you asked the fit
+<p class="plain">The residual barely moved down that row, and what changed the accuracy was what you asked the fit
 for.</p>
 
 <p>The ordering follows how much integration the quantity involves. A least-squares residual is
 near zero-mean over the fitted window, so <strong>integrating cancels it</strong>, which is the
 argument page 8 makes about noise, arriving here about fit error instead. The peak is a single
-point, nothing cancels, and the fit's inability to turn sharply is the whole error. HIC sits
+point, nothing cancels, and the fit's inability to turn sharply is most of the error. HIC sits
 between, being an integral over a short window, and improves with degree because that window is
-short enough for the cancellation to be only partial. So the question to ask of a fit is not
-<em>is the residual small</em> but <em>is the quantity I want an averaging one</em>. Integrals
-of a fit are robust. Peaks, slopes, extrema and endpoints are not, and neither is anything
-evaluated outside the fitted range, page 33.</p>
+short enough for the cancellation to be only partial. Thus the question to ask of a fit is whether the
+quantity you want is an averaging one, and the size of the residual does not answer it. Integrals
+of a fit tend to be robust. Peaks, slopes, extrema and endpoints are not, and neither is anything
+evaluated outside the fitted range, page 32.</p>
+</div></details>
 
-<h2 id="prediction-error-needs-held-out-data">Prediction Error Needs Held-Out Data</h2>
+<h2 id="prediction-error-needs-held-out-data">Estimating Prediction Error</h2>
 
 <p>To estimate prediction error you need something the fitted data cannot supply:</p>
 
@@ -1054,7 +1056,68 @@ evaluated outside the fitted range, page 33.</p>
 </ol>
 
 <p>All three share a property the residual lacks, which is that each one confronts the model with
-something it was not fitted to. That is generally the only kind of check worth the name.</p>
+something it was not fitted to.</p>
+
+<h3 id="two-models-compared-on-held-out-frames">Two Models Compared on Held-Out Frames</h3>
+
+<p>Holding data back is also how two models are compared. Consider the parabola for a shot's
+height, fitted two ways, with $g$ as a third parameter or with $g$ held at 9.81&nbsp;m/s² by
+moving $	frac{1}{2}gt^2$ to the data side, as page 13 does for the velocities. Each shot's free
+flight, found by the rules on page 13, is split in half. Both models are fitted to the first half
+of each shot, and each is scored by the RMS error of its predictions on the second half, which
+neither fit has seen. The example pack has 24 shots. Shot 325 is left out, so the comparison runs
+on 23. From its apex at frame 25 its height falls by a fixed amount at each of the next 19 frames
+(0.016&nbsp;m ten times, then 0.146&nbsp;m nine times), two straight runs that are likely the
+tracker filling a gap.</p>
+
+<table class="data">
+  <tr><th></th><th class="num">gravity fitted</th><th class="num">gravity held</th></tr>
+  <tr><td>median RMS on the fitted first half</td><td class="num">1.99&nbsp;cm</td>
+      <td class="num">2.12&nbsp;cm</td></tr>
+  <tr><td>shots where it fits the first half at least as well</td><td class="num">23 of 23</td>
+      <td class="num"></td></tr>
+  <tr><td>median RMS on the unseen second half</td><td class="num">5.8&nbsp;cm</td>
+      <td class="num">4.2&nbsp;cm</td></tr>
+  <tr><td>shots where it predicts the second half better</td><td class="num">9 of 23</td>
+      <td class="num">14 of 23</td></tr>
+  <tr><td>worst second-half RMS</td><td class="num">35.7&nbsp;cm</td>
+      <td class="num">11.8&nbsp;cm</td></tr>
+</table>
+
+<figure class="figure" id="fig-heldout">
+  <div class="fig-body"></div>
+  <figcaption>One dot per shot, from the example pack, which is in no student's data. Across is
+  the second-half error with gravity held at 9.81&nbsp;m/s², and up is the second-half error with
+  gravity fitted. A dot above the dashed line is a shot where holding gravity predicted better.
+  Both scales are logarithmic, so the spread of the bad shots fits on the plot.</figcaption>
+</figure>
+
+<p>The fitted model matches the frames it was given at least as closely on every shot, as it
+must, since the held model is the same parabola with one coefficient fixed. On the frames it was
+not given it does worse on 14 of the 23 shots. Fourteen of 23 is a majority but not a large one,
+and the clearer difference is in the bad shots. The worst second-half error is 35.7&nbsp;cm with
+gravity fitted and 11.8&nbsp;cm with it held, likely because a fitted gravity can absorb the noise
+in half a flight and then carry the wrong curvature forward. On this pack, then, the fitted model
+matched the first half more closely on every shot, and the held model predicted the second half
+better on 14 of 23.</p>
+
+<p>In code the comparison is a loop over the shots. Here <code>free_flight</code> returns
+<code>t</code> and <code>z</code> from the release frame up to, but not including, the first frame
+within 1&nbsp;m of the hoop. <code>fit_free</code> fits $a + bt + ct^2$ to $z$, and
+<code>fit_held</code> fits $a + bt$ to $z + 	frac{1}{2}(9.81)t^2$ and returns $c = -9.81/2$ with
+it, both by least squares. <code>rms</code> evaluates the parabola at the given times and returns
+the RMS of its difference from the heights, in centimetres.</p>
+
+<pre data-lang="python">out_free, out_held = [], []
+for s in train['shots']:
+    if s['id'] == 325:
+        continue
+    t, z = free_flight(s)
+    half = len(t) // 2
+    c_free = fit_free(t[:half], z[:half])
+    c_held = fit_held(t[:half], z[:half])
+    out_free.append(rms(c_free, t[half:], z[half:]))
+    out_held.append(rms(c_held, t[half:], z[half:]))</pre>
 
 <div class="check">
   <span class="label">Check</span>
@@ -1067,8 +1130,8 @@ the fit converged and that nothing is badly broken. They have not established an
 accuracy, meaning the error at any point outside the data, whether the model form is right, or
 whether the parameters mean what their names suggest. The demo on this page measures the
 relationship across 140 real shots and finds a correlation of &minus;0.003, so on this evidence
-the residual carries no usable information about the error at all.</p>
-     <p>The word doing the damage is "good". It attaches a judgement of quality to a number that only
+the residual carries no usable information about the error.</p>
+     <p>The misleading word is "good". It attaches a judgement of quality to a number that only
 describes the fit's relationship with its own inputs. A useful reply is to ask what the model is
 <em>for</em>, and then what the error is at that point, which almost always requires holding
 data back.</p></div></details></li>
@@ -1077,12 +1140,12 @@ data back.</p></div></details></li>
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>The parameter captures real structure</strong> the model was missing, drag in a
 trajectory, a second time constant in a decay. The residual falls because the model is closer to
 the truth, and prediction improves with it.</p>
-     <p><strong>The parameter is fitting noise.</strong> Any extra degree of freedom reduces the
+     <p><strong>The parameter is fitting noise.</strong> An extra degree of freedom cannot increase the
 residual on the data it was fitted to. That is guaranteed, and it happens whether or not the
-parameter corresponds to anything. Prediction gets worse.</p>
+parameter corresponds to anything. Prediction usually gets worse.</p>
      <p>Tell them apart by <strong>holding data back</strong>. Fit both versions on part of the data and
 measure the error on the part neither saw. The real parameter improves the held-out error. The
-spurious one degrades it. That is the whole of page 35, and it is the only test that separates
+spurious one degrades it. That is the whole of page 34, and it is the most reliable test that separates
 these two cases.</p>
      <p>A cheaper hint beforehand is to look at where the residual fell. Structure removed from one
 region is a sign of the first case. A uniform shrink everywhere is a sign of the second.</p></div></details></li>
@@ -1092,15 +1155,15 @@ region is a sign of the first case. A uniform shrink everywhere is a sign of the
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>It is fair when the <strong>model form is correct</strong>, so that what is left over is noise
 and not unmodelled signal, and when there are <strong>many more points than parameters</strong>.
 With <em>n</em> points and <em>p</em> parameters the fit absorbs some of the noise into the
-parameters, and the residual scatter underestimates &sigma; by about
+parameters, and the residual scatter underestimates &sigma; by a factor of about
 &radic;((<em>n</em>&nbsp;&minus;&nbsp;<em>p</em>)/<em>n</em>). At ten points and three
-parameters that is 16% low, and at four points and three parameters it is meaningless.</p>
+parameters that is 16% low, and at four points and three parameters it is nearly useless.</p>
      <p>Even when it is a fair estimate of &sigma;, it is not the prediction error, because prediction
 error has two more parts. The <strong>parameters are uncertain</strong>, and that uncertainty is
-carried to the prediction point and amplified by the distance extrapolated, page 33. And any
-<strong>model-form error</strong> is added on top, and is invisible to a residual computed under
-the same wrong form. &sigma; is what the instrument does. Prediction error is what your whole
-pipeline does at a place it has never been.</p></div></details></li>
+carried to the prediction point and amplified by the distance extrapolated, page 32. In addition,
+any <strong>model-form error</strong> is added on top, and a residual computed under the same
+wrong form may not show it. That is, &sigma; describes the instrument, while prediction error
+describes your whole pipeline at a place it has never been.</p></div></details></li>
   </ol>
 </div>
 
@@ -1130,11 +1193,11 @@ outside it reported separately.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/residual-and-error.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/residual-and-error.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-16">October 16, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-22">October 22, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

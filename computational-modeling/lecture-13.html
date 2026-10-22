@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lecture 13 — The filter class is part of the measurement</title>
+<title>Lecture 13 — Model form and free parameters</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-<link rel="stylesheet" href="css/demos.css?v=20261017141252">
+<link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+<link rel="stylesheet" href="css/demos.css?v=20261022093533">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -690,96 +690,189 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <section class="deck-slide part">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
-    <p class="say">Choosing the filter class for a crash measurement</p>
+    <p class="say">Choosing a model form before fitting it</p>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>All right, welcome. So we've spent this whole week filtering records, and I've been quietly saying CFC 180 and CFC 1000 as though somebody handed us those numbers. In this video I want to ask where they come from, and whether we get to pick.</p><p>In the last couple of videos we looked at smoothing, which trades noise for peak height, and at the second pass, which takes the delay back out. So now I want to look at how hard to filter, and for the standard's filter that's what we call the class. And this is the last video of week four, so let's take a look.</p><p>Here's the crossmember record from week three, with the pre-impact offset taken out, filtered forward and backward at each of the four classes, and we ask it two questions. What was the peak acceleration, and what was the change in velocity.</p><p>The peak, on the left, goes 1540, 1484, 1284, 630, 485. So from as recorded down to class 60 that's a factor of about 3.2, from the same record, depending on a number we typed. And the change in velocity, on the right, is minus 17.51, minus 17.51, minus 17.51, minus 17.51, minus 17.53. It moves by about nine hundredths of a percent across the whole lot. So the change in velocity is robust, and the peak probably needs its class.</p><p>And one small thing, the acceleration is negative, the car's slowing down, so by the peak I mean the biggest size, ignoring the sign.</p>">
+<section class="deck-slide full" data-notes="<p>All right, welcome. So the last video was the end of week four, where we filtered records. In this video I want to start fitting models to data, and I want to start with the part of fitting that the computer doesn't do for us. So let's take a look.</p><p>You've probably drawn a line of best fit before, in a physics lab, or with the trendline button in a spreadsheet. The line is y equals a plus b t, and drawing it means picking the two numbers a and b that put the line closest to the points. And that's what we call the fit, picking those two numbers.</p><p>But before any of that happened, somebody decided it was going to be a straight line. That's what we call the form of the model, and the fit never touches it. So that part's on us, okay?</p>">
   <div class="head">
-    <p class="say">From as recorded to CFC 60 the peak falls <span class="def">3.2 times</span>, and &Delta;v moves <span class="def">0.09%</span>.</p>
-    <p class="sub">Filtered forward and backward. The peak is the largest size, ignoring the sign.</p>
+    <p class="say">A fit chooses the numbers in <span class="def">a form we already picked</span>.</p>
+    <p class="sub">A line of best fit: the form is a straight line, and the fit picks <i>a</i> and <i>b</i>.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide legible" data-fig="l14-twoq"><div class="fig-body"></div></figure>
+    <div class="work">
+      $$y \;=\; \textcolor{#8A6508}{a} + \textcolor{#8A6508}{b}\,t$$
+    </div>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So here's what that looks like on the record itself. The grey dashed line is the record as recorded. The red dotted line is class 1000, the lightest, and the solid line is class 60, the heaviest.</p><p>At class 1000 the narrow spike at 10.8 milliseconds is still there, a little shorter, 1484. At class 60 it's gone, and the biggest thing left is a broad, slow dip about 53 milliseconds in, 485.</p>">
+<section class="deck-slide full" data-notes="<p>So here's some data to fit. This is one three-point attempt by Stephen Curry, Golden State at the Clippers, November 2015, and it missed. The arena's cameras tracked the ball 25 times a second, and this shot is from the example pack, so it isn't in anybody's data.</p><p>These are 31 frames of free flight, from just after it leaves his hand until it gets to the rim, so about 1.2 seconds. On the left is how far the ball is from the hoop, measured along the floor, and it goes from 7.91 meters down to 0.42. On the right is its height, which goes up from 3.27 to 5.07 and comes back down to 3.43.</p>">
   <div class="head">
-    <p class="say">A heavier filter <span class="def">removes the narrow spike</span> at 10.8&nbsp;ms.</p>
-    <p class="sub">As recorded dashed, CFC 1000 dotted, CFC 60 solid.</p>
+    <p class="say">One shot, tracked <span class="def">25 times a second</span> for 1.2&nbsp;s.</p>
+    <p class="sub">A missed three by Stephen Curry, November 2015. Example pack, in no student&rsquo;s data.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="l14-classes"><div class="fig-body"></div></figure>
+    <figure class="figure wide" data-fig="lec13-shot"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Let's fit a straight line to the distance first. Why would we expect a line? Well, once the ball leaves his hand, the only big force on it is gravity, and gravity pulls straight down. So nothing much is speeding it up or slowing it down horizontally, and it closes on the hoop at a pretty steady rate.</p><p>And it does, pretty much. Every point sits within about 7 centimeters of the line, and the RMS residual, the typical size of the gaps, is 2.9 centimeters. The tracking noise in this data set is about 2.8 centimeters, so the line is about as close as the cameras can tell. Okay.</p><p>Now it isn't perfect. Air resistance slows the ball a little bit, and a straight line leaves that out. On the example shots it shows up as a faint bend if you look at the gaps closely, but it's pretty small.</p>">
+  <div class="head">
+    <p class="say">The distance sits on a straight line, <span class="def">within 7&nbsp;cm</span>.</p>
+    <p class="sub">2.9&nbsp;cm RMS, about the size of the tracking noise.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec13-dist"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So the form came from the physics, and hopefully that means the two numbers tell us something about the ball. Let's check. a is 7.84 meters, and that's how far the ball was from the hoop at the first frame of the fit, time zero. b is minus 6.22 meters per second, and that's how fast it closed that distance. Both of them have units, and both of them are things about the ball we could go and check some other way.</p>">
+  <div class="head">
+    <p class="say">With a form from the physics, <span class="def">each number describes the ball</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">intercept</span><b><i>a</i> = 7.84&nbsp;m</b>
+        <span>How far the ball was from the hoop at the first frame.</span></div>
+      <div class="pcard"><span class="tag">slope</span><b><i>b</i> = &minus;6.22&nbsp;m/s</b>
+        <span>How fast the ball closed on the hoop.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Now let's do exactly the same thing to the height. We're going to use the same code and the same straight line.</p><p>And it gives us an answer. a is 4.41 meters and b is 0.05 meters per second, and this really is the best straight line through these points. Nothing went wrong in the fitting.</p><p>But look at the red sticks, those are the gaps between each point and the line. The points are below the line at both ends and above it through the middle, and the biggest gap is 1.14 meters. So the line goes through the points, but it's not really following them, okay?</p>">
+  <div class="head">
+    <p class="say">The same fit on the height gives <span class="def">the best line through a curve</span>.</p>
+    <p class="sub">Red sticks join each point to the line. The largest is 1.14&nbsp;m.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec13-height"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Now let's check these two against the ball, like we did for the distance.</p><p>The line says the ball was at 4.41 meters at the first frame. It was at 3.27. So 4.41 minus 3.27, that's 1.14, more than a meter off, and that's the same 1.14 as the biggest red stick on the last slide.</p><p>The slope says 0.05 meters per second, which is basically level. All that really tells us is the ball finished at about the height it started, 3.43 against 3.27. The ball itself was going up at almost 6 meters per second at the start, and coming down at almost 6 at the end.</p><p>So they have units, and they look like measurements, but neither one is actually true of the ball, okay.</p>">
+  <div class="head">
+    <p class="say">On the height, <span class="def">neither number describes the ball</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">intercept</span><b><i>a</i> = 4.41&nbsp;m</b>
+        <span>The ball was at 3.27&nbsp;m at the first frame.</span></div>
+      <div class="pcard"><span class="tag">slope</span><b><i>b</i> = 0.05&nbsp;m/s</b>
+        <span>The ball rose at almost 6&nbsp;m/s and fell at almost 6.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So here they are side by side. The fitting was identical on both panels. The only thing that changed was whether the form, a straight line, actually matched what the ball was doing.</p><p>On the left it did, because the physics says the horizontal motion is steady. On the right it didn't, because the height follows a curve. So I think it's mostly the form we picked that decides whether these numbers mean anything.</p>">
+  <div class="head">
+    <p class="say">The fit was the same, so <span class="def">the form decided what the numbers mean</span>.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide legible" id="fig-line"><div class="fig-body"></div></figure>
   </div>
 </section>
 
 <section class="deck-slide part">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
-    <p class="say">Why a low-pass filter shrinks a peak</p>
+    <p class="say">A straight line for the vertical velocity</p>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So why? Well, a low-pass filter takes out the fast content and keeps the slow. So the shrinking peak is a side effect of what a spike is made of.</p><p>A tall, brief spike needs fast content, because that's the only thing that can go up and come back down inside a millisecond. So if we filter at class 180, we take out most of what built that spike, and down it comes. Here it's zoomed in. As recorded, the spike reaches 1540. At class 180, at the same moment, it's a gentle dip.</p><p>And a broad, slow feature is made of slow content, so the same filter kind of mostly leaves it alone.</p>">
+<section class="deck-slide full" data-notes="<p>Okay, so what does the height follow? Well, let's go one step back to the physics. Gravity gives the ball a nearly constant downward acceleration, so its vertical velocity goes down steadily during the flight. v equals v-nought minus g t.</p><p>And that is a straight line. The intercept is v-nought, the vertical velocity at time zero, and the slope is minus g.</p><p>And we already know how to get the velocities. We take central differences of the heights, one frame either side, like we did in week four. That gives one velocity for every frame that has a neighbor on both sides, so 31 minus the two ends, 29 of them. Okay.</p>">
   <div class="head">
-    <p class="say">A narrow spike is made of <span class="def">fast content</span>, which a low-pass filter removes.</p>
-    <p class="sub">The impact spike, zoomed. As recorded dashed, CFC 180 solid.</p>
+    <p class="say">Gravity makes the vertical velocity <span class="def">a straight line</span>.</p>
+    <p class="sub">The velocities come from central differences of the heights, 29 of them.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="l14-zoom"><div class="fig-body"></div></figure>
+    <div class="work">
+      $$v \;=\; \textcolor{#8A6508}{v_0} \;-\; \textcolor{#8A6508}{g}\,t \qquad \text{intercept } v_0,\ \text{slope } {-g}$$
+    </div>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>And here's why the change in velocity barely moves. Delta-v is the integral, the area under the whole record. And what the filter takes off the top of a spike, it spreads into the shoulders on either side. So the area stays almost the same, even though the maximum doesn't.</p><p>And integration is itself a kind of smoothing, we saw that in week three, so a quantity built by integrating doesn't care much about the fast content in the first place.</p>">
+<section class="deck-slide full" data-notes="<p>So let's fit it, with both numbers free. And we get v-nought of 5.85 meters per second, and g of 9.60 meters per second squared. 9.81 minus 9.60 is 0.21, and 0.21 out of 9.81 is about 2 percent. Not bad.</p><p>Now the velocities scatter a lot about their line. The RMS residual is about half a meter per second, and some of them are off by 1.2. We saw why in week four, differencing blows up the tracking noise. But the fit uses all 29 of them, and the slope still comes out close to minus g.</p><p>Now why is this one nice? Well, the slope has units of acceleration. So before we look at any residual at all, we can hold it up against a number we already know, 9.81. If this had come out at 340, we'd know something was wrong straight away.</p>">
   <div class="head">
-    <p class="say">The filter moves area into the shoulders, so <span class="def">&Delta;v hardly changes</span>.</p>
-    <p class="sub">&minus;17.5091&nbsp;m/s as recorded, &minus;17.5120 at CFC 180.</p>
+    <p class="say">Fitted, the slope gives <span class="def"><i>g</i>&nbsp;=&nbsp;9.60&nbsp;m/s&sup2;</span>.</p>
+    <p class="sub">Within 2.1% of 9.81. A slope in m/s&sup2; can be checked against a number we know.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="l14-zoom"><div class="fig-body"></div></figure>
+    <figure class="figure wide" data-fig="lec13-vel" data-mode="free"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Okay. Now look at when the peak happens. 10.80 milliseconds as recorded, and at 1000, and at 600. Then 24.00 at class 180, and 53.04 at class 60.</p><p>Now this looks exactly like the phase lag from the last video, and it isn't. These are all forward-backward filtered, so there's no lag in any of them. What's happened is the peak has moved to a different feature of the record. The spike at 10.8 milliseconds has been filtered away, and now the biggest thing left is some other, broader event later on.</p><p>So at class 60 the number we report comes from a different moment in the crash, about 53 milliseconds in.</p>">
+<section class="deck-slide full" data-notes="<p>Now there's a second way to fit the same line. We can also hold g at 9.81, and only fit v-nought.</p><p>So I'm going to start with the model, and I'm going to add g t to both sides. Now the left side is all data, the velocity and the time, plus a number we know, and the right side is just v-nought, one parameter.</p><p>I'll call that moving a term to the data side. The page on linearity in the parameters, page 15, works it through properly, so I'll just show you what it does here.</p>">
   <div class="head">
-    <p class="say">At CFC 180 and 60 the reported peak is <span class="def">a different moment in the crash</span>.</p>
-    <p class="sub">Forward-backward, so no lag. CFC 180 dotted, CFC 60 solid.</p>
+    <p class="say">Holding <i>g</i> at 9.81 moves <span class="def">&minus;<i>gt</i> to the data side</span>.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="l14-moved"><div class="fig-body"></div></figure>
+    <div class="work">
+      $$\begin{aligned}
+      v &= v_0 - g\,t && \text{the model} \\[8pt]
+      v + g\,t &= v_0 && \text{add } g\,t \text{ to both sides} \\[8pt]
+      \underbrace{v + 9.81\,t}_{\text{data}} &= \textcolor{#8A6508}{v_0} && \text{one parameter left to fit}
+      \end{aligned}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So here it is with g held at 9.81. v-nought comes out at 5.98 instead of 5.85, and the RMS residual goes from 0.513 to 0.517 meters per second. So it went up a little bit, by four thousandths.</p><p>And that's what we'd expect. A fit with fewer free numbers can't get any closer to the points than one with more. The dashed line is the other fit, and on this plot the two are hard to tell apart.</p><p>So which one should we believe? I'm going to leave that for now, because it's the question assignment five asks. The short answer is that the residual alone probably can't tell us.</p>">
+  <div class="head">
+    <p class="say">With <i>g</i> held, the RMS residual moves <span class="def">from 0.513 to 0.517&nbsp;m/s</span>.</p>
+    <p class="sub">The dashed line is the fit with <i>g</i> free.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec13-vel" data-mode="fixed"><div class="fig-body"></div></figure>
   </div>
 </section>
 
 <section class="deck-slide part">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
-    <p class="say">What decides the class</p>
+    <p class="say">Finding the free flight in a tracked shot</p>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Okay. So which class is right?</p><p>What decides it is what we call the bandwidth of the thing being measured, the range of frequencies it actually responds to.</p><p>Say somebody asks how rough a road is. A truck and a bicycle give completely different answers, and neither of them is wrong, because they respond to different things. The bicycle feels every stone. The truck doesn't notice a stone, and it very much notices a dip. So how rough the road is probably depends on what's driving over it.</p><p>And it's the same with a crash. A peak used to estimate an injury needs the bandwidth the body responds to. A peak used to check a mounting bracket needs the bandwidth the bracket responds to. Those are different numbers, and both of them are knowable, and neither is in our file, because they're facts about the physical system.</p>">
+<section class="deck-slide full" data-notes="<p>All right. So all of that only works while the ball is in free flight. From the frame his hand lets go, to the frame the ball gets to the rim. And neither of those frames is marked anywhere in the data, so we have to find them with a rule.</p><p>Here's the start, on a different example shot, 1092. Each dot is the vertical velocity at one frame, up is positive. Before the release, the hand is pushing the ball up, so the velocity grows from frame to frame. Here it climbs from 2.58 at frame 6 up to 5.81 at frame 11.</p><p>After the release only gravity and a little air resistance act on it, so the velocity falls by about g times delta t each frame. At 25 frames a second that's 9.81 times 0.04, 0.39 meters per second a frame. And that's the dashed line. So the release is the frame where the velocity stops growing, frame 11.</p>">
   <div class="head">
-    <p class="say">The right class is set by <span class="def">what the measured thing responds to</span>.</p>
-    <p class="sub">That range of frequencies is its <span class="term">bandwidth</span>.</p>
+    <p class="say">Free flight starts where <span class="def">the vertical velocity stops growing</span>.</p>
+    <p class="sub">Shot 1092. After the release it falls 0.39&nbsp;m/s a frame.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide legible" id="fig-road"><div class="fig-body"></div></figure>
+    <figure class="figure wide legible" id="fig-release"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>And the record can't tell us its own class. There are three shortcuts that are tempting, and none of them gets there.</p><p>The record as recorded isn't the truth. It's already been through the lab's 2000 hertz filter, which it needed so the sampling wouldn't alias, that's the filter from lecture ten.</p><p>A lighter filter isn't automatically more faithful, because some of what it keeps is the sensor and its mounting vibrating, and that's the instrument's behavior, not the car's.</p><p>And a heavier filter isn't automatically safer, because it takes out real structure along with the artifacts, and it can't tell the two apart.</p>">
+<section class="deck-slide full" data-notes="<p>And here's that rule as code. The first two lines get the vertical velocity at every frame. This is a wider central difference than before, two frames either side, so four frames apart, which calms the noise a little bit. Frames without a neighbor two away just get nan, not a number.</p><p>Then we start at the highest point of the flight. Why there? Well, at the top the ball is definitely in the air, so it's a safe place to start. And we step back one frame at a time, for as long as the vertical velocity one frame earlier or two frames earlier was higher.</p><p>Why look two frames back? Because one noisy value would stop it early otherwise. On shot 1092, coming down from the top, the first place that happens is frame 23. One frame earlier the velocity is lower, 1.38 against 1.50. So a one-frame rule would stop there, and call frame 23 the release, which is way too late. Two frames back it's 2.21, so the rule keeps going, and it ends up at frame 11.</p><p>And the i greater than 3 is just a floor, so the rule can't step back off the start of the record.</p>">
   <div class="head">
-    <p class="say">The class comes from <span class="def">what the number is for</span>, outside the record.</p>
+    <p class="say">The rule steps back from the top <span class="def">while an earlier velocity was higher</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="panels">
+      <div class="code"><span class="dim">def</span> release(t, z):</div><div class="note"></div>
+      <div class="code">&nbsp;&nbsp;&nbsp;&nbsp;vz = np.full(len(t), np.nan)</div><div class="note">nan where there is no velocity</div>
+      <div class="code">&nbsp;&nbsp;&nbsp;&nbsp;vz[2:-2] = (z[4:] - z[:-4]) / (t[4:] - t[:-4])</div><div class="note">central difference, four frames</div>
+      <div class="code">&nbsp;&nbsp;&nbsp;&nbsp;i = int(np.argmax(z))</div><div class="note">start at the top of the flight</div>
+      <div class="code">&nbsp;&nbsp;&nbsp;&nbsp;<span class="dim">while</span> <span class="k">i &gt; 3 and (vz[i - 1] &gt; vz[i] or vz[i - 2] &gt; vz[i])</span>:</div><div class="note">a frame or two back was faster</div>
+      <div class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i -= 1</div><div class="note">step back a frame</div>
+      <div class="code">&nbsp;&nbsp;&nbsp;&nbsp;<span class="dim">return</span> i</div><div class="note">the release</div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>And the end. The example pack's programs stop at the first frame where the ball is within 1 meter of the hoop's center, measured along the floor, ignoring height. That comes before the ball can hit the rim or the backboard. On shot 1092 that's frame 37, so the free flight is frames 11 to 36. 36 minus 11 is 25, plus one because we keep both ends, so 26 frames.</p><p>Across the 24 example shots, the release lands anywhere from frame 3 to frame 19, and the window is 23 to 31 frames long. That frame 3 is the floor, by the way. On one shot the velocity is already falling when the record starts, so the rule runs back to the start and stops.</p><p>So you're going to want both rules in the report. Why? Well, somebody else using a different rule will probably get a slightly different window, and a slightly different g, and they need to be able to see why.</p>">
+  <div class="head">
+    <p class="say">Two rules set the window, and <span class="def">both go in the report</span>.</p>
   </div>
   <div class="stage">
     <div class="pcards c3">
-      <div class="pcard"><span class="tag">as recorded</span><b>Already filtered</b>
-        <span>The lab's 2,000&nbsp;Hz filter ran before sampling.</span></div>
-      <div class="pcard"><span class="tag">lighter</span><b>Keeps the instrument too</b>
-        <span>The sensor and its mounting vibrate, and that motion stays in.</span></div>
-      <div class="pcard"><span class="tag">heavier</span><b>Removes real structure too</b>
-        <span>It removes real crash events along with the sensor&rsquo;s own vibration.</span></div>
+      <div class="pcard"><span class="tag">start</span><b>The release</b>
+        <span>The frame where the vertical velocity stops growing.</span></div>
+      <div class="pcard"><span class="tag">end</span><b>Within 1&nbsp;m of the hoop</b>
+        <span>Measured along the floor, before the rim or backboard.</span></div>
+      <div class="pcard gold"><span class="tag">shot 1092</span><b>Frames 11 to 36</b>
+        <span>26 frames. The 24 example shots keep 23 to 31.</span></div>
     </div>
   </div>
 </section>
@@ -787,56 +880,94 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <section class="deck-slide part">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
-    <p class="say">SAE J211 fixes the class in advance</p>
+    <p class="say">Where a model&rsquo;s form comes from</p>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So SAE J211 fixes the class for each measurement, in advance, for everybody.</p><p>Head acceleration for HIC, the head injury criterion, is class 1000, because the head responds to fast content, and HIC is sensitive to it. Chest acceleration is 180, because the chest doesn't really respond much above a few hundred hertz. Vehicle structure, when we're going to integrate it for velocity, is 180 before integrating, and that one's a slightly different reason, it keeps the integral clean, and as we just saw it barely moves the answer either way. And belt and barrier loads are 60, and I like that reason. Load cells vibrate at their own frequency, what we call ringing, and that vibration isn't the load we're after.</p><p>So each class comes from what that body part, or that part of the car, actually responds to.</p>">
+<section class="deck-slide full" data-notes="<p>So let's say this in general. A model is a function of the independent variable, x, and some constants. The constants are theta-1 up to theta-p, and theta is just the Greek letter we usually use for them.</p><p>The form is f, whether it's a straight line, or a parabola, or a decaying exponential. And the parameters are the thetas, and those are what the fit finds.</p><p>So the computer only really does the thetas, and f is up to us. Give it a straight line and data on a curve, and it'll hand back the straight line that fits the curve least badly, like it did for the height.</p>">
   <div class="head">
-    <p class="say">SAE J211 assigns <span class="def">a class to each measurement</span>.</p>
+    <p class="say">The fit finds the <span class="term">parameters</span>, and <span class="def">we choose the form</span>.</p>
+    <p class="sub">&theta; (theta) marks a parameter. <i>f</i> is the form.</p>
   </div>
   <div class="stage">
-    <div class="pcards c4">
-      <div class="pcard"><span class="tag">CFC 1000</span><b>Head, for HIC</b>
-        <span>The head responds to fast content (HIC, the head injury criterion).</span></div>
-      <div class="pcard"><span class="tag">CFC 180</span><b>Chest</b>
-        <span>The chest responds mostly below a few hundred hertz.</span></div>
-      <div class="pcard"><span class="tag">CFC 180</span><b>Structure, for velocity</b>
-        <span>Smooths the record and changes &Delta;v by under 0.02%.</span></div>
-      <div class="pcard"><span class="tag">CFC 60</span><b>Belt and barrier loads</b>
-        <span>Load cells vibrate at their own frequency, and CFC 60 removes that vibration.</span></div>
+    <div class="work">
+      $$y \;=\; f(x;\; \textcolor{#8A6508}{\theta_1, \theta_2, \dots, \theta_p})$$
     </div>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>And that makes class 1000 correct for head acceleration, in a way that matters. If we filter a head channel at class 60, we remove the content HIC is computed from, so the HIC number comes out wrong.</p><p>Now part of this is a convention, and I want to be fair about which part. A committee working from the same physics might have written 900 or 1100, and the standard would probably work just as well. It couldn't have written 60, because the bandwidth of the head isn't a matter of opinion. So the physics fixes the class, roughly, and the convention fixes the exact number.</p><p>And fixing the exact number buys the second thing a standard is for. Two labs testing the same car get numbers they can compare, and a regulatory limit means one thing.</p>">
+<section class="deck-slide full" data-notes="<p>So where does f come from? There are three sources, and I've put them in order of how much the fitted numbers end up meaning.</p><p>Usually the best one is the physics. A projectile under gravity gives y equals y-nought plus v-nought t minus a half g t squared. That's a parabola with three parameters, and they're a height, a speed and an acceleration. So the fit measures physical things, with units.</p><p>Next is a known limiting behavior. Say something decays to zero, that suggests a e to the minus k x. Something that levels off suggests a x over b plus x. The numbers mean a little less, but the form is still backed by an argument.</p><p>And last is convenience, a polynomial of whatever degree fits. The coefficients don't mean anything on their own, and I probably wouldn't trust it very far outside the data. Sometimes that's the best we can do, and that's okay, we just say so.</p>">
   <div class="head">
-    <p class="say">The physics sets the class roughly, and J211 <span class="def">fixes the exact number</span>.</p>
+    <p class="say">A form comes from one of <span class="def">three sources</span>.</p>
+    <p class="sub">In order of how much the fitted numbers mean.</p>
   </div>
   <div class="stage">
     <div class="pcards c3">
-      <div class="pcard"><span class="tag">the physics</span><b>Not 60 for a head</b>
-        <span>CFC 60 removes the content HIC is computed from.</span></div>
-      <div class="pcard"><span class="tag">the convention</span><b>1000, not 900 or 1100</b>
-        <span>Either would likely work as well, so J211 picks one.</span></div>
-      <div class="pcard gold"><span class="tag">the payoff</span><b>Comparable numbers</b>
-        <span>Two labs testing the same car can compare results.</span></div>
+      <div class="pcard gold"><span class="tag">first</span><b>The physics</b>
+        <span>A projectile&rsquo;s parabola: a height, a speed and an acceleration.</span></div>
+      <div class="pcard"><span class="tag">second</span><b>A known limit</b>
+        <span>Decays to zero, <i>ae</i><sup>&minus;<i>kx</i></sup>. Levels off, <i>ax</i>/(<i>b</i>&nbsp;+&nbsp;<i>x</i>).</span></div>
+      <div class="pcard"><span class="tag">third</span><b>Convenience</b>
+        <span>A polynomial. Its coefficients mean nothing one at a time.</span></div>
     </div>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So here's what to do with all of that.</p><p>When you report a peak from a filtered record, report the class with it, because without the class the number is incomplete. A peak of 630 and a peak of 1484 can both be correct for this record.</p><p>When there's a standard, it's done the engineering for you, so use its class. And most problems don't come with a standard, so then you choose the class from what the number is for, what bandwidth that thing responds in, and you write down why, so somebody else can repeat it or disagree with it.</p><p>So hopefully that gives you an idea why the filter is part of the measurement, and that's the end of week four. Next week we start fitting models to data. Thanks a lot for watching and we'll see you in the next video.</p>">
+<section class="deck-slide part">
   <div class="head">
-    <p class="say">Report a filtered peak <span class="def">together with its class</span>.</p>
+    <p class="course">Computational Physical Modeling</p>
+    <p class="say">Adding parameters to a fit</p>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Now one thing that's very easy to do is add parameters. And more parameters always fit better.</p><p>Here's a test where we know the answer. Ten points from a parabola, the dashed curve, with real accelerometer noise added. So the true form is degree 2.</p><p>On the left, a degree 2 fit, three parameters, sits right on the dashed curve. On the right is degree 9, ten parameters for ten points. And it goes through every single point. But in between the points it swings away from the curve the points came from, and near the ends it goes right off the plot.</p>">
+  <div class="head">
+    <p class="say">Degree 9 passes through every point and <span class="def">misses the curve between them</span>.</p>
+    <p class="sub">Ten points from a parabola (dashed), with real accelerometer noise.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec13-deg"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So let's run every degree from 0 to 9 and watch two numbers.</p><p>The green line is the residual, the gap to the points. It falls the whole way, from about a half at degree 0 down to 0.00005 at degree 9, which is basically zero.</p><p>The red line is the error, the gap to the true curve. It falls too, to 0.0175 at degree 2, the right degree. And then it climbs back, to 0.442 at degree 9. 0.442 over 0.0175 is about 25, so twenty-five times worse than degree 2. Okay.</p><p>And on real data we only get the green line. We don't know the true curve, that's the whole reason we're fitting. So a residual that keeps falling as we add parameters doesn't tell us the model is getting better.</p>">
+  <div class="head">
+    <p class="say">The residual falls to zero while <span class="def">the error climbs back</span>.</p>
+    <p class="sub">On real data only the residual is available.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec13-curve"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>And here's why that has to happen. A degree 9 polynomial has ten coefficients. Ten points with different x values pin those ten coefficients down exactly, so the curve goes through every point, whatever the points are. Measurements, noise, numbers off a lottery ticket, it doesn't matter.</p><p>So the residual was going to be zero before anybody looked at the data, which means it being zero tells us nothing. Ten knobs, ten points, so the points don't really get to test anything, okay?</p><p>So parameters beyond what the physics calls for are probably mostly fitting the noise, and next time the noise is going to be different. In week ten we'll get a sharper test, holding some points back and predicting them.</p>">
+  <div class="head">
+    <p class="say">Ten parameters on ten points give zero residual <span class="def">whatever the data are</span>.</p>
   </div>
   <div class="stage">
     <div class="pcards c3">
-      <div class="pcard gold"><span class="tag">always</span><b>Name the class</b>
-        <span>A peak of 630 and a peak of 1484 both describe this record.</span></div>
-      <div class="pcard"><span class="tag">with a standard</span><b>Use its class</b>
-        <span>J211 has already matched the class to the measurement.</span></div>
-      <div class="pcard"><span class="tag">without one</span><b>Choose from the goal</b>
-        <span>Find the bandwidth of what the number is for, and say why.</span></div>
+      <div class="pcard"><span class="tag">degree 9</span><b>Ten coefficients</b>
+        <span>Ten points pin down all ten exactly.</span></div>
+      <div class="pcard"><span class="tag">residual</span><b>Zero, in advance</b>
+        <span>It was going to be zero before we looked.</span></div>
+      <div class="pcard gold"><span class="tag">week 10</span><b>Hold points back</b>
+        <span>Fit some points, then predict the rest.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So here's what to do with all of that in the assignment.</p><p>Pick the form before the fit, and take it from the physics if you can, because then the numbers have units and you can check them against something you know. Write down the rules you used for the window, because the fit only ever sees the frames you gave it. And if you're raising the degree of a polynomial past what the physics calls for, be a little bit suspicious of it, because a smaller residual is going to come with it no matter what.</p><p>So hopefully that gives you an idea of how we pick a form before we fit anything. In the next video we'll look at what best means in best fit, and why least squares is only one choice. Thanks a lot for watching and we'll see you in the next video.</p>">
+  <div class="head">
+    <p class="say">Choose the form first, and <span class="def">say where it came from</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c3">
+      <div class="pcard gold"><span class="tag">form</span><b>Physics first</b>
+        <span>Its parameters have units we can check.</span></div>
+      <div class="pcard"><span class="tag">window</span><b>Name the rule</b>
+        <span>The fit uses only the frames we give it.</span></div>
+      <div class="pcard"><span class="tag">degree</span><b>No higher than the physics needs</b>
+        <span>A higher degree always fits the points as well or better.</span></div>
     </div>
   </div>
 </section>
@@ -848,6 +979,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <div class="deck-notes"></div>
 
 
-<script type="module" src="js/bundle/lecture-13.js?v=20261017141252"></script>
+<script type="module" src="js/bundle/lecture-13.js?v=20261022093533"></script>
 </body>
 </html>

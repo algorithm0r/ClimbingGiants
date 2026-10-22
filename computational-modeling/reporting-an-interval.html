@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reporting an interval — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -912,11 +912,11 @@
   cannot be interpreted, because ±0.2 at 50% and ±0.2 at 99% are different statements about the
   same
   quantity.</p>
-  <p class="plain">  Say what you got, how far it could be out, and how sure of that you are. Two out of the three
-  is not a result.</p>
+  <p class="plain">  Say what you got, how far it could be out, and how sure of that you are, since a
+  result needs all three.</p>
 </div>
 
-<h2 id="value-half-width-and-rate">Value, Half-Width and Rate</h2>
+<h2 id="value-half-width-and-rate">Parts of a Result</h2>
 
 <table class="data">
   <tr><th>Part</th><th>Answers</th><th>Source</th></tr>
@@ -927,12 +927,13 @@
       honour</td></tr>
 </table>
 
-<p>The third is the one usually left off, and it is the one that gives the other two their meaning.
+<p>The level is the part most often left off, and the value and interval cannot be interpreted
+without it.
 An interval is commonly read as a boundary the truth cannot cross, when it is a claim about a
 rate. Saying "90%" is saying that over many cases like this one the truth is inside nine times
 in ten, which is a checkable statement, and the next page checks it.</p>
 
-<h2 id="percentiles-and-standard-deviations">Percentiles and Standard Deviations</h2>
+<h2 id="percentiles-and-standard-deviations">Interval Conventions</h2>
 
 <p>Resampling produces several hundred answers, so turning them into an interval means choosing
 which part of that distribution to quote. There are two conventions:</p>
@@ -943,25 +944,25 @@ which part of that distribution to quote. There are two conventions:</p>
   be used unless there is a reason not to.</li>
   <li><strong>Value ± <em>k</em>σ.</strong> Take the standard deviation of the answers and
   multiply
-  by 1.645 for 90%, 1.96 for 95%. Compact and symmetric, and the symmetry is an assumption and not a measurement.</li>
+  by 1.645 for 90%, 1.96 for 95%. Compact and symmetric, though the symmetry is assumed and not measured.</li>
 </ul>
 
 <p>On this course's crossing-time problem the two disagree, because the distribution has a long
 right tail: a fitted parabola slightly too flat crosses the rim much later, while one slightly
-too steep crosses only a little earlier. The percentile interval is therefore lopsided about the
-value, and the ±kσ interval is not, and the asymmetry is real.</p>
+too steep crosses only a little earlier. As a result the percentile interval is lopsided about
+the value and the ±kσ interval is not.</p>
 
 <cg-demo case="interval"></cg-demo>
 <div class="source measured"><span class="tag">Measured</span><span>Eight three-point arcs, drawn from a curated, outcome-balanced set of 1,016 shots from 508 games. SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz, via <a href="https://github.com/linouk23/NBA-Player-Movements" target="_blank" rel="noopener">linouk23/NBA-Player-Movements</a>, with play-by-play joined from <a href="https://github.com/shufinskiy/nba_data" target="_blank" rel="noopener">shufinskiy/nba_data</a>. The selection, windowing and unit conversion are this course&rsquo;s own.</span></div>
 
-<h2 id="three-ways-to-write-the-same-result">Three Ways to Write the Same Result</h2>
+<h2 id="three-ways-to-write-the-same-result">Written Forms of a Result</h2>
 
 <p>Three forms of the same result, which is how far from the centre of the hoop a real tracked
 three-pointer is predicted to pass from ten frames of flight, in descending order of how much
 they say:</p>
 
 <ul class="plain">
-  <li><em>d</em> = 59&nbsp;cm, 90% interval [22, 223]&nbsp;cm <em>(percentile, 1000
+  <li><em>d</em> = 60&nbsp;cm, 90% interval [22, 223]&nbsp;cm <em>(percentile, 1000
   resamples)</em></li>
   <li><em>d</em> = 82 &plusmn; 114&nbsp;cm at 90% confidence <em>(mean &plusmn;
   1.645&sigma;)</em></li>
@@ -969,17 +970,17 @@ they say:</p>
 </ul>
 
 <p>The first states the asymmetry and how the interval was obtained, so a reader may disagree with
-the method. The second is compact and discards the asymmetry, where the true interval runs
-+0.339 above the value and −0.202 below it. The third is not a result at all, because it implies
-four significant figures of accuracy on a quantity whose 90% interval is half a second wide.</p>
+the method. The second is compact and discards the asymmetry, where the percentile interval runs
+163&nbsp;cm above the value and 38&nbsp;cm below it. The third is not a result, because it implies
+a precision of about a centimetre on a quantity whose 90% interval is about 200&nbsp;cm wide.</p>
 
 <div class="aside">
-  <span class="label">Significant figures are an interval, badly stated</span>
-  <p>Writing 58.8&nbsp;cm where you could have written 60&nbsp;cm is already a claim about precision.
-The convention is that the last digit is uncertain, so 58.8 asserts something like &plusmn;0.1.
+  <span class="label">Significant figures</span>
+  <p>Writing 59.3&nbsp;cm where you could have written 60&nbsp;cm is already a claim about precision.
+The convention is that the last digit is uncertain, so 59.3 asserts something like &plusmn;0.1.
 Given an interval running from 22 to 223&nbsp;cm, the honest short form is
 <strong>60&nbsp;cm</strong>. Quoting digits beyond the interval is a claim that contradicts the interval printed next to it,
-and it happens constantly because the digits usually come out of the computer that way.</p>
+and it is common because the digits usually come out of the computer that way.</p>
 </div>
 
 <h2 id="choosing-the-level">Choosing the Level</h2>
@@ -1012,19 +1013,16 @@ that choice.</p>
 &plusmn;.</p>
      <p>Without a level, &plusmn;30 is not a claim. HIC = 412 &plusmn; 30 at 50% confidence says the
 truth is as likely outside 382&ndash;442 as inside. At 99% it says the truth is almost certainly
-in there. Those are different statements about the same numbers, and one is four times as strong
-as the other. Without the convention, you cannot tell whether 30 is a percentile half-width, a
+in there. Those are different statements about the same numbers. Without the convention, you cannot tell whether 30 is a percentile half-width, a
 standard deviation, a <em>k</em>&sigma; interval, or a manufacturer's tolerance, and on a skewed
-distribution, as page 33 shows, these differ enough to change a decision. You also cannot
-compare it with anyone else's HIC, because the filter class and baseline window are unstated.
-What a reader needs is a number, an interval, a level and the processing, and with fewer than
-four of those they are guessing.</p></div></details></li>
+distribution, as page 32 shows, these differ enough to change a decision. You also cannot
+compare it with anyone else's HIC, because the filter class and baseline window are unstated.</p></div></details></li>
     <li>Your 1000 resamples have 5th and 95th percentiles at 0.819 and 1.361 around a value of
     1.021. Write the result two ways and say what the second one loses.
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>As percentiles:</strong> <em>t</em> = 1.021&nbsp;s, 90% interval [0.819, 1.361]&nbsp;s
 (percentile, 1000 resamples).</p>
      <p><strong>As a half-width:</strong> <em>t</em> = 1.021 &plusmn; 0.271&nbsp;s at 90% confidence.</p>
-     <p>The second loses <strong>the asymmetry</strong>, and the asymmetry is the interesting part. The
+     <p>The second loses <strong>the asymmetry</strong>. The
 interval reaches 0.202 below the value and 0.340 above, so the upper tail is <strong>1.7 times
 longer</strong>, and writing &plusmn;0.271 asserts a symmetry that is not there. It understates
 how late the crossing might be and overstates how early. It also loses the provenance. "1000
@@ -1033,24 +1031,22 @@ which tells them what it does and does not include.</p></div></details></li>
     <li>Your interval runs from 22 to 223&nbsp;cm. How many digits of the value should you print?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>One significant figure. Report 60&nbsp;cm.</strong></p>
      <p>The interval spans 22 to 223&nbsp;cm, an order of magnitude. The value is not known to the
-nearest centimetre, or to the nearest ten. Writing 58.8 asserts, by the convention that the last
+nearest centimetre, or to the nearest ten. Writing 59.3 asserts, by the convention that the last
 digit is uncertain, a precision of about &plusmn;0.1&nbsp;cm, which overstates what was measured
 by a factor of a thousand. The rule: <strong>round the value to the precision the interval
 supports</strong>, and print the interval next to it so the reader does not have to infer
-anything. "60&nbsp;cm, 90% interval 22 to 223&nbsp;cm" is honest and slightly uncomfortable,
-which is the correct amount of comfort for a prediction from ten frames. Extra digits are the
-most common way a report claims a precision nobody measured, and they are read as claims by
-people who were not in the room.</p></div></details></li>
+anything. "60&nbsp;cm, 90% interval 22 to 223&nbsp;cm" is honest, and a prediction from ten frames
+supports no more than that. Extra digits are a common way a report claims a precision nobody
+measured, and people who were not in the room read them as claims.</p></div></details></li>
     <li>At 90% the two conventions give [22,&nbsp;223]&nbsp;cm and [&minus;32,&nbsp;196]&nbsp;cm
     from
     the same thousand draws. The two differ by more than width. One of them is <em>wrong</em>. Say
     which, and why.
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>The normal one, [&minus;32, 196].</strong></p>
-     <p>The quantity is a distance from the centre of the hoop. It cannot be negative. Not unlikely, not
-rare, <em>impossible</em>. An interval whose lower end is &minus;32&nbsp;cm places part of its
+     <p>The quantity is a distance from the centre of the hoop. It cannot be negative. An interval whose lower end is &minus;32&nbsp;cm places part of its
 claimed 90% on outcomes that do not exist, so the statement it makes is incoherent. The
-percentile interval cannot do this, and not by luck: it reports values the pipeline actually
-produced, and the pipeline cannot produce a negative distance. Every endpoint it returns is
+percentile interval cannot do this, because it reports values the pipeline produced, and the
+pipeline cannot produce a negative distance. Every endpoint it returns is
 achievable by construction.</p>
      <p>The general lesson is about the shape of the assumption and not the width of the answer. Mean
 &plusmn; <em>k</em>&sigma; assumes a symmetric unbounded distribution. Where the quantity is
@@ -1067,7 +1063,7 @@ page is listed here.</p>
 <dl class="glossary"></dl>
 
 <p class="deeper">Go deeper: <a href="workbench.html?tool=spread">the workbench</a>. perturb a
-record many times and watch the distribution of whatever you report from it. Which is where an
+record many times and watch the distribution of whatever you report from it. This is where an
 interval comes from when no formula gives one.</p>
 
   </main>
@@ -1085,11 +1081,11 @@ interval comes from when no formula gives one.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/reporting-an-interval.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/reporting-an-interval.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-16">October 16, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-22">October 22, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

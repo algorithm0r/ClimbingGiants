@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fit error and prediction error — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -839,6 +839,9 @@
           <span class="site-nav-sep">·</span>
           <strong>Fit and prediction error</strong>
         
+          <span class="site-nav-sep">·</span>
+          <a href="fleet-comparison.html">Fleet comparison</a>
+        
         <span class="site-nav-sep">·</span>
         <a href="assign-10.html">Assignment</a>
       </div>
@@ -901,27 +904,26 @@
 <div class="claim">
   <span class="label">Claim</span>
   <p class="exact">Fit error is measured on the data the model was fitted to. Prediction error is
-  measured on data it was not. Adding parameters always reduces the first and reduces the second
-  only
-  up to a point, after which it increases it. The model with the smallest fit error is therefore
-  regularly the worst model available, and choosing between candidates on fit error selects
-  against
-  the thing you want.</p>
-  <p class="plain">  The model that matches your data best is not the model that will do best on the next
-  measurement. Those are different questions, and only one of them is the one you have data for.</p>
+  measured on data it was not. Adding parameters always reduces the first, and typically reduces the
+  second only up to a point, after which it increases it. Thus the model with the smallest fit
+  error is often among the worst available, and choosing between candidates on fit error tends to
+  select against the thing you want.</p>
+  <p class="plain">  The model that matches your data best may not be the model that will do best on the next
+  measurement. Those are different questions, and your data answer only the first unless you set
+  some of it aside.</p>
 </div>
 
-<h2 id="held-out-data-separates-the-two-errors">Held-Out Data Separates the Two Errors</h2>
+<h2 id="held-out-data-separates-the-two-errors">Held-Out Data</h2>
 
-<p>This is week 6's distinction between residual and error, arrived at from the direction of
-choosing between models and not of judging one. The measurement that separates them is <dfn
+<p>This is week 6's distinction between residual and error, now applied to choosing between
+models. The measurement that separates them is <dfn
 data-g="held-out-data">held-out data</dfn>: fit on part of the data, predict the rest, and
 compare.</p>
 
 <table class="data">
   <tr><th></th><th>Fit Error</th><th>Prediction Error</th></tr>
   <tr><td>measured on</td><td>the points used to fit</td><td>points held out</td></tr>
-  <tr><td>as parameters are added</td><td>falls, always, reaching zero in exact arithmetic, and in practice only as far as the solve can reach (page 17)</td><td>falls, then rises</td></tr>
+  <tr><td>as parameters are added</td><td>falls, always, reaching zero in exact arithmetic, and in practice only as far as the solve can reach (page 16)</td><td>falls, then rises</td></tr>
   <tr><td>available without extra data?</td><td>yes</td><td>no</td></tr>
   <tr><td>answers</td><td>how well did this describe what I had</td>
       <td>how well will this do on what I get next</td></tr>
@@ -934,11 +936,11 @@ rising degree, and five are held out and used only to test.</p>
 
 <cg-demo case="held"></cg-demo>
 
-<p>There is one caveat this demo makes visible. At the top of the degree range the fit has as many
+<p>One caveat shows in this demo. At the top of the degree range the fit has as many
 parameters as fitted points, so it is exactly determined and the fit error is required to be
 zero, and it does not get there. The normal equations behind the fit are ill-conditioned long
-before that, so what the demo reports at high degree is the floor of the <em>solve</em> and not
-the floor of the mathematics, page 17. The shape of the argument here is unaffected, since the
+before that, so at high degree the demo reports the floor of the <em>solve</em> and not
+the floor of the mathematics (page 16). The shape of the argument here is unaffected, since the
 fit error still falls monotonically and the held-out error still turns.</p>
 
 <table class="data">
@@ -953,23 +955,23 @@ fit error still falls monotonically and the held-out error still turns.</p>
   <tr><td class="num">12</td><td class="num">3.32×10⁻²</td><td class="num">2.66×10⁻¹</td></tr>
 </table>
 
-<p>The fit error falls monotonically, all the way down, while the held-out error reaches its
-minimum at degree 3, the degree the data came from, and then rises, by a factor of
+<p>The fit error falls monotonically, while the held-out error reaches its minimum at degree 3
+(the degree the data came from) and then rises, by a factor of
 <strong>thirteen</strong> by degree 12. At degree 12 the fit error is the best in the table and
 the held-out error is the worst, and those are the same model. The two columns agree about which
-models are too simple and disagree completely about which are too complex, because only the
+models are too simple and disagree about which are too complex, because only the
 second is measuring performance on data the model has not already seen.</p>
 
 <div class="aside">
-  <span class="label">How much the minimum can be trusted</span>
+  <span class="label">Reliability of the minimum</span>
   <p>The minimum lands on the true degree here, and that is partly luck. Five held-out points give a
 noisy estimate of the held-out error, and neighbouring degrees differ by less than that noise.
 An earlier version of this page, with generated noise instead of recorded noise, put the minimum
 at degree 7 on the same experiment. What the measurement supports reliably is the
-<em>shape</em>: too simple on the left, too complex on the right, and a basin between. Reading a
-single degree off the bottom of a noisy basin takes more from the number than it contains. Where
-the physics says cubic, use cubic. The held-out test is there to catch a model that is badly
-wrong, and not to arbitrate between models that are all defensible.</p>
+<em>shape</em>: too simple on the left, too complex on the right, and a basin between. Five held-out
+points are not enough to pick a single degree from the bottom of the basin. Where the physics
+says cubic, use cubic, since the held-out test is there to catch a model that is badly wrong and
+not to arbitrate between models that are all defensible.</p>
 </div>
 
 <h2 id="three-candidates">Three Candidates</h2>
@@ -990,11 +992,11 @@ is the one to reject.</p>
 </table>
 
 <p>Reading the fit-error column alone selects degree 12, the worst of the three. Reading the
-held-out column rejects it outright, at thirteen times the error of degree 3. Reading the
+held-out column rejects it, at thirteen times the error of degree 3. Reading the
 residual structure column, which needs no held-out data at all, rejects degree 1 immediately and
 cannot distinguish 3 from 12, because both leave scatter. So the two diagnostics are
-complementary and not redundant. Residual structure catches models that are too simple and
-held-out error catches models that are too complex, and neither of them catches both.</p>
+complementary and not redundant. Residual structure catches models that are too simple, and
+held-out error is the only one of the two that catches models that are too complex.</p>
 
 <h2 id="alternatives-to-held-out-data">Alternatives to Held-Out Data</h2>
 
@@ -1006,12 +1008,12 @@ options, in descending order of directness:</p>
   repeat
   for every point. Every point serves as held-out data exactly once, and nothing is wasted. It
   costs
-  <em>n</em> fits instead of one, which for a linear fit is nothing.</li>
+  <em>n</em> fits instead of one, which for a linear fit is cheap.</li>
   <li><strong>An information criterion.</strong> AIC and its relatives add a penalty per parameter
   to the fit error, approximating what held-out testing would have found. Cheaper, and resting on
   assumptions the held-out measurement does not need.</li>
   <li><strong>Physics.</strong> If the form came from a derivation, the number of parameters was
-  never free to choose. This is the strongest answer and the reason page 14 puts physics
+  never free to choose. This is the strongest answer and the reason page 13 puts physics
   first.</li>
 </ol>
 
@@ -1039,21 +1041,19 @@ re-run is only a claim about what happened on one machine on one afternoon.</p>
     <li>Two models. One has a fit error of 0.02 and a held-out error of 0.31, one with 0.11 and
     0.13. Which would you hand a colleague, and what would you say about it?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>The second</strong>, fit 0.11, held out 0.13. It predicts more than twice as well on
-data it has not seen, which is the only thing a colleague is going to do with it. The first
-model looks five times better on the data it was fitted to and is nearly three times worse in
-use. A fit error of 0.02 with a held-out error of 0.31 is the signature of a model that has
-absorbed the noise. The second model's near-equality, 0.11 against 0.13, is itself the
-reassuring part. It says the model is performing about as well off its training data as on it,
-so it has not memorised anything, and 0.13 is a number that will probably survive contact with
+data it has not seen, which is what a colleague is going to do with it. The first model
+looks five times better on the data it was fitted to and is about 2.4 times worse in use. A fit error of 0.02 with a held-out error of 0.31 is the signature of a model that has
+absorbed the noise. The second model's near-equality, 0.11 against 0.13, says it performs
+about as well off its training data as on it, so it has likely not absorbed the noise, and 0.13 is a number that will probably survive contact with
 the next dataset. What to say: <strong>"expect about 0.13, measured on held-out data"</strong>,
-plus how many points were held out and how they were chosen. And say plainly that 0.11 is not
+plus how many points were held out and how they were chosen. Say plainly that 0.11 is not
 the accuracy, so nobody quotes it back.</p></div></details></li>
     <li>You have twelve data points and cannot get more. How would you estimate prediction error,
     and what does your method cost?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Leave-one-out cross-validation.</strong> Fit on eleven points, predict the twelfth,
 record the error, and repeat twelve times with a different point held out each time. The
 aggregate of those twelve errors estimates prediction error, and every point has served as
-unseen data exactly once. The costs are real and worth stating.</p>
+unseen data exactly once. It has three costs.</p>
      <p><strong>Twelve fits instead of one</strong>, which is trivial for a least-squares line, less
 trivial if each fit is an optimisation over an ODE solve.</p>
      <p><strong>The estimate is noisy.</strong> Twelve errors, and each rests on a single point, so the
@@ -1069,11 +1069,12 @@ the shape is wrong even when the residual is tiny, even with no held-out data, a
 <em>what</em> is wrong, missing curvature, a missing term. Held-out error is a single number and
 cannot point at anything.</p>
      <p><strong>Held-out error catches over-fitting.</strong> A model with enough parameters fits the
-noise as well as the signal, and its residuals then look like clean scatter with no structure at
-all, because the noise has been absorbed and not left over. Residual structure is blind to this
-by construction. The more thoroughly a model over-fits, the better its residual plot looks.</p>
-     <p>So the two failures are opposite and each is invisible to the other test. Structure finds a
-model that is too rigid. Held-out error finds one that is too flexible. A model that passes both
+noise as well as the signal, and its residuals then look like clean scatter with no structure,
+because the noise has been absorbed. Residual structure is blind to this
+by construction. The more thoroughly a model over-fits, the better its residual plot tends to look.</p>
+     <p>So residual structure cannot see over-fitting, and held-out error, though it rises for both
+failures, cannot say which one it found. Structure finds a model that is too rigid and says what
+it is missing, and held-out error finds one that is too flexible. A model that passes both
 is one whose form can follow the data and whose flexibility the data can support, and there is
 no single number that certifies that.</p></div></details></li>
   </ol>
@@ -1105,11 +1106,11 @@ outside it reported separately.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/fit-error-and-prediction-error.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/fit-error-and-prediction-error.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-16">October 16, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-22">October 22, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

@@ -7,7 +7,7 @@ const svgEl = (n, a = {}) => { const e = document.createElementNS('http://www.w3
   for (const k in a) e.setAttribute(k, a[k]); return e; };
 
 /* cumulative trapezoid: s[i] is the integral from the start up to sample i.
-   Shared because pages 5-8 and 25 all build one. */
+   Shared because pages 5-8 and 24 all build one. */
 function integrate(y, dt) {
   const s = new Float64Array(y.length);
   for (let i = 1; i < y.length; i++) s[i] = s[i-1] + (y[i] + y[i-1]) * 0.5 * dt;
@@ -969,7 +969,9 @@ function realNoiseRaw(n, sd = 1) {
 }
 
 /* The smoothing trade, on a signal whose truth is known. Widen the window and
-   watch the noise fall and the peak follow it down. */
+   watch the noise fall and the peak follow it down. Then the lag a one-sided
+   filter adds, and the second pass that removes it (the phase lag page, merged
+   into this one 2026-10-22). */
 
 const DT = 1e-3, N = 1000;
 const T = linspace(0, 1 - DT, N);
@@ -991,6 +993,23 @@ const CURVE = WIDTHS.map(w => {
   return Math.sqrt(sq / N);
 });
 const BESTW = WIDTHS[CURVE.indexOf(Math.min(...CURVE))];
+
+/* The lag demo: a pulse whose peak time is known by construction, filtered
+   one way and both ways. The lag is measured against the known time, not
+   estimated from the difference between two filtered curves. Its names carry
+   an L so they stay apart from the smoothing demo's. */
+const LDT = 8e-5, LN = 4000;
+const LT = linspace(0, (LN - 1) * LDT, LN);
+const LT0 = 0.020, LDUR = 0.020, TPEAK = LT0 + LDUR / 2;      // peak at exactly 30 ms
+const PULSE = new Float64Array(LN);
+for (let i = 0; i < LN; i++)
+  PULSE[i] = (LT[i] >= LT0 && LT[i] <= LT0 + LDUR) ? Math.sin(Math.PI * (LT[i] - LT0) / LDUR) : 0;
+
+const peakTime = y => {
+  let bi = 0;
+  for (let i = 1; i < LN; i++) if (Math.abs(y[i]) > Math.abs(y[bi])) bi = i;
+  return LT[bi];
+};
 
 mountDemo({
   smooth: {
@@ -1042,6 +1061,51 @@ mountDemo({
         }
       };
     }
+  },
+  lag: {
+    setting: 'A half-sine pulse 20&nbsp;ms wide whose peak is at exactly 30.000&nbsp;ms by ' +
+             'construction, sampled at 12.5&nbsp;kHz. The true peak time is therefore known and ' +
+             'the lag is measured, not inferred.',
+    source: {kind: 'constructed', text: 'A half-sine pulse whose peak is at exactly 30.000&nbsp;ms by construction, so the lag is measured against a known time. The filter is the one SAE&nbsp;J211 specifies.'},
+    caption: 'The solid curve is the filter you have selected; the ghost is the unfiltered pulse. ' +
+             'The amber line marks the true peak at 30.000&nbsp;ms, and the marker is where the ' +
+             'filtered peak actually lands.',
+    controls: [{key: 'lc', label: 'CFC class', min: 0, max: 3, step: 1, value: 2, dp: 0,
+                fmt: v => ['1000', '600', '180', '60'][Math.round(v)]}],
+    segments: [{key: 'pass', label: 'passes', value: 'one', options: [
+      {value: 'one', label: 'One pass'},
+      {value: 'two', label: 'Forward then backward'}]}],
+    panels: [{label: 'filtered pulse', unit: '', height: 240, xAxis: true,
+              xLabel: 'time', xUnit: 'ms', xScale: 1000, lens: true, lensZoom: 12}],
+    readouts: [
+      {key: 'class', label: 'CFC class'},
+      {key: 'true',  label: 'true peak'},
+      {key: 'meas',  label: 'filtered peak'},
+      {key: 'lag',   label: 'shift'},
+      {key: 'res',   label: 'sample interval'}
+    ],
+    compute(s) {
+      const klass = [1000, 600, 180, 60][Math.round(s.lc)];
+      const y = s.pass === 'one' ? cfcOnce(PULSE, klass, LDT) : cfc(PULSE, klass, LDT);
+      const tp = peakTime(y);
+      const lag = (tp - TPEAK) * 1000;
+      return {
+        panels: [{x: LT, y, ghost: PULSE, range: [0.012, 0.055],
+          opts: {
+            label: 'CFC ' + klass + (s.pass === 'one' ? ', one pass' : ', forward then backward'),
+            rings: [{x: TPEAK, y: 0, text: 'true peak 30.000 ms'}],
+            marks: [{t: tp, y: y[Math.round(tp / LDT)], cast: 'x',
+                     text: (tp * 1000).toFixed(3) + ' ms', dx: 8, dy: -9}]
+          }}],
+        readouts: {
+          class: 'CFC ' + klass,
+          true: '30.000 ms',
+          meas: (tp * 1000).toFixed(3) + ' ms',
+          lag: (lag >= 0 ? '+' : '−') + Math.abs(lag).toFixed(3) + ' ms',
+          res: (LDT * 1000).toFixed(3) + ' ms'
+        }
+      };
+    }
   }
 });
 
@@ -1082,6 +1146,42 @@ mountDemo({
     notes: [
       {x: FREEZE - 8, y: -6.2, anchor: 'end', cls: 'hi', text: 'the night it froze'},
       {x: 8, y: 25, anchor: 'start', text: 'a 31-day average'}
+    ]
+  });
+})();
+
+/* ---------------------------------------------------------------------------
+   fig-thermo — causality producing lag, without the word causality. A heavy
+   bulb climbs rather than jumps, and on the way up it reports a temperature
+   from a moment ago. Nothing is broken about the thermometer.
+--------------------------------------------------------------------------- */
+(() => {
+  const host = document.querySelector('#fig-thermo .fig-body');
+  if (!host) return;
+  const M = 300, TAU = 0.11, T0 = 0.28;
+  const X = [], STEP = [], READ = [];
+  for (let i = 0; i < M; i++) {
+    const t = i / (M - 1);
+    X.push(t);
+    STEP.push(t < T0 ? 0 : 1);
+    READ.push(t < T0 ? 0 : 1 - Math.exp(-(t - T0) / TAU));
+  }
+  /* where the reading first reaches half: the lag you would measure off a peak */
+  const half = T0 + TAU * Math.log(2);
+  diagram(host, {
+    w: 460, h: 208, xRange: [0, 1], yRange: [-0.22, 1.22], axes: false,
+    alt: 'A step change in temperature and a thermometer reading that climbs '
+       + 'towards it, reaching half the step a little after the step happened.',
+    curves: [{x: X, y: STEP, cls: 'ghost'}, {x: X, y: READ, cls: 'trace'}],
+    drops: [{x: T0, y: 1}, {x: half, y: 0.5}],
+    points: [{x: half, y: 0.5}],
+    leads: [{from: [T0, 0.5], to: [half, 0.5], cls: 'lead'}],
+    notes: [
+      {x: 0.02, y: 1.12, anchor: 'start', text: 'the water'},
+      {x: 0.97, y: 0.62, anchor: 'end', text: 'the reading'},
+      {x: (T0 + half) / 2, y: 0.36, anchor: 'middle', cls: 'hi', text: 'lag'},
+      {x: 0.5, y: -0.14, anchor: 'middle',
+       text: 'the bulb cannot know about heat it has not absorbed yet'}
     ]
   });
 })();
@@ -1303,81 +1403,24 @@ setTimeout(() => {
   });
 }, 0);
 
-/* Lecture 11's own figures.
-
-   The best-width search needs a known true signal, so it reuses the notes
-   page's own construction from the smoothing demo module bundled ahead of this
-   file: CLEAN (a 2 Hz sine at 1 kHz), NOISY (CLEAN plus real accelerometer
-   noise scaled to 0.01), WIDTHS (odd widths 1 to 151) and CURVE (RMS error at
-   each). Everything else is the crash record, test 10642 channel 093,
+/* Lecture 11's own figures, all on the crash record, test 10642 channel 093,
    h = 8e-5 s. Checked against the file:
      raw peak -1540.6 m/s^2 at 10.80 ms; pre-impact sd 2.377
-     9-sample average: peak -968.3, sd 1.204 (half the noise, 37% off the peak)
-     CFC 600 one pass: peak -1391.0 at 11.04 ms; two passes: -1283.8 at 10.80
+     9-sample centred average: peak -968.3 at 10.80 ms, sd 1.204
      jerk (central difference) over the 625 pre-impact samples: sd 16,507 raw,
      4,434 after the 9-sample average, the average taken over the whole record
+     one-sided average of the sample and the 4 before it: -1317.7 at 10.96 ms,
+     2 samples late; that average forward then backward: -1169.3 at 10.80 ms,
+     weights 1-2-3-4-5-4-3-2-1 over the same 9 samples as the centred average;
+     pre-impact sd 1.44 against 1.21 for the centred 9
+   centred average on the spike, lowest point between 8.5 and 13.5 ms:
+     w = 5 -1317.7, w = 9 -968.3, w = 25 -477.4 (at 11.12 ms)
    Hosts are found by data-fig so a figure can sit under more than one claim. */
 (() => {
   const each = (name, draw) =>
     document.querySelectorAll('[data-fig="' + name + '"] .fig-body').forEach(draw);
   const any = (...names) => names.some(n => document.querySelector('[data-fig="' + n + '"]'));
-  /* a short caption above one cell of a figure row, as lecture 10 has */
-  const cap = (cell, text) => { const p = document.createElement('div');
-    p.style.cssText = 'text-align:center; color:#5A5550; font-size:1.05em; margin:0 0 .2em';
-    p.textContent = text; cell.appendChild(p); return p; };
-
-  /* what each halving of the noise costs: 1/sqrt(w) against w */
-  each('l12-halving', host => {
-    const ws = linspace(1, 420, 420), f = ws.map(w => 1 / Math.sqrt(w));
-    panel(host, {label: 'noise left, as a fraction', unit: '', height: 260, xAxis: true,
-                 xLabel: 'window width w', xUnit: 'samples', xScale: 1, yClamp: [0, 0.55]})(
-      ws, f, null, [0, 420], {
-        marks: [{t: 25, y: 0.2, cast: 'both', text: 'w = 25: a fifth', dx: 10, dy: -10},
-                {t: 100, y: 0.1, cast: 'both', text: 'w = 100: a tenth', dx: 10, dy: -10},
-                {t: 400, y: 0.05, cast: 'both', text: 'w = 400: a twentieth', dx: -10, dy: -12, anchor: 'end'}]
-      });
-  });
-
-  /* the best width, on the page's sine: error against width, and the noise
-     reduction that keeps improving */
-  const sigma = (() => { let s = 0; for (let i = 0; i < NOISY.length; i++) s += (NOISY[i] - CLEAN[i]) ** 2;
-                         return Math.sqrt(s / NOISY.length); })();
-  const W = Float64Array.from(WIDTHS), E = Float64Array.from(CURVE);
-  const best = Math.min(...CURVE);
-  each('l12-err', host => {
-    panel(host, {label: 'RMS error against the true sine', unit: '', height: 270, xAxis: true,
-                 xLabel: 'window width w', xUnit: 'samples', xScale: 1, yClamp: [0, 0.075]})(
-      W, E, null, [1, 101], {
-        marks: [{t: BESTW, y: best, text: 'smallest at w = ' + BESTW, dx: 10, dy: -12}],
-        hlines: [{y: CURVE[0], cls: 'limit', text: 'no smoothing'}]
-      });
-  });
-  /* on a log axis, so the falling noise is visible beside the error */
-  each('l12-trap', host => {
-    panel(host, {label: 'error and noise left', unit: '', height: 270, xAxis: true,
-                 xLabel: 'window width w', xUnit: 'samples', xScale: 1, yLog: true, yClamp: [5e-4, 0.1]})(
-      W, E, null, [1, 101], {
-        curves: [{x: W, y: W.map(w => sigma / Math.sqrt(w)), cls: 'pred'}],
-        marks: [{t: 101, y: CURVE[WIDTHS.indexOf(101)], text: 'error against the truth', dx: -10, dy: -10, anchor: 'end'},
-                {t: 101, y: sigma / Math.sqrt(101), text: 'noise left, σ/√w', dx: -10, dy: -10, anchor: 'end'}]
-      });
-  });
-
-  /* the peak against width, true value 1 */
-  each('l12-peak', host => {
-    const peaks = WIDTHS.map(w => {
-      const ys = w === 1 ? NOISY : movingAverage(NOISY, w);
-      let p = 0; for (let i = 0; i < ys.length; i++) p = Math.max(p, Math.abs(ys[i])); return p;
-    });
-    panel(host, {label: 'peak of the smoothed sine', unit: '', height: 270, xAxis: true,
-                 xLabel: 'window width w', xUnit: 'samples', xScale: 1, yClamp: [0.9, 1.04]})(
-      W, Float64Array.from(peaks), null, [1, 151], {
-        hlines: [{y: 1, cls: 'limit', text: 'true peak, 1.0000'}],
-        marks: [{t: 9, y: peaks[WIDTHS.indexOf(9)], text: 'w = 9: ' + peaks[WIDTHS.indexOf(9)].toFixed(4), dx: 10, dy: -10}]
-      });
-  });
-
-  if (!any('l11-payoff', 'l12-crash', 'l12-twopass')) return;
+  if (!any('l11-payoff', 'l11-widths', 'l11-oneway', 'l11-twoway', 'l11-vs9')) return;
   fetch('data/test10642-crossmember-x.json').then(r => r.json()).then(d => {
     const H = d.dt, a = Float64Array.from(d.a);
     const t = Float64Array.from({length: d.n}, (_, i) => d.t0 + i * H);
@@ -1454,32 +1497,72 @@ setTimeout(() => {
                 fy: v => minus(v.toLocaleString('en-US')), raw: jr, sm: js});
     });
 
-    /* the impact spike, raw and after a 9-sample average */
-    each('l12-crash', host => {
-      const s9 = movingAverage(a, 9), kr = peakOf(a), k9 = peakOf(s9);
-      panel(host, {label: 'acceleration', unit: 'm/s²', height: 280, xAxis: true,
-                   xLabel: 'time', xUnit: 'ms', xScale: 1000, yClamp: [-1700, 400]})(
-        t, s9, a, [0.006, 0.016], {
-          marks: [{t: t[kr], y: a[kr], text: 'raw: −1541', dx: 10, dy: 4},
-                  {t: t[k9], y: s9[k9], text: '9-sample average: −968', dx: 10, dy: 4}]
-        });
+    /* the centred average at three widths on the spike, one strip each; the
+       value read is the lowest point inside the zoomed window */
+    each('l11-widths', host => {
+      const z0 = 0.0085, z1 = 0.0135, W = [5, 9, 25];
+      W.forEach((w, j) => {
+        const y = movingAverage(a, w);
+        let k = -1;
+        for (let i = 0; i < y.length; i++) if (t[i] >= z0 && t[i] <= z1 && (k < 0 || y[i] < y[k])) k = i;
+        const last = j === W.length - 1;
+        panel(host, {label: 'w = ' + w + ', ' + (w * H * 1000).toFixed(2) + ' ms,  acceleration', unit: 'm/s²',
+                     height: last ? 150 : 118, xAxis: last, xLabel: 'time', xUnit: 'ms', xScale: 1000,
+                     yClamp: [-1700, 250]})(
+          t, y, a, [z0, z1], {
+            marks: [{t: t[k], y: y[k], text: MINUS(Math.round(y[k])), dx: 10, dy: 5}]
+          });
+      });
     });
 
-    /* one pass of the CFC 600 filter moves the peak late; the backward pass
-       moves it back */
-    each('l12-twopass', host => {
-      const one = cfcOnce(a, 600, H), two = cfc(a, 600, H);
-      const k1 = peakOf(one), k2 = peakOf(two);
-      /* only the zoomed window, so the kit does not thin the curve to every
-         fifth sample */
-      const i0 = Math.floor((0.0095 - d.t0) / H), i1 = Math.ceil((0.0125 - d.t0) / H) + 1;
-      panel(host, {label: 'acceleration', unit: 'm/s²', height: 280, xAxis: true,
-                   xLabel: 'time', xUnit: 'ms', xScale: 1000, yClamp: [-1700, 400]})(
-        t, two, a, [0.0095, 0.0125], {
-          curves: [{x: t.slice(i0, i1), y: one.slice(i0, i1), cls: 'pred'}],
-          marks: [{t: t[k1], y: one[k1], cast: 'x', text: 'one pass: ' + (t[k1] * 1000).toFixed(2) + ' ms', dx: 10, dy: 4},
-                  {t: t[k2], y: two[k2], cast: 'x', text: 'two passes: ' + (t[k2] * 1000).toFixed(2) + ' ms', dx: -10, dy: 4, anchor: 'end'}]
-        });
+    /* the average of the w samples up to and including each one: all it
+       needs is the past, and it is the centred average moved (w - 1)/2 late */
+    const trailing = (y, w) => {
+      const out = new Float64Array(y.length); let s = 0;
+      for (let i = 0; i < y.length; i++) {
+        s += y[i]; if (i >= w) s -= y[i - w];
+        out[i] = s / Math.min(i + 1, w);
+      }
+      return out;
+    };
+    const rev = y => Float64Array.from(y).reverse();
+    const zoom = {label: 'acceleration', unit: 'm/s²', height: 280, xAxis: true,
+                  xLabel: 'time', xUnit: 'ms', xScale: 1000, yClamp: [-1700, 400]};
+    const span = [0.0095, 0.0125];
+    const cut = y => { const i0 = Math.floor((span[0] - d.t0) / H), i1 = Math.ceil((span[1] - d.t0) / H) + 1;
+                       return {x: t.slice(i0, i1), y: y.slice(i0, i1)}; };
+    const ms = s => (s * 1000).toFixed(2) + ' ms';
+
+    /* one pass of the sample and the 4 before it: reaches as far back as the
+       centred 9 and lags 2 samples */
+    const one = trailing(a, 5), two = rev(trailing(rev(one), 5)), c9 = movingAverage(a, 9);
+    const kr = peakOf(a), k1 = peakOf(one), k2 = peakOf(two), kc = peakOf(c9);
+    const lab = (name, y, k) => name + ': ' + MINUS(Math.round(y[k])) + ' at ' + ms(t[k]);
+
+    each('l11-oneway', host => {
+      panel(host, zoom)(t, one, a, span, {
+        marks: [{t: t[kr], y: a[kr], cast: 'x', text: 'raw: ' + ms(t[kr]), dx: -10, dy: 4, anchor: 'end'},
+                {t: t[k1], y: one[k1], cast: 'x', text: lab('one pass', one, k1), dx: 10, dy: 4}]
+      });
+    });
+
+    /* the same average run backward over the first pass's output */
+    each('l11-twoway', host => {
+      panel(host, zoom)(t, two, a, span, {
+        curves: [{...cut(one), cls: 'pred'}],
+        marks: [{t: t[k1], y: one[k1], cast: 'x', text: lab('one pass', one, k1), dx: 10, dy: 4},
+                {t: t[k2], y: two[k2], cast: 'x', text: lab('two passes', two, k2), dx: -10, dy: 4, anchor: 'end'}]
+      });
+    });
+
+    /* the two passes against the centred 9: the same 9 samples, weighted
+       1-2-3-4-5-4-3-2-1 against equally */
+    each('l11-vs9', host => {
+      panel(host, zoom)(t, two, a, span, {
+        curves: [{...cut(c9), cls: 'pred'}],
+        marks: [{t: t[k2], y: two[k2], text: lab('two passes', two, k2), dx: -10, dy: 4, anchor: 'end'},
+                {t: t[kc], y: c9[kc], text: lab('centred 9', c9, kc), dx: 10, dy: 4}]
+      });
     });
   });
 })();

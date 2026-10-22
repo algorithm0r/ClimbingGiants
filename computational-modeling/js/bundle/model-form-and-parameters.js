@@ -6,7 +6,7 @@ const svgEl = (n, a = {}) => { const e = document.createElementNS('http://www.w3
   for (const k in a) e.setAttribute(k, a[k]); return e; };
 
 /* cumulative trapezoid: s[i] is the integral from the start up to sample i.
-   Shared because pages 5-8 and 25 all build one. */
+   Shared because pages 5-8 and 24 all build one. */
 function integrate(y, dt) {
   const s = new Float64Array(y.length);
   for (let i = 1; i < y.length; i++) s[i] = s[i-1] + (y[i] + y[i-1]) * 0.5 * dt;
@@ -1012,6 +1012,38 @@ function polyfit(x, y, deg) {
 }
 const polyval = (c, x) => { let s = 0; for (let k = c.length - 1; k >= 0; k--) s = s * x + c[k]; return s; };
 
+/* One shot from the example pack (held back, so in no student's data): shot 700,
+   frames 8-38 of free flight, 25 Hz, time from frame 8. SHOT_D is the horizontal
+   distance from the hoop and SHOT_Z the height, both in metres, as recorded. */
+const SHOT_H = 0.04;
+const SHOT_T = Array.from({length: 31}, (_, i) => i * SHOT_H);
+const SHOT_D = [7.9054, 7.6249, 7.3730, 7.1166, 6.8507, 6.5963, 6.3330, 6.1048, 5.8236, 5.5750, 5.3412, 5.0792, 4.8344, 4.5811, 4.3325, 4.0536, 3.8338, 3.5966, 3.3265, 3.0730, 2.8377, 2.5786, 2.3472, 2.0915, 1.8832, 1.6246, 1.3825, 1.1429, 0.9050, 0.6659, 0.4235];
+const SHOT_Z = [3.2687, 3.5030, 3.7425, 3.9280, 4.1173, 4.2554, 4.4051, 4.5764, 4.6591, 4.7882, 4.9001, 4.9535, 4.9812, 5.0164, 5.0502, 5.0666, 5.0734, 5.0374, 4.9993, 4.9507, 4.8083, 4.7967, 4.6564, 4.5164, 4.4659, 4.2496, 4.1735, 4.0146, 3.7636, 3.5551, 3.4273];
+
+/* vertical velocity by central difference, at the 29 interior frames */
+const VEL_T = [], VEL_V = [];
+for (let i = 1; i < SHOT_Z.length - 1; i++) {
+  VEL_T.push(i * SHOT_H);
+  VEL_V.push((SHOT_Z[i + 1] - SHOT_Z[i - 1]) / (2 * SHOT_H));
+}
+const G_KNOWN = 9.81;
+/* v = v0 - g t two ways: both parameters fitted, or g held and only v0 fitted.
+   Holding g moves -g t to the data side, v + g t = v0, and the least-squares
+   v0 is then the mean of v + g t. */
+function velFit(mode) {
+  const n = VEL_T.length;
+  let st = 0, sv = 0, stt = 0, stv = 0;
+  for (let i = 0; i < n; i++) {
+    st += VEL_T[i]; sv += VEL_V[i]; stt += VEL_T[i] * VEL_T[i]; stv += VEL_T[i] * VEL_V[i];
+  }
+  let g, v0;
+  if (mode === 'fixed') { g = G_KNOWN; v0 = (sv + g * st) / n; }
+  else { const b = (n * stv - st * sv) / (n * stt - st * st); g = -b; v0 = (sv - b * st) / n; }
+  let sr = 0;
+  for (let i = 0; i < n; i++) { const e = VEL_V[i] - (v0 - g * VEL_T[i]); sr += e * e; }
+  return {g, v0, rms: Math.sqrt(sr / n)};
+}
+
 mountDemo({
   degree: {
     setting: 'Ten points from <em>y</em> = 2 + 3<em>x</em> − 4<em>x</em>², with noise of ' +
@@ -1054,8 +1086,148 @@ mountDemo({
         }
       };
     }
+  },
+  vel: {
+    setting: 'The vertical velocity of one shot, by central difference of its heights, and ' +
+             'the line <em>v</em> = <em>v</em>₀ − <em>gt</em> fitted to it two ways: with ' +
+             '<em>g</em> fitted from the data, or with <em>g</em> held at 9.81&nbsp;m/s² and ' +
+             'only <em>v</em>₀ fitted.',
+    source: {kind: 'measured', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz. One missed three-point attempt by Stephen Curry, Golden State at the Clippers, 19 November 2015, from the example pack, frames 8&ndash;38 of free flight.'},
+    caption: 'The solid line is the selected fit and the ghost is the other one. The dots are ' +
+             'the same 29 velocities in both, so any difference between the two fits is in the ' +
+             'line and not in the data.',
+    segments: [{key: 'fit', label: 'gravity', value: 'free', options: [
+      {value: 'free', label: 'Fitted'}, {value: 'fixed', label: 'Held at 9.81'}]}],
+    panels: [{label: 'vertical velocity', unit: 'm/s', height: 250, xAxis: true,
+              xLabel: 'time', xUnit: 's', xScale: 1}],
+    readouts: [
+      {key: 'v0',  label: 'intercept'},
+      {key: 'g',   label: 'slope'},
+      {key: 'how', label: ''},
+      {key: 'rms', label: 'RMS residual'}
+    ],
+    compute(s) {
+      const mode = s.fit === 'fixed' ? 'fixed' : 'free';
+      const f = velFit(mode), o = velFit(mode === 'fixed' ? 'free' : 'fixed');
+      const X = linspace(-0.02, 1.22, 2);
+      return {
+        panels: [{x: X, y: X.map(t => f.v0 - f.g * t), ghost: X.map(t => o.v0 - o.g * t),
+          range: [-0.02, 1.22],
+          opts: {yRange: [-7, 7], label: 'vertical velocity',
+                 scatter: [{x: VEL_T, y: VEL_V, r: 3}]}}],
+        readouts: {
+          v0:  'v₀ = ' + f.v0.toFixed(2) + ' m/s',
+          g:   '−g = −' + f.g.toFixed(2) + ' m/s²',
+          how: mode === 'fixed' ? 'g held at 9.81' : 'g fitted from the data',
+          rms: f.rms.toFixed(3) + ' m/s'
+        }
+      };
+    }
   }
 });
+
+/* ---------------------------------------------------------------------------
+   fig-line — a line of best fit, twice. The same least-squares line fitted to
+   one shot's distance from the hoop, where the form has a reason, and to its
+   height, where it has none. Example pack (held back), shot 700, frames 8-38,
+   time from frame 8. Fits computed here, so the drawn lines are the fits.
+--------------------------------------------------------------------------- */
+(() => {
+  const host = document.querySelector('#fig-line .fig-body');
+  if (!host) return;
+  const T = SHOT_T, D = SHOT_D, Z = SHOT_Z;
+  const line = y => {
+    const n = T.length;
+    let st = 0, sy = 0, stt = 0, sty = 0;
+    for (let i = 0; i < n; i++) { st += T[i]; sy += y[i]; stt += T[i] * T[i]; sty += T[i] * y[i]; }
+    const b = (n * sty - st * sy) / (n * stt - st * st);
+    return {a: (sy - b * st) / n, b};
+  };
+  const fd = line(D), fz = line(Z);
+  const ends = f => ({x: [-0.03, 1.23], y: [f.a - 0.03 * f.b, f.a + 1.23 * f.b]});
+  const cells = diagramRow(host, 2);
+
+  diagram(cells[0], {
+    w: 320, h: 190, xRange: [-0.05, 1.25], yRange: [-0.6, 8.6],
+    title: 'distance from the hoop',
+    alt: 'Thirty-one points falling steadily from about 7.9 metres to 0.4 metres over '
+       + '1.2 seconds, with a straight line through them that every point sits on.',
+    curves: [ends(fd)],
+    points: D.map((y, i) => ({x: T[i], y, r: 2.6})),
+    notes: [
+      {x: 0.05, y: 8.0, anchor: 'start', dx: 6, text: 'a = ' + fd.a.toFixed(2) + ' m'},
+      {x: 0.62, y: 5.6, anchor: 'start', dx: 8, cls: 'hi',
+       text: 'b = −' + Math.abs(fd.b).toFixed(2) + ' m/s'},
+      {x: 1.2, y: -0.35, anchor: 'end', text: '1.2 s'}
+    ]
+  });
+
+  diagram(cells[1], {
+    w: 320, h: 190, xRange: [-0.05, 1.25], yRange: [2.95, 5.45],
+    title: 'height above the floor',
+    alt: 'Thirty-one points rising from 3.3 metres to a peak of 5.1 metres and falling to '
+       + '3.4 metres, with a nearly flat straight line fitted through them that misses '
+       + 'both ends by about a metre.',
+    curves: [ends(fz)],
+    points: Z.map((y, i) => ({x: T[i], y, r: 2.6})),
+    leads: [{from: [0, Z[0]], to: [0, fz.a], cls: 'level'},
+            {from: [0.04, 5.12], to: [0, fz.a + 0.04]}],
+    notes: [
+      {x: 0.04, y: 5.16, anchor: 'start', dx: 3, text: 'a = ' + fz.a.toFixed(2) + ' m'},
+      {x: 0.62, y: 4.2, anchor: 'middle', cls: 'hi',
+       text: 'b = ' + fz.b.toFixed(2) + ' m/s'},
+      {x: 0.03, y: 3.2, anchor: 'start', dx: 6, text: 'misses by ' + (fz.a - Z[0]).toFixed(2) + ' m'},
+      {x: 1.2, y: 3.08, anchor: 'end', text: '1.2 s'}
+    ]
+  });
+})();
+
+/* ---------------------------------------------------------------------------
+   fig-release — finding free flight. Example pack (held back), shot 1092: the
+   vertical speed by frame from the central difference over four frames, and
+   the release found by the rule on the page (step back from the apex while
+   the speed one or two frames earlier was higher). The dashed line falls at
+   g dt per frame from the release. Computed here from data/example/train.json.
+--------------------------------------------------------------------------- */
+(async () => {
+  const host = document.querySelector('#fig-release .fig-body');
+  if (!host) return;
+  let d;
+  try { d = await (await fetch('data/example/train.json')).json(); }
+  catch (e) { return; }
+  const s = d.shots.find(q => q.id === 1092);
+  if (!s) return;
+  const t = s.t, z = s.z, n = t.length;
+  const vz = new Array(n).fill(NaN);
+  for (let i = 2; i < n - 2; i++) vz[i] = (z[i + 2] - z[i - 2]) / (t[i + 2] - t[i - 2]);
+  let r = 0;
+  for (let i = 1; i < n; i++) if (z[i] > z[r]) r = i;
+  while (r > 3 && (vz[r - 1] > vz[r] || vz[r - 2] > vz[r])) r--;
+  let end = 0;
+  while (end < n && Math.hypot(s.x[end] - s.hoop_x, s.y[end] - s.hoop_y) >= 1.0) end++;
+  const G = 9.81, dt = t[1] - t[0];
+  const idx = [];
+  for (let i = 2; i <= end; i++) idx.push(i);
+  diagram(host, {
+    w: 660, h: 250, xRange: [1, end + 1], yRange: [-5.2, 7.0], zero: true,
+    title: 'vertical speed (m/s) by frame, shot 1092',
+    alt: 'Vertical speed at each frame. It dips, then climbs to a peak of '
+       + vz[r].toFixed(2) + ' metres per second at frame ' + r + ', then falls along a straight '
+       + 'dashed line to about minus four metres per second at frame ' + end + '.',
+    curves: [{x: [r, end], y: [vz[r], vz[r] - G * dt * (end - r)], cls: 'ghost'}],
+    leads: [{from: [r, -5.2], to: [r, 7.0], cls: 'level'},
+            {from: [end, -5.2], to: [end, 7.0], cls: 'level'}],
+    points: idx.map(i => ({x: i, y: vz[i], r: 3})),
+    notes: [
+      {x: r, y: 6.5, anchor: 'middle', cls: 'hi', text: 'release, frame ' + r},
+      {x: end, y: 6.5, anchor: 'end', dx: -4, text: 'within 1 m of the hoop, frame ' + end},
+      {x: 5, y: 1.7, anchor: 'middle', text: 'in the hand'},
+      {x: 1.3, y: 0.35, anchor: 'start', text: '0 m/s'},
+      {x: r + 9, y: vz[r] - G * dt * 9 + 1.1, anchor: 'start',
+       text: 'falls ' + (G * dt).toFixed(2) + ' m/s a frame'}
+    ]
+  });
+})();
 
 /* ---- code: highlighting + per-line notes ---- */
 const RULES={

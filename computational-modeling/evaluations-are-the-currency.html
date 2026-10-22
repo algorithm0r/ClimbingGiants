@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Evaluations are the currency — Computational Physical Modeling</title>
+  <title>Evaluation cost — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -834,7 +834,7 @@
         <a href="week-07.html">Overview</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="conditions-become-roots.html">Conditions become roots</a>
+          <a href="conditions-become-roots.html">Conditions as roots</a>
         
           <span class="site-nav-sep">·</span>
           <a href="bisection.html">Bisection</a>
@@ -843,10 +843,10 @@
           <a href="newton-and-secant.html">Newton and secant</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="root-finding-fails.html">Four ways it fails</a>
+          <a href="root-finding-fails.html">Root-finding failures</a>
         
           <span class="site-nav-sep">·</span>
-          <strong>Evaluations</strong>
+          <strong>Evaluation cost</strong>
         
           <span class="site-nav-sep">·</span>
           <a href="windowed-optimum.html">Windowed optimum</a>
@@ -908,23 +908,22 @@
   <main data-pagefind-body class="wide">
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <div class="eyebrow">Week 7 · Root Finding and Search</div>
-<h1>Evaluations are the currency</h1>
+<h1>Evaluation cost</h1>
 
 <div class="claim">
   <span class="label">Claim</span>
   <p class="exact">Methods are compared by the number of evaluations of $f$ they consume to reach
   a
-  <dfn data-g="tolerance">tolerance</dfn>, not by the number of iterations they take. An
-  iteration is free. An evaluation costs
+  <dfn data-g="tolerance">tolerance</dfn>, not by the number of iterations they take. An iteration costs almost nothing beyond its evaluations. An evaluation costs
   whatever computing $f$ costs, and the methods in this week differ in how many evaluations each
   iteration needs.</p>
-  <p class="plain">  Count the expensive thing. Iterations are bookkeeping, and evaluations are the bill.</p>
+  <p class="plain">  Count evaluations, since they are where the time goes, and treat iterations as bookkeeping.</p>
 </div>
 
-<h2 id="why-iteration-counts-mislead">Why Iteration Counts Mislead</h2>
+<h2 id="why-iteration-counts-mislead">Iteration Counts</h2>
 
-<p>Iteration counts are what textbooks tabulate, and they are the wrong unit as soon as an
-iteration costs something. In this week alone:</p>
+<p>Many textbooks tabulate iteration counts, and they are the wrong unit as soon as methods need
+different numbers of evaluations per iteration. In this week alone:</p>
 
 <table class="data">
   <tr><th>Method</th><th>Evaluations per Iteration</th><th>Evaluated Quantity</th></tr>
@@ -935,7 +934,7 @@ iteration costs something. In this week alone:</p>
 
 <p>Newton in five iterations and the secant method in five iterations are not the same amount of
 work. Comparing them by iteration counts flatters Newton by a factor of two, and that factor is
-roughly the size of the difference being argued about, so the unit decides the argument.</p>
+roughly the size of the difference being argued about, so the choice of unit can decide which method wins.</p>
 
 <h2 id="the-comparison-in-evaluations">The Comparison in Evaluations</h2>
 
@@ -951,7 +950,7 @@ of [0.5, 3.0]:</p>
 </table>
 
 <p>The secant method reaches a comparable answer in fewer evaluations than Newton, despite
-converging more slowly per iteration. Its order of 1.63 is the golden ratio, 1.618, and the
+converging more slowly per iteration. Its measured order of 1.63 is close to the golden ratio, 1.618, and the
 arithmetic that makes it competitive is that $1.618$ per evaluation beats $2$ per two
 evaluations, since $1.618 > \sqrt{2}$. The measured orders in that table are computed from
 successive errors and not quoted from theory, and they are what the demo on the previous page
@@ -959,16 +958,14 @@ reports as you step it.</p>
 
 <h2 id="an-expensive-derivative">An Expensive Derivative</h2>
 
-<p>The table above assumes $f'$ costs about what $f$ costs. Often it costs much more, or nothing at
-all:</p>
+<details class="ans"><summary><span>Optional, open to read</span></summary><div class="body">
+<p>The table above assumes $f'$ costs about what $f$ costs. It may cost less, it may cost more, or it may not be available:</p>
 
 <ul class="plain">
-  <li><strong>An analytic derivative</strong> is usually cheaper than $f$, sometimes much cheaper
-  if
-  it shares subexpressions. Newton looks better than the table suggests.</li>
-  <li><strong>A numerical derivative</strong> costs one or two more evaluations of $f$, so Newton
-  becomes a 3-evaluation step that converges at order 2, which is worse per evaluation than the secant
-  method, which is getting a derivative estimate for free from values it already has.</li>
+  <li><strong>An analytic derivative</strong> can be cheaper than $f$, much cheaper if it shares subexpressions. Newton looks better than the table suggests.</li>
+  <li><strong>A numerical derivative</strong> costs one or two more evaluations of $f$, so Newton becomes a 2- or 3-evaluation step that converges at close to order 2. That is
+  worse per evaluation than the secant method, which gets a derivative estimate for free from
+  values it already has.</li>
   <li><strong>No derivative at all</strong>, where $f$ is a black box, a simulation or an experiment.
   Then
   Newton is unavailable and the choice is between bracketing and the secant method.</li>
@@ -976,11 +973,12 @@ all:</p>
 
 <p>The last case is the one where the currency argument bites hardest, because that is where an
 evaluation costs minutes or money and not microseconds.</p>
+</div></details>
 
-<h2 id="genuinely-expensive-f">Genuinely Expensive $f$</h2>
+<h2 id="genuinely-expensive-f">Expensive Functions</h2>
 
 <p>Everything above treats evaluations as merely countable. When each one is a finite-element run,
-a CFD solve, or a physical test, the count becomes the whole design of the analysis:</p>
+a CFD solve, or a physical test, the count shapes the design of the analysis:</p>
 
 <ol class="plain">
   <li><strong>Budget first.</strong> Decide how many evaluations are available before choosing a
@@ -992,7 +990,7 @@ a CFD solve, or a physical test, the count becomes the whole design of the analy
   <li><strong>Reuse.</strong> Every evaluation is a data point. A method that discards the values
   it
   computed, as bisection does with all but the sign, is wasting information it paid for. The
-  secant method's advantage is exactly that it reuses the previous value.</li>
+  secant method's advantage is that it reuses the previous value.</li>
   <li><strong>Report the count.</strong> An answer costing 6 evaluations and an answer costing 600
   are different results, and the second may not be repeatable within the project.</li>
 </ol>
@@ -1000,11 +998,9 @@ a CFD solve, or a physical test, the count becomes the whole design of the analy
 <cg-demo case="budget"></cg-demo>
 
 <div class="aside">
-  <span class="label">What bisection throws away</span>
+  <span class="label">Bisection and the function values</span>
   <p>Bisection evaluates $f$ at the midpoint and uses one bit of the answer, which is the sign. The
-magnitude, which would say whether the root is near this end of the bracket or the far one, is
-discarded entirely. Methods that use it, the secant method among them, converge faster for that
-reason and not because of any deeper cleverness. It is also why bisection's rate is independent
+magnitude, which would say whether the root is near this end of the bracket or the far one, is discarded. Methods that use it, the secant method among them, typically converge faster for that reason. It is also why bisection's rate is independent
 of the function, since a method that ignores the values cannot be helped or hindered by them.</p>
 </div>
 
@@ -1018,22 +1014,19 @@ of the function, since a method that ignores the values cannot be helped or hind
 every step, so 5 &times; 2 = <strong>10 evaluations</strong>, while the secant method reuses the
 previous point and needs one new value of <em>f</em> per step, plus one to start, so 7 + 1 =
 <strong>8</strong>. So the method that took <em>more iterations</em> did <em>less work</em>.
-Counting iterations would have reported Newton the winner by two, and the ranking reverses on
-the measure that corresponds to time actually spent.</p>
-     <p>The exception is worth naming. If <em>f</em>&prime; comes free, from an analytic derivative
+Counting iterations would have reported Newton the winner by two, while counting evaluations, which tracks the time spent, reverses the ranking.</p>
+     <p>If <em>f</em>&prime; comes free, from an analytic derivative
 evaluated in the same pass or an adjoint that costs a fraction of the forward solve, then
-Newton's 5 steps cost about 5 and it wins. That is why the useful question is always what an
-evaluation costs <em>here</em>, and not which method is faster in general.</p></div></details></li>
+Newton's 5 steps cost about 5 and it wins. That is why the useful question is what an evaluation costs <em>here</em>, and not which method is faster in general.</p></div></details></li>
     <li>Each evaluation of your <em>f</em> is a 20-minute simulation and you have one working day.
     State your <dfn data-g="evaluation-budget">evaluation budget</dfn> and pick a strategy.
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>24 evaluations.</strong> Eight hours is 480 minutes, at 20 minutes each. If the runs
 must be serial, spend them as <strong>a coarse scan then bisection</strong>, with about 8 points
 across the plausible range to confirm a sign change and isolate it, leaving 16 halvings, which
-reduces the surviving bracket by a factor of 65&thinsp;536. A scan looks like overhead, though
-it is what tells you there is one root and not none or three, and with 24 evaluations you cannot
+reduces the surviving bracket by a factor of 65&thinsp;536. A scan may look like overhead, though it shows whether the range holds one sign change, none or several, and with 24 evaluations you cannot
 afford to discover that late. Avoid Newton unless the derivative is free. At two evaluations a
 step it buys 12 steps, and it can spend all of them leaving the region.</p>
-     <p><strong>If the runs can go in parallel, the answer changes completely.</strong> Bisection is
+     <p><strong>If the runs can go in parallel, the answer changes.</strong> Bisection is
 strictly serial, each step needs the previous result, so 24 serial runs is 8 hours. A 24-point
 scan is 24 independent runs and finishes in 20 minutes on 24 cores. With a wall-clock budget in
 place of an evaluation budget, the method with the worse convergence rate can be an order of
@@ -1047,10 +1040,10 @@ property of the bookkeeping, not of the function, which is why the count can be 
 advance.</p>
      <p>Newton uses the local shape to extrapolate to the axis, so how well it does depends on how well
 a straight line describes <em>f</em> near the root. Near a simple root with moderate curvature
-it is spectacular. Near a double root it degrades to linear. Near an inflection it can step
-past. On a flat stretch the tangent sends it far away.</p>
-     <p>The trade is the recurring one. A method that assumes less is slower and cannot be surprised. A
-method that assumes more is faster when the assumption holds and fails when it does not.</p></div></details></li>
+it converges very quickly. Near a double root it degrades to linear. Near an inflection it can step
+past. On a flat stretch the tangent can send it far away.</p>
+     <p>A method that assumes less is slower, though its behaviour is predictable. A method that assumes
+more is faster when the assumption holds and may fail when it does not.</p></div></details></li>
   </ol>
 </div>
 
@@ -1079,11 +1072,11 @@ bisection, secant and Newton on any signal, counting evaluations.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/evaluations-are-the-currency.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/evaluations-are-the-currency.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-09-23">September 23, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-21">October 21, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

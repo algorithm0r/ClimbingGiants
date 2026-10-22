@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Week 8, Time Stepping — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -834,7 +834,7 @@
         <strong>Overview</strong>
         
           <span class="site-nav-sep">·</span>
-          <a href="from-a-rate-to-a-trajectory.html">Rate to trajectory</a>
+          <a href="from-a-rate-to-a-trajectory.html">Euler&#39;s method</a>
         
           <span class="site-nav-sep">·</span>
           <a href="state-as-a-vector.html">State as a vector</a>
@@ -904,7 +904,7 @@
     <div class="eyebrow">Week 8 · Time Stepping</div>
 <h1>Week 8, Time Stepping</h1>
 
-<p>When the rate of change of a quantity depends on the quantity itself, there is usually no formula to evaluate and the trajectory has to be built one step at a time. This week covers stepping, how to write a second-order equation so a stepper can advance it, how to measure the order of accuracy you are actually getting, and why a solution can be smooth, plausible and completely wrong. The last of those is the one to watch, though, because a stepper that has gone unstable does not commonly announce it. The output often looks like a reasonable curve until you halve the step and watch the answer move.</p>
+<p>When the rate of change of a quantity depends on the quantity itself, there is usually no formula to evaluate and the trajectory has to be built one step at a time. This week covers stepping, how to write a second-order equation so a stepper can advance it, how to measure the order of accuracy you get, and why a smooth, plausible solution can be wrong. A stepper that has lost accuracy does not commonly announce it, so the last of those is the hardest to catch. The output often looks like a reasonable curve, and the problem only shows when you halve the step and the answer changes.</p>
 
 <h2 id="learning-objectives">Learning Objectives</h2>
 
@@ -912,7 +912,7 @@
   <li>Advance a state with Euler's method, and write the stepper so it does not know the problem.</li>
   <li>Rewrite a second-order equation as a first-order system.</li>
   <li>Measure the order of accuracy you are getting, and say what reference you measured against.</li>
-  <li>Tell instability from inaccuracy, and watch a conserved quantity to catch both.</li>
+  <li>Tell instability from inaccuracy, and watch a conserved quantity to help catch both.</li>
 </ul>
 
 <h2 id="content">Content</h2>
@@ -921,10 +921,10 @@
 
 <table class="data">
   <tr><th>#</th><th>Page</th><th>Summary</th></tr>
-  <tr><td>26</td><td><a href="from-a-rate-to-a-trajectory.html">From a rate to a trajectory</a></td><td>Stepping, and the one line that is the whole method</td></tr>
-  <tr><td>27</td><td><a href="state-as-a-vector.html">State as a vector</a></td><td>Second order becomes first order by carrying the velocity</td></tr>
-  <tr><td>28</td><td><a href="order-of-accuracy-measured.html">Order of accuracy, measured</a></td><td>Halve the step, take the ratio, and read the order off</td></tr>
-  <tr><td>29</td><td><a href="stability-and-accuracy.html">Stability and accuracy fail at different step sizes</a> <span title="the week's anchor">&#9733;</span></td><td>Two failures at two different step sizes, with a wide gap between</td></tr>
+  <tr><td>25</td><td><a href="from-a-rate-to-a-trajectory.html">Euler's method</a></td><td>Euler's method and the choice of step</td></tr>
+  <tr><td>26</td><td><a href="state-as-a-vector.html">State as a vector</a></td><td>Second-order equations as first-order systems</td></tr>
+  <tr><td>27</td><td><a href="order-of-accuracy-measured.html">Order of accuracy</a></td><td>Measuring order by halving the step</td></tr>
+  <tr><td>28</td><td><a href="stability-and-accuracy.html">Stability and accuracy</a> <span title="the week's anchor">&#9733;</span></td><td>Inaccuracy, instability and energy as a check</td></tr>
 </table>
 
 <h2 id="assignment">Assignment</h2>
@@ -946,10 +946,10 @@ example pack, each in a different style.</p>
 
   
 
-  <script src="js/page.js?v=20261017141252"></script>
+  <script src="js/page.js?v=20261022093533"></script>
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-16">October 16, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-22">October 22, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

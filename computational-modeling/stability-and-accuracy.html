@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stability and accuracy fail at different step sizes — Computational Physical Modeling</title>
+  <title>Stability and accuracy — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -834,7 +834,7 @@
         <a href="week-08.html">Overview</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="from-a-rate-to-a-trajectory.html">Rate to trajectory</a>
+          <a href="from-a-rate-to-a-trajectory.html">Euler&#39;s method</a>
         
           <span class="site-nav-sep">·</span>
           <a href="state-as-a-vector.html">State as a vector</a>
@@ -902,7 +902,7 @@
   <main data-pagefind-body class="wide">
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <div class="eyebrow">Week 8 · Time Stepping</div>
-<h1>Stability and accuracy fail at different step sizes</h1>
+<h1>Stability and accuracy</h1>
 
 <div class="claim">
   <span class="label">Claim</span>
@@ -910,9 +910,8 @@
   <dfn data-g="stability">unstable at a larger one</dfn>, and
   the gap between them is wide. Between the two, a solution is substantially wrong while remaining
   smooth, bounded and plausible. A quantity the physics constrains, such as energy, momentum or mass,
-  detects
-  the error long before the trajectory looks wrong, because the trajectory never looks wrong until
-  the method is already failing.</p>
+  usually
+  detects the error long before the trajectory looks wrong.</p>
   <p class="plain">  The answer stops being right well before it starts looking wrong, so watch something the
   physics fixes, and not the curve.</p>
 </div>
@@ -926,16 +925,15 @@ $$m\ddot{x} + c\dot{x} + kx = 0, \qquad m = 1,\; c = 0.30,\; k = 40$$
 
 <p>giving a natural frequency $\omega_n = 6.325$ rad/s, a damping ratio $\zeta = 0.0237$, and a
 period of 0.9935 s. It is released from $x_0 = 0.05$ m at rest, and its exact solution is a
-decaying sinusoid, so every number below is compared against an answer and not an estimate. The
+decaying sinusoid, so every number below is compared against the exact answer. The
 quantity to watch is the energy:</p>
 
 $$E \;=\; \tfrac{1}{2}mv^2 \;+\; \tfrac{1}{2}kx^2$$
 
-<p>The damper removes energy, so the truth is that $E$ falls, steadily and never otherwise. Over
-one second the exact solution has $E/E_0 = 0.7422$, and anything else you see is the integrator
-and not the physics.</p>
+<p>The damper removes energy, so the true $E$ never increases. Over one second the exact solution
+has $E/E_0 = 0.7422$, so any other value comes from the integrator.</p>
 
-<h2 id="two-ways-explicit-euler-fails">Two Ways Explicit Euler Fails</h2>
+<h2 id="two-ways-explicit-euler-fails">Explicit Euler on the Oscillator</h2>
 
 <p>Explicit Euler, at step sizes from tiny to too large:</p>
 
@@ -960,15 +958,15 @@ and not the physics.</p>
 </table>
 
 <p>At $h = 0.010$ the energy ratio has passed 1. <strong>The simulation is adding energy to a
-system whose only energy term is a damper.</strong> There is no mechanism in the physics that
-can do that, so the excess is entirely the integrator, and it is 49% above the truth while the
+system that can only lose energy, through its damper.</strong> There is no mechanism in the physics that
+can do that, so the excess comes from the integrator, and it is 49% above the truth while the
 displacement is still within 19%. At $h = 0.002$, a step of two milliseconds on a one-second
-period and 500 steps per cycle, the trajectory is within 3.5% and looks entirely convincing,
+period and 500 steps per cycle, the trajectory is within 3.5% and looks convincing,
 while the energy is already 8% too high.</p>
 
 <cg-demo case="stability"></cg-demo>
 
-<h2 id="energy-as-the-diagnostic">Energy as the Diagnostic</h2>
+<h2 id="energy-as-the-diagnostic">Energy as a Diagnostic</h2>
 
 <p>Explicit Euler on an oscillator has a specific defect, in that at every step it moves along the
 tangent, and for a curving trajectory the tangent always points slightly outward. In the plane
@@ -983,8 +981,8 @@ damping. Three properties make energy the right thing to watch:</p>
 <ul class="plain">
   <li><strong>It has a known behaviour.</strong> A known direction, which is weaker than a known value and enough.
   Monotonically down. Any increase is diagnostic without needing the exact solution.</li>
-  <li><strong>It is available when the answer is not.</strong> The whole reason for integrating is
-  that there is no exact solution. Energy can be computed from the state at every step
+  <li><strong>It is available when the answer is not.</strong> We usually integrate because there is
+  no exact solution. Energy can be computed from the state at every step
   regardless.</li>
   <li><strong>It responds earlier.</strong> Displacement error and energy error grow together, but
   the energy has a threshold, crossing 1, that the displacement does not.</li>
@@ -1004,34 +1002,33 @@ limit, and the threshold depends on the method and the system through the produc
   <tr><td>RK4</td><td class="num">hω<sub>n</sub> &lt; 2.785</td><td class="num">h &lt; 0.440 s</td><td class="num">4</td></tr>
 </table>
 
-<p>The numbers make the gap concrete. RK4 stays <em>stable</em> up to a step of 0.44 s, which is
-under half a step per cycle and is absurd, while an <em>accurate</em> answer needs something
-nearer 0.005 s. The stability limit is roughly a hundred times the useful step, so reaching it
-means the answer has been meaningless for a long time already. Stability is the failure that
-announces itself, and it happens far past the failure that does not.</p>
+<p>RK4 stays <em>stable</em> up to a step of 0.44 s (about two steps per cycle), while an <em>accurate</em> answer needs something
+nearer 0.005 s. The stability limit is roughly a hundred times the useful step, so by the time
+you reach it the answer has long been unusable. Instability announces itself, and it sets in at
+step sizes far larger than those where accuracy is lost.</p>
 
 <div class="aside">
-  <span class="label">Methods built to preserve the structure</span>
-  <p>Euler's outward push is not bad luck. It follows from taking the position step with the old
+  <span class="label">Structure-preserving methods</span>
+  <p>Euler's outward push follows from taking the position step with the old
 velocity. Taking it with the <em>new</em> velocity instead, one character's difference in the
 code, gives the <dfn data-g="symplectic">symplectic Euler method</dfn>, which is still first
-order and still inaccurate, but does not gain energy. Over a long run it stays bounded where
-explicit Euler spirals out indefinitely. This is a whole family. Methods that give up some
-accuracy to preserve a structural property of the equations exactly. For a long orbital
-integration, staying bounded matters more than the local error, and the more accurate method is
-the wrong choice.</p>
+order and still inaccurate, but has no steady energy gain. Over a long run it stays bounded
+where explicit Euler on an undamped oscillator spirals out indefinitely. Symplectic Euler belongs
+to a family of methods that give up some accuracy to preserve a structural property of the
+equations exactly. For a long orbital integration, staying bounded often matters more than the
+local error, and the more accurate method may be the wrong choice.</p>
 </div>
 
-<h2 id="checking-for-manufactured-energy">Checking for Manufactured Energy</h2>
+<h2 id="checking-for-manufactured-energy">Energy Checks</h2>
 
 <ol class="plain">
   <li><strong>Find the <dfn data-g="conserved-quantity">conserved or monotone
   quantity</dfn></strong> and plot it alongside the answer.
-  Energy, momentum, mass, charge, whatever the physics fixes.</li>
+  This may be energy, momentum, mass or charge, depending on what the physics fixes.</li>
   <li><strong>Halve the step until the answer stops moving</strong>, not until it looks smooth. It
-  looks smooth long before it stops moving.</li>
+  usually looks smooth at a much larger step than the one where it stops moving.</li>
   <li><strong>Report the step and the check.</strong> "RK4, h = 2 ms, energy drift under 0.1% over
-  the run" is a defensible result. "RK4" on its own is not.</li>
+  the run" is a defensible result, while "RK4" on its own is not.</li>
 </ol>
 
 <div class="check">
@@ -1040,34 +1037,34 @@ the wrong choice.</p>
     <li>Your simulated damped oscillator ends the run with 3% more energy than it started with.
     What
     do you conclude, and what do you not yet know?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>The integration is <strong>manufacturing energy</strong>. A damped oscillator can only lose it,
-so the result looks like a slightly inaccurate solution of the right problem. It is
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>The integration is <strong>manufacturing energy</strong>. A damped oscillator can only lose energy,
+so although the result may look like a slightly inaccurate solution of the right problem, it is
 qualitatively wrong, and no refinement of the reading will fix it. What you do not know is
-<strong>why</strong>, and there are two quite different possibilities. The step may simply be
-too large for a method that would behave at a smaller one. Or the method may be structurally
-unsuited: forward Euler injects energy into an oscillator at <em>every</em> step size, and
+<strong>why</strong>, and there are two quite different possibilities. The step may be
+too large for a method that would behave at a smaller one. The method may also be structurally
+unsuited. For instance, forward Euler injects energy into an oscillator at <em>every</em> step size, and
 shrinking <em>h</em> slows the growth without ever removing it.</p>
      <p>Halving the step distinguishes them. If the surplus falls by about half, it is a step-size
 problem. If it falls by half and is still there, and halving again leaves it still there, the
 method is the problem and the answer is a different method. Energy is also a scalar summary of a
-trajectory, and a solution can conserve it and still have the phase badly wrong.</p></div></details></li>
+trajectory, and a solution can get it right and still have the phase badly wrong.</p></div></details></li>
     <li>Why does halving the step until the plot looks smooth fail as a criterion?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Because smoothness is a property of the picture and accuracy is a property of the answer, and
 the two come apart over a wide range of step sizes. Between the accuracy limit and the stability
 limit there is a wide band in which the solution is smooth, bounded, plausibly shaped, and
-substantially wrong. It looks exactly like a converged solution because the thing that makes an
+substantially wrong. It looks like a converged solution because the thing that makes an
 unconverged solution <em>look</em> wrong, whether oscillation or blow-up, belongs to
 instability, which is a different and much later failure. "Looks smooth" is also a test against
 the rendering. A curve drawn at 900 pixels hides everything smaller than a pixel, and a 5% error
 on this plot is about ten pixels while a 0.5% error is one.</p>
      <p>The criterion that works is the convergence study. Halve the step and compare the
-<em>answer</em> and not the picture, and stop when the change is smaller than what you need. It
-costs one extra run and it measures the thing you care about.</p></div></details></li>
+<em>answer</em> and not the picture, and stop when the change is smaller than what you need. Each
+halving costs one extra run, and it measures the answer itself.</p></div></details></li>
     <li>RK4 is stable on this system up to <em>h</em> = 0.44 s and useful up to about 0.005 s. In
     one sentence, why is the stability limit almost never the constraint that matters?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Because accuracy demands a step almost a hundred times smaller than stability does, so by the
 time the answer is good enough to use you are far inside the stable region and the stability
-limit has never come near to binding. The corollary is where it does bite:
+limit has never come near to binding. The exception is
 <strong>stiff</strong> problems, where the accuracy requirement is set by the slow behaviour you
 care about and the stability requirement by a fast transient you do not. There the two separate
 in the other direction, you are forced to take tiny steps to keep a component that has long
@@ -1100,11 +1097,11 @@ and RK4 on an equation you write, with the order measured from the run and not q
   </script>
   
 
-  <script type="module" src="js/bundle/stability-and-accuracy.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/stability-and-accuracy.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-09-23">September 23, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-20">October 20, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

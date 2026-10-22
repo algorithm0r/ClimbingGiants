@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Solving the normal equations — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -837,7 +837,7 @@
           <a href="model-form-and-parameters.html">Model form</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="least-squares-is-one-norm.html">One choice of norm</a>
+          <a href="least-squares-is-one-norm.html">Choice of norm</a>
         
           <span class="site-nav-sep">·</span>
           <a href="linearity-in-the-parameters.html">Linear in parameters</a>
@@ -921,7 +921,7 @@
   condition number of the problem they came from. The <em>fitted values</em> are far more robust
   to this than the <em>coefficients</em>, which are what carry the physical meaning. The solve
   reports nothing when it fails.</p>
-  <p class="plain">  The closed form is a matrix solve. It always returns something and it never warns you, so the
+  <p class="plain">  The closed form is a matrix solve. It always returns something and it usually does not warn you, so the
   curve it draws may be right long after the numbers it is built from have stopped meaning
   anything.</p>
 </div>
@@ -955,9 +955,10 @@ multiplies its parameters by. A parabola gives $1, x, x^2$, and a Fourier model 
 cosines. That is, the model form changes the entries of the matrix and nothing else about the
 procedure.</p>
 
-<h2 id="elimination-as-a-computer-does-it">Elimination, as a Computer Does It</h2>
+<h2 id="elimination-as-a-computer-does-it">Elimination with Pivoting</h2>
 
-<p>Elimination, in the version that works on a computer and not the one taught by hand.</p>
+<details class="ans"><summary><span>Optional, open to read</span></summary><div class="body">
+<p>The steps below are elimination in the version that works on a computer, which differs from the one usually taught by hand.</p>
 
 <ol class="plain">
   <li><strong>Choose a pivot.</strong> In column $k$, find the row at or below $k$ with the
@@ -976,26 +977,28 @@ when the sums are formed. Twelve parameters is a thousand operations, which is w
 once at the end and not repeatedly inside a search (and why it is usually not worth optimising).</p>
 
 <div class="aside">
-  <span class="label">Why pivot</span>
+  <span class="label">Pivoting</span>
   <p>Without pivoting the elimination divides by whatever happens to be on the diagonal. If that
 entry is zero the method stops. If it is merely small, the multipliers are large, and the
 subtraction that follows cancels the leading digits of every row it touches. Pivoting costs a
-comparison per column and removes an entire class of failure, which is why a library routine
-does it by default and does not ask.</p>
+comparison per column and removes this class of failure, which is why a library routine
+does it by default.</p>
 </div>
+</div></details>
 
 <h2 id="limits-of-the-closed-form">Limits of the Closed Form</h2>
 
-<p>Page 16 lists what a linear-in-parameters model buys: no starting guess, no iteration, no
-convergence to check, and the global minimum. All of that is true, and all of it is about the
+<details class="ans"><summary><span>Optional, open to read</span></summary><div class="body">
+<p>Page 15 lists what a linear-in-parameters model buys: no starting guess, no iteration, no
+convergence to check, and the global minimum. All of that is true, though all of it is about the
 <em>search</em>. The solve that follows the search has a failure mode of its own. A matrix is
 <strong>ill-conditioned</strong> when small changes in its entries produce large changes in the
-solution. The condition number $\kappa$ measures it, and the rule of thumb is blunt:</p>
+solution. The condition number $\kappa$ measures it, and a rule of thumb follows from it.</p>
 
-<p><strong>you lose about $\log_{10}\kappa$ of your sixteen significant digits.</strong> Polynomial
+<p><strong>You lose about $\log_{10}\kappa$ of your sixteen significant digits.</strong> Polynomial
 fitting produces ill-conditioned normal equations quickly, because $1, x, x^2, x^3$ look
-increasingly alike over a fixed interval, so the columns of the matrix become nearly parallel,
-and nearly parallel columns are what a large $\kappa$ is.</p>
+increasingly alike over a fixed interval, so the columns of the matrix become nearly parallel
+and $\kappa$ becomes large.</p>
 
 <table class="data">
   <tr><th class="num">degree</th><th class="num">condition number</th>
@@ -1010,17 +1013,18 @@ and nearly parallel columns are what a large $\kappa$ is.</p>
 
 <p>Twenty-one points evenly spaced over $[0, 1]$. By degree nine the normal equations cannot be
 solved in double precision at all, and by degree five half the digits have already gone.</p>
+</div></details>
 
-<h2 id="squared-conditioning-and-the-units-of-x">Squared Conditioning, and the Units of $x$</h2>
+<h2 id="squared-conditioning-and-the-units-of-x">Conditioning and the Units of $x$</h2>
 
 <p><strong>Forming the normal equations squares the conditioning.</strong> The least-squares
 problem is stated by a tall matrix $A$ whose rows are the model functions evaluated at each
 point, and multiplying by $A^{\!\top}$ to make it square costs $\kappa(A^{\!\top}\!A) =
 \kappa(A)^2$, exactly. At degree six the tall problem has $\kappa(A) = 1.8\times10^4$ and the
 normal equations have $3.2\times10^8$, which is four digits thrown away by a step taken for
-convenience. Methods that avoid forming $A^{\!\top}\!A$, such as the QR factorisation every
-library's least-squares routine uses, keep $\kappa(A)$ and lose half as many digits, which is
-why they are what a library uses.</p>
+convenience. Methods that avoid forming $A^{\!\top}\!A$, such as the QR factorisation, keep
+$\kappa(A)$ and lose half as many digits, which is why a library's least-squares routine uses
+one of them.</p>
 
 <p><strong>The units of $x$ change the answer.</strong> The same degree-5 fit on twenty-one points,
 differing only in how $x$ is expressed:</p>
@@ -1034,15 +1038,16 @@ differing only in how $x$ is expressed:</p>
 
 <p>Nothing about the physics or the data has changed. Shifting $x$ to sit around zero and scaling
 it to order one turns an unsolvable system into a comfortable one, and it costs two lines. It is
-the first thing to do to any polynomial fit and it is almost never mentioned.</p>
+a good idea to make it the first step of any polynomial fit, though it is rarely mentioned.</p>
 
-<h2 id="the-curve-survives-what-the-coefficients-do-not">The Curve Survives What the Coefficients Do Not</h2>
+<h2 id="the-curve-survives-what-the-coefficients-do-not">Errors in the Curve and in the Coefficients</h2>
 
+<details class="ans"><summary><span>Optional, open to read</span></summary><div class="body">
 <p>A condition number of 10&sup1;&sup2; sounds like it should ruin everything, and the demo below
 shows the fitted curve surviving it comfortably. Both facts are true, because they are about
 different things. These are the same normal equations solved twice, once in ordinary double
 precision, once in <strong>exact rational arithmetic</strong>, which has no rounding error at
-all. The difference between them is the damage done by the arithmetic, and nothing else.</p>
+all. The difference between them is the damage done by the arithmetic alone.</p>
 
 <table class="data">
   <tr><th class="num">degree</th><th class="num">worst error in a coefficient</th>
@@ -1062,43 +1067,46 @@ was for.</p>
   <li><strong>Reading values off the curve, inside the data.</strong> Robust. Interpolating a
   calibration at 340&nbsp;&deg;C survives conditioning that has destroyed the coefficients.</li>
   <li><strong>Reporting or interpreting a coefficient.</strong> Fragile, and this is usually the
-  point, because page 14 says the parameters are what the model <em>means</em>. A fitted gravity, a decay constant and a stiffness are all coefficients, and they go first.</li>
+  point, because page 13 says the parameters are what the model <em>means</em>. A fitted gravity, a decay constant and a stiffness are all coefficients, so they are the first to lose digits.</li>
   <li><strong>Evaluating outside the data.</strong> Worst of all, because extrapolation is where
-  the near-cancelling directions stop cancelling, and page 33 shows what distance does to an
+  the near-cancelling directions stop cancelling, and page 32 shows what distance does to an
   error in a coefficient.</li>
 </ul>
+</div></details>
 
 <h2 id="both-solves-on-one-record">Both Solves on One Record</h2>
 
+<details class="ans"><summary><span>Optional, open to read</span></summary><div class="body">
 <p>The demo runs the fit twice: once on temperature in degrees as recorded, once with $x$ shifted
 and scaled. Same data, same normal equations, same elimination.</p>
 
 <cg-demo case="solve"></cg-demo>
 
-<p>Raise the degree and watch the two answers separate. They agree exactly up to about degree
-twelve, differ by 23&nbsp;mV at degree fourteen, and at degree twenty, twenty-one parameters for
-twenty-one points, the two curves differ by <strong>8.95&nbsp;V</strong> somewhere in the range,
+<p>Raise the degree and watch the two answers separate. They agree up to about degree
+twelve, differ by 23&nbsp;mV at degree fourteen, and at degree twenty (twenty-one parameters for
+twenty-one points) the two curves differ by <strong>8.95&nbsp;V</strong> somewhere in the range,
 on a signal that spans about one volt.</p>
 
 <p>Degree twenty is the sharpest case. With as many parameters as points the fit is exactly
 determined and must pass through every point, so the residual is required to be
 <strong>zero</strong>. The scaled solve reports 1.06&nbsp;mV and the raw solve 1.76&nbsp;mV.
-Neither is zero, both are small, and the difference between them is arithmetic alone.</p>
+Both are small though neither is zero, and the difference between them comes from the arithmetic alone.</p>
 
-<p>Notice what is absent while this happens. No warning, no error, no growing residual. The
+<p>While this happens there is no warning, no error and no growing residual. The
 elimination performs the same operations it always performs and returns a vector of
 coefficients, and every check available inside the calculation passes.</p>
 
 <div class="aside">
-  <span class="label">The same shape as week 7</span>
+  <span class="label">Comparison with root finding</span>
   <p>A root finder returns a value satisfying its own stopping test, which does not make it the root
 you wanted. A linear solve returns the vector its elimination produced, which does not make it
 the solution of your system. In both cases the routine is correct, the internal check passes,
 and the thing that would catch the error has to come from outside, a domain, a plausibility, a
 second method.</p>
 </div>
+</div></details>
 
-<h2 id="how-many-digits-you-can-report">How Many Digits You Can Report</h2>
+<h2 id="how-many-digits-you-can-report">Reportable Digits</h2>
 
 <ol class="plain">
   <li><strong>Centre and scale $x$.</strong> Two lines, and worth several digits.</li>
@@ -1106,14 +1114,15 @@ second method.</p>
   will factorise and not square, and it will usually report a condition number or a rank if
   you
   ask.</li>
-  <li><strong>Keep the degree low.</strong> Most of the conditioning problem is a symptom of
+  <li><strong>Keep the degree low.</strong> The conditioning problem is often a symptom of
   asking
-  for more parameters than the data supports, which page 35 shows is also a modelling
+  for more parameters than the data supports, which page 34 shows is also a modelling
   mistake.</li>
   <li><strong>Check by substitution.</strong> Put the coefficients back and compute
-  $A^{\!\top}\!Ac - A^{\!\top}\!y$. It is cheap, and a large result is proof of trouble, though a small one is not proof of its absence, for the reason page 19 gives.</li>
+  $A^{\!\top}\!Ac - A^{\!\top}\!y$. It is cheap, and a large result is proof of trouble, though a small one is not proof of its absence, for the reason page 18 gives.</li>
 </ol>
 
+<details class="ans"><summary><span>Checks on conditioning, optional</span></summary><div class="body">
 <div class="check">
   <span class="label">Check</span>
   <ol>
@@ -1121,26 +1130,25 @@ second method.</p>
     the
     coefficients do you trust, and what would you do before reporting them?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>About seven.</strong> A double carries roughly sixteen significant digits and
-log&#8321;&#8320;(10&#8313;) = 9 of them are gone, leaving seven, and that is an optimistic
-reading, because the rule of thumb is a rule of thumb. Before reporting anything, three things,
+log&#8321;&#8320;(10&#8313;) = 9 of them are gone, leaving seven (an optimistic
+reading, since the rule is only approximate). Before reporting anything, three things,
 in order of effort:</p>
      <ol>
      <li><strong>Centre and scale <em>x</em>.</strong> Two lines. On the example above it moved
-     the condition number by seventeen orders of magnitude, and it may remove the problem
-     entirely.</li>
+     the condition number by seventeen orders of magnitude, and it may remove the problem.</li>
      <li><strong>Solve it again by a method that does not form
      <em>A</em><sup>&#8868;</sup><em>A</em></strong>, the library's least-squares routine,
      which factorises instead. If the coefficients agree to the digits you intend to print, print
      them.</li>
      <li><strong>Ask whether you need that many parameters.</strong> A condition number of
      10&#8313; on a polynomial fit usually means the degree is higher than the data supports,
-     which page 35 shows is a modelling problem before it is an arithmetic one.</li>
+     which page 34 shows is a modelling problem before it is an arithmetic one.</li>
      </ol>
-     <p>And report the digits you have and not the digits the computer printed. Sixteen were returned.
-Seven were earned.</p></div></details></li>
+     <p>Report the digits you have and not the digits the computer printed (here, seven of the
+sixteen returned).</p></div></details></li>
     <li>Why does centring $x$ about its mean help, when shifting the data cannot change the
     underlying relationship?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>It does not change the relationship. It changes the <strong>basis</strong> the relationship is
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Centring leaves the relationship alone and changes the <strong>basis</strong> it is
 expressed in, and conditioning is a property of the basis.</p>
      <p>Over 0 to 100, the functions 1, <em>x</em>, <em>x</em>&sup2;, <em>x</em>&sup3; are all large,
 all positive, and all increasing together. As vectors sampled at the data points they are nearly
@@ -1149,7 +1157,7 @@ table. Centred on zero and scaled to &plusmn;1, the even powers stay positive wh
 change sign halfway, the columns become far closer to orthogonal, and every entry is of order
 one. The fitted <em>curve</em> is identical either way, the same polynomial, written
 differently. What changes is how much cancellation the elimination has to do to find it, and
-therefore how many digits survive. The general form of this: <strong>a well-conditioned problem
+so how many digits survive. In general, <strong>a well-conditioned problem
 can be posed in an ill-conditioned way</strong>, and the fix is usually to change how it is
 written and not how it is solved. Fitting in an orthogonal polynomial basis instead of powers is
 the same idea taken further.</p></div></details></li>
@@ -1162,16 +1170,17 @@ not form <em>A</em><sup>&#8868;</sup><em>A</em>, so it works at &kappa;(<em>A</e
 normal equations work at &kappa;(<em>A</em>)&sup2;, twice as many digits, from the same data.</p>
      <p>The residual cannot settle it because <strong>the residual is nearly blind to this
 error</strong>. Ill-conditioning puts the error into the directions the data constrains least,
-and those are exactly the directions that barely move the fitted curve over the range the points
+and those are the directions that barely move the fitted curve over the range the points
 cover. The table above measures it. At degree nine the coefficients are wrong in the fourth
 figure while the curve is right to 10<sup>&minus;7</sup>&nbsp;V. So two coefficient sets can
 differ in the fourth digit and produce residuals that agree to every digit printed. Both fits
 pass through the data equally well. They disagree about what the data <em>means</em>, and the
-residual was never a measurement of that. If it matters, a smaller residual will not settle it.
+residual does not measure that. If it matters, a smaller residual will not settle it.
 The check is an independent solve, meaning a different method, or the same one after centring,
 and agreement between them to the digits you intend to use.</p></div></details></li>
   </ol>
 </div>
+</div></details>
 
 <h2 id="terms-used-on-this-page">Terms Used on This Page</h2>
 <dl class="glossary"></dl>
@@ -1195,11 +1204,11 @@ error outside it reported separately.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/solving-the-normal-equations.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/solving-the-normal-equations.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-16">October 16, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-22">October 22, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

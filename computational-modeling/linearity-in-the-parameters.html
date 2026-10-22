@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Linearity in the parameters, and what a transform costs — Computational Physical Modeling</title>
+  <title>Linearity in the parameters — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -837,7 +837,7 @@
           <a href="model-form-and-parameters.html">Model form</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="least-squares-is-one-norm.html">One choice of norm</a>
+          <a href="least-squares-is-one-norm.html">Choice of norm</a>
         
           <span class="site-nav-sep">·</span>
           <strong>Linear in parameters</strong>
@@ -908,7 +908,7 @@
   <main data-pagefind-body class="wide">
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <div class="eyebrow">Week 6 · Least Squares Fitting</div>
-<h1>Linearity in the parameters, and what a transform costs</h1>
+<h1>Linearity in the parameters</h1>
 
 <div class="claim">
   <span class="label">Claim</span>
@@ -918,7 +918,7 @@
   of the curve, is what admits a closed-form least-squares solution. A model that lacks it can
   sometimes be transformed into one that has it, and the transform changes which residuals the fit
   is minimising.</p>
-  <p class="plain">  "Linear fit" does not mean "straight line", it means the unknowns enter in a way that can be
+  <p class="plain">  "Linear fit" does not mean "straight line". It means the unknowns enter in a way that can be
   solved in one step. A parabola qualifies and a decaying exponential does not.</p>
 </div>
 
@@ -942,10 +942,10 @@ and the property is easier to check than to describe:</p>
 </table>
 
 <p>The fourth and fifth rows are the same shape of curve, and what changed is whether $k$ is being
-fitted, which is what decides the property. That is, linearity here is a statement about the
-unknowns and not about the graph.</p>
+fitted, which is what decides the property. That is, linearity here is a statement about how the
+unknowns enter the model.</p>
 
-<h2 id="linearity-gives-a-closed-form-solution">Linearity Gives a Closed-Form Solution</h2>
+<h2 id="linearity-gives-a-closed-form-solution">The Closed-Form Solution</h2>
 
 <p>When the model is linear in the parameters, minimising $\sum r_i^2$ produces a system of linear
 equations, the normal equations, with a closed-form solution. There is no starting guess, no
@@ -978,7 +978,7 @@ model and into the data.</p>
 <p>The general case is the same move. If the model is a sum of terms and some of their coefficients
 are known, subtract those terms from the measurements and fit what is left to the terms that
 remain. Two consequences follow, and week 6 measures both. The fit has fewer parameters so its
-residual can only get worse, and it can no longer absorb an error by adjusting a coefficient
+residual cannot get smaller, and it can no longer absorb an error by adjusting a coefficient
 that physics had already fixed.</p>
 
 <div class="check"><p><strong>Check.</strong> Two fits to the same twenty points: one solves for
@@ -992,8 +992,8 @@ of the curvature, and least squares picks the minimum over a set that includes i
 fit's residual is smaller than or equal to the constrained fit's on every dataset, and strictly
 smaller whenever the data's own best curvature differs from $-g/2$, which noise guarantees.</p>
     <p><strong>It does not make it the better model.</strong> The extra freedom is being spent fitting
-the noise in the sample, and page 19 is about the difference between a small residual and a
-small error. The constrained fit is worse at reproducing the points it was given and may well be
+the noise in the sample, and page 18 is about the difference between a small residual and a
+small error. The constrained fit is worse at reproducing the points it was given, though it may well be
 better at everything else.</p>
     </div></details></p></div>
 
@@ -1022,7 +1022,7 @@ c = A \ z;
 A = [ones(size(t)), t];
 c = A \ (z + 0.5*G*t.^2);</pre>
   <pre data-lang="js" hidden data-notes="3|lstsq stands for whichever routine you are using; the shape of the change is the point.">// all three free, solved by the same normal equations
-// page 17 describes
+// page 16 describes
 let A = t.map(ti =&gt; [1, ti, ti*ti]);
 let c = lstsq(A, z);
 
@@ -1032,19 +1032,20 @@ c = lstsq(A, z.map((zi, i) =&gt; zi + 0.5*G*t[i]*t[i]));</pre>
   <div class="code-hint">Hover a highlighted line for a description of what it does.</div>
 </div>
 
-<h2 id="log-transforms-and-their-cost">Log Transforms and Their Cost</h2>
+<h2 id="log-transforms-and-their-cost">Log Transforms</h2>
 
+<details class="ans"><summary><span>Optional, open to read</span></summary><div class="body">
 <p>$y = ae^{-kx}$ is not linear in $a$ and $k$. Taking logarithms:</p>
 
 $$\ln y \;=\; \ln a \;-\; kx$$
 
 <p>which is a straight line in $x$ with intercept $\ln a$ and slope $-k$, linear in its parameters,
-and solvable in closed form. The transform is exact and the algebra is not in question. What
-changes is the fit. Least squares on $\ln y$ minimises $\sum (\ln y_i - \ln \hat y_i)^2$, and
+and solvable in closed form. The transform is exact and the algebra is not in question,
+though the fit itself changes. Least squares on $\ln y$ minimises $\sum (\ln y_i - \ln \hat y_i)^2$, and
 the difference of logarithms is a <em>relative</em> discrepancy, so the transformed fit weights
 every point by its relative error where the untransformed fit weighted every point by its
-absolute error. If the measurement noise is a fixed absolute size, which is what most
-instruments produce, those are different problems.</p>
+absolute error. If the measurement noise is a fixed absolute size, which is typical of many
+instruments, those are different problems.</p>
 
 <cg-demo case="transform"></cg-demo>
 
@@ -1059,27 +1060,61 @@ instruments produce, those are different problems.</p>
       <td class="num">2.8%</td></tr>
 </table>
 
-<p>The transformed fit is four times further out. The reason is visible in the data. At $x = 0$ the
+<p>The transformed fit is four times further out. At $x = 0$ the
 noise of 0.05 is 1.0% of $y$, and at $x = 7$, where $y$ has decayed to 0.264, the same 0.05 is
 15.1%. On a logarithmic scale the last point is the noisiest by a wide margin, and the
 transformed fit, minimising relative discrepancy, lets it pull the slope.</p>
+</div></details>
 
-<h2 id="choosing-whether-to-transform">Choosing Whether to Transform</h2>
+<h2 id="choosing-whether-to-transform">Choosing a Fitting Space</h2>
 
+<details class="ans"><summary><span>Optional, open to read</span></summary><div class="body">
 <ul class="plain">
-  <li><strong>Transform</strong> when the noise really is proportional to the signal. Many
+  <li><strong>Transform</strong> when the noise is proportional to the signal. Many
   concentration and count measurements are. Then equal relative weighting is what you want and the transform is the correct model of the errors.</li>
-  <li><strong>Fit the original</strong> when the noise is a fixed absolute size, which covers most
+  <li><strong>Fit the original</strong> when the noise is a fixed absolute size, which is common for
   instruments with a stated resolution. The cost is an iterative fit and a starting guess.</li>
   <li><strong>Transform to get a starting guess, then fit the original.</strong> The usual
   practical
-  answer. The closed form gives a value close enough for the search to converge from, and the
-  search
-  gives the answer.</li>
+  answer. The closed form gives a starting value close enough for the search to converge from,
+  and the search then gives the answer.</li>
 </ul>
 
-<p>The mistake is doing the transform because the fit becomes easy, and then reporting the
-parameters as though the choice had no consequences. The transform itself is legitimate.</p>
+<p>The transform itself is legitimate. The mistake is doing it because the fit becomes easy,
+and then reporting the parameters as though the choice had no consequences.</p>
+
+<div class="check">
+  <span class="label">Check</span>
+  <ol>
+    <li>Your instrument has a resolution of ±0.01 regardless of reading. Would you fit an
+    exponential decay directly or on log <em>y</em>, and why?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Directly</strong>, by nonlinear least squares.</p>
+     <p>Taking logs makes the model linear in its parameters, which is why it is the standard trick, but
+it also transforms the errors. A constant &plusmn;0.01 is a small relative error where
+<em>y</em> is large and a large one where <em>y</em> has decayed to 0.05. On the log scale those
+small readings acquire large scatter, and least squares on log&thinsp;<em>y</em> weights every
+point equally, so the tail dominates the fit. The result is a biased decay constant, and the
+residuals on the log plot may look fine.</p>
+     <p>The general rule is to <strong>fit in the space where the errors are uniform.</strong> Constant
+absolute error means fit directly. Constant <em>relative</em> error, an instrument accurate to
+&plusmn;2% of reading, means the log transform is right, and then it is the correct estimator.</p></div></details></li>
+    <li>A fit on log <em>y</em> gives <em>k</em> = 0.411 and a direct fit gives 0.403. Which is
+    closer to the truth, and what would you have to know to answer that without being told?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>You cannot tell from the two numbers. What decides it is <strong>how the measurement error
+scales with the reading</strong>.</p>
+     <p>If the error is constant in absolute terms, the direct fit is the right estimator and 0.403 is
+the better answer. If the error is constant in relative terms, the log fit weights the points
+correctly and 0.411 is. The two disagree by 2%, which is about what a mis-specified weighting
+can cost.</p>
+     <p>You can find out from the data. Fit, then <strong>plot the residuals against
+<em>y</em></strong>. Constant scatter across the range means constant absolute error. A fan that
+widens with <em>y</em> means relative error. Repeated measurements at a few settings answer it
+directly. The choice of fitting space is a claim about the
+instrument, and it has to be settled with knowledge from outside
+the fit.</p></div></details></li>
+  </ol>
+</div>
+</div></details>
 
 <div class="check">
   <span class="label">Check</span>
@@ -1093,34 +1128,8 @@ nonlinear in <em>x</em>, and that is irrelevant, because the test is about how t
 with a closed-form solution. In <em>y</em> = ln(<em>a</em> + <em>bx</em>), the parameters are
 inside the logarithm. There is no way to write the model as a sum of parameters times functions
 of <em>x</em>, so the normal equations do not apply and the fit must be found by iteration.</p>
-     <p>The distinction is not about the shape of the curve. A parabola is linear in its parameters. A
-straight line through the origin with a fitted exponent is not.</p></div></details></li>
-    <li>Your instrument has a resolution of ±0.01 regardless of reading. Would you fit an
-    exponential decay directly or on log <em>y</em>, and why?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Directly</strong>, by nonlinear least squares.</p>
-     <p>Taking logs makes the model linear in its parameters, which is why it is the standard trick, but
-it also transforms the errors. A constant &plusmn;0.01 is a small relative error where
-<em>y</em> is large and a large one where <em>y</em> has decayed to 0.05. On the log scale those
-small readings acquire large scatter, and least squares on log&thinsp;<em>y</em> weights every
-point equally, so the tail dominates the fit. The result is a biased decay constant, and biased
-in a way the residuals on the log plot look fine about.</p>
-     <p>The rule underneath: <strong>fit in the space where the errors are uniform.</strong> Constant
-absolute error means fit directly. Constant <em>relative</em> error, an instrument accurate to
-&plusmn;2% of reading, means the log transform is right, and then it is the correct estimator.</p></div></details></li>
-    <li>A fit on log <em>y</em> gives <em>k</em> = 0.411 and a direct fit gives 0.403. Which is
-    closer to the truth, and what would you have to know to answer that without being told?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>You cannot tell from the two numbers. What decides it is <strong>how the measurement error
-scales with the reading</strong>.</p>
-     <p>If the error is constant in absolute terms, the direct fit is the right estimator and 0.403 is
-the better answer. If the error is constant in relative terms, the log fit weights the points
-correctly and 0.411 is. The two disagree by 2%, which is what a mis-specified weighting
-typically costs.</p>
-     <p>You can find out from the data. Fit, then <strong>plot the residuals against
-<em>y</em></strong>. Constant scatter across the range means constant absolute error. A fan that
-widens with <em>y</em> means relative error. Repeated measurements at a few settings answer it
-directly. Note what has happened here. The choice of fitting space is a claim about the
-instrument and not about the mathematics, and it has to be settled with knowledge from outside
-the fit.</p></div></details></li>
+     <p>For instance, a parabola is linear in its parameters, and a power law
+<em>y</em> = <em>ax</em><sup><em>b</em></sup> with a fitted exponent is not.</p></div></details></li>
   </ol>
 </div>
 
@@ -1150,11 +1159,11 @@ outside it reported separately.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/linearity-in-the-parameters.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/linearity-in-the-parameters.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-16">October 16, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-22">October 22, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

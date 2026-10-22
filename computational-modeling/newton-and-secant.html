@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Newton and the secant method — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -834,7 +834,7 @@
         <a href="week-07.html">Overview</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="conditions-become-roots.html">Conditions become roots</a>
+          <a href="conditions-become-roots.html">Conditions as roots</a>
         
           <span class="site-nav-sep">·</span>
           <a href="bisection.html">Bisection</a>
@@ -843,10 +843,10 @@
           <strong>Newton and secant</strong>
         
           <span class="site-nav-sep">·</span>
-          <a href="root-finding-fails.html">Four ways it fails</a>
+          <a href="root-finding-fails.html">Root-finding failures</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="evaluations-are-the-currency.html">Evaluations</a>
+          <a href="evaluations-are-the-currency.html">Evaluation cost</a>
         
           <span class="site-nav-sep">·</span>
           <a href="windowed-optimum.html">Windowed optimum</a>
@@ -921,8 +921,8 @@
   <dfn data-g="secant-method">secant method</dfn> replaces the
   tangent with the line through the two most recent estimates, requiring no derivative and
   converging almost as fast.</p>
-  <p class="plain">  Follow the slope down to the axis and start again from there. It is much faster than bisection
-  when it works, and it can fail.</p>
+  <p class="plain">  Follow the slope down to the axis and start again from there. It is usually much faster than
+  bisection, though it can fail.</p>
 </div>
 
 <h2 id="the-tangent-step">The Tangent Step</h2>
@@ -937,13 +937,14 @@ last two points:</p>
 
 $$f'(x_k) \;\approx\; \frac{f(x_k) - f(x_{k-1})}{x_k - x_{k-1}}$$
 
-<p>which is a finite difference, namely week 4's forward difference, with the step supplied by the
+<p>which is a finite difference, namely week 4's backward difference, with the step supplied by the
 iteration and not chosen.</p>
 
-<h2 id="correct-digits-double-each-step">Correct Digits Double Each Step</h2>
+<h2 id="correct-digits-double-each-step">Convergence Rates</h2>
 
-<p>Near a simple root Newton's error obeys $e_{k+1} \approx C e_k^2$, so the error is squared each
-step and the number of correct digits doubles. From an error of 10⁻¹ that goes 10⁻², 10⁻⁴, 10⁻⁸,
+<details class="ans"><summary><span>Optional, open to read</span></summary><div class="body">
+<p>Near a simple root Newton's error obeys $e_{k+1} \approx C e_k^2$, so the error is roughly squared
+each step and the number of correct digits roughly doubles. From an error of 10⁻¹ that goes 10⁻², 10⁻⁴, 10⁻⁸,
 10⁻¹⁶, which is four steps from one digit to machine precision. Compare with bisection, which
 gains one bit, about a third of a digit, per evaluation. To reach 12 digits from a bracket of
 width 1, bisection needs 40 evaluations and Newton needs about 5.</p>
@@ -956,23 +957,24 @@ width 1, bisection needs 40 evaluations and Newton needs about 5.</p>
   <tr><td>secant</td><td>two starts</td><td>1, being $f$ only</td><td>order 1.618</td><td>no</td></tr>
 </table>
 
-<p>The secant method's exponent is the golden ratio, and that is the reason the method survives
+<p>The secant method's exponent is the golden ratio, and that is one reason the method survives
 alongside Newton. It converges a little more slowly per step, though each step costs half as
 much, so per evaluation it is usually the faster of the two. It is also the only one of the
 three that needs neither a derivative nor a bracket.</p>
+</div></details>
 
 <cg-demo case="newton"></cg-demo>
 
-<h2 id="newton-keeps-no-bracket">Newton Keeps No Bracket</h2>
+<h2 id="newton-keeps-no-bracket">Steps Without a Bracket</h2>
 
 <p>Bisection's bracket is what makes its guarantee possible, because the root is inside and stays
-inside. Newton and the secant method keep no such interval, so at every step the estimate may be
-anywhere at all. Concretely:</p>
+inside. Newton and the secant method keep no such interval, so at every step the estimate may land
+anywhere. Concretely:</p>
 
 <ul class="plain">
   <li><strong>A small derivative gives a huge step.</strong> The tangent is nearly flat, so its
   axis
-  crossing is far away. This is page 23's third failure.</li>
+  crossing is far away. This is page 22's third failure.</li>
   <li><strong>The step can leave the domain.</strong> Nothing in the formula knows the beam ends
   at
   6 m.</li>
@@ -981,13 +983,13 @@ anywhere at all. Concretely:</p>
   <li><strong>It can converge to a different root</strong> than the one nearest the start.</li>
 </ul>
 
-<p>None of these is a bug. They are what a method without a bracket costs, and the price is usually
-worth paying, which is why Newton is the default in most libraries.</p>
+<p>These are what a method without a bracket costs, and the price is usually worth paying, which is
+why most library root finders take Newton or secant steps whenever they can.</p>
 
 <h2 id="combining-bisection-and-newton">Combining Bisection and Newton</h2>
 
-<p>The methods are usually combined and not chosen between, and the combination is what a good
-library actually does:</p>
+<details class="ans"><summary><span>Optional, open to read</span></summary><div class="body">
+<p>In practice the methods are usually combined, and a good library does it in three steps:</p>
 
 <ol class="plain">
   <li>Find a bracket by plotting or scanning.</li>
@@ -998,8 +1000,9 @@ library actually does:</p>
 
 <p>This is Brent's method, near enough, and it is what <code>scipy.optimize.brentq</code> and
 MATLAB's <code>fzero</code> are. Knowing that is likely worth more than being able to implement
-any of the three, because the practical decision is almost never which method to write. It is
-whether the problem has been set up so that a bracket exists at all.</p>
+any of the three, because the practical decision is usually whether the problem has been set up
+so that a bracket exists.</p>
+</div></details>
 
 <div class="check">
   <span class="label">Check</span>
@@ -1015,7 +1018,7 @@ of correct digits doubles each step.</p>
      <p>Three assumptions are hiding in that. The root is <strong>simple</strong>, since at a double
 root Newton is only linear and the errors would go 10<sup>&minus;3</sup>, 5&times;
 10<sup>&minus;4</sup>, 2.5&times;10<sup>&minus;4</sup>. The iteration is already <strong>in the
-asymptotic regime</strong>, meaning close enough for the quadratic law to hold. And <em>C</em>,
+asymptotic regime</strong>, meaning close enough for the quadratic law to hold. The third is that <em>C</em>,
 which is <em>f</em>&Prime;/2<em>f</em>&prime; at the root, is of order 1, when it may be a good
 deal larger. The last step also brushes machine precision, because for values of order 1,
 10<sup>&minus;12</sup> is close to the floor and the step after it would not deliver
@@ -1023,27 +1026,28 @@ deal larger. The last step also brushes machine precision, because for values of
     <li>Your <em>f</em> is expensive and you have no derivative. Which method, and how many
     evaluations per step?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>The secant method, at one evaluation per step.</strong> It reuses the previous point, so
-each step costs a single new evaluation of <em>f</em> and no derivative at all, at an order of
-1.618, the golden ratio.</p>
+each step costs a single new evaluation of <em>f</em> and no derivative, at an order of
+1.618 (the golden ratio).</p>
      <p>The alternative is Newton with a finite-difference derivative, which costs <strong>two</strong>
-evaluations per step for order 2. Compare them per evaluation and not per step. Secant gains a
+evaluations per step for an order of nearly 2. Compare them per evaluation and not per step. Secant gains a
 factor of 1.618 per evaluation, Newton &radic;2&nbsp;=&nbsp;1.414. <strong>The secant method is
 faster per evaluation</strong>, which is the currency when <em>f</em> is expensive. The
 difference-quotient derivative is also the worst of both worlds numerically, because it inherits
 the step-size dilemma from week 4, on a function you were told is expensive.</p></div></details></li>
     <li>Why can a hybrid method keep bisection's guarantee while taking Newton steps most of the
     time?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Because it never lets go of the bracket.</p>
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>It keeps the guarantee because it never lets go of the bracket.</p>
      <p>The hybrid keeps an interval known to contain a root at all times. Each step it
 <em>proposes</em> a Newton or secant step and then checks it. Does the proposal land inside the
 current bracket, and does it shrink the interval by enough? If yes, take it and update the
 bracket. If no, discard it and take a bisection step instead.</p>
-     <p>The guarantee survives because it was never a property of the steps. It is a property of the
-bracket, and the bracket is maintained unconditionally. The worst case is that every proposal is
+     <p>The guarantee survives because it is a property of the bracket and not of the steps, and the
+bracket is maintained unconditionally. The worst case is that every proposal is
 rejected, and then the method <em>is</em> bisection, with its bound intact.</p>
      <p>The speed survives because near a simple root Newton's proposals are excellent and are almost
-always accepted. You pay one comparison per step for a guarantee that costs nothing when it is
-not needed. That is Brent's method, and it is why the default root finder in most libraries is a hybrid and not either parent.</p></div></details></li>
+always accepted. The guarantee costs one comparison per step, which is small next to an evaluation
+of <em>f</em>. That is close to Brent's method, and it is why the default root finder in most
+libraries is a hybrid.</p></div></details></li>
   </ol>
 </div>
 
@@ -1072,11 +1076,11 @@ bisection, secant and Newton on any signal, counting evaluations.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/newton-and-secant.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/newton-and-secant.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-16">October 16, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-22">October 22, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

@@ -6,7 +6,7 @@ const svgEl = (n, a = {}) => { const e = document.createElementNS('http://www.w3
   for (const k in a) e.setAttribute(k, a[k]); return e; };
 
 /* cumulative trapezoid: s[i] is the integral from the start up to sample i.
-   Shared because pages 5-8 and 25 all build one. */
+   Shared because pages 5-8 and 24 all build one. */
 function integrate(y, dt) {
   const s = new Float64Array(y.length);
   for (let i = 1; i < y.length; i++) s[i] = s[i-1] + (y[i] + y[i-1]) * 0.5 * dt;
@@ -968,7 +968,9 @@ function realNoiseRaw(n, sd = 1) {
 }
 
 /* The smoothing trade, on a signal whose truth is known. Widen the window and
-   watch the noise fall and the peak follow it down. */
+   watch the noise fall and the peak follow it down. Then the lag a one-sided
+   filter adds, and the second pass that removes it (the phase lag page, merged
+   into this one 2026-10-22). */
 
 const DT = 1e-3, N = 1000;
 const T = linspace(0, 1 - DT, N);
@@ -990,6 +992,23 @@ const CURVE = WIDTHS.map(w => {
   return Math.sqrt(sq / N);
 });
 const BESTW = WIDTHS[CURVE.indexOf(Math.min(...CURVE))];
+
+/* The lag demo: a pulse whose peak time is known by construction, filtered
+   one way and both ways. The lag is measured against the known time, not
+   estimated from the difference between two filtered curves. Its names carry
+   an L so they stay apart from the smoothing demo's. */
+const LDT = 8e-5, LN = 4000;
+const LT = linspace(0, (LN - 1) * LDT, LN);
+const LT0 = 0.020, LDUR = 0.020, TPEAK = LT0 + LDUR / 2;      // peak at exactly 30 ms
+const PULSE = new Float64Array(LN);
+for (let i = 0; i < LN; i++)
+  PULSE[i] = (LT[i] >= LT0 && LT[i] <= LT0 + LDUR) ? Math.sin(Math.PI * (LT[i] - LT0) / LDUR) : 0;
+
+const peakTime = y => {
+  let bi = 0;
+  for (let i = 1; i < LN; i++) if (Math.abs(y[i]) > Math.abs(y[bi])) bi = i;
+  return LT[bi];
+};
 
 mountDemo({
   smooth: {
@@ -1041,6 +1060,51 @@ mountDemo({
         }
       };
     }
+  },
+  lag: {
+    setting: 'A half-sine pulse 20&nbsp;ms wide whose peak is at exactly 30.000&nbsp;ms by ' +
+             'construction, sampled at 12.5&nbsp;kHz. The true peak time is therefore known and ' +
+             'the lag is measured, not inferred.',
+    source: {kind: 'constructed', text: 'A half-sine pulse whose peak is at exactly 30.000&nbsp;ms by construction, so the lag is measured against a known time. The filter is the one SAE&nbsp;J211 specifies.'},
+    caption: 'The solid curve is the filter you have selected; the ghost is the unfiltered pulse. ' +
+             'The amber line marks the true peak at 30.000&nbsp;ms, and the marker is where the ' +
+             'filtered peak actually lands.',
+    controls: [{key: 'lc', label: 'CFC class', min: 0, max: 3, step: 1, value: 2, dp: 0,
+                fmt: v => ['1000', '600', '180', '60'][Math.round(v)]}],
+    segments: [{key: 'pass', label: 'passes', value: 'one', options: [
+      {value: 'one', label: 'One pass'},
+      {value: 'two', label: 'Forward then backward'}]}],
+    panels: [{label: 'filtered pulse', unit: '', height: 240, xAxis: true,
+              xLabel: 'time', xUnit: 'ms', xScale: 1000, lens: true, lensZoom: 12}],
+    readouts: [
+      {key: 'class', label: 'CFC class'},
+      {key: 'true',  label: 'true peak'},
+      {key: 'meas',  label: 'filtered peak'},
+      {key: 'lag',   label: 'shift'},
+      {key: 'res',   label: 'sample interval'}
+    ],
+    compute(s) {
+      const klass = [1000, 600, 180, 60][Math.round(s.lc)];
+      const y = s.pass === 'one' ? cfcOnce(PULSE, klass, LDT) : cfc(PULSE, klass, LDT);
+      const tp = peakTime(y);
+      const lag = (tp - TPEAK) * 1000;
+      return {
+        panels: [{x: LT, y, ghost: PULSE, range: [0.012, 0.055],
+          opts: {
+            label: 'CFC ' + klass + (s.pass === 'one' ? ', one pass' : ', forward then backward'),
+            rings: [{x: TPEAK, y: 0, text: 'true peak 30.000 ms'}],
+            marks: [{t: tp, y: y[Math.round(tp / LDT)], cast: 'x',
+                     text: (tp * 1000).toFixed(3) + ' ms', dx: 8, dy: -9}]
+          }}],
+        readouts: {
+          class: 'CFC ' + klass,
+          true: '30.000 ms',
+          meas: (tp * 1000).toFixed(3) + ' ms',
+          lag: (lag >= 0 ? '+' : '−') + Math.abs(lag).toFixed(3) + ' ms',
+          res: (LDT * 1000).toFixed(3) + ' ms'
+        }
+      };
+    }
   }
 });
 
@@ -1081,6 +1145,42 @@ mountDemo({
     notes: [
       {x: FREEZE - 8, y: -6.2, anchor: 'end', cls: 'hi', text: 'the night it froze'},
       {x: 8, y: 25, anchor: 'start', text: 'a 31-day average'}
+    ]
+  });
+})();
+
+/* ---------------------------------------------------------------------------
+   fig-thermo — causality producing lag, without the word causality. A heavy
+   bulb climbs rather than jumps, and on the way up it reports a temperature
+   from a moment ago. Nothing is broken about the thermometer.
+--------------------------------------------------------------------------- */
+(() => {
+  const host = document.querySelector('#fig-thermo .fig-body');
+  if (!host) return;
+  const M = 300, TAU = 0.11, T0 = 0.28;
+  const X = [], STEP = [], READ = [];
+  for (let i = 0; i < M; i++) {
+    const t = i / (M - 1);
+    X.push(t);
+    STEP.push(t < T0 ? 0 : 1);
+    READ.push(t < T0 ? 0 : 1 - Math.exp(-(t - T0) / TAU));
+  }
+  /* where the reading first reaches half: the lag you would measure off a peak */
+  const half = T0 + TAU * Math.log(2);
+  diagram(host, {
+    w: 460, h: 208, xRange: [0, 1], yRange: [-0.22, 1.22], axes: false,
+    alt: 'A step change in temperature and a thermometer reading that climbs '
+       + 'towards it, reaching half the step a little after the step happened.',
+    curves: [{x: X, y: STEP, cls: 'ghost'}, {x: X, y: READ, cls: 'trace'}],
+    drops: [{x: T0, y: 1}, {x: half, y: 0.5}],
+    points: [{x: half, y: 0.5}],
+    leads: [{from: [T0, 0.5], to: [half, 0.5], cls: 'lead'}],
+    notes: [
+      {x: 0.02, y: 1.12, anchor: 'start', text: 'the water'},
+      {x: 0.97, y: 0.62, anchor: 'end', text: 'the reading'},
+      {x: (T0 + half) / 2, y: 0.36, anchor: 'middle', cls: 'hi', text: 'lag'},
+      {x: 0.5, y: -0.14, anchor: 'middle',
+       text: 'the bulb cannot know about heat it has not absorbed yet'}
     ]
   });
 })();

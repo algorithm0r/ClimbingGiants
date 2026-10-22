@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Model form and free parameters — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261017141252">
-  <link rel="stylesheet" href="css/demos.css?v=20261017141252">
+  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
+  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -837,7 +837,7 @@
           <strong>Model form</strong>
         
           <span class="site-nav-sep">·</span>
-          <a href="least-squares-is-one-norm.html">One choice of norm</a>
+          <a href="least-squares-is-one-norm.html">Choice of norm</a>
         
           <span class="site-nav-sep">·</span>
           <a href="linearity-in-the-parameters.html">Linear in parameters</a>
@@ -919,9 +919,121 @@
   <p class="plain">  The computer finds the numbers, and you choose the shape. The shape is where the physics goes.</p>
 </div>
 
+<h2 id="a-line-of-best-fit">A Line of Best Fit</h2>
+
+<p>You have probably drawn a line of best fit before, in a physics lab or with a spreadsheet's
+trendline button. The line has the form $y = a + bt$, and drawing it means choosing the two
+numbers $a$ and $b$ that put the line closest to the points, and choosing those two numbers is
+the fit. You made the decision to use a straight line before the fit began, when you chose the
+form.</p>
+
+<figure class="figure" id="fig-line">
+  <div class="fig-body"></div>
+  <figcaption>One missed three-point attempt by Stephen Curry, Golden State at the Clippers, 19
+  November 2015, tracked at 25 frames a second (SportVU optical tracking). It is from the example
+  pack, so it is in no student's data. Both panels show the same 31 frames of free flight, from
+  shortly after release until the ball reaches the rim, with time measured from the first of
+  them. The left panel fits a straight line to the ball's horizontal distance from the hoop, and
+  the right panel fits a straight line to its height.</figcaption>
+</figure>
+
+<p>On the left the straight line has a reason behind it. Once the ball leaves the shooter's hand
+the only large force on it is gravity, which pulls straight down, so the ball closes on the hoop
+at a nearly steady rate. The fit returns $a = 7.84$&nbsp;m and $b = -6.22$&nbsp;m/s, and each
+number has a physical meaning. That is, $a$ is how far the ball was from the hoop at the first
+frame of the fit, and $b$ is the rate at which it closed that distance. The points sit within 7&nbsp;cm of
+the line (2.9&nbsp;cm RMS), which is about the size of the tracking noise in this data set
+(2.8&nbsp;cm). Air resistance slows the ball a little during the flight, and the straight line
+leaves that out. (Each of the 15 example-pack shots we fitted this way shows it as a faint
+bend in the residuals.)</p>
+
+<p>On the right the same arithmetic fitted the same form to the height, and it returned
+$a = 4.41$&nbsp;m and $b = 0.05$&nbsp;m/s. It is the best straight line
+through those points. However, the height of a ball in flight follows a curve, and the points
+sit as far as 1.14&nbsp;m from the line, below it at both ends and above it through the middle.
+As a result neither number describes the motion of the ball. The line puts the ball at 4.41&nbsp;m at the first frame,
+when it was at 3.27&nbsp;m. The slope says only that the ball finished the 1.2&nbsp;s at about the
+height it started (3.43&nbsp;m against 3.27&nbsp;m), while the ball itself was rising at almost
+6&nbsp;m/s at the start and falling at almost 6&nbsp;m/s at the end. The fitting was the same in both panels and only the form was different,
+so it is the form you choose that largely determines whether the fitted numbers describe
+anything real.</p>
+
+<h2 id="a-line-through-the-velocities">A Line Through the Velocities</h2>
+
+<p>The vertical velocity (the first derivative of the height) does follow a straight line.
+Gravity gives the ball a nearly constant downward acceleration (air resistance adds a little), so
+its vertical velocity decreases steadily during the flight, $v = v_0 - gt$. This is the
+form of a line of best fit, with $v_0$ as the intercept and $-g$ as the slope. The velocities come
+from the heights by the <a href="finite-differences.html">central difference</a> from week 4,
+one for each frame that has a neighbour on both sides (29 of the 31).</p>
+
+<p>With both parameters fitted, the fit returns $v_0 = 5.85$&nbsp;m/s and $g = 9.60$&nbsp;m/s², within 2.1% of 9.81&nbsp;m/s². The
+velocities scatter widely about their line (0.51&nbsp;m/s RMS, and up to 1.2&nbsp;m/s), because
+<a href="differentiation-amplifies-noise.html">differencing amplifies the tracking noise</a>.
+However, the fit uses all 29 velocities, and the slope still comes out close to $-g$. In addition
+the slope has units of acceleration, so it can be checked against a number you already know before
+any residual is inspected. (Fitting a parabola to the heights themselves gives 9.61&nbsp;m/s² for this shot,
+so the two routes agree to within 0.01&nbsp;m/s².)</p>
+
+<p>Since $g$ is already known, the line can also be fitted with $g$ held at 9.81&nbsp;m/s². The
+$-gt$ term then moves to the data side, $v + gt = v_0$, and only $v_0$ is left to fit
+(<a href="linearity-in-the-parameters.html">Linearity in the parameters</a> works this through).
+Holding $g$ gives $v_0 = 5.98$&nbsp;m/s, and the RMS residual changes from 0.513 to
+0.517&nbsp;m/s. The demo below switches between the two fits on the same 29 velocities.</p>
+
+<cg-demo case="vel"></cg-demo>
+
+<h2 id="finding-free-flight">Finding Free Flight</h2>
+
+<p>The straight line holds only while the ball is in free flight, from the frame the hand lets go
+to the frame the ball reaches the rim. Neither frame is marked in the data, so each comes from a
+rule applied to the data, and the rule belongs in the report. For the start, in the last few
+frames before the release the hand pushes the ball upward, so its vertical speed usually grows
+from frame to frame. After the release only gravity and a little air resistance act on it, so its vertical speed
+falls by about $g\,\Delta t$, which is 0.39&nbsp;m/s a frame at 25 frames a second. The release is
+the frame where the vertical speed stops growing.</p>
+
+<figure class="figure" id="fig-release">
+  <div class="fig-body"></div>
+  <figcaption>Shot 1092 from the example pack, which is in no student's data. Each dot is the
+  vertical speed at one frame, from the heights two frames either side (the central difference
+  over four frames). The dashed line falls at $g\,\Delta t$ per frame from the frame the rule
+  picks as the release. The two vertical lines mark the release and the first frame within
+  1&nbsp;m of the hoop, where the fit stops.</figcaption>
+</figure>
+
+<p>On shot 1092 the vertical speed climbs from 2.58&nbsp;m/s at frame 6 to 5.81&nbsp;m/s at frame
+11, drops to 5.62 at frame 12 and 5.14 at frame 13, and from there scatters about the dashed line.
+In code the rule starts at the highest point of the flight, where the ball is certainly in free
+flight, and steps back one frame at a time for as long as the speed a frame or two earlier was
+higher. It stops at frame 11, the peak of the vertical speed, and takes that as the release.
+Looking two frames back as well as one keeps a single noisy speed from stopping it early. At frame
+18, for instance, the speed one frame earlier is lower (3.65 against 3.74&nbsp;m/s), while the
+speed two frames earlier (3.83&nbsp;m/s) keeps the rule going.</p>
+
+<pre data-lang="python">def release(t, z):
+    vz = np.full(len(t), np.nan)
+    vz[2:-2] = (z[4:] - z[:-4]) / (t[4:] - t[:-4])
+    i = int(np.argmax(z))
+    while i &gt; 3 and (vz[i - 1] &gt; vz[i] or vz[i - 2] &gt; vz[i]):
+        i -= 1
+    return i</pre>
+
+<p>The first two and last two frames have no neighbours two frames away, so their speeds are left
+as <code>nan</code> (not a number), and the slices <code>z[4:]</code> and <code>z[:-4]</code> line
+up the frame two ahead of each frame with the frame two behind it.</p>
+
+<p>The example pack's own programs end the window at the first frame within 1&nbsp;m of the hoop
+centre, measured horizontally (from <em>x</em> and <em>y</em>, ignoring height), which comes before
+the ball can reach the rim or the backboard. For shot 1092 that is frame 37, so the free-flight window is frames 11 to 36,
+26 frames in all. Across the 24 example shots the two rules put the release anywhere from frame 3
+to frame 19 (on one shot the speed is already falling at the start of the record, so the rule
+stops at frame 3), and leave between 23 and 31 frames of free flight.</p>
+
 <h2 id="form-and-parameters">Form and Parameters</h2>
 
-<p>A model is a function of the independent variable and some constants:</p>
+<p>A straight line is one form among many. In general a model is a function of the independent
+variable and some constants:</p>
 
 $$y \;=\; f(x;\, \theta_1, \theta_2, \dots, \theta_p)$$
 
@@ -930,15 +1042,17 @@ decaying exponential, and the <strong>parameters</strong> are the $\theta$s, whi
 fitting determines. Only the second of the two is the computer's business.</p>
 
 <p>Fitting cannot change the form. Handed a straight-line form and data on a curve it will return
-the straight line that fits the curve least badly, with no complaint at all. The residuals will
-usually show the problem, which is why looking at them is a separate page in week 10.</p>
+the straight line that fits the curve least badly, as it did for the height above. The residuals
+will usually show the problem, as the long runs below, above and below the line do there, and
+reading them is a separate page in week 10.</p>
 
 <h2 id="three-sources-for-a-model-s-form">Three Sources for a Model's Form</h2>
 
 <p>Three sources, in descending order of how much the fitted parameters end up meaning:</p>
 
 <ol class="plain">
-  <li><strong>The physics.</strong> A projectile under gravity gives
+  <li><strong>The physics.</strong> The straight line for the distance above came from here
+  (gravity pulls only downward, so the horizontal speed stays nearly steady). A projectile under gravity gives
   $y = y_0 + v_0 t - \tfrac{1}{2}gt^2$, a parabola with three parameters that are a height, a speed and an acceleration. Fitting then measures physical quantities, and each has units.</li>
   <li><strong>A known limiting behaviour.</strong> Something that decays to zero suggests
   $a e^{-kx}$. Something that saturates suggests $a x /(b + x)$. The parameters mean less than in
@@ -949,12 +1063,11 @@ usually show the problem, which is why looking at them is a separate page in wee
   choice, but it should be named as what it is.</li>
 </ol>
 
-<h2 id="more-parameters-always-fit-better">More Parameters Always Fit Better</h2>
+<h2 id="more-parameters-always-fit-better">Adding Parameters</h2>
 
 <p>More parameters always fit better. With $m$ data points and $m$ parameters the fit passes
 exactly through every point and the residuals are zero, and zero residuals look like a perfect
-fit. What they actually are is a restatement of the data, with the noise included as if it were
-signal.</p>
+fit. That is, they restate the data, with the noise included as if it were signal.</p>
 
 <cg-demo case="degree"></cg-demo>
 
@@ -968,12 +1081,12 @@ is <dfn data-g="overfitting">describing the noise</dfn>, and the noise will be d
 time.</p>
 
 <div class="aside">
-  <span class="label">The parameters have units</span>
+  <span class="label">Parameter units</span>
   <p>In $y = y_0 + v_0 t - \tfrac{1}{2}gt^2$ fitted to metres against seconds, the three coefficients
 come out in metres, metres per second, and metres per second squared. A fitted $g$ of 9.7 m/s²
 is then checkable against 9.81, and a fitted $g$ of 340 is a signal that something is wrong
 before any residual has been inspected. A polynomial fitted for convenience has coefficients in
-m, m/s, m/s² too, but nothing to check them against, which is exactly what is given up by
+m, m/s, m/s² too, but nothing to check them against, and that is what is given up by
 choosing the form for convenience.</p>
 </div>
 
@@ -999,8 +1112,8 @@ scale.</p></div></details></li>
 determine those ten coefficients uniquely, and the resulting curve passes exactly through every
 point. That is a fact of linear algebra and it holds whatever the data are, whether
 measurements, noise, or numbers read off a lottery ticket. The residual was going to be zero
-before anyone looked at the data, so its being zero carries no information whatever. The fit has
-not been tested, it has been given as many knobs as there are observations. To learn something,
+before anyone looked at the data, so its being zero carries no information. The fit has
+as many knobs as there are observations, so the data cannot test it. To learn something,
 hold points back: fit nine, predict the tenth, and look at that.</p></div></details></li>
     <li>A trajectory fit returns <em>g</em> = 11.4 m/s². Name two things that could cause it, and
     say which you would check first.
@@ -1010,12 +1123,12 @@ projectile's.</p>
      <p><strong>The model form is missing something</strong>, such as drag, lift from spin, or a
 tracking error that varies systematically along the arc. Anything that adds curvature is
 curvature the parabola has to absorb into <em>g</em>.</p>
-     <p>Check the window first, and do it by plotting the residuals and not by reasoning. A window
-problem shows as structure concentrated at one end. A model-form problem shows as structure
-spread through the middle. The window is also the cheaper thing to be wrong about and the easier
+     <p>Check the window first, and do it by plotting the residuals. A window
+problem usually shows as structure concentrated at one end. A model-form problem usually shows as
+structure spread through the middle. The window is also the cheaper thing to be wrong about and the easier
 to fix. There is one more reason to look at the window first, which is that 11.4 is
-<em>above</em> 9.81. Drag reduces the fitted curvature, so unmodelled drag cannot explain a high
-value, and the arithmetic has already ruled one of the two out for you.</p></div></details></li>
+<em>above</em> 9.81. Drag reduces the fitted curvature, so unmodelled drag cannot explain a value
+above 9.81.</p></div></details></li>
   </ol>
 </div>
 
@@ -1045,11 +1158,11 @@ outside it reported separately.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/model-form-and-parameters.js?v=20261017141252"></script>
+  <script type="module" src="js/bundle/model-form-and-parameters.js?v=20261022093533"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-09-23">September 23, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-21">October 21, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
