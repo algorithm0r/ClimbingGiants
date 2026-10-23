@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Residual and error — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
-  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
+  <link rel="stylesheet" href="css/blocks.css?v=20261023091254">
+  <link rel="stylesheet" href="css/demos.css?v=20261023091254">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -949,9 +949,9 @@ landed.</p>
   <tr><th class="num">frames fitted</th><th class="num">flight seen</th>
       <th class="num">median residual</th><th class="num">median error</th>
       <th class="num">correlation</th></tr>
-  <tr><td class="num">6</td><td class="num">0.20 s</td><td class="num">1.26 cm</td><td class="num">110 cm</td><td class="num">&minus;0.015</td></tr>
-  <tr><td class="num">10</td><td class="num">0.36 s</td><td class="num">1.73 cm</td><td class="num">27 cm</td><td class="num">&minus;0.003</td></tr>
-  <tr><td class="num">14</td><td class="num">0.52 s</td><td class="num">2.06 cm</td><td class="num">12 cm</td><td class="num">+0.232</td></tr>
+  <tr><td class="num">6</td><td class="num">0.20 s</td><td class="num">1.27 cm</td><td class="num">113 cm</td><td class="num">&minus;0.015</td></tr>
+  <tr><td class="num">10</td><td class="num">0.36 s</td><td class="num">1.74 cm</td><td class="num">28 cm</td><td class="num">&minus;0.003</td></tr>
+  <tr><td class="num">14</td><td class="num">0.52 s</td><td class="num">2.06 cm</td><td class="num">13 cm</td><td class="num">+0.232</td></tr>
 </table>
 
 <p><strong>The correlation is essentially zero.</strong> At ten frames it is &minus;0.003 across 140 shots, so
@@ -959,15 +959,15 @@ knowing how closely a fit passed through the points it was given tells you almos
 how far its prediction will land from the answer.</p>
 
 <p>The demo marks the two extremes at ten frames. The
-<strong>tightest</strong> fit in the whole set, residual 0.53&nbsp;cm, a fifth of the tracker's
+<strong>tightest</strong> fit in the whole set, residual 0.53&nbsp;cm, a sixth of the tracker's
 own noise, lands 5&nbsp;cm from the answer. The <strong>loosest</strong> fit, residual
 4.88&nbsp;cm, nine times worse by the only measure available at the time, lands 7&nbsp;cm from
 the answer. Their errors are two centimetres apart, on fits that look like different species. Elsewhere in the
 same cloud, a fit of 0.81&nbsp;cm, the fourth tightest of the 140, lands 186&nbsp;cm out.</p>
 
-<p>The median residual <em>rises</em> from 1.26 to
-2.06&nbsp;cm as more frames are fitted, while the median error <em>falls</em> from 110 to
-12&nbsp;cm. More data makes the fit look worse and the prediction better, because a short window
+<p>The median residual <em>rises</em> from 1.27 to
+2.06&nbsp;cm as more frames are fitted, while the median error <em>falls</em> from 113 to
+13&nbsp;cm. More data makes the fit look worse and the prediction better, because a short window
 lets the parabola bend to the noise. The number that improves is the error, which on real data nobody can see.</p>
 
 <h2 id="the-fit-is-judged-only-where-the-data-are">Sources of the Gap</h2>
@@ -980,7 +980,7 @@ of them. A curve constrained at one end is free at the other, and the residual i
 entirely at the constrained end, which is why it can be small while the free end wanders.</p>
 
 <p><strong>Small parameter changes become large predictions far away.</strong> The fitted curvature
-is uncertain by a little. Multiplied by the square of a distance three and a half times the
+is uncertain by a little. Multiplied by the square of a distance about three times the
 observed span, a little becomes a lot. That amplification is the subject of week 9.</p>
 
 <p><strong>The residual has been made small on purpose.</strong> Adding parameters drives it toward
@@ -1062,7 +1062,7 @@ something it was not fitted to.</p>
 
 <p>Holding data back is also how two models are compared. Consider the parabola for a shot's
 height, fitted two ways, with $g$ as a third parameter or with $g$ held at 9.81&nbsp;m/s² by
-moving $	frac{1}{2}gt^2$ to the data side, as page 13 does for the velocities. Each shot's free
+moving $\tfrac{1}{2}gt^2$ to the data side, as page 13 does for the velocities. Each shot's free
 flight, found by the rules on page 13, is split in half. Both models are fitted to the first half
 of each shot, and each is scored by the RMS error of its predictions on the second half, which
 neither fit has seen. The example pack has 24 shots. Shot 325 is left out, so the comparison runs
@@ -1104,7 +1104,7 @@ better on 14 of 23.</p>
 <p>In code the comparison is a loop over the shots. Here <code>free_flight</code> returns
 <code>t</code> and <code>z</code> from the release frame up to, but not including, the first frame
 within 1&nbsp;m of the hoop. <code>fit_free</code> fits $a + bt + ct^2$ to $z$, and
-<code>fit_held</code> fits $a + bt$ to $z + 	frac{1}{2}(9.81)t^2$ and returns $c = -9.81/2$ with
+<code>fit_held</code> fits $a + bt$ to $z + \tfrac{1}{2}(9.81)t^2$ and returns $c = -9.81/2$ with
 it, both by least squares. <code>rms</code> evaluates the parabola at the given times and returns
 the RMS of its difference from the heights, in centimetres.</p>
 
@@ -1193,7 +1193,7 @@ outside it reported separately.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/residual-and-error.js?v=20261022093533"></script>
+  <script type="module" src="js/bundle/residual-and-error.js?v=20261023091254"></script>
   
 
   <footer class="site-footer">

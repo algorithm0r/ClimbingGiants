@@ -1163,7 +1163,7 @@ mountDemo({
     notes: [
       {x: L(1), y: L(1), anchor: 'start', dy: -8, text: '1 cm'},
       {x: L(10), y: L(10), anchor: 'start', dx: 6, text: '10 cm, equal error'},
-      {x: L(1.0), y: L(40), anchor: 'start', cls: 'hi', text: 'above the line: holding g did better'},
+      {x: L(1.0), y: L(28), anchor: 'start', cls: 'hi', text: 'above the line: holding g did better'},
       {x: L(55), y: L(0.95), anchor: 'end', text: 'gravity held at 9.81 \u2192'},
       {x: L(0.85), y: L(55), anchor: 'start', dy: 14, text: '\u2191 gravity fitted'}
     ]

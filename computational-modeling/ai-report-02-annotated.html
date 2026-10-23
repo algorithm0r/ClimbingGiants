@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Claude&#39;s report, annotated · Assignment 2 — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
-  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
+  <link rel="stylesheet" href="css/blocks.css?v=20261023091254">
+  <link rel="stylesheet" href="css/demos.css?v=20261023091254">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -917,7 +917,7 @@ ol.ai-notes p{margin:.35rem 0 0}
 <li><strong>Rates that do not divide 12,500.</strong> At 6,250 Hz the logger keeps every 2nd sample, which is exact. <mark class="ai-reworded" id="ef"><a href="#ff">At 1,000 Hz one of its intervals is 12.5 of ours, so its samples fall between ours.</a><sup>f</sup></mark> <mark class="ai-course" id="m2"><a href="#n2">I gave each of its samples the value of our sample taken at or just before that instant</a><sup>2</sup></mark> (at most 0.08 ms early), so its gaps alternate between 12 and 13 of our samples. <mark class="ai-cut" id="eg"><a href="#fg">This gives 25 different possible starts at 1 kHz.</a><sup>g</sup></mark> <mark class="ai-course" id="m3"><a href="#n3">I checked this choice against a second model (a straight line between our two neighbouring samples)</a><sup>3</sup></mark> and the worst-start percentages moved by at most 1.7 points, with no change to any pass or fail (Assumptions, below).</li>
 </ul>
 <p><strong>My standard:</strong> a rate is acceptable if <em>every</em> channel keeps at least 95% of its present peak at the worst start. I included the crossmember as well as the dummy, because the lab records both and I do not know which ones its reports use. <mark class="ai-course" id="m4"><a href="#n4">The program removes each channel's small pre-impact offset before reading peaks</a><sup>4</sup></mark> and converts to g (1 g = 9.81 m/s²).</p>
-<figure class="figure"><div class="fig-body"><img src="data/example/figures/ai02-report-fig1.png?v=20261022093533" alt="Figure 1"></div></figure>
+<figure class="figure"><div class="fig-body"><img src="data/example/figures/ai02-report-fig1.png?v=20261023091254" alt="Figure 1"></div></figure>
 <p><strong>Figure 1.</strong> The lowest peak a slower logger could read (worst start), as a percentage of the peak our 12,500 Hz logger read, <mark class="ai-reworded" id="eh"><a href="#fh">for each of the eight channels of test 10642, at 11 rates from 250 to 10,000 samples a second (log scale)</a><sup>h</sup></mark>. The dotted line is the 95% standard, the red line the proposed 1,000 Hz logger, the green line the recommended 6,250 Hz.</p>
 <p><strong>Table 1.</strong> Worst-start peak as a percentage of the 12,500 Hz peak. <mark class="ai-ask" id="m5"><a href="#n5">A star marks rates that divide 12,500 exactly (every k-th sample kept, no model needed).</a><sup>5</sup></mark></p>
 <table class="data">
@@ -1089,10 +1089,10 @@ ol.ai-notes p{margin:.35rem 0 0}
 </table>
 <p><mark class="ai-cut" id="ej"><a href="#fj">The best start always reads the full peak, because one start always lands on the peak sample. The gap between the two columns is the part of the reading decided by luck.</a><sup>j</sup></mark></p>
 <p><mark class="ai-cut" id="ek"><a href="#fk">Figure 2 shows why the crossmember is so sensitive.</a><sup>k</sup></mark> Its peak is a single sharp swing about 11 ms after impact, from −297 to −1,540 and back to −407 m/s² over 8 of our sample intervals (0.64 ms), which is shorter than the 1 ms between two samples of the proposed logger. One start lands on the bottom of the swing. The worst start steps over it entirely, and its largest reading anywhere in the record is 82.5 g.</p>
-<figure class="figure"><div class="fig-body"><img src="data/example/figures/ai02-report-fig2.png?v=20261022093533" alt="Figure 2"></div></figure>
+<figure class="figure"><div class="fig-body"><img src="data/example/figures/ai02-report-fig2.png?v=20261023091254" alt="Figure 2"></div></figure>
 <p><strong>Figure 2.</strong> <mark class="ai-cut" id="el"><a href="#fl">Left rear crossmember acceleration (g) from 0 to 30 ms after impact, test 10642.</a><sup>l</sup></mark> The grey line is our 12,500 Hz record. Blue circles are the samples a 1,000 Hz logger keeps from its best start, orange squares those from its worst start.</p>
 <p><mark class="ai-cut" id="em"><a href="#fm">At 6,250 Hz (every 2nd sample) the worst a logger can do is skip the single peak sample. It then reads the sample next to it, −1,503 m/s², which is the 2.4% loss in the answer.</a><sup>m</sup></mark> <mark class="ai-practice" id="m7"><a href="#n7">Below 6,250 Hz it can skip two samples in a row</a><sup>7</sup></mark>, and the next one down is −1,333 m/s² (86.5%).</p>
-<figure class="figure"><div class="fig-body"><img src="data/example/figures/ai02-report-fig3.png?v=20261022093533" alt="Figure 3"></div></figure>
+<figure class="figure"><div class="fig-body"><img src="data/example/figures/ai02-report-fig3.png?v=20261023091254" alt="Figure 3"></div></figure>
 <p><strong>Figure 3.</strong> <mark class="ai-cut" id="en"><a href="#fn">Worst-start peak (% of the 12,500 Hz peak) at every rate from 500 to 12,500 samples a second in steps of 250, for the crossmember and for whichever dummy channel is lowest at that rate, test 10642.</a><sup>n</sup></mark></p>
 <p><mark class="ai-cut" id="eo"><a href="#fo">Figure 3 checks the gap between the rates in Table 1. Every rate from 6,250 Hz up keeps 97.6% of the crossmember peak, and every rate from 6,000 Hz down fails.</a><sup>o</sup></mark> <mark class="ai-course" id="m8"><a href="#n8">So the boundary on this test is between 6,000 and 6,250 Hz, and a 10 kHz logger would do no better and no worse than a 6.25 kHz one.</a><sup>8</sup></mark></p>
 <h2 id="what-would-change-the-answer">What would change the answer</h2>
@@ -1185,7 +1185,7 @@ ol.ai-notes p{margin:.35rem 0 0}
 
   
 
-  <script src="js/page.js?v=20261022093533"></script>
+  <script src="js/page.js?v=20261023091254"></script>
 
   <footer class="site-footer">
     <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-17">October 17, 2026</time>.</span>

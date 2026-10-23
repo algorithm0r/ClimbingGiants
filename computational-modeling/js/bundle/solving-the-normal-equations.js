@@ -1065,7 +1065,7 @@ mountDemo({
       {value: 'unit', label: 'Scaled to −1…1'}]}],
     controls: [{key: 'deg', label: 'polynomial degree', min: 1, max: 20, step: 1, value: 3, dp: 0}],
     panels: [{label: 'reading', unit: 'V', height: 250, xAxis: true,
-              xLabel: 'temperature', xUnit: '°C', xScale: 1, yClamp: [0.9, 2.1],
+              xLabel: 'temperature', xUnit: '°C', xScale: 1, yClamp: [1.0, 3.4],
               lens: true, lensZoom: 10}],
     readouts: [
       {key: 'kap',  label: 'condition number'},

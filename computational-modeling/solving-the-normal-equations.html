@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Solving the normal equations — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261022093533">
-  <link rel="stylesheet" href="css/demos.css?v=20261022093533">
+  <link rel="stylesheet" href="css/blocks.css?v=20261023091254">
+  <link rel="stylesheet" href="css/demos.css?v=20261023091254">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -1007,12 +1007,12 @@ and $\kappa$ becomes large.</p>
   <tr><td class="num">2</td><td class="num">4.4×10²</td><td class="num">2.6</td></tr>
   <tr><td class="num">3</td><td class="num">1.2×10⁴</td><td class="num">4.1</td></tr>
   <tr><td class="num">5</td><td class="num">1.1×10⁷</td><td class="num">7.0</td></tr>
-  <tr><td class="num">7</td><td class="num">4.7×10⁸</td><td class="num">8.7</td></tr>
-  <tr><td class="num">9</td><td class="num">singular</td><td class="num">all of them</td></tr>
+  <tr><td class="num">7</td><td class="num">1.1×10¹⁰</td><td class="num">10.0</td></tr>
+  <tr><td class="num">9</td><td class="num">1.4×10¹³</td><td class="num">13.1</td></tr>
 </table>
 
-<p>Twenty-one points evenly spaced over $[0, 1]$. By degree nine the normal equations cannot be
-solved in double precision at all, and by degree five half the digits have already gone.</p>
+<p>Twenty-one points evenly spaced over $[0, 1]$. By degree nine only about three of the sixteen digits are
+left, and by degree five half of them have already gone.</p>
 </div></details>
 
 <h2 id="squared-conditioning-and-the-units-of-x">Conditioning and the Units of $x$</h2>
@@ -1021,7 +1021,7 @@ solved in double precision at all, and by degree five half the digits have alrea
 problem is stated by a tall matrix $A$ whose rows are the model functions evaluated at each
 point, and multiplying by $A^{\!\top}$ to make it square costs $\kappa(A^{\!\top}\!A) =
 \kappa(A)^2$, exactly. At degree six the tall problem has $\kappa(A) = 1.8\times10^4$ and the
-normal equations have $3.2\times10^8$, which is four digits thrown away by a step taken for
+normal equations have $3.4\times10^8$, which is four digits thrown away by a step taken for
 convenience. Methods that avoid forming $A^{\!\top}\!A$, such as the QR factorisation, keep
 $\kappa(A)$ and lose half as many digits, which is why a library's least-squares routine uses
 one of them.</p>
@@ -1065,7 +1065,7 @@ was for.</p>
 
 <ul>
   <li><strong>Reading values off the curve, inside the data.</strong> Robust. Interpolating a
-  calibration at 340&nbsp;&deg;C survives conditioning that has destroyed the coefficients.</li>
+  calibration at 34&nbsp;&deg;C survives conditioning that has destroyed the coefficients.</li>
   <li><strong>Reporting or interpreting a coefficient.</strong> Fragile, and this is usually the
   point, because page 13 says the parameters are what the model <em>means</em>. A fitted gravity, a decay constant and a stiffness are all coefficients, so they are the first to lose digits.</li>
   <li><strong>Evaluating outside the data.</strong> Worst of all, because extrapolation is where
@@ -1082,14 +1082,15 @@ and scaled. Same data, same normal equations, same elimination.</p>
 
 <cg-demo case="solve"></cg-demo>
 
-<p>Raise the degree and watch the two answers separate. They agree up to about degree
-twelve, differ by 23&nbsp;mV at degree fourteen, and at degree twenty (twenty-one parameters for
-twenty-one points) the two curves differ by <strong>8.95&nbsp;V</strong> somewhere in the range,
-on a signal that spans about one volt.</p>
+<p>Raise the degree and watch the two answers separate. They agree to better than a microvolt
+at degree nine, differ by 7&nbsp;mV at degree twelve and 23&nbsp;mV at degree fourteen, and at degree
+twenty (twenty-one parameters for twenty-one points) the two curves differ by
+<strong>6.98&nbsp;V</strong> somewhere in the range,
+on a signal that spans about two volts.</p>
 
 <p>Degree twenty is the sharpest case. With as many parameters as points the fit is exactly
 determined and must pass through every point, so the residual is required to be
-<strong>zero</strong>. The scaled solve reports 1.06&nbsp;mV and the raw solve 1.76&nbsp;mV.
+<strong>zero</strong>. The scaled solve reports 0.95&nbsp;mV and the raw solve 1.76&nbsp;mV.
 Both are small though neither is zero, and the difference between them comes from the arithmetic alone.</p>
 
 <p>While this happens there is no warning, no error and no growing residual. The
@@ -1152,8 +1153,9 @@ sixteen returned).</p></div></details></li>
 expressed in, and conditioning is a property of the basis.</p>
      <p>Over 0 to 100, the functions 1, <em>x</em>, <em>x</em>&sup2;, <em>x</em>&sup3; are all large,
 all positive, and all increasing together. As vectors sampled at the data points they are nearly
-parallel, and their entries differ by factors of a million, which is the 10&sup2;&#8304; in the
-table. Centred on zero and scaled to &plusmn;1, the even powers stay positive while the odd ones
+parallel, and their entries already differ by a factor of a million at <em>x</em>&sup3;. At degree
+five the entries of the normal equations span twenty orders of magnitude, which is the
+10&sup2;&#8304; in the table. Centred on zero and scaled to &plusmn;1, the even powers stay positive while the odd ones
 change sign halfway, the columns become far closer to orthogonal, and every entry is of order
 one. The fitted <em>curve</em> is identical either way, the same polynomial, written
 differently. What changes is how much cancellation the elimination has to do to find it, and
@@ -1204,7 +1206,7 @@ error outside it reported separately.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/solving-the-normal-equations.js?v=20261022093533"></script>
+  <script type="module" src="js/bundle/solving-the-normal-equations.js?v=20261023091254"></script>
   
 
   <footer class="site-footer">

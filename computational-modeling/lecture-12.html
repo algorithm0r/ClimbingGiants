@@ -6,8 +6,8 @@
 <title>Lecture 12 — Filtering a crash record to SAE J211</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261022093533">
-<link rel="stylesheet" href="css/demos.css?v=20261022093533">
+<link rel="stylesheet" href="css/blocks.css?v=20261023091254">
+<link rel="stylesheet" href="css/demos.css?v=20261023091254">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -846,14 +846,19 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>And there's a check I'd use every time, because five coefficients and two feedback terms leave a lot of room for a sign error, and a wrong filter usually still produces a plausible-looking curve.</p><p>Feed the filter a constant. A low-pass filter has to pass a constant through unchanged, because a constant has no fast content to remove. So filter an array of ones, and we should get ones back.</p><p>In terms of the coefficients, that says a-nought plus a-one plus a-two, over one minus b-one minus b-two, equals one. For the classes on this record it comes out within about two parts in ten to the fourteen, so compare against one with a tolerance, not with equality.</p><p>For class 60, the top comes to 0.00375808, and the bottom, one minus 1.91144542 plus 0.91520351, comes to 0.00375809. So the ratio is one, to that precision.</p>">
+<section class="deck-slide full" data-notes="<p>Now there's a test I'd run every time we write this filter. Five coefficients and two feedback terms leave a lot of room for a sign error, and a wrong filter usually still draws a smooth, plausible-looking curve. So looking at the output won't tell us it's broken. We need a check with a known answer.</p><p>And here it is. Feed the filter a constant, every input the same number c. Once it settles, every output is the same number too, call it y. Put those into the recipe. The three inputs are all c, and the two past outputs are both y.</p><p>Now gather the y terms on the left, and divide by c. That ratio, y over c, is what the filter does to something that never changes.</p><p>And a low-pass filter keeps the slow content and cuts the fast. A constant is the slowest content there is, so it has to come through unchanged, which means that ratio has to be exactly one. If your coefficients give anything else, one of them is wrong, usually a sign.</p><p>For class 60, the top comes to 0.00375808, and the bottom, one minus 1.91144542 plus 0.91520351, comes to 0.00375809. So the ratio is one, to that precision. In code, compare against one with a tolerance, not with equality. And we can also run it for real, filter an array of ones and check that ones come back, once the first few samples have settled.</p>">
   <div class="head">
     <p class="say">A low-pass filter must <span class="def">pass a constant unchanged</span>.</p>
-    <p class="sub">Filter an array of 1.0, and (once it settles) 1.0 should come back.</p>
+    <p class="sub">A test for your implementation. A sign error still gives a smooth, plausible curve.</p>
   </div>
   <div class="stage">
-    <div class="work">
-      $$\frac{a_0 + a_1 + a_2}{1 - b_1 - b_2} \;=\; \textcolor{#8A6508}{1}$$
+    <style>.deck-slide .work.spaced .katex-display{margin:.9em 0}</style>
+    <div class="work spaced" style="font-size:calc(var(--stage-text) * .75)">
+      $$\begin{aligned}
+      y &= a_0 c + a_1 c + a_2 c + b_1 y + b_2 y && \text{every input } c\text{, every settled output } y \\[10pt]
+      y\,(1 - b_1 - b_2) &= (a_0 + a_1 + a_2)\,c && \text{gather the } y \text{ terms}\\[10pt]
+      \frac{y}{c} &= \frac{a_0 + a_1 + a_2}{1 - b_1 - b_2} = \textcolor{#8A6508}{1} && \text{a constant passes unchanged}
+      \end{aligned}$$
     </div>
   </div>
 </section>
@@ -868,28 +873,10 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide part">
+<section class="deck-slide full" data-notes="<p>So why would anybody filter this channel at all? Here's a typical reason. Say we want to compare how hard the X5 slowed down with how hard another car slowed down in the same kind of test. The crossmember is part of the car's frame, so its record is the car's own deceleration, and for comparing vehicles Table 1 recommends class 60.</p><p>And class 60 suits that question. It keeps the car's overall pulse, the part that takes tens of milliseconds, and it takes out the sharp spike at impact, which only lasts about half a millisecond. And if the other lab also uses class 60 on the same kind of channel, the two numbers can actually be compared.</p><p>So the peak goes in the table with the class right next to it. 485 metres per second squared, or 49.4 g, at CFC 60, filtered forward and backward, for comparing vehicles. In crash work the class often sits in the table header or the plot legend, as CFC 60.</p><p>And if the question were different, the number would be too. If we were analysing the crossmember itself, as a component, the class would be 600, and the same record would give a peak of about 1,284. That's why the use goes in the line as well as the class.</p><p>And when there's no standard for a measurement, we choose the class from what the number is for, and we write down why, so somebody else can repeat it or disagree with it.</p><p>So hopefully that gives you a sense of why the filter is part of the measurement, and that's the end of week four. Next we start fitting models to data. Thanks a lot for watching and we'll see you in the next video.</p>">
   <div class="head">
-    <p class="course">Computational Physical Modeling</p>
-    <p class="say">Which class</p>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>And here's what that looks like on our record. The grey line is the record as recorded. The red line is class 600, the class for a component, and the green line is class 60, the class for comparing vehicles.</p><p>Class 600 keeps the spike, 1284. Class 60 cuts it, and its biggest value is the slow dip about 53 milliseconds in, 485. That 53 milliseconds isn't the spike arriving late, both of these are forward and backward, so there's no delay. It's a different moment in the crash.</p><p>So the class 60 peak describes the whole car's deceleration, which is what class 60 is for when we compare vehicles. And the class 600 peak describes the spike, which is what a component analysis would want.</p>">
-  <div class="head">
-    <p class="say">CFC 60 keeps the car&rsquo;s slow pulse and <span class="def">cuts the narrow spike</span>.</p>
-    <p class="sub">As recorded in grey, CFC 600 in red, CFC 60 in green.</p>
-  </div>
-  <div class="stage">
-    <style>.deck-slide [data-fig="l12-classes"] .ghost{stroke-dasharray:none; stroke-width:1} .deck-slide [data-fig="l12-classes"] .pred{stroke-dasharray:none; stroke-width:1.3}</style>
-    <figure class="figure wide" data-fig="l12-classes"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>So here's what to do with all of that. When you report a peak from a filtered record, the class goes right next to the number. In crash work it often sits in the table, or in the plot legend, as CFC 60, and peaks are often given in g as well as metres per second squared. Here's one common form, as a line in a results table.</p><p>And when there's no standard for a measurement, we choose the class from what the number is for, and we write down why, so somebody else can repeat it or disagree with it.</p><p>So hopefully that gives you a sense of why the filter is part of the measurement, and that's the end of week four. Next we start fitting models to data. Thanks a lot for watching and we'll see you in the next video.</p>">
-  <div class="head">
-    <p class="say">Report a filtered peak <span class="def">with its class and its use</span>.</p>
-    <p class="sub">One common form, as a line in a results table.</p>
+    <p class="say">To compare the X5 with another car, <span class="def">report the CFC 60 peak with its class</span>.</p>
+    <p class="sub">Table 1&rsquo;s class for comparing vehicles, written as a line in a results table.</p>
   </div>
   <div class="stage">
     <div class="raw">
@@ -908,6 +895,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <div class="deck-notes"></div>
 
 
-<script type="module" src="js/bundle/lecture-12.js?v=20261022093533"></script>
+<script type="module" src="js/bundle/lecture-12.js?v=20261023091254"></script>
 </body>
 </html>

@@ -1442,6 +1442,60 @@ setTimeout(() => {
   const ends = f => ({x: [-0.03, 1.23], y: [f.a - 0.03 * f.b, f.a + 1.23 * f.b]});
   const dots = y => y.map((v, i) => ({x: T[i], y: v, r: 3}));
 
+  /* what fitting a line means, before any formula: three candidate lines
+     through the distances, each with its gaps drawn. The close one is the
+     least-squares line; the others are it tilted too steeply and shifted up. */
+  each('lec13-cands', host => {
+    const tm = T.reduce((s, v) => s + v, 0) / T.length;
+    const steep = {b: fd.b * 1.5, a: fd.a + (fd.b - fd.b * 1.5) * tm};
+    const high = {a: fd.a + 2.2, b: fd.b};
+    const cells = diagramRow(host, 3);
+    [[fd, 'close to every point'], [steep, 'too steep'], [high, 'too high']].forEach(([f, name], k) => {
+      const at = t => f.a + f.b * t;
+      diagram(cells[k], {
+        w: 200, h: 170, xRange: [-0.05, 1.25], yRange: [-2.5, 11],
+        title: name,
+        alt: 'The distance points with a line drawn ' + name + ', and red sticks from each point to the line.',
+        leads: D.map((v, i) => ({from: [T[i], v], to: [T[i], at(T[i])], cls: 'alt'})),
+        curves: [ends(f)],
+        points: D.map((v, i) => ({x: T[i], y: v, r: 2.2}))
+      });
+    });
+  });
+
+  /* each extra degree is one more number for the fit to adjust */
+  each('lec13-degrees', host => {
+    const cells = diagramRow(host, 3);
+    [1, 2, 3].forEach((deg, k) => {
+      const c = polyfit(XD, YD, deg);
+      diagram(cells[k], {
+        w: 200, h: 170, xRange: [-0.05, 1.05], yRange: [0.6, 3.2],
+        title: 'degree ' + deg + ', ' + (deg + 1) + ' numbers to adjust',
+        alt: 'Ten points with a fitted polynomial of degree ' + deg + '.',
+        curves: [{x: XF, y: [...XF].map(v => polyval(c, v))}],
+        points: [...XD].map((x, i) => ({x, y: YD[i], r: 2.6}))
+      });
+    });
+  });
+
+  /* the three sources of a form, as shapes */
+  each('lec13-shapes', host => {
+    const cells = diagramRow(host, 3), X = linspace(0, 1, 120);
+    diagram(cells[0], {w: 200, h: 100, xRange: [-0.05, 1.05], yRange: [-0.1, 1.15], axes: false,
+      title: 'a parabola',
+      alt: 'A parabola, rising and falling like a ball in flight.',
+      curves: [{x: X, y: [...X].map(x => 4 * x * (1 - x))}]});
+    diagram(cells[1], {w: 200, h: 100, xRange: [-0.05, 1.05], yRange: [-0.1, 1.15], axes: false,
+      title: 'decay (green), leveling off (red)',
+      alt: 'A curve decaying toward zero and a curve rising and leveling off.',
+      curves: [{x: X, y: [...X].map(x => Math.exp(-4 * x))},
+               {x: X, y: [...X].map(x => x / (0.15 + x)), cls: 'alt'}]});
+    diagram(cells[2], {w: 200, h: 100, xRange: [-0.05, 1.05], yRange: [-0.1, 1.15], axes: false,
+      title: 'a polynomial',
+      alt: 'A wavy polynomial curve with no physical shape.',
+      curves: [{x: X, y: [...X].map(x => 0.5 + 0.35 * Math.sin(9 * x) * (1 - 0.4 * x))}]});
+  });
+
   /* the shot as tracked, before any fit */
   each('lec13-shot', host => {
     const [l, r] = diagramRow(host, 2);
@@ -1483,17 +1537,23 @@ setTimeout(() => {
       points: VEL_T.map((t, i) => ({x: t, y: VEL_V[i], r: 3})),
       notes: [{x: 0.02, y: f.v0, anchor: 'start', dx: 8, dy: -10,
                text: 'v₀ = ' + f.v0.toFixed(2) + ' m/s'},
-              {x: 0.7, y: f.v0 - f.g * 0.7, anchor: 'start', dx: 14, dy: -14, cls: 'hi',
+              {x: 0.02, y: 0, anchor: 'start', dx: 4, dy: -5, text: '0 m/s'},
+              {x: 0.95, y: f.v0 - f.g * 0.95, anchor: 'start', dx: 14, dy: -14, cls: 'hi',
                text: (held ? 'g held at ' : 'g = ') + f.g.toFixed(2) + ' m/s²'},
               {x: 1.2, y: 6.2, anchor: 'end', text: 'RMS residual ' + f.rms.toFixed(3) + ' m/s'}]
     });
   });
 
-  /* the straight line through the distances, which has a reason */
+  /* the straight line through the distances, which has a reason, and beside
+     it the gaps to that line in centimeters, since at the scale of the throw
+     they are too small to see. Shot 700: 21 of 31 within the 2.8 cm tracking
+     noise, largest 6.7 cm at the first frame; the arc (up at both ends, down
+     in the middle) is the drag the straight line leaves out. */
   each('lec13-dist', host => {
-    diagram(host, {
-      w: 440, h: 230, xRange: [-0.05, 1.25], yRange: [-0.6, 8.6],
-      title: 'distance from the hoop (m), against time (s)',
+    const [l, r] = diagramRow(host, 2);
+    diagram(l, {
+      w: 300, h: 210, xRange: [-0.05, 1.25], yRange: [-0.6, 8.6],
+      title: 'distance from the hoop (m)',
       alt: 'The thirty-one distances with a straight line through them; every point sits on the line.',
       curves: [ends(fd)],
       points: dots(D),
@@ -1501,6 +1561,21 @@ setTimeout(() => {
               {x: 0.62, y: 5.3, anchor: 'start', dx: 10, cls: 'hi',
                text: 'b = −' + Math.abs(fd.b).toFixed(2) + ' m/s'},
               {x: 1.2, y: -0.35, anchor: 'end', text: '1.2 s'}]
+    });
+    const cm = D.map((v, i) => (v - (fd.a + fd.b * T[i])) * 100);
+    const NOISE = 2.8;
+    diagram(r, {
+      w: 300, h: 210, xRange: [-0.05, 1.25], yRange: [-8.5, 8.5], zero: true,
+      title: 'gap from the line (cm)',
+      alt: 'The gap between each point and the line, in centimeters: all within 7 centimeters, '
+         + 'most inside the dashed band of plus and minus 2.8 centimeters, positive at both ends '
+         + 'and negative through the middle.',
+      leads: [{from: [-0.05, NOISE], to: [1.25, NOISE], cls: 'level'},
+              {from: [-0.05, -NOISE], to: [1.25, -NOISE], cls: 'level'},
+              ...cm.map((v, i) => ({from: [T[i], 0], to: [T[i], v], cls: 'alt'}))],
+      points: cm.map((v, i) => ({x: T[i], y: v, r: 3})),
+      notes: [{x: 0, y: cm[0], anchor: 'start', dx: 8, dy: 4, text: cm[0].toFixed(1) + ' cm'},
+              {x: 0.62, y: NOISE, anchor: 'middle', dy: -5, text: '±2.8 cm tracking noise'}]
     });
   });
 
@@ -1571,6 +1646,41 @@ setTimeout(() => {
               {x: 2, y: err[2], anchor: 'start', dx: 6, dy: 15, cls: 'hi', text: 'error ' + err[2].toFixed(4)}]
     });
   });
+})();
+
+/* one whole tracked shot, from the hands to past the rim, with the free-flight
+   window the rule finds (release to the first frame within 1 m of the hoop)
+   shaded. Shot 1092 from the example pack: release frame 11, window to frame
+   36, the ball meets the rim near frame 41 and bounces. */
+(async () => {
+  const hosts = document.querySelectorAll('[data-fig="lec13-whole"] .fig-body');
+  if (!hosts.length) return;
+  let d;
+  try { d = await (await fetch('data/example/train.json')).json(); }
+  catch (e) { return; }
+  const s = d.shots.find(q => q.id === 1092);
+  if (!s) return;
+  const t = s.t, z = s.z, n = t.length;
+  const vz = new Array(n).fill(NaN);
+  for (let i = 2; i < n - 2; i++) vz[i] = (z[i + 2] - z[i - 2]) / (t[i + 2] - t[i - 2]);
+  let r = 0;
+  for (let i = 1; i < n; i++) if (z[i] > z[r]) r = i;
+  while (r > 3 && (vz[r - 1] > vz[r] || vz[r - 2] > vz[r])) r--;
+  let end = 0;
+  while (end < n && Math.hypot(s.x[end] - s.hoop_x, s.y[end] - s.hoop_y) >= 1.0) end++;
+  const last = end - 1, Y0 = 0.6, Y1 = 5.4;
+  hosts.forEach(host => diagram(host, {
+    w: 440, h: 230, xRange: [-1, n], yRange: [Y0, Y1],
+    title: 'height (m) by frame, shot 1092, every tracked frame',
+    alt: 'The ball rises in the hand, flies in an arc, meets the rim and bounces. The free-flight '
+       + 'frames, from the release to just before the hoop, are shaded.',
+    areas: [{cls: 'fill', pts: [{x: r, y: Y0}, {x: last, y: Y0}, {x: last, y: Y1}, {x: r, y: Y1}]}],
+    points: z.map((v, i) => ({x: i, y: v, r: 2.6, cls: (i >= r && i <= last) ? 'dot' : 'miss'})),
+    notes: [{x: 4, y: 3.2, anchor: 'middle', text: 'in the hand'},
+            {x: (r + last) / 2, y: 5.15, anchor: 'middle', cls: 'hi', text: 'free flight, frames ' + r + ' to ' + last},
+            {x: 56, y: 4.3, anchor: 'middle', text: 'off the rim'},
+            {x: 41, y: 1.4, anchor: 'middle', text: 'the ball meets the rim'}]
+  }));
 })();
 
 /* Slide runtime. Every slide is in the DOM from the start, so the figure code
