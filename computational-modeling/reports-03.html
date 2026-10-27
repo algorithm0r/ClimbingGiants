@@ -1121,7 +1121,8 @@ G = 9.81   # m/s^2 in one g
 
 def load_test(pack='.'):
     folder = os.path.join(pack, 'crash')
-    with open(os.path.join(folder, os.listdir(folder)[0])) as f:
+    name = os.listdir(folder)[0]          # the crash folder holds one file
+    with open(os.path.join(folder, name)) as f:
         return json.load(f)
 
 
@@ -1137,16 +1138,16 @@ def running_integral(y, dt, rule='trapezoid'):
 def analyse(a, t, dt, lab, baseline=True, rule='trapezoid'):
     """Everything the report needs from one set of processing choices."""
     if baseline:
-        a = a - a[t &lt; 0].mean()        # towed at constant speed before contact
-    i0 = np.argmax(t &gt;= 0)
+        a = a - np.mean(a[t &lt; 0])      # towed at constant speed before contact
+    i0 = np.argmax(t &gt;= 0)             # the first sample at or after contact
     dv = running_integral(a, dt, rule)
     dv = dv - dv[i0]                   # change since contact
     v = lab + dv                       # the lab's speed is the constant
-    stop = i0 + np.argmax(v[i0:] &lt;= 0)
+    stop = i0 + np.argmax(v[i0:] &lt;= 0)  # the first sample after contact with v at or below 0
     x = running_integral(v, dt, rule)
     x = x - x[i0]
     return {'a': a, 'dv': dv, 'v': v, 'x': x, 'stop': stop,
-            'peak': dv.argmin(), 'crush': x[stop]}
+            'peak': np.argmin(dv), 'crush': x[stop]}
 
 
 test = load_test()
@@ -1160,11 +1161,12 @@ print(f"channel {ch['code']}: {ch['comment']}, {ch['n']} samples every {dt} s")
 print(f"lab speed {test['test']['speed_kph']} km/h = {lab:.2f} m/s")
 
 before = raw[t &lt; 0]
-print(f"before contact: mean {before.mean():.3f} m/s^2, "
-      f"standard deviation {before.std():.3f} m/s^2")
+print(f"before contact: mean {np.mean(before):.3f} m/s^2, "
+      f"standard deviation {np.std(before):.3f} m/s^2")
 
 r = analyse(raw, t, dt, lab)
-peak, stop = r['peak'], r['stop']
+peak = r['peak']
+stop = r['stop']
 print(f"largest change in velocity {-r['dv'][peak]:.2f} m/s at {1000 * t[peak]:.1f} ms"
       f"  (gap to lab {-r['dv'][peak] - lab:.2f} m/s, "
       f"{100 * (-r['dv'][peak] - lab) / lab:.1f}%)")
@@ -1173,8 +1175,8 @@ print(f"change over the whole record {-r['dv'][-1]:.2f} m/s"
       f"{100 * (-r['dv'][-1] - lab) / lab:.1f}%)")
 after = (t &gt; t[peak]) &amp; (t &lt;= 0.15)
 print(f"mean acceleration from {1000 * t[peak]:.1f} to 150 ms: "
-      f"{r['a'][after].mean() / G:.2f} g")
-print(f"mean acceleration over the last 50 ms: {r['a'][t &gt; 0.25].mean():.3f} m/s^2")
+      f"{np.mean(r['a'][after]) / G:.2f} g")
+print(f"mean acceleration over the last 50 ms: {np.mean(r['a'][t &gt; 0.25]):.3f} m/s^2")
 print(f"stopped at {1000 * t[stop]:.1f} ms, crush {1000 * r['crush']:.0f} mm")
 print(f"velocity at end of record {r['v'][-1]:.2f} m/s")
 
@@ -1185,7 +1187,11 @@ print(f"{'baseline':9} {'rule':10} {'dv peak':&gt;8} {'dv end':&gt;7} "
 choices = [(True, 'trapezoid'), (False, 'trapezoid'), (True, 'rectangle')]
 for baseline, rule in choices:
     s = analyse(raw, t, dt, lab, baseline, rule)
-    print(f"{'yes' if baseline else 'no':9} "
+    if baseline:
+        label = 'yes'
+    else:
+        label = 'no'
+    print(f"{label:9} "
           f"{rule:10} {-s['dv'][s['peak']]:8.2f} {-s['dv'][-1]:7.2f} "
           f"{1000 * t[s['stop']]:8.1f} {1000 * s['crush']:9.0f}")
 
@@ -1231,7 +1237,9 @@ plt.savefig('fig2_delta_v.svg')
 plt.close()
 
 # Figure 3: velocity with the lab's constant, and distance
-fig, (top, bottom) = plt.subplots(2, 1, figsize=(7, 6), sharex=True)
+fig, axes = plt.subplots(2, 1, figsize=(7, 6), sharex=True)
+top = axes[0]
+bottom = axes[1]
 top.plot(t_ms, r['v'])
 top.axhline(0, color='gray', linewidth=0.8)
 top.plot(t_ms[stop], 0, 'o')
@@ -1323,12 +1331,12 @@ This is the change in velocity since contact, with no constant added yet.</p>
     running = np.cumsum(panels)
     return np.concatenate([[0.0], running])
 
-i0 = np.argmax(t &gt;= 0)
+i0 = np.argmax(t &gt;= 0)       # the first sample at or after contact
 dv = cumulative(a, dt)
 dv = dv - dv[i0]
 print('change in velocity, contact to end:', round(dv[-1], 3), 'm/s')
-print('largest change:', round(dv.min(), 3), 'm/s at',
-      round(1000 * t[dv.argmin()], 1), 'ms')
+print('largest change:', round(np.min(dv), 3), 'm/s at',
+      round(1000 * t[np.argmin(dv)], 1), 'ms')
 print('gap to the lab:', round(-dv[-1] - lab, 3), 'm/s')</pre>
 <pre class="nb-out">change in velocity, contact to end: -17.431 m/s
 largest change: -18.077 m/s at 85.0 ms
@@ -1345,10 +1353,10 @@ plot.</p>
 contact the car is towed at a steady speed, so the sensor should read zero. Anything it reads then is
 an offset, and integrating an offset adds the offset times the time.</p>
 
-<pre class="nb-in">b = a[t &lt; 0].mean()
+<pre class="nb-in">b = np.mean(a[t &lt; 0])
 T = t[-1] - t[i0]
 print('offset before contact:', round(b, 4), 'm/s^2')
-print('noise before contact (std):', round(a[t &lt; 0].std(), 3), 'm/s^2')
+print('noise before contact (std):', round(np.std(a[t &lt; 0]), 3), 'm/s^2')
 print('offset times', round(T, 2), 's:', round(b * T, 4), 'm/s')</pre>
 <pre class="nb-out">offset before contact: 0.0411 m/s^2
 noise before contact (std): 2.513 m/s^2
@@ -1359,7 +1367,7 @@ it. I left it in. Now add the lab's speed as the constant of integration (the on
 that turns a change into an actual velocity).</p>
 
 <pre class="nb-in">v = lab + dv
-stop = i0 + np.argmax(v[i0:] &lt;= 0)
+stop = i0 + np.argmax(v[i0:] &lt;= 0)   # the first sample after contact with v at or below 0
 print('velocity reaches zero at', round(1000 * t[stop], 2), 'ms')
 print('velocity at end of record:', round(v[-1], 3), 'm/s')
 
@@ -1387,7 +1395,7 @@ distance the crossmember moved after contact.</p>
 <pre class="nb-in">x = cumulative(v, dt)
 x = x - x[i0]
 print('distance at the stop:', round(1000 * x[stop], 1), 'mm')
-print('largest distance:', round(1000 * x.max(), 1), 'mm')
+print('largest distance:', round(1000 * np.max(x), 1), 'mm')
 print('distance at end of record:', round(1000 * x[-1], 1), 'mm')
 
 plt.plot(1000 * t, 1000 * x)
@@ -1446,7 +1454,7 @@ probably the quickest way to catch a units error in a result like this.</p>
   <script src="js/page.js?v=20261027131534"></script>
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-11">October 11, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-27">October 27, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

@@ -18,7 +18,8 @@ G = 9.81   # m/s^2 in one g
 
 def load_test(pack='.'):
     folder = os.path.join(pack, 'crash')
-    with open(os.path.join(folder, os.listdir(folder)[0])) as f:
+    name = os.listdir(folder)[0]          # the crash folder holds one file
+    with open(os.path.join(folder, name)) as f:
         return json.load(f)
 
 
@@ -34,16 +35,16 @@ def running_integral(y, dt, rule='trapezoid'):
 def analyse(a, t, dt, lab, baseline=True, rule='trapezoid'):
     """Everything the report needs from one set of processing choices."""
     if baseline:
-        a = a - a[t < 0].mean()        # towed at constant speed before contact
-    i0 = np.argmax(t >= 0)
+        a = a - np.mean(a[t < 0])      # towed at constant speed before contact
+    i0 = np.argmax(t >= 0)             # the first sample at or after contact
     dv = running_integral(a, dt, rule)
     dv = dv - dv[i0]                   # change since contact
     v = lab + dv                       # the lab's speed is the constant
-    stop = i0 + np.argmax(v[i0:] <= 0)
+    stop = i0 + np.argmax(v[i0:] <= 0)  # the first sample after contact with v at or below 0
     x = running_integral(v, dt, rule)
     x = x - x[i0]
     return {'a': a, 'dv': dv, 'v': v, 'x': x, 'stop': stop,
-            'peak': dv.argmin(), 'crush': x[stop]}
+            'peak': np.argmin(dv), 'crush': x[stop]}
 
 
 test = load_test()
@@ -57,11 +58,12 @@ print(f"channel {ch['code']}: {ch['comment']}, {ch['n']} samples every {dt} s")
 print(f"lab speed {test['test']['speed_kph']} km/h = {lab:.2f} m/s")
 
 before = raw[t < 0]
-print(f"before contact: mean {before.mean():.3f} m/s^2, "
-      f"standard deviation {before.std():.3f} m/s^2")
+print(f"before contact: mean {np.mean(before):.3f} m/s^2, "
+      f"standard deviation {np.std(before):.3f} m/s^2")
 
 r = analyse(raw, t, dt, lab)
-peak, stop = r['peak'], r['stop']
+peak = r['peak']
+stop = r['stop']
 print(f"largest change in velocity {-r['dv'][peak]:.2f} m/s at {1000 * t[peak]:.1f} ms"
       f"  (gap to lab {-r['dv'][peak] - lab:.2f} m/s, "
       f"{100 * (-r['dv'][peak] - lab) / lab:.1f}%)")
@@ -70,8 +72,8 @@ print(f"change over the whole record {-r['dv'][-1]:.2f} m/s"
       f"{100 * (-r['dv'][-1] - lab) / lab:.1f}%)")
 after = (t > t[peak]) & (t <= 0.15)
 print(f"mean acceleration from {1000 * t[peak]:.1f} to 150 ms: "
-      f"{r['a'][after].mean() / G:.2f} g")
-print(f"mean acceleration over the last 50 ms: {r['a'][t > 0.25].mean():.3f} m/s^2")
+      f"{np.mean(r['a'][after]) / G:.2f} g")
+print(f"mean acceleration over the last 50 ms: {np.mean(r['a'][t > 0.25]):.3f} m/s^2")
 print(f"stopped at {1000 * t[stop]:.1f} ms, crush {1000 * r['crush']:.0f} mm")
 print(f"velocity at end of record {r['v'][-1]:.2f} m/s")
 
@@ -82,7 +84,11 @@ print(f"{'baseline':9} {'rule':10} {'dv peak':>8} {'dv end':>7} "
 choices = [(True, 'trapezoid'), (False, 'trapezoid'), (True, 'rectangle')]
 for baseline, rule in choices:
     s = analyse(raw, t, dt, lab, baseline, rule)
-    print(f"{'yes' if baseline else 'no':9} "
+    if baseline:
+        label = 'yes'
+    else:
+        label = 'no'
+    print(f"{label:9} "
           f"{rule:10} {-s['dv'][s['peak']]:8.2f} {-s['dv'][-1]:7.2f} "
           f"{1000 * t[s['stop']]:8.1f} {1000 * s['crush']:9.0f}")
 
@@ -128,7 +134,9 @@ plt.savefig('fig2_delta_v.svg')
 plt.close()
 
 # Figure 3: velocity with the lab's constant, and distance
-fig, (top, bottom) = plt.subplots(2, 1, figsize=(7, 6), sharex=True)
+fig, axes = plt.subplots(2, 1, figsize=(7, 6), sharex=True)
+top = axes[0]
+bottom = axes[1]
 top.plot(t_ms, r['v'])
 top.axhline(0, color='gray', linewidth=0.8)
 top.plot(t_ms[stop], 0, 'o')

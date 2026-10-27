@@ -1149,33 +1149,54 @@ channels = test['channels']
 
 rate_now = round(1 / channels['head_x']['dt'])
 # every whole-number step down from 20 kHz, to 200 Hz
-factors = [k for k in range(1, 101) if rate_now % k == 0]
-rates = [rate_now // k for k in factors]
+factors = []
+for k in range(1, 101):
+    if rate_now % k == 0:              # k divides the rate exactly
+        factors.append(k)
+rates = []
+for k in factors:
+    rates.append(rate_now // k)
 
 
 def values(key):
     """The channel in g, or in mm for the chest displacement.
     Its header says m, but the values are micrometers (see Errors)."""
     ch = channels[key]
+    out = []
     if key == 'chest_d':
-        return [v / 1000 for v in ch['y']], 'mm'
-    return [v / G for v in ch['y']], 'g'
+        for v in ch['y']:
+            out.append(v / 1000)
+        return out, 'mm'
+    for v in ch['y']:
+        out.append(v / G)
+    return out, 'g'
 
 
 def peak(y):
-    return max(abs(v) for v in y)
+    """The largest size in y, ignoring sign."""
+    biggest = abs(y[0])
+    for v in y:
+        if abs(v) &gt; biggest:
+            biggest = abs(v)
+    return biggest
 
 
 def peaks_by_start(y, k):
     """Peak of the record that keeps every k-th sample, for each start 0..k-1."""
-    return [peak(y[start::k]) for start in range(k)]
+    peaks = []
+    for start in range(k):
+        peaks.append(peak(y[start::k]))
+    return peaks
 
 
-v, info = test['vehicle'], test['test']
+v = test['vehicle']
+info = test['test']
 print(f"Test {test['testNo']}: {v['year']} {v['make']} {v['model']}, "
       f"{info['config']} at {info['speed_kph']} km/h")
-print("samples, spacing (s) and prefilter (Hz) of each channel:",
-      {(ch['n'], ch['dt'], ch['prefilter_hz']) for ch in channels.values()})
+timings = set()          # a set keeps each different combination once
+for ch in channels.values():
+    timings.add((ch['n'], ch['dt'], ch['prefilter_hz']))
+print("samples, spacing (s) and prefilter (Hz) of each channel:", timings)
 print(f"recorded rate {rate_now} Hz, {len(rates)} rates tried, {rates[0]} to {rates[-1]} Hz")
 print()
 
@@ -1183,7 +1204,10 @@ print()
 print(f"{'key':12} {'description':34} {'peak':&gt;8} {'unit':4} {'at (ms)':&gt;8}")
 for key, ch in channels.items():
     y, unit = values(key)
-    i = max(range(len(y)), key=lambda j: abs(y[j]))
+    i = 0                                # index of the largest size so far
+    for j in range(len(y)):
+        if abs(y[j]) &gt; abs(y[i]):
+            i = j
     t_ms = 1000 * (ch['t0'] + i * ch['dt'])
     print(f"{key:12} {ch['comment']:34} {peak(y):8.2f} {unit:4} {t_ms:8.2f}")
 
@@ -1192,21 +1216,32 @@ worst = {}
 for key in channels:
     y, unit = values(key)
     full = peak(y)
-    worst[key] = [min(peaks_by_start(y, k)) / full for k in factors]
+    worst[key] = []
+    for k in factors:
+        worst[key].append(min(peaks_by_start(y, k)) / full)
 
 print(f"\nworst-start peak as % of the 20 kHz peak")
-print(f"{'rate (Hz)':&gt;9} " + ' '.join(f"{key:&gt;11}" for key in channels))
-for i, r in enumerate(rates):
-    print(f"{r:9d} " + ' '.join(f"{100 * worst[key][i]:11.1f}" for key in channels))
+columns = []
+for key in channels:
+    columns.append(f"{key:&gt;11}")
+print(f"{'rate (Hz)':&gt;9} " + ' '.join(columns))
+for i in range(len(rates)):
+    columns = []
+    for key in channels:
+        columns.append(f"{100 * worst[key][i]:11.1f}")
+    print(f"{rates[i]:9d} " + ' '.join(columns))
 
 # the lowest rate that every channel passes, with every faster rate passing too
 lowest = rate_now
-for i, r in enumerate(rates):
-    if all(worst[key][i] &gt;= KEEP for key in channels):
-        lowest = r
+for i in range(len(rates)):
+    failing = []
+    for key in channels:
+        if worst[key][i] &lt; KEEP:
+            failing.append(key)
+    if len(failing) == 0:
+        lowest = rates[i]
     else:
-        failing = [key for key in channels if worst[key][i] &lt; KEEP]
-        print(f"\n{r} Hz is the first rate to fail: {', '.join(failing)}")
+        print(f"\n{rates[i]} Hz is the first rate to fail: {', '.join(failing)}")
         break
 print(f"Lowest rate keeping {100 * KEEP:.0f}% of every peak: {lowest} Hz")
 
@@ -1222,7 +1257,10 @@ for key in channels:
 # Figure 1: worst-start fraction against rate, one line per channel
 plt.figure(figsize=(7.5, 4.5))
 for key, ch in channels.items():
-    plt.semilogx(rates, [100 * w for w in worst[key]], '.-', label=ch['comment'].title())
+    percent = []
+    for w in worst[key]:
+        percent.append(100 * w)
+    plt.semilogx(rates, percent, '.-', label=ch['comment'].title())
 plt.axhline(100 * KEEP, color='black', linestyle=':', linewidth=0.8, label='95% of the peak')
 plt.axvline(PROPOSED, color='red', linewidth=0.8, label='proposed logger, 1000 Hz')
 plt.xticks([200, 500, 1000, 2000, 5000, 10000, 20000],
@@ -1238,17 +1276,38 @@ plt.close()
 # Figure 2: the crossmember around its peak, and what a 1 kHz logger keeps of it
 ch = channels['vehicle_x']
 y, unit = values('vehicle_x')
-t_ms = [1000 * (ch['t0'] + i * ch['dt']) for i in range(ch['n'])]
+t_ms = []
+for i in range(ch['n']):
+    t_ms.append(1000 * (ch['t0'] + i * ch['dt']))
 p = peaks_by_start(y, k)
-best_start, worst_start = p.index(max(p)), p.index(min(p))
+best_start = p.index(max(p))         # index gives the position of a value in a list
+worst_start = p.index(min(p))
 plt.figure(figsize=(7.5, 4))
-win = [i for i in range(ch['n']) if 40 &lt;= t_ms[i] &lt;= 70]
-plt.plot([t_ms[i] for i in win], [y[i] for i in win], color='gray', linewidth=0.8,
-         label='recorded at 20000 Hz')
-for start, mark, name in ((best_start, 'o', 'best'), (worst_start, 's', 'worst')):
-    kept = [i for i in win if (i - start) % k == 0]
-    plt.plot([t_ms[i] for i in kept], [y[i] for i in kept], mark + '-',
-             label=f'1000 Hz, {name} start (sample {start})')
+win = []                             # the samples from 40 to 70 ms
+for i in range(ch['n']):
+    if 40 &lt;= t_ms[i] and t_ms[i] &lt;= 70:
+        win.append(i)
+win_t = []
+win_y = []
+for i in win:
+    win_t.append(t_ms[i])
+    win_y.append(y[i])
+plt.plot(win_t, win_y, color='gray', linewidth=0.8, label='recorded at 20000 Hz')
+
+
+def plot_kept(start, mark, name):
+    """The samples in the window that a logger starting at sample start keeps."""
+    kept_t = []
+    kept_y = []
+    for i in win:
+        if (i - start) % k == 0:
+            kept_t.append(t_ms[i])
+            kept_y.append(y[i])
+    plt.plot(kept_t, kept_y, mark + '-', label=f'1000 Hz, {name} start (sample {start})')
+
+
+plot_kept(best_start, 'o', 'best')
+plot_kept(worst_start, 's', 'worst')
 plt.xlabel('time from impact (ms)')
 plt.ylabel('acceleration (g)')
 plt.title(ch['comment'].title() + ' [' + ch['code'] + '], 40 to 70 ms',
@@ -1291,9 +1350,25 @@ print(ch['comment'], ch['code'], ch['unit'])
 print('dt =', ch['dt'], 's, so the rate is', rate, 'Hz')
 
 G = 9.81
-y = [v / G for v in ch['y']]     # the crossmember in g
-full = max(abs(v) for v in y)
-i_peak = [abs(v) for v in y].index(full)
+y = []                           # the crossmember in g
+for v in ch['y']:
+    y.append(v / G)
+
+
+def peak(values):
+    """The largest size in values, ignoring sign."""
+    biggest = abs(values[0])
+    for v in values:
+        if abs(v) &gt; biggest:
+            biggest = abs(v)
+    return biggest
+
+
+full = peak(y)
+i_peak = 0                       # the index of the largest size
+for i in range(len(y)):
+    if abs(y[i]) &gt; abs(y[i_peak]):
+        i_peak = i
 print(f'peak at the recorded rate: {full:.1f} g, sample {i_peak}, '
       f'{1000 * (ch["t0"] + i_peak * ch["dt"]):.2f} ms')</pre>
 <pre class="nb-out">V1 LEFT REAR SEAT CROSSMEMBER AX 10SEATLERE00ACXP m/(s*s)
@@ -1309,10 +1384,11 @@ every <em>k</em>-th sample, for a range of <em>k</em>.</p>
 <pre class="nb-in">import matplotlib.pyplot as plt
 
 factors = [1, 2, 4, 5, 10, 20, 25, 40, 50, 100, 200, 400]
-rates, peaks = [], []
+rates = []
+peaks = []
 for k in factors:
     rates.append(rate / k)
-    peaks.append(max(abs(v) for v in y[::k]))    # every k-th sample, from sample 0
+    peaks.append(peak(y[::k]))    # every k-th sample, from sample 0
     print(f'{rate / k:7.0f} Hz  {peaks[-1]:6.1f} g  {100 * peaks[-1] / full:5.1f}%')
 
 plt.semilogx(rates, peaks, 'o-')
@@ -1350,8 +1426,13 @@ sample (4000&nbsp;Hz) keeps it and keeping every 4th (5000&nbsp;Hz) does not. A 
 no reason to start on our sample 0. To check, I tried every possible start at 1000&nbsp;Hz.</p>
 
 <pre class="nb-in">k = rate // 1000     # 20, so a 1000 Hz logger keeps one sample in 20
-at_1k = [max(abs(v) for v in y[s::k]) for s in range(k)]
-print([round(p, 1) for p in at_1k])
+at_1k = []           # the peak for each starting sample s
+for s in range(k):
+    at_1k.append(peak(y[s::k]))
+rounded = []
+for p in at_1k:
+    rounded.append(round(p, 1))
+print(rounded)
 print(f'lowest {min(at_1k):.1f} g, highest {max(at_1k):.1f} g, '
       f'average {sum(at_1k) / k:.1f} g')
 
@@ -1384,20 +1465,23 @@ lower rates.</p>
 
 <pre class="nb-in">def peaks_by_start(y, k):
     """Peak of every k-th sample, for each of the k possible starts."""
-    return [max(abs(v) for v in y[s::k]) for s in range(k)]
+    peaks = []
+    for s in range(k):
+        peaks.append(peak(y[s::k]))
+    return peaks
 
 check_rates = [10000, 5000, 2000, 1000, 500]
 typical = {}
 print('typical % of the 20 kHz peak (worst start in brackets)')
 for key, c in test['channels'].items():
     yy = c['y']                 # a percentage does not need the units
-    top = max(abs(v) for v in yy)
+    top = peak(yy)
     typical[key] = []
     line = f'{key:12}'
     for r in check_rates:
         p = peaks_by_start(yy, rate // r)
         typical[key].append(100 * sum(p) / len(p) / top)
-        line += f' {typical[key][-1]:5.1f} ({100 * min(p) / top:4.1f})'
+        line = line + f' {typical[key][-1]:5.1f} ({100 * min(p) / top:4.1f})'
     print(line)</pre>
 <pre class="nb-out">typical % of the 20 kHz peak (worst start in brackets)
 head_x        99.8 (99.6)  99.4 (98.8)  98.8 (96.5)  98.0 (95.1)  97.2 (94.1)
@@ -1484,7 +1568,7 @@ versions.</p>
   <script src="js/page.js?v=20261027131534"></script>
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-20">October 20, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-27">October 27, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

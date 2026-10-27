@@ -11,7 +11,11 @@ import matplotlib.pyplot as plt
 PACK = '.'   # the unzipped pack folder
 
 for folder in ['', 'crash', 'shots']:
-    print(folder or 'top level', sorted(os.listdir(os.path.join(PACK, folder))))
+    if folder == '':
+        label = 'top level'
+    else:
+        label = folder
+    print(label, sorted(os.listdir(os.path.join(PACK, folder))))
 
 name = os.listdir(os.path.join(PACK, 'crash'))[0]
 with open(os.path.join(PACK, 'crash', name)) as f:
@@ -19,9 +23,18 @@ with open(os.path.join(PACK, 'crash', name)) as f:
 print(test['vehicle'], test['test'])
 
 fig, axes = plt.subplots(4, 2, figsize=(10, 11), sharex=True)
-for ax, (key, ch) in zip(axes.flat, test['channels'].items()):
-    t_ms = [1000 * (ch['t0'] + i * ch['dt']) for i in range(ch['n'])]
-    before = [y for t, y in zip(t_ms, ch['y']) if t < 0]
+names = list(test['channels'].keys())
+for k in range(len(names)):
+    key = names[k]
+    ch = test['channels'][key]
+    ax = axes.flat[k]                   # the k-th plot in the grid
+    t_ms = []
+    for i in range(ch['n']):
+        t_ms.append(1000 * (ch['t0'] + i * ch['dt']))
+    before = []                         # the samples recorded before impact
+    for i in range(ch['n']):
+        if t_ms[i] < 0:
+            before.append(ch['y'][i])
     print(f"{key:12} {ch['unit']:8} n={ch['n']} dt={ch['dt']} {ch['status']}  "
           f"min {min(ch['y']):.1f}  max {max(ch['y']):.1f}  "
           f"mean before impact {sum(before) / len(before):.2f}")

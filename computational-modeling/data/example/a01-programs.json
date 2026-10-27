@@ -4,9 +4,9 @@
  "notebook": {
   "cells": [
    "import json\n\nwith open('crash/09793.json') as f:\n    test = json.load(f)\n\nprint(list(test.keys()))\nprint(test['vehicle'])\nprint(test['test'])",
-   "for key, ch in test['channels'].items():\n    print(f\"{key:12} {ch['comment']:34} \"\n          f\"{ch['dimension']:13} {ch['unit']:8} {ch['status']}\")\n\nprint({(ch['n'], ch['dt'], ch['t0']) for ch in test['channels'].values()})",
+   "for key, ch in test['channels'].items():\n    print(f\"{key:12} {ch['comment']:34} \"\n          f\"{ch['dimension']:13} {ch['unit']:8} {ch['status']}\")\n\ntimings = set()          # a set keeps each different timing once\nfor ch in test['channels'].values():\n    timings.add((ch['n'], ch['dt'], ch['t0']))\nprint(timings)",
    "for key, ch in test['channels'].items():\n    print(f\"{key:12} min {min(ch['y']):10.1f}   max {max(ch['y']):8.1f}   {ch['unit']}\")",
-   "import matplotlib.pyplot as plt\n\nfor key, ch in test['channels'].items():\n    t_ms = [1000 * (ch['t0'] + i * ch['dt']) for i in range(ch['n'])]\n    y, unit, dim = ch['y'], ch['unit'], ch['dimension']\n    if key == 'chest_d':   # header says m and 'Meters'; values are micrometers\n        y, unit, dim = [v / 1000 for v in y], 'mm', 'Displacement'\n    plt.figure()\n    plt.plot(t_ms, y)\n    plt.xlabel('time from impact (ms)')\n    plt.ylabel(dim + ' (' + unit + ')')\n    plt.title(ch['comment'] + '  [' + ch['code'] + ']')\n    plt.show()"
+   "import matplotlib.pyplot as plt\n\nfor key, ch in test['channels'].items():\n    t_ms = []\n    for i in range(ch['n']):\n        t_ms.append(1000 * (ch['t0'] + i * ch['dt']))\n    y = ch['y']\n    unit = ch['unit']\n    dim = ch['dimension']\n    if key == 'chest_d':   # header says m and 'Meters'; values are micrometers\n        y = []\n        for v in ch['y']:\n            y.append(v / 1000)\n        unit = 'mm'\n        dim = 'Displacement'\n    plt.figure()\n    plt.plot(t_ms, y)\n    plt.xlabel('time from impact (ms)')\n    plt.ylabel(dim + ' (' + unit + ')')\n    plt.title(ch['comment'] + '  [' + ch['code'] + ']')\n    plt.show()"
   ],
   "outputs": [
    "['testNo', 'source', 'vehicle', 'test', 'channels']\n{'make': 'HYUNDAI', 'model': 'ELANTRA', 'year': 2017}\n{'type': 'NEW CAR ASSESSMENT TEST', 'config': 'VEHICLE INTO BARRIER', 'speed_kph': 56.15, 'angle': 0}\n",

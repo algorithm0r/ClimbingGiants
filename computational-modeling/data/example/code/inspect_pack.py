@@ -17,33 +17,57 @@ PACK = '.'    # the unzipped pack folder
 def load_test(pack):
     """The crash folder holds one file, the test."""
     folder = os.path.join(pack, 'crash')
-    with open(os.path.join(folder, os.listdir(folder)[0])) as f:
+    name = os.listdir(folder)[0]
+    with open(os.path.join(folder, name)) as f:
         return json.load(f)
 
 
 def times_ms(ch):
     """The file stores no times. t0, dt and n give them, here in milliseconds."""
-    return [1000 * (ch['t0'] + i * ch['dt']) for i in range(ch['n'])]
+    t = []
+    for i in range(ch['n']):
+        t.append(1000 * (ch['t0'] + i * ch['dt']))
+    return t
+
+
+def micrometers_to_mm(y):
+    """Every value divided by 1000."""
+    out = []
+    for v in y:
+        out.append(v / 1000)
+    return out
 
 
 test = load_test(PACK)
-v, info = test['vehicle'], test['test']
+v = test['vehicle']
+info = test['test']
 print(f"Test {test['testNo']}: {v['year']} {v['make']} {v['model']}, "
       f"{info['config']} at {info['speed_kph']} km/h")
 
 # the largest value in each channel, and when it happens
 print(f"{'description':36} {'unit':8} {'largest':>9} {'in g':>6} {'at (ms)':>8}")
 for key, ch in test['channels'].items():
-    t, y = times_ms(ch), ch['y']
-    i = max(range(len(y)), key=lambda k: abs(y[k]))
-    in_g = f"{y[i] / G:6.1f}" if ch['dimension'] == 'Acceleration' else '     -'
+    t = times_ms(ch)
+    y = ch['y']
+    i = 0                                # index of the largest size so far
+    for k in range(len(y)):
+        if abs(y[k]) > abs(y[i]):
+            i = k
+    if ch['dimension'] == 'Acceleration':
+        in_g = f"{y[i] / G:6.1f}"
+    else:
+        in_g = '     -'
     print(f"{ch['comment']:36} {ch['unit']:8} {y[i]:9.1f} {in_g} {t[i]:8.1f}")
 
 # one figure per channel, labeled from its own header
 for key, ch in test['channels'].items():
-    y, unit, dim = ch['y'], ch['unit'], ch['dimension']
+    y = ch['y']
+    unit = ch['unit']
+    dim = ch['dimension']
     if key == 'chest_d':   # header says m and 'Meters', values are micrometers
-        y, unit, dim = [v / 1000 for v in y], 'mm', 'Displacement'
+        y = micrometers_to_mm(y)
+        unit = 'mm'
+        dim = 'Displacement'
     plt.figure(figsize=(5, 3))
     plt.plot(times_ms(ch), y, linewidth=0.8)
     plt.axvline(0, color='gray', linestyle='--', linewidth=0.8)
@@ -56,14 +80,16 @@ for key, ch in test['channels'].items():
 
 # the chest displacement as labeled, and read as micrometers
 ch = test['channels']['chest_d']
-fig, (a, b) = plt.subplots(1, 2, figsize=(10, 3.2))
+fig, axes = plt.subplots(1, 2, figsize=(10, 3.2))
+a = axes[0]
+b = axes[1]
 a.plot(times_ms(ch), ch['y'], color='tab:red', linewidth=0.8)
 a.set_title('as the header labels it')
 a.set_ylabel('chest displacement (m, per header)')
-b.plot(times_ms(ch), [v / 1000 for v in ch['y']], linewidth=0.8)
+b.plot(times_ms(ch), micrometers_to_mm(ch['y']), linewidth=0.8)
 b.set_title('read as micrometers, shown in mm')
 b.set_ylabel('chest displacement (mm)')
-for ax in (a, b):
+for ax in axes:
     ax.set_xlabel('time from impact (ms)')
 fig.tight_layout()
 fig.savefig('chest_d_units.svg')

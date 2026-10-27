@@ -16,7 +16,8 @@ import matplotlib.pyplot as plt
 G = 9.81   # m/s^2 in one g
 
 folder = 'crash'
-with open(os.path.join(folder, os.listdir(folder)[0])) as f:
+name = os.listdir(folder)[0]               # the crash folder holds one file
+with open(os.path.join(folder, name)) as f:
     test = json.load(f)
 
 # the only channel on the car body (header: V1 LEFT REAR SEAT CROSSMEMBER AX)
@@ -27,14 +28,16 @@ a = np.array(ch['y'])                     # m/s^2, forward is positive
 
 # Before impact the car is towed at a steady speed, so its real acceleration is
 # zero. Whatever the sensor reads then is an offset, so I take the average off.
-offset = a[t < 0].mean()
+offset = np.mean(a[t < 0])
 a = a - offset
 print(f"offset before impact: {offset:.3f} m/s^2")
 
 
 def running_integral(y, dt):
     """Cumulative trapezoid sum, with the leading zero so it lines up with t."""
-    return np.concatenate([[0.0], np.cumsum((y[1:] + y[:-1]) / 2 * dt)])
+    panels = (y[1:] + y[:-1]) / 2 * dt      # the area of each panel
+    running = np.cumsum(panels)
+    return np.concatenate([[0.0], running])
 
 
 i0 = np.argmax(t >= 0)            # first sample at the moment of contact
@@ -61,12 +64,14 @@ x = running_integral(v, dt)
 x = x - x[i0]
 crush = x[stop]
 print(f"distance moved from contact to stopping: {1000 * crush:.0f} mm")
-print(f"most rearward velocity: {v.min():.2f} m/s at {1000 * t[v.argmin()]:.1f} ms")
+print(f"most rearward velocity: {np.min(v):.2f} m/s at {1000 * t[np.argmin(v)]:.1f} ms")
 print(f"average deceleration to the stop: {lab / t[stop] / G:.1f} g")
 
 # two panels, sharing the time axis
 t_ms = 1000 * t
-fig, (top, bottom) = plt.subplots(2, 1, figsize=(7, 6.5), sharex=True)
+fig, axes = plt.subplots(2, 1, figsize=(7, 6.5), sharex=True)
+top = axes[0]
+bottom = axes[1]
 top.plot(t_ms, v)
 top.axhline(0, color='gray', linewidth=0.8)
 top.axhline(lab, color='gray', linestyle='--', linewidth=0.8)
