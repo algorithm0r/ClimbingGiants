@@ -1170,7 +1170,7 @@ one extra multiply and one extra add across the whole sum, and to report the int
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="2|Every sample except the last, each weighted by the full panel width.;5|The collected form: interior samples full weight, the two ends half.;9|Equivalent. numpy.trapezoid does the same thing.">def rectangle(y, h):
+  <pre data-lang="python" data-notes="2|Every sample except the last, each weighted by the full panel width. y[:-1] is a [slice](py-lists.html) that stops one before the end.;5|The collected form: interior samples full weight, the two ends half.;10|Equivalent: one panel at a time, each the average of its two ends. numpy.trapezoid does the same thing.">def rectangle(y, h):
     return h * sum(y[:-1])
 
 def trapezoid(y, h):
@@ -1178,7 +1178,10 @@ def trapezoid(y, h):
 
 # or, on the panels directly:
 def trapezoid_panels(y, h):
-    return h * sum((y[i] + y[i + 1]) / 2 for i in range(len(y) - 1))</pre>
+    total = 0.0
+    for i in range(len(y) - 1):
+        total = total + (y[i] + y[i + 1]) / 2
+    return h * total</pre>
   <pre data-lang="matlab" hidden data-notes="2|Every sample except the last.;6|Interior samples full weight, the two ends half. MATLAB's trapz does the same.">function I = rectangle(y, h)
     I = h * sum(y(1:end-1));
 end
@@ -1186,15 +1189,19 @@ end
 function I = trapezoid(y, h)
     I = h * (0.5*y(1) + sum(y(2:end-1)) + 0.5*y(end));
 end</pre>
-  <pre data-lang="js" hidden data-notes="3|Every sample except the last.;8|Interior samples full weight, the two ends half.">function rectangle(y, h) {
+  <pre data-lang="js" hidden data-notes="3|Every sample except the last.;10|The two ends at half weight, then the interior samples at full weight.">function rectangle(y, h) {
   let s = 0;
-  for (let i = 0; i &lt; y.length - 1; i++) s += y[i];
+  for (let i = 0; i &lt; y.length - 1; i++) {
+    s = s + y[i];
+  }
   return h * s;
 }
 
 function trapezoid(y, h) {
   let s = 0.5 * (y[0] + y[y.length - 1]);
-  for (let i = 1; i &lt; y.length - 1; i++) s += y[i];
+  for (let i = 1; i &lt; y.length - 1; i++) {
+    s = s + y[i];
+  }
   return h * s;
 }</pre>
   <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>

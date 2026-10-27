@@ -1039,20 +1039,21 @@ to generate cases whose answers are known, and then it counts.</p>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="1|procedure(case) returns (value, half_width); make_case() returns (case, truth).;6|One trial: build a case whose answer is known, then run the procedure on it.;10|The only test there is. Everything else on this page explains this line.;13|Report the measured rate beside the claimed one, never the rate alone.">def coverage(procedure, make_case, n=1000, level=0.90):
+  <pre data-lang="python" data-notes="1|procedure(case) returns (value, half_width); make_case() returns (case, truth).;6|One trial: build a case whose answer is known, then run the procedure on it.;10|The only test there is. Everything else on this page explains this line.;14|Report the measured rate beside the claimed one, never the rate alone.">def coverage(procedure, make_case, n=1000, level=0.90):
     hits = 0
     widths = []
 
-    for _ in range(n):
+    for k in range(n):
         case, truth = make_case()
         value, half = procedure(case)
         widths.append(half)
 
         if abs(value - truth) &lt;= half:
-            hits += 1
+            hits = hits + 1
 
+    median_half_width = sorted(widths)[n // 2]
     return {'claimed': level, 'measured': hits / n,
-            'median_half_width': sorted(widths)[n // 2]}</pre>
+            'median_half_width': median_half_width}</pre>
   <pre data-lang="matlab" hidden data-notes="1|procedure is a handle returning [value, half]; makeCase returns [case, truth].;6|One trial on a case whose answer is known.;9|The only test there is.;14|Report the measured rate beside the claimed one.">function r = coverage(procedure, makeCase, n, level)
     hits   = 0;
     widths = zeros(n, 1);
@@ -1070,20 +1071,22 @@ to generate cases whose answers are known, and then it counts.</p>
     r.measured        = hits / n;
     r.medianHalfWidth = median(widths);
 end</pre>
-  <pre data-lang="js" hidden data-notes="1|procedure(c) returns {value, half}; makeCase() returns {c, truth}.;5|One trial on a case whose answer is known.;8|The only test there is.;12|Report the measured rate beside the claimed one.">function coverage(procedure, makeCase, n = 1000, level = 0.90) {
+  <pre data-lang="js" hidden data-notes="1|procedure(c) returns {value, half}; makeCase() returns {c, truth}.;6|One trial on a case whose answer is known.;9|The only test there is.;16|Report the measured rate beside the claimed one.">function coverage(procedure, makeCase, n = 1000, level = 0.90) {
   let hits = 0;
   const widths = [];
 
   for (let k = 0; k &lt; n; k++) {
-    const {c, truth} = makeCase();
-    const {value, half} = procedure(c);
-    widths.push(half);
-    if (Math.abs(value - truth) &lt;= half) hits++;
+    const trial = makeCase();
+    const result = procedure(trial.c);
+    widths.push(result.half);
+    if (Math.abs(result.value - trial.truth) &lt;= result.half) {
+      hits = hits + 1;
+    }
   }
 
-  widths.sort((a, b) =&gt; a - b);
-  return {claimed: level, measured: hits / n,
-          medianHalfWidth: widths[n &gt;&gt; 1]};
+  widths.sort(function (a, b) { return a - b; });
+  const median = widths[Math.floor(n / 2)];
+  return {claimed: level, measured: hits / n, medianHalfWidth: median};
 }</pre>
   <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
 </div>

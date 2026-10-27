@@ -1061,9 +1061,10 @@ def definite(y, dt):
     s = [0; cumsum(panels)];
 end</pre>
   <pre data-lang="js" hidden data-notes="2|Same length as the input, and s[0] is already zero.;4|Each step adds one panel to the previous total.">function cumulative(y, dt) {
-  const s = new Float64Array(y.length);
-  for (let i = 1; i &lt; y.length; i++)
+  const s = new Array(y.length).fill(0);
+  for (let i = 1; i &lt; y.length; i++) {
     s[i] = s[i - 1] + (y[i] + y[i - 1]) * 0.5 * dt;
+  }
   return s;
 }</pre>
   <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>

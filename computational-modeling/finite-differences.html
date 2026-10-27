@@ -1064,7 +1064,7 @@ answer (the tracked basketball arcs are exactly this case).</p>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="3|The interior: every sample that has a neighbour on both sides.;5|First sample: forward, because there is nothing to its left.;6|Last sample: backward. These two values are order 1 where the rest are order 2.;9|numpy.gradient does exactly this, and is what you should actually call.">def derivative(y, dt):
+  <pre data-lang="python" data-notes="3|The interior: every sample that has a neighbour on both sides.;4|First sample: forward, because there is nothing to its left.;5|Last sample: backward. These two values are order 1 where the rest are order 2.;9|numpy.gradient does exactly this, and is what you should actually call.">def derivative(y, dt):
     d = np.empty_like(y)
     d[1:-1] = (y[2:] - y[:-2]) / (2 * dt)
     d[0]    = (y[1] - y[0]) / dt
@@ -1073,7 +1073,7 @@ answer (the tracked basketball arcs are exactly this case).</p>
 
 # equivalently:
 d = np.gradient(y, dt)</pre>
-  <pre data-lang="matlab" hidden data-notes="2|The interior, central difference.;3|Forward at the first sample.;4|Backward at the last.;7|gradient does the same thing.">function d = derivative(y, dt)
+  <pre data-lang="matlab" hidden data-notes="2|The interior, central difference.;3|Forward at the first sample.;4|Backward at the last.;8|gradient does the same thing.">function d = derivative(y, dt)
     d(2:numel(y)-1) = (y(3:end) - y(1:end-2)) / (2*dt);
     d(1)   = (y(2) - y(1)) / dt;
     d(end) = (y(end) - y(end-1)) / dt;
@@ -1081,11 +1081,14 @@ end
 
 % equivalently:
 d = gradient(y, dt);</pre>
-  <pre data-lang="js" hidden data-notes="3|Forward at the first sample.;4|Backward at the last.;5|Central everywhere in between.">function derivative(y, dt) {
-  const n = y.length, d = new Float64Array(n);
+  <pre data-lang="js" hidden data-notes="4|Forward at the first sample.;5|Backward at the last.;7|Central everywhere in between.">function derivative(y, dt) {
+  const n = y.length;
+  const d = new Array(n).fill(0);
   d[0] = (y[1] - y[0]) / dt;
   d[n - 1] = (y[n - 1] - y[n - 2]) / dt;
-  for (let i = 1; i &lt; n - 1; i++) d[i] = (y[i + 1] - y[i - 1]) / (2 * dt);
+  for (let i = 1; i &lt; n - 1; i++) {
+    d[i] = (y[i + 1] - y[i - 1]) / (2 * dt);
+  }
   return d;
 }</pre>
   <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>

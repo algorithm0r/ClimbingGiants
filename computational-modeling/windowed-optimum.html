@@ -1085,11 +1085,15 @@ exceeds the limit, which is what keeps the candidate set to the diagonal band.</
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="4|The prefix sum, built once. Every window's integral comes from this array.;7|Every admissible start.;9|Stop extending this window the moment it exceeds the limit: this is the constraint.;11|The integral over the window: one subtraction, whatever the window's length.;12|The quantity inside the maximum, for this one window.">import numpy as np
+  <pre data-lang="python" data-notes="5|The prefix sum, built once. Every window's integral comes from this array.;11|Every admissible start.;14|Stop extending this window the moment it exceeds the limit: this is the constraint.;16|The integral over the window: one subtraction, whatever the window's length.;17|The quantity inside the maximum, for this one window.;23|best holds the score and the window's two ends, as a tuple.">import numpy as np
 
 def windowed_optimum(t, a, wmax, mode="max"):
-    S = np.concatenate([[0.0], np.cumsum((a[1:] + a[:-1]) * 0.5 * np.diff(t))])
-    best = (-np.inf if mode == "max" else np.inf, None, None)
+    panels = (a[1:] + a[:-1]) * 0.5 * np.diff(t)
+    S = np.concatenate([[0.0], np.cumsum(panels)])
+    if mode == "max":
+        best = (-np.inf, None, None)
+    else:
+        best = (np.inf, None, None)
 
     for i in range(len(t) - 1):
         for j in range(i + 1, len(t)):
@@ -1098,42 +1102,79 @@ def windowed_optimum(t, a, wmax, mode="max"):
                 break
             mean = (S[j] - S[i]) / T
             score = mean ** 2.5 * T
-            if (score &gt; best[0]) if mode == "max" else (score &lt; best[0]):
+            if mode == "max":
+                better = score &gt; best[0]
+            else:
+                better = score &lt; best[0]
+            if better:
                 best = (score, t[i], t[j])
 
     return best</pre>
-  <pre data-lang="matlab" hidden data-notes="2|The prefix sum, built once.;7|Stop extending this window the moment it exceeds the limit.;9|The integral over the window: one subtraction.">function [score, t0, t1] = windowedOptimum(t, a, wmax, mode)
-    S = [0; cumsum((a(2:end) + a(1:end-1)) * 0.5 .* diff(t))];
-    best = -inf; if strcmp(mode, 'min'), best = inf; end
-    t0 = NaN; t1 = NaN;
+  <pre data-lang="matlab" hidden data-notes="3|The prefix sum, built once.;15|Stop extending this window the moment it exceeds the limit.;18|The integral over the window: one subtraction.">function [score, t0, t1] = windowedOptimum(t, a, wmax, mode)
+    panels = (a(2:end) + a(1:end-1)) * 0.5 .* diff(t);
+    S = [0; cumsum(panels)];
+    if strcmp(mode, 'max')
+        best = -inf;
+    else
+        best = inf;
+    end
+    t0 = NaN;
+    t1 = NaN;
 
     for i = 1:numel(t)-1
         for j = i+1:numel(t)
             T = t(j) - t(i);
-            if T &gt; wmax, break; end
+            if T &gt; wmax
+                break
+            end
             s = ((S(j) - S(i)) / T)^2.5 * T;
-            if (strcmp(mode,'max') &amp;&amp; s &gt; best) || (strcmp(mode,'min') &amp;&amp; s
-            &lt; best)
-                best = s; t0 = t(i); t1 = t(j);
+            if strcmp(mode, 'max')
+                better = s &gt; best;
+            else
+                better = s &lt; best;
+            end
+            if better
+                best = s;
+                t0 = t(i);
+                t1 = t(j);
             end
         end
     end
     score = best;
 end</pre>
-  <pre data-lang="js" hidden data-notes="2|The prefix sum, built once.;10|Stop extending this window the moment it exceeds the limit.;11|The integral over the window: one subtraction.">function windowedOptimum(t, a, wmax, mode = "max") {
+  <pre data-lang="js" hidden data-notes="2|The prefix sum, built once.;20|Stop extending this window the moment it exceeds the limit.;23|The integral over the window: one subtraction.">function windowedOptimum(t, a, wmax, mode = "max") {
   const S = [0];
-  for (let i = 1; i &lt; a.length; i++)
-    S.push(S[i - 1] + (a[i] + a[i - 1]) * 0.5 * (t[i] - t[i - 1]));
+  for (let i = 1; i &lt; a.length; i++) {
+    const panel = (a[i] + a[i - 1]) * 0.5 * (t[i] - t[i - 1]);
+    S.push(S[i - 1] + panel);
+  }
 
-  let best = mode === "max" ? -Infinity : Infinity, t0 = null, t1 = null;
+  let best;
+  if (mode === "max") {
+    best = -Infinity;
+  } else {
+    best = Infinity;
+  }
+  let t0 = null;
+  let t1 = null;
 
   for (let i = 0; i &lt; t.length - 1; i++) {
     for (let j = i + 1; j &lt; t.length; j++) {
       const T = t[j] - t[i];
-      if (T &gt; wmax) break;
+      if (T &gt; wmax) {
+        break;
+      }
       const score = Math.pow((S[j] - S[i]) / T, 2.5) * T;
-      if (mode === "max" ? score &gt; best : score &lt; best) {
-        best = score; t0 = t[i]; t1 = t[j];
+      let better;
+      if (mode === "max") {
+        better = score &gt; best;
+      } else {
+        better = score &lt; best;
+      }
+      if (better) {
+        best = score;
+        t0 = t[i];
+        t1 = t[j];
       }
     }
   }

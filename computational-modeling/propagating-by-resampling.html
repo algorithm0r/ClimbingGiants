@@ -1060,29 +1060,39 @@ page lets you do.</p></div></details></li>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="1|pipeline is a function taking a record and returning the number. If your analysis is not one of those, this cannot be run at all.;5|The whole analysis, every time. Resampling only the last step measures only the last step.;9|The interval is read off the distribution, and 5 to 95 is a claim of 90%.">def spread(pipeline, x, sigma, reps=200, rng=None):
-    rng = rng or np.random.default_rng()
+  <pre data-lang="python" data-notes="1|pipeline is a function taking a record and returning the number. If your analysis is not one of those, this cannot be run at all.;2|With no random generator passed in, make a new one.;6|A fresh draw of noise, one value per sample, with standard deviation sigma.;7|The whole analysis, every time. Resampling only the last step measures only the last step.;11|The interval is read off the distribution, and 5 to 95 is a claim of 90%.">def spread(pipeline, x, sigma, reps=200, rng=None):
+    if rng is None:
+        rng = np.random.default_rng()
     out = np.empty(reps)
     for k in range(reps):
-        out[k] = pipeline(x + rng.normal(0, sigma, x.shape))
+        noise = rng.normal(0, sigma, x.shape)
+        out[k] = pipeline(x + noise)
     return out
 
 draws = spread(my_whole_analysis, record, sigma)
 lo, hi = np.percentile(draws, [5, 95])</pre>
-  <pre data-lang="matlab" hidden data-notes="7|The @ makes the analysis a value that can be passed in.">function out = spread(pipeline, x, sigma, reps)
+  <pre data-lang="matlab" hidden data-notes="1|The @ makes the analysis a value that can be passed in.">draws = spread(@my_whole_analysis, record, sigma, 200);
+lo = prctile(draws, 5);
+hi = prctile(draws, 95);
+
+function out = spread(pipeline, x, sigma, reps)
     out = zeros(reps, 1);
     for k = 1:reps
-        out(k) = pipeline(x + sigma*randn(size(x)));
+        noise = sigma*randn(size(x));
+        out(k) = pipeline(x + noise);
     end
-end
-
-draws = spread(@my_whole_analysis, record, sigma, 200);
-lo = prctile(draws, 5);  hi = prctile(draws, 95);</pre>
-  <pre data-lang="js" hidden data-notes="5|sort so percentiles can be read straight off the array.">function spread(pipeline, x, sigma, reps = 200) {
+end</pre>
+  <pre data-lang="js" hidden data-notes="10|Sorted so percentiles can be read straight off the array. The function tells sort to compare numbers, since by default it compares them as text.">function spread(pipeline, x, sigma, reps = 200) {
   const out = [];
-  for (let k = 0; k &lt; reps; k++)
-    out.push(pipeline(x.map(v =&gt; v + sigma*gauss())));
-  return out.sort((a, b) =&gt; a - b);
+  for (let k = 0; k &lt; reps; k++) {
+    const noisy = [];
+    for (let i = 0; i &lt; x.length; i++) {
+      noisy.push(x[i] + sigma * gauss());
+    }
+    out.push(pipeline(noisy));
+  }
+  out.sort(function (a, b) { return a - b; });
+  return out;
 }</pre>
   <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
 </div>

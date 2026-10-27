@@ -1079,15 +1079,16 @@ correct.</p>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
   <div class="panes">
-  <pre data-lang="python" data-notes="8|The channel is selected by its code. The same line finds the driver head channel in any test in the set, while a channel picked by its index finds whatever happens to be first.;11|The three header fields, turned into the times the samples were taken at. The times are computed here because the file does not store them.;16|The axis text comes out of the header. Typing the text by hand produces a figure that is correct for one file and wrong for the next.">import json
+  <pre data-lang="python" data-notes="8|The loop looks at each channel in turn and keeps the one whose code matches under the name ch ([Loops](py-loops.html), [Conditions](py-conditions.html)). Selecting by code finds the driver head channel in any test in the set, while a channel picked by its position finds whatever happens to be first.;12|The three header fields, turned into the times the samples were taken at ([numpy arrays](py-numpy.html)). The times are computed here because the file does not store them.;17|The axis text comes out of the header. Typing the text by hand produces a figure that is correct for one file and wrong for the next.">import json
 import numpy as np
 import matplotlib.pyplot as plt
 
 with open('crash/10642.json') as f:
     test = json.load(f)
 
-ch = next(c for c in test['channels'].values()
-          if c['code'] == '11HEADCG0000ACXP')
+for c in test['channels'].values():
+    if c['code'] == '11HEADCG0000ACXP':
+        ch = c
 
 t = ch['t0'] + ch['dt'] * np.arange(ch['n'])
 y = np.array(ch['y'])
@@ -1097,12 +1098,14 @@ plt.xlabel('time (s)')
 plt.ylabel(f"{ch['dimension']} [{ch['unit']}]")
 plt.title(f"{ch['comment']}  ({ch['code']})")
 plt.show()</pre>
-  <pre data-lang="matlab" hidden data-notes="2|jsondecode turns the object into a struct, so the channels arrive as named fields and not as a list.;8|The same arithmetic. (0:ch.n-1) is the sample index.">test  = jsondecode(fileread('crash/10642.json'));
+  <pre data-lang="matlab" hidden data-notes="1|jsondecode turns the object into a struct, so the channels arrive as named fields and not as a list.;4|The loop looks at each channel in turn and keeps the one whose code matches under the name ch.;11|The same arithmetic. (0:ch.n-1) is the sample index.">test  = jsondecode(fileread('crash/10642.json'));
 names = fieldnames(test.channels);
 
 for k = 1:numel(names)
-    ch = test.channels.(names{k});
-    if strcmp(ch.code, '11HEADCG0000ACXP'), break; end
+    c = test.channels.(names{k});
+    if strcmp(c.code, '11HEADCG0000ACXP')
+        ch = c;
+    end
 end
 
 t = ch.t0 + ch.dt * (0:ch.n-1);
@@ -1111,13 +1114,20 @@ plot(t, ch.y);
 xlabel('time (s)');
 ylabel(sprintf('%s [%s]', ch.dimension, ch.unit));
 title(sprintf('%s  (%s)', ch.comment, ch.code));</pre>
-  <pre data-lang="js" hidden data-notes="3|Object.values because the channels are an object keyed by name, not an array.;7|Array.from builds the times without a loop.">const test = await (await fetch('crash/10642.json')).json();
+  <pre data-lang="js" hidden data-notes="2|The file arrives as text and .json() turns it into an object.;5|Object.values because the channels are an object keyed by name, not an array. The loop keeps the channel whose code matches.;12|One time per sample, built from the three header fields.">const response = await fetch('crash/10642.json');
+const test = await response.json();
 
-const ch = Object.values(test.channels)
-  .find(c =&gt; c.code === '11HEADCG0000ACXP');
+let ch;
+for (const c of Object.values(test.channels)) {
+  if (c.code === '11HEADCG0000ACXP') {
+    ch = c;
+  }
+}
 
-const t = Array.from({length: ch.n},
-                     (_, i) =&gt; ch.t0 + i * ch.dt);
+const t = [];
+for (let i = 0; i &lt; ch.n; i++) {
+  t.push(ch.t0 + i * ch.dt);
+}
 
 // plot t against ch.y, with the axis text taken from
 // ch.dimension, ch.unit, ch.comment and ch.code</pre>

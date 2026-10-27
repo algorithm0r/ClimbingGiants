@@ -1177,17 +1177,17 @@ you keep missing.</p></div></details></li>
     return y[::factor], dt * factor
 
 slow, slow_dt = at_lower_rate(y, dt, 10)</pre>
-  <pre data-lang="matlab" hidden data-notes="2|1:factor:end is the same selection.">function [s,
-  s_dt] = at_lower_rate(y, dt, factor)
+  <pre data-lang="matlab" hidden data-notes="2|1:factor:end is the same selection.">function [s, s_dt] = at_lower_rate(y, dt, factor)
     s = y(1:factor:end);
     s_dt = dt * factor;
 end
 
 [slow, slow_dt] = at_lower_rate(y, dt, 10);</pre>
-  <pre data-lang="js" hidden data-notes="3|The loop makes the discarding explicit.">function
-  atLowerRate(y, dt, factor) {
+  <pre data-lang="js" hidden data-notes="3|The loop makes the discarding explicit.">function atLowerRate(y, dt, factor) {
   const s = [];
-  for (let i = 0; i &lt; y.length; i += factor) s.push(y[i]);
+  for (let i = 0; i &lt; y.length; i = i + factor) {
+    s.push(y[i]);
+  }
   return [s, dt * factor];
 }</pre>
   <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>

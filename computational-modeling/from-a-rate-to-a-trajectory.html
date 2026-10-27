@@ -1064,12 +1064,16 @@ that is often a stronger statement than an error estimate.</p></div></details></
         out(k+2,:) = s;
     end
 end</pre>
-  <pre data-lang="js" hidden data-notes="7|map in place of a loop, so the same code advances a state of any length.">function euler(f, s0, t0, dt, n) {
-  let s = Float64Array.from(s0);
+  <pre data-lang="js" hidden data-notes="8|Each component advances by its own rate, so the same code advances a state of any length.">function euler(f, s0, t0, dt, n) {
+  let s = s0.slice();
   const out = [s.slice()];
   for (let k = 0; k &lt; n; k++) {
-    const ds = f(t0 + k*dt, s);
-    s = s.map((v, i) =&gt; v + dt*ds[i]);
+    const ds = f(t0 + k * dt, s);
+    const next = [];
+    for (let i = 0; i &lt; s.length; i++) {
+      next.push(s[i] + dt * ds[i]);
+    }
+    s = next;
     out.push(s.slice());
   }
   return out;

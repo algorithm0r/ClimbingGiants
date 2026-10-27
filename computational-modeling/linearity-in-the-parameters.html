@@ -1008,14 +1008,17 @@ better at everything else.</p>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="2|Three columns, three parameters.;7|Two columns. The quadratic column is gone because its coefficient is no longer being solved for.;8|The known term is added to the measurements before the fit begins. Nothing about the solver changes."># all three free
+  <pre data-lang="python" data-notes="2|Three columns, three parameters.;3|lstsq returns four things. The first, result[0], is the coefficients.;8|Two columns. The quadratic column is gone because its coefficient is no longer being solved for.;9|The known term is added to the measurements before the fit begins. Nothing about the solver changes."># all three free
 A = np.column_stack([np.ones_like(t), t, t**2])
-c = np.linalg.lstsq(A, z, rcond=None)[0]
+result = np.linalg.lstsq(A, z, rcond=None)
+c = result[0]
 
 # curvature already known: it moves out of the model
 # and into the data
 A = np.column_stack([np.ones_like(t), t])
-c = np.linalg.lstsq(A, z + 0.5*G*t**2, rcond=None)[0]</pre>
+z_known = z + 0.5*G*t**2
+result = np.linalg.lstsq(A, z_known, rcond=None)
+c = result[0]</pre>
   <pre data-lang="matlab" hidden data-notes="3|The backslash solves the least-squares problem directly.">% all three free
 A = [ones(size(t)), t, t.^2];
 c = A \ z;
@@ -1024,14 +1027,22 @@ c = A \ z;
 % and into the data
 A = [ones(size(t)), t];
 c = A \ (z + 0.5*G*t.^2);</pre>
-  <pre data-lang="js" hidden data-notes="3|lstsq stands for whichever routine you are using; the shape of the change is the point.">// all three free, solved by the same normal equations
-// page 16 describes
-let A = t.map(ti =&gt; [1, ti, ti*ti]);
+  <pre data-lang="js" hidden data-notes="7|lstsq stands for whichever routine you are using. The shape of the change is the point.">// all three free, solved by the same normal equations
+// that Solving the normal equations describes
+let A = [];
+for (let i = 0; i &lt; t.length; i++) {
+  A.push([1, t[i], t[i] * t[i]]);
+}
 let c = lstsq(A, z);
 
 // curvature already known
-A = t.map(ti =&gt; [1, ti]);
-c = lstsq(A, z.map((zi, i) =&gt; zi + 0.5*G*t[i]*t[i]));</pre>
+A = [];
+const zKnown = [];
+for (let i = 0; i &lt; t.length; i++) {
+  A.push([1, t[i]]);
+  zKnown.push(z[i] + 0.5 * G * t[i] * t[i]);
+}
+c = lstsq(A, zKnown);</pre>
   <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
 </div>
 

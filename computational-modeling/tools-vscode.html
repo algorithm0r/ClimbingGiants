@@ -930,7 +930,7 @@ file in the <code>crash</code> folder of your pack. If you see <code>FileNotFoun
 name in the program does not match the file. The example reads test 10642, which no student
 receives.</p>
 
-<div class="codetabs"><pre data-lang="python" data-notes="5|Put your own test number here.;9|These lines print what the file holds and every channel in it, with its code and its description. It is a good idea to read this list before you plot anything.;14|The channel is chosen by its code. Any code from the list printed above can go here.;18|The file stores no times. Three header fields give them, as the Anatomy page explains.;23|The axis text comes from the header, so the figure names its own channel and units.">import json
+<div class="codetabs"><pre data-lang="python" data-notes="5|Put your own test number here.;9|These lines print what the file holds and every channel in it, with its code and its description. It is a good idea to read this list before you plot anything.;14|The channel is chosen by its code. Any code from the list printed above can go here. The loop keeps the channel whose code matches under the name ch ([Loops](py-loops.html)).;19|The file stores no times. Three header fields give them, as the Anatomy page explains.;24|The axis text comes from the header, so the figure names its own channel and units.">import json
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -943,8 +943,9 @@ for name, ch in test['channels'].items():
     print(name, ch['code'], ch['comment'])
 
 # one channel, chosen by its code
-ch = next(c for c in test['channels'].values()
-          if c['code'] == '11HEADCG0000ACXP')
+for c in test['channels'].values():
+    if c['code'] == '11HEADCG0000ACXP':
+        ch = c
 
 # the times, built from the header
 t = ch['t0'] + ch['dt'] * np.arange(ch['n'])
