@@ -35,7 +35,9 @@ def cfc(y, dt, cls):
                       + b1 * out[i - 1] + b2 * out[i - 2])
         return out
 
-    return one_pass(one_pass(y)[::-1])[::-1]
+    forward = one_pass(y)
+    backward = one_pass(forward[::-1])
+    return backward[::-1]
 
 
 def search(a, dt, kmax):
@@ -45,14 +47,22 @@ def search(a, dt, kmax):
     S = [0.0]
     for i in range(1, len(a)):
         S.append(S[-1] + (a[i] + a[i - 1]) / 2 * dt)
-    best, bi, bj, count = 0.0, 0, 0, 0
+    best = 0.0
+    bi = 0
+    bj = 0
+    count = 0
     for i in range(len(a) - 1):
-        for j in range(i + 1, min(i + kmax, len(a) - 1) + 1):
-            count += 1
+        last = min(i + kmax, len(a) - 1)       # the last end allowed for this start
+        for j in range(i + 1, last + 1):
+            count = count + 1
             T = (j - i) * dt
             mean = (S[j] - S[i]) / T
-            if mean > 0 and T * mean ** 2.5 > best:
-                best, bi, bj = T * mean ** 2.5, i, j
+            if mean > 0:                       # a negative mean has no 2.5 power
+                score = T * mean ** 2.5
+                if score > best:
+                    best = score
+                    bi = i
+                    bj = j
     return best, bi, bj, count
 
 
@@ -64,16 +74,30 @@ v = test['vehicle']
 print(f"Test {test['testNo']}: {v['year']} {v['make']} {v['model']}, "
       f"{test['test']['config']} at {test['test']['speed_kph']} km/h")
 
-chans = [c for c in test['channels'].values() if c['code'] in CODES]
+chans = []
+for c in test['channels'].values():
+    if c['code'] in CODES:
+        chans.append(c)
 for c in chans:
     print(f"  using {c['code']}  {c['comment']}  {c['unit']}  {c['status']}")
-dt, n, t0 = chans[0]['dt'], chans[0]['n'], chans[0]['t0']
-t_ms = [1000 * (t0 + i * dt) for i in range(n)]
+dt = chans[0]['dt']
+n = chans[0]['n']
+t0 = chans[0]['t0']
+t_ms = []
+for i in range(n):
+    t_ms.append(1000 * (t0 + i * dt))
 
 # filter each component at CFC 1000, then the resultant, in g
-filtered = [cfc(c['y'], dt, 1000) for c in chans]
-res = [math.sqrt(x * x + y * y + z * z) / G for x, y, z in zip(*filtered)]
-k = max(range(n), key=lambda i: res[i])
+x = cfc(chans[0]['y'], dt, 1000)
+y = cfc(chans[1]['y'], dt, 1000)
+z = cfc(chans[2]['y'], dt, 1000)
+res = []
+for i in range(n):
+    res.append(math.sqrt(x[i] * x[i] + y[i] * y[i] + z[i] * z[i]) / G)
+k = 0                                   # the index of the peak
+for i in range(n):
+    if res[i] > res[k]:
+        k = i
 print(f"peak resultant {res[k]:.1f} g at {t_ms[k]:.2f} ms")
 
 kmax = round(LIMIT_MS / 1000 / dt)      # 15 ms in samples
@@ -86,7 +110,10 @@ t_one_test = time.perf_counter() - start
 mean_g = (hic / ((j - i) * dt)) ** (1 / 2.5)
 print(f"HIC15 = {hic:.1f} from {t_ms[i]:.2f} to {t_ms[j]:.2f} ms "
       f"({(j - i) * dt * 1000:.2f} ms long, mean {mean_g:.1f} g)")
-verdict = 'passes' if hic < HIC_PASS else 'fails'
+if hic < HIC_PASS:
+    verdict = 'passes'
+else:
+    verdict = 'fails'
 print(f"{verdict} the FMVSS 208 limit of {HIC_PASS}")
 print(f"windows looked at: {count:,} in {t_search:.2f} s")
 print(f"whole program for one test so far: {t_one_test:.2f} s")

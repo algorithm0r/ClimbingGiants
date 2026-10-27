@@ -34,7 +34,8 @@ def one_pass(x, c, start=0.0):
     outputs before the first sample are taken to be."""
     a0, a1, a2, b1, b2 = c
     out = np.zeros(len(x))
-    out[0] = out[1] = start
+    out[0] = start
+    out[1] = start
     for i in range(2, len(x)):
         out[i] = (a0 * x[i] + a1 * x[i - 1] + a2 * x[i - 2]
                   + b1 * out[i - 1] + b2 * out[i - 2])
@@ -45,8 +46,15 @@ def cfc(y, dt, cls, start_at_data=False):
     """Forward, then backward over the forward result. With start_at_data the
     filter starts from the first sample instead of from zero."""
     c = cfc_coefficients(cls, dt)
-    fwd = one_pass(y, c, y[0] if start_at_data else 0.0)[::-1]
-    return one_pass(fwd, c, fwd[0] if start_at_data else 0.0)[::-1]
+    start = 0.0
+    if start_at_data:
+        start = y[0]
+    fwd = one_pass(y, c, start)[::-1]       # forward, then reversed
+    start = 0.0
+    if start_at_data:
+        start = fwd[0]
+    back = one_pass(fwd, c, start)          # forward again over the reversed record
+    return back[::-1]
 
 
 def peak(t, y):
@@ -58,7 +66,12 @@ name = os.listdir(os.path.join(PACK, 'crash'))[0]
 with open(os.path.join(PACK, 'crash', name)) as f:
     test = json.load(f)
 
-key = [k for k, ch in test['channels'].items() if 'CROSSMEMBER' in ch['comment']][0]
+# the channel whose header comment names the crossmember
+key = None
+for k, c in test['channels'].items():
+    if 'CROSSMEMBER' in c['comment']:
+        key = k
+        break
 ch = test['channels'][key]
 dt = ch['dt']
 t = 1000 * (ch['t0'] + dt * np.arange(ch['n']))      # ms
@@ -71,14 +84,17 @@ print(f"  test speed {test['test']['speed_kph']} km/h = {test['test']['speed_kph
 
 # how wide is the unfiltered peak? count the samples around it above half its size
 i = int(np.argmax(np.abs(raw)))
-lo, hi = i, i
+lo = i
+hi = i
 while abs(raw[lo - 1]) > abs(raw[i]) / 2:
-    lo -= 1
+    lo = lo - 1
 while abs(raw[hi + 1]) > abs(raw[i]) / 2:
-    hi += 1
+    hi = hi + 1
 print(f"  unfiltered peak {raw[i]:.1f} m/s^2 at {t[i]:.2f} ms, above half that from "
       f"{t[lo]:.2f} to {t[hi]:.2f} ms ({hi - lo + 1} samples)")
-j = int(np.argmax(raw[(t > 45) & (t < 60)])) + int(np.argmax(t > 45))
+window = (t > 45) & (t < 60)              # True for the samples between 45 and 60 ms
+first = int(np.argmax(t > 45))             # the index of the first sample after 45 ms
+j = int(np.argmax(raw[window])) + first    # the window's largest value, as an index into raw
 print(f"  largest positive value between 45 and 60 ms: {raw[j]:.1f} m/s^2 at {t[j]:.2f} ms")
 
 print("\nchecks")
@@ -90,14 +106,14 @@ y60 = cfc(raw, dt, 60)
 p60, tp60 = peak(t, y60)
 p, tp = peak(t, cfc(raw, dt, 60, start_at_data=True))
 print(f"  start from first sample instead of zero: {p:.2f} m/s^2 at {tp:.2f} ms")
-offset = raw[t < 0].mean()
+offset = np.mean(raw[t < 0])
 p, tp = peak(t, cfc(raw - offset, dt, 60))
 print(f"  pre-impact mean {offset:.3f} m/s^2 removed first: {p:.2f} m/s^2 at {tp:.2f} ms")
 print(f"  in g: {p60 / G:.3f} with g = {G}, {p60 / 9.81:.3f} with g = 9.81")
 
 print("\nresult at CFC 60, forward and backward")
 print(f"  peak {p60:.2f} m/s^2 = {p60 / G:.2f} g at {tp60:.2f} ms")
-print(f"  the unfiltered peak is {raw.min() / p60:.2f} times this")
+print(f"  the unfiltered peak is {np.min(raw) / p60:.2f} times this")
 
 print("\nevery class")
 print(f"  {'filter':12} {'peak m/s^2':>11} {'peak g':>8} {'at ms':>7} {'delta-v m/s':>12}")

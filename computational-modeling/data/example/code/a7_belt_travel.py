@@ -37,7 +37,9 @@ def cfc(y, dt, cls):
                       + b1*out[i-1] + b2*out[i-2])
         return out
 
-    return one_pass(one_pass(y)[::-1])[::-1]
+    forward = one_pass(y)
+    backward = one_pass(forward[::-1])
+    return backward[::-1]
 
 
 def euler_travel(t, a_car, h):
@@ -65,19 +67,19 @@ t = ch['t0'] + dt * np.arange(ch['n'])
 a_raw = np.array(ch['y'])
 a_car = cfc(a_raw, dt, 180)    # J211's class for structure that gets integrated
 
-print(f"raw peak {a_raw.min() / G:.1f} g at {1000 * t[a_raw.argmin()]:.1f} ms, "
-      f"CFC 180 peak {a_car.min() / G:.1f} g at {1000 * t[a_car.argmin()]:.1f} ms")
+print(f"raw peak {np.min(a_raw) / G:.1f} g at {1000 * t[np.argmin(a_raw)]:.1f} ms, "
+      f"CFC 180 peak {np.min(a_car) / G:.1f} g at {1000 * t[np.argmin(a_car)]:.1f} ms")
 
 # the record's own step, then half, then a quarter
 runs = []
 previous = None
 for h in [dt, dt / 2, dt / 4]:
     times, u = euler_travel(t, a_car, h)
-    i = u.argmax()
+    i = np.argmax(u)
     line = (f"step {1000 * h:.4f} ms   travel {1000 * u[i]:.3f} mm "
             f"at {1000 * times[i]:.2f} ms")
     if previous is not None:
-        line += f"   change {1000 * (u[i] - previous):+.3f} mm"
+        line = line + f"   change {1000 * (u[i] - previous):+.3f} mm"
     print(line)
     previous = u[i]
     runs.append((h, times, u))
@@ -85,10 +87,10 @@ for h in [dt, dt / 2, dt / 4]:
 # Euler is order 1, so the error at a step is about twice the change
 # made by halving it (and in the opposite direction)
 h, times, u = runs[0]
-change = runs[1][2].max() - u.max()
+change = np.max(runs[1][2]) - np.max(u)
 print(f"error at the record's step is about {-1000 * 2 * change:+.3f} mm, "
-      f"so the settled travel is about {1000 * (u.max() + 2 * change):.2f} mm")
-j = u.argmin()
+      f"so the settled travel is about {1000 * (np.max(u) + 2 * change):.2f} mm")
+j = np.argmin(u)
 print(f"travel goes most negative at {1000 * times[j]:.1f} ms: {1000 * u[j]:.1f} mm")
 
 # the travel, all three steps on top of each other
@@ -96,7 +98,7 @@ plt.figure(figsize=(7, 4))
 for h, times, u in runs:
     plt.plot(1000 * times, 1000 * u, label=f"step {1000 * h:.4f} ms")
 h, times, u = runs[0]
-i = u.argmax()
+i = np.argmax(u)
 plt.plot(1000 * times[i], 1000 * u[i], 'ko')
 plt.annotate(f"furthest {1000 * u[i]:.0f} mm at {1000 * times[i]:.0f} ms",
              (1000 * times[i], 1000 * u[i]), xytext=(10, 0),

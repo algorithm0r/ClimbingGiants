@@ -46,8 +46,11 @@ def last_push(t, z):
     the hand is still on the ball. None if there is no such frame."""
     a = accel(t, z)
     top = int(np.argmax(z))
-    pushing = [i for i in range(top) if a[i] > 0]
-    return pushing[-1] if pushing else None
+    last = None
+    for i in range(top):
+        if a[i] > 0:
+            last = i
+    return last
 
 
 def release(t, z):
@@ -55,7 +58,10 @@ def release(t, z):
     within TOL of -g and stays there for RUN frames. None if it never does."""
     a = accel(t, z)
     p = last_push(t, z)
-    first = p + 1 if p is not None else WINDOW // 2
+    if p is not None:
+        first = p + 1
+    else:
+        first = WINDOW // 2
     for i in range(first, len(t) - RUN + 1):
         if np.all(np.abs(a[i:i + RUN] + G) < TOL):
             return i
@@ -79,17 +85,29 @@ def straight_runs(z, frames=6):
     line for 'frames' steps or more. Measured heights carry about 3 cm of noise,
     so a straight line means the tracker filled a gap."""
     flat = np.abs(np.diff(z, 2)) < 0.001
-    hits = [i for i in range(len(flat) - frames + 2) if flat[i:i + frames - 1].all()]
-    return (hits[0], hits[-1] + frames) if hits else None
+    hits = []
+    for i in range(len(flat) - frames + 2):
+        if np.all(flat[i:i + frames - 1]):
+            hits.append(i)
+    if len(hits) == 0:
+        return None
+    return hits[0], hits[-1] + frames
 
 
 def fit(t, z, fixed):
     if fixed:   # the known term moves to the left-hand side
         A = np.column_stack([np.ones_like(t), t])
-        c0, c1 = np.linalg.lstsq(A, z + 0.5 * G * t ** 2, rcond=None)[0]
-        return np.array([c0, c1, -G / 2])
+        c = np.linalg.lstsq(A, z + 0.5 * G * t ** 2, rcond=None)[0]
+        return np.array([c[0], c[1], -G / 2])
     A = np.column_stack([np.ones_like(t), t, t ** 2])
     return np.linalg.lstsq(A, z, rcond=None)[0]
+
+
+def find_shot(shots, wanted):
+    """The shot whose id is wanted."""
+    for s in shots:
+        if s['id'] == wanted:
+            return s
 
 
 def rms(c, t, z):
@@ -105,7 +123,8 @@ print('vertical tracking noise from the header (m):', noise)
 for name in ['test_short', 'test_mid', 'test_long']:
     seen = []
     for s in load(name)['shots']:
-        t, z = np.array(s['t']), np.array(s['z'])
+        t = np.array(s['t'])
+        z = np.array(s['z'])
         seen.append(len(t) - 1 - last_push(t, z))
     print(f'{name:10}  frames after the last upward push: '
           f'median {np.median(seen):.0f}, range {min(seen)} to {max(seen)}')
@@ -116,16 +135,18 @@ print()
 print(f"{'arc':>5} {'release':>7} {'end':>4} {'frames':>6} {'steps not 40 ms':>16}")
 odd_steps = []
 for s in shots:
-    t, z = np.array(s['t']), np.array(s['z'])
+    t = np.array(s['t'])
+    z = np.array(s['z'])
     gap = straight_runs(z)
     if gap:
         print(f"{s['id']:>5}  dropped: height is a straight line, "
               f"frames {gap[0]} to {gap[1]}")
         continue
-    r, e = release(t, z), flight_end(t, z)
+    r = release(t, z)
+    e = flight_end(t, z)
     steps = 1000 * np.diff(t[r:e + 1])     # ms between frames in the flight
     odd = steps[np.abs(steps - 40) > 5]
-    odd_steps += list(odd)
+    odd_steps = odd_steps + list(odd)
     print(f"{s['id']:>5} {r:>7} {e:>4} {e - r + 1:>6} {len(odd):>16}")
     arcs.append((s['id'], t[r:e + 1], z[r:e + 1]))
 
@@ -139,8 +160,12 @@ for n_fit in FIT_LENGTHS:
     for arc_id, t, z in arcs:
         if len(t) - n_fit < MIN_HELD_OUT:
             continue
-        tf, zf, th, zh = t[:n_fit], z[:n_fit], t[n_fit:], z[n_fit:]
-        free, fixed = fit(tf, zf, False), fit(tf, zf, True)
+        tf = t[:n_fit]          # the fitted frames
+        zf = z[:n_fit]
+        th = t[n_fit:]          # the held-out frames
+        zh = z[n_fit:]
+        free = fit(tf, zf, False)
+        fixed = fit(tf, zf, True)
         rows.append([rms(free, tf, zf), rms(fixed, tf, zf),
                      rms(free, th, zh), rms(fixed, th, zh), -2 * free[2]])
     # residuals and errors to cm, g stays in m/s^2
@@ -155,19 +180,26 @@ for n_fit, r in results.items():
     print(f'  held-out (cm):     free {med[2]:.1f}  fixed {med[3]:.1f}  '
           f'fixed closer on {np.sum(r[:, 3] < r[:, 2])}')
     print(f'  fitted g (m/s^2):  {med[4]:.2f}, '
-          f'range {r[:, 4].min():.1f} to {r[:, 4].max():.1f}')
+          f'range {np.min(r[:, 4]):.1f} to {np.max(r[:, 4]):.1f}')
 
 # whole flights, gravity fitted
-g_whole = [-2 * fit(t, z, False)[2] for _, t, z in arcs]
+g_whole = []
+for arc_id, t, z in arcs:
+    g_whole.append(-2 * fit(t, z, False)[2])
 print()
 print(f'g fitted to whole flights: median {np.median(g_whole):.2f}, '
       f'range {min(g_whole):.2f} to {max(g_whole):.2f} m/s^2, {len(g_whole)} arcs')
 
 # Figure 1: how the release is found, on one arc
-s = [s for s in shots if s['id'] == 1223][0]
-t, z = np.array(s['t']), np.array(s['z'])
-a, r, e = accel(t, z), release(t, z), flight_end(t, z)
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(7, 5.5), sharex=True)
+s = find_shot(shots, 1223)
+t = np.array(s['t'])
+z = np.array(s['z'])
+a = accel(t, z)
+r = release(t, z)
+e = flight_end(t, z)
+fig, axes = plt.subplots(2, 1, figsize=(7, 5.5), sharex=True)
+ax1 = axes[0]
+ax2 = axes[1]
 ax1.plot(t, z, '.', color='gray')
 ax1.plot(t[r:e + 1], z[r:e + 1], '.', color='black')
 ax1.set_ylabel('ball height (m)')
@@ -191,11 +223,16 @@ fig.savefig('release.svg')
 plt.close(fig)
 
 # Figure 2: residual and held-out error against frames fitted
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 3.8))
+fig, axes = plt.subplots(1, 2, figsize=(9, 3.8))
+ax1 = axes[0]
+ax2 = axes[1]
 models = [(0, 'gravity fitted', 'o-'), (1, 'gravity held at 9.81', 's-')]
 for col, label, mark in models:
-    resid = [np.median(results[n][:, col]) for n in FIT_LENGTHS]
-    held_out = [np.median(results[n][:, col + 2]) for n in FIT_LENGTHS]
+    resid = []
+    held_out = []
+    for n in FIT_LENGTHS:
+        resid.append(np.median(results[n][:, col]))
+        held_out.append(np.median(results[n][:, col + 2]))
     ax1.plot(FIT_LENGTHS, resid, mark, label=label)
     ax2.plot(FIT_LENGTHS, held_out, mark, label=label)
 ax1.set_title('Residual on the fitted frames')
@@ -210,8 +247,9 @@ fig.savefig('errors_by_window.svg')
 plt.close(fig)
 
 # Figure 3: the filled gap in arc 325
-s = [s for s in shots if s['id'] == 325][0]
-t, z = np.array(s['t']), np.array(s['z'])
+s = find_shot(shots, 325)
+t = np.array(s['t'])
+z = np.array(s['z'])
 lo, hi = straight_runs(z)
 plt.figure(figsize=(7, 3.5))
 plt.plot(t, z, '.-', color='gray', linewidth=0.6)

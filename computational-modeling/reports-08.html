@@ -1194,7 +1194,8 @@ def cfc(y, dt, cls):
     wa = np.tan(wd * dt / 2)
     d = 1 + np.sqrt(2) * wa + wa**2
     a0 = wa**2 / d
-    a1, a2 = 2 * a0, a0
+    a1 = 2 * a0
+    a2 = a0
     b1 = -2 * (wa**2 - 1) / d
     b2 = (-1 + np.sqrt(2) * wa - wa**2) / d
 
@@ -1204,7 +1205,9 @@ def cfc(y, dt, cls):
             out[i] = a0*x[i] + a1*x[i-1] + a2*x[i-2] + b1*out[i-1] + b2*out[i-2]
         return out
 
-    return one_pass(one_pass(y)[::-1])[::-1]
+    forward = one_pass(y)
+    backward = one_pass(forward[::-1])
+    return backward[::-1]
 
 
 def rk4(t, a_car, h):
@@ -1219,7 +1222,9 @@ def rk4(t, a_car, h):
     u = np.zeros(n_steps + 1)
     w = np.zeros(n_steps + 1)
     for n in range(n_steps):
-        tn, un, wn = times[n], u[n], w[n]
+        tn = times[n]
+        un = u[n]
+        wn = w[n]
         k1u, k1w = rate(tn, un, wn)
         k2u, k2w = rate(tn + h/2, un + h/2 * k1u, wn + h/2 * k1w)
         k3u, k3w = rate(tn + h/2, un + h/2 * k2u, wn + h/2 * k2w)
@@ -1234,7 +1239,7 @@ def travel(t, a_car, h):
     the largest value on the step grid, so it can only be at or below the true
     peak; the step study shows how much that matters."""
     times, u, w = rk4(t, a_car, h)
-    i = u.argmax()
+    i = np.argmax(u)
     return 1000 * u[i], 1000 * times[i]
 
 
@@ -1247,33 +1252,40 @@ raw = np.array(ch['y'])
 a180 = cfc(raw, dt, 180)
 print(f"drive: {ch['comment']} [{ch['code']}], "
       f"{ch['n']} samples every {1000 * dt} ms")
-print(f"peak raw {raw.min() / G:.1f} g at {1000 * t[raw.argmin()]:.2f} ms, "
-      f"CFC 180 {a180.min() / G:.1f} g at {1000 * t[a180.argmin()]:.2f} ms")
+print(f"peak raw {np.min(raw) / G:.1f} g at {1000 * t[np.argmin(raw)]:.2f} ms, "
+      f"CFC 180 {np.min(a180) / G:.1f} g at {1000 * t[np.argmin(a180)]:.2f} ms")
 fn = np.sqrt(K / M) / (2 * np.pi)
 print(f"belt natural frequency {fn:.2f} Hz (period {1000 / fn:.0f} ms), "
       f"damping ratio {C / (2 * np.sqrt(K * M)):.3f}")
 
 # ---- step study: halve from 6.4 ms (128 samples) down to 0.025 ms (half a sample)
-steps = [128 * dt / 2**k for k in range(9)]
+steps = []
+for k in range(9):
+    steps.append(128 * dt / 2**k)
 results = {'CFC 180': [], 'raw': []}
 print(f"\n{'step (ms)':&gt;10} {'CFC 180 (mm)':&gt;12} {'change':&gt;9} "
       f"{'raw (mm)':&gt;10} {'change':&gt;9}")
-for k, h in enumerate(steps):
+drives = {'CFC 180': a180, 'raw': raw}
+for k in range(len(steps)):
+    h = steps[k]
     row = f"{1000 * h:10.4f}"
-    for name, a in (('CFC 180', a180), ('raw', raw)):
+    for name, a in drives.items():
         x, at = travel(t, a, h)
         results[name].append(x)
         if k == 0:
-            row += f" {x:12.4f} {'':&gt;9}"
+            row = row + f" {x:12.4f} {'':&gt;9}"
         else:
-            row += f" {x:12.4f} {x - results[name][k-1]:+9.4f}"
+            row = row + f" {x:12.4f} {x - results[name][k-1]:+9.4f}"
     print(row)
 
 # the step: the largest one where the next TWO halvings each move the CFC 180
 # travel less than SETTLED (a single small change can be luck)
 s180 = results['CFC 180']
-k = next(k for k in range(len(steps) - 2)
-         if abs(s180[k+1] - s180[k]) &lt; SETTLED and abs(s180[k+2] - s180[k+1]) &lt; SETTLED)
+for k in range(len(steps) - 2):
+    first_change = abs(s180[k+1] - s180[k])
+    second_change = abs(s180[k+2] - s180[k+1])
+    if first_change &lt; SETTLED and second_change &lt; SETTLED:
+        break                      # k is the step chosen
 h = steps[k]
 print(f"\nchosen step {1000 * h:.2f} ms ({h / dt:.0f} samples), "
       f"step x natural frequency {h * np.sqrt(K / M):.3f}")
@@ -1281,9 +1293,10 @@ print(f"the next two halvings move the travel "
       f"{s180[k+1] - s180[k]:+.4f} and {s180[k+2] - s180[k+1]:+.4f} mm")
 
 times, u, w = rk4(t, a180, h)
-i = u.argmax()
-top, when = u[i], times[i]
-j = u.argmin()
+i = np.argmax(u)
+top = u[i]
+when = times[i]
+j = np.argmin(u)
 print(f"TRAVEL {1000 * top:.2f} mm at {1000 * when:.1f} ms")
 print(f"most negative travel {1000 * u[j]:.1f} mm at {1000 * times[j]:.1f} ms, "
       f"at the end of the record {1000 * u[-1]:.1f} mm")
@@ -1291,7 +1304,8 @@ print(f"most negative travel {1000 * u[j]:.1f} mm at {1000 * times[j]:.1f} ms, "
 # ---- checks
 print("\nchecks")
 print("1. the drive filtered three ways, all at the record's own step:")
-for name, a in (('CFC 180', a180), ('CFC 60', cfc(raw, dt, 60)), ('raw', raw)):
+checks = {'CFC 180': a180, 'CFC 60': cfc(raw, dt, 60), 'raw': raw}
+for name, a in checks.items():
     x, at = travel(t, a, dt)
     print(f"   {name:8} {x:.4f} mm at {at:.2f} ms")
 dv = np.sum((raw[1:] + raw[:-1]) / 2) * dt
@@ -1299,11 +1313,13 @@ print(f"2. velocity change in the drive {dv:.2f} m/s against an approach of "
       f"{V0:.2f} m/s, rebound {-dv - V0:.2f} m/s")
 a_occ = -(K * u + C * w) / M                     # occupant's own acceleration, m/s^2
 chest = cfc(np.array(test['channels']['chest_x']['y']), dt, 180)
-io, ic = a_occ.argmin(), chest.argmin()
+io = np.argmin(a_occ)
+ic = np.argmin(chest)
 print(f"3. model occupant peak {a_occ[io] / G:.1f} g at {1000 * times[io]:.1f} ms, "
       f"driver chest (CFC 180) {chest[ic] / G:.1f} g at {1000 * t[ic]:.1f} ms")
 # after the peak the model's spring pushes back. Does the chest show that?
-io, ic = a_occ.argmax(), chest.argmax()
+io = np.argmax(a_occ)
+ic = np.argmax(chest)
 print(f"   largest push back: model {a_occ[io] / G:+.1f} g at "
       f"{1000 * times[io]:.1f} ms, "
       f"chest {chest[ic] / G:+.1f} g at {1000 * t[ic]:.1f} ms")
@@ -1336,8 +1352,11 @@ plt.savefig('drive.svg')
 plt.close()
 
 plt.figure(figsize=(7, 4))
-plt.semilogx([1000 * s for s in steps], results['CFC 180'], 'o-', label='CFC 180 drive')
-plt.semilogx([1000 * s for s in steps], results['raw'], 's--', label='raw drive')
+steps_ms = []
+for s in steps:
+    steps_ms.append(1000 * s)
+plt.semilogx(steps_ms, results['CFC 180'], 'o-', label='CFC 180 drive')
+plt.semilogx(steps_ms, results['raw'], 's--', label='raw drive')
 plt.axvline(1000 * dt, color='gray', linestyle=':', label='record sample interval')
 plt.axvline(1000 * h, color='tab:red', linestyle=':', label='step used')
 plt.xlabel('step (ms)')
@@ -1388,8 +1407,8 @@ car = test['channels']['vehicle_x']
 print(car['comment'], car['code'], car['unit'], car['dt'], car['n'])
 t = car['t0'] + car['dt'] * np.arange(car['n'])
 a_car = np.array(car['y'])
-print('mean before impact', round(a_car[t &lt; 0].mean(), 3), 'm/s^2')
-i = a_car.argmin()
+print('mean before impact', round(np.mean(a_car[t &lt; 0]), 3), 'm/s^2')
+i = np.argmin(a_car)
 print('largest', round(a_car[i] / 9.81, 1), 'g at', round(1000 * t[i], 2), 'ms')</pre>
 <pre class="nb-out">V1 LEFT REAR SEAT CROSSMEMBER AX 10SEATLERE00ACXP m/(s*s) 5e-05 7001
 mean before impact 0.041 m/s^2
@@ -1402,7 +1421,9 @@ the mean there is 0.041&nbsp;m/s&sup2;, which is close enough to zero that I am 
 baseline. The largest value is huge (196&nbsp;<em>g</em>, where one <em>g</em> is
 9.81&nbsp;m/s&sup2;). Next, how fast the belt system itself moves.</p>
 
-<pre class="nb-in">m, k, c = 75.0, 296e3, 2.8e3      # kg, N/m, N*s/m from Alice
+<pre class="nb-in">m = 75.0       # kg      (the three values are from Alice)
+k = 296e3       # N/m
+c = 2.8e3       # N*s/m
 wn = np.sqrt(k / m)
 print('natural frequency', round(wn, 1), 'rad/s =', round(wn / (2*np.pi), 2), 'Hz')
 print('damping ratio', round(c / (2 * np.sqrt(k * m)), 3))</pre>
@@ -1437,7 +1458,7 @@ about four each time the step is halved. The state is the travel <code>u</code> 
     return times, u
 
 times, u = heun(0.0004, a_car)
-i = u.argmax()
+i = np.argmax(u)
 print('step 0.4 ms:', round(1000 * u[i], 3), 'mm at', round(1000 * times[i], 2), 'ms')</pre>
 <pre class="nb-out">step 0.4 ms: 106.491 mm at 76.4 ms</pre>
 
@@ -1447,10 +1468,10 @@ print('step 0.4 ms:', round(1000 * u[i], 3), 'mm at', round(1000 * times[i], 2),
 travel = []
 for h in steps:
     times, u = heun(h, a_car)
-    travel.append(1000 * u.max())
+    travel.append(1000 * np.max(u))
     line = f'step {1000 * h:.3f} ms   travel {travel[-1]:.4f} mm'
     if len(travel) &gt; 1:
-        line += f'   change {travel[-1] - travel[-2]:+.4f} mm'
+        line = line + f'   change {travel[-1] - travel[-2]:+.4f} mm'
     print(line)</pre>
 <pre class="nb-out">step 0.400 ms   travel 106.4915 mm
 step 0.200 ms   travel 108.7885 mm   change +2.2970 mm
@@ -1468,7 +1489,10 @@ thing.</p>
 
 <pre class="nb-in">import matplotlib.pyplot as plt
 
-plt.semilogx([1000 * h for h in steps], travel, 'o-')
+steps_ms = []
+for h in steps:
+    steps_ms.append(1000 * h)
+plt.semilogx(steps_ms, travel, 'o-')
 plt.xlabel('step (ms)')
 plt.ylabel('largest travel relative to the car (mm)')
 plt.title('Heun, raw crossmember drive: travel against step')
@@ -1485,7 +1509,8 @@ plt.show()</pre>
 <p>Now the run at 0.05&nbsp;ms, with the curve over the whole record.</p>
 
 <pre class="nb-in">times, u = heun(0.00005, a_car)
-i, j = u.argmax(), u.argmin()
+i = np.argmax(u)
+j = np.argmin(u)
 print('travel', round(1000 * u[i], 2), 'mm at', round(1000 * times[i], 2), 'ms')
 print('most negative', round(1000 * u[j], 1), 'mm at', round(1000*times[j], 1), 'ms')
 
@@ -1522,18 +1547,22 @@ car filtered at CFC&nbsp;180, the class J211 gives to structure that is going to
     a0 = wa**2 / d
     b1 = -2 * (wa**2 - 1) / d
     b2 = (-1 + np.sqrt(2) * wa - wa**2) / d
+
     def one_pass(x):
         out = np.zeros_like(x)
         for i in range(2, len(x)):
             out[i] = a0*x[i] + 2*a0*x[i-1] + a0*x[i-2] + b1*out[i-1] + b2*out[i-2]
         return out
-    return one_pass(one_pass(y)[::-1])[::-1]
+
+    forward = one_pass(y)
+    backward = one_pass(forward[::-1])
+    return backward[::-1]
 
 a180 = cfc(a_car, car['dt'], 180)
 times, u180 = heun(0.00005, a180)
-print('CFC 180 drive:', round(1000 * u180.max(), 4), 'mm')
-print('raw drive:', round(1000 * u.max(), 4), 'mm')
-print('difference', round(1000 * (u180.max() - u.max()), 4), 'mm')</pre>
+print('CFC 180 drive:', round(1000 * np.max(u180), 4), 'mm')
+print('raw drive:', round(1000 * np.max(u), 4), 'mm')
+print('difference', round(1000 * (np.max(u180) - np.max(u)), 4), 'mm')</pre>
 <pre class="nb-out">CFC 180 drive: 110.0186 mm
 raw drive: 110.0185 mm
 difference 0.0001 mm</pre>
@@ -1568,7 +1597,7 @@ reader does not have to find them in the middle.</p>
   <script src="js/page.js?v=20261027131534"></script>
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-11">October 11, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-27">October 27, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

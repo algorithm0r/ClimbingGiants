@@ -39,12 +39,17 @@ def one_pass(x, c):
 def cfc(y, dt, cls):
     """Forward over the record, then backward over the result."""
     c = cfc_coefficients(cls, dt)
-    return one_pass(one_pass(y, c)[::-1], c)[::-1]
+    forward = one_pass(y, c)
+    backward = one_pass(forward[::-1], c)
+    return backward[::-1]
 
 
 def peak(t, y):
     """The sample with the largest size, whichever sign it has."""
-    i = max(range(len(y)), key=lambda k: abs(y[k]))
+    i = 0
+    for k in range(len(y)):
+        if abs(y[k]) > abs(y[i]):
+            i = k
     return y[i], t[i]
 
 
@@ -53,10 +58,16 @@ with open(os.path.join(PACK, 'crash', name)) as f:
     test = json.load(f)
 
 # Alice's channel is the one whose header comment names the crossmember
-key = [k for k, ch in test['channels'].items() if 'CROSSMEMBER' in ch['comment']][0]
+key = None
+for k, c in test['channels'].items():
+    if 'CROSSMEMBER' in c['comment']:
+        key = k
+        break
 ch = test['channels'][key]
 dt = ch['dt']
-t_ms = [1000 * (ch['t0'] + i * dt) for i in range(ch['n'])]
+t_ms = []
+for i in range(ch['n']):
+    t_ms.append(1000 * (ch['t0'] + i * dt))
 raw = ch['y']
 print(f"test {test['testNo']}, channel '{key}': {ch['comment']} [{ch['code']}], "
       f"{ch['unit']}, {1 / dt:.0f} samples/s, prefilter {ch['prefilter_hz']} Hz")
@@ -79,9 +90,15 @@ p1, tp1 = peak(t_ms, one_pass(raw, cfc_coefficients(60, dt)))
 print(f"CFC 60, forward pass only:    {p1:.1f} m/s^2 = {p1 / G:.1f} g at {tp1:.2f} ms")
 
 # the memo's figure: the channel as recorded and at CFC 60, in g
+raw_g = []
+for v in raw:
+    raw_g.append(v / G)
+f60_g = []
+for v in f60:
+    f60_g.append(v / G)
 plt.figure(figsize=(8, 4))
-plt.plot(t_ms, [v / G for v in raw], color='lightgray', linewidth=0.8, label='as recorded')
-plt.plot(t_ms, [v / G for v in f60], linewidth=1.5, label='CFC 60, forward and backward')
+plt.plot(t_ms, raw_g, color='lightgray', linewidth=0.8, label='as recorded')
+plt.plot(t_ms, f60_g, linewidth=1.5, label='CFC 60, forward and backward')
 plt.plot(tp_raw, p_raw / G, 'o', color='gray')
 plt.annotate(f"{p_raw / G:.1f} g at {tp_raw:.1f} ms (unfiltered)", (tp_raw, p_raw / G),
              xytext=(10, 0), textcoords='offset points', fontsize=8)
