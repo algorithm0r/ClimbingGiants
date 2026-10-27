@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The filter class is part of the measurement — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261023091254">
-  <link rel="stylesheet" href="css/demos.css?v=20261023091254">
+  <link rel="stylesheet" href="css/blocks.css?v=20261027124351">
+  <link rel="stylesheet" href="css/demos.css?v=20261027124351">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -912,7 +912,7 @@
   below the peak of this channel varies by a factor of 3.2 as the
   <dfn data-g="cfc">CFC class</dfn> falls, while
   the change in velocity over the same range varies by 0.09%. Which class is correct is set by
-  the bandwidth of the quantity being measured, and SAE J211 assigns a class to each measurement.
+  the bandwidth of the quantity being measured, and SAE J211 recommends a class for each measurement.
   A peak reported without its class is incomplete.</p>
   <p class="plain">The filter changes the answer, so the filter is part of the answer. Which one
   to use is an engineering question with a right answer, and the standard records it.</p>
@@ -1007,16 +1007,21 @@ engineering knowledge and not something the analyst is free to choose.</p>
   bandwidth, and it belongs to the vehicle and not to the road.</figcaption>
 </figure>
 
-<h2 id="sae-j211-fixes-the-class-in-advance">SAE J211 Fixes the Class in Advance</h2>
+<h2 id="sae-j211-gives-the-class-in-advance">SAE J211 Gives the Class in Advance</h2>
 
-<p>SAE J211 fixes the class per measurement, in advance, for everyone:</p>
+<p>SAE J211 gives a class for each measurement in its Table 1, in advance, so that results from
+different laboratories can be compared. A few of its rows:</p>
 
 <table class="data">
-  <tr><th>Measurement</th><th>Required Class</th><th>Reason</th></tr>
+  <tr><th>Measurement</th><th>Class in Table 1</th><th>A reason (this course's reading)</th></tr>
   <tr><td>head acceleration, for HIC</td><td>CFC 1000</td>
       <td>the head responds to fast content, and HIC is sensitive to it</td></tr>
-  <tr><td>chest acceleration</td><td>CFC 180</td>
+  <tr><td>thorax spine acceleration</td><td>CFC 180</td>
       <td>the thorax does not respond above a few hundred hertz</td></tr>
+  <tr><td>vehicle structural acceleration, total vehicle comparison</td><td>CFC 60</td>
+      <td>the motion of the whole vehicle, which is slower than the response of its parts</td></tr>
+  <tr><td>vehicle structural acceleration, component analysis</td><td>CFC 600</td>
+      <td>a single part responds to faster content than the vehicle as a whole</td></tr>
   <tr><td>vehicle structural acceleration for velocity</td><td>CFC 180 before integrating</td>
       <td>keeps the integral clean without affecting it much either way</td></tr>
   <tr><td>belt and barrier loads</td><td>CFC 60</td>
@@ -1060,8 +1065,8 @@ share a name, and comparing them directly is the commonest way to be wrong about
 <div class="aside standard"><span class="label">The standard</span>
 <p>The standard in question is <strong>SAE J211-1</strong>, and the decision it fixes is the
 channel frequency class. The classes are CFC 60, 180, 600 and 1000, and Table 1 of the standard
-says which applies to which measurement, so the disagreement above has an answer that neither
-analyst gets to choose. <a href="standards.html">The standards behind the crash data</a> lists
+gives the recommended class for each measurement and each use, so two analysts who follow it and
+agree on the use choose the same class. <a href="standards.html">The standards behind the crash data</a> lists
 the entries this course needs, and links the text.</p></div>
 
 <h2 id="working-without-a-standard">Working Without a Standard</h2>
@@ -1156,11 +1161,11 @@ class, one pass or forward-and-backward, with the peak and the integral reported
   </script>
   
 
-  <script type="module" src="js/bundle/why-a-standard-exists.js?v=20261023091254"></script>
+  <script type="module" src="js/bundle/why-a-standard-exists.js?v=20261027124351"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-23">October 23, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-25">October 25, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

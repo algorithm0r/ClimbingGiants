@@ -191,16 +191,26 @@ table.data td.num,table.data th.num{text-align:right;font-family:"SF Mono",Conso
 .codetabs .ln{display:block;padding:0 1.1rem;position:relative}
 .codetabs .ln[data-note]{cursor:help}
 .codetabs .ln[data-note]:hover{background:#f4f7ee}
-.codetabs .ln[data-note]::after{
-  content:attr(data-note);position:absolute;left:1.1rem;top:100%;z-index:5;
+.codetabs .ln[data-note]::after,.codetabs .ln-note{
+  position:absolute;left:1.1rem;top:100%;z-index:5;
   background:var(--course-accent-dark);color:#fff;padding:.35rem .6rem;border-radius:3px;
   font-family:-apple-system,system-ui,sans-serif;font-size:.78rem;line-height:1.4;
   max-width:min(34rem,calc(100% - 2.2rem));white-space:normal;display:none}
-.codetabs .ln[data-note]:hover::after{display:block}
+.codetabs .ln[data-note]::after{content:attr(data-note)}
+.codetabs .ln[data-note]:hover::after,.codetabs .ln[data-note]:focus-visible::after{display:block}
+.codetabs .ln[data-note]:focus-visible{outline:2px solid var(--course-accent);outline-offset:-2px;
+  background:#f4f7ee}
+/* A pinned note is a real element so its links work. It is left out of a text
+   selection, so copying the code never copies the note with it. */
+.codetabs .ln.pinned{background:#f4f7ee}
+.codetabs .ln.pinned::after{display:none!important}
+.codetabs .ln-note{display:block;cursor:auto;user-select:none;-webkit-user-select:none}
+.codetabs .ln-note a{color:#fff;text-decoration:underline}
 /* Near the foot of the block a note opens upward instead, so it never reaches
    past the last line and asks the box to grow. Not if it is also near the top:
    in a four-line block there is nothing above line 2 to open into. */
-.codetabs .ln[data-note]:nth-last-child(-n+3):not(:nth-child(-n+3))::after{
+.codetabs .ln[data-note]:nth-last-child(-n+3):not(:nth-child(-n+3))::after,
+.codetabs .ln[data-note]:nth-last-child(-n+3):not(:nth-child(-n+3)) .ln-note{
   top:auto;bottom:100%}
 .codetabs .cmt{color:#8a8578;font-style:italic}
 .codetabs .kw{color:#7a3a8a;font-weight:600}

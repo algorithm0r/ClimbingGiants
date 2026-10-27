@@ -6,8 +6,8 @@
 <title>Class 4 — Filtering to a standard</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261023091254">
-<link rel="stylesheet" href="css/demos.css?v=20261023091254">
+<link rel="stylesheet" href="css/blocks.css?v=20261027124351">
+<link rel="stylesheet" href="css/demos.css?v=20261027124351">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -688,7 +688,7 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 
 
 <section class="deck-slide arrive">
-  <img src="data/img/f4f/f4f-04.png?v=20261023091254" width="1920" height="1080"
+  <img src="data/img/f4f/f4f-04.png?v=20261027124351" width="1920" height="1080"
        alt="University YMCA Student Center. The University YMCA Student Center (UWY) is UW Tacoma's student recreation center. It is a fully operational YMCA, with recreation and fitness spaces, an NCAA regulation basketball court, cardio and weights equipment, indoor track, personal training, and locker rooms. The UWY is a hub of student life at UW Tacoma as the home to the Center for Student Involvement and student government, campus meeting and events space, and game room. Beside it, a photograph of two students in purple shirts running on treadmills.">
 </section>
 
@@ -696,6 +696,26 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   <div class="head">
     <p class="course">TME 310 &middot; Computational Physical Modeling</p>
     <p class="say">Class 4</p>
+  </div>
+</section>
+
+<!-- The Canvas quiz "Mid-Quarter Survey" (course 1923223, quiz 2458235):
+     a survey, anonymous, five optional questions, no points, due
+     2026-11-02 07:59 UTC (Sunday, November 1, 11:59 pm Pacific). -->
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">The <span class="term">mid-quarter survey</span> is open on Canvas.</p>
+    <p class="sub">We are four weeks in, and I would like to hear how the course is going for you.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">where</span><b>Canvas, under Quizzes</b>
+        <span>It is called Mid-Quarter Survey, and it has five questions.</span></div>
+      <div class="pcard"><span class="tag">how</span><b>Anonymous, and every question is optional</b>
+        <span>It is not graded, so please answer only the questions you want to.</span></div>
+      <div class="pcard gold"><span class="tag">when</span><b>Sunday, November 1, at 11:59&nbsp;pm</b>
+        <span>The same night Assignment 4 is due.</span></div>
+    </div>
   </div>
 </section>
 
@@ -744,12 +764,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide part">
-  <div class="head">
-    <p class="course">TME 310 &middot; Computational Physical Modeling</p>
-    <p class="say">Break &middot; 10 minutes</p>
-  </div>
-</section>
 
 <!-- ============================================================ the request
      The content half walks the Assignment 4 steps on NHTSA test 9808 (2016
@@ -757,8 +771,8 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
      slides comes from that record, filtered with the code on the Smoothing
      notes page; the figures are computed in the browser by class-04-figs.js.
      Table 1 and the passes follow the public 1995 text of SAE J211-1
-     (law.resource.org), which recommends the classes and allows either a
-     phase-shifting or a phaseless filter. -->
+     (law.resource.org), which recommends the classes and defines CFC 60 and
+     180 by the Appendix C filter, run forward and then backward (3.7, 4.2). -->
 
 <section class="deck-slide point">
   <div class="head">
@@ -797,8 +811,8 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
         <span><a href="phase-lag.html">Phase lag</a>.</span></div>
       <div class="pcard"><span class="tag">step 4</span><b>Which class does the standard name?</b>
         <span><a href="why-a-standard-exists.html">The filter class is part of the measurement</a> and <a href="standards.html">the standards</a>.</span></div>
-      <div class="pcard"><span class="tag">step 5</span><b>How much does the class change the answer?</b>
-        <span>A sweep, as the filter class page does it.</span></div>
+      <div class="pcard"><span class="tag">step 5</span><b>How much does the filter change the answer?</b>
+        <span>The chosen CFC against the record as recorded.</span></div>
       <div class="pcard"><span class="tag">step 6</span><b>What sentence goes to the customer?</b>
         <span>The number, and what someone needs to get it again.</span></div>
       <div class="pcard"><span class="tag">step 7</span><b>Does the answer make sense?</b>
@@ -849,51 +863,27 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<!-- ============================================================ step 2 -->
+<!-- ============================================================ step 2
+     The formulas are lecture 12's (J211 Appendix C). CFC 60 at T = 0.0001 s
+     (the Civic, 10 kHz): a0 = a2 = 0.00145237, a1 = 0.00290473,
+     b1 = 1.88934322, b2 = -0.89515269; a0 + a1 + a2 = 1 - b1 - b2 = 0.00580947. -->
 
 <section class="deck-slide point compact">
   <div class="head">
     <p class="say">Each output is built from three <span class="term">inputs</span> and the two outputs before it.</p>
     <p class="sub">Step 2 of 7 &middot; How do we build the standard's filter?</p>
   </div>
-  <div class="stage tight">
-    <div class="figside" style="grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)">
-      <div class="pcol" style="position:relative">
-        <div class="pcard"><span class="tag">what we found</span><b>$y_i = a_0 x_i + a_1 x_{i-1} + a_2 x_{i-2}$<br>$\qquad + \, b_1 y_{i-1} + b_2 y_{i-2}$</b>
-          <span>The five coefficients come from the class and the sample interval <i>T</i> alone (Smoothing gives the formulas). For CFC&nbsp;60 on the Civic, $a_0 = 0.001452$, $a_1 = 2a_0$, $a_2 = a_0$, $b_1 = 1.88934$ and $b_2 = -0.89515$.</span></div>
-        <!-- The CFC 60 constant check at the Civic's sample interval, worked
-             as on a whiteboard (the beats are in class-04-figs.js). The board
-             hangs below the left card, out of the fit script's measurement. -->
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&amp;display=swap">
-        <style>
-          .c4wb{position:absolute; top:100%; left:0; margin-top:1.2vh; pointer-events:none;
-                font-family:Caveat,"Segoe Print","Bradley Hand",cursive; font-size:1.3em; line-height:1.05; color:#222}
-          .c4wb .row{display:flex; align-items:center; gap:.3em; white-space:nowrap; padding:.15vh 0}
-          .c4wb .note{color:#1f4e9c}
-          .c4wb .ringed{position:relative; padding:0 .3em}
-          @property --a{syntax:"<angle>"; inherits:false; initial-value:360deg}
-          .c4wb .ring{position:absolute; left:-4%; top:-30%; width:108%; height:160%;
-                      border:2.5px solid #2e7d32; border-radius:50%; transform:rotate(-2deg);
-                      -webkit-mask:conic-gradient(from 200deg, #000 var(--a), transparent 0);
-                      mask:conic-gradient(from 200deg, #000 var(--a), transparent 0)}
-        </style>
-        <div class="c4wb" data-board="coefs" aria-label="Working: CFC 60 and T is 0.0001 s. Omega d is 2 pi times 60 times 2.0775, which is 783.2. Omega a is tan of 783.2 times 0.0001 over 2, which is 0.03918. a0 plus a1 plus a2 is 0.005809, and 1 minus b1 minus b2 is 0.005809. A constant in comes out multiplied by 0.005809 over 0.005809, which is 1.">
-          <div class="row"><span class="note" data-k="n1">CFC 60, T = 0.0001 s</span></div>
-          <div class="row"><span data-k="w1">&omega;<sub>d</sub> = 2&pi; &times; 60 &times; 2.0775 = 783.2</span></div>
-          <div class="row"><span data-k="w2">&omega;<sub>a</sub> = tan(783.2 &times; 0.0001 / 2) = 0.03918</span></div>
-          <div class="row"><span data-k="a">a<sub>0</sub> + a<sub>1</sub> + a<sub>2</sub> = 0.005809</span></div>
-          <div class="row"><span data-k="b">1 &minus; b<sub>1</sub> &minus; b<sub>2</sub> = 0.005809</span></div>
-          <div class="row"><span data-k="k1">a constant comes out &times; 0.005809 / 0.005809 =</span>
-            <span class="ringed"><span data-k="k2">1</span><span class="ring" data-k="rk"></span></span></div>
-        </div>
-      </div>
-      <div class="pcol">
-        <div class="pcard"><span class="tag">what we learn</span><b>The same output for everyone</b>
-          <span>Coded correctly, the filter gives the same output for everyone. A sign error still gives a plausible curve, so the check on the board is worth one line of code.</span></div>
-        <div class="pcard gold"><span class="tag">next</span><b>Run it once, or twice?</b>
-          <span>Each output uses only samples at or before it.</span></div>
-      </div>
+  <div class="stage">
+    <style>.deck-slide .work.c4coef .katex-display{margin:.7em 0}</style>
+    <div class="work c4coef" style="font-size:calc(var(--stage-text) * .7)">
+      $$y_i = a_0 x_i + a_1 x_{i-1} + a_2 x_{i-2} + b_1 y_{i-1} + b_2 y_{i-2}$$
+      $$\omega_d = 2\pi \cdot \textcolor{#8A6508}{\mathrm{CFC}} \cdot 2.0775 \qquad \omega_a = \tan\frac{\omega_d \textcolor{#8A6508}{T}}{2} \qquad D = 1 + \sqrt{2}\,\omega_a + \omega_a^2$$
+      $$a_0 = a_2 = \frac{\omega_a^2}{D} \qquad a_1 = 2a_0 \qquad b_1 = \frac{-2(\omega_a^2 - 1)}{D} \qquad b_2 = \frac{-1 + \sqrt{2}\,\omega_a - \omega_a^2}{D}$$
+      $$\textcolor{#8A6508}{\text{CFC} = 60,\ T = 0.0001\text{ s}}: \qquad a_0 = a_2 = 0.00145237 \qquad a_1 = 0.00290473$$
+      $$b_1 = 1.88934322 \qquad b_2 = -0.89515269$$
+      $$\frac{a_0 + a_1 + a_2}{1 - b_1 - b_2} = \frac{0.00580947}{0.00580947} = 1 \qquad \text{a constant passes through unchanged}$$
     </div>
+    <p class="src">J211 Appendix C, as in lecture 12. The Civic (test 9808) records 10,000 samples a second, so $T$ = 0.0001&nbsp;s.</p>
   </div>
 </section>
 
@@ -901,20 +891,18 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 
 <section class="deck-slide point compact">
   <div class="head">
-    <p class="say">Run CFC&nbsp;60 <span class="term">forward only</span>, and where does the peak go?</p>
+    <p class="say">One curve is CFC&nbsp;60 run <span class="term">forward only</span>, and the other runs forward and then backward.</p>
     <p class="sub">Step 3 of 7 &middot; One pass or two?</p>
   </div>
   <div class="stage tight">
     <div class="figside" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
-      <div class="c2fig" data-c4="fbOnly"></div>
+      <style>.deck-slide .stage .cgp text.c4big{font-size:56px; font-weight:700} .cgp text.c4A{fill:#5F7038} .cgp text.c4B{fill:#b0443a}</style>
+      <div class="c2fig" data-c4="whichPass"></div>
       <div class="pcol">
-        <div class="pcard"><span class="tag">predict &middot; vote</span><b>Against forward then backward</b>
-          <span>The curve shown is CFC&nbsp;60 run forward and then backward over its own output.</span>
+        <div class="pcard"><span class="tag">predict &middot; vote</span><b>Which is which?</b>
           <div class="vote">
-            <div><b>A</b>Earlier, and smaller</div>
-            <div><b>B</b>Later, and smaller</div>
-            <div><b>C</b>Later, and larger</div>
-            <div><b>D</b>The same place and size</div>
+            <div><b>A</b>A is forward only</div>
+            <div><b>B</b>B is forward only</div>
           </div></div>
       </div>
     </div>
@@ -932,10 +920,10 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
       <div class="pcol">
         <div class="pcard"><span class="tag">what we found</span><b>&minus;371.5 at 65.2&nbsp;ms against &minus;355.5 at 62.4&nbsp;ms</b>
           <span>One pass sees only earlier samples, so it runs late. It is also half the filtering (two poles, not four), so more of the peak survives.</span></div>
-        <div class="pcard"><span class="tag">what we learn</span><b>J211 allows both</b>
-          <span>Section 9.4.1 says filtering "may be either phase-shifting or phaseless." Appendix C gets the phaseless one by running the filter forward and then backward.</span></div>
-        <div class="pcard gold"><span class="tag">next</span><b>A choice the customer could make differently</b>
-          <span>For this reason the sentence should say which one we used (the class comes next).</span></div>
+        <div class="pcard"><span class="tag">what we learn</span><b>J211's CFC 60 is the two-pass filter</b>
+          <span>Sections 3.7 and 4.2 define CFC 60 by the filter in Appendix C, which passes the rule forward and then backward. One pass is a different, two-pole filter.</span></div>
+        <div class="pcard gold"><span class="tag">next</span><b>A choice the customer could get wrong</b>
+          <span>For this reason the sentence should say both directions (the class comes next).</span></div>
       </div>
     </div>
   </div>
@@ -960,7 +948,8 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
         </table>
         <span>The standard says these classes are "recommended" so that results from different sources can be compared.</span></div>
       <div class="pcard gold"><span class="tag">predict &middot; vote</span><b>Which row is Alice's number?</b>
-        <span>Read her request again. What will the customer's engineers do with the peak?</span>
+        <span style="font-size:.85em"><em>"The peak acceleration on the crossmember channel goes to the customer this week, and their engineers will recompute it from the same file the moment it lands. I would rather not send a number that comes back different. Give me the peak, filtered the way the standard requires. Tell me which class you used and why that one, and give me a sentence to send with it."</em> (Alice)</span>
+        <span>What will the customer's engineers do with the peak?</span>
         <div class="vote">
           <div><b>A</b>Total vehicle comparison</div>
           <div><b>B</b>Collision simulation input</div>
@@ -979,106 +968,64 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
   <div class="stage tight">
     <div class="pcards c3">
-      <div class="pcard"><span class="tag">if they compare cars</span><b>CFC 60, &minus;355.5&nbsp;m/s&sup2;</b>
+      <div class="pcard"><span class="tag">if they compare cars</span><b>CFC 60</b>
         <span>A peak sent to a customer is most likely set beside their own numbers for another car (total vehicle comparison).</span></div>
-      <div class="pcard"><span class="tag">if they check the part</span><b>CFC 600, &minus;543.5&nbsp;m/s&sup2;</b>
+      <div class="pcard"><span class="tag">if they check the part</span><b>CFC 600</b>
         <span>An engineer sizing the crossmember or its mount probably needs the faster content the part responds to.</span></div>
-      <div class="pcard"><span class="tag">if they integrate it</span><b>CFC 180, &minus;429.9&nbsp;m/s&sup2;</b>
+      <div class="pcard"><span class="tag">if they integrate it</span><b>CFC 180</b>
         <span>Assignment 3's use. In that case a velocity or a crush is probably the number they want (a peak is less useful).</span></div>
     </div>
     <div class="pcards c2 do">
       <div class="pcard"><span class="tag">what we learn</span><b>An assumption goes in the report</b>
         <span>We pick the use we think most likely and write it down, so Alice can check it with the customer.</span></div>
-      <div class="pcard"><span class="tag">next</span><b>How much does it matter?</b>
-        <span>The three values above are already far apart. Is that true of every quantity?</span></div>
+      <div class="pcard"><span class="tag">next</span><b>How much does the filter matter?</b>
+        <span>We compare the CFC&nbsp;60 result with the record as it was recorded.</span></div>
     </div>
   </div>
 </section>
 
-<!-- ============================================================ step 5 -->
+<!-- ============================================================ step 5
+     CFC 60 (forward and backward, from zero) against the record as recorded,
+     on the Civic: -964.0 at 27.2 ms against -355.5 at 62.4 ms (a factor of
+     2.71). At 27.2 ms CFC 60 reads -145.4. All recomputed from
+     data/tests/09808.json. -->
 
 <section class="deck-slide point compact">
   <div class="head">
-    <p class="say">From as recorded to CFC&nbsp;60, how far do the <span class="term">peak</span> and $\Delta v$ move?</p>
-    <p class="sub">Step 5 of 7 &middot; How much does the class change the answer?</p>
+    <p class="say">What does CFC&nbsp;60 do to the <span class="term">peak</span>?</p>
+    <p class="sub">Step 5 of 7 &middot; How much does the filter change the answer?</p>
   </div>
   <div class="stage tight">
     <div class="pcards c1">
-      <div class="pcard gold"><span class="tag">predict &middot; vote</span><b>The peak, and the change in velocity from contact to the end of the record</b>
+      <div class="pcard gold"><span class="tag">predict &middot; vote</span><b>Against the record as recorded</b>
         <div class="vote">
-          <div><b>A</b>Both by about 5%</div>
-          <div><b>B</b>The peak by about 5%, $\Delta v$ by about half</div>
-          <div><b>C</b>The peak by a factor near 3, $\Delta v$ by under 1%</div>
-          <div><b>D</b>Both by a factor near 3</div>
+          <div><b>A</b>It hardly changes</div>
+          <div><b>B</b>It gets a little smaller</div>
+          <div><b>C</b>It gets much smaller</div>
+          <div><b>D</b>It gets larger</div>
         </div></div>
     </div>
-    <p class="src">$\Delta v$ is the area under the acceleration, the running total from class 3.</p>
-  </div>
-</section>
-
-<section class="deck-slide point compact" data-fill="0.97">
-  <div class="head">
-    <p class="say">Try each <span class="term">class</span>, and watch the peak and $\Delta v$.</p>
-    <p class="sub">Step 5 of 7 &middot; How much does the class change the answer?</p>
-  </div>
-  <div class="stage">
-    <!-- the sweep's own layout: the chart left, the buttons and readouts right,
-         set large because the room watches the readouts -->
-    <style>
-      .c4sweep{display:grid; grid-template-columns:minmax(0,1.9fr) minmax(0,1fr); gap:1.4vw; align-items:start}
-      .c4sweep .side{display:flex; flex-direction:column; gap:1.4vh}
-      .c4sweep .seg{display:grid; grid-template-columns:1fr 1fr; gap:.6vh .5vw}
-      .c4sweep .seg button{font:inherit; font-size:2.3vh; padding:.7em .4em; border:1.5px solid var(--def);
-                           border-radius:5px; background:#fff; color:var(--ink); cursor:pointer}
-      .c4sweep .seg button[aria-pressed="true"]{background:var(--def); color:#fff}
-      .c4sweep .seg[data-g="cls"] button:first-child{grid-column:1 / span 2}
-      .c4sweep .ro{display:grid; grid-template-columns:auto 1fr; gap:.8vh 1vw; align-items:baseline;
-                   border-top:1px solid #ddd6c8; padding-top:1.2vh}
-      .c4sweep .ro .k{font-size:2vh; color:#5A5550}
-      .c4sweep .ro .v{font-size:3.6vh; font-variant-numeric:tabular-nums; text-align:right}
-    </style>
-    <div class="c2fig" data-c4="sweep"></div>
-    <p class="src">The Civic (test 9808), as recorded, with no offset removed. $\Delta v$ is integrated with the trapezoid rule from contact to the last sample.</p>
   </div>
 </section>
 
 <section class="deck-slide point compact">
   <div class="head">
-    <p class="say">The peak falls by a factor of <span class="term">2.7</span>, while $\Delta v$ moves by 0.17%.</p>
-    <p class="sub">Step 5 of 7 &middot; How much does the class change the answer?</p>
+    <p class="say">CFC&nbsp;60 makes the peak <span class="term">2.7 times smaller</span>, and takes it from a different moment.</p>
+    <p class="sub">Step 5 of 7 &middot; How much does the filter change the answer?</p>
   </div>
   <div class="stage tight">
     <div class="figside" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
-      <div class="c2fig" data-c4="ratio"></div>
+      <div class="c2fig" data-c4="moment"></div>
       <div class="pcol">
-        <div class="pcard"><span class="tag">what we found</span><b>From &minus;964.0 to &minus;355.5&nbsp;m/s&sup2;</b>
-          <span>Over the same filters $\Delta v$ goes from &minus;16.750 to &minus;16.779&nbsp;m/s. Two analysts who chose different classes could get peaks up to 2.7 times apart, while their $\Delta v$ values would match to three figures.</span></div>
-        <div class="pcard"><span class="tag">what we learn</span><b>The filter spreads the spike's area into its shoulders</b>
-          <span>What comes off the top of a narrow spike goes into its shoulders. This keeps the area (and so $\Delta v$) about the same while the maximum drops.</span></div>
-        <div class="pcard gold"><span class="tag">next</span><b>The time of the peak moved too</b>
-          <span>From 31.8&nbsp;ms at CFC&nbsp;600 to 62.4&nbsp;ms at CFC&nbsp;60.</span></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide point compact">
-  <div class="head">
-    <p class="say">A heavier filter can make a <span class="term">different moment</span> the peak.</p>
-    <p class="sub">Step 5 of 7 &middot; How much does the class change the answer?</p>
-  </div>
-  <div class="stage tight">
-    <div class="figside" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
-      <div class="c2fig" data-c4="classes"></div>
-      <div class="pcol">
-        <div class="pcard"><span class="tag">what we found</span><b>31.8, then 52.3, then 62.4&nbsp;ms</b>
-          <span>Forward then backward has no lag, so the peak did not slide later. The narrow dip near 32&nbsp;ms is filtered away first, and a broader dip later in the crash becomes the largest.</span></div>
-        <div class="pcard"><span class="tag">what we learn</span><b>The peak can come from a different moment at each class</b>
-          <span>A peak at CFC&nbsp;60 and a peak at CFC&nbsp;600 are about different moments of this crash, and the value alone does not say which moment it came from.</span></div>
+        <div class="pcard"><span class="tag">what we found</span><b>&minus;964.0 at 27.2&nbsp;ms becomes &minus;355.5 at 62.4&nbsp;ms</b>
+          <span>As recorded, then CFC&nbsp;60 forward and backward. The filtered peak is 2.7 times smaller.</span></div>
+        <div class="pcard"><span class="tag">what we learn</span><b>The two peaks are different moments of the crash</b>
+          <span>What comes off the top of a narrow spike goes into its shoulders. At 27.2&nbsp;ms CFC&nbsp;60 reads &minus;145.4, and a broader dip later becomes the largest. Forward then backward has no lag, so the later peak is not a delay.</span></div>
         <div class="pcard gold"><span class="tag">next</span><b>Write it down for Alice</b>
-          <span>Since the peak changes this much with the class, the sentence to Alice should name the class.</span></div>
+          <span>Since the peak changes this much with the filter, the sentence to Alice should name the class.</span></div>
       </div>
     </div>
+    <p class="src">The Civic (test 9808), with no offset removed. Values in m/s&sup2;.</p>
   </div>
 </section>
 
@@ -1112,12 +1059,12 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
         <p style="font-size:1.1em; line-height:1.45; margin:.6vh 0">"Peak X acceleration at the left rear seat crossmember (channel 10FORALERE00ACXP, NHTSA test 9808): &minus;355.5&nbsp;m/s&sup2; at 62.4&nbsp;ms after contact, filtered at CFC&nbsp;60 per SAE J211-1, forward and then backward."</p></div>
     </div>
     <div class="pcards c3 do">
-      <div class="pcard"><span class="tag">a different value is right</span><b>For a different use</b>
-        <span>CFC&nbsp;600 (&minus;543.5) if the customer is analyzing the crossmember itself.</span></div>
-      <div class="pcard"><span class="tag">a different value comes back</span><b>From one pass</b>
-        <span>&minus;371.5 at 65.2&nbsp;ms. A later and slightly larger peak probably means they filtered once.</span></div>
-      <div class="pcard"><span class="tag">a different value comes back</span><b>From no filter</b>
-        <span>&minus;964.0 at 27.2&nbsp;ms (about 98&nbsp;<i>g</i>), nearly three times ours.</span></div>
+      <div class="pcard"><span class="tag">a different use</span><b>If they analyze the crossmember itself</b>
+        <span>The class is CFC&nbsp;600, and the peak is &minus;543.5&nbsp;m/s&sup2;.</span></div>
+      <div class="pcard"><span class="tag">one pass</span><b>If they send back &minus;371.5 at 65.2&nbsp;ms</b>
+        <span>They probably filtered forward only.</span></div>
+      <div class="pcard"><span class="tag">no filter</span><b>If they send back &minus;964.0 at 27.2&nbsp;ms</b>
+        <span>They did not filter. That is nearly three times our peak.</span></div>
     </div>
   </div>
 </section>
@@ -1141,8 +1088,8 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
         <span>Removing the mean before contact moves the peak by less than 0.01&nbsp;m/s&sup2;. The customer will probably filter the file as it is, so we did too.</span></div>
     </div>
     <div class="pcards c1 do">
-      <div class="pcard"><span class="tag">what we conclude</span><b>Of the choices we checked, the class moves the answer most</b>
-        <span>The start and the offset move it by less than the last digit we report, one pass moves it by 4.5%, and the class by a factor of 2.7.</span></div>
+      <div class="pcard"><span class="tag">what we conclude</span><b>Of the choices we checked, filtering at all moves the answer most</b>
+        <span>The start and the offset move it by less than the last digit we report, one pass moves it by 4.5%, and CFC&nbsp;60 against the raw record by a factor of 2.7.</span></div>
     </div>
   </div>
 </section>
@@ -1161,7 +1108,7 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
           <li><b>The filter.</b> Where your coefficients came from, and the constant check.</li>
           <li><b>The passes.</b> One or two, and why.</li>
           <li><b>The class.</b> Which use you assumed the customer has.</li>
-          <li><b>The sweep.</b> What the other classes give.</li>
+          <li><b>The comparison.</b> Your filtered peak against the raw one.</li>
           <li><b>The sentence.</b> Everything the customer needs to get your number.</li>
           <li><b>The checks.</b> Which ones you ran, and what they showed.</li>
         </ol></div>
@@ -1174,6 +1121,369 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
         </ul>
         <span>Please see the <a href="reports-04.html">example reports</a>.</span></div>
     </div>
+  </div>
+</section>
+
+<!-- ============================================================ the break -->
+
+<section class="deck-slide part">
+  <div class="head">
+    <p class="course">TME 310 &middot; Computational Physical Modeling</p>
+    <p class="say">Break &middot; 10 minutes</p>
+  </div>
+</section>
+
+<!-- ============================================================ with the tutor
+     Chris's own conversation with the course tutor on the Assignment 4 page,
+     2026-10-25, 12:26 to 1:27 pm, on test 9079; the whole log is
+     tutor-chat-04.html. The map slides and the animation follow. -->
+
+<!-- ============================================================ the map
+     Rows are the walkthrough's seven steps; columns are defending a number, in the
+     syllabus's words (how you got it, what it rests on, how far off it could be) and its
+     objective (which parts a standard fixes and which are yours). Tags on the first map
+     are from the walkthrough slides above. The second map places the prompts of the A4
+     conversation with the tutor; it is our reading. Written by pipeline make_map.py. -->
+
+<style>
+.c4map{display:grid; grid-template-columns:7.2em repeat(4, minmax(0,1fr)) 7.5em; gap:.55vh .8vw; width:100%; font-size:.72em; line-height:1.25; align-items:stretch}
+.c4map.noal{grid-template-columns:7.2em repeat(4, minmax(0,1fr))}
+.c4map .hd{font-size:.82em; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--warm-gray); align-self:end; padding-bottom:.3vh; border-bottom:2px solid var(--course-accent)}
+.c4map .hd.al{border-bottom-color:var(--kraft, #C8860A)}
+.c4map .rl{grid-column:1; font-weight:700; color:var(--course-accent-dark); align-self:center}
+.c4map .mc{display:flex; flex-wrap:wrap; align-items:center; gap:.3em; min-height:2.4em; padding:.25em .4em; border-radius:4px; background:#f7f9f1}
+.c4map .mc:empty{background:#fbfaf6; outline:1px dashed #e3ddd2; outline-offset:-1px}
+.c4map .tag{font-weight:400; color:var(--ink)}
+.c4map .tag.std{color:var(--course-accent-dark); font-weight:700}
+.c4map .tag.mix{color:var(--ink); font-weight:700}
+.c4map .tag.ours{color:#8A6508; font-weight:700}
+.c4map .ag{grid-column:6; display:flex; align-items:center; padding-left:.6em; border-left:3px solid #C8860A; color:#8A6508; font-weight:700; font-size:.92em}
+.c4map .mc i{display:inline-grid; place-items:center; min-width:1.7em; height:1.7em; padding:0 .25em; border-radius:99px; background:var(--course-accent); color:#fff; font-style:normal; font-weight:700; font-size:.9em}
+.c4map .mc i.ed{background:#C8860A}
+.c4map .mc .none{color:var(--warm-gray); font-size:.92em}
+</style>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Each step of Assignment 4 adds part of how we <span class="term">defend</span> the peak.</p>
+    <p class="sub">Defending a number means saying how you got it, what it rests on and how far off it could be, and which parts the standard fixed.</p>
+  </div>
+  <div class="stage tight">
+<div class="c4map">
+<span class="hd"></span>
+<span class="hd">How we got it</span>
+<span class="hd">What it rests on</span>
+<span class="hd">How far off it could be</span>
+<span class="hd">The standard, or ours</span>
+<span class="hd al">Alice gets</span>
+<span class="rl" style="grid-row:2">The channel</span>
+<span class="mc" style="grid-row:2;grid-column:2"><b class="tag">the one the header comment names</b></span>
+<span class="mc" style="grid-row:2;grid-column:3"><b class="tag">prefiltered before sampling</b></span>
+<span class="mc" style="grid-row:2;grid-column:4"><b class="tag">as recorded, a one-sample spike</b></span>
+<span class="mc" style="grid-row:2;grid-column:5"></span>
+<span class="rl" style="grid-row:3">The filter</span>
+<span class="mc" style="grid-row:3;grid-column:2"><b class="tag">a difference equation, five coefficients</b></span>
+<span class="mc" style="grid-row:3;grid-column:3"><b class="tag">coefficients from the class and T</b></span>
+<span class="mc" style="grid-row:3;grid-column:4"></span>
+<span class="mc" style="grid-row:3;grid-column:5"><b class="tag std">J211 Appendix C</b></span>
+<span class="rl" style="grid-row:4">The passes</span>
+<span class="mc" style="grid-row:4;grid-column:2"><b class="tag">forward, then backward</b></span>
+<span class="mc" style="grid-row:4;grid-column:3"></span>
+<span class="mc" style="grid-row:4;grid-column:4"><b class="tag">one pass: 2.8 ms later, 4.5% larger</b></span>
+<span class="mc" style="grid-row:4;grid-column:5"><b class="tag std">CFC 60 is the two-pass filter</b></span>
+<span class="rl" style="grid-row:5">The class</span>
+<span class="mc" style="grid-row:5;grid-column:2"><b class="tag">Table 1, by use</b></span>
+<span class="mc" style="grid-row:5;grid-column:3"><b class="tag">the use is an assumption</b></span>
+<span class="mc" style="grid-row:5;grid-column:4"><b class="tag">a different use, a different class and peak</b></span>
+<span class="mc" style="grid-row:5;grid-column:5"><b class="tag mix">table: J211 · use: ours</b></span>
+<span class="rl" style="grid-row:6">The comparison</span>
+<span class="mc" style="grid-row:6;grid-column:2"><b class="tag">CFC 60 against the raw record</b></span>
+<span class="mc" style="grid-row:6;grid-column:3"></span>
+<span class="mc" style="grid-row:6;grid-column:4"><b class="tag">peak ÷2.7, and a different moment</b></span>
+<span class="mc" style="grid-row:6;grid-column:5"></span>
+<span class="rl" style="grid-row:7">The sentence</span>
+<span class="mc" style="grid-row:7;grid-column:2"><b class="tag">names the channel, class and passes</b></span>
+<span class="mc" style="grid-row:7;grid-column:3"></span>
+<span class="mc" style="grid-row:7;grid-column:4"><b class="tag">what each wrong number looks like</b></span>
+<span class="mc" style="grid-row:7;grid-column:5"><b class="tag ours">ours to write</b></span>
+<span class="rl" style="grid-row:8">The checks</span>
+<span class="mc" style="grid-row:8;grid-column:2"><b class="tag">a constant comes back as 1</b></span>
+<span class="mc" style="grid-row:8;grid-column:3"><b class="tag">the start, the offset, the rate</b></span>
+<span class="mc" style="grid-row:8;grid-column:4"><b class="tag">start and offset: under the last digit</b></span>
+<span class="mc" style="grid-row:8;grid-column:5"><b class="tag ours">ours</b></span>
+<span class="ag" style="grid-row:3 / 5">the peak</span>
+<span class="ag" style="grid-row:5 / 6">the class, and why</span>
+<span class="ag" style="grid-row:6 / 8">the sentence, and when a different value is right</span>
+<span class="ag" style="grid-row:8 / 9">the assumptions</span>
+</div>
+    <p class="src">Green bold: J211 fixes it. Gold bold: it is ours. The column headings follow the syllabus. The tags are from the walkthrough on the Civic (test 9808).</p>
+  </div>
+</section>
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">The conversation with the tutor, placed on the same <span class="term">map</span>.</p>
+    <p class="sub">Numbers are prompts, and the pencils are my edits after the chat. The placing is our reading of the log.</p>
+  </div>
+  <div class="stage tight">
+<div class="c4map noal">
+<span class="hd"></span>
+<span class="hd">How we got it</span>
+<span class="hd">What it rests on</span>
+<span class="hd">How far off it could be</span>
+<span class="hd">The standard, or ours</span>
+<span class="rl" style="grid-row:2">The channel</span>
+<span class="mc" style="grid-row:2;grid-column:2"><i title="prompt 1">1</i><i title="prompt 5">5</i></span>
+<span class="mc" style="grid-row:2;grid-column:3"><i class="ed" title="edit after the chat, 1:55 pm">&#9998;</i></span>
+<span class="mc" style="grid-row:2;grid-column:4"></span>
+<span class="mc" style="grid-row:2;grid-column:5"></span>
+<span class="rl" style="grid-row:3">The filter</span>
+<span class="mc" style="grid-row:3;grid-column:2"><i title="prompt 5">5</i><i title="prompt 8">8</i><i title="prompt 9">9</i><i title="prompt 11">11</i></span>
+<span class="mc" style="grid-row:3;grid-column:3"><i title="prompt 7">7</i></span>
+<span class="mc" style="grid-row:3;grid-column:4"></span>
+<span class="mc" style="grid-row:3;grid-column:5"><i title="prompt 6">6</i></span>
+<span class="rl" style="grid-row:4">The passes</span>
+<span class="mc" style="grid-row:4;grid-column:2"><i title="prompt 10">10</i></span>
+<span class="mc" style="grid-row:4;grid-column:3"></span>
+<span class="mc" style="grid-row:4;grid-column:4"></span>
+<span class="mc" style="grid-row:4;grid-column:5"><i title="prompt 10">10</i></span>
+<span class="rl" style="grid-row:5">The class</span>
+<span class="mc" style="grid-row:5;grid-column:2"><i title="prompt 6">6</i></span>
+<span class="mc" style="grid-row:5;grid-column:3"><i title="prompt 7">7</i></span>
+<span class="mc" style="grid-row:5;grid-column:4"><i title="prompt 7">7</i></span>
+<span class="mc" style="grid-row:5;grid-column:5"><i title="prompt 1">1</i><i title="prompt 2">2</i><i title="prompt 6">6</i></span>
+<span class="rl" style="grid-row:6">The comparison</span>
+<span class="mc" style="grid-row:6;grid-column:2"><i title="prompt 5">5</i><i title="prompt 13">13</i></span>
+<span class="mc" style="grid-row:6;grid-column:3"></span>
+<span class="mc" style="grid-row:6;grid-column:4"><i title="prompt 13">13</i></span>
+<span class="mc" style="grid-row:6;grid-column:5"></span>
+<span class="rl" style="grid-row:7">The sentence</span>
+<span class="mc" style="grid-row:7;grid-column:2"><i title="prompt 13">13</i></span>
+<span class="mc" style="grid-row:7;grid-column:3"></span>
+<span class="mc" style="grid-row:7;grid-column:4"><i title="prompt 2">2</i><i title="prompt 3">3</i></span>
+<span class="mc" style="grid-row:7;grid-column:5"></span>
+<span class="rl" style="grid-row:8">The checks</span>
+<span class="mc" style="grid-row:8;grid-column:2"><i title="prompt 5">5</i><i title="prompt 9">9</i></span>
+<span class="mc" style="grid-row:8;grid-column:3"><i title="prompt 3">3</i><i title="prompt 4">4</i><i title="prompt 10">10</i><i class="ed" title="edit after the chat, 5:40 pm">&#9998;</i></span>
+<span class="mc" style="grid-row:8;grid-column:4"><i title="prompt 12">12</i><i title="prompt 13">13</i></span>
+<span class="mc" style="grid-row:8;grid-column:5"><i class="ed" title="edit after the chat, 5:40 pm">&#9998;</i></span>
+</div>
+    <p class="src">The whole conversation is on the site: <a href="tutor-chat-04.html">Assignment 4 with the course tutor</a>.</p>
+  </div>
+</section>
+
+<style>
+/* The chat animation (chatanim in class-04-figs.js). Player styles are the 490
+   week 2 deck's, in this course's colours. */
+.c4anim{--rule:#ddd6c9; --kraft:#C8860A; --hot:#C8860A}
+body.inclass .deck-slide.c4anim{justify-content:flex-start; padding-top:3vh; gap:1vh}
+.c4anim .stage{align-items:center}
+.c4anim .animlabel,.c4anim .loopbar,.c4anim .player,#c4a,.c4a-mx,.c4a-tl{width:min(100%, 158vh); margin-inline:auto}
+.c4anim .animlabel{display:flex; justify-content:space-between; align-items:baseline; gap:1rem; margin-bottom:.6vh;
+  font-size:clamp(.8rem,1.3vw,1.05rem); font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--term)}
+.c4anim .animlabel small{font-size:.78em; font-weight:400; letter-spacing:0; text-transform:none; color:var(--warm-gray)}
+#c4a{position:relative; height:52vh; display:grid; grid-template-columns:100fr 0fr; gap:1.2vw; transition:grid-template-columns calc(.8s / var(--sp)) ease;
+  font-size:calc(var(--stage-text) * .5); line-height:1.35; --sp:1}
+#c4a .col{position:relative; display:flex; flex-direction:column; min-height:0; border:1px solid var(--rule); border-radius:6px; background:#fff; overflow:hidden}
+#c4a .bar{flex:none; display:flex; align-items:center; gap:.5em; padding:.35em .7em; background:#EEE9E0; font-size:.82em; color:var(--warm-gray); font-weight:600}
+#c4a .bar i{width:.6em; height:.6em; border-radius:50%; background:#d6cfc2; flex:none}
+.c4a-clock{margin-left:auto; font-family:Consolas,"SF Mono",monospace; font-weight:700; color:#fff; background:var(--course-accent-dark); padding:.05em .45em; border-radius:4px}
+/* the chat */
+.c4a-conv{position:relative; flex:1; min-height:0; overflow:hidden; padding:.6em .7em; display:flex; flex-direction:column; gap:.6em}
+.c4a-conv .cb{max-width:92%; padding:.45em .7em; border-radius:9px; font-size:.82em; line-height:1.38}
+.c4a-conv .cb .said{white-space:pre-wrap}
+.c4a-conv .cb p{margin:.35em 0}
+.c4a-conv .cb h2,.c4a-conv .cb h3{font-size:1em; margin:.6em 0 .2em; color:var(--course-accent-dark)}
+.c4a-conv .cb ul,.c4a-conv .cb ol{margin:.3em 0; padding-left:1.3em}
+.c4a-conv .cb li{margin:.1em 0}
+.c4a-conv .cb pre{margin:.4em 0; padding:.4em .55em; background:#f4f1ea; border:1px solid var(--rule); border-radius:4px; font-size:.78em; line-height:1.35; overflow:hidden; white-space:pre}
+.c4a-conv .cb pre code,.c4a-conv .cb code{background:none; padding:0; font-family:Consolas,"SF Mono",monospace; font-size:.95em}
+.c4a-conv .cb pre.paste{background:#fff}
+.c4a-conv .cb table{border-collapse:collapse; font-size:.85em; margin:.3em 0}
+.c4a-conv .cb th,.c4a-conv .cb td{border:1px solid var(--rule); padding:.15em .4em; text-align:left}
+.c4a-conv .cb mark{background:#fbe3a6; color:inherit; padding:0 .1em; border-radius:2px; box-shadow:0 0 0 2px #fbe3a6}
+.c4a-conv .cb small{display:block; font-size:.72em; font-weight:700; letter-spacing:.06em; text-transform:uppercase; opacity:.7; margin-bottom:.1em}
+.c4a-conv .cb.me{align-self:flex-end; background:#e6edd8; border:1px solid #cfd8bc; border-bottom-right-radius:3px}
+.c4a-conv .cb.tutor{align-self:flex-start; background:#fbf8f2; border:1px solid var(--rule); border-bottom-left-radius:3px}
+.c4a-conv .cb.new{animation:c4adrop calc(.45s / var(--sp)) cubic-bezier(.2,.9,.3,1.2)}
+.c4a-conv .cb.dots{display:flex; gap:.3em; padding:.6em .8em}
+.c4a-conv .cb.dots i{width:.45em; height:.45em; border-radius:50%; background:var(--warm-gray); animation:c4adot 1.2s ease-in-out infinite}
+.c4a-conv .cb.dots i:nth-child(2){animation-delay:.2s}
+.c4a-conv .cb.dots i:nth-child(3){animation-delay:.4s}
+@keyframes c4adrop{from{transform:translateY(40%); opacity:0} to{transform:none; opacity:1}}
+@keyframes c4adot{0%,80%,100%{opacity:.3} 40%{opacity:1}}
+/* the editor and the terminal */
+#c4a .tabs{flex:none; display:flex; gap:.15em; padding:.3em .5em 0; background:#EEE9E0; font-size:.8em}
+#c4a .tab{padding:.2em .8em; border-radius:5px 5px 0 0; color:var(--warm-gray); font-family:Consolas,"SF Mono",monospace}
+#c4a .tab.on{background:#fff; color:var(--ink); font-weight:700}
+#c4a .tab.gone{display:none}
+.c4a-file{margin-left:auto; align-self:center; font-size:.92em; color:var(--warm-gray)}
+/* the zoomed-out file: one bar per line (chatanim openDoc) */
+.c4a-body .mini{padding:5px 12px; --lh:4px}
+.c4a-body .mr{height:var(--lh); display:flex; align-items:center}
+.c4a-body .mr i{display:block; height:max(1px, calc(var(--lh) * .62)); border-radius:1px; background:#a9b08f; transition:background calc(.4s / var(--sp))}
+.c4a-body .mr.doc i{background:#d6cfc2}
+.c4a-body .mr.comment i{background:#c9c2b4}
+.c4a-body .mr.def i{background:var(--course-accent-dark)}
+.c4a-body .mr.code i{background:#8f9a76}
+.c4a-body .mr.head i{background:var(--course-accent-dark); height:max(2px, calc(var(--lh) * .9))}
+.c4a-body .mr.table i{background:#b7bf9c}
+.c4a-body .mr.list i{background:#8f9a76}
+.c4a-body .mr.quote i{background:#7d8b62}
+.c4a-body .mr.image i{background:#d9b26a}
+.c4a-body .mr.para i{background:#c2bcaf}
+.c4a-body .mr.chg{background:#f8dfa0; animation:c4aflash calc(1.6s / var(--sp)) ease-out}
+.c4a-body .mr.chg.still{animation:none}
+.c4a-body .mr.chg i{background:#b06f00; height:max(2px, calc(var(--lh) * .8))}
+.c4a-body{flex:1; min-height:0; overflow:hidden; padding:.3em 0; font-family:Consolas,"SF Mono",monospace; font-size:.72em; line-height:1.38; scroll-behavior:smooth}
+.c4a-body .ln{display:flex; gap:.8em; padding:0 .6em; white-space:pre}
+.c4a-body.wrap .ln{white-space:pre-wrap}
+.c4a-body .ln span{flex:none; width:2.2em; text-align:right; color:#b3aca0; user-select:none}
+.c4a-body .ln code{background:none; padding:0; font-size:1em; color:var(--ink); min-width:0}
+.c4a-body .ln.chg{background:#fdf1d6; box-shadow:inset 3px 0 0 var(--kraft); animation:c4aflash calc(1.6s / var(--sp)) ease-out}
+.c4a-body .ln.chg.still{animation:none}
+@keyframes c4aflash{from{background:#f6d58c} to{background:#fdf1d6}}
+.c4a-body .none{margin:auto; padding:2em 1em; text-align:center; color:var(--warm-gray); font-family:inherit}
+.c4a-term{flex:none; height:0; overflow:hidden; background:#1f2419; color:#d8e2c4; font-family:Consolas,"SF Mono",monospace; font-size:.68em; line-height:1.35; padding:0 .7em; white-space:pre-wrap; overflow-wrap:anywhere;
+  transition:height calc(.5s / var(--sp)), padding calc(.5s / var(--sp))}
+#c4a.has-term .c4a-term{padding:.45em .7em}
+.c4a-term div.wait{visibility:hidden}
+/* the editor column takes no room until the first file opens */
+#c4a.has-ed{grid-template-columns:53fr 47fr}
+#c4a.instant,#c4a.instant *{transition:none !important}
+#c4a .c4a-edcol{opacity:0; transition:opacity calc(.5s / var(--sp)) calc(.3s / var(--sp))}
+#c4a.has-ed .c4a-edcol{opacity:1}
+#c4a:not(.has-ed) .c4a-edcol{border-width:0}
+/* streaming: every word is laid out, and shown as it arrives */
+.c4a-conv .cb.streaming .tk{visibility:hidden}
+.c4a-conv .cb.streaming .tk.on{visibility:visible}
+.c4a-conv .cb.streaming li:not(.seen)::marker{color:transparent}
+.c4a-conv .cb.streaming pre:not(.seen){visibility:hidden}
+.c4a-conv .cb.streaming details:not(.seen){visibility:hidden}
+.c4a-conv .cb details.code{margin:.4em 0}
+.c4a-conv .cb details.code summary{display:inline-block; cursor:pointer; padding:.15em .6em; border:1px solid var(--rule); border-radius:4px;
+  background:#f4f1ea; font-family:Consolas,"SF Mono",monospace; font-size:.8em; color:var(--warm-gray)}
+.c4a-conv .cb details.code summary::marker{content:"\25B8  "}
+.c4a-conv .cb details.code[open] summary::marker{content:"\25BE  "}
+.c4a-conv .cb.streaming th:not(.seen),.c4a-conv .cb.streaming td:not(.seen){border-color:transparent; background:none}
+.c4a-conv .cb.streaming mark{background:none; box-shadow:none}
+/* the message box */
+.c4a-input{flex:none; display:flex; align-items:flex-end; gap:.1em; margin:.3em .6em .6em; padding:.4em .8em; max-height:5.4em; overflow:hidden;
+  border:1px solid var(--rule); border-radius:12px; background:#fff; font-size:.82em; line-height:1.38; white-space:pre-wrap}
+.c4a-input .txt:empty::before{content:"Message the tutor\2026"; color:#a8a296}
+.c4a-input .caret{flex:none; width:.5em; height:1.1em; background:var(--course-accent-dark); animation:c4acaret 1s steps(1) infinite}
+@keyframes c4acaret{50%{opacity:0}}
+/* the maxims, and the prompt timeline with the Polya phases */
+.c4a-mx{display:flex; flex-wrap:wrap; align-items:center; gap:.45em; margin-top:1.2vh; min-height:2.1em; font-size:calc(var(--stage-text) * .5)}
+.c4a-mx .mxl{font-size:.72em; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--warm-gray); margin-right:.3em}
+.c4a-mx .mx{display:inline-flex; align-items:center; height:1.9em; padding:0 .2em; border-radius:99px; border:1.5px solid #d6cfc2; color:#a8a296;
+  white-space:nowrap; overflow:hidden; cursor:help; transition:background calc(.4s / var(--sp)), color calc(.4s / var(--sp)), border-color calc(.4s / var(--sp)), padding calc(.4s / var(--sp))}
+.c4a-mx .mx b{display:inline-grid; place-items:center; min-width:1.4em; font-weight:700}
+.c4a-mx .mx em{font-style:normal; max-width:0; opacity:0; transition:max-width calc(.5s / var(--sp)), opacity calc(.4s / var(--sp)), margin calc(.4s / var(--sp))}
+.c4a-mx .mx.on{background:var(--course-accent-dark); border-color:var(--course-accent-dark); color:#fff; padding:0 .75em 0 .3em}
+.c4a-mx .mx.on em{max-width:16em; opacity:1; margin-left:.2em}
+.c4a-tl{position:relative; height:3.7em; margin-top:2.4vh; font-size:calc(var(--stage-text) * .48)}
+.c4a-tl .tl-line{position:absolute; left:0; width:80%; top:.95em; border-top:2px solid #d6cfc2}
+.c4a-tl .tl-line.a{left:86%; width:14%; border-top-style:dashed}
+.c4a-tl .tl-dot{position:absolute; top:.15em; width:1.65em; height:1.65em; margin-left:-.825em; padding:0; border-radius:50%; border:2px solid var(--course-accent);
+  background:#fff; color:var(--course-accent-dark); font:700 .85em/1 inherit; font-family:inherit; display:grid; place-items:center; cursor:pointer;
+  transition:transform calc(.3s / var(--sp)), background calc(.3s / var(--sp)), color calc(.3s / var(--sp))}
+.c4a-tl .tl-dot.a{border-radius:4px; font-weight:400}
+.c4a-tl .tl-dot.done{background:var(--course-accent); color:#fff}
+.c4a-tl .tl-dot.on{background:var(--kraft); border-color:var(--kraft); color:#fff; transform:scale(1.3); box-shadow:0 0 0 4px rgba(200,134,10,.2); z-index:2}
+.c4a-tl .tl-band{position:absolute; top:2.4em; border-top:4px solid #e5e0d6; padding-top:.2em; font-size:.74em; font-weight:700; letter-spacing:.05em;
+  text-transform:uppercase; color:#a8a296; white-space:nowrap; transition:border-color calc(.3s / var(--sp)), color calc(.3s / var(--sp))}
+.c4a-tl .tl-band.done{border-color:#c7cfae; color:var(--course-accent-dark)}
+.c4a-tl .tl-band.on{border-color:var(--course-accent-dark); color:var(--ink)}
+.c4a-tl .tl-lab{position:absolute; top:-1.3em; font-size:.72em; color:var(--warm-gray); white-space:nowrap}
+.c4a-tl .tl-brk{position:absolute; top:.15em; color:#b3aca0; font-weight:700}
+/* the cards */
+.c4a-card{position:absolute; inset:12% 18%; z-index:5; display:flex; flex-direction:column; justify-content:center; gap:.7em; padding:1.4em 2em;
+  background:#fff; border:2px solid var(--course-accent); border-radius:10px; box-shadow:0 12px 40px rgba(25,25,25,.18); font-size:1.15em}
+.c4a-card[hidden]{display:none}
+.c4a-card .when{font-family:Consolas,"SF Mono",monospace; font-weight:700; color:var(--course-accent-dark)}
+.c4a-card b{font-size:1.1em}
+.c4a-card .soft{color:var(--warm-gray)}
+/* the caption and the player (490 week 2) */
+.c4anim .loopbar{position:relative; margin-top:.4em}
+.c4anim .loopcap{min-width:0; height:2.9em; margin:0; text-align:left; font-size:calc(var(--stage-text) * .62); color:var(--ink); text-wrap:balance}
+.c4anim .loopcap .n{color:var(--term); font-weight:700; margin-right:.6em; font-variant-numeric:tabular-nums}
+.c4anim .pmore{display:inline-grid; place-items:center; width:1.35em; height:1.35em; margin-left:.45em; vertical-align:.05em; padding:0;
+  border:1.5px solid var(--course-accent-dark); border-radius:50%; background:transparent; color:var(--course-accent-dark);
+  font:700 .72em/1 Georgia, "Times New Roman", serif; font-style:italic; cursor:pointer}
+.c4anim .pmore:hover,.c4anim .pmore[aria-expanded="true"]{background:var(--course-accent-dark); color:#fff}
+.c4anim .pmorebox{position:absolute; left:0; bottom:calc(100% + .5rem); z-index:7; max-width:min(46rem, 100%); padding:.75rem 2.2rem .75rem .9rem;
+  background:#fff; border:1px solid var(--rule); border-left:4px solid var(--course-accent-dark); border-radius:6px;
+  box-shadow:0 10px 30px rgba(25,25,25,.18); font-size:calc(var(--stage-text) * .55); line-height:1.5; color:var(--ink)}
+.c4anim .pmorebox[hidden]{display:none}
+.c4anim .pmorebox button{position:absolute; top:.35rem; right:.4rem; border:0; background:transparent; font-size:1.1rem; line-height:1; color:var(--warm-gray); cursor:pointer; padding:.2rem .35rem; border-radius:4px}
+.c4anim .player{display:flex; align-items:center; gap:.9rem; color:var(--ink); font-size:16px}
+.c4anim .ptp{display:flex; align-items:center; gap:.15rem; flex:none}
+.c4anim .ptp button,.c4anim .pauto{display:grid; place-items:center; width:2.1rem; height:2.1rem; padding:0; border:0; border-radius:50%; background:transparent; color:var(--ink); cursor:pointer}
+.c4anim .ptp button svg,.c4anim .pauto svg{width:1.25rem; height:1.25rem}
+.c4anim .ptp button:hover,.c4anim .pauto:hover{background:var(--subtle)}
+.c4anim .ptp .ppb{width:2.7rem; height:2.7rem; margin:0 .2rem; background:var(--course-accent-dark); color:#fff; box-shadow:0 2px 8px rgba(71,84,42,.3)}
+.c4anim .ptp .ppb svg{width:1.35rem; height:1.35rem; display:block}
+.c4anim .ptp .ppb span{display:none}
+.c4anim .ptp .ppb.playing .i-pause,.c4anim .ptp .ppb:not(.playing) .i-play{display:block}
+.c4anim .pbar{position:relative; flex:1; min-width:0; height:1.6rem; cursor:pointer; touch-action:none}
+.c4anim .psegs{position:absolute; left:0; right:0; top:50%; height:5px; transform:translateY(-50%)}
+.c4anim .pbar:hover .psegs{height:8px}
+.c4anim .pseg{position:absolute; top:0; bottom:0; padding-right:3px; box-sizing:border-box}
+.c4anim .pseg::before{content:""; position:absolute; inset:0 3px 0 0; border-radius:3px; background:#E5E4DF}
+.c4anim .pseg.hot::before{background:#D9D8D2}
+.c4anim .pseg i{position:absolute; left:0; top:0; bottom:0; width:0; max-width:calc(100% - 3px); border-radius:3px; background:var(--course-accent-dark)}
+.c4anim .pseg.quiet i{background:#40403E}
+.c4anim .pknob{position:absolute; top:50%; width:14px; height:14px; margin:-7px 0 0 -7px; border-radius:50%; background:var(--course-accent-dark); opacity:0; pointer-events:none}
+.c4anim .pbar:hover .pknob{opacity:1}
+.c4anim .ptip{position:absolute; bottom:calc(100% + .35rem); transform:translateX(-50%); white-space:nowrap; pointer-events:none;
+  background:#191919; color:#F0F0EB; font-size:.78rem; padding:.3rem .6rem; border-radius:5px; z-index:8}
+.c4anim .ptime{flex:none; width:7.2em; text-align:right; font-size:.8rem; color:var(--warm-gray); font-variant-numeric:tabular-nums}
+.c4anim .pspeed{position:relative; flex:none}
+.c4anim .pchip{font:inherit; font-size:.8rem; font-weight:700; width:4.2em; height:1.75rem; border:1px solid var(--rule); border-radius:99px; background:#fff; color:var(--ink); cursor:pointer}
+.c4anim .ppop{position:absolute; bottom:calc(100% + .45rem); left:50%; transform:translateX(-50%); z-index:9; display:flex; flex-direction:column; align-items:center; gap:.35rem;
+  padding:.55rem .45rem; background:#fff; border:1px solid var(--rule); border-radius:10px; box-shadow:0 8px 24px rgba(25,25,25,.16)}
+.c4anim .ppop[hidden]{display:none}
+.c4anim .ppop input{writing-mode:vertical-lr; direction:rtl; width:1.4rem; height:7.5rem; margin:0; accent-color:var(--course-accent-dark)}
+.c4anim .ppop .pv{font-size:.78rem; font-weight:700}
+.c4anim .ppop .pmin{font-size:.68rem; color:var(--warm-gray)}
+.c4anim .pauto{color:var(--warm-gray); opacity:.6}
+.c4anim .pauto[aria-pressed="true"]{color:var(--course-accent-dark); opacity:1; background:rgba(95,112,56,.12)}
+@media (prefers-reduced-motion:reduce){ .c4a-conv .cb,.c4a-body .ln.chg,.c4a-conv .cb.dots i{animation:none} }
+</style>
+
+<section class="deck-slide anim c4anim">
+  <div class="stage">
+    <div class="animlabel"><span>Assignment 4 with the course tutor</span><small>Click a prompt on the timeline to jump to it &middot; hover a maxim for its wording</small></div>
+    <div id="c4a" data-src="data/example/tutor04-anim.json?v=20261027124351">
+      <div class="col">
+        <div class="bar"><i></i><i></i><i></i>Course tutor &middot; Assignment 4 page<span class="c4a-clock">Sun 12:26 PM</span></div>
+        <div class="c4a-conv"></div>
+        <div class="c4a-input"><span class="txt"></span><i class="caret"></i></div>
+      </div>
+      <div class="col c4a-edcol">
+        <div class="tabs"><span class="tab gone" data-tab="code">a4_demo.py</span><span class="tab gone" data-tab="report">report.md</span><span class="c4a-file"></span></div>
+        <div class="c4a-body"></div>
+        <div class="c4a-term"></div>
+      </div>
+      <div class="c4a-card c4a-intro" hidden>
+        <span class="when">Sunday, October 25, 12:26 PM</span>
+        <b>I work Assignment 4 as a student, with the course tutor open beside the assignment page.</b>
+        <span>The chat is on the left. Once there is a program, an editor opens beside it with the program and the report as they change, and the program's output underneath.</span>
+        <span>In each of the tutor's replies, the highlighted part is what my next prompt answers.</span>
+        <span class="soft">Under the chat, the timeline marks each prompt and its P&oacute;lya step, and above it the maxims a prompt shows open up to their names.</span>
+      </div>
+      <div class="c4a-card c4a-end" hidden>
+        <span class="when">Sunday, 5:40 PM</span>
+        <b>Thirteen prompts, one program and one report.</b>
+        <span>The tutor wrote the code and the first draft. I chose the class, the passes and the start, and I filled the brackets in the report.</span>
+        <span class="soft">The conversation, the finished report and the program are on the site: <a href="tutor-chat-04.html">Assignment 4 with the course tutor</a>.</span>
+      </div>
+    </div>
+    <div class="c4a-mx" id="c4a-mx"></div>
+    <div class="c4a-tl" id="c4a-tl"></div>
+    <div class="loopbar"><p class="loopcap" id="c4a-cap" aria-live="polite"></p></div>
+    <div class="player" id="c4a-player"></div>
   </div>
 </section>
 
@@ -1220,7 +1530,7 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
       <div class="pcard gold"><span class="tag">today</span><b>Before you leave</b>
         <ul>
           <li>Code the filter, and feed it a constant.</li>
-          <li>Filter your crossmember at all four classes, and read the peak and $\Delta v$ at each.</li>
+          <li>Compare your CFC&nbsp;60 peak with the raw one.</li>
           <li>Write the sentence to Alice, with the class you think the customer needs.</li>
         </ul></div>
     </div>
@@ -1306,6 +1616,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 })();
 </script>
 
-<script type="module" src="js/bundle/class-04.js?v=20261023091254"></script>
+<script type="module" src="js/bundle/class-04.js?v=20261027124351"></script>
 </body>
 </html>

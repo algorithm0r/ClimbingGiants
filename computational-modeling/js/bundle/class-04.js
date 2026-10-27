@@ -1260,9 +1260,7 @@ setTimeout(() => {
    CFC 60 peak by less than 0.01 m/s².
 
    A host is <div class="c2fig" data-c4="name">. The class 2 chart styles
-   (.c2chart, .c2lab, the c2- line classes) are reused as they are. The live
-   sweep stops its clicks from reaching the deck, which would otherwise advance
-   a slide. */
+   (.c2chart, .c2lab, the c2- line classes) are reused as they are. */
 (() => {
   const FILE = 'data/tests/09808.json';
   const CLASSES = [1000, 600, 180, 60];
@@ -1297,16 +1295,11 @@ setTimeout(() => {
     return T;
   });
 
-  /* the sample of largest magnitude, and the change in velocity from contact */
+  /* the sample of largest magnitude */
   function peak(T, y) {
     let ip = 0;
     for (let i = 1; i < T.n; i++) if (Math.abs(y[i]) > Math.abs(y[ip])) ip = i;
     return {i: ip, t: T.t[ip], y: y[ip]};
-  }
-  function dv(T, y) {
-    let s = 0;
-    for (let i = T.i0 + 1; i < T.n; i++) s += 0.5 * (y[i] + y[i - 1]) * T.dt;
-    return s;
   }
   const one = v => Float64Array.of(v);
   const ms = v => MINUS(String(+(v * 1000).toFixed(3)));
@@ -1429,63 +1422,47 @@ setTimeout(() => {
         labels: [{x: p.t, y: p.y, dx: 12, dy: 24, cls: 'c2lab', text: v1(p.y) + ' at ' + ms(p.t) + ' ms'}]});
     },
 
+    /* both, unnamed, for the vote: A is one pass, B is forward and backward */
+    whichPass(host, T) {
+      const p = peak(T, T.one[60]), q = peak(T, T.f[60]);
+      chart(host, {h: 460, y: {lo: -420, hi: 120, ticks: [-400, -200, 0], zero: true,
+          label: 'Civic crossmember (m/s²), CFC 60, two ways'},
+        x: {lo: 0, hi: 0.12, fmt: ms, label: 'time (ms)'},
+        series: [{x: T.t, y: T.one[60], cls: 'c2-head'}, {x: T.t, y: T.f[60], cls: 'c2-cross'},
+                 {x: one(p.t), y: one(p.y), line: false, dots: 'c2p-head', r: 8},
+                 {x: one(q.t), y: one(q.y), line: false, dots: 'c2p-cross', r: 8}],
+        labels: [{x: p.t, y: p.y, dx: 18, dy: 30, cls: 'c4big c4A', text: 'A'},
+                 {x: q.t, y: q.y, dx: -18, dy: 30, anchor: 'end', cls: 'c4big c4B', text: 'B'}]});
+    },
+
     /* the same with one pass laid over it */
     onePass(host, T) {
       const p = peak(T, T.f[60]), q = peak(T, T.one[60]);
       chart(host, {h: 460, y: {lo: -420, hi: 120, ticks: [-400, -200, 0], zero: true,
           label: 'Civic crossmember (m/s²), CFC 60'},
         x: {lo: 0, hi: 0.12, fmt: ms, label: 'time (ms)'},
-        series: [{x: T.t, y: T.f[60], style: lineStyle(60)},
-                 {x: T.t, y: T.one[60], cls: 'c2-amber'},
+        series: [{x: T.t, y: T.f[60], cls: 'c2-cross'},
+                 {x: T.t, y: T.one[60], cls: 'c2-head'},
                  {x: one(p.t), y: one(p.y), line: false, dots: 'c2p-cross', r: 8},
-                 {x: one(q.t), y: one(q.y), line: false, dots: 'c2p-amber', r: 8}],
+                 {x: one(q.t), y: one(q.y), line: false, dots: 'c2p-head', r: 8}],
         labels: [{x: p.t, y: p.y, dx: -12, dy: 6, anchor: 'end', cls: 'c2lab',
-                  text: 'two passes: ' + v1(p.y) + ' at ' + ms(p.t) + ' ms'},
+                  text: 'B, two passes: ' + v1(p.y) + ' at ' + ms(p.t) + ' ms'},
                  {x: q.t, y: q.y, dx: 12, dy: 6, cls: 'c2lab',
-                  text: 'one pass: ' + v1(q.y) + ' at ' + ms(q.t) + ' ms'}]});
+                  text: 'A, one pass: ' + v1(q.y) + ' at ' + ms(q.t) + ' ms'}]});
     },
 
-    /* the peak and the change in velocity at each filter, each as a percentage
-       of its value as recorded */
-    ratio(host, T) {
-      const ys = [T.raw, ...CLASSES.map(k => T.f[k])], xs = Float64Array.from(ys, (_, i) => i + 1);
-      const p0 = Math.abs(peak(T, T.raw).y), d0 = dv(T, T.raw);
-      const pk = Float64Array.from(ys, y => 100 * Math.abs(peak(T, y).y) / p0);
-      const dd = Float64Array.from(ys, y => 100 * dv(T, y) / d0);
-      const labels = [];
-      ys.forEach((y, i) => {
-        labels.push({x: i + 1, y: pk[i], dy: 34, anchor: 'middle', cls: 'c2lab',
-                     text: v1(peak(T, y).y)});
-        labels.push({x: i + 1, y: dd[i], dy: -16, anchor: 'middle', cls: 'c2lab',
-                     text: MINUS(dv(T, y).toFixed(3))});
-      });
-      chart(host, {h: 470, y: {lo: 0, hi: 115, ticks: [0, 25, 50, 75, 100],
-          label: 'percentage of the value as recorded'},
-        x: {lo: 0.5, hi: 5.5, ticks: Array.from(xs),
-            fmt: v => v === 1 ? 'as recorded' : 'CFC ' + CLASSES[v - 2]},
-        series: [{x: xs, y: dd, cls: 'c2-head', dots: 'c2p-head', r: 8},
-                 {x: xs, y: pk, cls: 'c2-cross', dots: 'c2p-cross', r: 8}],
-        labels: [...labels,
-                 {x: 5.45, y: dd[4], dy: 30, anchor: 'end', cls: 'c2lab', text: 'Δv (m/s)'},
-                 {x: 2.5, y: 72, cls: 'c2lab', text: 'peak (m/s²)'}]});
-    },
-
-    /* three classes over the pulse, each peak marked */
-    classes(host, T) {
-      const series = [{x: T.t, y: T.raw, cls: 'c2-faint'}], labels = [];
-      const place = {600: {dx: -12, dy: 6, anchor: 'end'}, 180: {dy: 34, anchor: 'middle'},
-                     60: {dx: 14, dy: 30}};
-      for (const k of [600, 180, 60]) {
-        const p = peak(T, T.f[k]);
-        series.push({x: T.t, y: T.f[k], style: lineStyle(k)});
-        series.push({x: one(p.t), y: one(p.y), line: false, dots: 'c2p-cross', r: 7});
-        labels.push({x: p.t, y: p.y, cls: 'c2lab', ...place[k],
-                     text: 'CFC ' + k + ': ' + ms(p.t) + ' ms'});
-      }
+    /* CFC 60 laid over the record as recorded, each peak with its value and time */
+    moment(host, T) {
+      const p = peak(T, T.raw), q = peak(T, T.f[60]);
       chart(host, {h: 470, y: {lo: -1050, hi: 650, ticks: [-1000, -500, 0, 500], zero: true,
-          label: 'Civic crossmember (m/s²): as recorded (grey), CFC 600, 180 and 60'},
+          label: 'Civic crossmember (m/s²): as recorded (grey) and CFC 60'},
         x: {lo: 0, hi: 0.1, fmt: ms, label: 'time (ms)'},
-        series, labels});
+        vlines: [{x: p.t, text: ms(p.t) + ' ms', anchor: 'start', dx: 6}, {x: q.t, text: ms(q.t) + ' ms', anchor: 'start', dx: 6}],
+        series: [{x: T.t, y: T.raw, cls: 'c2-faint'}, {x: T.t, y: T.f[60], style: lineStyle(60)},
+                 {x: one(p.t), y: one(p.y), line: false, dots: 'c2p-cross', r: 7},
+                 {x: one(q.t), y: one(q.y), line: false, dots: 'c2p-cross', r: 7}],
+        labels: [{x: p.t, y: p.y, dx: 12, dy: 6, cls: 'c2lab', text: 'as recorded: ' + v1(p.y)},
+                 {x: q.t, y: q.y, dx: 12, dy: 30, cls: 'c2lab', text: 'CFC 60: ' + v1(q.y)}]});
     },
 
     /* outside crash testing: three small figures */
@@ -1539,76 +1516,6 @@ setTimeout(() => {
     },
   };
 
-  /* -------------------------------------------------------- the live sweep */
-  /* One button per filter, and one or two passes. The chart is redrawn from
-     the record on every click, and the readouts are computed from the same
-     arrays, so the numbers on the slide cannot drift from the data. */
-  function sweep(host, T) {
-    const root = document.createElement('div');
-    root.className = 'c4sweep';
-    const opts = [['raw', 'as recorded'], ...CLASSES.map(k => [String(k), 'CFC ' + k])];
-    root.innerHTML =
-      '<div class="plot"></div><div class="side">' +
-      '<div class="seg" data-g="cls">' + opts.map(([k, l]) =>
-        `<button type="button" data-v="${k}"${k === 'raw' ? ' aria-pressed="true"' : ''}>${l}</button>`).join('') +
-      '</div><div class="seg two" data-g="pass">' +
-      '<button type="button" data-v="2" aria-pressed="true">forward and backward</button>' +
-      '<button type="button" data-v="1">forward only</button></div>' +
-      '<div class="ro"><span class="k">peak</span><span class="v" data-r="pk"></span>' +
-      '<span class="k">time of peak</span><span class="v" data-r="tp"></span>' +
-      '<span class="k">&Delta;v from contact</span><span class="v" data-r="dv"></span></div></div>';
-    host.appendChild(root);
-    const st = {cls: 'raw', pass: '2'};
-    const draw = () => {
-      const plot = root.querySelector('.plot');
-      plot.textContent = '';
-      const y = st.cls === 'raw' ? T.raw : (st.pass === '2' ? T.f : T.one)[+st.cls];
-      const p = peak(T, y);
-      chart(plot, {h: 520, y: {lo: -1050, hi: 650, ticks: [-1000, -500, 0, 500], zero: true,
-          label: 'Civic crossmember (m/s²)'},
-        x: {lo: 0, hi: 0.12, fmt: ms, label: 'time (ms)'},
-        series: [{x: T.t, y: T.raw, cls: 'c2-faint'},
-                 st.cls === 'raw' ? {x: T.t, y: T.raw, cls: 'c2-cross'}
-                                  : {x: T.t, y, style: lineStyle(+st.cls)},
-                 {x: one(p.t), y: one(p.y), line: false, dots: 'c2p-cross', r: 8}]});
-      root.querySelector('[data-r="pk"]').textContent = v1(p.y) + ' m/s²';
-      root.querySelector('[data-r="tp"]').textContent = ms(p.t) + ' ms';
-      root.querySelector('[data-r="dv"]').textContent = MINUS(dv(T, y).toFixed(3)) + ' m/s';
-      root.querySelector('.two').style.opacity = st.cls === 'raw' ? 0.35 : 1;
-    };
-    root.addEventListener('click', e => {
-      e.stopPropagation();
-      const b = e.target.closest('button');
-      if (!b) return;
-      const g = b.parentElement.dataset.g;
-      st[g] = b.dataset.v;
-      for (const o of b.parentElement.children) o.setAttribute('aria-pressed', String(o === b));
-      draw();
-    });
-    draw();
-  }
-
-  /* ------------------------------------------------- whiteboard boards */
-  Object.assign(CG_BOARDS, {
-
-    /* step 2: the CFC 60 coefficients on the Civic, then the constant check */
-    coefs: () => ({
-      reset(h) { h.hide('n1', 'w1', 'w2', 'a', 'b', 'k1', 'k2'); h.unring('rk'); },
-      beats(h) {
-        return [
-          {d: 2000, run: f => h.write('n1', 1400, f)},
-          {d: 2600, run: f => h.write('w1', 2000, f)},
-          {d: 2200, run: f => h.write('w2', 1600, f)},
-          {d: 2800, run: f => h.write('a', 2200, f)},
-          {d: 2800, run: f => h.write('b', 2200, f)},
-          {d: 2600, run: f => h.write('k1', 2000, f)},
-          {d: 1600, run: f => h.write('k2', 1000, f)},
-          {d: 1300, run: f => h.ring('rk', f)}
-        ];
-      }
-    })
-  });
-
   /* ------------------------------------------------------------ mounting */
   ready.then(T => {
     for (const host of document.querySelectorAll('.c2fig[data-c4]')) {
@@ -1616,11 +1523,581 @@ setTimeout(() => {
       /* one figure failing must not stop the ones after it */
       try {
         if (FIGS[name]) { FIGS[name](host, T); continue; }
-        if (name === 'sweep') { sweep(host, T); continue; }
         host.textContent = 'unknown figure: ' + name;
       } catch (e) { console.error('class 4 figure ' + name + ':', e); }
     }
   });
+})();
+
+
+/* ---------------------------------------------------------------- chatanim
+   The A4 conversation with the course tutor, played as an animation: the chat
+   on the left, the files in the editor (and the program's output under it) in
+   the middle, and on the right which part of the work each beat serves, read
+   through Polya's steps, the seven maxims, and defending a number.
+
+   The beats and every file version come from data/example/tutor04-anim.json,
+   built by pipeline/tutor-chat/make_anim.py; the chat text and the files are
+   verbatim, and the captions are ours.
+
+   The Player is the one from the TCSS 490 week 2 deck (class-2-workflow): an
+   animation hands it its beats, how long each runs, how to show one (fast =
+   state only), how to reset, and its stops. With autoplay off, the arrow keys
+   step between stops before the deck sees them. */
+(() => {
+  const root = document.getElementById('c4a');
+  if (!root) return;
+  const slide = root.closest('.deck-slide');
+  const capEl = document.getElementById('c4a-cap'), playerEl = document.getElementById('c4a-player');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = s => root.querySelector(s);
+
+  const ICON = {
+    first:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 5.5h2.2v13H6zM18.5 6.6v10.8a1 1 0 0 1-1.55.83L9.6 13.03a1.2 1.2 0 0 1 0-2.06l7.35-5.2a1 1 0 0 1 1.55.83z"/></svg>',
+    last:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.8 5.5H18v13h-2.2zM5.5 6.6v10.8a1 1 0 0 0 1.55.83l7.35-5.2a1.2 1.2 0 0 0 0-2.06L7.05 5.77A1 1 0 0 0 5.5 6.6z"/></svg>',
+    prev:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M14.5 6.5 9 12l5.5 5.5"/></svg>',
+    next:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M9.5 6.5 15 12l-5.5 5.5"/></svg>',
+    play:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8.5 5.9v12.2a1 1 0 0 0 1.52.85l9.6-6.1a1 1 0 0 0 0-1.7l-9.6-6.1A1 1 0 0 0 8.5 5.9z"/></svg>',
+    pause:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect fill="currentColor" x="6.5" y="5.5" width="4" height="13" rx="1.2"/><rect fill="currentColor" x="13.5" y="5.5" width="4" height="13" rx="1.2"/></svg>',
+    auto:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 3.5 20.5 7 17 10.5M3.5 11.5V10a3 3 0 0 1 3-3h14M7 20.5 3.5 17 7 13.5M20.5 12.5V14a3 3 0 0 1-3 3h-14"/></svg>'
+  };
+
+  /* ---------- Player (from the 490 week 2 deck, same behaviour) ---------- */
+  function Player(cfg){
+    const S = cfg.steps, el = cfg.el, cap = cfg.cap;
+    const RATE = 0.75;
+    const cum = [0]; S.forEach(s => cum.push(cum[cum.length - 1] + cfg.dur(s)));
+    const TOTAL = cum[S.length];
+    const stops = cfg.stops.slice().sort((a, b) => a.k - b.k);
+    if (!stops.length || stops[0].k > 0) stops.unshift({ k:0, label:'Start', text:'' });
+    const stopAt = new Set(stops.map(s => s.k));
+    const isStop = k => k >= S.length || stopAt.has(k);
+    const lastStop = stops[stops.length - 1].k;
+    const fmt = ms => { const t = Math.floor(ms / 1000); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
+
+    el.innerHTML =
+      '<div class="ptp">' +
+        '<button type="button" data-a="first" title="Beginning" aria-label="Go to the beginning">' + ICON.first + '</button>' +
+        '<button type="button" data-a="prev" title="Previous" aria-label="Previous stop">' + ICON.prev + '</button>' +
+        '<button type="button" data-a="pp" class="ppb" title="Pause" aria-label="Pause"><span class="i-pause">' + ICON.pause + '</span><span class="i-play">' + ICON.play + '</span></button>' +
+        '<button type="button" data-a="next" title="Next" aria-label="Next stop">' + ICON.next + '</button>' +
+        '<button type="button" data-a="last" title="End" aria-label="Go to the end">' + ICON.last + '</button>' +
+      '</div>' +
+      '<div class="pbar" role="slider" tabindex="0" aria-label="Animation position" aria-valuemin="0" aria-valuemax="' + TOTAL + '">' +
+        '<div class="psegs"></div><div class="pknob"></div><div class="ptip" hidden></div>' +
+      '</div>' +
+      '<span class="ptime">0:00 / ' + fmt(TOTAL / RATE) + '</span>' +
+      '<div class="pspeed"><button type="button" class="pchip" aria-haspopup="true" aria-expanded="false" title="Speed">1×</button>' +
+        '<div class="ppop" hidden><span class="pv">1.00×</span><input type="range" min="0.5" max="4" step="0.05" value="1" aria-label="Playback speed"><span class="pmin">0.5×</span></div></div>' +
+      '<button type="button" class="pauto" aria-pressed="true" title="Autoplay on: plays straight through" aria-label="Autoplay">' + ICON.auto + '</button>';
+    const q = s => el.querySelector(s);
+    const pp = q('[data-a="pp"]'), bar = q('.pbar'), segsEl = q('.psegs'), knob = q('.pknob'), tip = q('.ptip'), timeEl = q('.ptime');
+    const chip = q('.pchip'), pop = q('.ppop'), range = q('.ppop input'), pv = q('.pv'), autoBtn = q('.pauto');
+
+    const segs = stops.map((st, i) => {
+      const a = cum[st.k], b = i + 1 < stops.length ? cum[stops[i + 1].k] : TOTAL;
+      const d = document.createElement('div');
+      d.className = 'pseg' + (st.quiet ? ' quiet' : '');
+      d.style.left = (a / TOTAL * 100) + '%'; d.style.width = ((b - a) / TOTAL * 100) + '%';
+      d.innerHTML = '<i></i>';
+      segsEl.appendChild(d);
+      return { a, b, st, fill:d.firstChild, el:d };
+    });
+
+    let cur = -1, playing = false, held = false, skipHold = false, auto = true;
+    const moreBox = document.createElement('div');
+    moreBox.className = 'pmorebox'; moreBox.hidden = true; moreBox.setAttribute('role', 'note');
+    moreBox.innerHTML = '<span></span><button type="button" aria-label="Close">×</button>';
+    if (cap) cap.parentNode.appendChild(moreBox);
+    let moreOpen = false, morePinned = false, moreResume = false, moreBtn = null;
+    function openMore(s, pin){
+      moreBox.firstChild.textContent = s.more; moreBox.hidden = false;
+      if (moreBtn) moreBtn.setAttribute('aria-expanded', 'true');
+      if (!moreOpen) { moreResume = playing; if (playing) setPlaying(false); }
+      moreOpen = true; morePinned = morePinned || pin;
+    }
+    function closeMore(resume){
+      if (!moreOpen) return;
+      moreBox.hidden = true; moreOpen = false; morePinned = false;
+      if (moreBtn) moreBtn.setAttribute('aria-expanded', 'false');
+      if (resume && moreResume) setPlaying(true);
+    }
+    function show(s, fast){
+      closeMore(false);
+      cfg.apply(s, fast);
+      if (!cap || !s.more) { moreBtn = null; return; }
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'pmore'; b.textContent = 'i';
+      b.setAttribute('aria-label', 'More about this step'); b.setAttribute('aria-expanded', 'false');
+      b.addEventListener('pointerenter', ev => { if (ev.pointerType === 'mouse') openMore(s, false); });
+      b.addEventListener('click', ev => { ev.stopPropagation(); if (moreOpen && morePinned) closeMore(true); else openMore(s, true); });
+      cap.appendChild(b); moreBtn = b;
+    }
+    if (cap) {
+      cap.parentNode.addEventListener('pointerleave', ev => { if (ev.pointerType === 'mouse' && moreOpen && !morePinned) closeMore(true); });
+      moreBox.lastChild.addEventListener('click', ev => { ev.stopPropagation(); closeMore(true); });
+      document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && moreOpen) closeMore(true); });
+      document.addEventListener('pointerdown', ev => { if (moreOpen && !ev.target.closest('.pmorebox, .pmore')) closeMore(true); });
+    }
+    let pausedPos = 0, beatStart = 0, sp = RATE, timer = null;
+
+    function pos(){
+      if (!playing || cur < 0) return pausedPos;
+      return Math.min(cum[cur + 1], cum[cur] + (performance.now() - beatStart) * sp);
+    }
+    function label(){
+      pp.classList.toggle('playing', playing);
+      const t = playing ? 'Pause' : held ? (cur >= S.length - 1 ? 'Start over' : 'Play the next part') : 'Play';
+      pp.title = t; pp.setAttribute('aria-label', t);
+    }
+    function doReset(){ cfg.halt(); cfg.reset(); cur = -1; }
+    function schedule(ms){ clearTimeout(timer); timer = setTimeout(next, ms / sp); }
+    function hold(){ playing = false; held = true; clearTimeout(timer); pausedPos = cur < 0 ? 0 : cum[cur + 1] - 1; label(); }
+    function next(){
+      if (!playing) return;
+      if (!auto && cur >= 0 && isStop(cur + 1) && !skipHold) { hold(); return; }
+      skipHold = false;
+      cur++;
+      if (cur >= S.length) { doReset(); cur = 0; }
+      show(S[cur], false);
+      beatStart = performance.now();
+      schedule(cfg.dur(S[cur]));
+    }
+    function setPlaying(on){
+      if (!on && playing) pausedPos = pos();
+      if (on && held) skipHold = true;
+      held = false;
+      playing = on; clearTimeout(timer);
+      if (!on) cfg.halt();
+      label();
+      if (!on) return;
+      if (cur < 0 || pausedPos >= TOTAL || (cur >= S.length - 1 && skipHold)) { if (cur >= 0) doReset(); skipHold = false; next(); return; }
+      const done = pausedPos - cum[cur];
+      beatStart = performance.now() - done / sp;
+      schedule(cfg.dur(S[cur]) - done);
+    }
+    function seek(ms){
+      held = false;
+      ms = Math.max(0, Math.min(TOTAL - 1, ms));
+      clearTimeout(timer);
+      doReset();
+      let k = 0; while (k < S.length - 1 && cum[k + 1] <= ms) k++;
+      for (let j = 0; j < k; j++) cfg.apply(S[j], true);
+      show(S[k], true);
+      cur = k; pausedPos = ms;
+      label();
+      if (playing) { beatStart = performance.now() - (ms - cum[k]) / sp; schedule(cfg.dur(S[k]) - (ms - cum[k])); }
+    }
+    function holdBefore(k){
+      setPlaying(false);
+      if (k <= 0) { doReset(); pausedPos = 0; if (cap) cap.innerHTML = '<span class="n">Ready</span>Press → or ▶ to play the first part.'; }
+      else seek(cum[k] - 1);
+      cur = k - 1; held = true; label();
+    }
+    function jumpTo(k){
+      const was = playing;
+      if (!auto) { holdBefore(k); return; }
+      setPlaying(false);
+      if (k <= 0) { doReset(); pausedPos = 0; } else seek(was ? cum[k] - 1 : cum[k]);
+      if (was) setPlaying(true);
+    }
+    function stopBefore(i){ return stops.filter(s => s.k <= i).pop().k; }
+    function stepNav(d){
+      if (d > 0) {
+        if (held && cur >= S.length - 1) return false;
+        if (held) { setPlaying(true); return true; }
+        let k = cur + 1; while (!isStop(k)) k++;
+        if (k >= S.length) return false;
+        jumpTo(k); return true;
+      }
+      const at = pos();
+      let k = stopBefore(Math.max(0, cur));
+      if (at - cum[k] < 1500 || (held && cur + 1 === k)) { if (k === 0) return false; k = stopBefore(k - 1); }
+      jumpTo(k); return true;
+    }
+    function first(){ if (!auto) holdBefore(0); else { setPlaying(false); doReset(); pausedPos = 0; setPlaying(true); } }
+    function last(){
+      const was = playing;
+      setPlaying(false); seek(cum[lastStop]);
+      if (!auto) { cur = S.length - 1; held = true; label(); }
+      else if (was) setPlaying(true);
+    }
+    function setSpeed(v){
+      const p = pos();
+      const vs = Math.max(.5, Math.min(4, Math.round(v * 20) / 20));
+      sp = vs * RATE;
+      range.value = vs; pv.textContent = vs.toFixed(2) + '×';
+      chip.textContent = (vs === 1 ? '1' : String(+vs.toFixed(2))) + '×';
+      cfg.onSpeed(sp);
+      if (playing && cur >= 0) { beatStart = performance.now() - (p - cum[cur]) / sp; schedule(cfg.dur(S[cur]) - (p - cum[cur])); }
+    }
+    function setAuto(on){
+      auto = on;
+      autoBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      autoBtn.title = on ? 'Autoplay on: plays straight through' : 'Autoplay off: stops at each gap in the bar';
+      if (on && held) setPlaying(true);
+    }
+
+    el.querySelector('.ptp').addEventListener('click', ev => {
+      const b = ev.target.closest('button'); if (!b) return;
+      ({ first, last, prev:() => stepNav(-1), next:() => stepNav(1), pp:() => setPlaying(!playing) })[b.dataset.a]();
+    });
+    autoBtn.addEventListener('click', () => setAuto(!auto));
+
+    const openPop = on => { pop.hidden = !on; chip.setAttribute('aria-expanded', on ? 'true' : 'false'); if (on) range.focus(); };
+    chip.addEventListener('click', () => openPop(pop.hidden));
+    chip.addEventListener('wheel', ev => { ev.preventDefault(); setSpeed(sp / RATE + (ev.deltaY < 0 ? .05 : -.05)); }, { passive:false });
+    range.addEventListener('input', () => setSpeed(+range.value));
+    range.addEventListener('keydown', ev => { if (ev.key === 'Escape') { openPop(false); chip.focus(); } });
+    document.addEventListener('pointerdown', ev => { if (!pop.hidden && !ev.target.closest('.pspeed')) openPop(false); });
+
+    const msAt = x => { const r = bar.getBoundingClientRect(); return Math.max(0, Math.min(1, (x - r.left) / r.width)) * TOTAL; };
+    let drag = false, wasPlaying = false;
+    function showTip(x){
+      const ms = msAt(x), r = bar.getBoundingClientRect();
+      const sg = segs.find(s => ms >= s.a && ms < s.b) || segs[segs.length - 1];
+      segs.forEach(s => s.el.classList.toggle('hot', s === sg));
+      tip.textContent = sg.st.label + (sg.st.text ? ' · ' + sg.st.text : '') + ' · ' + fmt(ms / RATE);
+      tip.hidden = false;
+      const w = tip.offsetWidth, left = Math.max(w / 2, Math.min(r.width - w / 2, x - r.left));
+      tip.style.left = left + 'px';
+    }
+    bar.addEventListener('pointerdown', ev => {
+      drag = true; bar.setPointerCapture(ev.pointerId);
+      wasPlaying = playing; if (playing) setPlaying(false);
+      seek(msAt(ev.clientX)); showTip(ev.clientX);
+    });
+    bar.addEventListener('pointermove', ev => { showTip(ev.clientX); if (drag) seek(msAt(ev.clientX)); });
+    bar.addEventListener('pointerup', () => { drag = false; if (wasPlaying) setPlaying(true); });
+    bar.addEventListener('pointerleave', () => { if (!drag) { tip.hidden = true; segs.forEach(s => s.el.classList.remove('hot')); } });
+    bar.addEventListener('keydown', ev => {
+      const step = { ArrowLeft:-5000, ArrowRight:5000, ArrowDown:-5000, ArrowUp:5000 }[ev.key];
+      if (step === undefined && ev.key !== 'Home' && ev.key !== 'End') return;
+      ev.preventDefault(); ev.stopPropagation();
+      const was = playing; setPlaying(false);
+      seek(ev.key === 'Home' ? 0 : ev.key === 'End' ? TOTAL - 1 : pos() + step);
+      if (was) setPlaying(true);
+    });
+
+    (function frame(){
+      const p = pos();
+      segs.forEach(s => { s.fill.style.width = (Math.max(0, Math.min(1, (p - s.a) / (s.b - s.a))) * 100) + '%'; });
+      knob.style.left = (p / TOTAL * 100) + '%';
+      bar.setAttribute('aria-valuenow', Math.round(p));
+      bar.setAttribute('aria-valuetext', fmt(p) + ' of ' + fmt(TOTAL));
+      timeEl.textContent = fmt(p / RATE) + ' / ' + fmt(TOTAL / RATE);
+      requestAnimationFrame(frame);
+    })();
+
+    label();
+    cfg.onSpeed(sp);
+    return {
+      start(){
+        if (cfg.reduce) { doReset(); S.forEach((s, j) => j < S.length - 1 ? cfg.apply(s, true) : show(s, true)); cur = S.length - 1; pausedPos = TOTAL; setPlaying(false); return; }
+        if (!auto) { holdBefore(0); return; }
+        setPlaying(false); doReset(); pausedPos = 0; setPlaying(true);
+      },
+      stop(){ closeMore(false); setPlaying(false); held = false; cfg.leave(); openPop(false); },
+      toggle(){ setPlaying(!playing); },
+      step(d){ return !auto && stepNav(d); },
+      go(k){ jumpTo(k); }
+    };
+  }
+
+  /* ---------- the animation ---------- */
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+  /* Lines of b that are not in the longest common subsequence with a: the
+     lines an edit added or changed. */
+  function changed(a, b){
+    const n = a.length, m = b.length, L = Array.from({ length:n + 1 }, () => new Uint16Array(m + 1));
+    for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--)
+      L[i][j] = a[i] === b[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+    const out = new Set(); let i = 0, j = 0;
+    while (j < m) {
+      if (i < n && a[i] === b[j]) { i++; j++; }
+      else if (i < n && L[i + 1][j] >= L[i][j + 1]) i++;
+      else { out.add(j); j++; }
+    }
+    return out;
+  }
+
+  fetch(root.dataset.src).then(r => r.json()).then(D => {
+    const intro = { t:'12:26 PM', polya:0, maxims:[], cpm:[], card:'intro', dur:9000,
+      cap:'Sunday, October 25. I work Assignment 4 as a student, with the course tutor open beside the assignment page.' };
+    const outro = { t:'5:40 PM', polya:0, maxims:[], cpm:[], card:'end', dur:9000,
+      cap:'Thirteen prompts, one program and one report.' };
+    const S = [intro, ...D.beats, outro];
+    const stops = [{ k:0, label:'Start', text:'', quiet:true }];
+    /* the player's bar has one segment per prompt, and one per edit after the chat */
+    const afterK = S.findIndex(s => s.stop === 'After the chat');
+    S.forEach((s, k) => {
+      if (s.chat && s.chat.who === 'me') stops.push({ k, label:'Prompt ' + s.chat.n, text:s.t });
+      else if (k >= afterK && !s.card) stops.push({ k, label:'After the chat', text:s.t });
+    });
+    stops.push({ k:S.length - 1, label:'End', text:'', quiet:true });
+
+    /* Under the stage: the maxims, then the prompts on a timeline with the
+       Polya phases beneath. Each prompt and the reply to it form a group; the
+       maxims shown anywhere in the group open up for as long as the group is
+       on screen. The run before prompt 13 belongs to prompt 12's group, and
+       each edit after the chat is a group of its own. */
+    S.forEach((s, k) => { s.k = k; });
+    const mins = t => { const m = t.match(/(\d+):(\d+)/); let h = +m[1]; if (h < 12) h += 12; return h * 60 + +m[2]; };
+    const firstAfter = S.findIndex(s => s.stop === 'After the chat');
+    let g = null;
+    S.forEach((s, k) => {
+      if (s.card) g = null;
+      else if (k >= firstAfter) g = 'a' + k;
+      else if (s.chat) g = 'p' + s.chat.n;
+      s.g = g;
+    });
+    const groupMax = {};
+    S.forEach(s => { if (s.g) groupMax[s.g] = [...new Set([...(groupMax[s.g] || []), ...s.maxims])]; });
+
+    const mx = document.getElementById('c4a-mx'), tl = document.getElementById('c4a-tl');
+    mx.innerHTML = '<span class="mxl">Maxims</span>' + D.maxims.map((m, i) =>
+      '<span class="mx" data-m="' + (i + 1) + '" title="' + esc(m[0] + ': ' + m[1]) + '"><b>' + (i + 1) + '</b><em>' + esc(m[0]) + '</em></span>').join('');
+
+    const prompts = S.filter(s => s.chat && s.chat.who === 'me');
+    const after = S.filter((s, k) => k >= firstAfter && !s.card);
+    const t0 = mins(prompts[0].t), t1 = mins(prompts[prompts.length - 1].t), SPAN = 80;
+    const xP = s => (mins(s.t) - t0) / (t1 - t0) * SPAN;
+    const xA = i => SPAN + 7 + i * (12 / Math.max(1, after.length - 1));
+    const px = n => xP(prompts[n - 1]);
+    const bands = [[1, 4], [5, 7], [8, 11], [12, 13]].map(([a, b], i) => {
+      const l = px(a), r = i === 3 ? 100 : (px(b) + px(b + 1)) / 2 - .8;
+      return '<span class="tl-band" data-p="' + (i + 1) + '" style="left:' + (i ? (px(a - 1) + px(a)) / 2 + .8 : 0) + '%;width:' +
+        (r - (i ? (px(a - 1) + px(a)) / 2 + .8 : 0)) + '%">' + esc(D.polya[i][0]) + '</span>';
+    }).join('');
+    tl.innerHTML = '<div class="tl-line"></div><div class="tl-line a"></div>' +
+      prompts.map(s => '<button type="button" class="tl-dot" data-k="' + s.k + '" style="left:' + xP(s) + '%" title="Prompt ' + s.chat.n + ', ' + s.t + '">' + s.chat.n + '</button>').join('') +
+      after.map((s, i) => '<button type="button" class="tl-dot a" data-k="' + s.k + '" style="left:' + xA(i) + '%" title="' + esc(s.t) + ', after the chat">&#9998;</button>').join('') +
+      '<span class="tl-lab" style="left:0">12:26 PM</span>' +
+      '<span class="tl-lab" style="left:' + SPAN + '%;transform:translateX(-50%)">1:27 PM</span>' +
+      '<span class="tl-lab" style="left:' + (px(8) + px(9)) / 2 + '%;transform:translateX(-50%)">19 minutes</span>' +
+      '<span class="tl-lab" style="right:0">after the chat, to 5:40 PM</span>' +
+      '<span class="tl-brk" style="left:' + (SPAN + 3.3) + '%">//</span>' + bands;
+
+    function track(s){
+      const gk = s.g;
+      tl.querySelectorAll('.tl-dot').forEach(d => {
+        const k = +d.dataset.k, on = gk && S[k].g === gk;
+        d.classList.toggle('on', !!on); d.classList.toggle('done', !on && k < s.k);
+      });
+      tl.querySelectorAll('.tl-band').forEach(b => { const p = +b.dataset.p; b.classList.toggle('on', p === s.polya); b.classList.toggle('done', p < s.polya); });
+      const lit = (gk && groupMax[gk]) || [];
+      mx.querySelectorAll('.mx').forEach(m => m.classList.toggle('on', lit.includes(+m.dataset.m)));
+    }
+
+    const conv = $('.c4a-conv'), body = $('.c4a-body'), term = $('.c4a-term'), clock = $('.c4a-clock');
+    const input = $('.c4a-input .txt');
+    const tabs = { code:$('[data-tab="code"]'), report:$('[data-tab="report"]') };
+    const shown = { code:null, report:null };   // the version on screen for each file
+    let timers = [], runs = [], speed = 1;
+    const later = (fn, ms) => { const t = setTimeout(() => { timers = timers.filter(x => x[0] !== t); fn(); }, ms / speed); timers.push([t, fn]); };
+
+    /* How long my typing and the tutor's streaming take at 1x. Each beat's
+       running time is its reading time plus these. */
+    const typeMs = c => Math.min(4500, Math.max(900, c.chars * 20));
+    const streamMs = c => Math.min(20000, Math.max(1800, c.words * 30));
+    S.forEach(s => { if (s.chat) s.dur += s.chat.who === 'me' ? typeMs(s.chat) + 600 : 700 + streamMs(s.chat); });
+
+    /* A run is a motion drawn frame by frame (typing, streaming). halt()
+       finishes every run and every pending step at once, which is what a
+       pause or a seek needs. */
+    function run(ms, frame, done){
+      let t = 0, last = performance.now(), raf = 0;
+      const r = { finish(){ cancelAnimationFrame(raf); runs = runs.filter(x => x !== r); frame(1); done(); } };
+      const tick = now => { t += (now - last) * speed; last = now; if (t >= ms) { r.finish(); return; } frame(t / ms); raf = requestAnimationFrame(tick); };
+      runs.push(r); raf = requestAnimationFrame(tick);
+    }
+
+    /* Each message is shown whole. My prompts are typed into the box and sent;
+       the tutor's replies stream in with the pane following them. When a reply
+       is in, the pane settles on its marked passage, the part my next prompt
+       answers. */
+    function scrollTo(y, fast){ conv.scrollTo({ top:Math.max(0, y), behavior:fast || reduce ? 'auto' : 'smooth' }); }
+    function make(c){
+      const d = document.createElement('div');
+      d.className = 'cb ' + c.who;
+      d.innerHTML = '<small>' + (c.who === 'tutor' ? 'Tutor &middot; reply ' : 'Me &middot; prompt ') + c.n + '</small>' + c.html;
+      conv.appendChild(d);
+      return d;
+    }
+    function toMark(d, fast){
+      const mk = d.querySelector('mark');
+      if (mk) scrollTo(mk.offsetTop - conv.clientHeight * .35, fast);
+      else if (d.offsetHeight > conv.clientHeight) scrollTo(d.offsetTop - 8, fast);
+    }
+    function plain(html){
+      return new DOMParser().parseFromString(html.replace(/<pre[\s\S]*?<\/pre>/, ''), 'text/html').body.textContent.trim();
+    }
+    function sendMine(c, fast, done){
+      if (fast) { const d = make(c); scrollTo(d.offsetTop - 8, true); toMark(d, true); done(); return; }
+      const text = (c.paste ? '[pastes a4_demo.py]\n' : '') + plain(c.html);
+      run(typeMs(c), f => { input.textContent = text.slice(0, Math.round(text.length * f)); input.parentNode.scrollTop = 1e6; }, () => {
+        input.textContent = '';
+        const d = make(c); d.classList.add('new');
+        scrollTo(d.offsetTop - 8, false);
+        if (d.querySelector('mark')) later(() => toMark(d, false), 900);
+        done();
+      });
+    }
+    function streamReply(c, fast, done){
+      if (fast) { const d = make(c); scrollTo(d.offsetTop - 8, true); toMark(d, true); done(); return; }
+      const dots = document.createElement('div');
+      dots.className = 'cb tutor dots'; dots.innerHTML = '<i></i><i></i><i></i>';
+      conv.appendChild(dots); scrollTo(dots.offsetTop - conv.clientHeight * .5, false);
+      later(() => {
+        dots.remove();
+        const d = make(c);
+        /* every word becomes a hidden span, so the layout is final from the
+           start and the pane can follow the words as they appear */
+        const walker = document.createTreeWalker(d, NodeFilter.SHOW_TEXT), nodes = [];
+        while (walker.nextNode()) { const el = walker.currentNode.parentNode; if (!el.closest('small') && (!el.closest('details') || el.closest('summary'))) nodes.push(walker.currentNode); }
+        const toks = [];
+        nodes.forEach(n => {
+          const frag = document.createDocumentFragment();
+          n.textContent.split(/(\s+)/).forEach(w => {
+            if (!w) return;
+            if (/^\s+$/.test(w)) { frag.appendChild(document.createTextNode(w)); return; }
+            const sp = document.createElement('span'); sp.className = 'tk'; sp.textContent = w; frag.appendChild(sp); toks.push(sp);
+          });
+          n.parentNode.replaceChild(frag, n);
+        });
+        d.classList.add('streaming');
+        scrollTo(d.offsetTop - 8, true);
+        let shownN = 0;
+        run(streamMs(c), f => {
+          const k = Math.round(toks.length * f);
+          for (; shownN < k; shownN++) {
+            toks[shownN].classList.add('on');
+            /* a list item, code block or table cell appears with its first word */
+            for (let el = toks[shownN].parentElement; el && el !== d && !el.classList.contains('seen'); el = el.parentElement) el.classList.add('seen');
+          }
+          if (k) { const y = toks[k - 1].offsetTop - conv.clientHeight * .72; if (y > conv.scrollTop) conv.scrollTop = y; }
+        }, () => { d.classList.remove('streaming'); later(() => toMark(d, false), 500); done(); });
+      }, 700);
+    }
+
+    /* The files are drawn zoomed out: each line is a bar as long as the line
+       and indented as it is, coloured by what kind of line it is, so the shape
+       of the program and the report shows as they change. Report lines wrap
+       at WRAP characters, as they would on screen. */
+    const WRAP = 92;
+    function kinds(which, lines){
+      if (which === 'report') return lines.map(l =>
+        !l.trim() ? 'blank' : /^#/.test(l) ? 'head' : /^\|/.test(l) ? 'table' : /^>/.test(l) ? 'quote' :
+        /^(\s*[-*]|\s*\d+\.)\s/.test(l) ? 'list' : /^!\[/.test(l) ? 'image' : 'para');
+      let doc = false;
+      return lines.map(l => {
+        const tq = (l.match(/"{3}/g) || []).length;
+        const k = !l.trim() ? 'blank' : (doc || tq) ? 'doc' : /^\s*#/.test(l) ? 'comment' : /^\s*(def|class)\s/.test(l) ? 'def' : 'code';
+        if (tq % 2) doc = !doc;
+        return k;
+      });
+    }
+    /* fit the whole file to the panel, and again whenever the panel changes size */
+    function fit(){
+      const n = body.querySelectorAll('.mr').length;
+      if (n) body.style.setProperty('--lh', Math.max(1.6, Math.min(7, (body.clientHeight - 10) / n)) + 'px');
+    }
+    new ResizeObserver(fit).observe(body);
+    function openDoc(which, ver, fast){
+      root.classList.add('has-ed');
+      const name = D.docs[which].name, lines = D.docs[which].vers[ver].split('\n');
+      const prev = shown[which] ? D.docs[which].vers[shown[which]].split('\n') : null;
+      const chg = prev ? changed(prev, lines) : new Set();
+      shown[which] = ver;
+      tabs.code.classList.toggle('on', which === 'code'); tabs.report.classList.toggle('on', which === 'report');
+      tabs[which].classList.remove('gone');
+      const kind = kinds(which, lines), rows = [];
+      const cols = which === 'report' ? WRAP : Math.max(80, ...lines.map(l => l.length));
+      lines.forEach((l, i) => {
+        const ind = l.length - l.trimStart().length, len = l.trim().length;
+        const c = chg.has(i) ? ' chg' + (fast ? ' still' : '') : '';
+        if (!len) { rows.push('<div class="mr' + c + '"></div>'); return; }
+        if (which !== 'report') { rows.push('<div class="mr ' + kind[i] + c + '"><i style="margin-left:' + (ind / cols * 100) + '%;width:' + (len / cols * 100) + '%"></i></div>'); return; }
+        for (let a = 0; a < len; a += WRAP) {
+          const w = Math.min(WRAP, len - a);
+          rows.push('<div class="mr ' + kind[i] + c + '"><i style="width:' + (w / cols * 100) + '%"></i></div>');
+        }
+      });
+      body.innerHTML = '<div class="mini">' + rows.join('') + '</div>';
+      fit();
+      $('.c4a-file').textContent = lines.length + ' lines' + (!prev ? ' · new' : ' · ' + chg.size + ' changed');
+    }
+    /* The terminal opens to exactly the height of the output it is about to
+       show (long lines wrap), and the lines then appear one by one. */
+    function fitTerm(){ term.style.height = 'auto'; const h = term.scrollHeight; term.style.height = h + 'px'; }
+    function showTerm(k, fast){
+      root.classList.add('has-term');
+      const rows = D.terms[k].split('\n').map(l => { const d = document.createElement('div'); d.textContent = l; return d; });
+      term.innerHTML = '';
+      rows.forEach(d => { if (!fast) d.className = 'wait'; term.appendChild(d); });
+      term.style.height = 'auto';
+      const h = term.scrollHeight;
+      if (!fast) { term.style.height = '0px'; void term.offsetHeight; }
+      term.style.height = h + 'px';
+      if (!fast) rows.forEach((d, i) => later(() => d.classList.remove('wait'), 400 + i * 260));
+    }
+    new ResizeObserver(() => { if (root.classList.contains('has-term')) fitTerm(); }).observe(root);
+
+    function apply(s, fast){
+      clock.textContent = 'Sun ' + s.t;
+      capEl.innerHTML = '<span class="n">' + esc(s.t) + '</span>' + esc(s.cap);
+      track(s);
+      $('.c4a-intro').hidden = s.card !== 'intro';
+      $('.c4a-end').hidden = s.card !== 'end';
+      /* the files change once the message that changes them is in */
+      const after = () => { if (s.doc) { if (fast) openDoc(s.doc.tab, s.doc.ver, true); else later(() => openDoc(s.doc.tab, s.doc.ver, false), 300); } };
+      if (s.chat) (s.chat.who === 'me' ? sendMine : streamReply)(s.chat, fast, after);
+      else after();
+      if (s.term) showTerm(s.term, fast);
+    }
+    function halt(){
+      runs.slice().forEach(r => r.finish());
+      while (timers.length) {
+        const t = timers; timers = [];
+        t.forEach(([id, fn]) => { clearTimeout(id); fn(); });
+        runs.slice().forEach(r => r.finish());
+      }
+    }
+    function reset(){
+      halt();
+      /* a reset or a seek redraws the state at once, without the layout easing in */
+      root.classList.add('instant');
+      requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove('instant')));
+      conv.innerHTML = ''; term.innerHTML = ''; term.style.height = ''; input.textContent = '';
+      root.classList.remove('has-ed', 'has-term');
+      shown.code = shown.report = null;
+      tabs.code.classList.add('gone'); tabs.report.classList.add('gone');
+      tabs.code.classList.remove('on'); tabs.report.classList.remove('on');
+      body.classList.remove('wrap');
+      body.innerHTML = '';
+      $('.c4a-file').textContent = '';
+    }
+
+    const player = Player({ steps:S, el:playerEl, cap:capEl, dur:s => s.dur, apply, reset, halt, stops,
+      onSpeed:v => { speed = v / 0.75; root.style.setProperty('--sp', speed); }, leave:halt, reduce });
+    reset();
+    /* a click on a prompt jumps there */
+    tl.addEventListener('click', ev => { const d = ev.target.closest('.tl-dot'); if (d) player.go(+d.dataset.k); });
+
+    let wasOn = false;
+    const sync = () => { const on = slide.classList.contains('on'); if (on && !wasOn) player.start(); if (!on && wasOn) player.stop(); wasOn = on; };
+    new MutationObserver(sync).observe(slide, { attributes:true, attributeFilter:['class'] });
+    sync();
+    /* with autoplay off, the arrows step the animation before the deck sees them */
+    addEventListener('keydown', ev => {
+      if (!slide.classList.contains('on') || ev.metaKey || ev.ctrlKey || ev.altKey) return;
+      const d = { ArrowRight:1, ArrowLeft:-1 }[ev.key];
+      if (d && player.step(d)) { ev.preventDefault(); ev.stopImmediatePropagation(); }
+    }, true);
+    /* clicks inside the animation must not reach the deck */
+    slide.addEventListener('click', ev => ev.stopPropagation());
+  }).catch(err => { console.error('chatanim:', err); root.textContent = 'The animation could not load its data.'; });
 })();
 
 /* Slide runtime. Every slide is in the DOM from the start, so the figure code
@@ -1884,9 +2361,9 @@ if (slides.length) {
 
 /* ---- code: highlighting + per-line notes ---- */
 const RULES={
-  python:{kw:/\b(def|return|import|from|as|for|in|if|else|elif|while|lambda|None|True|False)\b/g,
+  python:{kw:/\b(def|return|import|from|as|for|in|if|else|elif|while|with|not|and|or|is|try|except|finally|raise|break|continue|pass|lambda|None|True|False)\b/g,
           cmt:/#.*$/gm, str:/(['"])(?:\\.|(?!\1).)*\1/g},
-  matlab:{kw:/\b(function|end|for|while|if|else|elseif|return|nargin|abs)\b/g,
+  matlab:{kw:/\b(function|end|for|while|if|else|elseif|switch|case|otherwise|try|catch|break|continue|return|true|false|nargin|abs)\b/g,
           cmt:/%.*$/gm, str:/'(?:[^']|'')*'/g},
   js:{kw:/\b(function|const|let|var|return|for|of|in|if|else|new|=>)\b/g,
       cmt:/\/\/.*$/gm, str:/(['"`])(?:\\.|(?!\1).)*\1/g}
@@ -1904,6 +2381,14 @@ function highlight(raw,lang){
     out+=esc(raw.slice(pos,s))+`<span class="${cls}">${esc(raw.slice(s,e))}</span>`;pos=e}
   return out+esc(raw.slice(pos));
 }
+/* A note may carry a link, written [text](page.html). The hover preview is CSS
+   and can only show text, so it shows the link's words. Clicking, tapping, Enter
+   or Space pins the note open as a real element, where the link works. That is
+   also the only way to read a note on a phone or from the keyboard. */
+const LINK=/\[([^\]]+)\]\(([^)\s]+)\)/g;
+const notePlain=n=>n.replace(LINK,'$1');
+const noteHTML=n=>esc(n).replace(LINK,(m,t,h)=>`<a href="${h.replace(/"/g,'&quot;')}">${t}</a>`);
+const attr=s=>esc(s).replace(/"/g,'&quot;');
 document.querySelectorAll('.codetabs pre').forEach(pre=>{
   const lang=pre.dataset.lang;
   const notes={};
@@ -1914,9 +2399,40 @@ document.querySelectorAll('.codetabs pre').forEach(pre=>{
   const src=pre.textContent.replace(/\n$/,'');
   pre.innerHTML=src.split('\n').map((line,i)=>{
     const note=notes[i+1];
-    return `<span class="ln"${note?` data-note="${note.replace(/"/g,'&quot;')}"`:''}>${
-      highlight(line,lang)||'&nbsp;'}</span>`;
+    return `<span class="ln"${note?` data-note="${attr(notePlain(note))}" data-note-src="${attr(note)
+      }" tabindex="0" role="button" aria-expanded="false"`:''}>${highlight(line,lang)||'&nbsp;'}</span>`;
   }).join('');
+});
+function unpin(){
+  document.querySelectorAll('.codetabs .ln.pinned').forEach(ln=>{
+    ln.classList.remove('pinned');ln.setAttribute('aria-expanded','false');
+    ln.querySelector('.ln-note')?.remove();
+  });
+}
+function togglePin(ln){
+  if(ln.classList.contains('pinned')){unpin();return}
+  unpin();
+  const box=document.createElement('span');
+  box.className='ln-note';
+  box.innerHTML=noteHTML(ln.dataset.noteSrc);
+  ln.appendChild(box);ln.classList.add('pinned');ln.setAttribute('aria-expanded','true');
+}
+document.addEventListener('click',e=>{
+  const ln=e.target.closest&&e.target.closest('.codetabs .ln[data-note]');
+  if(!ln){unpin();return}
+  if(e.target.closest('.ln-note'))return;
+  /* a drag to select code is not a request for its note */
+  if(String(getSelection()).length)return;
+  togglePin(ln);
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){unpin();return}
+  const ln=e.target.closest&&e.target.closest('.codetabs .ln[data-note]');
+  if(ln&&e.target===ln&&(e.key==='Enter'||e.key===' ')){e.preventDefault();togglePin(ln)}
+});
+document.addEventListener('focusout',e=>{
+  const ln=e.target.closest&&e.target.closest('.codetabs .ln.pinned');
+  if(ln&&!ln.contains(e.relatedTarget))unpin();
 });
 const LANG_KEY='cg-code-lang';
 function applyLang(lang){

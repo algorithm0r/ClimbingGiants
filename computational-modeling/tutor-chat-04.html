@@ -1,0 +1,2338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assignment 4 with the course tutor — Computational Physical Modeling</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="css/blocks.css?v=20261027124351">
+  <link rel="stylesheet" href="css/demos.css?v=20261027124351">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (olive). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #5F7038;
+      --course-accent-dark: #47542A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    /* ── Week page video and class cards (media-cards.js) ── */
+    .media-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+      gap: 0.9rem;
+      margin: 1rem 0;
+    }
+    .media-card {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-top: 4px solid var(--course-accent);
+      border-radius: 4px;
+      padding: 0.75rem 0.9rem 0.85rem;
+    }
+    .media-card.class { border-top-color: #C8860A; }
+    .media-card p { margin: 0; }
+    .mc-kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .mc-title { font-weight: 600; line-height: 1.3; margin: 0.25rem 0 0.35rem !important; }
+    .mc-sub { font-size: 0.85rem; color: #5A5550; line-height: 1.4; }
+    .mc-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.7rem; }
+    .mc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--course-accent);
+      border-radius: 3px;
+      text-decoration: none;
+      color: var(--course-accent-dark);
+    }
+    a.mc-btn:visited { color: var(--course-accent-dark); }
+    a.mc-btn:hover { background: #F0EDE7; }
+    .mc-btn svg { width: 1em; height: 1em; flex: none; }
+    .mc-btn.primary, a.mc-btn.primary:visited { background: var(--course-accent); color: #fff; }
+    a.mc-btn.primary:hover { background: var(--course-accent-dark); }
+    .mc-btn.pending { border-style: dashed; border-color: #b8b2a8; color: #5A5550; }
+    .mc-total { font-size: 0.9rem; color: #5A5550; }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+    /* the remembered data phrase; filled in by page.js */
+    .cg-phrase { display: inline-flex; align-items: center; gap: .3rem; margin-right: .6rem;
+      font-size: .82rem; flex-shrink: 0; }
+    /* The header row is a fixed 780px. The title, the toggle, "Your data", Search and
+       "Report a problem" only just fit in it, so the chip shows the label alone (the
+       phrase is in the link's title and on the data page) and Search shows its icon.
+       An earlier chip that held the phrase and was allowed to shrink squeezed the
+       label down to "Yo" on a classroom projector. */
+    .cg-phrase a { color: rgba(230,238,222,.92); text-decoration: none; white-space: nowrap; }
+    .header-links .search-btn .sb-label { display: none; }
+    .header-links button.report-btn { white-space: nowrap; }
+    /* the title keeps its own width */
+    .site-header-top .site-title { white-space: nowrap; flex-shrink: 0; }
+    .site-header-top .header-links { min-width: 0; margin-left: 1rem; }
+    @media (max-width: 780px) {
+      /* below the 780px row: the report button's short form, as on phones */
+      .header-links .report-btn .rb-full { display: none; }
+      .header-links .report-btn .rb-short { display: inline; }
+      .cg-phrase { margin-right: .2rem; }
+    }
+    .cg-phrase a:hover { color: #fff; text-decoration: underline; }
+    .cg-phrase button { background: none; border: none; cursor: pointer; padding: 0 .2rem;
+      color: rgba(230,238,222,.7); font: inherit; font-size: 1rem; line-height: 1; }
+    .cg-phrase button:hover { color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* Two rules the other course sites do not define. The header's top
+       row carries a report button beside the title, and a page with a
+       wide demo in it needs more than the reading measure. */
+    .site-header-top { border-bottom: 1px solid rgba(200,222,180,0.15); }
+    main.wide { max-width: 1180px; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Computational Physical Modeling</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <span class="cg-phrase" id="cg-phrase"></span>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        
+          <a href="syllabus.html">Syllabus</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="notes.html">Notes</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reports.html">Examples</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reflection.html">Reflection</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="meeting.html">Meeting</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="ai-use.html">AI Use</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="tools.html">Tools</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="workbench.html">Workbench</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="extra-labor.html">Extra Labor</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="canvas-grades.html">Canvas Grades</a>
+          
+        
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+          
+          
+          
+          <a href="week-01.html">1</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-02.html">2</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-03.html">3</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-04.html">4</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          <span class="week-gap" title="Week 5 is a break week">5<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <a href="week-06.html">6</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-07.html">7</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-08.html">8</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-09.html">9</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-10.html">10</a>
+          
+        
+      </div>
+    </nav>
+
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+
+  <main data-pagefind-body>
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <!-- Generated from the tutor's markdown export of one conversation (Chris, 2026-10-25,
+     12:26 to 1:27 pm) by pipeline/tutor-chat/make_chat.py (python make_chat.py <export.md> ../../markdown/tutor-chat-04.html chat_intro.html). Prompts and replies are verbatim; the Polya step
+     headings and the prompt index are ours. The finished report below the chat is report.md from Chris's
+     assignment 4 demo folder, on test 9793, rendered as written. The program's numbers in prompt 13 (test 9079,
+     -452.5 at 44.95 ms filtered, -950.1 at 40.15 ms raw) were rerun and match, and so do the
+     tutor's hand-computed CFC 60 coefficients at 50 us. -->
+<style>
+.tc-index{display:flex;flex-wrap:wrap;gap:.35rem 1.1rem;margin:1.2rem 0 1.6rem;font-size:.88rem}
+.tc-index div{display:flex;align-items:center;gap:.3rem}
+.tc-index b{color:var(--course-accent-dark);font-weight:600;margin-right:.15rem}
+.tc-index a{display:inline-block;min-width:1.7rem;text-align:center;padding:.05rem .3rem;border-radius:3px;
+  background:#eef3e4;border:1px solid #d6dcc4;color:var(--course-accent-dark);text-decoration:none}
+.tc-step{margin:2.4rem 0 .9rem;padding-bottom:.35rem;border-bottom:2px solid var(--subtle);
+  font-family:Georgia,"Times New Roman",serif;font-size:1.35rem;color:var(--course-accent-dark)}
+.tc-step span{display:block;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;color:var(--amber);font-weight:700}
+.tc-turn{margin:1rem 0;border-radius:8px;padding:.9rem 1.15rem;scroll-margin-top:10rem}
+.tc-student{background:#eef3e4;border:1px solid #d6dcc4;margin-right:10%}
+.tc-tutor{background:#fff;border:1px solid #e3ddd2;margin-left:4%}
+.tc-who{font-size:.74rem;letter-spacing:.07em;text-transform:uppercase;color:var(--warm-gray);
+  font-weight:600;margin-bottom:.45rem}
+.tc-said{white-space:pre-wrap;font-size:1.04rem;line-height:1.55}
+.tc-said + .tc-paste,.tc-paste + .tc-said{margin-top:.7rem}
+.tc-paste{margin:0;background:#fff;border:1px solid #d6dcc4;border-radius:4px;max-height:20rem;
+  overflow:auto;padding:.6rem .8rem;font-size:.78rem;line-height:1.4}
+.tc-paste code,.tc-reply pre code{background:none;padding:0;font-size:inherit}
+.tc-reply > :first-child{margin-top:0}
+.tc-reply > :last-child{margin-bottom:0}
+.tc-reply h2,.tc-reply h3{font-size:1.05rem;margin:1.2rem 0 .4rem;color:var(--course-accent-dark)}
+.tc-reply pre{background:#f7f5f0;border:1px solid #e3ddd2;border-radius:4px;padding:.65rem .85rem;
+  overflow-x:auto;font-size:.8rem;line-height:1.45}
+.tc-reply pre code.language-markdown{white-space:pre-wrap;word-break:break-word}
+.tc-reply table{border-collapse:collapse;margin:.6rem 0;font-size:.92rem}
+.tc-reply th,.tc-reply td{border:1px solid #e3ddd2;padding:.3rem .6rem;text-align:left;vertical-align:top}
+.tc-reply th{background:#f7f5f0}
+.tc-reason{margin:0 0 .8rem;font-size:.86rem;color:var(--warm-gray);background:#faf8f3;
+  border-left:3px solid var(--amber);border-radius:0 4px 4px 0;padding:.35rem .85rem}
+.tc-reason summary{cursor:pointer;font-weight:600}
+.tc-reason[open] summary{margin-bottom:.4rem}
+.tc-reason p{margin:.4rem 0}
+.tc-final{margin-top:1.2rem}
+.tc-program{background:#fff;border:1px solid #e3ddd2;border-top:4px solid var(--course-accent);border-radius:4px;
+  padding:.8rem 1rem;overflow-x:auto;font-size:.8rem;line-height:1.45}
+.tc-program code{background:none;padding:0;font-size:inherit}
+.tc-final h3{font-size:1.45rem;margin:.4rem 0 .8rem}
+.tc-final h4{font-size:1.1rem;margin:1.4rem 0 .5rem}
+.tc-final img{display:block;max-width:100%;height:auto;margin:.6rem 0}
+.tc-final table{border-collapse:collapse;margin:.6rem 0;font-size:.88rem}
+.tc-final th,.tc-final td{border:1px solid #e3ddd2;padding:.35rem .6rem;text-align:left;vertical-align:top}
+.tc-final th{background:#f7f5f0}
+.tc-final blockquote{margin:.6rem 0;padding:.5rem .9rem;border-left:3px solid var(--course-accent);background:#f7f9f1}
+.tc-final blockquote p{margin:0}
+@media (max-width:640px){.tc-final table{display:block;overflow-x:auto}
+  .tc-student,.tc-tutor{margin-left:0;margin-right:0}
+  .tc-turn{padding:.75rem .85rem}}
+</style>
+
+<div class="eyebrow"><a href="week-04.html">Week 4</a> &middot; Assignment 4</div>
+<h1>Assignment 4 with the course tutor</h1>
+
+<p>This is one whole conversation with the course tutor about <a href="assign-04.html">Assignment
+4</a>. I (Chris) worked the assignment the way a student might, from the assignment page,
+starting from its Getting Started section and drawing on the videos and slides as I went. The purpose of this page is to let you see how a
+conversation like this goes from a first question to a report, including the places where the
+tutor handed a decision back and the places where they took a default.</p>
+
+<p>Nothing in the conversation has been edited. My prompts are shown as I typed them (typos
+included), and the tutor's replies are shown as they wrote them. Above each reply is the tutor's
+summary of their own reasoning, which you can open. The conversation took about an hour, with 13
+prompts and 13 replies, and the tutor ran on Claude Opus 5.5. It worked on NHTSA test 9079, a 2015
+Nissan Sentra recorded at 20,000 samples a second.</p>
+
+<p>The headings mark where the conversation sits in P&oacute;lya's four steps (<i>How to Solve
+It</i>, 1945). They are our reading, added for <a href="class-04.html">class 4</a>. For the seven maxims the class uses alongside them, please see
+<a href="ai-use.html">Using AI in this course</a>.</p>
+
+<nav class="tc-index" aria-label="Prompts">
+  <div><b>Understand</b><a href="#prompt-1">1</a><a href="#prompt-2">2</a><a href="#prompt-3">3</a><a href="#prompt-4">4</a></div>
+  <div><b>Plan</b><a href="#prompt-5">5</a><a href="#prompt-6">6</a><a href="#prompt-7">7</a></div>
+  <div><b>Carry out</b><a href="#prompt-8">8</a><a href="#prompt-9">9</a><a href="#prompt-10">10</a><a href="#prompt-11">11</a></div>
+  <div><b>Look back</b><a href="#prompt-12">12</a><a href="#prompt-13">13</a></div>
+  <div><b>After</b><a href="#finished-report">finished report</a><a href="#program">program</a></div>
+</nav>
+
+<div class="tc-chat">
+<div class="tc-step"><span>P&oacute;lya step 1</span>Understand the problem</div>
+<div class="tc-turn tc-student" id="prompt-1"><div class="tc-who">Prompt 1 &middot; Chris, working as a student &middot; 12:26 PM</div><div class="tc-said">hi claude, i&#x27;m trying to get started on this assignment and i&#x27;ve looked at the getting started part.here is what i think i understand.
+
+i should use the crossmember again like last assignment, I need to smooth it with a filter, i don&#x27;t know what filter but i think a standard tells me what one. is this right?</div></div>
+<div class="tc-turn tc-tutor"><div class="tc-who">Course tutor &middot; 12:26 PM</div><details class="tc-reason"><summary>The tutor's summary of their reasoning (525 tokens)</summary><p>I shouldn't assume the crossmember channel matches a previous assignment without evidence—better to point them toward checking the header that names it directly. On "smooth it with a filter," that's only partially correct; the actual spec defines a filter as a formula computing each output sample from specific input values, so I should be careful not to confirm their simplified version.</p>
+<p>I'm wary of handing them the specific filter class, since figuring that out is part of the assigned work—I can instead point toward standards like ISO/TS 13499, SAE J211-1, and FMVSS 208 without fabricating course content. I also notice they haven't addressed the peak itself, why a particular class applies, or the conditions under which a different value would be correct, so a probing question about why the filter choice matters for reproducibility could help deepen their thinking without overloading them.</p></details><div class="tc-reply"><p>You're mostly on the right track. Let me sharpen a couple of pieces.</p>
+<p><strong>The channel.</strong> The assignment doesn't say it's the same channel as last time. It says it's "the one whose header comment names the crossmember." I don't know what you used for Assignment 3, so don't rely on memory. Open the header, find the comment that names the crossmember, and confirm. Reading the header is part of the work in this course.</p>
+<p><strong>The filter.</strong> Yes, a standard tells you, and the course lists three that apply to the crash data: ISO/TS 13499, SAE J211-1, and FMVSS 208. The page "The standards behind the crash data" lists which decisions each one makes. So your job is not to pick a filter you like. It's to find:</p>
+<ol>
+<li>which standard names a filter for this kind of channel,</li>
+<li>which <strong>class</strong> it names for this channel (the assignment says the standard names a class for each kind of channel), and</li>
+<li>why it names that one, since Alice wants the "why" too.</li>
+</ol>
+<p>One small correction to "smooth it": smoothing is part of the idea, but the getting-started note describes the filter as a formula where each output sample depends on the inputs <em>and the outputs before it</em>. The week 4 pages "Smoothing and phase lag" and "The filter class is part of the measurement" cover why that distinction matters.</p>
+<p><strong>What you haven't mentioned yet.</strong> Alice needs four things, and your summary covers mainly the filter. She also needs:</p>
+<ul>
+<li>the peak acceleration itself,</li>
+<li>a short sentence she can paste into an email, and</li>
+<li>the conditions under which a <em>different</em> peak would be the right one, if any.</li>
+</ul>
+<p>Before you go further, consider this question: <strong>why does the context say the customer's engineers will recompute the peak from the same file?</strong> What would make their number come out different from yours, and how does that connect to why a standard fixes the filter instead of leaving it to you?</p>
+<p>If you can answer that in a sentence or two, you'll have the core of the assignment, and the "conditions for a different value" part will start to make sense.</p></div></div>
+<div class="tc-turn tc-student" id="prompt-2"><div class="tc-who">Prompt 2 &middot; Chris, working as a student &middot; 12:29 PM</div><div class="tc-said">they are telling me that the other engineers might use a different method, right? that is why we use a standard. so we both use the same filter?</div></div>
+<div class="tc-turn tc-tutor"><div class="tc-who">Course tutor &middot; 12:29 PM</div><details class="tc-reason"><summary>The tutor's summary of their reasoning (496 tokens)</summary><p>The student's got the core idea right—same standard means same class means same number—but I want to sharpen this by noting what happens if they deviate from the filter choice, and flag that the standard leaves several things unfixed: which channel to use, how peaks are defined, time windows, baseline handling, bad-value treatment, and filter implementation details like direction and padding.</p>
+<p>I know SAE J211 defines specific Channel Frequency Classes (CFC 60, 180, 600, 1000) with a phaseless filter approach, but I shouldn't just hand that over since finding the class is their task. Instead, I want to push them one step further: ask what else, beyond the filter, could still make their number diverge from someone else's—steering them toward distinguishing what the standard locks down versus what remains a choice, then nudge them to go look up the actual class on the standards page.</p></details><div class="tc-reply"><p>Yes, that's the core of it. If the customer filters with a different cutoff, they'll get a different peak, because <strong>the peak depends heavily on the filter</strong>. Heavier smoothing shaves the tall, narrow spikes, so the peak drops. Lighter filtering leaves more noise in, so the peak rises. Neither number is "the raw truth." That's what the week 4 page title means: <em>the filter class is part of the measurement</em>. Naming the class is as much a part of reporting the number as naming the units.</p>
+<p>So the standard turns "which filter?" from a matter of taste into a shared rule. You and the customer follow it, you get the same number.</p>
+<p>One thing to push on: the standard fixes the filter, but does it fix <em>everything</em> that goes into the peak? Suppose you and the customer both apply exactly the same filter class to the same file. <strong>What other choices could still make your peak and theirs come out different?</strong></p>
+<p>Try to list two or three. Think about what you actually do between opening the file and writing down a single number. Your list will feed directly into two of Alice's items:</p>
+<ul>
+<li>the <strong>assumptions</strong> you write down (report standard 3), and</li>
+<li>the <strong>conditions under which a different value would be right</strong>.</li>
+</ul>
+<p>After that, the next concrete step is the "standards behind the crash data" page, to find which standard names the class for this channel and the reason it gives.</p></div></div>
+<div class="tc-turn tc-student" id="prompt-3"><div class="tc-who">Prompt 3 &middot; Chris, working as a student &middot; 12:31 PM</div><div class="tc-said">i don&#x27;t know what else goes into the peak. if we fix the filter won&#x27;t we get the same peak on the same data?</div></div>
+<div class="tc-turn tc-tutor"><div class="tc-who">Course tutor &middot; 12:31 PM</div><details class="tc-reason"><summary>The tutor's summary of their reasoning (705 tokens)</summary><p>The student seems stuck on what else factors into the peak measurement. I should make this more concrete by walking through the actual steps between opening the file and recording a number, offering one seed example rather than the full list — things like which channel to use if there are multiple, whether to take magnitude versus signed peak, and whether baseline offset needs removing first.</p>
+<p>There's also the time window, units, and filtering implementation details like forward-backward passes, edge handling, and sampling rate — I know SAE J211-1 defines CFC filter classes using a 4-pole Butterworth, but I shouldn't hand them that since identifying the right class is part of their assignment. My plan is to validate that their intuition is partially correct — identical steps give identical numbers — while showing with a small concrete example that "filter class" alone doesn't fully specify the recipe.</p>
+<p>A good example: is "peak" defined as the largest positive value or largest magnitude, since a frontal crash deceleration could be sign-dependent? That ambiguity, plus the recursive filter's dependence on prior outputs (what does the very first output depend on?), gives a nice edge-case nudge. I'll keep my response short: affirm what's right, then offer one worked example followed by two pointed questions to help them trace their own pipeline.</p></details><div class="tc-reply"><p>You're right that the same filter on the same data, done the same way, gives the same peak. The catch is in "done the same way." The filter <em>class</em> is one decision, but turning a file into one number takes several more, and the customer's engineers make each of those too.</p>
+<p>Here's one example. <strong>What does "peak" mean?</strong> In a frontal crash the vehicle is slowing down hard, so depending on the sign convention in the file, the big values might be negative. Is the peak the most positive value, the most negative, or the largest in magnitude? If you report +38 g and they report −41 g from the same filtered signal, you've both done the filter "right" and still disagree. (Those numbers are made up, just to show the idea.)</p>
+<p>Now try finding others yourself by tracing your own program, step by step, from opening the file to printing the number. At each step, ask: <strong>did I make a choice here that someone else could make differently?</strong> Two places worth looking:</p>
+<ol>
+<li><strong>Before filtering.</strong> What do you do to the raw samples first? Think back to Assignment 3 and "the constant" and "bias." Does the signal sit at exactly zero before impact?</li>
+<li><strong>Inside the filter, at the edges.</strong> The getting-started note says each output depends on <em>the outputs before it</em>. So what does the very <strong>first</strong> output depend on, when there are no earlier outputs yet? (This is the "first sample" question from the Reading Code page.)</li>
+</ol>
+<p>You don't need the right answers yet. Just tell me what you'd guess for each, and whether you think the standard decides it or leaves it to you. That split, between what the standard fixes and what's yours, is what Alice's "conditions under which a different value would be right" is asking for.</p></div></div>
+<div class="tc-turn tc-student" id="prompt-4"><div class="tc-who">Prompt 4 &middot; Chris, working as a student &middot; 12:34 PM</div><div class="tc-said">i don&#x27;t have a program yet, and alice didn&#x27;t ask me to correct any bias or anything. i guess i see what you are saying though. if i correct bias and the other lab doesn&#x27;t then we could get a different answer. is that what you mean?</div></div>
+<div class="tc-turn tc-tutor"><div class="tc-who">Course tutor &middot; 12:34 PM</div><details class="tc-reason"><summary>The tutor's summary of their reasoning (567 tokens)</summary><p>The student is right that there's no program yet and Alice never asked for bias correction — that confirms the literal default applies: no bias correction unless specified. I realize I mistakenly referenced "your own program" when they don't have one yet, so I should acknowledge that slip and note the professor's instruction to take the literal default and hand decisions back rather than choosing for them.</p>
+<p>The key insight to surface is that not correcting for bias is itself a choice, just as much as correcting would be — either way they need to document it as an assumption. I shouldn't assert what SAE J211 specifically says about bias/offset without checking sources, so I'll point them toward the standards page to verify before locking in the assumption.</p>
+<p>Given they understand the problem reasonably well now, the natural next step is to transition into planning: ask them to sketch the steps their program will take from opening the file to printing the peak value, marking which steps are standard-fixed versus their own design choices, while keeping guidance brief and not overloading them.</p></details><div class="tc-reply"><p>Yes, that's exactly it. And my mistake: you don't have a program yet, so "trace your program" wasn't a fair ask. Let's make that the next step instead.</p>
+<p>You're also right that Alice didn't ask for a bias correction. Here's the subtle part: <strong>not correcting is also a choice.</strong> If the signal doesn't sit at zero before impact, then "leave it alone" and "subtract the offset" give different peaks. Whichever you do, someone else could do the other. So it belongs in your written assumptions either way, for example: "No offset was removed before filtering."</p>
+<p>Whether you <em>should</em> correct it isn't my call or a default. It depends on what the standard says. When you read "The standards behind the crash data" page, check two things:</p>
+<ol>
+<li>Which filter class it names for this channel, and why.</li>
+<li>Whether it says anything about the signal's zero level before filtering. If it does, that choice is fixed for you. If it doesn't, it's yours to make and state.</li>
+</ol>
+<p>So far your list of places a peak can differ:</p>
+<ul>
+<li>the filter class (fixed by the standard)</li>
+<li>the zero level / bias (check the standard)</li>
+<li>what "peak" means: most positive, most negative, or largest magnitude</li>
+<li>how the filter starts at the first sample (still open, worth keeping on the list)</li>
+</ul>
+<p>That list is most of what Alice's "conditions under which a different value would be right" asks for.</p>
+<p><strong>Next, before writing code:</strong> could you sketch, in plain words, the steps your program will take from opening the file to printing one number? Four or five lines is plenty. Then mark each step "the standard decides" or "I decide." Send me the sketch and we can check it together.</p></div></div>
+<div class="tc-step"><span>P&oacute;lya step 2</span>Devise a plan</div>
+<div class="tc-turn tc-student" id="prompt-5"><div class="tc-who">Prompt 5 &middot; Chris, working as a student &middot; 12:40 PM</div><div class="tc-said">i was going to ask more about the standard but i&#x27;ll give you my sketch
+
+open the file and find the crossmember channel
+do the filter on the channel to get a second channel
+probably plot both so i know i did it right
+do the peak finding on each so i know what changed and i can tell alice
+
+then i write the report
+
+but what i don&#x27;t know is what standard filter to apply and where to find it. what i saw in teh videos looked kind of complex with special coefficients.</div></div>
+<div class="tc-turn tc-tutor"><div class="tc-who">Course tutor &middot; 12:40 PM</div><details class="tc-reason"><summary>The tutor's summary of their reasoning (1,242 tokens)</summary><p>I should acknowledge their sketch's good structure while flagging the missing pieces—header reading, sample interval, peak definition—and point them toward the course page that lists which decisions each standard makes, being careful not to overstate specifics about SAE J211-1 that I'm not fully certain of.</p>
+<p>I'll point them to the course page rather than naming the standard myself, since identifying which filter class applies is their task to work out. I can gently note that these tables typically key the class on what the data will be used for, without naming the specific class — leaving the "why" for them to discover when they read the table.</p>
+<p>The coefficients themselves come from a formula based on the class and sampling interval, so I should flag that the sampling interval in the header is something they'll need for step one. I'll also hint at checking whether the filter runs forward-and-backward, since that affects phase lag — a good conceptual point to raise without revealing the answer, and worth connecting to their step of comparing raw versus filtered peaks.</p>
+<p>For step 3 (plotting) and step 4 (peaks), I want to ask what "right" would look like and define edge cases and peak sign clearly, plus quickly address the "standard decides / I decide" markers they skipped. I'll keep the response concise.</p></details><div class="tc-reply"><p>Your sketch is a solid structure. Comparing the raw and filtered peaks is a good idea too, because it shows Alice how much the filter matters. Here's where the items from our list fit into it:</p>
+<ol>
+<li><strong>Open the file, find the crossmember channel.</strong> Also read the header for the <strong>sampling interval</strong>. You'll need it for the filter (more below).</li>
+<li><strong>Filter the channel.</strong> The class is <em>the standard decides</em>. How the filter starts at the first sample may or may not be fixed. Check.</li>
+<li><strong>Plot both.</strong> What would "done it right" look like on the plot? Decide that before you look, or any plot will seem fine.</li>
+<li><strong>Find the peak.</strong> Most positive, most negative, or largest magnitude? <em>I decide</em>, unless the standard says otherwise. And should anything happen to the zero level before step 2? Check the standard.</li>
+</ol>
+<p><strong>Where to find the filter.</strong> Start with the course page "The standards behind the crash data." It lists which decisions each of the three standards makes, so it should tell you which one fixes the filter for this channel. I don't have that page's contents, so I won't guess what it says. When you find the table or rule that assigns a class, look at what it depends on. Is it only the kind of channel, or something else too? That's where your "why" for Alice will come from.</p>
+<p><strong>About the coefficients.</strong> Don't let them scare you. The getting-started note says "smoothing gives the coefficients," so the week 4 page "Smoothing and phase lag" is where the formula is built up. The coefficients aren't magic numbers to copy. They're calculated from two things: the filter class and the sampling interval. That's why step 1 needs the sampling interval. Once you have both, getting the coefficients is mostly plugging in. The idea behind them matters more than the arithmetic.</p>
+<p>While you're on that page, keep one question in mind: <strong>if a filter delays the signal (phase lag), what could that do to the peak you report?</strong> The answer may explain why the standard's filter works the way it does.</p>
+<p>Once you've found the standard and the class, send me what you found and we can check it before you write code.</p></div></div>
+<div class="tc-turn tc-student" id="prompt-6"><div class="tc-who">Prompt 6 &middot; Chris, working as a student &middot; 12:45 PM</div><div class="tc-said">i&#x27;ve read the course website but i can&#x27;t find a good source for the standard. can you help me? what standard should we apply in this case and why? i think its 60 or 180, but how do i know which?</div></div>
+<div class="tc-turn tc-tutor"><div class="tc-who">Course tutor &middot; 12:45 PM</div><details class="tc-reason"><summary>The tutor's summary of their reasoning (1,526 tokens)</summary><p>I recall SAE J211-1 defines Channel Frequency Classes (CFC) at 1000, 600, 180, and 60, with a recommended practice table mapping measurement types to the appropriate CFC — I should pull that mapping accurately rather than guess, since figuring out which class applies is genuinely part of the task.</p>
+<p>adds 600 for component analysis, confirming the "60 or 180" question really depends on purpose. I'm fairly confident in this J211-1 table recollection but should hedge appropriately and suggest they verify against the standard text or course materials, since I don't have access to the actual course page content.</p>
+<p>I should also flag the ISO/TS 13499 channel code convention, since the last character of that 16-character code may already indicate a filter class — things like unfiltered, CFC1000, CFC600, CFC180, CFC60, or prefiltered. I'm only moderately confident on the exact letter mapping, so I'll mention it softly and suggest Alice check whether her data channel is already filtered before applying another filter, since double-filtering would distort the signal.</p>
+<p>I'm not going to pick the filter class for her — that's her call based on what the peak acceleration is meant to represent. I could briefly note why J211 differentiates filter classes: whole-vehicle pulses tend to be lower frequency, while component-level structural ringing needs more bandwidth, but I shouldn't over-explain this. Better to just ask her directly what the crossmember peak is being used for — a vehicle-level pulse comparison, or a local structural response — since that determines which row of the table actually applies, and also ask where on the vehicle this crossmember sits since location might matter too.</p></details><div class="tc-reply"><p>The standard you want is <strong>SAE J211-1</strong>. It defines the filter classes, called <strong>Channel Frequency Classes (CFC)</strong>: 1000, 600, 180, and 60. The number is roughly the frequency (in Hz) up to which the filter passes the signal nearly unchanged. Your instinct that it's 60 or 180 is a good one.</p>
+<p><strong>How J211-1 decides the class.</strong> It doesn't assign a class just by <em>where the sensor is</em>. For vehicle structure accelerations, like a crossmember, its recommended-class table assigns one by <strong>what the number will be used for</strong>. From my memory of that table:</p>
+<table>
+<thead>
+<tr>
+<th>Use of the structural acceleration</th>
+<th>Recommended CFC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total vehicle comparison</td>
+<td>60</td>
+</tr>
+<tr>
+<td>Collision simulation input</td>
+<td>60</td>
+</tr>
+<tr>
+<td>Component analysis</td>
+<td>600</td>
+</tr>
+<tr>
+<td>Integration for velocity or displacement</td>
+<td>180</td>
+</tr>
+</tbody>
+</table>
+<p>Please check this against the standard itself or the course's standards page before you rely on it. I'm confident J211-1 ties the class to purpose, but I can't see your course page, and you should cite the source, not me.</p>
+<p><strong>Why this matters for Alice.</strong> It answers two of her four items at once:</p>
+<ul>
+<li><strong>"Which class, and why"</strong>: the class follows from what the customer will use the peak for.</li>
+<li><strong>"When would a different value be right"</strong>: if the number were used for a different purpose in that table, a different class, and a different peak, would be correct.</li>
+</ul>
+<p><strong>The decision that's yours:</strong> reread Alice's context. What is the customer doing with this peak, and which row does that match? What in the assignment or the header supports your reading? If the purpose isn't stated clearly, that's worth flagging in your report as an assumption.</p>
+<p><strong>One more header check.</strong> ISO/TS 13499 is the data format standard, and its channel codes include a field for filter class. Look at whether your crossmember channel is marked as unfiltered or already filtered. If it's already filtered, filtering it again would change your answer. Again, confirm the field meanings against the course page rather than my memory.</p>
+<p>Once you've picked a row and have a reason for it, send me your choice and your sampling interval. Then we can move to computing the filter coefficients.</p></div></div>
+<div class="tc-turn tc-student" id="prompt-7"><div class="tc-who">Prompt 7 &middot; Chris, working as a student &middot; 12:49 PM</div><div class="tc-said">ok, here is my reasoning. we are reporting a peak, not integrating to velocity. integration is 180. maybe we are doing component analysis, but more likely we are doing total vehicle comparison. so 60. but, i should probably record this as one of my assumptions, right?
+
+for my data the time step inteval is 50 micro seconds (20kHz)</div></div>
+<div class="tc-turn tc-tutor"><div class="tc-who">Course tutor &middot; 12:49 PM</div><details class="tc-reason"><summary>The tutor's summary of their reasoning (1,612 tokens)</summary><p>I'm noting the student's elimination-based reasoning for CFC 60 and the 50 µs sampling interval at 20 kHz, planning to move into coefficient computation next. Before that though, I want to check their claim about "total vehicle comparison" being more likely—I should push them to point to what in the assignment actually supports that interpretation rather than taking it as given.</p>
+<p>I'm recalling the SAE J211-1 Appendix table for channel frequency classes: total vehicle comparison at 60, collision simulation input at 60, component analysis at 600, integration for velocity/displacement at 180—worth connecting the component analysis case since it would yield a much higher peak, which illustrates the "different value" condition. I should double check this table from memory before stating it as fact.</p>
+<p>On sampling rate, 20 kHz is plenty for CFC 60 per J211's recommended multiple, so I don't think it needs flagging. Now I'm working through the J211 Appendix C formulas for the phaseless 4-pole Butterworth filter coefficients—computing the angular frequency terms and the a0/a1/a2 filter coefficients from CFC and sampling period.</p>
+<p>Still writing filter coefficients...</p>
+<p>I'm weighing whether to actually hand over these coefficients given the course's learning objective is applying a standard-specified filter and explaining why—since I'm reconstructing the formula from memory, there's real risk of fabrication, so it's safer to point them to J211-1 Appendix C and the course's week 4 page and have them bring the formula rather than assert it myself. I also want to revisit the forward-backward pass phase-lag question I left open earlier.</p>
+<p>I'm also flagging several loose threads: whether the forward/backward filtering creates edge effects at the start and end of the signal, whether the peak definition is still unresolved, and whether they've checked if the ISO 13499 header already indicates the data was pre-filtered. On readiness, since they've already chosen their filter class with reasoning, I want to push them toward execution but first pressure-test the "why"—specifically whether a crossmember channel peak really supports a total-vehicle comparison or whether it's actually component-level analysis, since the gap between the 60 and 600 values is large enough that this assumption is load-bearing. A sensitivity check reporting both peaks could be a useful way to show how much rides on that assumption, though I'll leave the final call to them. I'm also noting the sampling rate details (50 µs, 20 kHz) as something worth confirming.</p>
+<p>I want to point them toward the filter formula itself—J211-1's appendix and the "smoothing and phase lag" material—describing the general recursive structure (current and past input/output terms with coefficients derived from CFC and sampling interval) without handing over the exact coefficient derivation, and I'm considering whether to just tell them J211 applies the filter in both directions for phase correction or instead prompt them to go find that detail themselves.</p></details><div class="tc-reply"><p>Yes, record it as an assumption. Your reasoning is also a good model for the report: you ruled out integration because you're reporting a peak, then chose between the remaining rows.</p>
+<p><strong>That assumption carries a lot of weight.</strong> The two rows you're choosing between are CFC 60 and CFC 600, a factor of ten in bandwidth. CFC 600 passes much more of the short, sharp content, so its peak will usually be noticeably higher. If the customer files this as component analysis and you file it as total vehicle comparison, you'll disagree by a lot, even though you both followed J211-1 correctly. That gives you a direct answer to Alice's fourth item: <em>"If this peak is used for component analysis, CFC 600 applies and the peak would be different."</em></p>
+<p>Before you commit, push on one thing: <strong>what in Alice's context makes total vehicle comparison more likely?</strong> A crossmember is a single part of the structure, which could argue for component analysis. I'm not saying 60 is wrong. I'm saying "more likely" needs a reason you can write down. If the assignment and header don't settle it, say so, and consider whether reporting both values would help Alice. That's your call.</p>
+<p><strong>Your sampling interval:</strong> 50 µs and 20 kHz agree (1 / 0.00005 s = 20,000 Hz). In the filter formula, the time step T = 0.00005 s.</p>
+<p><strong>Next step: the filter formula.</strong> The getting-started note gives its shape: each output sample is a weighted sum of the current and recent inputs plus the previous outputs. For this filter that looks like</p>
+<p>y[n] = a0·x[n] + a1·x[n−1] + a2·x[n−2] + b1·y[n−1] + b2·y[n−2]</p>
+<p>The five coefficients come from the CFC and T. I'm not going to give you those coefficient formulas from memory, because you need to cite them. Look in J211-1 itself (it includes the digital filter in an appendix) and on the week 4 page "Smoothing and phase lag."</p>
+<p>While you read, look for answers to two of our open questions:</p>
+<ol>
+<li><strong>Phase lag.</strong> Does the standard run the filter once, or does it do something extra so the peak isn't shifted in time?</li>
+<li><strong>The first samples.</strong> The formula needs x[n−1], x[n−2], y[n−1], and y[n−2]. What does the standard (or the course page) say to use at n = 0 and n = 1, before those exist?</li>
+</ol>
+<p>Also, did you check the ISO/TS 13499 channel code in the header to see whether the crossmember channel is already filtered? If it is, filtering again would give the wrong answer, so check that before you write code.</p>
+<p>Send me the coefficient formulas once you find them. We can work out the numbers for CFC 60 and T = 50 µs together, and you can check them.</p></div></div>
+<div class="tc-step"><span>P&oacute;lya step 3</span>Carry out the plan</div>
+<div class="tc-turn tc-student" id="prompt-8"><div class="tc-who">Prompt 8 &middot; Chris, working as a student &middot; 12:52 PM</div><div class="tc-said">i saw them in the slides. they are ugly. i don&#x27;t want to copy them here. but on the slides they used 80 micro seconds and 60, but i need 50 micro seconds and 60 so mine will be different. can you compute them for me so i can double check them with my code?</div></div>
+<div class="tc-turn tc-tutor"><div class="tc-who">Course tutor &middot; 12:52 PM</div><details class="tc-reason"><summary>The tutor's summary of their reasoning (2,728 tokens)</summary><p>Computing the J211 CFC 60 coefficients for T=50µs counts as tedious arithmetic I can perform, since the learning objective is applying the filter correctly and explaining the reasoning, not deriving formulas from scratch. Since they now have slides to reference, I can work through the computation directly rather than withholding it.</p>
+<p>I recall the standard formula structure: wd = 2π·CFC·2.0775 (though some versions use 1.25×5/3 ≈ 2.0833, so I should flag this constant discrepancy), then wa = tan(wd·T/2), and the filter coefficients a0, a1, a2, b1, b2 derive from wa through the Butterworth 2-pole formulas. I should be transparent about which constant I'm using and tell them to cross-check against whatever their slides specify, since the two versions give slightly different numbers.</p>
+<p>Now I'm working through the actual numbers for CFC=60, T=5e-5: computing wd = 2π·60·2.0775 ≈ 783.199 rad/s, then wd·T/2 ≈ 0.0196, and I need tan of that small angle next.</p>
+<p>Adding these corrections gives wa ≈ 0.0195824786, then I'm squaring that value to get wa² ≈ 0.0003834735, and now multiplying by √2 to continue the calculation.</p>
+<p>The denominator works out to D ≈ 1.02807727954, and now I'm dividing wa² by D to find a0, getting roughly 0.000373.</p>
+<p>So a0 ≈ 3.7300e-4, a1 = 7.4600e-4, a2 = 3.7300e-4. Now I'm computing b1 = 2(1−wa²)/D, working through the arithmetic to get b1 ≈ 1.94463304, and moving on to find b2 next.</p>
+<p>Sum checks out to 1, confirming unity DC gain as expected. Final values: a0 ≈ 3.7300e-4, a1 ≈ 7.4600e-4, a2 = a0, b1 ≈ 1.94463, b2 ≈ −0.94613 — precise to about 5-6 digits, which should be plenty. I should flag for the student that this sum-to-one check is a good self-verification step for their code, and note that if their slides use a slightly different constant than 2.0775, their numbers will differ slightly — not worth recomputing, just worth mentioning. I'll also suggest they test their code against the 80 µs slide example to confirm it reproduces the expected values.</p>
+<p>I should remind them that the filter is phaseless since J211 runs forward then backward, and that some conventions flip the sign on the b terms, so they should double-check that themselves when verifying.</p></details><div class="tc-reply"><p>Yes, this is plugging numbers into a formula, so I'll do the arithmetic and you check it. Here's what I used so you can compare it line by line with your slides (this is the J211-1 Appendix C form as I remember it):</p>
+<ul>
+<li>ω_d = 2π · CFC · 2.0775</li>
+<li>ω_a = tan(ω_d · T / 2)</li>
+<li>D = 1 + √2·ω_a + ω_a²</li>
+<li>a0 = ω_a² / D, a1 = 2·a0, a2 = a0</li>
+<li>b1 = −2(ω_a² − 1) / D</li>
+<li>b2 = (−1 + √2·ω_a − ω_a²) / D</li>
+</ul>
+<p><strong>For CFC 60, T = 50 µs:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ω_d</td>
+<td>≈ 783.20 rad/s</td>
+</tr>
+<tr>
+<td>ω_a</td>
+<td>≈ 0.0195825</td>
+</tr>
+<tr>
+<td>a0</td>
+<td>≈ 3.7300 × 10⁻⁴</td>
+</tr>
+<tr>
+<td>a1</td>
+<td>≈ 7.4600 × 10⁻⁴</td>
+</tr>
+<tr>
+<td>a2</td>
+<td>≈ 3.7300 × 10⁻⁴</td>
+</tr>
+<tr>
+<td>b1</td>
+<td>≈ 1.94463</td>
+</tr>
+<tr>
+<td>b2</td>
+<td>≈ −0.94613</td>
+</tr>
+</tbody>
+</table>
+<p>These are hand-computed to about five or six significant figures. Your code will carry more digits, so expect small differences in the last place.</p>
+<p><strong>Things to check before trusting my numbers or yours:</strong></p>
+<ol>
+<li><strong>The constant in ω_d.</strong> I used 2.0775. Some older versions and some course materials use 1.25 × 5/3 ≈ 2.0833 instead. If your slides use a different constant, your numbers will differ slightly from mine. In that case, follow the slides and say which you used in the report.</li>
+<li><strong>The sign convention on b1 and b2.</strong> I used y[n] = a0·x[n] + a1·x[n−1] + a2·x[n−2] + b1·y[n−1] + b2·y[n−2]. Some sources put minus signs in front of the b terms and flip the signs of b1 and b2 to match. Either works, as long as your formula and your coefficients agree.</li>
+<li><strong>Reproduce the slide example first.</strong> Run your code with T = 80 µs and CFC 60. If it matches the slides, you can trust it at 50 µs. This check is stronger than comparing against me.</li>
+<li><strong>A self-check you can run yourself:</strong> what should a0 + a1 + a2 + b1 + b2 add up to, and why? Think about what the filter should do to a signal that's constant. Then add up the numbers in the table and see if they agree.</li>
+</ol>
+<p>Coefficients are only part of it. Your sketch still has two open questions from the standard: does it run the filter once, or forward and then backward (the phase-lag question)? And what does it use for the first two samples? Have you found what the slides say about those?</p></div></div>
+<div class="tc-turn tc-student" id="prompt-9"><div class="tc-who">Prompt 9 &middot; Chris, working as a student &middot; 1:11 PM</div><pre class="tc-paste"><code>&quot;&quot;&quot;
+a4_demo.py  --  starter for the Assignment 4 demo: filter the crossmember channel
+
+Reads the crash test from crash/ next to this script, finds the channel whose
+header comment names the crossmember, and runs a loop over its samples to
+filter them.
+
+What this script does NOT do yet is filter.  The loop body copies each input
+sample to the output, so the peak it prints is the raw peak.
+
+Run:  python a4_demo.py
+&quot;&quot;&quot;
+import json
+import sys
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+HERE = Path(__file__).parent
+CRASH = HERE / &quot;crash&quot; / &quot;09079.json&quot;
+PLOT = HERE / &quot;a4-plot.png&quot;
+
+
+def load_crash(path):
+    with open(path) as f:
+        return json.load(f)
+
+
+def find_crossmember(test):
+    # The key is our label; the comment is the instrument&#x27;s.  Trust the comment.
+    hits = [k for k, ch in test[&quot;channels&quot;].items()
+            if &quot;CROSSMEMBER&quot; in (ch.get(&quot;comment&quot;) or &quot;&quot;).upper()]
+    if len(hits) != 1:
+        for k, ch in test[&quot;channels&quot;].items():
+            print(f&quot;  {k:12s} {ch.get(&#x27;comment&#x27;)}&quot;)
+        sys.exit(f&quot;expected one crossmember channel, found {len(hits)}&quot;)
+    return hits[0]
+
+
+def peak(t, a):
+    i = np.argmax(np.abs(a))
+    return a[i], t[i]
+
+
+def main():
+    test = load_crash(CRASH)
+    key = find_crossmember(test)
+    ch = test[&quot;channels&quot;][key]
+
+    x = np.array(ch[&quot;y&quot;])
+    dt = ch[&quot;dt&quot;]
+    t = ch[&quot;t0&quot;] + dt * np.arange(ch[&quot;n&quot;])
+
+    print(f&quot;test {test[&#x27;testNo&#x27;]}: {key}  &#x27;{ch[&#x27;comment&#x27;]}&#x27;&quot;)
+    print(f&quot;  {ch[&#x27;n&#x27;]} samples, dt = {dt} s ({1 / dt:.0f} Hz), unit {ch[&#x27;unit&#x27;]}&quot;)
+
+    y = np.zeros_like(x)
+    for i in range(len(x)):
+        # TODO: the filter goes here
+        y[i] = x[i]
+
+    a, ta = peak(t, x)
+    print(f&quot;  raw peak:      {a:10.1f} {ch[&#x27;unit&#x27;]} at t = {ta * 1000:.2f} ms&quot;)
+    a, ta = peak(t, y)
+    print(f&quot;  filtered peak: {a:10.1f} {ch[&#x27;unit&#x27;]} at t = {ta * 1000:.2f} ms&quot;)
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.plot(t * 1000, x, color=&quot;#2a78d6&quot;, lw=1, label=&quot;raw&quot;)
+    ax.plot(t * 1000, y, color=&quot;#eb6834&quot;, lw=2, label=&quot;filtered&quot;)
+    ax.set_title(f&quot;Test {test[&#x27;testNo&#x27;]}: {ch[&#x27;comment&#x27;]}&quot;)
+    ax.set_xlabel(&quot;time (ms)&quot;)
+    ax.set_ylabel(f&quot;acceleration ({ch[&#x27;unit&#x27;]})&quot;)
+    ax.grid(color=&quot;#e0e0e0&quot;, lw=0.5)
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(PLOT, dpi=150)
+    print(f&quot;  saved {PLOT.name}&quot;)
+    plt.show()
+
+
+if __name__ == &quot;__main__&quot;:
+    main()</code></pre>
+<div class="tc-said">this is my program so far. can you write me the subroutine for the filter with your coefficients? can you also write some tests with output i can read to make sure our coefficients are right?</div></div>
+<div class="tc-turn tc-tutor"><div class="tc-who">Course tutor &middot; 1:11 PM</div><details class="tc-reason"><summary>The tutor's summary of their reasoning (6,625 tokens)</summary><p>I need to verify my Butterworth filter coefficients against the J211 Appendix C formula, double-checking the warped frequency calculation and the a0, a1, a2, b1 derivations before writing the subroutine.</p>
+<p>Running through the numbers, wd works out to roughly 783.2, and after plugging in the small-angle tangent approximation and solving the denominator D, the coefficients a0, b1, and b2 all check out — their sum lands right at 1.0, confirming unit DC gain as expected. Now I need to decide on an implementation detail: whether the subroutine should apply the filter forward-only or in the phaseless forward-backward manner that J211 specifies.</p>
+<p>I'm unsure about the standard's convention for initial conditions, and since the student hasn't specified this either, following the professor's instructions means I should pick the most literal, minimal default (a single forward pass with zeroed initial conditions for missing early samples), clearly flag that choice, and ask the student to confirm or override it.</p>
+<p>I should decide whether writing the code myself crosses a learning-objective line. Since the course emphasizes reading code over writing it, I can implement this, but I'll hand verification back by asking them to walk through and explain the lines. I also shouldn't quietly default to forward-backward filtering—since they asked for "the filter with your coefficients," I'll use a single forward pass, name that choice explicitly, and flag the peak-detection convention (largest magnitude) as another decision point to raise with them.</p>
+<p>Good tests to suggest: checking DC gain by confirming coefficients sum to ~1 and that a constant input settles to that constant after the initial transient; printing coefficients for a known case (like T=80 µs, CFC 60) so they can compare against the slide values themselves rather than me fabricating those numbers; and testing frequency response with a low-frequency sine (around 10 Hz) that should pass through with amplitude near 1.</p>
+<p>Working through the math, I confirm that squaring the single-pass response doubles the attenuation, so the two-pass -3 dB point lands exactly at 100 Hz, which matches 1.667×60 — confirming the J211 CFC 60 spec.</p>
+<p>I'm thinking the test should verify two things: an analytic frequency response computed directly from the coefficients (clean, no transient) and a sine-pass-through test that confirms the loop implementation matches that analytic result. For test cases, I'll check coefficients against the slide example (80 µs, 60 Hz) and then the 50 µs comparison case.</p>
+<p>I also want a step-input test showing the startup transient settling from zero initial conditions to the constant value, plus a sine-sweep test printing gain at several frequencies against the analytic |H|, confirming the 0.707 gain at 124.65 Hz. Finally, a half-sine pulse test (mimicking a crash-like pulse) seems useful for checking peak time shift and amplitude change between input and output, which directly addresses the phase lag question.</p>
+<p>I'm also flagging a key edge-case pitfall: if someone implements the filter loop using x[i-1] with i=0, numpy will silently wrap to x[-1], the last array element, which is a real bug trap. My implementation avoids it by using explicit state variables (x1, x2, y1, y2) initialized to zero rather than indexing into arrays with negative wraparound.</p>
+<p>Writing the coefficient calculation function...</p>
+<p>I should use np.zeros_like for consistency, though float works fine with real input. For integration, I'd set CFC=60 as a named constant and swap the loop for a call to filter_pass with the computed coefficients, making it easy to test and read. I'll also plan a test_filter.py file importing from a4_demo to verify behavior.</p>
+<p>For verification, I'm writing a frequency-response function that computes the filter's gain at a given frequency using the z-transform, being careful about the sign convention on the feedback coefficients. Then I plan to test this against a generated sine wave by running it through the loop-based filter and measuring the output amplitude after transients settle, which requires a long enough signal (e.g. 1 second at high sample rates) to capture multiple periods even at low frequencies.</p>
+<p>I'm also planning a constant-input test to expose startup transient behavior, and a half-sine pulse test to examine the filter's step/impulse-like response.</p>
+<p>For the pulse test, I should estimate the group delay roughly (~1.8 ms for a single-pass second-order Butterworth) without stating exact predicted output values, instead prompting the user to predict first. I'll only commit to values I'm confident about — coefficient sum near 1, low-frequency gain near 1, and unity gain at the single-pass cutoff frequency of 124.65 Hz.</p>
+<p>The gain there should match 1/√2 exactly due to prewarping, and sampling at 20 kHz gives so many samples per cycle that the discretization error in measuring the peak is negligible. I'm also considering how to hint at the standard's −3 dB frequency table for CFC 60 without just stating the value outright, since I recall it's around 100 Hz but want the user to verify it themselves.</p>
+<p>This suggests two passes may be needed, but I'll let them draw that conclusion themselves by pointing them toward what the standard says about running direction, rather than handing over the calculation. I also want to leave the phase lag question open since they haven't responded yet — this test result gives them evidence to work with on their own.</p>
+<p>I should note the coefficients I used came from memory, so the independent slide test at 80 µs serves as the real check, and the sign convention and constant value are exposed for them to verify. Their peak-finding code already uses absolute value correctly to grab the largest magnitude while preserving sign — that's a sound design choice already built into the starter code.</p>
+<p>I'll flag that choosing the largest-magnitude point is itself a decision worth stating explicitly in their report, and I want them to double check the ISO 13499 filter header briefly. I should also prompt them to verify the shift order in their indexing logic themselves — asking why the order matters, what happens at the boundary case i=0, and why they didn't use the previous index instead — as a self-check tied to the course material.</p>
+<p>Writing a test script now to validate the CFC filter coefficients by computing the frequency response gain directly from the filter coefficients and comparing across named coefficient sets.</p>
+<p>Still writing test cases...</p>
+<p>Then I'm testing a fifth case: a half-sine pulse 5 ms wide, checking the filtered output's peak value and timing against the input's. The whole test suite runs fast since it's only about 140k loop iterations total across the seven frequencies.</p>
+<p>I'm sketching the final demo script structure—setting the CFC constant at top with an assumption note, keeping helper functions above main, making the filter function accept plain lists by converting to numpy arrays, and planning a concise response that states my assumptions (single forward pass, zero-padding before the first sample, the 2.0775 constant, sign convention) before showing the code.</p>
+<p>I want to lay out how to read the test results: Test 1 compared against the slides as the strongest check, Test 2 against my own table where the sum should be near 1, Test 3 showing startup behavior, Test 4 comparing measured vs computed values near 124.65 Hz and 0.7071, and Test 5 for predicting before running. I'm flagging decisions still open—one pass vs two, how Test 4 compares against the standard's table, time shift in Test 5, and initial conditions tied to Test 3 and bias—plus noting the peak() function embodies a specific choice about what "peak" means. I want to keep the final write-up tight.</p></details><div class="tc-reply"><p>I'll write it as <strong>one forward pass of the formula, nothing more</strong>. That's the most literal reading of "the filter with your coefficients." Several choices are still open, so here are the defaults I took. Each one is yours to change.</p>
+<p><strong>Defaults I took (none of these are decided yet):</strong></p>
+<ol>
+<li><strong>One pass, forward only.</strong> You haven't decided whether the standard runs the filter once or forward-then-backward, so I did one pass. Test 4 and Test 5 below will give you evidence on this.</li>
+<li><strong>Before the first sample, inputs and outputs are taken as zero.</strong> That's the literal "nothing exists before the record." Test 3 shows what this does.</li>
+<li><strong>Constant 2.0775</strong> in ω_d, and the <strong>plus-sign convention</strong> on b1 and b2, matching what I gave you before. Both are arguments, so you can match your slides.</li>
+</ol>
+<h3 id="additions-to-a4-demo-py">Additions to <code>a4_demo.py</code></h3>
+<p>Put these above <code>main()</code>:</p>
+<pre><code class="language-python">CFC = 60   # ASSUMPTION: &quot;total vehicle comparison&quot; row of the J211-1 table
+
+
+def cfc_coefficients(cfc, dt, k=2.0775):
+    &quot;&quot;&quot;Coefficients for y[n] = a0 x[n] + a1 x[n-1] + a2 x[n-2] + b1 y[n-1] + b2 y[n-2].&quot;&quot;&quot;
+    wd = 2 * np.pi * cfc * k
+    wa = np.tan(wd * dt / 2)
+    D = 1 + np.sqrt(2) * wa + wa**2
+    a0 = wa**2 / D
+    a1 = 2 * a0
+    a2 = a0
+    b1 = -2 * (wa**2 - 1) / D
+    b2 = (-1 + np.sqrt(2) * wa - wa**2) / D
+    return a0, a1, a2, b1, b2
+
+
+def filter_pass(x, coeffs):
+    &quot;&quot;&quot;One forward pass of the difference equation over x.&quot;&quot;&quot;
+    a0, a1, a2, b1, b2 = coeffs
+    x = np.asarray(x, dtype=float)
+    y = np.zeros(len(x))
+    x1 = x2 = 0.0   # DEFAULT: inputs before the record taken as zero
+    y1 = y2 = 0.0   # DEFAULT: outputs before the record taken as zero
+    for i in range(len(x)):
+        y[i] = a0 * x[i] + a1 * x1 + a2 * x2 + b1 * y1 + b2 * y2
+        x2, x1 = x1, x[i]
+        y2, y1 = y1, y[i]
+    return y
+</code></pre>
+<p>Then replace your copy loop in <code>main()</code> with:</p>
+<pre><code class="language-python">    y = filter_pass(x, cfc_coefficients(CFC, dt))
+</code></pre>
+<p><strong>Why the state variables instead of <code>x[i-1]</code>:</strong> at <code>i = 0</code>, <code>x[i-1]</code> in Python is <code>x[-1]</code>, the <strong>last</strong> sample in the record. The code would run without error and quietly mix the end of the crash into the start. This is the "first sample" edge from the Reading Code page.</p>
+<h3 id="test-filter-py-put-it-next-to-a4-demo-py"><code>test_filter.py</code> (put it next to <code>a4_demo.py</code>)</h3>
+<pre><code class="language-python">&quot;&quot;&quot;Checks on the CFC filter in a4_demo.py.   Run:  python test_filter.py&quot;&quot;&quot;
+import numpy as np
+from a4_demo import cfc_coefficients, filter_pass
+
+NAMES = (&quot;a0&quot;, &quot;a1&quot;, &quot;a2&quot;, &quot;b1&quot;, &quot;b2&quot;)
+
+
+def show(c):
+    for name, v in zip(NAMES, c):
+        print(f&quot;    {name} = {v: .8e}&quot;)
+    print(f&quot;    sum of all five = {sum(c):.10f}&quot;)
+
+
+def gain_from_coeffs(c, f, dt):
+    &quot;&quot;&quot;Gain at frequency f computed directly from the coefficients (no loop).&quot;&quot;&quot;
+    a0, a1, a2, b1, b2 = c
+    zi = np.exp(-2j * np.pi * f * dt)
+    return abs((a0 + a1 * zi + a2 * zi**2) / (1 - b1 * zi - b2 * zi**2))
+
+
+def main():
+    print(&quot;Test 1: slide case, CFC 60, dt = 80 us  -&gt; compare with your slides&quot;)
+    show(cfc_coefficients(60, 80e-6))
+
+    dt = 50e-6
+    c = cfc_coefficients(60, dt)
+    print(&quot;\nTest 2: your case, CFC 60, dt = 50 us  -&gt; compare with the table in chat&quot;)
+    show(c)
+
+    print(&quot;\nTest 3: constant input of 5.0&quot;)
+    y = filter_pass(np.full(2000, 5.0), c)
+    print(&quot;    first five outputs:&quot;, &quot; &quot;.join(f&quot;{v:.4f}&quot; for v in y[:5]))
+    print(f&quot;    last output: {y[-1]:.6f}&quot;)
+
+    print(&quot;\nTest 4: sine gain, measured through the loop vs computed from coefficients&quot;)
+    t = np.arange(0, 1.0, dt)
+    for f in (10, 30, 60, 100, 60 * 2.0775, 300, 1000):
+        y = filter_pass(np.sin(2 * np.pi * f * t), c)
+        measured = np.max(np.abs(y[len(y) // 2:]))   # skip the start-up
+        computed = gain_from_coeffs(c, f, dt)
+        print(f&quot;    {f:8.2f} Hz   measured {measured:.4f}   computed {computed:.4f}&quot;
+              f&quot;   ({20 * np.log10(computed):6.2f} dB)&quot;)
+
+    print(&quot;\nTest 5: half-sine pulse, height 1, 5 ms wide, starting at 20 ms&quot;)
+    t = np.arange(0, 0.06, dt)
+    on = (t &gt;= 0.020) &amp; (t &lt;= 0.025)
+    x = np.where(on, np.sin(np.pi * (t - 0.020) / 0.005), 0.0)
+    y = filter_pass(x, c)
+    for label, s in ((&quot;input &quot;, x), (&quot;output&quot;, y)):
+        i = np.argmax(np.abs(s))
+        print(f&quot;    {label} peak {s[i]:.4f} at t = {t[i] * 1000:.2f} ms&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre>
+<h3 id="how-to-read-the-output">How to read the output</h3>
+<ul>
+<li><strong>Test 1 is the strongest check.</strong> If it matches your slides, the formula is right, and Test 2 follows from it. I've only given you my hand-computed numbers, so trust the slides over me.</li>
+<li><strong>Tests 2 and 3:</strong> the sum should come out very close to 1. Test 3 should end at 5.0. Look at the first few outputs, though. Starting from zero, the filter sees a constant 5.0 as a sudden <em>step</em> from 0 to 5. Connect that to your bias question: if your crossmember channel doesn't sit at zero before impact, the start of your filtered signal will contain a transient the car never experienced.</li>
+<li><strong>Test 4:</strong> "measured" and "computed" should agree to about three decimals. That shows the loop does what the coefficients say. At 124.65 Hz (= 2.0775 × 60) the gain should be 0.7071 (−3 dB), which is exactly what the formula is built to give for one pass.</li>
+<li><strong>Test 5:</strong> <strong>predict before you run it.</strong> Will the output peak be higher, lower, or the same as 1? Earlier, later, or the same time?</li>
+</ul>
+<h3 id="your-check">Your check</h3>
+<p>Could you tell me, without running it:</p>
+<ol>
+<li>Why the line <code>x2, x1 = x1, x[i]</code> assigns in that order. What would go wrong if you wrote <code>x1 = x[i]</code> and then <code>x2 = x1</code>?</li>
+<li>Which single line you would change to report the component-analysis value.</li>
+</ol>
+<p>Also note that your <code>peak()</code> function already makes one of our listed decisions. <code>np.argmax(np.abs(a))</code> means "largest magnitude." That's fine, but it belongs in your written assumptions.</p>
+<h3 id="what-s-still-your-decision">What's still your decision</h3>
+<p><strong>One pass or two.</strong> J211-1's performance spec lists frequency points each class must meet. As I recall, for CFC 60 the response is about −3 dB near 100 Hz, but check that against the standard. Compare it with your Test 4 line at 100 Hz, and with the time shift in Test 5. What do they suggest about how the standard intends the filter to be run? Find what the standard actually says before you change anything.</p>
+<p>Finally, the ISO/TS 13499 check from before is still open. If the header says the crossmember channel is already filtered, none of this should be applied to it.</p></div></div>
+<div class="tc-turn tc-student" id="prompt-10"><div class="tc-who">Prompt 10 &middot; Chris, working as a student &middot; 1:15 PM</div><div class="tc-said">oh, i want to do two passes for phaseless. i don&#x27;t know what to do with the first samples. this was not covered in the videos. will it effect the answer much? what is common? y0 = x0 or something else? the slides say 2.0775.</div></div>
+<div class="tc-turn tc-tutor"><div class="tc-who">Course tutor &middot; 1:15 PM</div><details class="tc-reason"><summary>The tutor's summary of their reasoning (2,787 tokens)</summary><p>The student is asking about initial conditions for the forward-backward pass—whether y0=x0 matters and what's conventional. I should present the common options without deciding for them, and be cautious about claiming specifics from J211-1 Appendix C regarding filter initialization since I'm not fully certain of the exact wording.</p>
+<p>I'm also working through why 2.0775 is calibrated specifically for two-pass filtering: with a second-order Butterworth, two passes squares the magnitude response, and solving for where that combined response hits -3 dB confirms the corner frequency lands near 100 Hz for CFC 60—nicely validating that the constant is designed around the phaseless, two-pass approach.</p>
+<p>On initial conditions, I estimate the startup transient for a 2nd-order Butterworth at fc≈124.65 Hz settles within roughly 10 ms, so whether it matters depends on how close the peak of interest is to the start or end of the signal.</p>
+<p>Since the backward pass begins at the end of the record, edge effects at both the start and end could matter, and the cleanest way to check this is to actually run the filter with different initial conditions and compare the peak output. I'm thinking through a few ways to initialize the filter state — the default of zeros, versus setting it to match a steady-state response as if the signal had been constant at its first sample value forever.</p>
+<p>I should also mention padding approaches, like how scipy's filtfilt extends the signal with reflected samples before filtering and trims afterward, using its own method to pick initial conditions.</p>
+<p>If the data includes pre-impact samples (negative t0), the edge transient likely occurs before the actual event and may not matter much for the peak — worth flagging back to them. I'm not fully certain what J211-1 specifies about initialization at the start of the record, so I should note that uncertainty and point them to the standard or their course materials rather than assert something wrong.</p>
+<p>For the two-pass implementation, I can describe it simply: filter the signal forward, reverse it, filter again, then reverse back — that's the symmetric double-pass approach they're asking about.</p>
+<p>I could also suggest adding an <code>init</code> parameter to their filter function so they can compare "zero" vs "first-sample" initialization, with zero as the default, and have them test both to see how it affects peak timing — the shift should vanish with the double pass. I'll also confirm their 2.0775 constant matches expectations, and suggest they verify it against the known gain behavior at 100 Hz (~0.707) from Test 4.</p>
+<p>I'm unsure exactly what the standard specifies about initialization, so I should flag that as something for them to check rather than assume, and ask them what t0 and init choice they're using so I can give more targeted feedback.</p>
+<p>I'm writing a filter_pass function with a zero or edge-based initialization option, then a filter_twopass function that applies it forward and backward for zero-phase filtering.</p>
+<p>Writing filter_twopass function...</p>
+<p>In main, I compute Butterworth-style coefficients and compare the output peaks using zero versus edge initialization, also printing the signal's start/end values to check consistency. I'm verifying whether the edge initialization produces an exact DC steady-state with unity gain when x[0] is nonzero, checking the filter coefficient relationships that would guarantee this.</p>
+<p>I should note that edge-initialization isn't bias correction—it just avoids a fake transient step, while any DC offset remains uncorrected, which is a separate issue to flag. I also want them to use the earlier transient test to empirically observe how many samples it takes for the filter to settle within 0.1% of the true value.</p></details><div class="tc-reply"><p>Good. Your slides use 2.0775, so your Test 1 should match them. There's a connection you can check yourself: <strong>2.0775 was chosen with two passes in mind.</strong> In Test 4, square the "computed" gain at 100 Hz, since two passes apply the gain twice. Compare that with the −3 dB point you look up for CFC 60 in J211-1. If they agree, that supports two passes as the intended use.</p>
+<h3 id="two-passes">Two passes</h3>
+<p>Filter forward, reverse the result, filter again, and reverse back:</p>
+<pre><code class="language-python">def filter_twopass(x, coeffs, init=&quot;zero&quot;):
+    &quot;&quot;&quot;Forward pass, then a backward pass, so the phase shifts cancel.&quot;&quot;&quot;
+    fwd = filter_pass(x, coeffs, init)
+    return filter_pass(fwd[::-1], coeffs, init)[::-1]
+</code></pre>
+<p>Rerun Test 5 with this. The output peak should no longer arrive late. Predict whether its height changes compared with one pass.</p>
+<p>Note that the backward pass <em>starts at the end of the record</em>. So you now have <strong>two</strong> edges to think about, the first samples and the last ones.</p>
+<h3 id="will-the-first-samples-affect-the-answer-much">Will the first samples affect the answer much?</h3>
+<p>I can't tell you, but you can measure it. It depends on two things you can read from your data:</p>
+<ol>
+<li><strong>How far the peak is from each edge.</strong> The start-up transient dies out after a short time. Test 3 shows you how long: count how many samples it takes to get within, say, 0.1% of 5.0. If your peak is much farther than that from both ends, the edges probably won't touch it.</li>
+<li><strong>The signal level at the edges.</strong> If the record starts and ends near zero, the zero default creates almost no false step. If it doesn't, it does.</li>
+</ol>
+<p>Also check <code>t0</code>. If the record starts before impact, the transient happens before the crash.</p>
+<h3 id="the-options-your-choice-not-mine">The options (your choice, not mine)</h3>
+<ul>
+<li><strong>Zero state</strong> (current default): assume nothing existed before the record. If the edges aren't near zero, this creates a false step.</li>
+<li><strong>Edge state</strong> (what "y0 = x0" is aiming at): pretend the signal sat at x[0] forever. To do this properly, you set <em>all four</em> stored values (x1, x2, y1, y2) to x[0], not just y[0]. This works because the filter's DC gain is 1, which is your "sum = 1" check from earlier.</li>
+<li><strong>Padding</strong>: extend the record past each end (constant or mirrored), filter, then cut the padding off. Library routines such as SciPy's <code>filtfilt</code> do a version of this.</li>
+</ul>
+<p>I don't know reliably whether J211-1 specifies initialization, so I won't guess. Check the standard and the course page. If neither says, it's your assumption to state. Edge state is not bias correction. It avoids a false step, but any offset stays in. That's still a separate decision.</p>
+<h3 id="code-to-measure-it">Code to measure it</h3>
+<p>Update <code>filter_pass</code> so the start is an explicit choice:</p>
+<pre><code class="language-python">def filter_pass(x, coeffs, init=&quot;zero&quot;):
+    a0, a1, a2, b1, b2 = coeffs
+    x = np.asarray(x, dtype=float)
+    y = np.zeros(len(x))
+    if init == &quot;zero&quot;:
+        x1 = x2 = y1 = y2 = 0.0      # nothing before the record
+    elif init == &quot;edge&quot;:
+        x1 = x2 = y1 = y2 = x[0]     # as if the signal had sat at x[0] forever
+    else:
+        raise ValueError(init)
+    for i in range(len(x)):
+        y[i] = a0 * x[i] + a1 * x1 + a2 * x2 + b1 * y1 + b2 * y2
+        x2, x1 = x1, x[i]
+        y2, y1 = y1, y[i]
+    return y
+</code></pre>
+<p>In <code>main()</code>, replace the filter line with this. I've kept <strong>zero</strong> as the reported default, because you haven't chosen yet:</p>
+<pre><code class="language-python">    c = cfc_coefficients(CFC, dt)
+    print(f&quot;  edges: x[0] = {x[0]:.2f} at {t[0]*1000:.2f} ms, &quot;
+          f&quot;x[-1] = {x[-1]:.2f} at {t[-1]*1000:.2f} ms&quot;)
+    y = filter_twopass(x, c, init=&quot;zero&quot;)          # DEFAULT: not yet decided
+    y_edge = filter_twopass(x, c, init=&quot;edge&quot;)
+    p0, _ = peak(t, y)
+    pe, _ = peak(t, y_edge)
+    print(f&quot;  peak, zero init: {p0:.2f}   edge init: {pe:.2f}   diff: {pe - p0:.3g}&quot;)
+</code></pre>
+<p>If the difference is tiny compared with the CFC 60 vs 600 difference, write one sentence saying so in your assumptions and move on. If it's large, look at the plot near the edges before you report anything.</p>
+<h3 id="your-check-2">Your check</h3>
+<ol>
+<li>In the <code>"edge"</code> case, why must x1 and x2 be set as well as y1 and y2? What would the first output be if only y1 and y2 were set to x[0]?</li>
+<li>After you run it, which initialization will you report, and what's your one-sentence reason?</li>
+</ol>
+<p>The ISO/TS 13499 check is still open. Does the header say whether the crossmember channel is already filtered?</p></div></div>
+<div class="tc-turn tc-student" id="prompt-11"><div class="tc-who">Prompt 11 &middot; Chris, working as a student &middot; 1:18 PM</div><div class="tc-said">can you give me one updated file with your suggested changes?</div></div>
+<div class="tc-turn tc-tutor"><div class="tc-who">Course tutor &middot; 1:18 PM</div><details class="tc-reason"><summary>The tutor's summary of their reasoning (1,491 tokens)</summary><p>I'm putting together the full updated a4_demo.py reflecting the chosen defaults: CFC 60, two-pass filtering, and the 2.0775 constant confirmed from the slides, while leaving the zero-init decision as still open. I'm also considering whether test_filter.py needs corresponding updates.</p>
+<p>Since the student only asked for one updated file, I'll keep test_filter.py untouched and note that the filter_pass signature change stays backward-compatible with its default init value. I'll keep the main script's output minimal — raw and filtered peak prints plus the edge comparison — without adding extra plots or speculative ISO key lookups since I don't know the actual JSON structure.</p>
+<p>I'll verify the backward pass's edge initialization is correct since it starts from the forward pass's last output value, which checks out. Then I'll write the updated docstring and assumptions block at the top of the file before diving into the actual script.</p>
+<p>Writing demo script header...</p>
+<p>Still another unresolved item: whether the ISO/TS 13499 header already marks the channel as filtered, in which case it shouldn't be filtered twice. I'm sketching the main routine to compute the CFC coefficients, print them alongside the raw signal edges, then run the two-pass filter with both zero and edge initialization so the results can be compared, printing the raw and filtered peaks for each.</p>
+<p>The default test file still works fine since zero initialization remains the default. I'll just briefly suggest, optionally, a small three-line addition to extend test 5 with the two-pass filter, without overcomplicating things since they only asked for one file.</p></details><div class="tc-reply"><p>Here is the full <code>a4_demo.py</code>. It includes everything from the last two replies: coefficients, a selectable start state, two passes, and the zero-vs-edge comparison.</p>
+<p>The docstring lists every choice the script makes. Each one is labeled as <strong>your decision</strong> or <strong>a default I took that you haven't decided yet</strong>, so it can go straight into your report's assumptions.</p>
+<pre><code class="language-python">&quot;&quot;&quot;
+a4_demo.py  --  Assignment 4: filter the crossmember channel
+
+Reads the crash test from crash/ next to this script, finds the channel whose
+header comment names the crossmember, filters it with the SAE J211-1 CFC
+filter run twice (forward, then backward), and reports raw and filtered peaks.
+
+Choices made in this script (each belongs in the report's assumptions):
+  CFC = 60       DECIDED: &quot;total vehicle comparison&quot; row of the J211-1 table.
+                 If the customer treats this as component analysis, CFC 600.
+  k = 2.0775     DECIDED: constant in omega_d, as on the course slides.
+  two passes     DECIDED: forward then backward, so the phase shifts cancel.
+  INIT = &quot;zero&quot;  DEFAULT, NOT YET DECIDED: filter state before each pass is
+                 zero.  The run also prints the &quot;edge&quot; result for comparison.
+  peak           largest magnitude, sign kept (np.argmax(np.abs(...))).
+  no bias        DEFAULT, NOT YET DECIDED: no zero-level correction is applied
+                 before filtering.
+  NOT YET CHECKED: whether the ISO/TS 13499 channel code says this channel is
+                 already filtered.  If it is, it must not be filtered again.
+
+Run:  python a4_demo.py
+&quot;&quot;&quot;
+import json
+import sys
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+HERE = Path(__file__).parent
+CRASH = HERE / &quot;crash&quot; / &quot;09079.json&quot;
+PLOT = HERE / &quot;a4-plot.png&quot;
+
+CFC = 60        # DECIDED (assumption): total vehicle comparison
+INIT = &quot;zero&quot;   # DEFAULT, NOT YET DECIDED: &quot;zero&quot; or &quot;edge&quot;
+
+
+def load_crash(path):
+    with open(path) as f:
+        return json.load(f)
+
+
+def find_crossmember(test):
+    # The key is our label; the comment is the instrument's.  Trust the comment.
+    hits = [k for k, ch in test[&quot;channels&quot;].items()
+            if &quot;CROSSMEMBER&quot; in (ch.get(&quot;comment&quot;) or &quot;&quot;).upper()]
+    if len(hits) != 1:
+        for k, ch in test[&quot;channels&quot;].items():
+            print(f&quot;  {k:12s} {ch.get('comment')}&quot;)
+        sys.exit(f&quot;expected one crossmember channel, found {len(hits)}&quot;)
+    return hits[0]
+
+
+def cfc_coefficients(cfc, dt, k=2.0775):
+    &quot;&quot;&quot;Coefficients for y[n] = a0 x[n] + a1 x[n-1] + a2 x[n-2] + b1 y[n-1] + b2 y[n-2].&quot;&quot;&quot;
+    wd = 2 * np.pi * cfc * k
+    wa = np.tan(wd * dt / 2)
+    D = 1 + np.sqrt(2) * wa + wa**2
+    a0 = wa**2 / D
+    a1 = 2 * a0
+    a2 = a0
+    b1 = -2 * (wa**2 - 1) / D
+    b2 = (-1 + np.sqrt(2) * wa - wa**2) / D
+    return a0, a1, a2, b1, b2
+
+
+def filter_pass(x, coeffs, init=&quot;zero&quot;):
+    &quot;&quot;&quot;One forward pass of the difference equation over x.&quot;&quot;&quot;
+    a0, a1, a2, b1, b2 = coeffs
+    x = np.asarray(x, dtype=float)
+    y = np.zeros(len(x))
+    if init == &quot;zero&quot;:
+        x1 = x2 = y1 = y2 = 0.0      # nothing before the record
+    elif init == &quot;edge&quot;:
+        x1 = x2 = y1 = y2 = x[0]     # as if the signal had sat at x[0] forever
+    else:
+        raise ValueError(init)
+    for i in range(len(x)):
+        y[i] = a0 * x[i] + a1 * x1 + a2 * x2 + b1 * y1 + b2 * y2
+        x2, x1 = x1, x[i]
+        y2, y1 = y1, y[i]
+    return y
+
+
+def filter_twopass(x, coeffs, init=&quot;zero&quot;):
+    &quot;&quot;&quot;Forward pass, then a backward pass, so the phase shifts cancel.&quot;&quot;&quot;
+    fwd = filter_pass(x, coeffs, init)
+    return filter_pass(fwd[::-1], coeffs, init)[::-1]
+
+
+def peak(t, a):
+    # Largest magnitude, sign kept.  This is a choice; state it in the report.
+    i = np.argmax(np.abs(a))
+    return a[i], t[i]
+
+
+def main():
+    test = load_crash(CRASH)
+    key = find_crossmember(test)
+    ch = test[&quot;channels&quot;][key]
+
+    x = np.array(ch[&quot;y&quot;])
+    dt = ch[&quot;dt&quot;]
+    t = ch[&quot;t0&quot;] + dt * np.arange(ch[&quot;n&quot;])
+
+    print(f&quot;test {test['testNo']}: {key}  '{ch['comment']}'&quot;)
+    print(f&quot;  {ch['n']} samples, dt = {dt} s ({1 / dt:.0f} Hz), unit {ch['unit']}&quot;)
+    print(f&quot;  edges: x[0] = {x[0]:.2f} at {t[0] * 1000:.2f} ms, &quot;
+          f&quot;x[-1] = {x[-1]:.2f} at {t[-1] * 1000:.2f} ms&quot;)
+
+    c = cfc_coefficients(CFC, dt)
+    print(f&quot;  CFC {CFC} coefficients: &quot; + &quot;  &quot;.join(f&quot;{v:.6e}&quot; for v in c))
+
+    y = filter_twopass(x, c, init=INIT)
+    y_zero = filter_twopass(x, c, init=&quot;zero&quot;)
+    y_edge = filter_twopass(x, c, init=&quot;edge&quot;)
+
+    a, ta = peak(t, x)
+    print(f&quot;  raw peak:      {a:10.1f} {ch['unit']} at t = {ta * 1000:.2f} ms&quot;)
+    a, ta = peak(t, y)
+    print(f&quot;  filtered peak: {a:10.1f} {ch['unit']} at t = {ta * 1000:.2f} ms&quot;
+          f&quot;   (CFC {CFC}, two passes, init = {INIT})&quot;)
+    p0, _ = peak(t, y_zero)
+    pe, _ = peak(t, y_edge)
+    print(f&quot;  peak, zero init: {p0:.2f}   edge init: {pe:.2f}   diff: {pe - p0:.3g}&quot;)
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.plot(t * 1000, x, color=&quot;#2a78d6&quot;, lw=1, label=&quot;raw&quot;)
+    ax.plot(t * 1000, y, color=&quot;#eb6834&quot;, lw=2,
+            label=f&quot;CFC {CFC}, two passes, {INIT} init&quot;)
+    ax.set_title(f&quot;Test {test['testNo']}: {ch['comment']}&quot;)
+    ax.set_xlabel(&quot;time (ms)&quot;)
+    ax.set_ylabel(f&quot;acceleration ({ch['unit']})&quot;)
+    ax.grid(color=&quot;#e0e0e0&quot;, lw=0.5)
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(PLOT, dpi=150)
+    print(f&quot;  saved {PLOT.name}&quot;)
+    plt.show()
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre>
+<p><strong>Notes:</strong></p>
+<ul>
+<li><strong><code>test_filter.py</code> still works unchanged</strong>, because <code>init</code> defaults to <code>"zero"</code>. To see the two-pass effect in Test 5, change its import to include <code>filter_twopass</code> and add one more output line using <code>filter_twopass(x, c)</code>. Compare its peak time with the one-pass output.</li>
+<li><strong>The plot legend now names the filter.</strong> This supports the "identified at a glance" report standard, and it means anyone reading the plot sees the class without looking it up.</li>
+<li><strong>Switching initialization</strong> is one line: <code>INIT = "edge"</code>. Switching to the component-analysis value is also one line: <code>CFC = 600</code>.</li>
+</ul>
+<p><strong>Before you trust it, could you check these?</strong></p>
+<ol>
+<li>Run <code>test_filter.py</code> first and confirm Test 1 matches your slides at 80 µs. That's the check that lets you trust everything else.</li>
+<li>Look at the <code>diff:</code> line from <code>a4_demo.py</code>. Is it small compared with how far your peak is from the record's edges and from the CFC 60 vs 600 difference? That's what decides <code>INIT</code>.</li>
+<li>One step I added in this version that you didn't ask for: <code>filter_twopass</code> reverses with <code>[::-1]</code> twice. Can you say why the second reversal is needed? What would the plot look like without it?</li>
+</ol>
+<p>The ISO/TS 13499 check is still the last open item before this number goes to Alice.</p></div></div>
+<div class="tc-step"><span>P&oacute;lya step 4</span>Look back</div>
+<div class="tc-turn tc-student" id="prompt-12"><div class="tc-who">Prompt 12 &middot; Chris, working as a student &middot; 1:21 PM</div><div class="tc-said">can you explain how the zero default works?</div></div>
+<div class="tc-turn tc-tutor"><div class="tc-who">Course tutor &middot; 1:21 PM</div><details class="tc-reason"><summary>The tutor's summary of their reasoning (1,637 tokens)</summary><p>The student wants an explanation of how the zero default initialization works, so I should walk through it clearly at their level. With zero initial conditions, the first output y[0] depends only on the tiny feedforward coefficient a0 times x[0], making it very small compared to the input, and then subsequent outputs build up as more terms from past inputs and outputs accumulate.</p>
+<p>This essentially means the filter treats the signal as having been silent before the recording starts, so the first sample looks like a step from zero to x[0]. I can estimate the settling behavior using the natural frequency and damping ratio of the design, giving a rough settling time of a few milliseconds — but rather than hand them the exact number, it's better to let them measure it directly in Test 3.</p>
+<p>This default is reasonable if x[0] is near zero (sensor pre-zeroed before impact), but if there's a bias offset, it creates an artificial transient the car never actually experienced. With a two-pass forward-backward filter, this happens at both ends — the backward pass introduces a false step at the far end sized by the forward pass's final output, landing that artifact at the edge of the record after reversal. I should flag that someone should check whether this edge overshoot could ever rival the actual crash peak magnitude, though for typical offset sizes versus tens-of-g crash peaks, that's unlikely.</p>
+<p>By linearity, the gap between zero-init and edge-init output is exactly the filter's step response to the initial value x[0] — since edge-init holds the signal at its steady-state DC value (gain 1), decomposing the signal into a constant plus deviation shows the constant part passes through unchanged under edge-init, while zero-init effectively injects a step at the start.</p>
+<p>This confirms that the zero-default error decays precisely like the step response, which is exactly what Test 3 isolates with the 5.0 constant input. I'm now tracing through the actual first few output samples numerically to check this against the coefficient values, computing y0 and y1 by hand with the filter coefficients to see if the decay matches expectations.</p>
+<p>Rather than fully reproduce the numeric trace, showing the symbolic form of the first two steps is cleaner and safer, since the student will verify it by running Test 3 themselves. I want to hand this back with a check-back question — asking them what x[0] is in their file and, using the linearity argument, what size of zero-vs-edge difference that predicts, pushing them to articulate the reasoning in their own words rather than just giving the answer.</p></details><div class="tc-reply"><h2 id="what-the-zero-default-assumes">What the zero default assumes</h2>
+<p>A recursive filter needs the last two inputs and the last two outputs to compute each new sample. At the first sample, none of those exist. The zero default fills them in with zeros:</p>
+<pre><code class="language-python">x1 = x2 = y1 = y2 = 0.0
+</code></pre>
+<p>In words, the filter assumes <strong>the signal was exactly zero forever before the record began</strong>, and that the filter was at rest.</p>
+<h2 id="what-happens-in-the-first-few-samples">What happens in the first few samples</h2>
+<p>Here is the formula, written out with those zeros plugged in:</p>
+<ul>
+<li><strong>Sample 0:</strong> y[0] = a0·x[0] + a1·0 + a2·0 + b1·0 + b2·0 = <strong>a0·x[0]</strong></li>
+<li><strong>Sample 1:</strong> y[1] = a0·x[1] + a1·x[0] + a2·0 + b1·y[0] + b2·0</li>
+<li><strong>Sample 2 onward:</strong> all five terms use real record values.</li>
+</ul>
+<p>Since a0 ≈ 3.7 × 10⁻⁴, y[0] is tiny compared with x[0]. The output then climbs toward the signal over the next stretch of samples.</p>
+<p>The reason is that, from the filter's point of view, the record doesn't begin smoothly. It sees zero, zero, zero, …, then suddenly x[0]. <strong>It treats the start of the record as a step from 0 to x[0]</strong>, and its output is the filter's response to that step. That response rises, slightly overshoots, and settles. It takes a few milliseconds, not a single sample.</p>
+<h2 id="why-test-3-is-this-problem-in-isolation">Why Test 3 is this problem in isolation</h2>
+<p>Test 3 feeds in a constant 5.0. The "true" filtered answer is 5.0 everywhere, because the filter passes a constant unchanged (the sum-of-coefficients check). Under the zero default, though, the output starts near 0 and climbs to 5. That climb is the error the zero default introduces when the record starts at 5.</p>
+<p>This gives a useful way to think about your real data. The filter is linear, so you can split your signal into two parts: the constant x[0], plus whatever varies around it. For one pass:</p>
+<ul>
+<li>The <strong>varying part</strong> is handled identically under zero or edge initialization.</li>
+<li>The <strong>constant part</strong> is passed exactly under edge initialization. Under zero initialization, it produces the Test 3 ramp, scaled by x[0]/5.</li>
+</ul>
+<p>So for a single pass, the zero-vs-edge difference is exactly the error in Test 3 at the start, scaled to the height of x[0]. It shrinks as the transient dies out.</p>
+<h2 id="with-two-passes-there-are-two-false-steps">With two passes, there are two false steps</h2>
+<ol>
+<li>The <strong>forward pass</strong> starts from zero at the beginning of the record, so there is a false step of height x[0] there.</li>
+<li>The <strong>backward pass</strong> starts from zero at the end of the record. The value it sees first is the forward output's last value, so there is a false step of roughly that height at the end.</li>
+</ol>
+<p>After the final reversal, the first transient sits at the start of your result and the second sits at the end.</p>
+<h2 id="when-it-matters-and-when-it-doesn-t">When it matters and when it doesn't</h2>
+<ul>
+<li><strong>If the record starts and ends near zero,</strong> the false steps are tiny, and zero and edge give nearly the same answer.</li>
+<li><strong>If the record has an offset at either end</strong> (bias, or a sensor that hasn't returned to zero), the filtered signal near that edge contains a transient the car never experienced.</li>
+<li><strong>It can affect the peak</strong> in two ways. The crash peak might fall within the settling time of an edge, or the edge transient might be larger in magnitude than the real peak. Your <code>peak()</code> searches the whole record, edges included.</li>
+</ul>
+<h2 id="a-check-you-can-do-before-running-anything">A check you can do before running anything</h2>
+<p>Look at the <code>edges:</code> line your script prints.</p>
+<ol>
+<li>Using the scaling argument above, roughly how big do you expect the zero-vs-edge difference to be right at the start of the record? Is it about x[0], about a0·x[0], or something else?</li>
+<li>From Test 3, about how many milliseconds does it take the output to get within 0.1% of 5.0? Is your crash peak farther than that from both ends of the record?</li>
+</ol>
+<p>If your answers say the peak is far from both edges and the edge values are small, that becomes your one-sentence assumption for the report.</p></div></div>
+<div class="tc-turn tc-student" id="prompt-13"><div class="tc-who">Prompt 13 &middot; Chris, working as a student &middot; 1:27 PM</div><div class="tc-said">ok, the beginning and end are both close to zero so this seems like the right choice to me.
+
+the program reports a peak of -452.5 at 44.95 ms after the filter vs -950.1 at 40.15. the plotted line looks reasonable to me. can you write a report using these numbers? open with a clean sentence stating these filtered numbers, the filter class used, the double pass and the zero start. then the plot (i&#x27;ll insert) then the choices made listed clearly and assumptions. use the ones from this chat please. and also the limitations of what we&#x27;ve done. use the ones from this chat. please write it in MD but make it so i can copy it to use in my final report.</div></div>
+<div class="tc-turn tc-tutor"><div class="tc-who">Course tutor &middot; 1:27 PM</div><details class="tc-reason"><summary>The tutor's summary of their reasoning (1,593 tokens)</summary><p>Since the student made the key decisions themselves and the course permits AI use for this, I can write the report using their chosen numbers, but I need to avoid fabricating anything—flagging unverified items like the ISO/TS 13499 check and the J211-1 table pulled from memory, and noting the units question remains open.</p>
+<p>I also don't know whether the acceleration values are in g or m/s², which changes their plausibility entirely, so I'll leave that as a placeholder rather than guess. I should also flag the ~4.8 ms shift between the raw and filtered peak times as worth noting, since a two-pass filter is zero-phase and that shift likely reflects a different feature of the smoothed pulse rather than a timing lag.</p>
+<p>There are several things the student hasn't confirmed — whether Test 1 matched the slides, the −3 dB check for two passes, bias correction — so these should be marked as unverified assumptions rather than stated as fact, using the known details like k=2.0775, sampling dt of 50 µs, and the test number from the filename.</p>
+<p>I should also note conditions where a different value would be correct — CFC 600, a different peak definition, single-pass filtering — and flag that peak sign depends on the header's convention rather than asserting deceleration. I want to close with a short checklist of what still needs verification before submission, keeping the report concise but defensible line by line.</p>
+<p>For the actual email sentence, I'm drafting something like: peak crossmember acceleration of −452.5 at 44.95 ms from the given channel, filtered with SAE J211 CFC 60 (a second-order Butterworth run forward then backward for zero phase), peak taken as largest magnitude with no bias correction — being careful to describe the filter as "second-order, applied in both directions" rather than asserting a specific pole count I'm not fully certain of.</p>
+<p>I should flag the ISO/TS 13499 question prominently as a limitation, since if the data's already filtered the reported value would be wrong. I'll present the final text as a fenced markdown block for easy copying, using bracketed placeholders, and follow it with a short "verify before submitting" note plus the key open question.</p></details><div class="tc-reply"><p>Below is the report. I used only the numbers you gave and the choices from this chat. Anything I don't know is a <strong>[bracketed placeholder]</strong>. I didn't fill those in because I'd be guessing, and the customer will recompute from the file.</p>
+<pre><code class="language-markdown">**Data phrase:** [your four-word phrase]
+
+# Crossmember Peak Acceleration, Test 09079
+
+**The peak crossmember acceleration is −452.5 [unit] at t = 44.95 ms, filtered with SAE J211-1 Channel Frequency Class (CFC) 60, applied in two passes (forward, then backward) with the filter state set to zero at the start of each pass.** The unfiltered peak on the same channel is −950.1 [unit] at t = 40.15 ms.
+
+**Sentence for the customer:**
+
+&gt; Peak crossmember acceleration for test 09079 is −452.5 [unit] at 44.95 ms (channel [channel key], &quot;[header comment]&quot;), filtered SAE J211-1 CFC 60, run forward and backward from a zero initial state, with no bias correction; &quot;peak&quot; is the sample of largest magnitude, sign kept.
+
+## Plot
+
+[Insert a4-plot.png]
+
+*Figure 1. Test 09079, [header comment]. Raw signal (blue) and CFC 60 two-pass filtered signal, zero initial state (orange). Time in ms; acceleration in [unit].*
+
+## Choices made
+
+| Choice | What was used | Why |
+|---|---|---|
+| Channel | [channel key], the one channel whose header comment names the crossmember | The header comment is the instrument's description; the key is only a label. |
+| Standard | SAE J211-1 | It defines the channel frequency classes for crash instrumentation. |
+| Filter class | CFC 60 | The peak is reported for total vehicle comparison, the use J211-1 assigns CFC 60 to for structural accelerations. CFC 180 (for integration) does not apply because nothing is integrated. |
+| Filter form | J211-1 recursive difference equation, constant 2.0775 in ω_d (as given in the course slides), coefficients computed from dt = 50 µs (20 kHz) | The coefficients depend on the class and the sampling interval. |
+| Passes | Two: forward, then backward over the reversed signal | Running backward cancels the phase shift of the forward pass, so the filtered peak is not delayed by the filter. |
+| Initial state | Zero: inputs and outputs before each pass taken as 0 | The record begins and ends close to zero (x[0] = [value], x[−1] = [value]), so the false step this creates at each edge is small. Edge initialization changed the peak by [diff value from script]. |
+| Bias / zero offset | None removed | Not corrected. The record starts near zero, so any offset is taken to be small. |
+| Peak definition | Sample of largest magnitude, sign kept | The customer must use the same definition to reproduce the number. |
+
+## Assumptions
+
+1. The crossmember channel has not already been filtered by the data acquisition system. [State what the ISO/TS 13499 channel code in the header says, or state that this was not checked.]
+2. The intended use is total vehicle comparison. If it is component analysis, the class changes (see below).
+3. The J211-1 class-by-use table was taken from [source you verified it in].
+4. The sign convention of the channel is as recorded in the file. [State the axis/sign convention from the header if it is given.]
+5. The zero offset before impact is small enough to ignore.
+
+## Things that look wrong or deserve a second look
+
+- **The peak time moved by 4.8 ms** (40.15 ms raw → 44.95 ms filtered), even though the two-pass filter introduces no phase delay. [Your explanation from the plot. For example, does the raw peak look like a narrow spike, with the filtered peak sitting on a broader part of the pulse?]
+- **The filtered peak is less than half the raw peak.** Expected for a low-pass filter if the raw maximum is a short, high-frequency spike, but this is why the filter class must travel with the number.
+
+## When a different value would be the right one
+
+- **The customer uses CFC 600** (component analysis): the peak would differ, possibly by a lot, since the bandwidth is ten times wider. [CFC 600 peak, if you compute it.]
+- **The channel was already filtered** at acquisition: it should not be filtered again, and the reported peak would be different.
+- **A different peak definition** (most positive, or most negative, rather than largest magnitude).
+- **Bias is removed before filtering**, single-pass filtering is used, or a padded/library implementation (e.g., SciPy `filtfilt`) is used. Each can shift the result slightly; the edge-initialization difference above indicates the size of the start-up effect.
+
+## Limitations
+
+- The J211-1 class table was recalled from memory during the analysis and [has / has not] been checked against the standard itself.
+- The coefficients were verified against the course slides at 80 µs: [yes / not yet].
+- J211-1's own specification for initialization was not found; zero initialization is this analysis's assumption.
+- The two-pass response was [checked / not checked] against the J211-1 CFC 60 frequency-response limits.
+- The ISO/TS 13499 filter-status check is [done / open].
+- One channel, one test. The number says nothing about other tests or other locations on the vehicle.
+
+## Reproducing this result
+
+Program: `a4_demo.py`, submitted with this report. Settings: `CFC = 60`, `INIT = &quot;zero&quot;`, two passes, `k = 2.0775`. Changing the class or initialization is one line each.
+</code></pre>
+<p><strong>Before you submit, please fill or confirm these:</strong></p>
+<ol>
+<li><strong>[unit]:</strong> your script prints it. I didn't want to guess between g and m/s². The difference is a factor of about 10, and it changes whether −452.5 is plausible.</li>
+<li><strong>The <code>diff:</code> value and the edge values.</strong> You said they're close to zero. Putting the actual numbers in turns that from a claim into evidence.</li>
+<li><strong>The ISO/TS 13499 item.</strong> This is the one open check that could invalidate the number, not just shift it. I'd resolve it before this goes to Alice.</li>
+<li><strong>The 4.8 ms shift.</strong> I flagged it rather than explaining it, because the explanation comes from your plot, not from me.</li>
+</ol>
+<p>Here's one check for you, in the spirit of the "pick a line" self-check. The email sentence says "no bias correction." If the customer's engineer asks why you didn't remove the offset, what's your one-sentence answer, and what number in your output backs it up?</p></div></div>
+</div>
+
+<h2 id="finished-report">The Finished Report</h2>
+
+<p>The tutor's draft at the end of the conversation still had brackets in it, and I finished the
+report myself afterwards. These are the changes I made to the draft:</p>
+
+<ul>
+  <li><strong>Filled from the header.</strong> The unit, the channel key and its comment, and the
+  first assumption, which uses the header's 4000&nbsp;Hz prefilter and the size of the raw spikes
+  to say the channel has not already been filtered to a class. The sign convention in the fourth
+  assumption is checked against the data (the vehicle decelerates and the peak is negative).</li>
+  <li><strong>Filled from the program and the plot.</strong> The values at the two ends of the
+  record, how much the edge start changes the peak, and why the peak moved 2.35&nbsp;ms (the filter
+  removed a fast spike and the peak is now on the slower pulse).</li>
+  <li><strong>Named a source.</strong> The class table came from the course slides, and the zero
+  start now rests on a quoted sentence from J211-1 Appendix C.</li>
+  <li><strong>Cut.</strong> Five of the six limitations (the one kept is rewritten around that
+  sentence), and the case where the channel was filtered already. The CFC&nbsp;600 value is
+  offered on request.</li>
+</ul>
+
+<p>The finished report is on test 9793 (a 2017 Hyundai Elantra, also recorded at 20,000 samples a
+second), one of the tests held back from the phrase assignment, so its numbers differ from those in
+the conversation.</p>
+
+<div class="aside report tc-final"><span class="label">Finished by Chris &middot; after the conversation</span>
+<p><strong>Data phrase:</strong> example pack (test 9793, held back from the phrase assignment)</p>
+<h3 id="crossmember-peak-acceleration-test-09793">Crossmember Peak Acceleration, Test 09793</h3>
+<p><strong>The peak crossmember acceleration is −437.0 m/s² at t = 55.10 ms, filtered with SAE J211-1 Channel Frequency Class (CFC) 60, applied in two passes (forward, then backward) with the filter state set to zero at the start of each pass.</strong> The unfiltered peak on the same channel is −1919.8 m/s² at t = 52.75 ms.</p>
+<p><strong>Sentence for the customer:</strong></p>
+<blockquote>
+<p>Peak crossmember acceleration for test 09793 is −437.0 m/s² at 55.10 ms (channel vehicle_x, "V1 LEFT REAR SEAT CROSSMEMBER AX"), filtered SAE J211-1 CFC 60, run forward and backward from a zero initial state, with no bias correction; "peak" is the sample of largest magnitude, sign kept.</p>
+</blockquote>
+<h4>Plot</h4>
+<p><img alt="Raw and CFC 60 filtered crossmember acceleration, test 09793" src="data/example/figures/tutor04-report-fig1.png?v=20261027124351" /></p>
+<p><em>Figure 1. Test 09793, V1 LEFT REAR SEAT CROSSMEMBER AX. Raw signal (blue) and CFC 60 two-pass filtered signal, zero initial state (orange). Time in ms; acceleration in m/s².</em></p>
+<h4>Choices made</h4>
+<table>
+<thead>
+<tr>
+<th>Choice</th>
+<th>What was used</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Channel</td>
+<td>vehicle_x, the one channel whose header comment names the crossmember</td>
+<td>The header comment is the instrument's description; the key is only a label.</td>
+</tr>
+<tr>
+<td>Standard</td>
+<td>SAE J211-1</td>
+<td>It defines the channel frequency classes for crash instrumentation.</td>
+</tr>
+<tr>
+<td>Filter class</td>
+<td>CFC 60</td>
+<td>The peak is reported for total vehicle comparison, the use J211-1 assigns CFC 60 to for structural accelerations. CFC 180 (for integration) does not apply because nothing is integrated.</td>
+</tr>
+<tr>
+<td>Filter form</td>
+<td>J211-1 recursive difference equation, constant 2.0775 in ω_d (as given in the course slides), coefficients computed from dt = 50 µs (20 kHz)</td>
+<td>The coefficients depend on the class and the sampling interval.</td>
+</tr>
+<tr>
+<td>Passes</td>
+<td>Two: forward, then backward over the reversed signal</td>
+<td>Running backward cancels the phase shift of the forward pass, so the filtered peak is not delayed by the filter.</td>
+</tr>
+<tr>
+<td>Initial state</td>
+<td>Zero: inputs and outputs before each pass taken as 0</td>
+<td>The record begins and ends close to zero (x[0] = 0.01 m/s², x[−1] = 2.47 m/s²), so the false step this creates at each edge is small. Edge initialization changed the peak by 4×10⁻¹² m/s², which is zero to the precision reported.</td>
+</tr>
+<tr>
+<td>Bias / zero offset</td>
+<td>None removed</td>
+<td>Not corrected. The record starts near zero, so any offset is taken to be small.</td>
+</tr>
+<tr>
+<td>Peak definition</td>
+<td>Sample of largest magnitude, sign kept</td>
+<td>The customer must use the same definition to reproduce the number.</td>
+</tr>
+</tbody>
+</table>
+<h4>Assumptions</h4>
+<ol>
+<li>The crossmember channel has not already been filtered to a CFC class. The channel header gives a 4000 Hz prefilter (<code>prefilter_hz</code>), the analog anti-alias filter applied before sampling. The raw signal has sample-to-sample spikes near ±1900 m/s², which a channel already filtered to CFC 60 could not have. So the data carries the anti-alias filter only, and filtering it to CFC 60 does not filter it twice.</li>
+<li>The intended use is total vehicle comparison. If it is component analysis, the class changes (see below).</li>
+<li>The J211-1 class-by-use table was taken from course slides.</li>
+<li>Positive is forward along the vehicle's longitudinal axis. The header gives only <code>Longitudinal</code>, but the data confirm it: in a frontal barrier test the vehicle decelerates, and the peak is negative.</li>
+<li>The zero offset before impact is small enough to ignore.</li>
+</ol>
+<h4>Things that look wrong or deserve a second look</h4>
+<ul>
+<li><strong>The peak time moved by 2.35 ms</strong> (52.75 ms raw → 55.10 ms filtered), even though the two-pass filter introduces no phase delay. The filter smoothed away the fast spike at 52.75 ms and captured the slower pulse, whose minimum is at 55.10 ms. These are two different features, not one feature delayed.</li>
+<li><strong>The filtered peak is less than a quarter of the raw peak.</strong> Expected for a low-pass filter if the raw maximum is a short, high-frequency spike, but this is why the filter class must travel with the number.</li>
+</ul>
+<h4>When a different value would be the right one</h4>
+<ul>
+<li><strong>The customer uses CFC 600</strong> (component analysis): the peak would differ, possibly by a lot, since the bandwidth is ten times wider. The report can be regenerated at CFC 600 on request.</li>
+<li><strong>A different peak definition</strong> (most positive, or most negative, rather than largest magnitude).</li>
+<li><strong>Bias is removed before filtering</strong>, single-pass filtering is used, or a padded/library implementation (e.g., SciPy <code>filtfilt</code>) is used. Each can shift the result slightly; the edge-initialization difference above indicates the size of the start-up effect.</li>
+</ul>
+<h4>Limitations</h4>
+<ul>
+<li>Zero initialization relies on J211-1 Appendix C: "If the data set to be filtered contains sufficient pre-event and post-event data, then the initial conditions can be ignored." This record has 50 ms before t = 0, and edge initialization changed the peak by 4×10⁻¹² m/s².</li>
+</ul>
+<h4>Reproducing this result</h4>
+<p>Program: <code>a4_demo.py</code>, submitted with this report. Settings: <code>CFC = 60</code>, <code>INIT = "zero"</code>, two passes, <code>k = 2.0775</code>. Changing the class or initialization is one line each.</p>
+</div>
+
+<h2 id="program">The Program</h2>
+
+<p>This is <a href="data/example/code/a4_demo.py" download><code>a4_demo.py</code></a> as it was
+submitted with the report. It is the full file the tutor wrote in reply to prompt 11, with one
+line changed, the crash file it reads (test 9793 in place of 9079). It reads
+<code>crash/09793.json</code> from a folder next to it.</p>
+
+<pre class="tc-program"><code>&quot;&quot;&quot;
+a4_demo.py  --  Assignment 4: filter the crossmember channel
+
+Reads the crash test from crash/ next to this script, finds the channel whose
+header comment names the crossmember, filters it with the SAE J211-1 CFC
+filter run twice (forward, then backward), and reports raw and filtered peaks.
+
+Choices made in this script (each belongs in the report&#x27;s assumptions):
+  CFC = 60       DECIDED: &quot;total vehicle comparison&quot; row of the J211-1 table.
+                 If the customer treats this as component analysis, CFC 600.
+  k = 2.0775     DECIDED: constant in omega_d, as on the course slides.
+  two passes     DECIDED: forward then backward, so the phase shifts cancel.
+  INIT = &quot;zero&quot;  DEFAULT, NOT YET DECIDED: filter state before each pass is
+                 zero.  The run also prints the &quot;edge&quot; result for comparison.
+  peak           largest magnitude, sign kept (np.argmax(np.abs(...))).
+  no bias        DEFAULT, NOT YET DECIDED: no zero-level correction is applied
+                 before filtering.
+  NOT YET CHECKED: whether the ISO/TS 13499 channel code says this channel is
+                 already filtered.  If it is, it must not be filtered again.
+
+Run:  python a4_demo.py
+&quot;&quot;&quot;
+import json
+import sys
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+HERE = Path(__file__).parent
+CRASH = HERE / &quot;crash&quot; / &quot;09793.json&quot;
+PLOT = HERE / &quot;a4-plot.png&quot;
+
+CFC = 60        # DECIDED (assumption): total vehicle comparison
+INIT = &quot;zero&quot;   # DEFAULT, NOT YET DECIDED: &quot;zero&quot; or &quot;edge&quot;
+
+
+def load_crash(path):
+    with open(path) as f:
+        return json.load(f)
+
+
+def find_crossmember(test):
+    # The key is our label; the comment is the instrument&#x27;s.  Trust the comment.
+    hits = [k for k, ch in test[&quot;channels&quot;].items()
+            if &quot;CROSSMEMBER&quot; in (ch.get(&quot;comment&quot;) or &quot;&quot;).upper()]
+    if len(hits) != 1:
+        for k, ch in test[&quot;channels&quot;].items():
+            print(f&quot;  {k:12s} {ch.get(&#x27;comment&#x27;)}&quot;)
+        sys.exit(f&quot;expected one crossmember channel, found {len(hits)}&quot;)
+    return hits[0]
+
+
+def cfc_coefficients(cfc, dt, k=2.0775):
+    &quot;&quot;&quot;Coefficients for y[n] = a0 x[n] + a1 x[n-1] + a2 x[n-2] + b1 y[n-1] + b2 y[n-2].&quot;&quot;&quot;
+    wd = 2 * np.pi * cfc * k
+    wa = np.tan(wd * dt / 2)
+    D = 1 + np.sqrt(2) * wa + wa**2
+    a0 = wa**2 / D
+    a1 = 2 * a0
+    a2 = a0
+    b1 = -2 * (wa**2 - 1) / D
+    b2 = (-1 + np.sqrt(2) * wa - wa**2) / D
+    return a0, a1, a2, b1, b2
+
+
+def filter_pass(x, coeffs, init=&quot;zero&quot;):
+    &quot;&quot;&quot;One forward pass of the difference equation over x.&quot;&quot;&quot;
+    a0, a1, a2, b1, b2 = coeffs
+    x = np.asarray(x, dtype=float)
+    y = np.zeros(len(x))
+    if init == &quot;zero&quot;:
+        x1 = x2 = y1 = y2 = 0.0      # nothing before the record
+    elif init == &quot;edge&quot;:
+        x1 = x2 = y1 = y2 = x[0]     # as if the signal had sat at x[0] forever
+    else:
+        raise ValueError(init)
+    for i in range(len(x)):
+        y[i] = a0 * x[i] + a1 * x1 + a2 * x2 + b1 * y1 + b2 * y2
+        x2, x1 = x1, x[i]
+        y2, y1 = y1, y[i]
+    return y
+
+
+def filter_twopass(x, coeffs, init=&quot;zero&quot;):
+    &quot;&quot;&quot;Forward pass, then a backward pass, so the phase shifts cancel.&quot;&quot;&quot;
+    fwd = filter_pass(x, coeffs, init)
+    return filter_pass(fwd[::-1], coeffs, init)[::-1]
+
+
+def peak(t, a):
+    # Largest magnitude, sign kept.  This is a choice; state it in the report.
+    i = np.argmax(np.abs(a))
+    return a[i], t[i]
+
+
+def main():
+    test = load_crash(CRASH)
+    key = find_crossmember(test)
+    ch = test[&quot;channels&quot;][key]
+
+    x = np.array(ch[&quot;y&quot;])
+    dt = ch[&quot;dt&quot;]
+    t = ch[&quot;t0&quot;] + dt * np.arange(ch[&quot;n&quot;])
+
+    print(f&quot;test {test[&#x27;testNo&#x27;]}: {key}  &#x27;{ch[&#x27;comment&#x27;]}&#x27;&quot;)
+    print(f&quot;  {ch[&#x27;n&#x27;]} samples, dt = {dt} s ({1 / dt:.0f} Hz), unit {ch[&#x27;unit&#x27;]}&quot;)
+    print(f&quot;  edges: x[0] = {x[0]:.2f} at {t[0] * 1000:.2f} ms, &quot;
+          f&quot;x[-1] = {x[-1]:.2f} at {t[-1] * 1000:.2f} ms&quot;)
+
+    c = cfc_coefficients(CFC, dt)
+    print(f&quot;  CFC {CFC} coefficients: &quot; + &quot;  &quot;.join(f&quot;{v:.6e}&quot; for v in c))
+
+    y = filter_twopass(x, c, init=INIT)
+    y_zero = filter_twopass(x, c, init=&quot;zero&quot;)
+    y_edge = filter_twopass(x, c, init=&quot;edge&quot;)
+
+    a, ta = peak(t, x)
+    print(f&quot;  raw peak:      {a:10.1f} {ch[&#x27;unit&#x27;]} at t = {ta * 1000:.2f} ms&quot;)
+    a, ta = peak(t, y)
+    print(f&quot;  filtered peak: {a:10.1f} {ch[&#x27;unit&#x27;]} at t = {ta * 1000:.2f} ms&quot;
+          f&quot;   (CFC {CFC}, two passes, init = {INIT})&quot;)
+    p0, _ = peak(t, y_zero)
+    pe, _ = peak(t, y_edge)
+    print(f&quot;  peak, zero init: {p0:.2f}   edge init: {pe:.2f}   diff: {pe - p0:.3g}&quot;)
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.plot(t * 1000, x, color=&quot;#2a78d6&quot;, lw=1, label=&quot;raw&quot;)
+    ax.plot(t * 1000, y, color=&quot;#eb6834&quot;, lw=2,
+            label=f&quot;CFC {CFC}, two passes, {INIT} init&quot;)
+    ax.set_title(f&quot;Test {test[&#x27;testNo&#x27;]}: {ch[&#x27;comment&#x27;]}&quot;)
+    ax.set_xlabel(&quot;time (ms)&quot;)
+    ax.set_ylabel(f&quot;acceleration ({ch[&#x27;unit&#x27;]})&quot;)
+    ax.grid(color=&quot;#e0e0e0&quot;, lw=0.5)
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(PLOT, dpi=150)
+    print(f&quot;  saved {PLOT.name}&quot;)
+    plt.show()
+
+
+if __name__ == &quot;__main__&quot;:
+    main()</code></pre>
+
+  </main>
+
+  
+
+  <script src="js/page.js?v=20261027124351"></script>
+
+  <footer class="site-footer">
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-25">October 25, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Algorithms');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  
+  
+  
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

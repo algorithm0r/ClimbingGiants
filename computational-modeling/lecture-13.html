@@ -6,8 +6,8 @@
 <title>Lecture 13 — Model form and free parameters</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261023091254">
-<link rel="stylesheet" href="css/demos.css?v=20261023091254">
+<link rel="stylesheet" href="css/blocks.css?v=20261027124351">
+<link rel="stylesheet" href="css/demos.css?v=20261027124351">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -736,6 +736,19 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">The RMS gives one typical size for all 31 gaps, <span class="def">2.9&nbsp;cm</span>.</p>
+    <p class="sub">RMS stands for root mean square. The plain mean of the gaps is 0 because the positive and negative ones cancel, so each gap is squared first.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec13-rms"><div class="fig-body"></div></figure>
+    <div class="work">
+      $$\text{RMS} \;=\; \sqrt{\frac{6.73^2 + 3.57^2 + 3.28^2 + \cdots}{31}} \;=\; \sqrt{\frac{257.6}{31}} \;=\; \sqrt{8.31} \;=\; 2.9\ \text{cm}$$
+    </div>
+  </div>
+</section>
+
 <section class="deck-slide full" data-notes="<p>Now the fit gave us two numbers, a and b. What do they mean? Well, in y equals a plus b t, a is the line's value at t equals zero, so it should be where the ball was at the first frame. And b is how much the line changes per second, so it should be how fast the ball closed on the hoop. Let's check both against the ball itself.</p><p>a is 7.84 meters. The first tracked frame has the ball at 7.91 meters, so 7 centimeters apart, which is that biggest stick on the last slide. Okay.</p><p>b is minus 6.22 meters per second. The ball went from 7.91 meters to 0.42, so 7.91 minus 0.42, that's 7.49 meters, in 1.2 seconds. 7.49 over 1.2 is about 6.24 meters per second. So that matches too, and the minus sign just means the distance was shrinking.</p><p>So both numbers describe the ball. Keep that check in mind, because we're about to do it again on the height.</p>">
   <div class="head">
     <p class="say">Both fitted numbers <span class="def">check out against the ball</span>.</p>
@@ -807,7 +820,7 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <section class="deck-slide full" data-notes="<p>So let's fit it, with both numbers free. And we get v-nought of 5.85 meters per second, and g of 9.60 meters per second squared. 9.81 minus 9.60 is 0.21, and 0.21 out of 9.81 is about 2 percent. Not bad.</p><p>Now the velocities scatter a lot about their line. The RMS residual is about half a meter per second, and some of them are off by 1.2. We saw why in week four, differencing blows up the tracking noise. But the fit uses all 29 of them, and the slope still comes out close to minus g.</p><p>Now why is this one nice? Well, the slope has units of acceleration. So before we look at any residual at all, we can hold it up against a number we already know, 9.81. If this had come out at 340, we'd know something was wrong straight away.</p>">
   <div class="head">
     <p class="say">The fitted slope gives <span class="def"><i>g</i>&nbsp;=&nbsp;9.60&nbsp;m/s&sup2;</span>.</p>
-    <p class="sub">This is within 2.1% of 9.81. RMS, the root of the mean squared residual, is the typical size of the residuals.</p>
+    <p class="sub">This is within 2.1% of 9.81. The velocities&rsquo; typical gap from the line, their RMS residual, is 0.513&nbsp;m/s.</p>
   </div>
   <div class="stage">
     <figure class="figure wide" data-fig="lec13-vel" data-mode="free"><div class="fig-body"></div></figure>
@@ -1028,6 +1041,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <div class="deck-notes"></div>
 
 
-<script type="module" src="js/bundle/lecture-13.js?v=20261023091254"></script>
+<script type="module" src="js/bundle/lecture-13.js?v=20261027124351"></script>
 </body>
 </html>

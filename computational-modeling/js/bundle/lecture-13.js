@@ -1423,6 +1423,7 @@ setTimeout(() => {
    and XD/YD/polyfit for the degree demo), so a slide and the page cannot
    disagree. Checked against the page:
      distance  a = 7.84 m, b = -6.22 m/s, RMS 2.9 cm, max 6.7 cm
+               mean gap 0, sum of squares 257.6 cm2, mean square 8.31 cm2
      height    a = 4.41 m, b = 0.05 m/s, max miss 1.14 m, first frame 3.27 m
      degree    RMS residual 0.50175 (0), 0.07368 (2), 0.00005 (9)
                RMS error    0.45785 (0), 0.01748 (2), 0.44195 (9)
@@ -1576,6 +1577,36 @@ setTimeout(() => {
       points: cm.map((v, i) => ({x: T[i], y: v, r: 3})),
       notes: [{x: 0, y: cm[0], anchor: 'start', dx: 8, dy: 4, text: cm[0].toFixed(1) + ' cm'},
               {x: 0.62, y: NOISE, anchor: 'middle', dy: -5, text: '±2.8 cm tracking noise'}]
+    });
+  });
+
+  /* RMS built from the distance fit's own gaps: their plain mean is 0, so
+     each is squared (left, with the mean square 8.31 cm2), and the root of
+     that mean, 2.9 cm, goes back on the gaps in cm (right). */
+  each('lec13-rms', host => {
+    const [l, r] = diagramRow(host, 2);
+    const cm = D.map((v, i) => (v - (fd.a + fd.b * T[i])) * 100), sq = cm.map(v => v * v);
+    const ms = sq.reduce((s, v) => s + v, 0) / sq.length, rms = Math.sqrt(ms);
+    diagram(l, {
+      w: 300, h: 190, xRange: [-0.05, 1.25], yRange: [-3, 52],
+      title: 'each gap squared (cm²), and their mean',
+      alt: 'The squares of the 31 gaps: one of 45 at the first frame, the rest below 13, '
+         + 'with a dashed line at their mean, 8.31 square centimeters.',
+      leads: [{from: [-0.05, ms], to: [1.25, ms], cls: 'level'},
+              ...sq.map((v, i) => ({from: [T[i], 0], to: [T[i], v], cls: 'alt'}))],
+      points: sq.map((v, i) => ({x: T[i], y: v, r: 2.6})),
+      notes: [{x: 0, y: sq[0], anchor: 'start', dx: 8, dy: 4, text: cm[0].toFixed(2) + '² = ' + sq[0].toFixed(1)},
+              {x: 0.15, y: ms, anchor: 'start', dy: -6, cls: 'hi', text: 'mean ' + ms.toFixed(2) + ' cm²'}]
+    });
+    diagram(r, {
+      w: 300, h: 190, xRange: [-0.05, 1.25], yRange: [-8.5, 8.5], zero: true,
+      title: 'the gaps (cm), with ± the root of that mean',
+      alt: 'The 31 gaps in centimeters, with dashed lines at plus and minus 2.9 centimeters.',
+      leads: [{from: [-0.05, rms], to: [1.25, rms], cls: 'level'},
+              {from: [-0.05, -rms], to: [1.25, -rms], cls: 'level'},
+              ...cm.map((v, i) => ({from: [T[i], 0], to: [T[i], v], cls: 'alt'}))],
+      points: cm.map((v, i) => ({x: T[i], y: v, r: 2.6})),
+      notes: [{x: 0.62, y: rms, anchor: 'middle', dy: -5, cls: 'hi', text: '±' + rms.toFixed(1) + ' cm, the RMS'}]
     });
   });
 
@@ -1944,9 +1975,9 @@ if (slides.length) {
 
 /* ---- code: highlighting + per-line notes ---- */
 const RULES={
-  python:{kw:/\b(def|return|import|from|as|for|in|if|else|elif|while|lambda|None|True|False)\b/g,
+  python:{kw:/\b(def|return|import|from|as|for|in|if|else|elif|while|with|not|and|or|is|try|except|finally|raise|break|continue|pass|lambda|None|True|False)\b/g,
           cmt:/#.*$/gm, str:/(['"])(?:\\.|(?!\1).)*\1/g},
-  matlab:{kw:/\b(function|end|for|while|if|else|elseif|return|nargin|abs)\b/g,
+  matlab:{kw:/\b(function|end|for|while|if|else|elseif|switch|case|otherwise|try|catch|break|continue|return|true|false|nargin|abs)\b/g,
           cmt:/%.*$/gm, str:/'(?:[^']|'')*'/g},
   js:{kw:/\b(function|const|let|var|return|for|of|in|if|else|new|=>)\b/g,
       cmt:/\/\/.*$/gm, str:/(['"`])(?:\\.|(?!\1).)*\1/g}
@@ -1964,6 +1995,14 @@ function highlight(raw,lang){
     out+=esc(raw.slice(pos,s))+`<span class="${cls}">${esc(raw.slice(s,e))}</span>`;pos=e}
   return out+esc(raw.slice(pos));
 }
+/* A note may carry a link, written [text](page.html). The hover preview is CSS
+   and can only show text, so it shows the link's words. Clicking, tapping, Enter
+   or Space pins the note open as a real element, where the link works. That is
+   also the only way to read a note on a phone or from the keyboard. */
+const LINK=/\[([^\]]+)\]\(([^)\s]+)\)/g;
+const notePlain=n=>n.replace(LINK,'$1');
+const noteHTML=n=>esc(n).replace(LINK,(m,t,h)=>`<a href="${h.replace(/"/g,'&quot;')}">${t}</a>`);
+const attr=s=>esc(s).replace(/"/g,'&quot;');
 document.querySelectorAll('.codetabs pre').forEach(pre=>{
   const lang=pre.dataset.lang;
   const notes={};
@@ -1974,9 +2013,40 @@ document.querySelectorAll('.codetabs pre').forEach(pre=>{
   const src=pre.textContent.replace(/\n$/,'');
   pre.innerHTML=src.split('\n').map((line,i)=>{
     const note=notes[i+1];
-    return `<span class="ln"${note?` data-note="${note.replace(/"/g,'&quot;')}"`:''}>${
-      highlight(line,lang)||'&nbsp;'}</span>`;
+    return `<span class="ln"${note?` data-note="${attr(notePlain(note))}" data-note-src="${attr(note)
+      }" tabindex="0" role="button" aria-expanded="false"`:''}>${highlight(line,lang)||'&nbsp;'}</span>`;
   }).join('');
+});
+function unpin(){
+  document.querySelectorAll('.codetabs .ln.pinned').forEach(ln=>{
+    ln.classList.remove('pinned');ln.setAttribute('aria-expanded','false');
+    ln.querySelector('.ln-note')?.remove();
+  });
+}
+function togglePin(ln){
+  if(ln.classList.contains('pinned')){unpin();return}
+  unpin();
+  const box=document.createElement('span');
+  box.className='ln-note';
+  box.innerHTML=noteHTML(ln.dataset.noteSrc);
+  ln.appendChild(box);ln.classList.add('pinned');ln.setAttribute('aria-expanded','true');
+}
+document.addEventListener('click',e=>{
+  const ln=e.target.closest&&e.target.closest('.codetabs .ln[data-note]');
+  if(!ln){unpin();return}
+  if(e.target.closest('.ln-note'))return;
+  /* a drag to select code is not a request for its note */
+  if(String(getSelection()).length)return;
+  togglePin(ln);
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){unpin();return}
+  const ln=e.target.closest&&e.target.closest('.codetabs .ln[data-note]');
+  if(ln&&e.target===ln&&(e.key==='Enter'||e.key===' ')){e.preventDefault();togglePin(ln)}
+});
+document.addEventListener('focusout',e=>{
+  const ln=e.target.closest&&e.target.closest('.codetabs .ln.pinned');
+  if(ln&&!ln.contains(e.relatedTarget))unpin();
 });
 const LANG_KEY='cg-code-lang';
 function applyLang(lang){

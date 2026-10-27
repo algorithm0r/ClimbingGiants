@@ -1522,9 +1522,9 @@ mountDemo(DEMOS);
 
 /* ---- code: highlighting + per-line notes ---- */
 const RULES={
-  python:{kw:/\b(def|return|import|from|as|for|in|if|else|elif|while|lambda|None|True|False)\b/g,
+  python:{kw:/\b(def|return|import|from|as|for|in|if|else|elif|while|with|not|and|or|is|try|except|finally|raise|break|continue|pass|lambda|None|True|False)\b/g,
           cmt:/#.*$/gm, str:/(['"])(?:\\.|(?!\1).)*\1/g},
-  matlab:{kw:/\b(function|end|for|while|if|else|elseif|return|nargin|abs)\b/g,
+  matlab:{kw:/\b(function|end|for|while|if|else|elseif|switch|case|otherwise|try|catch|break|continue|return|true|false|nargin|abs)\b/g,
           cmt:/%.*$/gm, str:/'(?:[^']|'')*'/g},
   js:{kw:/\b(function|const|let|var|return|for|of|in|if|else|new|=>)\b/g,
       cmt:/\/\/.*$/gm, str:/(['"`])(?:\\.|(?!\1).)*\1/g}
@@ -1542,6 +1542,14 @@ function highlight(raw,lang){
     out+=esc(raw.slice(pos,s))+`<span class="${cls}">${esc(raw.slice(s,e))}</span>`;pos=e}
   return out+esc(raw.slice(pos));
 }
+/* A note may carry a link, written [text](page.html). The hover preview is CSS
+   and can only show text, so it shows the link's words. Clicking, tapping, Enter
+   or Space pins the note open as a real element, where the link works. That is
+   also the only way to read a note on a phone or from the keyboard. */
+const LINK=/\[([^\]]+)\]\(([^)\s]+)\)/g;
+const notePlain=n=>n.replace(LINK,'$1');
+const noteHTML=n=>esc(n).replace(LINK,(m,t,h)=>`<a href="${h.replace(/"/g,'&quot;')}">${t}</a>`);
+const attr=s=>esc(s).replace(/"/g,'&quot;');
 document.querySelectorAll('.codetabs pre').forEach(pre=>{
   const lang=pre.dataset.lang;
   const notes={};
@@ -1552,9 +1560,40 @@ document.querySelectorAll('.codetabs pre').forEach(pre=>{
   const src=pre.textContent.replace(/\n$/,'');
   pre.innerHTML=src.split('\n').map((line,i)=>{
     const note=notes[i+1];
-    return `<span class="ln"${note?` data-note="${note.replace(/"/g,'&quot;')}"`:''}>${
-      highlight(line,lang)||'&nbsp;'}</span>`;
+    return `<span class="ln"${note?` data-note="${attr(notePlain(note))}" data-note-src="${attr(note)
+      }" tabindex="0" role="button" aria-expanded="false"`:''}>${highlight(line,lang)||'&nbsp;'}</span>`;
   }).join('');
+});
+function unpin(){
+  document.querySelectorAll('.codetabs .ln.pinned').forEach(ln=>{
+    ln.classList.remove('pinned');ln.setAttribute('aria-expanded','false');
+    ln.querySelector('.ln-note')?.remove();
+  });
+}
+function togglePin(ln){
+  if(ln.classList.contains('pinned')){unpin();return}
+  unpin();
+  const box=document.createElement('span');
+  box.className='ln-note';
+  box.innerHTML=noteHTML(ln.dataset.noteSrc);
+  ln.appendChild(box);ln.classList.add('pinned');ln.setAttribute('aria-expanded','true');
+}
+document.addEventListener('click',e=>{
+  const ln=e.target.closest&&e.target.closest('.codetabs .ln[data-note]');
+  if(!ln){unpin();return}
+  if(e.target.closest('.ln-note'))return;
+  /* a drag to select code is not a request for its note */
+  if(String(getSelection()).length)return;
+  togglePin(ln);
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){unpin();return}
+  const ln=e.target.closest&&e.target.closest('.codetabs .ln[data-note]');
+  if(ln&&e.target===ln&&(e.key==='Enter'||e.key===' ')){e.preventDefault();togglePin(ln)}
+});
+document.addEventListener('focusout',e=>{
+  const ln=e.target.closest&&e.target.closest('.codetabs .ln.pinned');
+  if(ln&&!ln.contains(e.relatedTarget))unpin();
 });
 const LANG_KEY='cg-code-lang';
 function applyLang(lang){

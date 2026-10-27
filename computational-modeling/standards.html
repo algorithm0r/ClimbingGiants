@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The standards behind the crash data — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261023091254">
-  <link rel="stylesheet" href="css/demos.css?v=20261023091254">
+  <link rel="stylesheet" href="css/blocks.css?v=20261027124351">
+  <link rel="stylesheet" href="css/demos.css?v=20261027124351">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -898,9 +898,8 @@ named, and when an assignment names one this page is where to find it.</p>
       data status</td>
       <td>assignment 1, and every time you load a channel afterwards</td></tr>
   <tr><td><strong>SAE J211-1</strong><br>Instrumentation for impact test</td>
-      <td>the channel code scheme, the channel frequency classes, and the four-pole
-      Butterworth filter with its coefficients and the requirement to run it forward
-      and backward</td>
+      <td>the channel code scheme, the channel frequency classes (Table 1), and the
+      digital Butterworth filter used for CFC 60 and 180 (Appendix C)</td>
       <td>assignments 3 and 4, and anything downstream that reports a peak</td></tr>
   <tr><td><strong>FMVSS 208</strong> and the<br><strong>NCAP test protocol</strong></td>
       <td>the test itself, meaning the barrier, the speed and the dummies, and the injury
@@ -908,30 +907,64 @@ named, and when an assignment names one this page is where to find it.</p>
       <td>assignments 6, 8 and 9</td></tr>
 </table>
 
-<h2 id="the-fixed-values">The Fixed Values</h2>
+<h2 id="the-values-the-standards-give">The Values the Standards Give</h2>
 
 <table class="data">
-  <tr><th>Quantity</th><th>Fixed By</th><th>Value</th></tr>
+  <tr><th>Quantity</th><th>Given By</th><th>Value</th></tr>
   <tr><td>Head acceleration, filter class</td><td>SAE J211-1, Table 1</td><td>CFC 1000</td></tr>
   <tr><td>Thorax spine acceleration, filter class</td><td>SAE J211-1, Table 1</td><td>CFC 180</td></tr>
-  <tr><td>Vehicle structure, <em>for comparing vehicles</em></td><td>SAE J211-1, Table 1</td><td>CFC 60</td></tr>
-  <tr><td>Vehicle structure, <em>for integrating to velocity or displacement</em></td><td>SAE J211-1, Table 1</td><td>CFC 180</td></tr>
-  <tr><td>Filter passes</td><td>SAE J211-1</td><td>two, forward then backward</td></tr>
+  <tr><td>Vehicle structure, <em>for total vehicle comparison</em></td><td>SAE J211-1, Table 1</td><td>CFC 60</td></tr>
+  <tr><td>Vehicle structure, <em>for collision simulation input</em></td><td>SAE J211-1, Table 1</td><td>CFC 60</td></tr>
+  <tr><td>Vehicle structure, <em>for component analysis</em></td><td>SAE J211-1, Table 1</td><td>CFC 600</td></tr>
+  <tr><td>Vehicle structure, <em>for integration to velocity or displacement</em></td><td>SAE J211-1, Table 1</td><td>CFC 180</td></tr>
+  <tr><td>Filter for CFC 60 and 180</td><td>SAE J211-1, 3.7, 4.2 and Appendix C</td><td>the four-pole phaseless Butterworth of Appendix C: a two-pole rule passed over the data forward and then backward (its formulas are on the <a href="smoothing.html">Smoothing</a> page)</td></tr>
   <tr><td>HIC window limit</td><td>FMVSS 208 S6.2</td><td>15 ms</td></tr>
   <tr><td>HIC computed on</td><td>FMVSS 208 S6.2</td><td>the resultant acceleration at the head centre of gravity</td></tr>
   <tr><td>HIC limit, 50th percentile male</td><td>FMVSS 208 S6.2</td><td>700</td></tr>
 </table>
 
-<p>The same channel takes a different filter class depending on what you compute
-from it. The crossmember
-accelerometer is one instrument recording one signal, and J211 gives it
-<strong>CFC 60</strong> when the number wanted is a structural peak for comparing
-vehicles, and <strong>CFC 180</strong> when the same signal is about to be
-integrated into a velocity or a distance. Assignment 3 integrates that channel and
-assignment 4 reports its peak. That is, the standard is not classifying the
-instrument, it is classifying the use you are about to put the signal to, and the
-same channel may take either class depending on which assignment you are
-working.</p>
+<p>Table 1 gives its classes as recommendations, so that test results from different
+sources can be compared, and section 5 of the standard adds that "the ultimate usage of
+the data and good engineering judgment" decide which frequencies matter. The same channel
+takes a different class depending on what you compute from it. The crossmember
+accelerometer is one instrument recording one signal, and Table 1 lists four uses for a
+vehicle structural acceleration, with three classes among them:
+<strong>CFC 60</strong> for total vehicle comparison (the overall acceleration of the frame
+or body, in the words of the table's footnote), <strong>CFC 60</strong> for collision
+simulation input, <strong>CFC 600</strong> for component analysis, and
+<strong>CFC 180</strong> for integration to velocity or displacement. Assignment 3
+integrates that channel and assignment 4 reports its peak. That is, the standard
+classifies the use you are about to put the signal to, so it is a good idea to say which
+use you assumed.</p>
+
+<h2 id="what-j211-asks-you-to-report">What J211 Asks You to Report</h2>
+
+<p>J211 also says what should go with a filtered number, and an assignment 4 sentence
+draws on each of these.</p>
+
+<ul>
+  <li><strong>The class and the filter.</strong> A channel is designated with its class,
+  as in "CFC 60" (4.8), and "the type of digital filter used should be reported" (9.4.1).
+  For CFC 60 and 180 the class is defined by the Butterworth filter of Appendix C
+  (3.7 and 4.2). For CFC 600 and 1000 any filter may be used as long as the channel meets
+  the standard's performance limits (9.4.1).</li>
+  <li><strong>The passes.</strong> Appendix C passes its two-pole rule over the data twice
+  to make a four-pole filter, forward and then backward, so that the filter "will not phase
+  shift the data." Backward then forward gives the same result. One forward pass is a
+  two-pole filter, so it removes less and moves every event later (see
+  <a href="smoothing.html#phase-lag">phase lag</a>), and it is not the CFC 60 filter. The
+  phaseless filter has a cost of its own: a fast rise in the data spreads to before the
+  event as well as after it (Appendix C), and section 9.4.1 calls this "time
+  uncertainty."</li>
+  <li><strong>The start and the end.</strong> When a record has enough data before and
+  after the event, the filter's initial conditions "can be ignored." Otherwise the record
+  is padded at both ends before filtering, and the start-up method used has to be reported
+  (Appendix C). The crash records in this
+  course start between 20 and 50&nbsp;ms before contact, and the header's <code>t0</code>
+  says which.</li>
+  <li><strong>The order.</strong> Filtering "should precede all nonlinear operations, such
+  as calculation of resultant vectors and injury indices" (9.4.1).</li>
+</ul>
 
 <div class="verify">
 <p><strong>Two things the numbers above do not settle.</strong></p>
@@ -958,7 +991,8 @@ are not comparable with these without saying which was used.</p>
   <li><strong>SAE J211-1</strong> is sold by SAE, but the 1995 revision is public because it is
   incorporated by reference into federal regulation:
   <a href="https://law.resource.org/pub/us/cfr/ibr/005/sae.j211-1.1995.html">law.resource.org</a>.
-  Table 1 is the one that assigns a class to each measurement.</li>
+  Table 1 lists the recommended class for each measurement, section 9.4.1 covers digital
+  filtering, and Appendix C gives the filter.</li>
   <li><strong>ISO/TS 13499</strong> is sold by ISO. You do not need it. The header fields it
   mandates are visible in your own files, and
   <a href="anatomy-of-a-measured-signal.html">Anatomy of a signal</a> reads one through.</li>
@@ -979,10 +1013,10 @@ above), while a choice that was yours needs a reason.</p>
 
   
 
-  <script src="js/page.js?v=20261023091254"></script>
+  <script src="js/page.js?v=20261027124351"></script>
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-09-13">September 13, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-25">October 25, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

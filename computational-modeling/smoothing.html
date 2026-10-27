@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smoothing and phase lag — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261023091254">
-  <link rel="stylesheet" href="css/demos.css?v=20261023091254">
+  <link rel="stylesheet" href="css/blocks.css?v=20261027124351">
+  <link rel="stylesheet" href="css/demos.css?v=20261027124351">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -1059,7 +1059,8 @@ and the outputs it has already produced, feeding its own results back in. That b
 same sharpness for five numbers, and the trade is the familiar one: keep a little state and you
 do far less work.</p>
 
-<p>SAE J211 specifies a four-pole Butterworth low-pass. "Four-pole" is how steeply it cuts, a
+<p>Appendix C of SAE J211 gives a four-pole Butterworth low-pass, and the standard says it should
+be used for CFC 60 and 180. "Four-pole" is how steeply it cuts, a
 compromise between a sharp edge and the ringing a sharper one would add, and "Butterworth" is the
 family that keeps the passband flat so the content you meant to keep comes through at its true
 size. The number in its name is the <dfn data-g="cfc">channel frequency class</dfn>. The rule
@@ -1222,7 +1223,7 @@ end</pre>
   };
   return onePass(onePass(y).reverse()).reverse();
 }</pre>
-  <div class="code-hint">Hover a highlighted line for a description of what it does.</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
 </div>
 
 <h2 id="the-cost-of-two-passes">The Cost of Two Passes</h2>
@@ -1251,9 +1252,12 @@ compare the forward-backward output against the same output shifted, or against 
 filter designed to have the sharpness the two passes actually produce.</p>
 
 <div class="aside standard"><span class="label">The standard</span>
-<p>Running the filter twice is not a refinement someone thought of. <strong>SAE J211-1</strong>
-requires it, and the reason is the lag. A single pass moves every event later and
-leaves nothing in the output to say so. See <a href="standards.html">The standards behind the
+<p>For CFC 60 and 180, <strong>SAE J211-1</strong> defines the class by the filter of its
+Appendix C. That filter passes the two-pole rule above over the data twice to make four poles,
+forward and then backward, so that it "will not phase shift the data," and backward then
+forward gives the same result. A single pass is a different filter, two-pole and late, and it
+leaves nothing in the output to say so. The standard also asks that the type of filter be
+reported. See <a href="standards.html">The standards behind the
 crash data</a>.</p></div>
 
 <h2 id="when-the-lag-changes-the-answer">When the Lag Changes the Answer</h2>
@@ -1314,10 +1318,10 @@ and can no longer be filtered at CFC 1000 at all, which is worth checking before
 anything you intend to filter afterwards.</p>
 
 <div class="aside standard"><span class="label">The standard</span>
-<p>Which class to use is not an open question on a crash record. <strong>SAE J211-1</strong> Table
-1 assigns one to each kind of measurement: CFC 1000 for head acceleration, CFC 180 for thorax
-spine, CFC 60 for vehicle structure being compared between vehicles and CFC 180 for the same
-structure being integrated. See <a href="standards.html">The standards behind the crash
+<p>On a crash record the starting point is <strong>SAE J211-1</strong> Table 1, which recommends a
+class for each kind of measurement and use: CFC 1000 for head acceleration, CFC 180 for thorax spine,
+and for vehicle structure CFC 60 for comparing vehicles or for collision simulation input, CFC 600
+for component analysis and CFC 180 before integrating. See <a href="standards.html">The standards behind the crash
 data</a>.</p></div>
 
 <div class="check">
@@ -1426,11 +1430,11 @@ class, one pass or forward-and-backward, with the peak and the integral reported
   </script>
   
 
-  <script type="module" src="js/bundle/smoothing.js?v=20261023091254"></script>
+  <script type="module" src="js/bundle/smoothing.js?v=20261027124351"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-23">October 23, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-25">October 25, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

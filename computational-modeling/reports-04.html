@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Example reports · Assignment 4 — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261023091254">
-  <link rel="stylesheet" href="css/demos.css?v=20261023091254">
+  <link rel="stylesheet" href="css/blocks.css?v=20261027124351">
+  <link rel="stylesheet" href="css/demos.css?v=20261027124351">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -926,7 +926,7 @@ over the whole record."</em></p>
   1.65&nbsp;ms late because a one-way filter delays everything. J211 asks for both directions,
   which is why the sentence says so.</li>
   <li><strong>A different class is right if the number is used differently.</strong> If the
-  customer integrates this channel to get velocity or crush, J211 assigns CFC&nbsp;180, and the
+  customer integrates this channel to get velocity or crush, J211 recommends CFC&nbsp;180, and the
   peak at that class is &minus;509.6&nbsp;m/s&sup2; (51.9&nbsp;<em>g</em>) at 53.35&nbsp;ms. In
   that case the CFC&nbsp;180 value is the right one to send.</li>
   <li><strong>The channel is one sensor on the seat crossmember.</strong> Our file calls it
@@ -936,7 +936,7 @@ over the whole record."</em></p>
 </ul>
 
 <figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r04-memo-peak.svg?v=20261023091254"
+  <div class="fig-body"><img src="data/example/figures/r04-memo-peak.svg?v=20261027124351"
     alt="The crossmember X acceleration in g against time from impact, from -10 to 160 ms. The
     unfiltered trace in light gray swings sharply and reaches -195.7 g at 52.8 ms. The CFC 60 trace
     is a smooth dip that reaches -44.5 g at 55.1 ms. Both peaks are marked and labeled."></div>
@@ -972,7 +972,7 @@ channel) comes with its own value.</p>
 
 <h4>Summary</h4>
 <p>The peak longitudinal acceleration of the left rear seat crossmember in test 9793, filtered at
-CFC&nbsp;60 as SAE J211-1 requires for vehicle structure compared between vehicles, is
+CFC&nbsp;60, the class SAE J211-1 recommends for vehicle structure compared between vehicles, is
 &minus;437.0&nbsp;m/s&sup2; (&minus;44.56&nbsp;<em>g</em>) at 55.10&nbsp;ms after impact. The
 proposed sentence for the customer is:</p>
 
@@ -982,7 +982,8 @@ forward and backward with no offset removed."</em></p>
 
 <p>A different class, and so a different value, would be right if the customer integrates the
 channel to velocity or displacement. J211-1 gives that use CFC&nbsp;180
-(&minus;509.6&nbsp;m/s&sup2;).</p>
+(&minus;509.6&nbsp;m/s&sup2;). If they analyze the crossmember as a component, it gives
+CFC&nbsp;600 (&minus;995.2&nbsp;m/s&sup2;).</p>
 
 <h4>Data</h4>
 <p>The channel is the one whose header names the crossmember. Its code is 10SEATLERE00ACXP, its
@@ -1002,10 +1003,11 @@ backward over the result, which cancels the delay a single pass causes. The peak
 with the largest absolute value. One <em>g</em> is taken as standard gravity,
 9.80665&nbsp;m/s&sup2;.</p>
 
-<p>The course standards page gives two classes for a vehicle structural acceleration, both from
-J211-1 Table 1: CFC&nbsp;60 for a structural peak for comparing vehicles, and CFC&nbsp;180 for
-integrating to velocity or displacement. The quantity here is a peak, not an integral, so this
-report uses CFC&nbsp;60.</p>
+<p>The course standards page gives four uses for a vehicle structural acceleration, all from
+J211-1 Table 1, with three classes among them: CFC&nbsp;60 for total vehicle comparison or for
+collision simulation input, CFC&nbsp;600 for component analysis, and CFC&nbsp;180 for
+integration to velocity or displacement. The quantity here is a peak going to a customer, who is most likely comparing
+vehicles, so this report uses CFC&nbsp;60.</p>
 
 <h4>Results</h4>
 <p>Figure&nbsp;1 shows the whole record. The filtered trace is a single smooth dip, and its largest
@@ -1014,7 +1016,7 @@ J211 defines. Change in velocity (&Delta;<var>v</var>, the area under the accele
 whole record) is included as a comparison.</p>
 
 <figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r04-rep-raw.svg?v=20261023091254"
+  <div class="fig-body"><img src="data/example/figures/r04-rep-raw.svg?v=20261027124351"
     alt="Crossmember X acceleration in g over the whole record, -50 to 300 ms. The unfiltered trace
     in light gray swings widely between about 50 and 100 ms. The CFC 60 trace is a smooth dip with
     its peak marked at -44.6 g at 55.1 ms."></div>
@@ -1041,7 +1043,7 @@ removed and a broader part of the pulse has become the largest value. Figure&nbs
 for the main pulse.</p>
 
 <figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r04-rep-classes.svg?v=20261023091254"
+  <div class="fig-body"><img src="data/example/figures/r04-rep-classes.svg?v=20261027124351"
     alt="Crossmember X acceleration in g from 40 to 80 ms, unfiltered and at CFC 1000, 600, 180
     and 60. The deep narrow spike near 53 ms gets shallower as the class falls, and at CFC 60 only a
     smooth dip to about -45 g remains."></div>
@@ -1070,7 +1072,7 @@ for the main pulse.</p>
 </ul>
 
 <figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r04-rep-onepass.svg?v=20261023091254"
+  <div class="fig-body"><img src="data/example/figures/r04-rep-onepass.svg?v=20261027124351"
     alt="Crossmember X acceleration in g from 30 to 90 ms. The CFC 60 trace run forward only sits
     slightly to the right of the forward-and-backward trace. Dotted vertical lines mark the two
     peaks, 1.65 ms apart."></div>
@@ -1383,7 +1385,7 @@ plt.legend()
 plt.show()</pre>
 
 <figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r04-nb-1.svg?v=20261023091254"
+  <div class="fig-body"><img src="data/example/figures/r04-nb-1.svg?v=20261027124351"
     alt="Matplotlib default plot titled Left rear seat crossmember X acceleration, test 9793, in g
     against time from impact from 0 to 150 ms. The unfiltered trace in light gray has sharp spikes
     and the CFC 60 trace is a smooth dip with a red dot at its lowest point near 55 ms."></div>
@@ -1410,7 +1412,7 @@ CFC 180:  -509.7 m/s^2 =  -52.0 g at 53.35 ms
 CFC  60:  -437.1 m/s^2 =  -44.6 g at 55.10 ms</pre>
 
 <figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r04-nb-2.svg?v=20261023091254"
+  <div class="fig-body"><img src="data/example/figures/r04-nb-2.svg?v=20261027124351"
     alt="Matplotlib default plot titled Crossmember X acceleration at three filter classes, in g
     from 40 to 80 ms. The CFC 600 trace dips to about -100 g near 53 ms, CFC 180 to about -52 g and
     CFC 60 to about -45 g."></div>
@@ -1446,10 +1448,10 @@ the reader a search.</p>
 
   
 
-  <script src="js/page.js?v=20261023091254"></script>
+  <script src="js/page.js?v=20261027124351"></script>
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-11">October 11, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-25">October 25, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

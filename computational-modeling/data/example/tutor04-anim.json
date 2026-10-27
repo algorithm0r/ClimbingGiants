@@ -1,0 +1,689 @@
+{
+ "polya": [
+  [
+   "Understand the problem",
+   "What is the unknown, what are the data, and what is the condition?"
+  ],
+  [
+   "Devise a plan",
+   "Have you seen a related problem, and can you use its method?"
+  ],
+  [
+   "Carry out the plan",
+   "Can you see that each step is correct?"
+  ],
+  [
+   "Look back",
+   "Can you check the result, and can you use the result or the method for another problem?"
+  ]
+ ],
+ "maxims": [
+  [
+   "Augmented intelligence",
+   "AI, like team members, should extend our own capabilities and understanding without substituting our judgment and contributions."
+  ],
+  [
+   "Prompt as craft",
+   "Clear communication drives results whether with AI, colleagues, or personal goals."
+  ],
+  [
+   "Iterative refinement",
+   "Progress comes through cycles of reflection and improvement in AI work, team projects, and self-development."
+  ],
+  [
+   "Critical evaluation",
+   "Apply discerning judgment to AI outputs, others' contributions, and your own work."
+  ],
+  [
+   "Attribution",
+   "Acknowledge sources of ideas, whether AI-generated, from others, or from your past work."
+  ],
+  [
+   "Ethical responsibility",
+   "Consider impacts on others when using AI, leading teams, or making personal choices."
+  ],
+  [
+   "Continuous improvement",
+   "The skills of collaboration with AI, others, and ourselves can all be developed through deliberate practice and a growth mindset."
+  ]
+ ],
+ "cpm": [
+  [
+   "how",
+   "How you got it",
+   "Defending a number means you can say how you got it (syllabus)."
+  ],
+  [
+   "rests",
+   "What it rests on",
+   "What assumptions it rests on (syllabus)."
+  ],
+  [
+   "far",
+   "How far off it could be",
+   "How far off it could plausibly be (syllabus)."
+  ],
+  [
+   "std",
+   "The standard, or yours",
+   "Say which parts of an analysis a standard fixes and which parts are yours, and defend the ones that are yours (learning objective)."
+  ]
+ ],
+ "beats": [
+  {
+   "t": "12:26 PM",
+   "polya": 1,
+   "cap": "Prompt 1 says what I think the task is, and asks whether it is right.",
+   "maxims": [
+    2
+   ],
+   "cpm": [
+    "std"
+   ],
+   "chat": {
+    "who": "me",
+    "n": 1,
+    "html": "<div class=\"said\">hi claude, i&#x27;m trying to get started on this assignment and i&#x27;ve looked at the getting started part.here is what i think i understand.\n\ni should use the crossmember again like last assignment, I need to smooth it with a filter, i don&#x27;t know what filter but i think a standard tells me what one. is this right?</div>",
+    "chars": 309,
+    "paste": false
+   },
+   "stop": "Understand",
+   "dur": 8200
+  },
+  {
+   "t": "12:26 PM",
+   "polya": 1,
+   "cap": "The tutor corrects the channel, adds the three things Alice wants besides the filter, and asks why the customer will recompute the peak.",
+   "maxims": [
+    4
+   ],
+   "cpm": [
+    "how",
+    "std"
+   ],
+   "chat": {
+    "who": "tutor",
+    "n": 1,
+    "html": "<p>You're mostly on the right track. Let me sharpen a couple of pieces.</p>\n<p><strong>The channel.</strong> The assignment doesn't say it's the same channel as last time. It says it's \"the one whose header comment names the crossmember.\" I don't know what you used for Assignment 3, so don't rely on memory. Open the header, find the comment that names the crossmember, and confirm. Reading the header is part of the work in this course.</p>\n<p><strong>The filter.</strong> Yes, a standard tells you, and the course lists three that apply to the crash data: ISO/TS 13499, SAE J211-1, and FMVSS 208. The page \"The standards behind the crash data\" lists which decisions each one makes. So your job is not to pick a filter you like. It's to find:</p>\n<ol>\n<li>which standard names a filter for this kind of channel,</li>\n<li>which <strong>class</strong> it names for this channel (the assignment says the standard names a class for each kind of channel), and</li>\n<li>why it names that one, since Alice wants the \"why\" too.</li>\n</ol>\n<p>One small correction to \"smooth it\": smoothing is part of the idea, but the getting-started note describes the filter as a formula where each output sample depends on the inputs <em>and the outputs before it</em>. The week 4 pages \"Smoothing and phase lag\" and \"The filter class is part of the measurement\" cover why that distinction matters.</p>\n<p><strong>What you haven't mentioned yet.</strong> Alice needs four things, and your summary covers mainly the filter. She also needs:</p>\n<ul>\n<li>the peak acceleration itself,</li>\n<li>a short sentence she can paste into an email, and</li>\n<li>the conditions under which a <em>different</em> peak would be the right one, if any.</li>\n</ul>\n<p>Before you go further, consider this question: <mark>why does the context say the customer's engineers will recompute the peak from the same file?</mark> What would make their number come out different from yours, and how does that connect to why a standard fixes the filter instead of leaving it to you?</p>\n<p>If you can answer that in a sentence or two, you'll have the core of the assignment, and the \"conditions for a different value\" part will start to make sense.</p>",
+    "words": 355
+   },
+   "more": "I don't know what you used for Assignment 3, so don't rely on memory. Open the header, find the comment that names the crossmember, and confirm.",
+   "dur": 10600
+  },
+  {
+   "t": "12:29 PM",
+   "polya": 1,
+   "cap": "I answer: a standard means both labs use the same filter.",
+   "maxims": [],
+   "cpm": [
+    "std"
+   ],
+   "chat": {
+    "who": "me",
+    "n": 2,
+    "html": "<div class=\"said\">they are telling me that the other engineers might use a different method, right? that is why we use a standard. so we both use the same filter?</div>",
+    "chars": 144,
+    "paste": false
+   },
+   "dur": 7000
+  },
+  {
+   "t": "12:29 PM",
+   "polya": 1,
+   "cap": "The tutor agrees, says the filter class is part of the measurement, and asks what else could make two peaks differ.",
+   "maxims": [],
+   "cpm": [
+    "std",
+    "far"
+   ],
+   "chat": {
+    "who": "tutor",
+    "n": 2,
+    "html": "<p>Yes, that's the core of it. If the customer filters with a different cutoff, they'll get a different peak, because <strong>the peak depends heavily on the filter</strong>. Heavier smoothing shaves the tall, narrow spikes, so the peak drops. Lighter filtering leaves more noise in, so the peak rises. Neither number is \"the raw truth.\" That's what the week 4 page title means: <em>the filter class is part of the measurement</em>. Naming the class is as much a part of reporting the number as naming the units.</p>\n<p>So the standard turns \"which filter?\" from a matter of taste into a shared rule. You and the customer follow it, you get the same number.</p>\n<p>One thing to push on: the standard fixes the filter, but does it fix <em>everything</em> that goes into the peak? Suppose you and the customer both apply exactly the same filter class to the same file. <mark>What other choices could still make your peak and theirs come out different?</mark></p>\n<p>Try to list two or three. Think about what you actually do between opening the file and writing down a single number. Your list will feed directly into two of Alice's items:</p>\n<ul>\n<li>the <strong>assumptions</strong> you write down (report standard 3), and</li>\n<li>the <strong>conditions under which a different value would be right</strong>.</li>\n</ul>\n<p>After that, the next concrete step is the \"standards behind the crash data\" page, to find which standard names the class for this channel and the reason it gives.</p>",
+    "words": 244
+   },
+   "more": "Naming the class is as much a part of reporting the number as naming the units.",
+   "dur": 10000
+  },
+  {
+   "t": "12:31 PM",
+   "polya": 1,
+   "cap": "I say I am stuck, and ask the question back.",
+   "maxims": [],
+   "cpm": [],
+   "chat": {
+    "who": "me",
+    "n": 3,
+    "html": "<div class=\"said\">i don&#x27;t know what else goes into the peak. if we fix the filter won&#x27;t we get the same peak on the same data?</div>",
+    "chars": 108,
+    "paste": false
+   },
+   "dur": 6700
+  },
+  {
+   "t": "12:31 PM",
+   "polya": 1,
+   "cap": "The tutor gives one example, what \"peak\" means, and two places to look: before filtering, and at the first sample.",
+   "maxims": [],
+   "cpm": [
+    "rests",
+    "far"
+   ],
+   "chat": {
+    "who": "tutor",
+    "n": 3,
+    "html": "<p>You're right that the same filter on the same data, done the same way, gives the same peak. The catch is in \"done the same way.\" The filter <em>class</em> is one decision, but turning a file into one number takes several more, and the customer's engineers make each of those too.</p>\n<p>Here's one example. <strong>What does \"peak\" mean?</strong> In a frontal crash the vehicle is slowing down hard, so depending on the sign convention in the file, the big values might be negative. Is the peak the most positive value, the most negative, or the largest in magnitude? If you report +38 g and they report −41 g from the same filtered signal, you've both done the filter \"right\" and still disagree. (Those numbers are made up, just to show the idea.)</p>\n<p><mark>Now try finding others yourself by tracing your own program, step by step, from opening the file to printing the number.</mark> At each step, ask: <strong>did I make a choice here that someone else could make differently?</strong> Two places worth looking:</p>\n<ol>\n<li><strong>Before filtering.</strong> What do you do to the raw samples first? Think back to Assignment 3 and \"the constant\" and \"bias.\" <mark>Does the signal sit at exactly zero before impact?</mark></li>\n<li><strong>Inside the filter, at the edges.</strong> The getting-started note says each output depends on <em>the outputs before it</em>. So what does the very <strong>first</strong> output depend on, when there are no earlier outputs yet? (This is the \"first sample\" question from the Reading Code page.)</li>\n</ol>\n<p>You don't need the right answers yet. Just tell me what you'd guess for each, and whether you think the standard decides it or leaves it to you. That split, between what the standard fixes and what's yours, is what Alice's \"conditions under which a different value would be right\" is asking for.</p>",
+    "words": 302
+   },
+   "more": "Is the peak the most positive value, the most negative, or the largest in magnitude?",
+   "dur": 9700
+  },
+  {
+   "t": "12:34 PM",
+   "polya": 1,
+   "cap": "I point out that there is no program yet, and that Alice did not ask for a bias correction.",
+   "maxims": [
+    4
+   ],
+   "cpm": [
+    "rests"
+   ],
+   "chat": {
+    "who": "me",
+    "n": 4,
+    "html": "<div class=\"said\">i don&#x27;t have a program yet, and alice didn&#x27;t ask me to correct any bias or anything. i guess i see what you are saying though. if i correct bias and the other lab doesn&#x27;t then we could get a different answer. is that what you mean?</div>",
+    "chars": 231,
+    "paste": false
+   },
+   "dur": 9400
+  },
+  {
+   "t": "12:34 PM",
+   "polya": 1,
+   "cap": "The tutor calls their request a mistake, says not correcting is also a choice, and asks for a plan before any code.",
+   "maxims": [
+    3
+   ],
+   "cpm": [
+    "rests"
+   ],
+   "chat": {
+    "who": "tutor",
+    "n": 4,
+    "html": "<p>Yes, that's exactly it. And my mistake: you don't have a program yet, so \"trace your program\" wasn't a fair ask. Let's make that the next step instead.</p>\n<p>You're also right that Alice didn't ask for a bias correction. Here's the subtle part: <strong>not correcting is also a choice.</strong> If the signal doesn't sit at zero before impact, then \"leave it alone\" and \"subtract the offset\" give different peaks. Whichever you do, someone else could do the other. So it belongs in your written assumptions either way, for example: \"No offset was removed before filtering.\"</p>\n<p>Whether you <em>should</em> correct it isn't my call or a default. It depends on what the standard says. When you read \"The standards behind the crash data\" page, check two things:</p>\n<ol>\n<li>Which filter class it names for this channel, and why.</li>\n<li>Whether it says anything about the signal's zero level before filtering. If it does, that choice is fixed for you. If it doesn't, it's yours to make and state.</li>\n</ol>\n<p>So far your list of places a peak can differ:</p>\n<ul>\n<li>the filter class (fixed by the standard)</li>\n<li>the zero level / bias (check the standard)</li>\n<li>what \"peak\" means: most positive, most negative, or largest magnitude</li>\n<li>how the filter starts at the first sample (still open, worth keeping on the list)</li>\n</ul>\n<p>That list is most of what Alice's \"conditions under which a different value would be right\" asks for.</p>\n<p><strong>Next, before writing code:</strong> <mark>could you sketch, in plain words, the steps your program will take from opening the file to printing one number?</mark> Four or five lines is plenty. Then mark each step \"the standard decides\" or \"I decide.\" Send me the sketch and we can check it together.</p>",
+    "words": 283
+   },
+   "more": "And my mistake: you don't have a program yet, so \"trace your program\" wasn't a fair ask. … not correcting is also a choice.",
+   "dur": 10300
+  },
+  {
+   "t": "12:40 PM",
+   "polya": 2,
+   "cap": "My plan is four steps, from opening the file to the peak.",
+   "maxims": [
+    1
+   ],
+   "cpm": [
+    "how"
+   ],
+   "chat": {
+    "who": "me",
+    "n": 5,
+    "html": "<div class=\"said\">i was going to ask more about the standard but i&#x27;ll give you my sketch\n\nopen the file and find the crossmember channel\ndo the filter on the channel to get a second channel\nprobably plot both so i know i did it right\ndo the peak finding on each so i know what changed and i can tell alice\n\nthen i write the report\n\nbut what i don&#x27;t know is what standard filter to apply and where to find it. what i saw in teh videos looked kind of complex with special coefficients.</div>",
+    "chars": 465,
+    "paste": false
+   },
+   "stop": "Plan",
+   "dur": 7300
+  },
+  {
+   "t": "12:40 PM",
+   "polya": 2,
+   "cap": "The tutor marks each step \"the standard decides\" or \"I decide\", and says the coefficients come from the class and the sampling interval.",
+   "maxims": [
+    4
+   ],
+   "cpm": [
+    "how",
+    "std"
+   ],
+   "chat": {
+    "who": "tutor",
+    "n": 5,
+    "html": "<p>Your sketch is a solid structure. Comparing the raw and filtered peaks is a good idea too, because it shows Alice how much the filter matters. Here's where the items from our list fit into it:</p>\n<ol>\n<li><strong>Open the file, find the crossmember channel.</strong> Also read the header for the <strong>sampling interval</strong>. You'll need it for the filter (more below).</li>\n<li><strong>Filter the channel.</strong> The class is <em>the standard decides</em>. How the filter starts at the first sample may or may not be fixed. Check.</li>\n<li><strong>Plot both.</strong> What would \"done it right\" look like on the plot? Decide that before you look, or any plot will seem fine.</li>\n<li><strong>Find the peak.</strong> Most positive, most negative, or largest magnitude? <em>I decide</em>, unless the standard says otherwise. And should anything happen to the zero level before step 2? Check the standard.</li>\n</ol>\n<p><strong>Where to find the filter.</strong> <mark>Start with the course page \"The standards behind the crash data.\"</mark> It lists which decisions each of the three standards makes, so it should tell you which one fixes the filter for this channel. I don't have that page's contents, so I won't guess what it says. When you find the table or rule that assigns a class, look at what it depends on. Is it only the kind of channel, or something else too? That's where your \"why\" for Alice will come from.</p>\n<p><strong>About the coefficients.</strong> Don't let them scare you. The getting-started note says \"smoothing gives the coefficients,\" so the week 4 page \"Smoothing and phase lag\" is where the formula is built up. The coefficients aren't magic numbers to copy. They're calculated from two things: the filter class and the sampling interval. That's why step 1 needs the sampling interval. Once you have both, getting the coefficients is mostly plugging in. The idea behind them matters more than the arithmetic.</p>\n<p>While you're on that page, keep one question in mind: <strong>if a filter delays the signal (phase lag), what could that do to the peak you report?</strong> The answer may explain why the standard's filter works the way it does.</p>\n<p>Once you've found the standard and the class, send me what you found and we can check it before you write code.</p>",
+    "words": 370
+   },
+   "more": "What would \"done it right\" look like on the plot? Decide that before you look, or any plot will seem fine.",
+   "dur": 10600
+  },
+  {
+   "t": "12:45 PM",
+   "polya": 2,
+   "cap": "I ask which standard applies, and how to choose between CFC 60 and 180.",
+   "maxims": [],
+   "cpm": [
+    "std"
+   ],
+   "chat": {
+    "who": "me",
+    "n": 6,
+    "html": "<div class=\"said\">i&#x27;ve read the course website but i can&#x27;t find a good source for the standard. can you help me? what standard should we apply in this case and why? i think its 60 or 180, but how do i know which?</div>",
+    "chars": 194,
+    "paste": false
+   },
+   "dur": 7900
+  },
+  {
+   "t": "12:45 PM",
+   "polya": 2,
+   "cap": "The tutor names SAE J211-1 and gives its four uses from memory, then says to check them against a source.",
+   "maxims": [
+    5,
+    4
+   ],
+   "cpm": [
+    "std"
+   ],
+   "chat": {
+    "who": "tutor",
+    "n": 6,
+    "html": "<p>The standard you want is <strong>SAE J211-1</strong>. It defines the filter classes, called <strong>Channel Frequency Classes (CFC)</strong>: 1000, 600, 180, and 60. The number is roughly the frequency (in Hz) up to which the filter passes the signal nearly unchanged. Your instinct that it's 60 or 180 is a good one.</p>\n<p><strong>How J211-1 decides the class.</strong> It doesn't assign a class just by <em>where the sensor is</em>. For vehicle structure accelerations, like a crossmember, its recommended-class table assigns one by <strong>what the number will be used for</strong>. From my memory of that table:</p>\n<table>\n<thead>\n<tr>\n<th>Use of the structural acceleration</th>\n<th>Recommended CFC</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Total vehicle comparison</td>\n<td>60</td>\n</tr>\n<tr>\n<td>Collision simulation input</td>\n<td>60</td>\n</tr>\n<tr>\n<td>Component analysis</td>\n<td>600</td>\n</tr>\n<tr>\n<td>Integration for velocity or displacement</td>\n<td>180</td>\n</tr>\n</tbody>\n</table>\n<p>Please check this against the standard itself or the course's standards page before you rely on it. I'm confident J211-1 ties the class to purpose, but I can't see your course page, and you should cite the source, not me.</p>\n<p><strong>Why this matters for Alice.</strong> It answers two of her four items at once:</p>\n<ul>\n<li><strong>\"Which class, and why\"</strong>: the class follows from what the customer will use the peak for.</li>\n<li><strong>\"When would a different value be right\"</strong>: if the number were used for a different purpose in that table, a different class, and a different peak, would be correct.</li>\n</ul>\n<p><strong>The decision that's yours:</strong> reread Alice's context. <mark>What is the customer doing with this peak, and which row does that match?</mark> What in the assignment or the header supports your reading? If the purpose isn't stated clearly, that's worth flagging in your report as an assumption.</p>\n<p><strong>One more header check.</strong> ISO/TS 13499 is the data format standard, and its channel codes include a field for filter class. Look at whether your crossmember channel is marked as unfiltered or already filtered. If it's already filtered, filtering it again would change your answer. Again, confirm the field meanings against the course page rather than my memory.</p>\n<p><mark>Once you've picked a row and have a reason for it, send me your choice and your sampling interval.</mark> Then we can move to computing the filter coefficients.</p>",
+    "words": 354
+   },
+   "more": "I'm confident J211-1 ties the class to purpose, but I can't see your course page, and you should cite the source, not me.",
+   "dur": 9700
+  },
+  {
+   "t": "12:49 PM",
+   "polya": 2,
+   "cap": "I choose CFC 60 by ruling out integration, and ask to record the use as an assumption.",
+   "maxims": [
+    1
+   ],
+   "cpm": [
+    "rests",
+    "std"
+   ],
+   "chat": {
+    "who": "me",
+    "n": 7,
+    "html": "<div class=\"said\">ok, here is my reasoning. we are reporting a peak, not integrating to velocity. integration is 180. maybe we are doing component analysis, but more likely we are doing total vehicle comparison. so 60. but, i should probably record this as one of my assumptions, right?\n\nfor my data the time step inteval is 50 micro seconds (20kHz)</div>",
+    "chars": 331,
+    "paste": false
+   },
+   "dur": 8800
+  },
+  {
+   "t": "12:49 PM",
+   "polya": 2,
+   "cap": "The tutor says the assumption carries a lot of weight (CFC 60 or 600) and asks for a reason behind \"more likely\".",
+   "maxims": [
+    4
+   ],
+   "cpm": [
+    "rests",
+    "far"
+   ],
+   "chat": {
+    "who": "tutor",
+    "n": 7,
+    "html": "<p>Yes, record it as an assumption. Your reasoning is also a good model for the report: you ruled out integration because you're reporting a peak, then chose between the remaining rows.</p>\n<p><strong>That assumption carries a lot of weight.</strong> The two rows you're choosing between are CFC 60 and CFC 600, a factor of ten in bandwidth. CFC 600 passes much more of the short, sharp content, so its peak will usually be noticeably higher. If the customer files this as component analysis and you file it as total vehicle comparison, you'll disagree by a lot, even though you both followed J211-1 correctly. That gives you a direct answer to Alice's fourth item: <em>\"If this peak is used for component analysis, CFC 600 applies and the peak would be different.\"</em></p>\n<p>Before you commit, push on one thing: <strong>what in Alice's context makes total vehicle comparison more likely?</strong> A crossmember is a single part of the structure, which could argue for component analysis. I'm not saying 60 is wrong. I'm saying \"more likely\" needs a reason you can write down. If the assignment and header don't settle it, say so, and consider whether reporting both values would help Alice. That's your call.</p>\n<p><strong>Your sampling interval:</strong> 50 µs and 20 kHz agree (1 / 0.00005 s = 20,000 Hz). In the filter formula, the time step T = 0.00005 s.</p>\n<p><strong>Next step: the filter formula.</strong> The getting-started note gives its shape: each output sample is a weighted sum of the current and recent inputs plus the previous outputs. For this filter that looks like</p>\n<p>y[n] = a0·x[n] + a1·x[n−1] + a2·x[n−2] + b1·y[n−1] + b2·y[n−2]</p>\n<p>The five coefficients come from the CFC and T. I'm not going to give you those coefficient formulas from memory, because you need to cite them. Look in J211-1 itself (it includes the digital filter in an appendix) and on the week 4 page \"Smoothing and phase lag.\"</p>\n<p>While you read, look for answers to two of our open questions:</p>\n<ol>\n<li><strong>Phase lag.</strong> Does the standard run the filter once, or does it do something extra so the peak isn't shifted in time?</li>\n<li><strong>The first samples.</strong> The formula needs x[n−1], x[n−2], y[n−1], and y[n−2]. What does the standard (or the course page) say to use at n = 0 and n = 1, before those exist?</li>\n</ol>\n<p>Also, did you check the ISO/TS 13499 channel code in the header to see whether the crossmember channel is already filtered? If it is, filtering again would give the wrong answer, so check that before you write code.</p>\n<p><mark>Send me the coefficient formulas once you find them. We can work out the numbers for CFC 60 and T = 50 µs together, and you can check them.</mark></p>",
+    "words": 454
+   },
+   "more": "I'm not saying 60 is wrong. I'm saying \"more likely\" needs a reason you can write down.",
+   "dur": 10300
+  },
+  {
+   "t": "12:52 PM",
+   "polya": 3,
+   "cap": "I ask the tutor to do the arithmetic for my sampling interval, so I can check my code against it.",
+   "maxims": [
+    1
+   ],
+   "cpm": [
+    "how"
+   ],
+   "chat": {
+    "who": "me",
+    "n": 8,
+    "html": "<div class=\"said\">i saw them in the slides. they are ugly. i don&#x27;t want to copy them here. but on the slides they used 80 micro seconds and 60, but i need 50 micro seconds and 60 so mine will be different. can you compute them for me so i can double check them with my code?</div>",
+    "chars": 256,
+    "paste": false
+   },
+   "stop": "Carry out",
+   "dur": 9700
+  },
+  {
+   "t": "12:52 PM",
+   "polya": 3,
+   "cap": "The tutor computes the five coefficients and lists four ways to check them.",
+   "maxims": [
+    4
+   ],
+   "cpm": [
+    "how"
+   ],
+   "chat": {
+    "who": "tutor",
+    "n": 8,
+    "html": "<p>Yes, this is plugging numbers into a formula, so I'll do the arithmetic and you check it. Here's what I used so you can compare it line by line with your slides (this is the J211-1 Appendix C form as I remember it):</p>\n<ul>\n<li>ω_d = 2π · CFC · 2.0775</li>\n<li>ω_a = tan(ω_d · T / 2)</li>\n<li>D = 1 + √2·ω_a + ω_a²</li>\n<li>a0 = ω_a² / D, a1 = 2·a0, a2 = a0</li>\n<li>b1 = −2(ω_a² − 1) / D</li>\n<li>b2 = (−1 + √2·ω_a − ω_a²) / D</li>\n</ul>\n<p><strong>For CFC 60, T = 50 µs:</strong></p>\n<table>\n<thead>\n<tr>\n<th>Quantity</th>\n<th>Value</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>ω_d</td>\n<td>≈ 783.20 rad/s</td>\n</tr>\n<tr>\n<td>ω_a</td>\n<td>≈ 0.0195825</td>\n</tr>\n<tr>\n<td>a0</td>\n<td>≈ 3.7300 × 10⁻⁴</td>\n</tr>\n<tr>\n<td>a1</td>\n<td>≈ 7.4600 × 10⁻⁴</td>\n</tr>\n<tr>\n<td>a2</td>\n<td>≈ 3.7300 × 10⁻⁴</td>\n</tr>\n<tr>\n<td>b1</td>\n<td>≈ 1.94463</td>\n</tr>\n<tr>\n<td>b2</td>\n<td>≈ −0.94613</td>\n</tr>\n</tbody>\n</table>\n<p>These are hand-computed to about five or six significant figures. Your code will carry more digits, so expect small differences in the last place.</p>\n<p><mark>Things to check before trusting my numbers or yours:</mark></p>\n<ol>\n<li><strong>The constant in ω_d.</strong> I used 2.0775. Some older versions and some course materials use 1.25 × 5/3 ≈ 2.0833 instead. If your slides use a different constant, your numbers will differ slightly from mine. In that case, follow the slides and say which you used in the report.</li>\n<li><strong>The sign convention on b1 and b2.</strong> I used y[n] = a0·x[n] + a1·x[n−1] + a2·x[n−2] + b1·y[n−1] + b2·y[n−2]. Some sources put minus signs in front of the b terms and flip the signs of b1 and b2 to match. Either works, as long as your formula and your coefficients agree.</li>\n<li><strong>Reproduce the slide example first.</strong> Run your code with T = 80 µs and CFC 60. If it matches the slides, you can trust it at 50 µs. This check is stronger than comparing against me.</li>\n<li><strong>A self-check you can run yourself:</strong> what should a0 + a1 + a2 + b1 + b2 add up to, and why? Think about what the filter should do to a signal that's constant. Then add up the numbers in the table and see if they agree.</li>\n</ol>\n<p>Coefficients are only part of it. Your sketch still has two open questions from the standard: does it run the filter once, or forward and then backward (the phase-lag question)? And what does it use for the first two samples? Have you found what the slides say about those?</p>",
+    "words": 394
+   },
+   "more": "Run your code with T = 80 µs and CFC 60. If it matches the slides, you can trust it at 50 µs. This check is stronger than comparing against me.",
+   "dur": 7600
+  },
+  {
+   "t": "1:11 PM",
+   "polya": 3,
+   "cap": "I paste my starter program and ask for the filter and some tests.",
+   "maxims": [
+    2
+   ],
+   "cpm": [
+    "how"
+   ],
+   "chat": {
+    "who": "me",
+    "n": 9,
+    "html": "<details class=\"code\"><summary>a4_demo.py as pasted, 83 lines</summary><pre class=\"paste\"><code>&quot;&quot;&quot;\na4_demo.py  --  starter for the Assignment 4 demo: filter the crossmember channel\n\nReads the crash test from crash/ next to this script, finds the channel whose\nheader comment names the crossmember, and runs a loop over its samples to\nfilter them.\n\nWhat this script does NOT do yet is filter.  The loop body copies each input\nsample to the output, so the peak it prints is the raw peak.\n\nRun:  python a4_demo.py\n&quot;&quot;&quot;\nimport json\nimport sys\nfrom pathlib import Path\n\nimport matplotlib.pyplot as plt\nimport numpy as np\n\nHERE = Path(__file__).parent\nCRASH = HERE / &quot;crash&quot; / &quot;09079.json&quot;\nPLOT = HERE / &quot;a4-plot.png&quot;\n\n\ndef load_crash(path):\n    with open(path) as f:\n        return json.load(f)\n\n\ndef find_crossmember(test):\n    # The key is our label; the comment is the instrument&#x27;s.  Trust the comment.\n    hits = [k for k, ch in test[&quot;channels&quot;].items()\n            if &quot;CROSSMEMBER&quot; in (ch.get(&quot;comment&quot;) or &quot;&quot;).upper()]\n    if len(hits) != 1:\n        for k, ch in test[&quot;channels&quot;].items():\n            print(f&quot;  {k:12s} {ch.get(&#x27;comment&#x27;)}&quot;)\n        sys.exit(f&quot;expected one crossmember channel, found {len(hits)}&quot;)\n    return hits[0]\n\n\ndef peak(t, a):\n    i = np.argmax(np.abs(a))\n    return a[i], t[i]\n\n\ndef main():\n    test = load_crash(CRASH)\n    key = find_crossmember(test)\n    ch = test[&quot;channels&quot;][key]\n\n    x = np.array(ch[&quot;y&quot;])\n    dt = ch[&quot;dt&quot;]\n    t = ch[&quot;t0&quot;] + dt * np.arange(ch[&quot;n&quot;])\n\n    print(f&quot;test {test[&#x27;testNo&#x27;]}: {key}  &#x27;{ch[&#x27;comment&#x27;]}&#x27;&quot;)\n    print(f&quot;  {ch[&#x27;n&#x27;]} samples, dt = {dt} s ({1 / dt:.0f} Hz), unit {ch[&#x27;unit&#x27;]}&quot;)\n\n    y = np.zeros_like(x)\n    for i in range(len(x)):\n        # TODO: the filter goes here\n        y[i] = x[i]\n\n    a, ta = peak(t, x)\n    print(f&quot;  raw peak:      {a:10.1f} {ch[&#x27;unit&#x27;]} at t = {ta * 1000:.2f} ms&quot;)\n    a, ta = peak(t, y)\n    print(f&quot;  filtered peak: {a:10.1f} {ch[&#x27;unit&#x27;]} at t = {ta * 1000:.2f} ms&quot;)\n\n    fig, ax = plt.subplots(figsize=(10, 5))\n    ax.plot(t * 1000, x, color=&quot;#2a78d6&quot;, lw=1, label=&quot;raw&quot;)\n    ax.plot(t * 1000, y, color=&quot;#eb6834&quot;, lw=2, label=&quot;filtered&quot;)\n    ax.set_title(f&quot;Test {test[&#x27;testNo&#x27;]}: {ch[&#x27;comment&#x27;]}&quot;)\n    ax.set_xlabel(&quot;time (ms)&quot;)\n    ax.set_ylabel(f&quot;acceleration ({ch[&#x27;unit&#x27;]})&quot;)\n    ax.grid(color=&quot;#e0e0e0&quot;, lw=0.5)\n    ax.legend()\n    fig.tight_layout()\n    fig.savefig(PLOT, dpi=150)\n    print(f&quot;  saved {PLOT.name}&quot;)\n    plt.show()\n\n\nif __name__ == &quot;__main__&quot;:\n    main()</code></pre></details><div class=\"said\"><mark>this is my program so far. can you write me the subroutine for the filter with your coefficients? can you also write some tests with output i can read to make sure our coefficients are right?</mark></div>",
+    "chars": 191,
+    "paste": true
+   },
+   "doc": {
+    "tab": "code",
+    "ver": "starter"
+   },
+   "dur": 7600
+  },
+  {
+   "t": "1:11 PM",
+   "polya": 3,
+   "cap": "The tutor writes one pass, the literal reading of my request, names each default they took, and writes five tests.",
+   "maxims": [
+    2,
+    3
+   ],
+   "cpm": [
+    "how",
+    "rests"
+   ],
+   "chat": {
+    "who": "tutor",
+    "n": 9,
+    "html": "<p>I'll write it as <strong>one forward pass of the formula, nothing more</strong>. That's the most literal reading of \"the filter with your coefficients.\" Several choices are still open, so here are the defaults I took. Each one is yours to change.</p>\n<p><strong>Defaults I took (none of these are decided yet):</strong></p>\n<ol>\n<li><strong>One pass, forward only.</strong> You haven't decided whether the standard runs the filter once or forward-then-backward, so I did one pass. Test 4 and Test 5 below will give you evidence on this.</li>\n<li><mark>Before the first sample, inputs and outputs are taken as zero.</mark> That's the literal \"nothing exists before the record.\" Test 3 shows what this does.</li>\n<li><strong>Constant 2.0775</strong> in ω_d, and the <strong>plus-sign convention</strong> on b1 and b2, matching what I gave you before. Both are arguments, so you can match your slides.</li>\n</ol>\n<h3>Additions to <code>a4_demo.py</code></h3>\n<p>Put these above <code>main()</code>:</p>\n<details class=\"code\"><summary>Python code, 28 lines</summary><pre><code class=\"language-python\">CFC = 60   # ASSUMPTION: &quot;total vehicle comparison&quot; row of the J211-1 table\n\n\ndef cfc_coefficients(cfc, dt, k=2.0775):\n    &quot;&quot;&quot;Coefficients for y[n] = a0 x[n] + a1 x[n-1] + a2 x[n-2] + b1 y[n-1] + b2 y[n-2].&quot;&quot;&quot;\n    wd = 2 * np.pi * cfc * k\n    wa = np.tan(wd * dt / 2)\n    D = 1 + np.sqrt(2) * wa + wa**2\n    a0 = wa**2 / D\n    a1 = 2 * a0\n    a2 = a0\n    b1 = -2 * (wa**2 - 1) / D\n    b2 = (-1 + np.sqrt(2) * wa - wa**2) / D\n    return a0, a1, a2, b1, b2\n\n\ndef filter_pass(x, coeffs):\n    &quot;&quot;&quot;One forward pass of the difference equation over x.&quot;&quot;&quot;\n    a0, a1, a2, b1, b2 = coeffs\n    x = np.asarray(x, dtype=float)\n    y = np.zeros(len(x))\n    x1 = x2 = 0.0   # DEFAULT: inputs before the record taken as zero\n    y1 = y2 = 0.0   # DEFAULT: outputs before the record taken as zero\n    for i in range(len(x)):\n        y[i] = a0 * x[i] + a1 * x1 + a2 * x2 + b1 * y1 + b2 * y2\n        x2, x1 = x1, x[i]\n        y2, y1 = y1, y[i]\n    return y\n</code></pre></details>\n<p>Then replace your copy loop in <code>main()</code> with:</p>\n<pre><code class=\"language-python\">    y = filter_pass(x, cfc_coefficients(CFC, dt))\n</code></pre>\n<p><strong>Why the state variables instead of <code>x[i-1]</code>:</strong> at <code>i = 0</code>, <code>x[i-1]</code> in Python is <code>x[-1]</code>, the <strong>last</strong> sample in the record. The code would run without error and quietly mix the end of the crash into the start. This is the \"first sample\" edge from the Reading Code page.</p>\n<h3><code>test_filter.py</code> (put it next to <code>a4_demo.py</code>)</h3>\n<details class=\"code\"><summary>Python code, 55 lines</summary><pre><code class=\"language-python\">&quot;&quot;&quot;Checks on the CFC filter in a4_demo.py.   Run:  python test_filter.py&quot;&quot;&quot;\nimport numpy as np\nfrom a4_demo import cfc_coefficients, filter_pass\n\nNAMES = (&quot;a0&quot;, &quot;a1&quot;, &quot;a2&quot;, &quot;b1&quot;, &quot;b2&quot;)\n\n\ndef show(c):\n    for name, v in zip(NAMES, c):\n        print(f&quot;    {name} = {v: .8e}&quot;)\n    print(f&quot;    sum of all five = {sum(c):.10f}&quot;)\n\n\ndef gain_from_coeffs(c, f, dt):\n    &quot;&quot;&quot;Gain at frequency f computed directly from the coefficients (no loop).&quot;&quot;&quot;\n    a0, a1, a2, b1, b2 = c\n    zi = np.exp(-2j * np.pi * f * dt)\n    return abs((a0 + a1 * zi + a2 * zi**2) / (1 - b1 * zi - b2 * zi**2))\n\n\ndef main():\n    print(&quot;Test 1: slide case, CFC 60, dt = 80 us  -&gt; compare with your slides&quot;)\n    show(cfc_coefficients(60, 80e-6))\n\n    dt = 50e-6\n    c = cfc_coefficients(60, dt)\n    print(&quot;\\nTest 2: your case, CFC 60, dt = 50 us  -&gt; compare with the table in chat&quot;)\n    show(c)\n\n    print(&quot;\\nTest 3: constant input of 5.0&quot;)\n    y = filter_pass(np.full(2000, 5.0), c)\n    print(&quot;    first five outputs:&quot;, &quot; &quot;.join(f&quot;{v:.4f}&quot; for v in y[:5]))\n    print(f&quot;    last output: {y[-1]:.6f}&quot;)\n\n    print(&quot;\\nTest 4: sine gain, measured through the loop vs computed from coefficients&quot;)\n    t = np.arange(0, 1.0, dt)\n    for f in (10, 30, 60, 100, 60 * 2.0775, 300, 1000):\n        y = filter_pass(np.sin(2 * np.pi * f * t), c)\n        measured = np.max(np.abs(y[len(y) // 2:]))   # skip the start-up\n        computed = gain_from_coeffs(c, f, dt)\n        print(f&quot;    {f:8.2f} Hz   measured {measured:.4f}   computed {computed:.4f}&quot;\n              f&quot;   ({20 * np.log10(computed):6.2f} dB)&quot;)\n\n    print(&quot;\\nTest 5: half-sine pulse, height 1, 5 ms wide, starting at 20 ms&quot;)\n    t = np.arange(0, 0.06, dt)\n    on = (t &gt;= 0.020) &amp; (t &lt;= 0.025)\n    x = np.where(on, np.sin(np.pi * (t - 0.020) / 0.005), 0.0)\n    y = filter_pass(x, c)\n    for label, s in ((&quot;input &quot;, x), (&quot;output&quot;, y)):\n        i = np.argmax(np.abs(s))\n        print(f&quot;    {label} peak {s[i]:.4f} at t = {t[i] * 1000:.2f} ms&quot;)\n\n\nif __name__ == &quot;__main__&quot;:\n    main()\n</code></pre></details>\n<h3>How to read the output</h3>\n<ul>\n<li><strong>Test 1 is the strongest check.</strong> If it matches your slides, the formula is right, and Test 2 follows from it. I've only given you my hand-computed numbers, so trust the slides over me.</li>\n<li><strong>Tests 2 and 3:</strong> the sum should come out very close to 1. Test 3 should end at 5.0. Look at the first few outputs, though. Starting from zero, the filter sees a constant 5.0 as a sudden <em>step</em> from 0 to 5. Connect that to your bias question: if your crossmember channel doesn't sit at zero before impact, the start of your filtered signal will contain a transient the car never experienced.</li>\n<li><strong>Test 4:</strong> \"measured\" and \"computed\" should agree to about three decimals. That shows the loop does what the coefficients say. At 124.65 Hz (= 2.0775 × 60) the gain should be 0.7071 (−3 dB), which is exactly what the formula is built to give for one pass.</li>\n<li><strong>Test 5:</strong> <strong>predict before you run it.</strong> Will the output peak be higher, lower, or the same as 1? Earlier, later, or the same time?</li>\n</ul>\n<h3>Your check</h3>\n<p>Could you tell me, without running it:</p>\n<ol>\n<li>Why the line <code>x2, x1 = x1, x[i]</code> assigns in that order. What would go wrong if you wrote <code>x1 = x[i]</code> and then <code>x2 = x1</code>?</li>\n<li>Which single line you would change to report the component-analysis value.</li>\n</ol>\n<p>Also note that your <code>peak()</code> function already makes one of our listed decisions. <code>np.argmax(np.abs(a))</code> means \"largest magnitude.\" That's fine, but it belongs in your written assumptions.</p>\n<h3>What's still your decision</h3>\n<p><mark>One pass or two.</mark> J211-1's performance spec lists frequency points each class must meet. As I recall, for CFC 60 the response is about −3 dB near 100 Hz, but check that against the standard. Compare it with your Test 4 line at 100 Hz, and with the time shift in Test 5. What do they suggest about how the standard intends the filter to be run? Find what the standard actually says before you change anything.</p>\n<p>Finally, the ISO/TS 13499 check from before is still open. If the header says the crossmember channel is already filtered, none of this should be applied to it.</p>",
+    "words": 584
+   },
+   "more": "I'll write it as one forward pass of the formula, nothing more. That's the most literal reading of \"the filter with your coefficients.\"",
+   "dur": 9700
+  },
+  {
+   "t": "1:15 PM",
+   "polya": 3,
+   "cap": "I choose two passes, and ask what to do with the first samples.",
+   "maxims": [
+    1
+   ],
+   "cpm": [
+    "rests",
+    "std"
+   ],
+   "chat": {
+    "who": "me",
+    "n": 10,
+    "html": "<div class=\"said\">oh, i want to do two passes for phaseless. i don&#x27;t know what to do with the first samples. this was not covered in the videos. will it effect the answer much? what is common? y0 = x0 or something else? the slides say 2.0775.</div>",
+    "chars": 224,
+    "paste": false
+   },
+   "dur": 7600
+  },
+  {
+   "t": "1:15 PM",
+   "polya": 3,
+   "cap": "The tutor adds the backward pass and lists three ways to start the filter, with code to measure the difference.",
+   "maxims": [
+    4
+   ],
+   "cpm": [
+    "far",
+    "rests"
+   ],
+   "chat": {
+    "who": "tutor",
+    "n": 10,
+    "html": "<p>Good. Your slides use 2.0775, so your Test 1 should match them. There's a connection you can check yourself: <strong>2.0775 was chosen with two passes in mind.</strong> In Test 4, square the \"computed\" gain at 100 Hz, since two passes apply the gain twice. Compare that with the −3 dB point you look up for CFC 60 in J211-1. If they agree, that supports two passes as the intended use.</p>\n<h3>Two passes</h3>\n<p>Filter forward, reverse the result, filter again, and reverse back:</p>\n<details class=\"code\"><summary>Python code, 4 lines</summary><pre><code class=\"language-python\">def filter_twopass(x, coeffs, init=&quot;zero&quot;):\n    &quot;&quot;&quot;Forward pass, then a backward pass, so the phase shifts cancel.&quot;&quot;&quot;\n    fwd = filter_pass(x, coeffs, init)\n    return filter_pass(fwd[::-1], coeffs, init)[::-1]\n</code></pre></details>\n<p>Rerun Test 5 with this. The output peak should no longer arrive late. Predict whether its height changes compared with one pass.</p>\n<p>Note that the backward pass <em>starts at the end of the record</em>. So you now have <strong>two</strong> edges to think about, the first samples and the last ones.</p>\n<h3>Will the first samples affect the answer much?</h3>\n<p>I can't tell you, but you can measure it. It depends on two things you can read from your data:</p>\n<ol>\n<li><strong>How far the peak is from each edge.</strong> The start-up transient dies out after a short time. Test 3 shows you how long: count how many samples it takes to get within, say, 0.1% of 5.0. If your peak is much farther than that from both ends, the edges probably won't touch it.</li>\n<li><strong>The signal level at the edges.</strong> If the record starts and ends near zero, the zero default creates almost no false step. If it doesn't, it does.</li>\n</ol>\n<p>Also check <code>t0</code>. If the record starts before impact, the transient happens before the crash.</p>\n<h3>The options (your choice, not mine)</h3>\n<ul>\n<li><strong>Zero state</strong> (current default): assume nothing existed before the record. If the edges aren't near zero, this creates a false step.</li>\n<li><strong>Edge state</strong> (what \"y0 = x0\" is aiming at): pretend the signal sat at x[0] forever. To do this properly, you set <em>all four</em> stored values (x1, x2, y1, y2) to x[0], not just y[0]. This works because the filter's DC gain is 1, which is your \"sum = 1\" check from earlier.</li>\n<li><strong>Padding</strong>: extend the record past each end (constant or mirrored), filter, then cut the padding off. Library routines such as SciPy's <code>filtfilt</code> do a version of this.</li>\n</ul>\n<p>I don't know reliably whether J211-1 specifies initialization, so I won't guess. Check the standard and the course page. If neither says, it's your assumption to state. Edge state is not bias correction. It avoids a false step, but any offset stays in. That's still a separate decision.</p>\n<h3>Code to measure it</h3>\n<p><mark>Update <code>filter_pass</code> so the start is an explicit choice:</mark></p>\n<details class=\"code\"><summary>Python code, 15 lines</summary><pre><code class=\"language-python\">def filter_pass(x, coeffs, init=&quot;zero&quot;):\n    a0, a1, a2, b1, b2 = coeffs\n    x = np.asarray(x, dtype=float)\n    y = np.zeros(len(x))\n    if init == &quot;zero&quot;:\n        x1 = x2 = y1 = y2 = 0.0      # nothing before the record\n    elif init == &quot;edge&quot;:\n        x1 = x2 = y1 = y2 = x[0]     # as if the signal had sat at x[0] forever\n    else:\n        raise ValueError(init)\n    for i in range(len(x)):\n        y[i] = a0 * x[i] + a1 * x1 + a2 * x2 + b1 * y1 + b2 * y2\n        x2, x1 = x1, x[i]\n        y2, y1 = y1, y[i]\n    return y\n</code></pre></details>\n<p>In <code>main()</code>, replace the filter line with this. I've kept <strong>zero</strong> as the reported default, because you haven't chosen yet:</p>\n<details class=\"code\"><summary>Python code, 8 lines</summary><pre><code class=\"language-python\">    c = cfc_coefficients(CFC, dt)\n    print(f&quot;  edges: x[0] = {x[0]:.2f} at {t[0]*1000:.2f} ms, &quot;\n          f&quot;x[-1] = {x[-1]:.2f} at {t[-1]*1000:.2f} ms&quot;)\n    y = filter_twopass(x, c, init=&quot;zero&quot;)          # DEFAULT: not yet decided\n    y_edge = filter_twopass(x, c, init=&quot;edge&quot;)\n    p0, _ = peak(t, y)\n    pe, _ = peak(t, y_edge)\n    print(f&quot;  peak, zero init: {p0:.2f}   edge init: {pe:.2f}   diff: {pe - p0:.3g}&quot;)\n</code></pre></details>\n<p>If the difference is tiny compared with the CFC 60 vs 600 difference, write one sentence saying so in your assumptions and move on. If it's large, look at the plot near the edges before you report anything.</p>\n<h3>Your check</h3>\n<ol>\n<li>In the <code>\"edge\"</code> case, why must x1 and x2 be set as well as y1 and y2? What would the first output be if only y1 and y2 were set to x[0]?</li>\n<li>After you run it, which initialization will you report, and what's your one-sentence reason?</li>\n</ol>\n<p>The ISO/TS 13499 check is still open. Does the header say whether the crossmember channel is already filtered?</p>",
+    "words": 551
+   },
+   "more": "I can't tell you, but you can measure it.",
+   "dur": 9700
+  },
+  {
+   "t": "1:18 PM",
+   "polya": 3,
+   "cap": "I ask for one file with every change in it.",
+   "maxims": [
+    3
+   ],
+   "cpm": [],
+   "chat": {
+    "who": "me",
+    "n": 11,
+    "html": "<div class=\"said\">can you give me one updated file with your suggested changes?</div>",
+    "chars": 61,
+    "paste": false
+   },
+   "dur": 6700
+  },
+  {
+   "t": "1:18 PM",
+   "polya": 3,
+   "cap": "The tutor's full file replaces mine. Its docstring sorts each choice into decided, default, and not yet checked.",
+   "maxims": [
+    3
+   ],
+   "cpm": [
+    "rests",
+    "how"
+   ],
+   "chat": {
+    "who": "tutor",
+    "n": 11,
+    "html": "<p>Here is the full <code>a4_demo.py</code>. It includes everything from the last two replies: coefficients, a selectable start state, two passes, and the zero-vs-edge comparison.</p>\n<p>The docstring lists every choice the script makes. Each one is labeled as <strong>your decision</strong> or <strong>a default I took that you haven't decided yet</strong>, so it can go straight into your report's assumptions.</p>\n<details class=\"code\"><summary>Python code, 143 lines</summary><pre><code class=\"language-python\">&quot;&quot;&quot;\na4_demo.py  --  Assignment 4: filter the crossmember channel\n\nReads the crash test from crash/ next to this script, finds the channel whose\nheader comment names the crossmember, filters it with the SAE J211-1 CFC\nfilter run twice (forward, then backward), and reports raw and filtered peaks.\n\nChoices made in this script (each belongs in the report's assumptions):\n  CFC = 60       DECIDED: &quot;total vehicle comparison&quot; row of the J211-1 table.\n                 If the customer treats this as component analysis, CFC 600.\n  k = 2.0775     DECIDED: constant in omega_d, as on the course slides.\n  two passes     DECIDED: forward then backward, so the phase shifts cancel.\n  INIT = &quot;zero&quot;  DEFAULT, NOT YET DECIDED: filter state before each pass is\n                 zero.  The run also prints the &quot;edge&quot; result for comparison.\n  peak           largest magnitude, sign kept (np.argmax(np.abs(...))).\n  no bias        DEFAULT, NOT YET DECIDED: no zero-level correction is applied\n                 before filtering.\n  NOT YET CHECKED: whether the ISO/TS 13499 channel code says this channel is\n                 already filtered.  If it is, it must not be filtered again.\n\nRun:  python a4_demo.py\n&quot;&quot;&quot;\nimport json\nimport sys\nfrom pathlib import Path\n\nimport matplotlib.pyplot as plt\nimport numpy as np\n\nHERE = Path(__file__).parent\nCRASH = HERE / &quot;crash&quot; / &quot;09079.json&quot;\nPLOT = HERE / &quot;a4-plot.png&quot;\n\nCFC = 60        # DECIDED (assumption): total vehicle comparison\nINIT = &quot;zero&quot;   # DEFAULT, NOT YET DECIDED: &quot;zero&quot; or &quot;edge&quot;\n\n\ndef load_crash(path):\n    with open(path) as f:\n        return json.load(f)\n\n\ndef find_crossmember(test):\n    # The key is our label; the comment is the instrument's.  Trust the comment.\n    hits = [k for k, ch in test[&quot;channels&quot;].items()\n            if &quot;CROSSMEMBER&quot; in (ch.get(&quot;comment&quot;) or &quot;&quot;).upper()]\n    if len(hits) != 1:\n        for k, ch in test[&quot;channels&quot;].items():\n            print(f&quot;  {k:12s} {ch.get('comment')}&quot;)\n        sys.exit(f&quot;expected one crossmember channel, found {len(hits)}&quot;)\n    return hits[0]\n\n\ndef cfc_coefficients(cfc, dt, k=2.0775):\n    &quot;&quot;&quot;Coefficients for y[n] = a0 x[n] + a1 x[n-1] + a2 x[n-2] + b1 y[n-1] + b2 y[n-2].&quot;&quot;&quot;\n    wd = 2 * np.pi * cfc * k\n    wa = np.tan(wd * dt / 2)\n    D = 1 + np.sqrt(2) * wa + wa**2\n    a0 = wa**2 / D\n    a1 = 2 * a0\n    a2 = a0\n    b1 = -2 * (wa**2 - 1) / D\n    b2 = (-1 + np.sqrt(2) * wa - wa**2) / D\n    return a0, a1, a2, b1, b2\n\n\ndef filter_pass(x, coeffs, init=&quot;zero&quot;):\n    &quot;&quot;&quot;One forward pass of the difference equation over x.&quot;&quot;&quot;\n    a0, a1, a2, b1, b2 = coeffs\n    x = np.asarray(x, dtype=float)\n    y = np.zeros(len(x))\n    if init == &quot;zero&quot;:\n        x1 = x2 = y1 = y2 = 0.0      # nothing before the record\n    elif init == &quot;edge&quot;:\n        x1 = x2 = y1 = y2 = x[0]     # as if the signal had sat at x[0] forever\n    else:\n        raise ValueError(init)\n    for i in range(len(x)):\n        y[i] = a0 * x[i] + a1 * x1 + a2 * x2 + b1 * y1 + b2 * y2\n        x2, x1 = x1, x[i]\n        y2, y1 = y1, y[i]\n    return y\n\n\ndef filter_twopass(x, coeffs, init=&quot;zero&quot;):\n    &quot;&quot;&quot;Forward pass, then a backward pass, so the phase shifts cancel.&quot;&quot;&quot;\n    fwd = filter_pass(x, coeffs, init)\n    return filter_pass(fwd[::-1], coeffs, init)[::-1]\n\n\ndef peak(t, a):\n    # Largest magnitude, sign kept.  This is a choice; state it in the report.\n    i = np.argmax(np.abs(a))\n    return a[i], t[i]\n\n\ndef main():\n    test = load_crash(CRASH)\n    key = find_crossmember(test)\n    ch = test[&quot;channels&quot;][key]\n\n    x = np.array(ch[&quot;y&quot;])\n    dt = ch[&quot;dt&quot;]\n    t = ch[&quot;t0&quot;] + dt * np.arange(ch[&quot;n&quot;])\n\n    print(f&quot;test {test['testNo']}: {key}  '{ch['comment']}'&quot;)\n    print(f&quot;  {ch['n']} samples, dt = {dt} s ({1 / dt:.0f} Hz), unit {ch['unit']}&quot;)\n    print(f&quot;  edges: x[0] = {x[0]:.2f} at {t[0] * 1000:.2f} ms, &quot;\n          f&quot;x[-1] = {x[-1]:.2f} at {t[-1] * 1000:.2f} ms&quot;)\n\n    c = cfc_coefficients(CFC, dt)\n    print(f&quot;  CFC {CFC} coefficients: &quot; + &quot;  &quot;.join(f&quot;{v:.6e}&quot; for v in c))\n\n    y = filter_twopass(x, c, init=INIT)\n    y_zero = filter_twopass(x, c, init=&quot;zero&quot;)\n    y_edge = filter_twopass(x, c, init=&quot;edge&quot;)\n\n    a, ta = peak(t, x)\n    print(f&quot;  raw peak:      {a:10.1f} {ch['unit']} at t = {ta * 1000:.2f} ms&quot;)\n    a, ta = peak(t, y)\n    print(f&quot;  filtered peak: {a:10.1f} {ch['unit']} at t = {ta * 1000:.2f} ms&quot;\n          f&quot;   (CFC {CFC}, two passes, init = {INIT})&quot;)\n    p0, _ = peak(t, y_zero)\n    pe, _ = peak(t, y_edge)\n    print(f&quot;  peak, zero init: {p0:.2f}   edge init: {pe:.2f}   diff: {pe - p0:.3g}&quot;)\n\n    fig, ax = plt.subplots(figsize=(10, 5))\n    ax.plot(t * 1000, x, color=&quot;#2a78d6&quot;, lw=1, label=&quot;raw&quot;)\n    ax.plot(t * 1000, y, color=&quot;#eb6834&quot;, lw=2,\n            label=f&quot;CFC {CFC}, two passes, {INIT} init&quot;)\n    ax.set_title(f&quot;Test {test['testNo']}: {ch['comment']}&quot;)\n    ax.set_xlabel(&quot;time (ms)&quot;)\n    ax.set_ylabel(f&quot;acceleration ({ch['unit']})&quot;)\n    ax.grid(color=&quot;#e0e0e0&quot;, lw=0.5)\n    ax.legend()\n    fig.tight_layout()\n    fig.savefig(PLOT, dpi=150)\n    print(f&quot;  saved {PLOT.name}&quot;)\n    plt.show()\n\n\nif __name__ == &quot;__main__&quot;:\n    main()\n</code></pre></details>\n<p><strong>Notes:</strong></p>\n<ul>\n<li><strong><code>test_filter.py</code> still works unchanged</strong>, because <code>init</code> defaults to <code>\"zero\"</code>. To see the two-pass effect in Test 5, change its import to include <code>filter_twopass</code> and add one more output line using <code>filter_twopass(x, c)</code>. Compare its peak time with the one-pass output.</li>\n<li><strong>The plot legend now names the filter.</strong> This supports the \"identified at a glance\" report standard, and it means anyone reading the plot sees the class without looking it up.</li>\n<li><strong>Switching initialization</strong> is one line: <code>INIT = \"edge\"</code>. Switching to the component-analysis value is also one line: <code>CFC = 600</code>.</li>\n</ul>\n<p><strong>Before you trust it, could you check these?</strong></p>\n<ol>\n<li>Run <code>test_filter.py</code> first and confirm Test 1 matches your slides at 80 µs. That's the check that lets you trust everything else.</li>\n<li>Look at the <code>diff:</code> line from <code>a4_demo.py</code>. <mark>Is it small compared with how far your peak is from the record's edges and from the CFC 60 vs 600 difference? That's what decides <code>INIT</code>.</mark></li>\n<li>One step I added in this version that you didn't ask for: <code>filter_twopass</code> reverses with <code>[::-1]</code> twice. Can you say why the second reversal is needed? What would the plot look like without it?</li>\n</ol>\n<p>The ISO/TS 13499 check is still the last open item before this number goes to Alice.</p>",
+    "words": 271
+   },
+   "doc": {
+    "tab": "code",
+    "ver": "tutor"
+   },
+   "dur": 9100
+  },
+  {
+   "t": "1:21 PM",
+   "polya": 4,
+   "cap": "Before trusting the zero start, I ask how it works.",
+   "maxims": [
+    4
+   ],
+   "cpm": [
+    "far"
+   ],
+   "chat": {
+    "who": "me",
+    "n": 12,
+    "html": "<div class=\"said\">can you explain how the zero default works?</div>",
+    "chars": 43,
+    "paste": false
+   },
+   "stop": "Look back",
+   "dur": 6700
+  },
+  {
+   "t": "1:21 PM",
+   "polya": 4,
+   "cap": "The tutor explains the zero start as a false step at each end of the record, and says what to check: the values at the edges.",
+   "maxims": [],
+   "cpm": [
+    "far",
+    "rests"
+   ],
+   "chat": {
+    "who": "tutor",
+    "n": 12,
+    "html": "<h2>What the zero default assumes</h2>\n<p>A recursive filter needs the last two inputs and the last two outputs to compute each new sample. At the first sample, none of those exist. The zero default fills them in with zeros:</p>\n<pre><code class=\"language-python\">x1 = x2 = y1 = y2 = 0.0\n</code></pre>\n<p>In words, the filter assumes <strong>the signal was exactly zero forever before the record began</strong>, and that the filter was at rest.</p>\n<h2>What happens in the first few samples</h2>\n<p>Here is the formula, written out with those zeros plugged in:</p>\n<ul>\n<li><strong>Sample 0:</strong> y[0] = a0·x[0] + a1·0 + a2·0 + b1·0 + b2·0 = <strong>a0·x[0]</strong></li>\n<li><strong>Sample 1:</strong> y[1] = a0·x[1] + a1·x[0] + a2·0 + b1·y[0] + b2·0</li>\n<li><strong>Sample 2 onward:</strong> all five terms use real record values.</li>\n</ul>\n<p>Since a0 ≈ 3.7 × 10⁻⁴, y[0] is tiny compared with x[0]. The output then climbs toward the signal over the next stretch of samples.</p>\n<p>The reason is that, from the filter's point of view, the record doesn't begin smoothly. It sees zero, zero, zero, …, then suddenly x[0]. <strong>It treats the start of the record as a step from 0 to x[0]</strong>, and its output is the filter's response to that step. That response rises, slightly overshoots, and settles. It takes a few milliseconds, not a single sample.</p>\n<h2>Why Test 3 is this problem in isolation</h2>\n<p>Test 3 feeds in a constant 5.0. The \"true\" filtered answer is 5.0 everywhere, because the filter passes a constant unchanged (the sum-of-coefficients check). Under the zero default, though, the output starts near 0 and climbs to 5. That climb is the error the zero default introduces when the record starts at 5.</p>\n<p>This gives a useful way to think about your real data. The filter is linear, so you can split your signal into two parts: the constant x[0], plus whatever varies around it. For one pass:</p>\n<ul>\n<li>The <strong>varying part</strong> is handled identically under zero or edge initialization.</li>\n<li>The <strong>constant part</strong> is passed exactly under edge initialization. Under zero initialization, it produces the Test 3 ramp, scaled by x[0]/5.</li>\n</ul>\n<p>So for a single pass, the zero-vs-edge difference is exactly the error in Test 3 at the start, scaled to the height of x[0]. It shrinks as the transient dies out.</p>\n<h2>With two passes, there are two false steps</h2>\n<ol>\n<li>The <strong>forward pass</strong> starts from zero at the beginning of the record, so there is a false step of height x[0] there.</li>\n<li>The <strong>backward pass</strong> starts from zero at the end of the record. The value it sees first is the forward output's last value, so there is a false step of roughly that height at the end.</li>\n</ol>\n<p>After the final reversal, the first transient sits at the start of your result and the second sits at the end.</p>\n<h2>When it matters and when it doesn't</h2>\n<ul>\n<li><strong>If the record starts and ends near zero,</strong> the false steps are tiny, and zero and edge give nearly the same answer.</li>\n<li><strong>If the record has an offset at either end</strong> (bias, or a sensor that hasn't returned to zero), the filtered signal near that edge contains a transient the car never experienced.</li>\n<li><strong>It can affect the peak</strong> in two ways. The crash peak might fall within the settling time of an edge, or the edge transient might be larger in magnitude than the real peak. Your <code>peak()</code> searches the whole record, edges included.</li>\n</ul>\n<h2>A check you can do before running anything</h2>\n<p>Look at the <code>edges:</code> line your script prints.</p>\n<ol>\n<li>Using the scaling argument above, roughly how big do you expect the zero-vs-edge difference to be right at the start of the record? Is it about x[0], about a0·x[0], or something else?</li>\n<li>From Test 3, about how many milliseconds does it take the output to get within 0.1% of 5.0? Is your crash peak farther than that from both ends of the record?</li>\n</ol>\n<p><mark>If your answers say the peak is far from both edges and the edge values are small, that becomes your one-sentence assumption for the report.</mark></p>",
+    "words": 668
+   },
+   "more": "It treats the start of the record as a step from 0 to x[0], and its output is the filter's response to that step.",
+   "dur": 11500
+  },
+  {
+   "t": "1:27 PM",
+   "polya": 4,
+   "cap": "I run the program. Both ends are near zero, and the edge start moves the peak by about 5 × 10⁻¹² m/s².",
+   "maxims": [
+    4
+   ],
+   "cpm": [
+    "far"
+   ],
+   "term": "run_9079",
+   "dur": 8100
+  },
+  {
+   "t": "1:27 PM",
+   "polya": 4,
+   "cap": "I keep the zero start and ask for a report in a set order: the sentence, the plot, the choices, the assumptions, the limitations.",
+   "maxims": [
+    2
+   ],
+   "cpm": [
+    "how",
+    "rests"
+   ],
+   "chat": {
+    "who": "me",
+    "n": 13,
+    "html": "<div class=\"said\">ok, the beginning and end are both close to zero so this seems like the right choice to me.\n\nthe program reports a peak of -452.5 at 44.95 ms after the filter vs -950.1 at 40.15. the plotted line looks reasonable to me. can you write a report using these numbers? open with a clean sentence stating these filtered numbers, the filter class used, the double pass and the zero start. then the plot (i&#x27;ll insert) then the choices made listed clearly and assumptions. use the ones from this chat please. and also the limitations of what we&#x27;ve done. use the ones from this chat. please write it in MD but make it so i can copy it to use in my final report.</div>",
+    "chars": 651,
+    "paste": false
+   },
+   "dur": 10900
+  },
+  {
+   "t": "1:27 PM",
+   "polya": 4,
+   "cap": "The tutor drafts the report from the chat, and puts whatever they did not know in brackets.",
+   "maxims": [
+    5,
+    6
+   ],
+   "cpm": [
+    "how",
+    "rests",
+    "far"
+   ],
+   "chat": {
+    "who": "tutor",
+    "n": 13,
+    "html": "<p>Below is the report. I used only the numbers you gave and the choices from this chat. Anything I don't know is a <strong>[bracketed placeholder]</strong>. I didn't fill those in because I'd be guessing, and the customer will recompute from the file.</p>\n<details class=\"code\"><summary>Report draft, 61 lines</summary><pre><code class=\"language-markdown\">**Data phrase:** [your four-word phrase]\n\n# Crossmember Peak Acceleration, Test 09079\n\n**The peak crossmember acceleration is −452.5 [unit] at t = 44.95 ms, filtered with SAE J211-1 Channel Frequency Class (CFC) 60, applied in two passes (forward, then backward) with the filter state set to zero at the start of each pass.** The unfiltered peak on the same channel is −950.1 [unit] at t = 40.15 ms.\n\n**Sentence for the customer:**\n\n&gt; Peak crossmember acceleration for test 09079 is −452.5 [unit] at 44.95 ms (channel [channel key], &quot;[header comment]&quot;), filtered SAE J211-1 CFC 60, run forward and backward from a zero initial state, with no bias correction; &quot;peak&quot; is the sample of largest magnitude, sign kept.\n\n## Plot\n\n[Insert a4-plot.png]\n\n*Figure 1. Test 09079, [header comment]. Raw signal (blue) and CFC 60 two-pass filtered signal, zero initial state (orange). Time in ms; acceleration in [unit].*\n\n## Choices made\n\n| Choice | What was used | Why |\n|---|---|---|\n| Channel | [channel key], the one channel whose header comment names the crossmember | The header comment is the instrument's description; the key is only a label. |\n| Standard | SAE J211-1 | It defines the channel frequency classes for crash instrumentation. |\n| Filter class | CFC 60 | The peak is reported for total vehicle comparison, the use J211-1 assigns CFC 60 to for structural accelerations. CFC 180 (for integration) does not apply because nothing is integrated. |\n| Filter form | J211-1 recursive difference equation, constant 2.0775 in ω_d (as given in the course slides), coefficients computed from dt = 50 µs (20 kHz) | The coefficients depend on the class and the sampling interval. |\n| Passes | Two: forward, then backward over the reversed signal | Running backward cancels the phase shift of the forward pass, so the filtered peak is not delayed by the filter. |\n| Initial state | Zero: inputs and outputs before each pass taken as 0 | The record begins and ends close to zero (x[0] = [value], x[−1] = [value]), so the false step this creates at each edge is small. Edge initialization changed the peak by [diff value from script]. |\n| Bias / zero offset | None removed | Not corrected. The record starts near zero, so any offset is taken to be small. |\n| Peak definition | Sample of largest magnitude, sign kept | The customer must use the same definition to reproduce the number. |\n\n## Assumptions\n\n1. The crossmember channel has not already been filtered by the data acquisition system. [State what the ISO/TS 13499 channel code in the header says, or state that this was not checked.]\n2. The intended use is total vehicle comparison. If it is component analysis, the class changes (see below).\n3. The J211-1 class-by-use table was taken from [source you verified it in].\n4. The sign convention of the channel is as recorded in the file. [State the axis/sign convention from the header if it is given.]\n5. The zero offset before impact is small enough to ignore.\n\n## Things that look wrong or deserve a second look\n\n- **The peak time moved by 4.8 ms** (40.15 ms raw → 44.95 ms filtered), even though the two-pass filter introduces no phase delay. [Your explanation from the plot. For example, does the raw peak look like a narrow spike, with the filtered peak sitting on a broader part of the pulse?]\n- **The filtered peak is less than half the raw peak.** Expected for a low-pass filter if the raw maximum is a short, high-frequency spike, but this is why the filter class must travel with the number.\n\n## When a different value would be the right one\n\n- **The customer uses CFC 600** (component analysis): the peak would differ, possibly by a lot, since the bandwidth is ten times wider. [CFC 600 peak, if you compute it.]\n- **The channel was already filtered** at acquisition: it should not be filtered again, and the reported peak would be different.\n- **A different peak definition** (most positive, or most negative, rather than largest magnitude).\n- **Bias is removed before filtering**, single-pass filtering is used, or a padded/library implementation (e.g., SciPy `filtfilt`) is used. Each can shift the result slightly; the edge-initialization difference above indicates the size of the start-up effect.\n\n## Limitations\n\n- The J211-1 class table was recalled from memory during the analysis and [has / has not] been checked against the standard itself.\n- The coefficients were verified against the course slides at 80 µs: [yes / not yet].\n- J211-1's own specification for initialization was not found; zero initialization is this analysis's assumption.\n- The two-pass response was [checked / not checked] against the J211-1 CFC 60 frequency-response limits.\n- The ISO/TS 13499 filter-status check is [done / open].\n- One channel, one test. The number says nothing about other tests or other locations on the vehicle.\n\n## Reproducing this result\n\nProgram: `a4_demo.py`, submitted with this report. Settings: `CFC = 60`, `INIT = &quot;zero&quot;`, two passes, `k = 2.0775`. Changing the class or initialization is one line each.\n</code></pre></details>\n<p><mark>Before you submit, please fill or confirm these:</mark></p>\n<ol>\n<li><strong>[unit]:</strong> your script prints it. I didn't want to guess between g and m/s². The difference is a factor of about 10, and it changes whether −452.5 is plausible.</li>\n<li><strong>The <code>diff:</code> value and the edge values.</strong> You said they're close to zero. Putting the actual numbers in turns that from a claim into evidence.</li>\n<li><strong>The ISO/TS 13499 item.</strong> This is the one open check that could invalidate the number, not just shift it. I'd resolve it before this goes to Alice.</li>\n<li><strong>The 4.8 ms shift.</strong> I flagged it rather than explaining it, because the explanation comes from your plot, not from me.</li>\n</ol>\n<p>Here's one check for you, in the spirit of the \"pick a line\" self-check. The email sentence says \"no bias correction.\" If the customer's engineer asks why you didn't remove the offset, what's your one-sentence answer, and what number in your output backs it up?</p>",
+    "words": 198
+   },
+   "more": "This is the one open check that could invalidate the number, not just shift it.",
+   "doc": {
+    "tab": "report",
+    "ver": "r1"
+   },
+   "dur": 8800
+  },
+  {
+   "t": "after 1:27",
+   "polya": 4,
+   "cap": "After the chat I fill my data phrase and the brackets the header answers: the unit, the channel and its comment.",
+   "maxims": [
+    1
+   ],
+   "cpm": [
+    "how"
+   ],
+   "doc": {
+    "tab": "report",
+    "ver": "r2"
+   },
+   "stop": "After the chat",
+   "dur": 7800
+  },
+  {
+   "t": "1:37 PM",
+   "polya": 4,
+   "cap": "The demo moves to test 9793, one held back from the phrase assignment. One line of the program changes, and it is run again.",
+   "maxims": [],
+   "cpm": [
+    "how"
+   ],
+   "doc": {
+    "tab": "code",
+    "ver": "final"
+   },
+   "term": "run_9793",
+   "dur": 8700
+  },
+  {
+   "t": "1:55 PM",
+   "polya": 4,
+   "cap": "The report takes the new numbers. I fill the edge values from the output, write the filter-status assumption from the header, name the class table's source, and cut five limitations.",
+   "maxims": [
+    4,
+    5
+   ],
+   "cpm": [
+    "rests",
+    "std"
+   ],
+   "doc": {
+    "tab": "report",
+    "ver": "r3"
+   },
+   "dur": 10500
+  },
+  {
+   "t": "5:40 PM",
+   "polya": 4,
+   "cap": "Later I fill the last brackets: the sign convention from the data, why the peak moved, and the start-up rule, quoted from J211-1 Appendix C.",
+   "maxims": [
+    4,
+    5
+   ],
+   "cpm": [
+    "rests",
+    "far",
+    "std"
+   ],
+   "doc": {
+    "tab": "report",
+    "ver": "r4"
+   },
+   "dur": 9000
+  }
+ ],
+ "docs": {
+  "code": {
+   "name": "a4_demo.py",
+   "vers": {
+    "starter": "\"\"\"\na4_demo.py  --  starter for the Assignment 4 demo: filter the crossmember channel\n\nReads the crash test from crash/ next to this script, finds the channel whose\nheader comment names the crossmember, and runs a loop over its samples to\nfilter them.\n\nWhat this script does NOT do yet is filter.  The loop body copies each input\nsample to the output, so the peak it prints is the raw peak.\n\nRun:  python a4_demo.py\n\"\"\"\nimport json\nimport sys\nfrom pathlib import Path\n\nimport matplotlib.pyplot as plt\nimport numpy as np\n\nHERE = Path(__file__).parent\nCRASH = HERE / \"crash\" / \"09079.json\"\nPLOT = HERE / \"a4-plot.png\"\n\n\ndef load_crash(path):\n    with open(path) as f:\n        return json.load(f)\n\n\ndef find_crossmember(test):\n    # The key is our label; the comment is the instrument's.  Trust the comment.\n    hits = [k for k, ch in test[\"channels\"].items()\n            if \"CROSSMEMBER\" in (ch.get(\"comment\") or \"\").upper()]\n    if len(hits) != 1:\n        for k, ch in test[\"channels\"].items():\n            print(f\"  {k:12s} {ch.get('comment')}\")\n        sys.exit(f\"expected one crossmember channel, found {len(hits)}\")\n    return hits[0]\n\n\ndef peak(t, a):\n    i = np.argmax(np.abs(a))\n    return a[i], t[i]\n\n\ndef main():\n    test = load_crash(CRASH)\n    key = find_crossmember(test)\n    ch = test[\"channels\"][key]\n\n    x = np.array(ch[\"y\"])\n    dt = ch[\"dt\"]\n    t = ch[\"t0\"] + dt * np.arange(ch[\"n\"])\n\n    print(f\"test {test['testNo']}: {key}  '{ch['comment']}'\")\n    print(f\"  {ch['n']} samples, dt = {dt} s ({1 / dt:.0f} Hz), unit {ch['unit']}\")\n\n    y = np.zeros_like(x)\n    for i in range(len(x)):\n        # TODO: the filter goes here\n        y[i] = x[i]\n\n    a, ta = peak(t, x)\n    print(f\"  raw peak:      {a:10.1f} {ch['unit']} at t = {ta * 1000:.2f} ms\")\n    a, ta = peak(t, y)\n    print(f\"  filtered peak: {a:10.1f} {ch['unit']} at t = {ta * 1000:.2f} ms\")\n\n    fig, ax = plt.subplots(figsize=(10, 5))\n    ax.plot(t * 1000, x, color=\"#2a78d6\", lw=1, label=\"raw\")\n    ax.plot(t * 1000, y, color=\"#eb6834\", lw=2, label=\"filtered\")\n    ax.set_title(f\"Test {test['testNo']}: {ch['comment']}\")\n    ax.set_xlabel(\"time (ms)\")\n    ax.set_ylabel(f\"acceleration ({ch['unit']})\")\n    ax.grid(color=\"#e0e0e0\", lw=0.5)\n    ax.legend()\n    fig.tight_layout()\n    fig.savefig(PLOT, dpi=150)\n    print(f\"  saved {PLOT.name}\")\n    plt.show()\n\n\nif __name__ == \"__main__\":\n    main()",
+    "tutor": "\"\"\"\na4_demo.py  --  Assignment 4: filter the crossmember channel\n\nReads the crash test from crash/ next to this script, finds the channel whose\nheader comment names the crossmember, filters it with the SAE J211-1 CFC\nfilter run twice (forward, then backward), and reports raw and filtered peaks.\n\nChoices made in this script (each belongs in the report's assumptions):\n  CFC = 60       DECIDED: \"total vehicle comparison\" row of the J211-1 table.\n                 If the customer treats this as component analysis, CFC 600.\n  k = 2.0775     DECIDED: constant in omega_d, as on the course slides.\n  two passes     DECIDED: forward then backward, so the phase shifts cancel.\n  INIT = \"zero\"  DEFAULT, NOT YET DECIDED: filter state before each pass is\n                 zero.  The run also prints the \"edge\" result for comparison.\n  peak           largest magnitude, sign kept (np.argmax(np.abs(...))).\n  no bias        DEFAULT, NOT YET DECIDED: no zero-level correction is applied\n                 before filtering.\n  NOT YET CHECKED: whether the ISO/TS 13499 channel code says this channel is\n                 already filtered.  If it is, it must not be filtered again.\n\nRun:  python a4_demo.py\n\"\"\"\nimport json\nimport sys\nfrom pathlib import Path\n\nimport matplotlib.pyplot as plt\nimport numpy as np\n\nHERE = Path(__file__).parent\nCRASH = HERE / \"crash\" / \"09079.json\"\nPLOT = HERE / \"a4-plot.png\"\n\nCFC = 60        # DECIDED (assumption): total vehicle comparison\nINIT = \"zero\"   # DEFAULT, NOT YET DECIDED: \"zero\" or \"edge\"\n\n\ndef load_crash(path):\n    with open(path) as f:\n        return json.load(f)\n\n\ndef find_crossmember(test):\n    # The key is our label; the comment is the instrument's.  Trust the comment.\n    hits = [k for k, ch in test[\"channels\"].items()\n            if \"CROSSMEMBER\" in (ch.get(\"comment\") or \"\").upper()]\n    if len(hits) != 1:\n        for k, ch in test[\"channels\"].items():\n            print(f\"  {k:12s} {ch.get('comment')}\")\n        sys.exit(f\"expected one crossmember channel, found {len(hits)}\")\n    return hits[0]\n\n\ndef cfc_coefficients(cfc, dt, k=2.0775):\n    \"\"\"Coefficients for y[n] = a0 x[n] + a1 x[n-1] + a2 x[n-2] + b1 y[n-1] + b2 y[n-2].\"\"\"\n    wd = 2 * np.pi * cfc * k\n    wa = np.tan(wd * dt / 2)\n    D = 1 + np.sqrt(2) * wa + wa**2\n    a0 = wa**2 / D\n    a1 = 2 * a0\n    a2 = a0\n    b1 = -2 * (wa**2 - 1) / D\n    b2 = (-1 + np.sqrt(2) * wa - wa**2) / D\n    return a0, a1, a2, b1, b2\n\n\ndef filter_pass(x, coeffs, init=\"zero\"):\n    \"\"\"One forward pass of the difference equation over x.\"\"\"\n    a0, a1, a2, b1, b2 = coeffs\n    x = np.asarray(x, dtype=float)\n    y = np.zeros(len(x))\n    if init == \"zero\":\n        x1 = x2 = y1 = y2 = 0.0      # nothing before the record\n    elif init == \"edge\":\n        x1 = x2 = y1 = y2 = x[0]     # as if the signal had sat at x[0] forever\n    else:\n        raise ValueError(init)\n    for i in range(len(x)):\n        y[i] = a0 * x[i] + a1 * x1 + a2 * x2 + b1 * y1 + b2 * y2\n        x2, x1 = x1, x[i]\n        y2, y1 = y1, y[i]\n    return y\n\n\ndef filter_twopass(x, coeffs, init=\"zero\"):\n    \"\"\"Forward pass, then a backward pass, so the phase shifts cancel.\"\"\"\n    fwd = filter_pass(x, coeffs, init)\n    return filter_pass(fwd[::-1], coeffs, init)[::-1]\n\n\ndef peak(t, a):\n    # Largest magnitude, sign kept.  This is a choice; state it in the report.\n    i = np.argmax(np.abs(a))\n    return a[i], t[i]\n\n\ndef main():\n    test = load_crash(CRASH)\n    key = find_crossmember(test)\n    ch = test[\"channels\"][key]\n\n    x = np.array(ch[\"y\"])\n    dt = ch[\"dt\"]\n    t = ch[\"t0\"] + dt * np.arange(ch[\"n\"])\n\n    print(f\"test {test['testNo']}: {key}  '{ch['comment']}'\")\n    print(f\"  {ch['n']} samples, dt = {dt} s ({1 / dt:.0f} Hz), unit {ch['unit']}\")\n    print(f\"  edges: x[0] = {x[0]:.2f} at {t[0] * 1000:.2f} ms, \"\n          f\"x[-1] = {x[-1]:.2f} at {t[-1] * 1000:.2f} ms\")\n\n    c = cfc_coefficients(CFC, dt)\n    print(f\"  CFC {CFC} coefficients: \" + \"  \".join(f\"{v:.6e}\" for v in c))\n\n    y = filter_twopass(x, c, init=INIT)\n    y_zero = filter_twopass(x, c, init=\"zero\")\n    y_edge = filter_twopass(x, c, init=\"edge\")\n\n    a, ta = peak(t, x)\n    print(f\"  raw peak:      {a:10.1f} {ch['unit']} at t = {ta * 1000:.2f} ms\")\n    a, ta = peak(t, y)\n    print(f\"  filtered peak: {a:10.1f} {ch['unit']} at t = {ta * 1000:.2f} ms\"\n          f\"   (CFC {CFC}, two passes, init = {INIT})\")\n    p0, _ = peak(t, y_zero)\n    pe, _ = peak(t, y_edge)\n    print(f\"  peak, zero init: {p0:.2f}   edge init: {pe:.2f}   diff: {pe - p0:.3g}\")\n\n    fig, ax = plt.subplots(figsize=(10, 5))\n    ax.plot(t * 1000, x, color=\"#2a78d6\", lw=1, label=\"raw\")\n    ax.plot(t * 1000, y, color=\"#eb6834\", lw=2,\n            label=f\"CFC {CFC}, two passes, {INIT} init\")\n    ax.set_title(f\"Test {test['testNo']}: {ch['comment']}\")\n    ax.set_xlabel(\"time (ms)\")\n    ax.set_ylabel(f\"acceleration ({ch['unit']})\")\n    ax.grid(color=\"#e0e0e0\", lw=0.5)\n    ax.legend()\n    fig.tight_layout()\n    fig.savefig(PLOT, dpi=150)\n    print(f\"  saved {PLOT.name}\")\n    plt.show()\n\n\nif __name__ == \"__main__\":\n    main()",
+    "final": "\"\"\"\na4_demo.py  --  Assignment 4: filter the crossmember channel\n\nReads the crash test from crash/ next to this script, finds the channel whose\nheader comment names the crossmember, filters it with the SAE J211-1 CFC\nfilter run twice (forward, then backward), and reports raw and filtered peaks.\n\nChoices made in this script (each belongs in the report's assumptions):\n  CFC = 60       DECIDED: \"total vehicle comparison\" row of the J211-1 table.\n                 If the customer treats this as component analysis, CFC 600.\n  k = 2.0775     DECIDED: constant in omega_d, as on the course slides.\n  two passes     DECIDED: forward then backward, so the phase shifts cancel.\n  INIT = \"zero\"  DEFAULT, NOT YET DECIDED: filter state before each pass is\n                 zero.  The run also prints the \"edge\" result for comparison.\n  peak           largest magnitude, sign kept (np.argmax(np.abs(...))).\n  no bias        DEFAULT, NOT YET DECIDED: no zero-level correction is applied\n                 before filtering.\n  NOT YET CHECKED: whether the ISO/TS 13499 channel code says this channel is\n                 already filtered.  If it is, it must not be filtered again.\n\nRun:  python a4_demo.py\n\"\"\"\nimport json\nimport sys\nfrom pathlib import Path\n\nimport matplotlib.pyplot as plt\nimport numpy as np\n\nHERE = Path(__file__).parent\nCRASH = HERE / \"crash\" / \"09793.json\"\nPLOT = HERE / \"a4-plot.png\"\n\nCFC = 60        # DECIDED (assumption): total vehicle comparison\nINIT = \"zero\"   # DEFAULT, NOT YET DECIDED: \"zero\" or \"edge\"\n\n\ndef load_crash(path):\n    with open(path) as f:\n        return json.load(f)\n\n\ndef find_crossmember(test):\n    # The key is our label; the comment is the instrument's.  Trust the comment.\n    hits = [k for k, ch in test[\"channels\"].items()\n            if \"CROSSMEMBER\" in (ch.get(\"comment\") or \"\").upper()]\n    if len(hits) != 1:\n        for k, ch in test[\"channels\"].items():\n            print(f\"  {k:12s} {ch.get('comment')}\")\n        sys.exit(f\"expected one crossmember channel, found {len(hits)}\")\n    return hits[0]\n\n\ndef cfc_coefficients(cfc, dt, k=2.0775):\n    \"\"\"Coefficients for y[n] = a0 x[n] + a1 x[n-1] + a2 x[n-2] + b1 y[n-1] + b2 y[n-2].\"\"\"\n    wd = 2 * np.pi * cfc * k\n    wa = np.tan(wd * dt / 2)\n    D = 1 + np.sqrt(2) * wa + wa**2\n    a0 = wa**2 / D\n    a1 = 2 * a0\n    a2 = a0\n    b1 = -2 * (wa**2 - 1) / D\n    b2 = (-1 + np.sqrt(2) * wa - wa**2) / D\n    return a0, a1, a2, b1, b2\n\n\ndef filter_pass(x, coeffs, init=\"zero\"):\n    \"\"\"One forward pass of the difference equation over x.\"\"\"\n    a0, a1, a2, b1, b2 = coeffs\n    x = np.asarray(x, dtype=float)\n    y = np.zeros(len(x))\n    if init == \"zero\":\n        x1 = x2 = y1 = y2 = 0.0      # nothing before the record\n    elif init == \"edge\":\n        x1 = x2 = y1 = y2 = x[0]     # as if the signal had sat at x[0] forever\n    else:\n        raise ValueError(init)\n    for i in range(len(x)):\n        y[i] = a0 * x[i] + a1 * x1 + a2 * x2 + b1 * y1 + b2 * y2\n        x2, x1 = x1, x[i]\n        y2, y1 = y1, y[i]\n    return y\n\n\ndef filter_twopass(x, coeffs, init=\"zero\"):\n    \"\"\"Forward pass, then a backward pass, so the phase shifts cancel.\"\"\"\n    fwd = filter_pass(x, coeffs, init)\n    return filter_pass(fwd[::-1], coeffs, init)[::-1]\n\n\ndef peak(t, a):\n    # Largest magnitude, sign kept.  This is a choice; state it in the report.\n    i = np.argmax(np.abs(a))\n    return a[i], t[i]\n\n\ndef main():\n    test = load_crash(CRASH)\n    key = find_crossmember(test)\n    ch = test[\"channels\"][key]\n\n    x = np.array(ch[\"y\"])\n    dt = ch[\"dt\"]\n    t = ch[\"t0\"] + dt * np.arange(ch[\"n\"])\n\n    print(f\"test {test['testNo']}: {key}  '{ch['comment']}'\")\n    print(f\"  {ch['n']} samples, dt = {dt} s ({1 / dt:.0f} Hz), unit {ch['unit']}\")\n    print(f\"  edges: x[0] = {x[0]:.2f} at {t[0] * 1000:.2f} ms, \"\n          f\"x[-1] = {x[-1]:.2f} at {t[-1] * 1000:.2f} ms\")\n\n    c = cfc_coefficients(CFC, dt)\n    print(f\"  CFC {CFC} coefficients: \" + \"  \".join(f\"{v:.6e}\" for v in c))\n\n    y = filter_twopass(x, c, init=INIT)\n    y_zero = filter_twopass(x, c, init=\"zero\")\n    y_edge = filter_twopass(x, c, init=\"edge\")\n\n    a, ta = peak(t, x)\n    print(f\"  raw peak:      {a:10.1f} {ch['unit']} at t = {ta * 1000:.2f} ms\")\n    a, ta = peak(t, y)\n    print(f\"  filtered peak: {a:10.1f} {ch['unit']} at t = {ta * 1000:.2f} ms\"\n          f\"   (CFC {CFC}, two passes, init = {INIT})\")\n    p0, _ = peak(t, y_zero)\n    pe, _ = peak(t, y_edge)\n    print(f\"  peak, zero init: {p0:.2f}   edge init: {pe:.2f}   diff: {pe - p0:.3g}\")\n\n    fig, ax = plt.subplots(figsize=(10, 5))\n    ax.plot(t * 1000, x, color=\"#2a78d6\", lw=1, label=\"raw\")\n    ax.plot(t * 1000, y, color=\"#eb6834\", lw=2,\n            label=f\"CFC {CFC}, two passes, {INIT} init\")\n    ax.set_title(f\"Test {test['testNo']}: {ch['comment']}\")\n    ax.set_xlabel(\"time (ms)\")\n    ax.set_ylabel(f\"acceleration ({ch['unit']})\")\n    ax.grid(color=\"#e0e0e0\", lw=0.5)\n    ax.legend()\n    fig.tight_layout()\n    fig.savefig(PLOT, dpi=150)\n    print(f\"  saved {PLOT.name}\")\n    plt.show()\n\n\nif __name__ == \"__main__\":\n    main()"
+   }
+  },
+  "report": {
+   "name": "report.md",
+   "vers": {
+    "r1": "**Data phrase:** [your four-word phrase]\n\n# Crossmember Peak Acceleration, Test 09079\n\n**The peak crossmember acceleration is −452.5 [unit] at t = 44.95 ms, filtered with SAE J211-1 Channel Frequency Class (CFC) 60, applied in two passes (forward, then backward) with the filter state set to zero at the start of each pass.** The unfiltered peak on the same channel is −950.1 [unit] at t = 40.15 ms.\n\n**Sentence for the customer:**\n\n> Peak crossmember acceleration for test 09079 is −452.5 [unit] at 44.95 ms (channel [channel key], \"[header comment]\"), filtered SAE J211-1 CFC 60, run forward and backward from a zero initial state, with no bias correction; \"peak\" is the sample of largest magnitude, sign kept.\n\n## Plot\n\n[Insert a4-plot.png]\n\n*Figure 1. Test 09079, [header comment]. Raw signal (blue) and CFC 60 two-pass filtered signal, zero initial state (orange). Time in ms; acceleration in [unit].*\n\n## Choices made\n\n| Choice | What was used | Why |\n|---|---|---|\n| Channel | [channel key], the one channel whose header comment names the crossmember | The header comment is the instrument's description; the key is only a label. |\n| Standard | SAE J211-1 | It defines the channel frequency classes for crash instrumentation. |\n| Filter class | CFC 60 | The peak is reported for total vehicle comparison, the use J211-1 assigns CFC 60 to for structural accelerations. CFC 180 (for integration) does not apply because nothing is integrated. |\n| Filter form | J211-1 recursive difference equation, constant 2.0775 in ω_d (as given in the course slides), coefficients computed from dt = 50 µs (20 kHz) | The coefficients depend on the class and the sampling interval. |\n| Passes | Two: forward, then backward over the reversed signal | Running backward cancels the phase shift of the forward pass, so the filtered peak is not delayed by the filter. |\n| Initial state | Zero: inputs and outputs before each pass taken as 0 | The record begins and ends close to zero (x[0] = [value], x[−1] = [value]), so the false step this creates at each edge is small. Edge initialization changed the peak by [diff value from script]. |\n| Bias / zero offset | None removed | Not corrected. The record starts near zero, so any offset is taken to be small. |\n| Peak definition | Sample of largest magnitude, sign kept | The customer must use the same definition to reproduce the number. |\n\n## Assumptions\n\n1. The crossmember channel has not already been filtered by the data acquisition system. [State what the ISO/TS 13499 channel code in the header says, or state that this was not checked.]\n2. The intended use is total vehicle comparison. If it is component analysis, the class changes (see below).\n3. The J211-1 class-by-use table was taken from [source you verified it in].\n4. The sign convention of the channel is as recorded in the file. [State the axis/sign convention from the header if it is given.]\n5. The zero offset before impact is small enough to ignore.\n\n## Things that look wrong or deserve a second look\n\n- **The peak time moved by 4.8 ms** (40.15 ms raw → 44.95 ms filtered), even though the two-pass filter introduces no phase delay. [Your explanation from the plot. For example, does the raw peak look like a narrow spike, with the filtered peak sitting on a broader part of the pulse?]\n- **The filtered peak is less than half the raw peak.** Expected for a low-pass filter if the raw maximum is a short, high-frequency spike, but this is why the filter class must travel with the number.\n\n## When a different value would be the right one\n\n- **The customer uses CFC 600** (component analysis): the peak would differ, possibly by a lot, since the bandwidth is ten times wider. [CFC 600 peak, if you compute it.]\n- **The channel was already filtered** at acquisition: it should not be filtered again, and the reported peak would be different.\n- **A different peak definition** (most positive, or most negative, rather than largest magnitude).\n- **Bias is removed before filtering**, single-pass filtering is used, or a padded/library implementation (e.g., SciPy `filtfilt`) is used. Each can shift the result slightly; the edge-initialization difference above indicates the size of the start-up effect.\n\n## Limitations\n\n- The J211-1 class table was recalled from memory during the analysis and [has / has not] been checked against the standard itself.\n- The coefficients were verified against the course slides at 80 µs: [yes / not yet].\n- J211-1's own specification for initialization was not found; zero initialization is this analysis's assumption.\n- The two-pass response was [checked / not checked] against the J211-1 CFC 60 frequency-response limits.\n- The ISO/TS 13499 filter-status check is [done / open].\n- One channel, one test. The number says nothing about other tests or other locations on the vehicle.\n\n## Reproducing this result\n\nProgram: `a4_demo.py`, submitted with this report. Settings: `CFC = 60`, `INIT = \"zero\"`, two passes, `k = 2.0775`. Changing the class or initialization is one line each.",
+    "r2": "**Data phrase:** ochre swallow linen zircon\n\n# Crossmember Peak Acceleration, Test 09079\n\n**The peak crossmember acceleration is −452.5 m/s² at t = 44.95 ms, filtered with SAE J211-1 Channel Frequency Class (CFC) 60, applied in two passes (forward, then backward) with the filter state set to zero at the start of each pass.** The unfiltered peak on the same channel is −950.1 m/s² at t = 40.15 ms.\n\n**Sentence for the customer:**\n\n> Peak crossmember acceleration for test 09079 is −452.5 m/s² at 44.95 ms (channel vehicle_x, \"V1 LEFT REAR SEAT CROSSMEMBER AX\"), filtered SAE J211-1 CFC 60, run forward and backward from a zero initial state, with no bias correction; \"peak\" is the sample of largest magnitude, sign kept.\n\n## Plot\n\n![Raw and CFC 60 filtered crossmember acceleration, test 09079](a4-plot.png)\n\n*Figure 1. Test 09079, V1 LEFT REAR SEAT CROSSMEMBER AX. Raw signal (blue) and CFC 60 two-pass filtered signal, zero initial state (orange). Time in ms; acceleration in m/s².*\n\n## Choices made\n\n| Choice | What was used | Why |\n|---|---|---|\n| Channel | vehicle_x, the one channel whose header comment names the crossmember | The header comment is the instrument's description; the key is only a label. |\n| Standard | SAE J211-1 | It defines the channel frequency classes for crash instrumentation. |\n| Filter class | CFC 60 | The peak is reported for total vehicle comparison, the use J211-1 assigns CFC 60 to for structural accelerations. CFC 180 (for integration) does not apply because nothing is integrated. |\n| Filter form | J211-1 recursive difference equation, constant 2.0775 in ω_d (as given in the course slides), coefficients computed from dt = 50 µs (20 kHz) | The coefficients depend on the class and the sampling interval. |\n| Passes | Two: forward, then backward over the reversed signal | Running backward cancels the phase shift of the forward pass, so the filtered peak is not delayed by the filter. |\n| Initial state | Zero: inputs and outputs before each pass taken as 0 | The record begins and ends close to zero (x[0] = [value], x[−1] = [value]), so the false step this creates at each edge is small. Edge initialization changed the peak by [diff value from script]. |\n| Bias / zero offset | None removed | Not corrected. The record starts near zero, so any offset is taken to be small. |\n| Peak definition | Sample of largest magnitude, sign kept | The customer must use the same definition to reproduce the number. |\n\n## Assumptions\n\n1. The crossmember channel has not already been filtered by the data acquisition system. [State what the ISO/TS 13499 channel code in the header says, or state that this was not checked.]\n2. The intended use is total vehicle comparison. If it is component analysis, the class changes (see below).\n3. The J211-1 class-by-use table was taken from [source you verified it in].\n4. The sign convention of the channel is as recorded in the file. [State the axis/sign convention from the header if it is given.]\n5. The zero offset before impact is small enough to ignore.\n\n## Things that look wrong or deserve a second look\n\n- **The peak time moved by 4.8 ms** (40.15 ms raw → 44.95 ms filtered), even though the two-pass filter introduces no phase delay. [Your explanation from the plot. For example, does the raw peak look like a narrow spike, with the filtered peak sitting on a broader part of the pulse?]\n- **The filtered peak is less than half the raw peak.** Expected for a low-pass filter if the raw maximum is a short, high-frequency spike, but this is why the filter class must travel with the number.\n\n## When a different value would be the right one\n\n- **The customer uses CFC 600** (component analysis): the peak would differ, possibly by a lot, since the bandwidth is ten times wider. [CFC 600 peak, if you compute it.]\n- **The channel was already filtered** at acquisition: it should not be filtered again, and the reported peak would be different.\n- **A different peak definition** (most positive, or most negative, rather than largest magnitude).\n- **Bias is removed before filtering**, single-pass filtering is used, or a padded/library implementation (e.g., SciPy `filtfilt`) is used. Each can shift the result slightly; the edge-initialization difference above indicates the size of the start-up effect.\n\n## Limitations\n\n- The J211-1 class table was recalled from memory during the analysis and [has / has not] been checked against the standard itself.\n- The coefficients were verified against the course slides at 80 µs: [yes / not yet].\n- J211-1's own specification for initialization was not found; zero initialization is this analysis's assumption.\n- The two-pass response was [checked / not checked] against the J211-1 CFC 60 frequency-response limits.\n- The ISO/TS 13499 filter-status check is [done / open].\n- One channel, one test. The number says nothing about other tests or other locations on the vehicle.\n\n## Reproducing this result\n\nProgram: `a4_demo.py`, submitted with this report. Settings: `CFC = 60`, `INIT = \"zero\"`, two passes, `k = 2.0775`. Changing the class or initialization is one line each.",
+    "r3": "**Data phrase:** example pack (test 9793, held back from the phrase assignment)\n\n# Crossmember Peak Acceleration, Test 09793\n\n**The peak crossmember acceleration is −437.0 m/s² at t = 55.10 ms, filtered with SAE J211-1 Channel Frequency Class (CFC) 60, applied in two passes (forward, then backward) with the filter state set to zero at the start of each pass.** The unfiltered peak on the same channel is −1919.8 m/s² at t = 52.75 ms.\n\n**Sentence for the customer:**\n\n> Peak crossmember acceleration for test 09793 is −437.0 m/s² at 55.10 ms (channel vehicle_x, \"V1 LEFT REAR SEAT CROSSMEMBER AX\"), filtered SAE J211-1 CFC 60, run forward and backward from a zero initial state, with no bias correction; \"peak\" is the sample of largest magnitude, sign kept.\n\n## Plot\n\n![Raw and CFC 60 filtered crossmember acceleration, test 09793](a4-plot.png)\n\n*Figure 1. Test 09793, V1 LEFT REAR SEAT CROSSMEMBER AX. Raw signal (blue) and CFC 60 two-pass filtered signal, zero initial state (orange). Time in ms; acceleration in m/s².*\n\n## Choices made\n\n| Choice | What was used | Why |\n|---|---|---|\n| Channel | vehicle_x, the one channel whose header comment names the crossmember | The header comment is the instrument's description; the key is only a label. |\n| Standard | SAE J211-1 | It defines the channel frequency classes for crash instrumentation. |\n| Filter class | CFC 60 | The peak is reported for total vehicle comparison, the use J211-1 assigns CFC 60 to for structural accelerations. CFC 180 (for integration) does not apply because nothing is integrated. |\n| Filter form | J211-1 recursive difference equation, constant 2.0775 in ω_d (as given in the course slides), coefficients computed from dt = 50 µs (20 kHz) | The coefficients depend on the class and the sampling interval. |\n| Passes | Two: forward, then backward over the reversed signal | Running backward cancels the phase shift of the forward pass, so the filtered peak is not delayed by the filter. |\n| Initial state | Zero: inputs and outputs before each pass taken as 0 | The record begins and ends close to zero (x[0] = 0.01 m/s², x[−1] = 2.47 m/s²), so the false step this creates at each edge is small. Edge initialization changed the peak by 4×10⁻¹² m/s², which is zero to the precision reported. |\n| Bias / zero offset | None removed | Not corrected. The record starts near zero, so any offset is taken to be small. |\n| Peak definition | Sample of largest magnitude, sign kept | The customer must use the same definition to reproduce the number. |\n\n## Assumptions\n\n1. The crossmember channel has not already been filtered to a CFC class. The channel header gives a 4000 Hz prefilter (`prefilter_hz`), the analog anti-alias filter applied before sampling. The raw signal has sample-to-sample spikes near ±1900 m/s², which a channel already filtered to CFC 60 could not have. So the data carries the anti-alias filter only, and filtering it to CFC 60 does not filter it twice.\n2. The intended use is total vehicle comparison. If it is component analysis, the class changes (see below).\n3. The J211-1 class-by-use table was taken from course slides.\n4. The sign convention of the channel is as recorded in the file. [State the axis/sign convention from the header if it is given.]\n5. The zero offset before impact is small enough to ignore.\n\n## Things that look wrong or deserve a second look\n\n- **The peak time moved by 2.35 ms** (52.75 ms raw → 55.10 ms filtered), even though the two-pass filter introduces no phase delay. [Your explanation from the plot. For example, does the raw peak look like a narrow spike, with the filtered peak sitting on a broader part of the pulse?]\n- **The filtered peak is less than a quarter of the raw peak.** Expected for a low-pass filter if the raw maximum is a short, high-frequency spike, but this is why the filter class must travel with the number.\n\n## When a different value would be the right one\n\n- **The customer uses CFC 600** (component analysis): the peak would differ, possibly by a lot, since the bandwidth is ten times wider. [CFC 600 peak, if you compute it.]\n- **The channel was already filtered** at acquisition: it should not be filtered again, and the reported peak would be different.\n- **A different peak definition** (most positive, or most negative, rather than largest magnitude).\n- **Bias is removed before filtering**, single-pass filtering is used, or a padded/library implementation (e.g., SciPy `filtfilt`) is used. Each can shift the result slightly; the edge-initialization difference above indicates the size of the start-up effect.\n\n## Limitations\n\n- J211-1's own specification for initialization was not found; zero initialization is this analysis's assumption.\n\n## Reproducing this result\n\nProgram: `a4_demo.py`, submitted with this report. Settings: `CFC = 60`, `INIT = \"zero\"`, two passes, `k = 2.0775`. Changing the class or initialization is one line each.",
+    "r4": "**Data phrase:** example pack (test 9793, held back from the phrase assignment)\n\n# Crossmember Peak Acceleration, Test 09793\n\n**The peak crossmember acceleration is −437.0 m/s² at t = 55.10 ms, filtered with SAE J211-1 Channel Frequency Class (CFC) 60, applied in two passes (forward, then backward) with the filter state set to zero at the start of each pass.** The unfiltered peak on the same channel is −1919.8 m/s² at t = 52.75 ms.\n\n**Sentence for the customer:**\n\n> Peak crossmember acceleration for test 09793 is −437.0 m/s² at 55.10 ms (channel vehicle_x, \"V1 LEFT REAR SEAT CROSSMEMBER AX\"), filtered SAE J211-1 CFC 60, run forward and backward from a zero initial state, with no bias correction; \"peak\" is the sample of largest magnitude, sign kept.\n\n## Plot\n\n![Raw and CFC 60 filtered crossmember acceleration, test 09793](a4-plot.png)\n\n*Figure 1. Test 09793, V1 LEFT REAR SEAT CROSSMEMBER AX. Raw signal (blue) and CFC 60 two-pass filtered signal, zero initial state (orange). Time in ms; acceleration in m/s².*\n\n## Choices made\n\n| Choice | What was used | Why |\n|---|---|---|\n| Channel | vehicle_x, the one channel whose header comment names the crossmember | The header comment is the instrument's description; the key is only a label. |\n| Standard | SAE J211-1 | It defines the channel frequency classes for crash instrumentation. |\n| Filter class | CFC 60 | The peak is reported for total vehicle comparison, the use J211-1 assigns CFC 60 to for structural accelerations. CFC 180 (for integration) does not apply because nothing is integrated. |\n| Filter form | J211-1 recursive difference equation, constant 2.0775 in ω_d (as given in the course slides), coefficients computed from dt = 50 µs (20 kHz) | The coefficients depend on the class and the sampling interval. |\n| Passes | Two: forward, then backward over the reversed signal | Running backward cancels the phase shift of the forward pass, so the filtered peak is not delayed by the filter. |\n| Initial state | Zero: inputs and outputs before each pass taken as 0 | The record begins and ends close to zero (x[0] = 0.01 m/s², x[−1] = 2.47 m/s²), so the false step this creates at each edge is small. Edge initialization changed the peak by 4×10⁻¹² m/s², which is zero to the precision reported. |\n| Bias / zero offset | None removed | Not corrected. The record starts near zero, so any offset is taken to be small. |\n| Peak definition | Sample of largest magnitude, sign kept | The customer must use the same definition to reproduce the number. |\n\n## Assumptions\n\n1. The crossmember channel has not already been filtered to a CFC class. The channel header gives a 4000 Hz prefilter (`prefilter_hz`), the analog anti-alias filter applied before sampling. The raw signal has sample-to-sample spikes near ±1900 m/s², which a channel already filtered to CFC 60 could not have. So the data carries the anti-alias filter only, and filtering it to CFC 60 does not filter it twice.\n2. The intended use is total vehicle comparison. If it is component analysis, the class changes (see below).\n3. The J211-1 class-by-use table was taken from course slides.\n4. Positive is forward along the vehicle's longitudinal axis. The header gives only `Longitudinal`, but the data confirm it: in a frontal barrier test the vehicle decelerates, and the peak is negative.\n5. The zero offset before impact is small enough to ignore.\n\n## Things that look wrong or deserve a second look\n\n- **The peak time moved by 2.35 ms** (52.75 ms raw → 55.10 ms filtered), even though the two-pass filter introduces no phase delay. The filter smoothed away the fast spike at 52.75 ms and captured the slower pulse, whose minimum is at 55.10 ms. These are two different features, not one feature delayed.\n- **The filtered peak is less than a quarter of the raw peak.** Expected for a low-pass filter if the raw maximum is a short, high-frequency spike, but this is why the filter class must travel with the number.\n\n## When a different value would be the right one\n\n- **The customer uses CFC 600** (component analysis): the peak would differ, possibly by a lot, since the bandwidth is ten times wider. The report can be regenerated at CFC 600 on request.\n- **A different peak definition** (most positive, or most negative, rather than largest magnitude).\n- **Bias is removed before filtering**, single-pass filtering is used, or a padded/library implementation (e.g., SciPy `filtfilt`) is used. Each can shift the result slightly; the edge-initialization difference above indicates the size of the start-up effect.\n\n## Limitations\n\n- Zero initialization relies on J211-1 Appendix C: \"If the data set to be filtered contains sufficient pre-event and post-event data, then the initial conditions can be ignored.\" This record has 50 ms before t = 0, and edge initialization changed the peak by 4×10⁻¹² m/s².\n\n## Reproducing this result\n\nProgram: `a4_demo.py`, submitted with this report. Settings: `CFC = 60`, `INIT = \"zero\"`, two passes, `k = 2.0775`. Changing the class or initialization is one line each."
+   }
+  }
+ },
+ "terms": {
+  "run_9079": "$ python a4_demo.py\ntest 9079: vehicle_x  'V1 LEFT REAR SEAT CROSSMEMBER AX'\n  7001 samples, dt = 5e-05 s (20000 Hz), unit m/(s*s)\n  edges: x[0] = -0.49 at -50.00 ms, x[-1] = 3.25 at 300.00 ms\n  CFC 60 coefficients: 3.730006e-04  7.460013e-04  3.730006e-04  1.944633e+00  -9.461250e-01\n  raw peak:          -950.1 m/(s*s) at t = 40.15 ms\n  filtered peak:     -452.5 m/(s*s) at t = 44.95 ms   (CFC 60, two passes, init = zero)\n  peak, zero init: -452.54   edge init: -452.54   diff: 5.17e-12\n  saved a4-plot.png",
+  "run_9793": "$ python a4_demo.py\ntest 9793: vehicle_x  'V1 LEFT REAR SEAT CROSSMEMBER AX'\n  7001 samples, dt = 5e-05 s (20000 Hz), unit m/(s*s)\n  edges: x[0] = 0.01 at -50.00 ms, x[-1] = 2.47 at 300.00 ms\n  CFC 60 coefficients: 3.730006e-04  7.460013e-04  3.730006e-04  1.944633e+00  -9.461250e-01\n  raw peak:         -1919.8 m/(s*s) at t = 52.75 ms\n  filtered peak:     -437.0 m/(s*s) at t = 55.10 ms   (CFC 60, two passes, init = zero)\n  peak, zero init: -437.02   edge init: -437.02   diff: 4.15e-12\n  saved a4-plot.png"
+ }
+}
