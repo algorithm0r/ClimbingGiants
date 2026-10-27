@@ -41,18 +41,22 @@ def cfc(y, dt, cls):
                       + b1 * out[i - 1] + b2 * out[i - 2])
         return out
 
-    return one_pass(one_pass(y)[::-1])[::-1]
+    forward = one_pass(y)
+    backward = one_pass(forward[::-1])
+    return backward[::-1]
 
 
 def hic(a, dt, limit_ms):
     """Largest HIC over every window up to limit_ms, a = resultant in g.
     Prefix sum of the trapezoid integral, one numpy pass per window length."""
-    S = np.concatenate([[0.0], np.cumsum((a[1:] + a[:-1]) / 2 * dt)])
+    panels = (a[1:] + a[:-1]) / 2 * dt
+    S = np.concatenate([[0.0], np.cumsum(panels)])
+    kmax = round(limit_ms / 1000 / dt)          # the limit in samples
     best = 0.0
-    for k in range(1, round(limit_ms / 1000 / dt) + 1):
+    for k in range(1, kmax + 1):
         T = k * dt
-        mean = np.clip((S[k:] - S[:-k]) / T, 0, None)
-        best = max(best, (T * mean ** 2.5).max())
+        mean = np.clip((S[k:] - S[:-k]) / T, 0, None)   # every window of length k at once
+        best = max(best, np.max(T * mean ** 2.5))
     return best
 
 
@@ -60,8 +64,14 @@ def pipeline(chs, dt, cls=1000, limit_ms=15, g=G):
     """The whole analysis: filter each component, resultant in g, HIC search.
     cls=None skips the filter."""
     if cls is not None:
-        chs = [cfc(c, dt, cls) for c in chs]
-    return hic(np.sqrt(sum(c ** 2 for c in chs)) / g, dt, limit_ms)
+        filtered = []
+        for c in chs:
+            filtered.append(cfc(c, dt, cls))
+        chs = filtered
+    total = 0
+    for c in chs:
+        total = total + c ** 2
+    return hic(np.sqrt(total) / g, dt, limit_ms)
 
 
 def autocorr(r, lag):
@@ -70,51 +80,73 @@ def autocorr(r, lag):
 
 
 def independent_noise(pre, n, rng):
-    return rng.normal(0, pre.std(), n)
+    return rng.normal(0, np.std(pre), n)
 
 
 def block_noise(pre, n, rng):
     """Join random 10 ms pieces of the (mean-removed) pre-impact record."""
-    r = pre - pre.mean()
+    r = pre - np.mean(pre)
     pieces = []
-    for _ in range(n // BLOCK + 1):
-        s = rng.integers(0, len(r) - BLOCK + 1)
+    for k in range(n // BLOCK + 1):
+        s = rng.integers(0, len(r) - BLOCK + 1)     # a random start
         pieces.append(r[s:s + BLOCK])
     return np.concatenate(pieces)[:n]
 
 
-with open(os.path.join('crash', os.listdir('crash')[0])) as f:
+name = os.listdir('crash')[0]           # the crash folder holds one file
+with open(os.path.join('crash', name)) as f:
     test = json.load(f)
-chans = [c for c in test['channels'].values() if c['code'] in CODES]
-dt, n, t0 = chans[0]['dt'], chans[0]['n'], chans[0]['t0']
+chans = []
+for c in test['channels'].values():
+    if c['code'] in CODES:
+        chans.append(c)
+dt = chans[0]['dt']
+n = chans[0]['n']
+t0 = chans[0]['t0']
 t_ms = 1000 * (t0 + dt * np.arange(n))
 before = t_ms < 0
-raw = [np.array(c['y']) for c in chans]
-pre = [c[before] for c in raw]
+raw = []                                # each channel's samples
+pre = []                                # the part of each before impact
+for c in chans:
+    y = np.array(c['y'])
+    raw.append(y)
+    pre.append(y[before])
 
 # 1. the noise
 print(f"{len(chans)} head channels, {n} samples every {dt * 1000:g} ms, "
       f"{t_ms[0]:.2f} to {t_ms[-1]:.2f} ms")
-print(f"pre-impact stretch: {before.sum()} samples, "
+print(f"pre-impact stretch: {np.sum(before)} samples, "
       f"{t_ms[0]:.2f} to {t_ms[before][-1]:.2f} ms")
 LAGS = [1, 20, 100, 200]
+columns = []
+for lag in LAGS:
+    columns.append(f'r({lag * dt * 1000:g} ms)')
 print(f"{'code':18} {'prefilter':>9} {'mean':>7} {'sigma':>6} {'sigma':>7}   "
-      + '  '.join(f'r({l * dt * 1000:g} ms)' for l in LAGS))
-for c, p in zip(chans, pre):
-    r = p - p.mean()
-    print(f"{c['code']:18} {c['prefilter_hz']:>6} Hz {p.mean():7.3f} {p.std():6.3f} "
-          f"{p.std() / G:6.4f}g   "
-          + '  '.join(f'{autocorr(r, l):9.2f}' for l in LAGS))
+      + '  '.join(columns))
+for m in range(len(chans)):
+    c = chans[m]
+    p = pre[m]
+    r = p - np.mean(p)
+    columns = []
+    for lag in LAGS:
+        columns.append(f'{autocorr(r, lag):9.2f}')
+    print(f"{c['code']:18} {c['prefilter_hz']:>6} Hz {np.mean(p):7.3f} {np.std(p):6.3f} "
+          f"{np.std(p) / G:6.4f}g   "
+          + '  '.join(columns))
 
 # 2. the value, then the reruns
 value = pipeline(raw, dt)
 print(f"\nHIC15 on the record: {value:.2f}")
 rng = np.random.default_rng(310)
+models = {'independent': independent_noise, 'blocks': block_noise}
 draws = {}
-for name, noise in (('independent', independent_noise), ('blocks', block_noise)):
+for name, noise in models.items():      # noise is a function: one of the two above
     runs = []
-    for _ in range(DRAWS):
-        runs.append(pipeline([c + noise(p, n, rng) for c, p in zip(raw, pre)], dt))
+    for k in range(DRAWS):
+        noisy = []
+        for m in range(len(raw)):
+            noisy.append(raw[m] + noise(pre[m], n, rng))
+        runs.append(pipeline(noisy, dt))
     draws[name] = np.array(runs)
 
 # 3. the intervals
@@ -129,17 +161,22 @@ for name, d in draws.items():
 l95, h95 = np.percentile(draws['blocks'], [2.5, 97.5])
 print(f"\n{'held fixed, changed to':34} {'HIC15':>7} {'shift':>7} "
       f"{'x 95% width':>11}")
-changes = [('g = 9.81', pipeline(raw, dt, g=9.81)),
-           ('pre-impact mean subtracted',
-            pipeline([c - p.mean() for c, p in zip(raw, pre)], dt))]
-for name, v in changes:
+changes = {}
+changes['g = 9.81'] = pipeline(raw, dt, g=9.81)
+corrected = []
+for m in range(len(raw)):
+    corrected.append(raw[m] - np.mean(pre[m]))
+changes['pre-impact mean subtracted'] = pipeline(corrected, dt)
+for name, v in changes.items():
     ratio = abs(v - value) / (h95 - l95)
     print(f"{name:34} {v:7.2f} {v - value:+7.2f} {ratio:11.2f}")
 
 # Figure 1: the pre-impact stretch of each channel
 fig, axs = plt.subplots(3, 1, figsize=(8, 6), sharex=True)
-for ax, c, p in zip(axs, chans, pre):
-    ax.plot(t_ms[before], p, linewidth=0.7)
+for m in range(len(chans)):
+    ax = axs[m]
+    c = chans[m]
+    ax.plot(t_ms[before], pre[m], linewidth=0.7)
     ax.set_title(f"{c['comment']}  [{c['code']}]", fontsize=9)
     ax.set_ylabel('acceleration (m/s$^2$)', fontsize=8)
 axs[-1].set_xlabel('time from impact (ms)')
@@ -152,9 +189,12 @@ plt.close(fig)
 # Figure 2: how alike neighboring samples are
 lags = np.arange(1, 501)
 plt.figure(figsize=(8, 3.6))
-for c, p in zip(chans, pre):
-    r = p - p.mean()
-    plt.plot(lags * dt * 1000, [autocorr(r, l) for l in lags], label=c['code'])
+for m in range(len(chans)):
+    r = pre[m] - np.mean(pre[m])
+    corr = []
+    for lag in lags:
+        corr.append(autocorr(r, lag))
+    plt.plot(lags * dt * 1000, corr, label=chans[m]['code'])
 plt.axhline(0, color='gray', linewidth=0.8)
 plt.axvline(BLOCK * dt * 1000, color='gray', linestyle='--', linewidth=0.8,
             label='block length, 10 ms')
@@ -168,9 +208,12 @@ plt.close()
 
 # Figure 3: the reruns under both noise models, 95% intervals marked
 plt.figure(figsize=(8, 3.8))
-bins = np.linspace(min(d.min() for d in draws.values()),
-                   max(d.max() for d in draws.values()), 50)
-for (name, d), col in zip(draws.items(), ('tab:blue', 'tab:orange')):
+lowest = min(np.min(draws['independent']), np.min(draws['blocks']))
+highest = max(np.max(draws['independent']), np.max(draws['blocks']))
+bins = np.linspace(lowest, highest, 50)
+colors = {'independent': 'tab:blue', 'blocks': 'tab:orange'}
+for name, d in draws.items():
+    col = colors[name]
     lo, hi = np.percentile(d, [2.5, 97.5])
     plt.hist(d, bins=bins, alpha=0.6, color=col,
              label=f'{name}: 95% interval {lo:.2f} to {hi:.2f}')

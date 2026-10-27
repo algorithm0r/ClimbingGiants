@@ -1166,18 +1166,22 @@ def cfc(y, dt, cls):
                       + b1 * out[i - 1] + b2 * out[i - 2])
         return out
 
-    return one_pass(one_pass(y)[::-1])[::-1]
+    forward = one_pass(y)
+    backward = one_pass(forward[::-1])
+    return backward[::-1]
 
 
 def hic(a, dt, limit_ms):
     """Largest HIC over every window up to limit_ms, a = resultant in g.
     Prefix sum of the trapezoid integral, one numpy pass per window length."""
-    S = np.concatenate([[0.0], np.cumsum((a[1:] + a[:-1]) / 2 * dt)])
+    panels = (a[1:] + a[:-1]) / 2 * dt
+    S = np.concatenate([[0.0], np.cumsum(panels)])
+    kmax = round(limit_ms / 1000 / dt)          # the limit in samples
     best = 0.0
-    for k in range(1, round(limit_ms / 1000 / dt) + 1):
+    for k in range(1, kmax + 1):
         T = k * dt
-        mean = np.clip((S[k:] - S[:-k]) / T, 0, None)
-        best = max(best, (T * mean ** 2.5).max())
+        mean = np.clip((S[k:] - S[:-k]) / T, 0, None)   # every window of length k at once
+        best = max(best, np.max(T * mean ** 2.5))
     return best
 
 
@@ -1185,8 +1189,14 @@ def pipeline(chs, dt, cls=1000, limit_ms=15, g=G):
     """The whole analysis: filter each component, resultant in g, HIC search.
     cls=None skips the filter."""
     if cls is not None:
-        chs = [cfc(c, dt, cls) for c in chs]
-    return hic(np.sqrt(sum(c ** 2 for c in chs)) / g, dt, limit_ms)
+        filtered = []
+        for c in chs:
+            filtered.append(cfc(c, dt, cls))
+        chs = filtered
+    total = 0
+    for c in chs:
+        total = total + c ** 2
+    return hic(np.sqrt(total) / g, dt, limit_ms)
 
 
 def autocorr(r, lag):
@@ -1195,51 +1205,73 @@ def autocorr(r, lag):
 
 
 def independent_noise(pre, n, rng):
-    return rng.normal(0, pre.std(), n)
+    return rng.normal(0, np.std(pre), n)
 
 
 def block_noise(pre, n, rng):
     """Join random 10 ms pieces of the (mean-removed) pre-impact record."""
-    r = pre - pre.mean()
+    r = pre - np.mean(pre)
     pieces = []
-    for _ in range(n // BLOCK + 1):
-        s = rng.integers(0, len(r) - BLOCK + 1)
+    for k in range(n // BLOCK + 1):
+        s = rng.integers(0, len(r) - BLOCK + 1)     # a random start
         pieces.append(r[s:s + BLOCK])
     return np.concatenate(pieces)[:n]
 
 
-with open(os.path.join('crash', os.listdir('crash')[0])) as f:
+name = os.listdir('crash')[0]           # the crash folder holds one file
+with open(os.path.join('crash', name)) as f:
     test = json.load(f)
-chans = [c for c in test['channels'].values() if c['code'] in CODES]
-dt, n, t0 = chans[0]['dt'], chans[0]['n'], chans[0]['t0']
+chans = []
+for c in test['channels'].values():
+    if c['code'] in CODES:
+        chans.append(c)
+dt = chans[0]['dt']
+n = chans[0]['n']
+t0 = chans[0]['t0']
 t_ms = 1000 * (t0 + dt * np.arange(n))
 before = t_ms &lt; 0
-raw = [np.array(c['y']) for c in chans]
-pre = [c[before] for c in raw]
+raw = []                                # each channel's samples
+pre = []                                # the part of each before impact
+for c in chans:
+    y = np.array(c['y'])
+    raw.append(y)
+    pre.append(y[before])
 
 # 1. the noise
 print(f"{len(chans)} head channels, {n} samples every {dt * 1000:g} ms, "
       f"{t_ms[0]:.2f} to {t_ms[-1]:.2f} ms")
-print(f"pre-impact stretch: {before.sum()} samples, "
+print(f"pre-impact stretch: {np.sum(before)} samples, "
       f"{t_ms[0]:.2f} to {t_ms[before][-1]:.2f} ms")
 LAGS = [1, 20, 100, 200]
+columns = []
+for lag in LAGS:
+    columns.append(f'r({lag * dt * 1000:g} ms)')
 print(f"{'code':18} {'prefilter':&gt;9} {'mean':&gt;7} {'sigma':&gt;6} {'sigma':&gt;7}   "
-      + '  '.join(f'r({l * dt * 1000:g} ms)' for l in LAGS))
-for c, p in zip(chans, pre):
-    r = p - p.mean()
-    print(f"{c['code']:18} {c['prefilter_hz']:&gt;6} Hz {p.mean():7.3f} {p.std():6.3f} "
-          f"{p.std() / G:6.4f}g   "
-          + '  '.join(f'{autocorr(r, l):9.2f}' for l in LAGS))
+      + '  '.join(columns))
+for m in range(len(chans)):
+    c = chans[m]
+    p = pre[m]
+    r = p - np.mean(p)
+    columns = []
+    for lag in LAGS:
+        columns.append(f'{autocorr(r, lag):9.2f}')
+    print(f"{c['code']:18} {c['prefilter_hz']:&gt;6} Hz {np.mean(p):7.3f} {np.std(p):6.3f} "
+          f"{np.std(p) / G:6.4f}g   "
+          + '  '.join(columns))
 
 # 2. the value, then the reruns
 value = pipeline(raw, dt)
 print(f"\nHIC15 on the record: {value:.2f}")
 rng = np.random.default_rng(310)
+models = {'independent': independent_noise, 'blocks': block_noise}
 draws = {}
-for name, noise in (('independent', independent_noise), ('blocks', block_noise)):
+for name, noise in models.items():      # noise is a function: one of the two above
     runs = []
-    for _ in range(DRAWS):
-        runs.append(pipeline([c + noise(p, n, rng) for c, p in zip(raw, pre)], dt))
+    for k in range(DRAWS):
+        noisy = []
+        for m in range(len(raw)):
+            noisy.append(raw[m] + noise(pre[m], n, rng))
+        runs.append(pipeline(noisy, dt))
     draws[name] = np.array(runs)
 
 # 3. the intervals
@@ -1254,17 +1286,22 @@ for name, d in draws.items():
 l95, h95 = np.percentile(draws['blocks'], [2.5, 97.5])
 print(f"\n{'held fixed, changed to':34} {'HIC15':&gt;7} {'shift':&gt;7} "
       f"{'x 95% width':&gt;11}")
-changes = [('g = 9.81', pipeline(raw, dt, g=9.81)),
-           ('pre-impact mean subtracted',
-            pipeline([c - p.mean() for c, p in zip(raw, pre)], dt))]
-for name, v in changes:
+changes = {}
+changes['g = 9.81'] = pipeline(raw, dt, g=9.81)
+corrected = []
+for m in range(len(raw)):
+    corrected.append(raw[m] - np.mean(pre[m]))
+changes['pre-impact mean subtracted'] = pipeline(corrected, dt)
+for name, v in changes.items():
     ratio = abs(v - value) / (h95 - l95)
     print(f"{name:34} {v:7.2f} {v - value:+7.2f} {ratio:11.2f}")
 
 # Figure 1: the pre-impact stretch of each channel
 fig, axs = plt.subplots(3, 1, figsize=(8, 6), sharex=True)
-for ax, c, p in zip(axs, chans, pre):
-    ax.plot(t_ms[before], p, linewidth=0.7)
+for m in range(len(chans)):
+    ax = axs[m]
+    c = chans[m]
+    ax.plot(t_ms[before], pre[m], linewidth=0.7)
     ax.set_title(f"{c['comment']}  [{c['code']}]", fontsize=9)
     ax.set_ylabel('acceleration (m/s$^2$)', fontsize=8)
 axs[-1].set_xlabel('time from impact (ms)')
@@ -1277,9 +1314,12 @@ plt.close(fig)
 # Figure 2: how alike neighboring samples are
 lags = np.arange(1, 501)
 plt.figure(figsize=(8, 3.6))
-for c, p in zip(chans, pre):
-    r = p - p.mean()
-    plt.plot(lags * dt * 1000, [autocorr(r, l) for l in lags], label=c['code'])
+for m in range(len(chans)):
+    r = pre[m] - np.mean(pre[m])
+    corr = []
+    for lag in lags:
+        corr.append(autocorr(r, lag))
+    plt.plot(lags * dt * 1000, corr, label=chans[m]['code'])
 plt.axhline(0, color='gray', linewidth=0.8)
 plt.axvline(BLOCK * dt * 1000, color='gray', linestyle='--', linewidth=0.8,
             label='block length, 10 ms')
@@ -1293,9 +1333,12 @@ plt.close()
 
 # Figure 3: the reruns under both noise models, 95% intervals marked
 plt.figure(figsize=(8, 3.8))
-bins = np.linspace(min(d.min() for d in draws.values()),
-                   max(d.max() for d in draws.values()), 50)
-for (name, d), col in zip(draws.items(), ('tab:blue', 'tab:orange')):
+lowest = min(np.min(draws['independent']), np.min(draws['blocks']))
+highest = max(np.max(draws['independent']), np.max(draws['blocks']))
+bins = np.linspace(lowest, highest, 50)
+colors = {'independent': 'tab:blue', 'blocks': 'tab:orange'}
+for name, d in draws.items():
+    col = colors[name]
     lo, hi = np.percentile(d, [2.5, 97.5])
     plt.hist(d, bins=bins, alpha=0.6, color=col,
              label=f'{name}: 95% interval {lo:.2f} to {hi:.2f}')
@@ -1337,16 +1380,21 @@ import numpy as np
 with open('crash/09793.json') as f:
     test = json.load(f)
 
-head = [test['channels'][k] for k in ('head_x', 'head_y', 'head_z')]
-dt, n, t0 = head[0]['dt'], head[0]['n'], head[0]['t0']
+head = [test['channels']['head_x'], test['channels']['head_y'], test['channels']['head_z']]
+dt = head[0]['dt']
+n = head[0]['n']
+t0 = head[0]['t0']
 t_ms = 1000 * (t0 + dt * np.arange(n))
-x, y, z = [np.array(c['y']) for c in head]
+x = np.array(head[0]['y'])
+y = np.array(head[1]['y'])
+z = np.array(head[2]['y'])
 quiet = t_ms &lt; 0          # the 50 ms before impact
 
-print(quiet.sum(), 'samples before impact')
-for c, a in zip(head, (x, y, z)):
-    print(c['code'], c['comment'], ' mean %.3f  sigma %.3f m/s^2'
-          % (a[quiet].mean(), a[quiet].std()))</pre>
+print(np.sum(quiet), 'samples before impact')
+for c in head:
+    a = np.array(c['y'])
+    print(c['code'], c['comment'],
+          f' mean {np.mean(a[quiet]):.3f}  sigma {np.std(a[quiet]):.3f} m/s^2')</pre>
 <pre class="nb-out">1000 samples before impact
 11HEADCG0000ACXP V1P1 HEAD CG X ACCELERATION  mean 0.054  sigma 0.811 m/s^2
 11HEADCG0000ACYP V1P1 HEAD CG Y ACCELERATION  mean -0.205  sigma 1.061 m/s^2
@@ -1376,23 +1424,29 @@ def cfc(y, dt, cls):
             out[i] = (a0 * x[i] + 2 * a0 * x[i - 1] + a0 * x[i - 2]
                       + b1 * out[i - 1] + b2 * out[i - 2])
         return out
-    return one_pass(one_pass(y)[::-1])[::-1]
+    forward = one_pass(y)
+    backward = one_pass(forward[::-1])
+    return backward[::-1]
 
 def hic(a, dt, limit_ms=15):
     # prefix sum, then every window length up to the limit, all starts at once
-    S = np.concatenate([[0.0], np.cumsum((a[1:] + a[:-1]) / 2 * dt)])
+    panels = (a[1:] + a[:-1]) / 2 * dt
+    S = np.concatenate([[0.0], np.cumsum(panels)])
+    kmax = round(limit_ms / 1000 / dt)
     best = 0.0
-    for k in range(1, round(limit_ms / 1000 / dt) + 1):
+    for k in range(1, kmax + 1):
         mean = np.clip((S[k:] - S[:-k]) / (k * dt), 0, None)
-        best = max(best, (k * dt * mean ** 2.5).max())
+        best = max(best, np.max(k * dt * mean ** 2.5))
     return best
 
 def head_hic(x, y, z, g=G, limit_ms=15):
-    fx, fy, fz = cfc(x, dt, 1000), cfc(y, dt, 1000), cfc(z, dt, 1000)
+    fx = cfc(x, dt, 1000)
+    fy = cfc(y, dt, 1000)
+    fz = cfc(z, dt, 1000)
     return hic(np.sqrt(fx ** 2 + fy ** 2 + fz ** 2) / g, dt, limit_ms)
 
 value = head_hic(x, y, z)
-print('HIC15 = %.2f' % value)</pre>
+print(f'HIC15 = {value:.2f}')</pre>
 <pre class="nb-out">HIC15 = 150.39</pre>
 
 <p>That matches assignment 6. Now the first try, the way the Resampling notes do it: independent
@@ -1400,7 +1454,7 @@ Gaussian noise of each channel's sigma added to the raw channels, 200 runs, and 
 percentiles as a 90% interval.</p>
 
 <pre class="nb-in">rng = np.random.default_rng(2026)
-sig = [a[quiet].std() for a in (x, y, z)]
+sig = [np.std(x[quiet]), np.std(y[quiet]), np.std(z[quiet])]
 
 indep = []
 for k in range(200):
@@ -1408,8 +1462,7 @@ for k in range(200):
                           y + rng.normal(0, sig[1], n),
                           z + rng.normal(0, sig[2], n)))
 lo, hi = np.percentile(indep, [5, 95])
-print('independent noise, 200 runs: 90%% interval %.2f to %.2f, width %.2f'
-      % (lo, hi, hi - lo))</pre>
+print(f'independent noise, 200 runs: 90% interval {lo:.2f} to {hi:.2f}, width {hi - lo:.2f}')</pre>
 <pre class="nb-out">independent noise, 200 runs: 90% interval 150.31 to 150.46, width 0.16</pre>
 
 <p>That is tiny, about a tenth of a percent of the value. The noise is filtered at CFC&nbsp;1000 (the
@@ -1421,7 +1474,7 @@ one's, so I plotted the recorded noise next to independent noise of the same sig
 
 plt.figure(figsize=(8, 3.5))
 plt.plot(t_ms[quiet], y[quiet], label='recorded (head Y)')
-plt.plot(t_ms[quiet], y[quiet].mean() + rng.normal(0, sig[1], quiet.sum()),
+plt.plot(t_ms[quiet], np.mean(y[quiet]) + rng.normal(0, sig[1], np.sum(quiet)),
          alpha=0.6, label='independent noise, same sigma')
 plt.xlabel('time from impact (ms)')
 plt.ylabel('head Y acceleration (m/s$^2$)')
@@ -1449,7 +1502,7 @@ Interval notes give it as the usual level for engineering reports.</p>
 <pre class="nb-in">def real_noise(a):
     # the recorded noise before impact, mean removed, repeated end to end
     # and started at a random point
-    r = a[quiet] - a[quiet].mean()
+    r = a[quiet] - np.mean(a[quiet])
     s = rng.integers(len(r))
     return np.tile(r, n // len(r) + 2)[s:s + n]
 
@@ -1458,11 +1511,12 @@ for k in range(500):
     real.append(head_hic(x + real_noise(x), y + real_noise(y), z + real_noise(z)))
 real = np.array(real)
 lo, hi = np.percentile(real, [5, 95])
-print('recorded noise, 500 runs: 90%% interval %.2f to %.2f, width %.2f'
-      % (lo, hi, hi - lo))
-print('median %.2f' % np.median(real))
+print(f'recorded noise, 500 runs: 90% interval {lo:.2f} to {hi:.2f}, width {hi - lo:.2f}')
+print(f'median {np.median(real):.2f}')
 
-bins = np.linspace(min(real.min(), min(indep)), max(real.max(), max(indep)), 60)
+lowest = min(np.min(real), min(indep))
+highest = max(np.max(real), max(indep))
+bins = np.linspace(lowest, highest, 60)
 plt.figure(figsize=(8, 3.5))
 plt.hist(indep, bins=bins, alpha=0.7, label='independent noise (200 runs)')
 plt.hist(real, bins=bins, alpha=0.7, label='recorded noise (500 runs)')
@@ -1495,8 +1549,13 @@ not. Next, whether 500 runs is enough.</p>
 
 <pre class="nb-in">m = np.arange(20, 501, 10)
 plt.figure(figsize=(8, 3.5))
-plt.plot(m, [np.percentile(real[:k], 5) for k in m], label='5th percentile')
-plt.plot(m, [np.percentile(real[:k], 95) for k in m], label='95th percentile')
+low_end = []         # the interval's ends using only the first k runs
+high_end = []
+for k in m:
+    low_end.append(np.percentile(real[:k], 5))
+    high_end.append(np.percentile(real[:k], 95))
+plt.plot(m, low_end, label='5th percentile')
+plt.plot(m, high_end, label='95th percentile')
 plt.axhline(value, color='black', linewidth=0.8, label='value on the record')
 plt.xlabel('number of runs used')
 plt.ylabel('HIC15 (a in g, t in s)')
@@ -1505,7 +1564,8 @@ plt.legend(fontsize=8, loc='lower right', bbox_to_anchor=(1, 0.15))
 plt.show()
 
 for k in (100, 200, 300, 400, 500):
-    print(k, 'runs: %.2f to %.2f' % tuple(np.percentile(real[:k], [5, 95])))</pre>
+    ends = np.percentile(real[:k], [5, 95])
+    print(k, f'runs: {ends[0]:.2f} to {ends[1]:.2f}')</pre>
 
 <figure class="figure">
   <div class="fig-body"><img src="data/example/figures/r09-nb-3.svg?v=20261027131534"
@@ -1523,7 +1583,7 @@ for k in (100, 200, 300, 400, 500):
 <p>At 200, 300, 400 and 500 runs the ends agree to within 0.04, so 500 is plenty. Last, one of the things I
 held fixed, to see how it compares with the interval.</p>
 
-<pre class="nb-in">print('g = 9.81 instead of 9.80665: %.2f' % head_hic(x, y, z, g=9.81))</pre>
+<pre class="nb-in">print(f'g = 9.81 instead of 9.80665: {head_hic(x, y, z, g=9.81):.2f}')</pre>
 <pre class="nb-out">g = 9.81 instead of 9.80665: 150.26</pre>
 
 <p>Rounding <em>g</em> to 9.81 moves HIC15 by 0.13. That would put it outside the independent-noise
@@ -1560,7 +1620,7 @@ assumptions again at the end.</p>
   <script src="js/page.js?v=20261027131534"></script>
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-11">October 11, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-27">October 27, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
