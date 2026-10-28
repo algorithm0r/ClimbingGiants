@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VS Code and Python — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261027131534">
-  <link rel="stylesheet" href="css/demos.css?v=20261027131534">
+  <link rel="stylesheet" href="css/blocks.css?v=20261027212236">
+  <link rel="stylesheet" href="css/demos.css?v=20261027212236">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -930,7 +930,7 @@ file in the <code>crash</code> folder of your pack. If you see <code>FileNotFoun
 name in the program does not match the file. The example reads test 10642, which no student
 receives.</p>
 
-<div class="codetabs"><pre data-lang="python" data-notes="1|import brings in the three libraries the program uses: json to read the file, numpy for arrays and matplotlib to draw ([Files and libraries](py-files.html)).;5|Put your own test number here. open finds the file in the crash folder, and the next line reads all of it into a dictionary called test ([Dictionaries](py-dicts.html)).;9|These lines print what the file holds and every channel in it, with its code and its description. It is a good idea to read this list before you plot anything.;10|items() gives each channel's short name and the channel itself, one pair per pass ([Loops](py-loops.html)).;14|The channel is chosen by its code. Any code from the list printed above can go here. The loop keeps the channel whose code matches under the name ch ([Loops](py-loops.html)).;19|The file stores no times. Three header fields give them, as the Anatomy page explains ([numpy arrays](py-numpy.html)).;20|The samples as a numpy array.;22|One line of y against t. The three lines after it label the figure ([Figures](py-plots.html)).;24|The axis text comes from the header, so the figure names its own channel and units. The f-string fills in each pair of braces ([Numbers and text](py-values.html)).;26|Saves the figure as an image for your report. Save before plt.show(), which can leave nothing to save once its window closes.">import json
+<div class="codetabs"><pre data-lang="python" data-notes="1|import brings in the three libraries the program uses: json to read the file, numpy for arrays and matplotlib to draw ([Files and libraries](py-files.html)).;5|Put your own test number here. open finds the file in the crash folder, and the next line reads all of it into a dictionary called test ([Dictionaries](py-dicts.html)).;6|test is now a name for everything the file holds. = sets a name ([Names and assignment](py-names.html)).;9|These lines print what the file holds and every channel in it, with its code and its description. It is a good idea to read this list before you plot anything.;10|items() gives each channel's short name and the channel itself, one pair per pass ([Loops](py-loops.html)).;14|The channel is chosen by its code. Any code from the list printed above can go here. The loop keeps the channel whose code matches under the name ch ([Loops](py-loops.html)).;15|== asks whether the two codes are equal, and if runs the indented line only when they are ([Conditions](py-conditions.html)).;19|The file stores no times. Three header fields give them, as the Anatomy page explains ([numpy arrays](py-numpy.html)).;20|The samples as a numpy array.;22|One line of y against t. The three lines after it label the figure ([Figures](py-plots.html)).;24|The axis text comes from the header, so the figure names its own channel and units. The f-string fills in each pair of braces ([Numbers and text](py-values.html)).;26|Saves the figure as an image for your report. Save before plt.show(), which can leave nothing to save once its window closes.">import json
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -963,7 +963,7 @@ terminal, the plot opens in a window, and <code>channel.png</code> is saved in y
 place in your report. The program finishes when you close the plot window.</p>
 
 <figure class="figure">
-  <div class="fig-body"><img src="data/img/anatomy-sample-plot.png?v=20261027131534" alt="A line plot of driver head longitudinal acceleration against time, from -0.05 to 0.31 seconds, titled with the channel description and code, with the unit on the vertical axis."></div>
+  <div class="fig-body"><img src="data/img/anatomy-sample-plot.png?v=20261027212236" alt="A line plot of driver head longitudinal acceleration against time, from -0.05 to 0.31 seconds, titled with the channel description and code, with the unit on the vertical axis."></div>
   <figcaption>What the example draws for test 10642. Your plot shows your own test, with its title and units taken from its own header.</figcaption>
 </figure>
 
@@ -975,6 +975,12 @@ field, including the three that give the times.</li>
 <li><a href="standards.html">The standards</a> say what the channel codes and units mean.</li>
 <li><a href="reports.html">Worked examples</a> show what a finished report and its figures look
 like.</li>
+<li>The <a href="python.html">Reading Python</a> pages explain each kind of line in this program,
+in Python and in MATLAB. The ones it leans on most are <a href="py-lists.html">Lists, indexes
+and slices</a>, <a href="py-dicts.html">Dictionaries and the data file</a> and <a
+href="py-files.html">Files and libraries</a>, and <a href="py-errors.html">Reading an error</a>
+helps when a program stops. Code from an AI or from the web often uses a one-line loop that <a
+href="py-comprehensions.html">Comprehensions</a> explains.</li>
 <li>The tutor in the corner of this page will extend the program with you. For instance, ask it
 "how do I plot every channel in my test, one under another" or "how do I find the largest value
 in a channel and the time it happened".</li>
@@ -984,7 +990,7 @@ in a channel and the time it happened".</li>
 
   
 
-  <script src="js/page.js?v=20261027131534"></script>
+  <script src="js/page.js?v=20261027212236"></script>
 
   <footer class="site-footer">
     <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-27">October 27, 2026</time>.</span>

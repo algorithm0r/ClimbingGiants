@@ -2452,7 +2452,7 @@ applyLang(localStorage.getItem(LANG_KEY)||'python');
 /* ---- glossary: shared store + hover/focus definitions + generated list ----
    data/glossary.json is the single source of truth for every page on the site. */
 (async function(){
-  let TERMS={};
+  let TERMS={}, TITLES={};
   try{
     /* no-store because a cached glossary that predates a term makes that term
        silently vanish from the page. On the built site this becomes a hashed
@@ -2461,6 +2461,11 @@ applyLang(localStorage.getItem(LANG_KEY)||'python');
     if(!r.ok) throw new Error(r.status);
     TERMS=(await r.json()).terms;
   }catch(e){ console.error('glossary unavailable:',e); return; }
+  /* page titles for "Taught on" (pipeline/python_inventory.py --write); without
+     them the definitions still show, just with no pointer to where they are taught */
+  try{ const r=await fetch('data/page-titles.json',{cache:'no-store'}); if(r.ok) TITLES=await r.json(); }catch(e){}
+  const here=(location.pathname.split('/').pop()||'index.html').replace(/\.html$/,'');
+  const taughtElsewhere=e=>e.taught&&e.taught!==here&&TITLES[e.taught];
 
   /* the slide decks have no <main>; measure the page body there instead */
   const used=new Set(), main=(document.querySelector('main')||document.body).getBoundingClientRect();
@@ -2473,7 +2478,7 @@ applyLang(localStorage.getItem(LANG_KEY)||'python');
       el.removeAttribute('data-g');
       return;
     }
-    el.setAttribute('data-def',e.def);
+    el.setAttribute('data-def',taughtElsewhere(e)?e.def+' Taught on: '+TITLES[e.taught]+'.':e.def);
     el.setAttribute('tabindex','0');
     used.add(el.dataset.g);
     if(el.getBoundingClientRect().left-main.left > main.width-440) el.classList.add('right');
@@ -2482,8 +2487,16 @@ applyLang(localStorage.getItem(LANG_KEY)||'python');
   if(!dl)return;
   [...used].map(k=>TERMS[k]).sort((a,b)=>a.term.localeCompare(b.term)).forEach(e=>{
     const dt=document.createElement('dt'),dd=document.createElement('dd');
-    dt.textContent=e.term;dd.textContent=e.def;dl.append(dt,dd);
+    dt.textContent=e.term;dd.textContent=e.def;
+    if(taughtElsewhere(e)){
+      const a=document.createElement('a');a.href=e.taught+'.html';a.textContent=TITLES[e.taught];
+      dd.append(' Taught on ',a,'.');
+    }
+    dl.append(dt,dd);
   });
+  const all=document.createElement('p');
+  all.className='glossary-all';all.innerHTML='<a href="terms.html">Every term in the course</a>';
+  dl.after(all);
 })();
 
 
