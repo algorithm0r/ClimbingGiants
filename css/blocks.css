@@ -174,7 +174,7 @@ table.data td.num,table.data th.num{text-align:right;font-family:"SF Mono",Conso
 .codetabs pre[hidden]{display:none}
 /* A box that carries its own output puts the two side by side. Only one pre and
    one .out are ever visible, so the grid always has exactly two items. */
-.codetabs .panes{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,36rem);
+.codetabs .panes{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);
   align-items:start}
 .codetabs .out{padding:.85rem 1rem;background:#fbfaf7;border-left:1px solid #eee7da;
   align-self:stretch}
@@ -190,7 +190,13 @@ table.data td.num,table.data th.num{text-align:right;font-family:"SF Mono",Conso
   white-space:pre;overflow-x:auto;margin:0;color:#3a3833}
 .codetabs .out .lbl{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--warm-gray);
   margin:0 0 .35rem}
-@media (max-width:52rem){
+/* A wide equation or table scrolls inside itself on a narrow screen, so the page
+   does not scroll sideways under the reader. */
+.katex-display{overflow-x:auto;overflow-y:hidden;padding:2px 0}
+@media (max-width:640px){
+  table.data{display:block;max-width:100%;overflow-x:auto}
+}
+@media (max-width:60rem){
   .codetabs .panes{grid-template-columns:1fr}
   .codetabs .out{border-left:0;border-top:1px solid #eee7da}
 }

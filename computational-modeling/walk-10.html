@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reading the assignment 9 program — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261027212236">
-  <link rel="stylesheet" href="css/demos.css?v=20261027212236">
+  <link rel="stylesheet" href="css/blocks.css?v=20261027232552">
+  <link rel="stylesheet" href="css/demos.css?v=20261027232552">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -879,7 +879,7 @@
   </script>
 
 
-  <main data-pagefind-body>
+  <main data-pagefind-body class="wide">
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <div class="eyebrow"><a href="reports-10.html">Example reports &middot; Assignment 9</a></div>
 <h1>Reading the assignment 9 program</h1>
@@ -1130,7 +1130,7 @@ printing, the checks and the figures will need in one record for the car.</p>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="2|Opens the file and closes it again when the indented lines below it end ([Files and libraries](py-files.html)).;3|Reads the whole file as one dictionary.;4|A dictionary from each channel's ISO code to the channel ([Dictionaries](py-dicts.html)).;5|.values() gives each channel in turn, and the next line files it under its code.;7|The driver's head channel in X. Its dt and t0 are used for all three axes.;11|A loop over a string takes one letter at a time, so a is X, then Y, then Z ([Loops](py-loops.html)).;12|The code with the axis letter put in, such as 11HEADCG0000ACYP.;12|np.array turns the list of samples into an array, so arithmetic works on all of them at once ([numpy arrays](py-numpy.html)).;13|Filtered at CFC 1000, the default.;14|The time of each sample in ms. t0 is negative, since the record starts before impact, so impact falls at 0.;15|HIC15 and its first and last sample.;19|A set keeps each value once, so it shows which statuses occur among the channels.;24|True for the file from the crash folder, the customer's car.;27|.title() gives each word a capital first letter and lower case after it, so BMW becomes Bmw. .strip() removes spaces from the ends, which the Cascada's model field has ([Numbers and text](py-values.html)).;33|[0] keeps the HIC and drops the window.;34|The window as times in ms, which is how it is printed.;39|The finished record added to the list.">for path in paths:
+  <pre data-lang="python" data-notes="2|Opens the file and closes it again when the indented lines below it end ([Files and libraries](py-files.html)).;3|Reads the whole file as one dictionary.;4|A dictionary from each channel's ISO code to the channel ([Dictionaries](py-dicts.html)).;5|.values() gives each channel in turn, and the next line files it under its code.;7|The driver's head channel in X. Its dt and t0 are used for all three axes.;11|A loop over a string takes one letter at a time, so a is X, then Y, then Z ([Loops](py-loops.html)).;12|The code with the axis letter put in, such as 11HEADCG0000ACYP, picks the channel. np.array turns its list of samples into an array, so arithmetic works on all of them at once ([numpy arrays](py-numpy.html)).;13|Filtered at CFC 1000, the default.;14|The time of each sample in ms. t0 is negative, since the record starts before impact, so impact falls at 0.;15|HIC15 and its first and last sample.;19|A set keeps each value once, so it shows which statuses occur among the channels.;24|True for the file from the crash folder, the customer's car.;27|.title() gives each word a capital first letter and lower case after it, so BMW becomes Bmw. .strip() removes spaces from the ends, which the Cascada's model field has ([Numbers and text](py-values.html)).;33|[0] keeps the HIC and drops the window.;34|The window as times in ms, which is how it is printed.;39|The finished record added to the list.">for path in paths:
     with open(path) as f:
         test = json.load(f)
     ch = {}                                  # each channel under its ISO code
@@ -1506,7 +1506,7 @@ holding the two colleagues' tests.</p>
 
   
 
-  <script src="js/page.js?v=20261027212236"></script>
+  <script src="js/page.js?v=20261027232552"></script>
 
   <footer class="site-footer">
     <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-27">October 27, 2026</time>.</span>
