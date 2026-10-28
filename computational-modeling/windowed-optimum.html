@@ -937,7 +937,7 @@ number changes, which is why the limit is written into the name of the quantity.
 <h2 id="the-hic-definition">The HIC Definition</h2>
 
 <p>For a head acceleration record <em>a</em>(<em>t</em>) measured in multiples of <dfn
-data-g="standard-gravity">standard gravity</dfn>, and a window running from $t_1$ to $t_2$:</p>
+data-g="standard-gravity">standard gravity</dfn>, with time in seconds, and a window running from $t_1$ to $t_2$:</p>
 
 $$\mathrm{HIC} \;=\; \max_{\substack{t_1 < t_2 \\ t_2 - t_1 \le w}}
   \left[ \frac{1}{t_2 - t_1}\int_{t_1}^{t_2} a\,\mathrm{d}t \right]^{2.5} (t_2 - t_1)$$
@@ -1206,7 +1206,8 @@ as differences of floating-point times. On the record below, the window from 60.
 comes out at 0.015000000000000013&nbsp;s, a hair over 0.015, so a limit of exactly
 <code>0.015</code> drops it and the search returns 150.38 on the window one sample earlier.
 Comparing <code>j - i &gt; 300</code> in place of <code>T &gt; wmax</code> counts the limit in
-samples and avoids the problem as well.</p>
+samples and avoids the problem as well (300 samples is 15&nbsp;ms at this record's 20&nbsp;000 samples
+a second, and 150 at 10&nbsp;000).</p>
 
 <p>The example pack's crash, test 9793 (a 2017 Hyundai Elantra), records the driver's head at
 20&nbsp;000 samples a second, 7001 samples in all. A 15&nbsp;ms limit admits windows up to 300

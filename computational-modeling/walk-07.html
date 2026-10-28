@@ -1243,7 +1243,7 @@ the mean acceleration over the window, which is the HIC formula solved for the m
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="5|The limits, then None for no limit. + joins two lists ([Lists](py-lists.html)).;7|With no limit, a window can be as long as the whole record.;9|The limit in samples. At 0.05 ms per sample, 15 ms is 300 samples.;11|The four values hic hands back, each under its own name.;13|The result kept under its limit, 15 or None ([Dictionaries](py-dicts.html)).;14|The mean acceleration over the window, in g: HIC = T times the mean to the 2.5, solved for the mean.;20|:11, writes the count with commas between thousands, padded to 11 characters ([Numbers and text](py-values.html))."># ---- HIC for each limit, and with no limit
+  <pre data-lang="python" data-notes="5|The limits, then None for no limit. + joins two lists ([Lists](py-lists.html)).;7|With no limit, a window can be as long as the whole record.;9|The limit in samples. At 0.05 ms per sample, as on the example test, 15 ms is 300 samples, and at 0.1 ms it is 150.;11|The four values hic hands back, each under its own name.;13|The result kept under its limit, 15 or None ([Dictionaries](py-dicts.html)).;14|The mean acceleration over the window, in g: HIC = T times the mean to the 2.5, solved for the mean.;20|:11, writes the count with commas between thousands, padded to 11 characters ([Numbers and text](py-values.html))."># ---- HIC for each limit, and with no limit
 print(f"{'limit':&gt;8} {'HIC':&gt;7} {'from (ms)':&gt;10} {'to (ms)':&gt;8} {'length':&gt;7} "
       f"{'mean g':&gt;7} {'windows':&gt;11} {'time (s)':&gt;9}")
 found = {}
@@ -1509,7 +1509,7 @@ AI</a>. Pick a line and say why it is that way.</p>
 <table class="data">
   <tr><th class="num">Python line</th><th class="num">MATLAB line</th><th>The decision</th><th>What else could have been chosen</th></tr>
   <tr><td class="num">19</td><td class="num">17</td><td>Accelerations are converted to <em>g</em> with standard gravity</td><td>9.81&nbsp;m/s&sup2;, the rounded value</td></tr>
-  <tr><td class="num">64</td><td class="num">219</td><td>Windows may start anywhere in the record, before impact included</td><td>starting the search at impact, by handing hic only the samples from impact on, which the notebook does</td></tr>
+  <tr><td class="num">64</td><td class="num">219</td><td>Windows may start anywhere in the record, before impact included</td><td>starting the search at impact, by handing hic only the samples from impact on, which the notebook in the example reports does</td></tr>
   <tr><td class="num">57</td><td class="num">212</td><td>Each window&rsquo;s integral uses the trapezoid rule</td><td>the rectangle rule, which differs slightly on short windows</td></tr>
   <tr><td class="num">114</td><td class="num">42</td><td>Each component is filtered before the resultant is formed</td><td>forming the resultant first and filtering it once</td></tr>
   <tr><td class="num">115</td><td class="num">44</td><td>The baseline before impact is left in, and removing it is only a check</td><td>subtracting each channel&rsquo;s mean before impact first</td></tr>
@@ -1548,7 +1548,9 @@ check, each component's mean before impact removed: HIC15 = 150.4</pre>
 <p>Both versions are downloads: <a href="data/example/code/a6_hic_search.py" download><code>a6_hic_search.py</code></a>
 and <a href="data/example/code/a6_hic_search.m" download><code>a6_hic_search.m</code></a>. Unzip a data pack, put
 the program in the pack's top folder beside <code>crash</code> and <code>shots</code>, and run it
-from there (<a href="py-files.html">Files and libraries</a> explains why the folder matters). On your own pack it reads your data, so its numbers will differ from the ones above. The MATLAB
+from there (<a href="py-files.html">Files and libraries</a> explains why the folder matters). In Colab,
+upload the program beside your unzipped pack and run it in a cell with <code>%run a6_hic_search.py</code>
+(the <a href="tools-colab.html#a-downloaded-program">Colab guide</a> shows how). On your own pack it reads your data, so its numbers will differ from the ones above. The MATLAB
 version should run as it is in MATLAB R2018b or later. GNU Octave, which is free, needs a script's functions defined
 before they are used, so to run it there, move the functions to the top of the file and put a line
 <code>1;</code> above them. Figure&nbsp;2's vertical axis stops at 62&nbsp;<em>g</em>, so raise it if your resultant
