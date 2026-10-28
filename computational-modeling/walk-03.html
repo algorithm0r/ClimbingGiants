@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reading the assignment 3 program — Computational Physical Modeling</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="css/blocks.css?v=20261027131534">
+  <link rel="stylesheet" href="css/demos.css?v=20261027131534">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (olive). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #5F7038;
+      --course-accent-dark: #47542A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    /* ── Week page video and class cards (media-cards.js) ── */
+    .media-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+      gap: 0.9rem;
+      margin: 1rem 0;
+    }
+    .media-card {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-top: 4px solid var(--course-accent);
+      border-radius: 4px;
+      padding: 0.75rem 0.9rem 0.85rem;
+    }
+    .media-card.class { border-top-color: #C8860A; }
+    .media-card p { margin: 0; }
+    .mc-kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .mc-title { font-weight: 600; line-height: 1.3; margin: 0.25rem 0 0.35rem !important; }
+    .mc-sub { font-size: 0.85rem; color: #5A5550; line-height: 1.4; }
+    .mc-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.7rem; }
+    .mc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--course-accent);
+      border-radius: 3px;
+      text-decoration: none;
+      color: var(--course-accent-dark);
+    }
+    a.mc-btn:visited { color: var(--course-accent-dark); }
+    a.mc-btn:hover { background: #F0EDE7; }
+    .mc-btn svg { width: 1em; height: 1em; flex: none; }
+    .mc-btn.primary, a.mc-btn.primary:visited { background: var(--course-accent); color: #fff; }
+    a.mc-btn.primary:hover { background: var(--course-accent-dark); }
+    .mc-btn.pending { border-style: dashed; border-color: #b8b2a8; color: #5A5550; }
+    .mc-total { font-size: 0.9rem; color: #5A5550; }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+    /* the remembered data phrase; filled in by page.js */
+    .cg-phrase { display: inline-flex; align-items: center; gap: .3rem; margin-right: .6rem;
+      font-size: .82rem; flex-shrink: 0; }
+    /* The header row is a fixed 780px. The title, the toggle, "Your data", Search and
+       "Report a problem" only just fit in it, so the chip shows the label alone (the
+       phrase is in the link's title and on the data page) and Search shows its icon.
+       An earlier chip that held the phrase and was allowed to shrink squeezed the
+       label down to "Yo" on a classroom projector. */
+    .cg-phrase a { color: rgba(230,238,222,.92); text-decoration: none; white-space: nowrap; }
+    .header-links .search-btn .sb-label { display: none; }
+    .header-links button.report-btn { white-space: nowrap; }
+    /* the title keeps its own width */
+    .site-header-top .site-title { white-space: nowrap; flex-shrink: 0; }
+    .site-header-top .header-links { min-width: 0; margin-left: 1rem; }
+    @media (max-width: 780px) {
+      /* below the 780px row: the report button's short form, as on phones */
+      .header-links .report-btn .rb-full { display: none; }
+      .header-links .report-btn .rb-short { display: inline; }
+      .cg-phrase { margin-right: .2rem; }
+    }
+    .cg-phrase a:hover { color: #fff; text-decoration: underline; }
+    .cg-phrase button { background: none; border: none; cursor: pointer; padding: 0 .2rem;
+      color: rgba(230,238,222,.7); font: inherit; font-size: 1rem; line-height: 1; }
+    .cg-phrase button:hover { color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* Two rules the other course sites do not define. The header's top
+       row carries a report button beside the title, and a page with a
+       wide demo in it needs more than the reading measure. */
+    .site-header-top { border-bottom: 1px solid rgba(200,222,180,0.15); }
+    main.wide { max-width: 1180px; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Computational Physical Modeling</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <span class="cg-phrase" id="cg-phrase"></span>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        
+          <a href="syllabus.html">Syllabus</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="notes.html">Notes</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reports.html">Examples</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reflection.html">Reflection</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="meeting.html">Meeting</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="ai-use.html">AI Use</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="tools.html">Tools</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="python.html">Python</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="workbench.html">Workbench</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="extra-labor.html">Extra Labor</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="canvas-grades.html">Canvas Grades</a>
+          
+        
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+          
+          
+          
+          <a href="week-01.html">1</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-02.html">2</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-03.html">3</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-04.html">4</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          <span class="week-gap" title="Week 5 is a break week">5<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <a href="week-06.html">6</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-07.html">7</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-08.html">8</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-09.html">9</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-10.html">10</a>
+          
+        
+      </div>
+    </nav>
+
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+
+  <main data-pagefind-body>
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <div class="eyebrow"><a href="reports-03.html">Example reports &middot; Assignment 3</a></div>
+<h1>Reading the assignment 3 program</h1>
+
+<p>This page reads <code>a3_velocity_and_crush.py</code>, the program behind the technical report
+in the <a href="reports-03.html">assignment&nbsp;3 example reports</a>, one section at a time. The
+program integrates the crossmember's acceleration once to get the car's change in velocity since
+contact, compares it with the lab's measured speed, then adds the lab's speed as the constant of
+integration and integrates again to get the distance the compartment traveled before it stopped,
+the crush. It then changes each processing choice in turn to see how much the answers move. Each
+section shows the Python beside a MATLAB version that prints the same results (checked by running
+both on the example pack, the MATLAB version in GNU Octave), and the line notes say what each line
+does.</p>
+
+<p>The integration is the running trapezoid sum from <a href="cumulative-integration.html">Cumulative
+integration</a>. <a href="program-shape-state-and-flow.html">Program shape I</a> suggests reading
+unfamiliar code by finding what comes in, what goes out and the state each loop builds, and the next
+section starts there. In the Python file the functions come first and the main part follows, from
+the top down. A MATLAB script has to keep its functions at the end, so its line ranges jump. A line
+you cannot read is usually covered on one of the <a href="python.html">Reading Python</a> pages,
+which the notes link to, and the MATLAB lines have notes of their own.</p>
+
+<h2 id="what-comes-in-and-what-goes-out">What Comes In and What Goes Out</h2>
+
+<table class="data">
+  <tr><th>Comes in</th><th>From</th></tr>
+  <tr><td>The crossmember's X acceleration</td><td><code>crash/09793.json</code> (the one file in the pack's crash folder), channel <code>vehicle_x</code></td></tr>
+  <tr><td>The lab's speed at contact</td><td>the same file's test header</td></tr>
+</table>
+
+<table class="data">
+  <tr><th>Goes out</th><th>Where</th></tr>
+  <tr><td>The channel, the lab's speed, and the channel's mean before contact</td><td>printed, and the report's Data section</td></tr>
+  <tr><td>The change in velocity, its gap to the lab's speed, the stop and the crush</td><td>printed, and the report's Results table</td></tr>
+  <tr><td>How much each processing choice and the constant move the answers</td><td>printed, and the report's Checks</td></tr>
+  <tr><td>Three figures</td><td><code>fig1_acceleration.svg</code>, <code>fig2_delta_v.svg</code>, <code>fig3_velocity_crush.svg</code></td></tr>
+</table>
+
+<p>The state worth tracking is <code>r</code>, the dictionary <code>analyse</code> hands back for the
+standard choices. Every result the program computes is read from it.</p>
+
+<h2 id="settings">Settings</h2>
+
+<p>The program uses numpy for arrays and matplotlib for the figures, and one setting, the size of one
+<em>g</em>, used to give accelerations in <em>g</em>.</p>
+<div class="codetabs" id="s0">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="4|numpy, under the short name np, does arithmetic on whole arrays at once ([Files and libraries](py-files.html)).;7|One g in m/s squared, used only to print and plot accelerations in g.">import json
+import os
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+G = 9.81   # m/s^2 in one g</pre>
+  <pre data-lang="matlab" hidden data-notes="1|In MATLAB % starts a comment, and the semicolon stops MATLAB from printing the value.">G = 9.81;  % m/s^2 in one g</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 10 to 16 (Python) and line 12 (MATLAB).</div>
+</div>
+<h2 id="loading-the-test">Loading the Test</h2>
+
+<p>The first function opens the one file in the pack's crash folder and reads it into a
+dictionary.</p>
+<div class="codetabs" id="s1">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|pack='.' is a default, so load_test() with nothing in the brackets reads the folder the program is run from ([Functions](py-functions.html)).;3|The first file the folder lists, the only one ([Lists](py-lists.html)).;4|Opens the file and closes it again when the indented line below ends ([Files and libraries](py-files.html)).">def load_test(pack='.'):
+    folder = os.path.join(pack, 'crash')
+    name = os.listdir(folder)[0]          # the crash folder holds one file
+    with open(os.path.join(folder, name)) as f:
+        return json.load(f)</pre>
+  <pre data-lang="matlab" hidden data-notes="2|dir lists the files that match the pattern.;3|fileread reads the file as text, and jsondecode turns it into a struct.">function test = load_test(pack)
+    files = dir(fullfile(pack, 'crash', '*.json'));   % the crash folder holds one file
+    test = jsondecode(fileread(fullfile(pack, 'crash', files(1).name)));
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 19 to 23 (Python) and lines 124 to 127 (MATLAB).</div>
+</div>
+<h2 id="the-running-integral">The Running Integral</h2>
+
+<p>This function integrates a record from its first sample to every sample. Each panel is the area
+under the curve between two neighboring samples, and the running total of the panels is the integral up to each
+sample. A 0 goes in front, so the result has one value per sample and lines up with the times. The
+rectangle rule is there for one of the checks.</p>
+<div class="codetabs" id="s2">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|rule is 'trapezoid' unless the call says otherwise ([Functions](py-functions.html)).;4|y[1:] is every sample but the first and y[:-1] every sample but the last, so each pair of neighbors is averaged and multiplied by dt, the area of one trapezoid ([numpy arrays](py-numpy.html)).;6|The rectangle rule, using each panel's left-hand sample.;7|np.cumsum is the running total. The 0 in front is the integral up to the first sample.">def running_integral(y, dt, rule='trapezoid'):
+    """Cumulative integral with the leading zero, so it lines up with t."""
+    if rule == 'trapezoid':
+        panels = (y[1:] + y[:-1]) / 2 * dt
+    else:                                  # rectangle, left-hand sample
+        panels = y[:-1] * dt
+    return np.concatenate([[0.0], np.cumsum(panels)])</pre>
+  <pre data-lang="matlab" hidden data-notes="4|y(2:end) and y(1:end-1) are the samples shifted by one, so each pair of neighbors gives one trapezoid.;8|The 0 on top of the column of running totals.">function out = running_integral(y, dt, rule)
+    % Cumulative integral with the leading zero, so it lines up with t.
+    if strcmp(rule, 'trapezoid')
+        panels = (y(2:end) + y(1:end-1)) / 2 * dt;
+    else                                   % rectangle, left-hand sample
+        panels = y(1:end-1) * dt;
+    end
+    out = [0; cumsum(panels)];
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 26 to 32 (Python) and lines 130 to 138 (MATLAB).</div>
+</div>
+<h2 id="one-analysis">One Analysis</h2>
+
+<p>This function does the whole method for one set of choices: remove the offset or not, and which
+integration rule. The main part calls it once with the standard choices and again for each check,
+so every check runs exactly the same steps. It integrates once to the change in velocity since
+contact, adds the constant to get the velocity, finds the first sample after contact where the
+velocity reaches zero, and integrates again to the distance. The crush is the distance at that
+sample.</p>
+<div class="codetabs" id="s3">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|Two defaults: with neither given, the offset is removed and the trapezoid rule used ([Functions](py-functions.html)).;4|t &lt; 0 is true for every sample before contact, so a[t &lt; 0] keeps those samples. Their mean is the offset ([numpy arrays](py-numpy.html)).;5|np.argmax on true and false gives the position of the first true, here the first sample at or after contact.;7|Moves the whole curve so it is 0 at contact.;8|The lab's speed as the constant of integration turns the change into the velocity.;9|The first sample from contact on where the velocity is at or below 0. If it never is, np.argmax gives 0 and stop is contact itself, with no warning.;11|The distance since contact.;12|Everything as one dictionary, so the caller can pick what it needs by name ([Dictionaries](py-dicts.html)).;13|The position of the most negative change, the largest change in velocity.">def analyse(a, t, dt, lab, baseline=True, rule='trapezoid'):
+    """Everything the report needs from one set of processing choices."""
+    if baseline:
+        a = a - np.mean(a[t &lt; 0])      # towed at constant speed before contact
+    i0 = np.argmax(t &gt;= 0)             # the first sample at or after contact
+    dv = running_integral(a, dt, rule)
+    dv = dv - dv[i0]                   # change since contact
+    v = lab + dv                       # the lab's speed is the constant
+    stop = i0 + np.argmax(v[i0:] &lt;= 0)  # the first sample after contact with v at or below 0
+    x = running_integral(v, dt, rule)
+    x = x - x[i0]
+    return {'a': a, 'dv': dv, 'v': v, 'x': x, 'stop': stop,
+            'peak': np.argmin(dv), 'crush': x[stop]}</pre>
+  <pre data-lang="matlab" hidden data-notes="3|nargin is the number of inputs given. MATLAB has no defaults in the function line, so they are set here.;12|find(..., 1) gives the position of the first true.;16|The same search. If the velocity never reaches 0, find gives nothing, stop is empty, and the printing and plotting below go wrong, where the Python quietly uses contact.;20|A struct holds the results under names, as the Python dictionary does.">function r = analyse(a, t, dt, lab, baseline, rule)
+    % Everything the report needs from one set of processing choices.
+    if nargin &lt; 5
+        baseline = true;
+    end
+    if nargin &lt; 6
+        rule = 'trapezoid';
+    end
+    if baseline
+        a = a - mean(a(t &lt; 0));        % towed at constant speed before contact
+    end
+    i0 = find(t &gt;= 0, 1);              % the first sample at or after contact
+    dv = running_integral(a, dt, rule);
+    dv = dv - dv(i0);                  % change since contact
+    v = lab + dv;                      % the lab's speed is the constant
+    stop = i0 - 1 + find(v(i0:end) &lt;= 0, 1);  % the first sample after contact with v at or below 0
+    x = running_integral(v, dt, rule);
+    x = x - x(i0);
+    [~, peak] = min(dv);
+    r = struct('a', a, 'dv', dv, 'v', v, 'x', x, 'stop', stop, 'peak', peak, ...
+               'crush', x(stop));
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 35 to 47 (Python) and lines 141 to 162 (MATLAB).</div>
+</div>
+<h2 id="reading-the-channel">Reading the Channel</h2>
+
+<p>The main part starts here. It takes the crossmember channel, builds the times, turns the lab's
+speed into m/s, and prints the channel's mean and spread before contact. The car is towed at a
+steady speed before contact, so a sensor on it should read close to zero there.</p>
+<div class="codetabs" id="s4">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|The car body's channel, the only sensor on the car body. On the example pack it is the crossmember, and on some packs a sill ([Dictionaries](py-dicts.html)).;4|The time of every sample in seconds. np.arange(n) is 0, 1, up to n - 1 ([numpy arrays](py-numpy.html)).;5|The samples as an array, so whole-array arithmetic works.;6|km/h to m/s: divide by 3.6.;11|The samples before contact.;13|The standard deviation, how far the samples spread around their mean.">test = load_test()
+ch = test['channels']['vehicle_x']      # V1 LEFT REAR SEAT CROSSMEMBER AX
+dt = ch['dt']
+t = ch['t0'] + dt * np.arange(ch['n'])
+raw = np.array(ch['y'])
+lab = test['test']['speed_kph'] / 3.6
+
+print(f"channel {ch['code']}: {ch['comment']}, {ch['n']} samples every {dt} s")
+print(f"lab speed {test['test']['speed_kph']} km/h = {lab:.2f} m/s")
+
+before = raw[t &lt; 0]
+print(f"before contact: mean {np.mean(before):.3f} m/s^2, "
+      f"standard deviation {np.std(before):.3f} m/s^2")</pre>
+  <pre data-lang="matlab" hidden data-notes="4|(0:ch.n-1)' is a column of 0 to n - 1, the same shape as the samples.;13|The 1 makes MATLAB divide by n, as np.std does. Without it MATLAB divides by n - 1.">test = load_test('.');
+ch = test.channels.vehicle_x;          % V1 LEFT REAR SEAT CROSSMEMBER AX
+dt = ch.dt;
+t = ch.t0 + dt * (0:ch.n-1)';
+raw = ch.y;
+lab = test.test.speed_kph / 3.6;
+
+fprintf('channel %s: %s, %d samples every %g s\n', ch.code, ch.comment, ch.n, dt);
+fprintf('lab speed %g km/h = %.2f m/s\n', test.test.speed_kph, lab);
+
+before = raw(t &lt; 0);
+fprintf('before contact: mean %.3f m/s^2, standard deviation %.3f m/s^2\n', ...
+        mean(before), std(before, 1));</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 50 to 62 (Python) and lines 14 to 26 (MATLAB).</div>
+</div>
+<h2 id="the-answers">The Answers</h2>
+
+<p>One analysis with the standard choices gives the numbers in the report's Results (the largest
+change in velocity and its gap to the lab's speed, the change over the whole record, the time the
+compartment stopped, the crush and the velocity at the end of the record) and the two mean
+accelerations its Errors and Anomalies discusses.</p>
+<div class="codetabs" id="s5">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|The standard choices: offset removed, trapezoid rule.;2|Picks one result out of the dictionary by its name.;4|The change is negative (the car slows), so the minus gives its size.;7|[-1] is the last value, the change over the whole record.;10|&amp; combines two true-or-false arrays sample by sample: after the peak and no later than 150 ms.;14|The crush in mm, with no decimal places.">r = analyse(raw, t, dt, lab)
+peak = r['peak']
+stop = r['stop']
+print(f"largest change in velocity {-r['dv'][peak]:.2f} m/s at {1000 * t[peak]:.1f} ms"
+      f"  (gap to lab {-r['dv'][peak] - lab:.2f} m/s, "
+      f"{100 * (-r['dv'][peak] - lab) / lab:.1f}%)")
+print(f"change over the whole record {-r['dv'][-1]:.2f} m/s"
+      f"  (gap to lab {-r['dv'][-1] - lab:.2f} m/s, "
+      f"{100 * (-r['dv'][-1] - lab) / lab:.1f}%)")
+after = (t &gt; t[peak]) &amp; (t &lt;= 0.15)
+print(f"mean acceleration from {1000 * t[peak]:.1f} to 150 ms: "
+      f"{np.mean(r['a'][after]) / G:.2f} g")
+print(f"mean acceleration over the last 50 ms: {np.mean(r['a'][t &gt; 0.25]):.3f} m/s^2")
+print(f"stopped at {1000 * t[stop]:.1f} ms, crush {1000 * r['crush']:.0f} mm")
+print(f"velocity at end of record {r['v'][-1]:.2f} m/s")</pre>
+  <pre data-lang="matlab" hidden data-notes="2|A struct field, read with a dot.;4|%% prints a percent sign, and ... continues the line onto the next.;7|end inside the brackets is the last position.">r = analyse(raw, t, dt, lab);
+peak = r.peak;
+stop = r.stop;
+fprintf('largest change in velocity %.2f m/s at %.1f ms  (gap to lab %.2f m/s, %.1f%%)\n', ...
+        -r.dv(peak), 1000 * t(peak), -r.dv(peak) - lab, 100 * (-r.dv(peak) - lab) / lab);
+fprintf('change over the whole record %.2f m/s  (gap to lab %.2f m/s, %.1f%%)\n', ...
+        -r.dv(end), -r.dv(end) - lab, 100 * (-r.dv(end) - lab) / lab);
+after = (t &gt; t(peak)) &amp; (t &lt;= 0.15);
+fprintf('mean acceleration from %.1f to 150 ms: %.2f g\n', 1000 * t(peak), mean(r.a(after)) / G);
+fprintf('mean acceleration over the last 50 ms: %.3f m/s^2\n', mean(r.a(t &gt; 0.25)));
+fprintf('stopped at %.1f ms, crush %.0f mm\n', 1000 * t(stop), 1000 * r.crush);
+fprintf('velocity at end of record %.2f m/s\n', r.v(end));</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 64 to 78 (Python) and lines 28 to 39 (MATLAB).</div>
+</div>
+<h2 id="how-much-each-choice-moves-the-answers">How Much Each Choice Moves the Answers</h2>
+
+<p>The same analysis runs three times: as standard, without removing the offset, and with the
+rectangle rule. If the answers hardly move, the gap to the lab's speed is not a product of the
+processing.</p>
+<div class="codetabs" id="s6">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="5|A list of pairs, each a choice of offset and rule ([Lists](py-lists.html)).;6|Each pair is unpacked into the two names ([Loops](py-loops.html)).;7|The whole analysis with this pair of choices.;8|Prints yes or no in place of True or False ([Conditions](py-conditions.html))."># how much each processing choice moves the answers
+print()
+print(f"{'baseline':9} {'rule':10} {'dv peak':&gt;8} {'dv end':&gt;7} "
+      f"{'stop ms':&gt;8} {'crush mm':&gt;9}")
+choices = [(True, 'trapezoid'), (False, 'trapezoid'), (True, 'rectangle')]
+for baseline, rule in choices:
+    s = analyse(raw, t, dt, lab, baseline, rule)
+    if baseline:
+        label = 'yes'
+    else:
+        label = 'no'
+    print(f"{label:9} "
+          f"{rule:10} {-s['dv'][s['peak']]:8.2f} {-s['dv'][-1]:7.2f} "
+          f"{1000 * t[s['stop']]:8.1f} {1000 * s['crush']:9.0f}")</pre>
+  <pre data-lang="matlab" hidden data-notes="5|The two parts of each choice in two lists, read together by m.;6|A cell array holds pieces of text. rules{m} reads one.">% how much each processing choice moves the answers
+fprintf('\n');
+fprintf('%-9s %-10s %8s %7s %8s %9s\n', 'baseline', 'rule', 'dv peak', 'dv end', ...
+        'stop ms', 'crush mm');
+baselines = [true, false, true];
+rules = {'trapezoid', 'trapezoid', 'rectangle'};
+for m = 1:3
+    s = analyse(raw, t, dt, lab, baselines(m), rules{m});
+    if baselines(m)
+        label = 'yes';
+    else
+        label = 'no';
+    end
+    fprintf('%-9s %-10s %8.2f %7.2f %8.1f %9.0f\n', label, rules{m}, -s.dv(s.peak), ...
+            -s.dv(end), 1000 * t(s.stop), 1000 * s.crush);
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 80 to 93 (Python) and lines 41 to 56 (MATLAB).</div>
+</div>
+<h2 id="how-much-the-constant-moves-the-crush">How Much the Constant Moves the Crush</h2>
+
+<p>The crush depends on the constant added to the change in velocity. The loop tries the lab's speed
+0.1&nbsp;m/s lower and higher, and the change over the whole record in place of the lab's speed.</p>
+<div class="codetabs" id="s7">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="3|c takes each of the three constants in turn ([Loops](py-loops.html)).;4|The analysis with c in place of the lab's speed."># how much the constant moves the crush
+print()
+for c in [lab - 0.1, lab + 0.1, -r['dv'][-1]]:
+    s = analyse(raw, t, dt, c)
+    print(f"constant {c:.2f} m/s: stop {1000 * t[s['stop']]:.1f} ms, "
+          f"crush {1000 * s['crush']:.0f} mm")</pre>
+  <pre data-lang="matlab" hidden data-notes="3|A MATLAB loop over a row takes each value in turn.">% how much the constant moves the crush
+fprintf('\n');
+for c = [lab - 0.1, lab + 0.1, -r.dv(end)]
+    s = analyse(raw, t, dt, c);
+    fprintf('constant %.2f m/s: stop %.1f ms, crush %.0f mm\n', c, 1000 * t(s.stop), ...
+            1000 * s.crush);
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 95 to 100 (Python) and lines 58 to 64 (MATLAB).</div>
+</div>
+<h2 id="figure-1-the-acceleration">Figure 1, the Acceleration</h2>
+
+<p>The figures use the times in milliseconds. The first is the channel in <em>g</em> with its offset
+removed.</p>
+<div class="codetabs" id="s8">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="4|A new figure, 7 by 3.6 inches ([Figures](py-plots.html)).;5|The acceleration with the offset removed, in g.;6|A dashed line at contact.">t_ms = 1000 * t
+
+# Figure 1: the channel in g, offset removed
+plt.figure(figsize=(7, 3.6))
+plt.plot(t_ms, r['a'] / G, linewidth=0.7, label='as recorded, offset removed')
+plt.axvline(0, color='gray', linestyle='--', linewidth=0.8)
+plt.xlim(-20, 160)
+plt.xlabel('time from contact (ms)')
+plt.ylabel('acceleration (g)')
+plt.title('Left rear seat crossmember, X acceleration [10SEATLERE00ACXP]')
+plt.legend(loc='lower right')
+plt.tight_layout()
+plt.savefig('fig1_acceleration.svg')
+plt.close()</pre>
+  <pre data-lang="matlab" hidden data-notes="6|A dashed vertical line at contact. [0.5 0.5 0.5] is gray as red, green and blue.">t_ms = 1000 * t;
+
+% Figure 1: the channel in g, offset removed
+fig = figure('Position', [100 100 700 360]);
+plot(t_ms, r.a / G, 'LineWidth', 0.7);
+xline(0, '--', 'Color', [0.5 0.5 0.5]);
+xlim([-20 160]);
+xlabel('time from contact (ms)');
+ylabel('acceleration (g)');
+title('Left rear seat crossmember, X acceleration [10SEATLERE00ACXP]');
+legend({'as recorded, offset removed'}, 'Location', 'southeast');
+saveas(fig, 'fig1_acceleration.svg');
+close(fig);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 102 to 115 (Python) and lines 66 to 78 (MATLAB).</div>
+</div>
+<h2 id="figure-2-the-change-in-velocity">Figure 2, the Change in Velocity</h2>
+
+<p>The second figure is the change in velocity since contact, with the lab's speed marked with its
+sign reversed, and the two values the report reads, at the largest change and at the end of the
+record.</p>
+<div class="codetabs" id="s9">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="4|Where the curve would end if the car finished at rest.;5|Writes the label at a point in the plot's own units. ha='right' puts the text's right end there.;6|A dot on the largest change."># Figure 2: change in velocity, constant set to zero
+plt.figure(figsize=(7, 3.6))
+plt.plot(t_ms, r['dv'])
+plt.axhline(-lab, color='gray', linestyle='--', linewidth=0.8)
+plt.text(295, -lab + 0.6, f"minus the lab's speed, {-lab:.2f} m/s", ha='right')
+plt.plot(t_ms[peak], r['dv'][peak], 'o')
+plt.text(t_ms[peak] + 4, r['dv'][peak] - 1.6,
+         f"{r['dv'][peak]:.2f} m/s at {t_ms[peak]:.1f} ms")
+plt.plot(t_ms[-1], r['dv'][-1], 'o')
+plt.text(295, r['dv'][-1] - 0.8, f"{r['dv'][-1]:.2f} m/s at 300 ms",
+         ha='right', va='top')
+plt.ylim(-21, 2)
+plt.xlabel('time from contact (ms)')
+plt.ylabel('change in velocity (m/s)')
+plt.title('Change in velocity since contact (crossmember, constant = 0)')
+plt.tight_layout()
+plt.savefig('fig2_delta_v.svg')
+plt.close()</pre>
+  <pre data-lang="matlab" hidden data-notes="7|MATLAB's ha='right'.">% Figure 2: change in velocity, constant set to zero
+fig = figure('Position', [100 100 700 360]);
+plot(t_ms, r.dv);
+hold on
+yline(-lab, '--', 'Color', [0.5 0.5 0.5]);
+text(295, -lab + 0.6, sprintf('minus the lab''s speed, %.2f m/s', -lab), ...
+     'HorizontalAlignment', 'right');
+plot(t_ms(peak), r.dv(peak), 'o');
+text(t_ms(peak) + 4, r.dv(peak) - 1.6, sprintf('%.2f m/s at %.1f ms', r.dv(peak), t_ms(peak)));
+plot(t_ms(end), r.dv(end), 'o');
+text(295, r.dv(end) - 0.8, sprintf('%.2f m/s at 300 ms', r.dv(end)), ...
+     'HorizontalAlignment', 'right', 'VerticalAlignment', 'top');
+ylim([-21 2]);
+xlabel('time from contact (ms)');
+ylabel('change in velocity (m/s)');
+title('Change in velocity since contact (crossmember, constant = 0)');
+saveas(fig, 'fig2_delta_v.svg');
+close(fig);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 117 to 134 (Python) and lines 80 to 97 (MATLAB).</div>
+</div>
+<h2 id="figure-3-velocity-and-crush">Figure 3, Velocity and Crush</h2>
+
+<p>The last figure has two plots, one above the other: the velocity with the lab's speed as the
+constant, with the stop marked, and the distance since contact, with the crush marked.</p>
+<div class="codetabs" id="s10">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|Two sets of axes, one above the other, sharing the time axis.;3|The upper plot. bottom on the next line is the lower one.;11|The distance in mm."># Figure 3: velocity with the lab's constant, and distance
+fig, axes = plt.subplots(2, 1, figsize=(7, 6), sharex=True)
+top = axes[0]
+bottom = axes[1]
+top.plot(t_ms, r['v'])
+top.axhline(0, color='gray', linewidth=0.8)
+top.plot(t_ms[stop], 0, 'o')
+top.text(t_ms[stop] + 4, 1.0, f"zero at {t_ms[stop]:.1f} ms")
+top.set_ylabel('velocity (m/s)')
+top.set_title('(a) Velocity of the compartment, lab speed as the constant')
+bottom.plot(t_ms, 1000 * r['x'])
+bottom.plot(t_ms[stop], 1000 * r['crush'], 'o')
+bottom.text(t_ms[stop] + 4, 1000 * r['crush'] - 90, f"{1000 * r['crush']:.0f} mm")
+bottom.set_ylim(-100, 750)
+bottom.set_xlim(-10, 160)
+bottom.set_xlabel('time from contact (ms)')
+bottom.set_ylabel('distance since contact (mm)')
+bottom.set_title('(b) Distance travelled toward the barrier')
+fig.tight_layout()
+fig.savefig('fig3_velocity_crush.svg')</pre>
+  <pre data-lang="matlab" hidden data-notes="3|The first of two plots, one above the other. Each plot command after it draws there.">% Figure 3: velocity with the lab's constant, and distance
+fig = figure('Position', [100 100 700 600]);
+subplot(2, 1, 1);
+plot(t_ms, r.v);
+hold on
+yline(0, 'Color', [0.5 0.5 0.5]);
+plot(t_ms(stop), 0, 'o');
+text(t_ms(stop) + 4, 1.0, sprintf('zero at %.1f ms', t_ms(stop)));
+xlim([-10 160]);
+ylabel('velocity (m/s)');
+title('(a) Velocity of the compartment, lab speed as the constant');
+subplot(2, 1, 2);
+plot(t_ms, 1000 * r.x);
+hold on
+plot(t_ms(stop), 1000 * r.crush, 'o');
+text(t_ms(stop) + 4, 1000 * r.crush - 90, sprintf('%.0f mm', 1000 * r.crush));
+ylim([-100 750]);
+xlim([-10 160]);
+xlabel('time from contact (ms)');
+ylabel('distance since contact (mm)');
+title('(b) Distance travelled toward the barrier');
+saveas(fig, 'fig3_velocity_crush.svg');
+close(fig);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 136 to 155 (Python) and lines 99 to 121 (MATLAB).</div>
+</div>
+
+<h2 id="decisions-in-this-program">Decisions in This Program</h2>
+
+<p>Every line below holds a decision the student made. The line numbers are those of the
+downloadable files. To check your own program, use the test on <a href="ai-use.html">Using
+AI</a>. Pick a line and say why it is that way.</p>
+
+<table class="data">
+  <tr><th class="num">Python line</th><th class="num">MATLAB line</th><th>The decision</th><th>What else could have been chosen</th></tr>
+  <tr><td class="num">38</td><td class="num">150</td><td>The mean before contact is subtracted as an offset</td><td>leaving it in (the second row of the choices table)</td></tr>
+  <tr><td class="num">35</td><td class="num">147</td><td>The trapezoid rule</td><td>the rectangle rule (the third row)</td></tr>
+  <tr><td class="num">42</td><td class="num">155</td><td>The lab&rsquo;s speed is the constant of integration</td><td>the change over the whole record, which the last check uses</td></tr>
+  <tr><td class="num">47</td><td class="num">159</td><td>The change in velocity is read where it is largest</td><td>the change over the whole record, which is also printed</td></tr>
+  <tr><td class="num">43</td><td class="num">156</td><td>The crush is the distance at the first sample with the velocity at or below zero</td><td>interpolating between samples to where the velocity crosses zero</td></tr>
+  <tr><td class="num">51</td><td class="num">15</td><td>The channel is not filtered</td><td>filtering at CFC&nbsp;180 first, which J211 gives for this use (assignment&nbsp;4)</td></tr>
+</table>
+
+<h2 id="what-it-prints">What It Prints</h2>
+
+<p>This is everything the program prints, run on the example pack. On that pack the MATLAB version
+prints the same lines (checked in Octave).</p>
+
+<pre class="nb-out">channel 10SEATLERE00ACXP: V1 LEFT REAR SEAT CROSSMEMBER AX, 7001 samples every 5e-05 s
+lab speed 56.15 km/h = 15.60 m/s
+before contact: mean 0.041 m/s^2, standard deviation 2.513 m/s^2
+largest change in velocity 18.08 m/s at 85.0 ms  (gap to lab 2.48 m/s, 15.9%)
+change over the whole record 17.44 m/s  (gap to lab 1.85 m/s, 11.8%)
+mean acceleration from 85.0 to 150 ms: 0.77 g
+mean acceleration over the last 50 ms: 0.636 m/s^2
+stopped at 64.9 ms, crush 645 mm
+velocity at end of record -1.85 m/s
+
+baseline  rule        dv peak  dv end  stop ms  crush mm
+yes       trapezoid     18.08   17.44     64.9       645
+no        trapezoid     18.08   17.43     64.9       645
+yes       rectangle     18.08   17.44     64.9       646
+
+constant 15.50 m/s: stop 64.7 ms, crush 639 mm
+constant 15.70 m/s: stop 65.3 ms, crush 652 mm
+constant 17.44 m/s: stop 73.3 ms, crush 771 mm</pre>
+
+<h2 id="running-it-yourself">Running It Yourself</h2>
+
+<p>Both versions are downloads: <a href="data/example/code/a3_velocity_and_crush.py" download><code>a3_velocity_and_crush.py</code></a>
+and <a href="data/example/code/a3_velocity_and_crush.m" download><code>a3_velocity_and_crush.m</code></a>. Unzip a data pack, put
+the program in the pack's top folder beside <code>crash</code> and <code>shots</code>, and run it
+from there (<a href="py-files.html">Files and libraries</a> explains why the folder matters). On your own pack it reads your data, so its numbers will differ from the ones above.
+Figure&nbsp;1's title, Figure&nbsp;3's range (the crush runs to 852&nbsp;mm on some tests) and
+the last 50&nbsp;ms (some records end at 310&nbsp;ms) are set for the example test. The MATLAB
+version should run as it is in MATLAB R2018b or later. GNU Octave, which is free, needs a script's functions defined
+before they are used, so to run it there, move the functions to the top of the file and put a line
+<code>1;</code> above them.</p>
+
+  </main>
+
+  
+
+  <script src="js/page.js?v=20261027131534"></script>
+
+  <footer class="site-footer">
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-27">October 27, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Algorithms');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  
+  
+  
+    
+  
+  
+  <script src="https://uwt-tutor-backend.onrender.com/widget.js"
+          data-key="wk_bcb80c4ee2d5718131d24548528577c3"
+          data-content-selector="main"
+          data-color="#5F7038"></script>
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

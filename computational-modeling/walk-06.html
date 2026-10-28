@@ -1,0 +1,2037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reading the assignment 5 program — Computational Physical Modeling</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="css/blocks.css?v=20261027131534">
+  <link rel="stylesheet" href="css/demos.css?v=20261027131534">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (olive). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #5F7038;
+      --course-accent-dark: #47542A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    /* ── Week page video and class cards (media-cards.js) ── */
+    .media-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+      gap: 0.9rem;
+      margin: 1rem 0;
+    }
+    .media-card {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-top: 4px solid var(--course-accent);
+      border-radius: 4px;
+      padding: 0.75rem 0.9rem 0.85rem;
+    }
+    .media-card.class { border-top-color: #C8860A; }
+    .media-card p { margin: 0; }
+    .mc-kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .mc-title { font-weight: 600; line-height: 1.3; margin: 0.25rem 0 0.35rem !important; }
+    .mc-sub { font-size: 0.85rem; color: #5A5550; line-height: 1.4; }
+    .mc-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.7rem; }
+    .mc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--course-accent);
+      border-radius: 3px;
+      text-decoration: none;
+      color: var(--course-accent-dark);
+    }
+    a.mc-btn:visited { color: var(--course-accent-dark); }
+    a.mc-btn:hover { background: #F0EDE7; }
+    .mc-btn svg { width: 1em; height: 1em; flex: none; }
+    .mc-btn.primary, a.mc-btn.primary:visited { background: var(--course-accent); color: #fff; }
+    a.mc-btn.primary:hover { background: var(--course-accent-dark); }
+    .mc-btn.pending { border-style: dashed; border-color: #b8b2a8; color: #5A5550; }
+    .mc-total { font-size: 0.9rem; color: #5A5550; }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+    /* the remembered data phrase; filled in by page.js */
+    .cg-phrase { display: inline-flex; align-items: center; gap: .3rem; margin-right: .6rem;
+      font-size: .82rem; flex-shrink: 0; }
+    /* The header row is a fixed 780px. The title, the toggle, "Your data", Search and
+       "Report a problem" only just fit in it, so the chip shows the label alone (the
+       phrase is in the link's title and on the data page) and Search shows its icon.
+       An earlier chip that held the phrase and was allowed to shrink squeezed the
+       label down to "Yo" on a classroom projector. */
+    .cg-phrase a { color: rgba(230,238,222,.92); text-decoration: none; white-space: nowrap; }
+    .header-links .search-btn .sb-label { display: none; }
+    .header-links button.report-btn { white-space: nowrap; }
+    /* the title keeps its own width */
+    .site-header-top .site-title { white-space: nowrap; flex-shrink: 0; }
+    .site-header-top .header-links { min-width: 0; margin-left: 1rem; }
+    @media (max-width: 780px) {
+      /* below the 780px row: the report button's short form, as on phones */
+      .header-links .report-btn .rb-full { display: none; }
+      .header-links .report-btn .rb-short { display: inline; }
+      .cg-phrase { margin-right: .2rem; }
+    }
+    .cg-phrase a:hover { color: #fff; text-decoration: underline; }
+    .cg-phrase button { background: none; border: none; cursor: pointer; padding: 0 .2rem;
+      color: rgba(230,238,222,.7); font: inherit; font-size: 1rem; line-height: 1; }
+    .cg-phrase button:hover { color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* Two rules the other course sites do not define. The header's top
+       row carries a report button beside the title, and a page with a
+       wide demo in it needs more than the reading measure. */
+    .site-header-top { border-bottom: 1px solid rgba(200,222,180,0.15); }
+    main.wide { max-width: 1180px; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Computational Physical Modeling</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <span class="cg-phrase" id="cg-phrase"></span>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        
+          <a href="syllabus.html">Syllabus</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="notes.html">Notes</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reports.html">Examples</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reflection.html">Reflection</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="meeting.html">Meeting</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="ai-use.html">AI Use</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="tools.html">Tools</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="python.html">Python</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="workbench.html">Workbench</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="extra-labor.html">Extra Labor</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="canvas-grades.html">Canvas Grades</a>
+          
+        
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+          
+          
+          
+          <a href="week-01.html">1</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-02.html">2</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-03.html">3</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-04.html">4</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          <span class="week-gap" title="Week 5 is a break week">5<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <a href="week-06.html">6</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-07.html">7</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-08.html">8</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-09.html">9</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-10.html">10</a>
+          
+        
+      </div>
+    </nav>
+
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+
+  <main data-pagefind-body>
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <div class="eyebrow"><a href="reports-06.html">Example reports &middot; Assignment 5</a></div>
+<h1>Reading the assignment 5 program</h1>
+
+<p>This page reads <code>a5_model_selection.py</code>, the program behind the technical report in
+the <a href="reports-06.html">assignment&nbsp;5 example reports</a>, one section at a time. The
+program decides which of two models of a shot's height to build on. One fits gravity from the data
+and the other holds it at 9.81&nbsp;m/s&sup2;, and the program tests each by fitting it to the
+start of a flight and measuring how well it predicts the rest. Each section below shows the Python
+beside a MATLAB version that prints exactly the same output (checked by running both on the example pack, the MATLAB version in GNU Octave), and the line notes say what each line does and which lines carry a decision.</p>
+
+<p><a href="program-shape-state-and-flow.html">Program shape I</a> suggests reading
+unfamiliar code by finding what comes in, what goes out and the state each loop builds, and the
+next section starts there. In the Python file the functions come first and the main part follows, from the top
+down. A MATLAB script has to keep its functions at the end, so its line ranges jump. A line you cannot read is usually covered on one of the <a
+href="python.html">Reading Python</a> pages, which the notes link to, and the MATLAB lines have
+notes of their own.</p>
+
+<h2 id="what-comes-in-and-what-goes-out">What Comes In and What Goes Out</h2>
+
+<table class="data">
+  <tr><th>Comes in</th><th>From</th></tr>
+  <tr><td>24 training shots, each a list of times and heights</td><td><code>shots/train.json</code></td></tr>
+  <tr><td>Three sets of 12 test shots, cut off at different points</td><td><code>shots/test_short.json</code>, <code>test_mid.json</code>, <code>test_long.json</code></td></tr>
+  <tr><td>The tracker's noise and the rim height</td><td>the header of <code>train.json</code> (the rim height is copied into the program)</td></tr>
+</table>
+
+<table class="data">
+  <tr><th>Goes out</th><th>Where</th></tr>
+  <tr><td>One line per training arc: where its flight starts and ends</td><td>printed</td></tr>
+  <tr><td>The tracking noise, the frames of flight in each test file, and <em>g</em> fitted to whole flights</td><td>printed</td></tr>
+  <tr><td>A summary per fit length: the residual and held-out error for both models, and the free model's fitted <em>g</em></td><td>printed, and the report's results table</td></tr>
+  <tr><td>Three figures</td><td><code>release.svg</code>, <code>errors_by_window.svg</code>, <code>arc_325.svg</code></td></tr>
+</table>
+
+<p>The state worth tracking through the main part is small. <code>arcs</code> collects each usable
+flight, <code>results</code> holds one table of scores per fit length, and <code>g_whole</code>
+holds gravity fitted to each whole flight, and <code>odd_steps</code> collects the uneven frame
+steps. Everything else is scratch inside a loop or a function.</p>
+
+<h2 id="settings">Settings</h2>
+
+<p>The program starts by bringing in its libraries and naming the numbers that decide how it finds a
+flight and how it tests the models. Each one is either given (the rim height, and gravity at 9.81 as
+Bob set it) or a choice the student made. Naming it at the top puts each choice in one place, so it
+can be found and changed there. The MATLAB
+version has no imports, since <code>jsondecode</code>, <code>polyfit</code> and the plotting
+functions are built in.</p>
+<div class="codetabs" id="s0">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|Three libraries: json reads the files, numpy does the arithmetic on arrays and matplotlib draws ([Files and libraries](py-files.html)).;6|Gravity for the fixed model, the value Bob set. A name in capitals is a constant by convention. That is, it is assigned once here and never changed ([Names and assignment](py-names.html)). Everything after # is a comment for people, which Python ignores.;7|Each acceleration is estimated from 9 frames, 0.32 s of flight. This number is a choice.;8|How close to -9.81 an acceleration has to be to count as free flight. This number is a choice.;9|How many frames in a row it has to stay that close. This number is a choice.;10|The rim height, 10 feet, from the file header. A fact, copied in by hand.;11|The three numbers of frames each model is fitted to, as a list ([Lists](py-lists.html)). They are a choice.;12|An arc is scored only if at least 3 frames are left over after the fitted ones. This number is a choice.">import json
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+G = 9.81               # m/s^2
+WINDOW = 9             # frames in each acceleration estimate (0.32 s)
+TOL = 5.0              # m/s^2, how close to -g counts as "settled"
+RUN = 4                # frames in a row it has to stay settled
+RIM = 3.048            # m, rim height (from the header)
+FIT_LENGTHS = [6, 10, 14]
+MIN_HELD_OUT = 3       # an arc needs at least this many unseen frames to be scored</pre>
+  <pre data-lang="matlab" hidden data-notes="1|The same settings. The semicolon stops MATLAB printing each value, and everything after % is a comment.;6|A row of three numbers.">G = 9.81;               % m/s^2
+WINDOW = 9;             % frames in each acceleration estimate (0.32 s)
+TOL = 5.0;              % m/s^2, how close to -g counts as "settled"
+RUN = 4;                % frames in a row it has to stay settled
+RIM = 3.048;            % m, rim height (from the header)
+FIT_LENGTHS = [6, 10, 14];
+MIN_HELD_OUT = 3;       % an arc needs at least this many unseen frames to be scored</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 14 to 25 (Python) and lines 17 to 23 (MATLAB).</div>
+</div>
+<h2 id="loading-a-file">Loading a File</h2>
+
+<p>The first function opens one of the four shot files and hands back everything in it. It takes a
+name such as <code>'train'</code> and builds the path from it, so the rest of the program never
+has to spell out a folder.</p>
+<div class="codetabs" id="s1">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|Takes a file name without its folder or extension ([Functions](py-functions.html)).;2|The f-string builds the path, so load('train') opens shots/train.json ([Numbers and text](py-values.html)). with opens the file as f and closes it again when the block ends ([Files and libraries](py-files.html)).;3|Hands back the whole file as a dictionary with two keys, header and shots ([Dictionaries](py-dicts.html)).">def load(name):
+    with open(f'shots/{name}.json') as f:
+        return json.load(f)</pre>
+  <pre data-lang="matlab" hidden data-notes="1|Named load_shots because load is already a MATLAB function.;2|fileread reads the file as text, and square brackets join the pieces of the path. jsondecode turns the text into a struct.;3|When every shot has the same fields, shots is an array of structs, one per shot. Some packs include a shot with an extra field, and then jsondecode gives a cell array, so this turns it back into a struct array.">function d = load_shots(name)
+    d = jsondecode(fileread(['shots/' name '.json']));
+    if iscell(d.shots)
+        % jsondecode gives a cell array when the shots do not all have the same
+        % fields (some carry an extra one). Keep the three fields used here.
+        cells = d.shots;
+        d.shots = struct('id', {}, 't', {}, 'z', {});
+        for m = 1:numel(cells)
+            d.shots(m).id = cells{m}.id;
+            d.shots(m).t = cells{m}.t;
+            d.shots(m).z = cells{m}.z;
+        end
+    end
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 28 to 30 (Python) and lines 205 to 218 (MATLAB).</div>
+</div>
+<h2 id="the-acceleration-at-each-frame">The Acceleration at Each Frame</h2>
+
+<p>Finding where a flight starts and ends depends on the ball's vertical acceleration, which the
+file does not hold. This function estimates it at every frame by fitting a parabola through the 9
+frames centered on that frame, since a parabola's acceleration is twice its <em>t</em>&sup2;
+coefficient. The four frames at each end have no full window around them and get
+<code>nan</code>.</p>
+<div class="codetabs" id="s2">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|Text in triple quotes just after def describes the function. Python keeps it but does not run it.;4|Half the window: 4 frames either side. // drops the remainder, so 9 // 2 is 4.;5|An array of nan (not a number), one per frame, to be filled in ([numpy arrays](py-numpy.html)).;6|Every frame with 4 frames on both sides ([Loops](py-loops.html)).;7|Fits a parabola to the 9 heights around frame i, with time measured from frame i. c[0] is the t squared coefficient ([Lists](py-lists.html)).;8|polyfit returns the t squared coefficient first, so the second derivative is 2 c[0].">def accel(t, z):
+    """Vertical acceleration at every frame, from a parabola through the 9 frames
+    centered on it. NaN where the window runs off either end."""
+    h = WINDOW // 2
+    a = np.full(len(t), np.nan)
+    for i in range(h, len(t) - h):
+        c = np.polyfit(t[i - h:i + h + 1] - t[i], z[i - h:i + h + 1], 2)
+        a[i] = 2 * c[0]
+    return a</pre>
+  <pre data-lang="matlab" hidden data-notes="1|MATLAB functions see only their inputs, so WINDOW is passed in. In Python it is read from the top of the file.;4|floor rounds down, so this is 4, as // gives in Python.;6|MATLAB counts from 1, so the first frame with 4 before it is frame 5.;7|polyfit gives the highest power first, as numpy does, so c(1) is the t squared coefficient.">function a = accel(t, z, WINDOW)
+    % Vertical acceleration at every frame, from a parabola through the 9 frames
+    % centered on it. NaN where the window runs off either end.
+    h = floor(WINDOW / 2);
+    a = nan(numel(t), 1);
+    for i = h+1:numel(t)-h
+        c = polyfit(t(i-h:i+h) - t(i), z(i-h:i+h), 2);
+        a(i) = 2 * c(1);
+    end
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 33 to 41 (Python) and lines 221 to 230 (MATLAB).</div>
+</div>
+<h2 id="where-the-hand-lets-go">Where the Hand Lets Go</h2>
+
+<p>While the hand is on the ball the acceleration is upward. <code>last_push</code> finds the last
+frame before the top of the flight where it still is, and <code>release</code> takes the first
+frame after that where the acceleration has settled near &minus;9.81&nbsp;m/s&sup2; and stays
+there for four frames. Requiring four frames in a row keeps one noisy estimate from deciding the
+release.</p>
+<div class="codetabs" id="s3">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="5|The frame of the highest point. Everything before it could still be the throw.;6|None means &quot;no frame found yet&quot;. If no frame qualifies, None is what comes back ([Conditions](py-conditions.html)).;7|Frames 0 up to the one before the top.;8|Upward acceleration, so the hand is still pushing. Each such frame replaces the one before, so the last one is kept.;18|Start just after the last push. With no push found, start at the first frame that has an acceleration.;22|Every start with RUN frames from it to the end of the record.;23|True only if all four accelerations from frame i are within TOL of -G ([numpy arrays](py-numpy.html)). a + G is near zero when a is near -G.;24|The first frame that passes is the release, and return ends the search there.">def last_push(t, z):
+    """The last frame before the top where the acceleration is upward, meaning
+    the hand is still on the ball. None if there is no such frame."""
+    a = accel(t, z)
+    top = int(np.argmax(z))
+    last = None
+    for i in range(top):
+        if a[i] &gt; 0:
+            last = i
+    return last
+
+
+def release(t, z):
+    """The first frame after the last upward push at which the acceleration is
+    within TOL of -g and stays there for RUN frames. None if it never does."""
+    a = accel(t, z)
+    p = last_push(t, z)
+    if p is not None:
+        first = p + 1
+    else:
+        first = WINDOW // 2
+    for i in range(first, len(t) - RUN + 1):
+        if np.all(np.abs(a[i:i + RUN] + G) &lt; TOL):
+            return i
+    return None</pre>
+  <pre data-lang="matlab" hidden data-notes="5|max hands back the value and its position. ~ discards the value.;6|An empty array plays the part of Python's None. isempty tests for it.;23|This is frame 5 in MATLAB's counting and frame 4 in Python's, which is the same frame.;27|i:i+RUN-1 is four frames, both ends included.">function last = last_push(t, z, WINDOW)
+    % The last frame before the top where the acceleration is upward, meaning
+    % the hand is still on the ball. Empty if there is no such frame.
+    a = accel(t, z, WINDOW);
+    [~, top] = max(z);
+    last = [];
+    for i = 1:top-1
+        if a(i) &gt; 0
+            last = i;
+        end
+    end
+end
+
+
+function r = release(t, z, WINDOW, G, TOL, RUN)
+    % The first frame after the last upward push at which the acceleration is
+    % within TOL of -g and stays there for RUN frames. Empty if it never does.
+    a = accel(t, z, WINDOW);
+    p = last_push(t, z, WINDOW);
+    if ~isempty(p)
+        first = p + 1;
+    else
+        first = floor(WINDOW / 2) + 1;
+    end
+    r = [];
+    for i = first:numel(t)-RUN+1
+        if all(abs(a(i:i+RUN-1) + G) &lt; TOL)
+            r = i;
+            return
+        end
+    end
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 44 to 68 (Python) and lines 233 to 264 (MATLAB).</div>
+</div>
+<h2 id="where-the-flight-ends">Where the Flight Ends</h2>
+
+<p>The flight ends at whichever comes first after the top: the acceleration leaving the band for
+four frames in a row (the ball has hit the rim, the backboard or the net) or the ball dropping below
+rim height. The function returns the frame before that, the last frame of free flight.</p>
+<div class="codetabs" id="s4">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="7|From the top to the last frame that still has RUN frames from it.;8|Either condition ends the flight: four frames all outside the band, or the ball below the rim ([Conditions](py-conditions.html)). Ending at rim height is a choice.;9|The frame before is the last one in free flight.;10|If nothing ends it, the flight runs to the last frame of the record.">def flight_end(t, z):
+    """Last frame of the flight: the frame before the acceleration leaves the
+    band for RUN frames in a row (the ball has hit something), or the frame
+    before the ball drops through rim height, whichever comes first."""
+    a = accel(t, z)
+    top = int(np.argmax(z))
+    for i in range(top, len(t) - RUN + 1):
+        if np.all(np.abs(a[i:i + RUN] + G) &gt;= TOL) or z[i] &lt; RIM:
+            return i - 1
+    return len(t) - 1</pre>
+  <pre data-lang="matlab" hidden data-notes="8||| is or.;13|The last frame. MATLAB counts from 1, so it is numel(t) where Python has len(t) - 1.">function e = flight_end(t, z, WINDOW, G, TOL, RUN, RIM)
+    % Last frame of the flight: the frame before the acceleration leaves the
+    % band for RUN frames in a row (the ball has hit something), or the frame
+    % before the ball drops through rim height, whichever comes first.
+    a = accel(t, z, WINDOW);
+    [~, top] = max(z);
+    for i = top:numel(t)-RUN+1
+        if all(abs(a(i:i+RUN-1) + G) &gt;= TOL) || z(i) &lt; RIM
+            e = i - 1;
+            return
+        end
+    end
+    e = numel(t);
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 71 to 80 (Python) and lines 267 to 280 (MATLAB).</div>
+</div>
+<h2 id="filled-in-stretches">Filled-In Stretches</h2>
+
+<p>Measured heights carry about 3&nbsp;cm of noise, so they are very unlikely to lie on a straight
+line. When the tracker loses the ball it probably fills the gap with one, and this function looks
+for that: six or more steps (seven frames) where the second difference of the height is essentially
+zero. One training arc, 325,
+has such a stretch and is left out of the comparison.</p>
+<div class="codetabs" id="s5">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|frames=6 is a default: a call that leaves it out looks for runs of 6 steps ([Functions](py-functions.html)). Six is a choice.;5|np.diff(z, 2) is the second difference, zero on a straight line. flat is True wherever it is under 1 mm ([numpy arrays](py-numpy.html)). The 1 mm threshold is a choice.;8|Five second differences in a row near zero means seven frames (six steps) on a straight line.;10|No straight stretch, so the function hands back None.;12|The first frame of the first straight run and the last frame of the last one, as a pair. hits[-1] is the last start found.">def straight_runs(z, frames=6):
+    """First and last frame of any stretch where the height falls on a straight
+    line for 'frames' steps or more. Measured heights carry about 3 cm of noise,
+    so a straight line means the tracker filled a gap."""
+    flat = np.abs(np.diff(z, 2)) &lt; 0.001
+    hits = []
+    for i in range(len(flat) - frames + 2):
+        if np.all(flat[i:i + frames - 1]):
+            hits.append(i)
+    if len(hits) == 0:
+        return None
+    return hits[0], hits[-1] + frames</pre>
+  <pre data-lang="matlab" hidden data-notes="9|Assigning one past the end adds a value to the array.;14|The first and last frame, as a row of two. Empty when there is no stretch.">function gap = straight_runs(z, frames)
+    % First and last frame of any stretch where the height falls on a straight
+    % line for 'frames' steps or more. Measured heights carry about 3 cm of noise,
+    % so a straight line means the tracker filled a gap. Empty if there is none.
+    flat = abs(diff(z, 2)) &lt; 0.001;
+    hits = [];
+    for i = 1:numel(flat)-frames+2
+        if all(flat(i:i+frames-2))
+            hits(end+1) = i;
+        end
+    end
+    gap = [];
+    if ~isempty(hits)
+        gap = [hits(1), hits(end) + frames];
+    end
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 83 to 94 (Python) and lines 283 to 298 (MATLAB).</div>
+</div>
+<h2 id="the-two-models">The Two Models</h2>
+
+<p><code>fit</code> holds both models. Each is a parabola fitted by least squares, and the only difference is whether the <em>t</em>&sup2; coefficient is solved for or set
+to &minus;<em>g</em>/2 in advance. The second case moves the known term over to the measurements
+and fits a straight line to what is left, as <a href="linearity-in-the-parameters.html">Linearity
+in the parameters</a> explains. <code>rms</code> scores a fitted parabola against a set of heights,
+and <code>find_shot</code> picks a shot out by its id for the figures.</p>
+<div class="codetabs" id="s6">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|fixed is True for the model that holds gravity, False for the one that fits it ([Conditions](py-conditions.html)).;3|Two columns, for c0 and c1.;4|The known term is added to the heights, and a straight line is fitted to the result. lstsq hands back several things, and [0] keeps the coefficients.;5|The same three coefficients the free fit returns, with the third set by hand.;6|Three columns: all three coefficients come from the data.;14|Returns the first shot with that id. With no match the function hands back None.;18|The root mean square of the gap between the parabola and the heights, in meters.">def fit(t, z, fixed):
+    if fixed:   # the known term moves to the left-hand side
+        A = np.column_stack([np.ones_like(t), t])
+        c = np.linalg.lstsq(A, z + 0.5 * G * t ** 2, rcond=None)[0]
+        return np.array([c[0], c[1], -G / 2])
+    A = np.column_stack([np.ones_like(t), t, t ** 2])
+    return np.linalg.lstsq(A, z, rcond=None)[0]
+
+
+def find_shot(shots, wanted):
+    """The shot whose id is wanted."""
+    for s in shots:
+        if s['id'] == wanted:
+            return s
+
+
+def rms(c, t, z):
+    return np.sqrt(np.mean((c[0] + c[1] * t + c[2] * t ** 2 - z) ** 2))</pre>
+  <pre data-lang="matlab" hidden data-notes="3|ones(size(t)) is a column of ones the same size as t, for the constant c0.;4|The backslash solves the least-squares problem. .^ squares each time.;24|Named rms_error because rms is already a MATLAB function.">function c = fit(t, z, fixed, G)
+    if fixed   % the known term moves to the left-hand side
+        A = [ones(size(t)), t];
+        c2 = A \ (z + 0.5 * G * t.^2);
+        c = [c2(1); c2(2); -G / 2];
+        return
+    end
+    A = [ones(size(t)), t, t.^2];
+    c = A \ z;
+end
+
+
+function s = find_shot(shots, wanted)
+    % The shot whose id is wanted.
+    for m = 1:numel(shots)
+        if shots(m).id == wanted
+            s = shots(m);
+            return
+        end
+    end
+end
+
+
+function e = rms_error(c, t, z)
+    e = sqrt(mean((c(1) + c(2) * t + c(3) * t.^2 - z).^2));
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 97 to 114 (Python) and lines 301 to 326 (MATLAB).</div>
+</div>
+<h2 id="reading-the-training-file">Reading the Training File</h2>
+
+<p>The program runs from here. Apart from the settings, everything above was function definitions,
+which store functions without running them (in the MATLAB file they sit at the bottom), so reading
+from here down follows the order the program runs in.</p>
+<div class="codetabs" id="s7">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|A list of 24 dictionaries, one per shot ([Dictionaries](py-dicts.html)).;3|Three keys in a row reach into the header. The value is printed and not used again.">train = load('train')
+shots = train['shots']
+noise = train['header']['tracking_noise']['vertical_m']
+print('vertical tracking noise from the header (m):', noise)</pre>
+  <pre data-lang="matlab" hidden data-notes="3|Dots reach into the struct the way keys do in Python.">train = load_shots('train');
+shots = train.shots;
+noise = train.header.tracking_noise.vertical_m;
+fprintf('vertical tracking noise from the header (m): %g\n', noise);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 117 to 120 (Python) and lines 25 to 28 (MATLAB).</div>
+</div>
+<h2 id="how-much-flight-a-test-record-gives">How Much Flight a Test Record Gives</h2>
+
+<p>Bob's test records are cut off early, so the program first counts how many frames each one has
+after the hand lets go. The fit lengths of 6, 10 and 14 frames are one under the median for the
+short, middle and long records, which leaves a frame to spare for finding the release.</p>
+<div class="codetabs" id="s8">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|One pass per test file ([Loops](py-loops.html)).;7|The frames after the last push, which is the most a fit could use on that record.;9|The median, the shortest and the longest. :10 pads the name to 10 characters so the columns line up, and :.0f prints the median with no decimals ([Numbers and text](py-values.html))."># how much flight does a test record give us to fit?
+for name in ['test_short', 'test_mid', 'test_long']:
+    seen = []
+    for s in load(name)['shots']:
+        t = np.array(s['t'])
+        z = np.array(s['z'])
+        seen.append(len(t) - 1 - last_push(t, z))
+    print(f'{name:10}  frames after the last upward push: '
+          f'median {np.median(seen):.0f}, range {min(seen)} to {max(seen)}')</pre>
+  <pre data-lang="matlab" hidden data-notes="2|Curly braces make a cell array, a list whose entries can be different sizes (here, pieces of text). names{k} takes the k-th one out.;10|The same count. With MATLAB's counting from 1 the - 1 is not needed.">% how much flight does a test record give us to fit?
+names = {'test_short', 'test_mid', 'test_long'};
+for k = 1:numel(names)
+    d = load_shots(names{k});
+    test_shots = d.shots;
+    seen = zeros(numel(test_shots), 1);
+    for m = 1:numel(test_shots)
+        t = test_shots(m).t;
+        z = test_shots(m).z;
+        seen(m) = numel(t) - last_push(t, z, WINDOW);
+    end
+    fprintf('%-10s  frames after the last upward push: median %.0f, range %d to %d\n', ...
+            names{k}, median(seen), min(seen), max(seen));
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 122 to 130 (Python) and lines 30 to 43 (MATLAB).</div>
+</div>
+<h2 id="finding-the-flight-in-each-training-arc">Finding the Flight in Each Training Arc</h2>
+
+<p>This loop runs the functions above on every training shot. A shot with a filled-in stretch is
+reported and skipped. For the rest it finds the release and the end of the flight, counts the steps
+inside the flight that are not 40&nbsp;ms apart (as the 25&nbsp;Hz tracker should give), and keeps the times and
+heights of the flight in <code>arcs</code>.</p>
+<div class="codetabs" id="s9">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|The accumulator: one entry per usable flight, built up by the loop.;4|:&gt;5 right-aligns the text in 5 characters, so the headings sit over their columns ([Numbers and text](py-values.html)).;9|A pair of frame numbers, or None.;10|A pair counts as true and None as false, so this asks whether a stretch was found ([Conditions](py-conditions.html)).;13|Skip the rest of this pass and go on to the next shot.;16|t[r:e + 1] is the flight, release to end inclusive ([Lists](py-lists.html)). np.diff gives the time between neighboring frames, here in ms.;17|The steps more than 5 ms away from 40 ms. 5 ms is a choice.;18|Adds this arc's odd steps to the running list.;20|Keeps the id and the flight's times and heights together, as a tuple of three."># find the flight in every training arc
+arcs = []
+print()
+print(f"{'arc':&gt;5} {'release':&gt;7} {'end':&gt;4} {'frames':&gt;6} {'steps not 40 ms':&gt;16}")
+odd_steps = []
+for s in shots:
+    t = np.array(s['t'])
+    z = np.array(s['z'])
+    gap = straight_runs(z)
+    if gap:
+        print(f"{s['id']:&gt;5}  dropped: height is a straight line, "
+              f"frames {gap[0]} to {gap[1]}")
+        continue
+    r = release(t, z)
+    e = flight_end(t, z)
+    steps = 1000 * np.diff(t[r:e + 1])     # ms between frames in the flight
+    odd = steps[np.abs(steps - 40) &gt; 5]
+    odd_steps = odd_steps + list(odd)
+    print(f"{s['id']:&gt;5} {r:&gt;7} {e:&gt;4} {e - r + 1:&gt;6} {len(odd):&gt;16}")
+    arcs.append((s['id'], t[r:e + 1], z[r:e + 1]))
+
+print(f'steps other than 40 ms inside the flights: {len(odd_steps)}, '
+      f'from {min(odd_steps):.0f} to {max(odd_steps):.0f} ms')</pre>
+  <pre data-lang="matlab" hidden data-notes="3|Cell arrays, because each flight has a different number of frames.;15|Minus 1 prints Python's frame numbers, the ones the report uses.;20|t(r:e) includes both ends, so it needs no + 1.;23|%5d is a whole number padded to 5 characters, like :&gt;5 in Python.">% find the flight in every training arc
+arc_ids = [];
+arc_t = {};
+arc_z = {};
+fprintf('\n');
+fprintf('%5s %7s %4s %6s %16s\n', 'arc', 'release', 'end', 'frames', 'steps not 40 ms');
+odd_steps = [];
+for m = 1:numel(shots)
+    s = shots(m);
+    t = s.t;
+    z = s.z;
+    gap = straight_runs(z, 6);
+    if ~isempty(gap)
+        fprintf('%5d  dropped: height is a straight line, frames %d to %d\n', ...
+                s.id, gap(1) - 1, gap(2) - 1);
+        continue
+    end
+    r = release(t, z, WINDOW, G, TOL, RUN);
+    e = flight_end(t, z, WINDOW, G, TOL, RUN, RIM);
+    steps = 1000 * diff(t(r:e));           % ms between frames in the flight
+    odd = steps(abs(steps - 40) &gt; 5);
+    odd_steps = [odd_steps; odd];
+    fprintf('%5d %7d %4d %6d %16d\n', s.id, r - 1, e - 1, e - r + 1, numel(odd));
+    arc_ids(end+1) = s.id;
+    arc_t{end+1} = t(r:e);
+    arc_z{end+1} = z(r:e);
+end
+
+fprintf('steps other than 40 ms inside the flights: %d, from %.0f to %.0f ms\n', ...
+        numel(odd_steps), min(odd_steps), max(odd_steps));</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 132 to 154 (Python) and lines 45 to 74 (MATLAB).</div>
+</div>
+<h2 id="both-models-three-fit-lengths">Both Models, Three Fit Lengths</h2>
+
+<p>For each fit length, each model is fitted to the first frames of every
+flight and scored twice: on the frames it was fitted to (the residual) and on the frames after them,
+which it never saw (the held-out error). The held-out error is the one that says how well a model
+predicts, which is what Bob needs.</p>
+<div class="codetabs" id="s10">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|A dictionary with one table per fit length, under the fit length as its key ([Dictionaries](py-dicts.html)).;5|Each entry of arcs is a tuple of three, unpacked into three names.;6|Too few frames left to score, so the arc is skipped at this length.;8|The first n_fit frames, which the models are fitted to ([Lists](py-lists.html)).;10|Everything after them, which the fits never see.;12|The three coefficients of each model fitted to those frames. False and True pick the model.;14|One row per arc: two residuals, two held-out errors and the gravity the free model found.;17|The four errors from meters to centimeters. Gravity is left in m/s squared."># both models, three fit lengths, scored on the unseen part of the flight
+results = {}
+for n_fit in FIT_LENGTHS:
+    rows = []
+    for arc_id, t, z in arcs:
+        if len(t) - n_fit &lt; MIN_HELD_OUT:
+            continue
+        tf = t[:n_fit]          # the fitted frames
+        zf = z[:n_fit]
+        th = t[n_fit:]          # the held-out frames
+        zh = z[n_fit:]
+        free = fit(tf, zf, False)
+        fixed = fit(tf, zf, True)
+        rows.append([rms(free, tf, zf), rms(fixed, tf, zf),
+                     rms(free, th, zh), rms(fixed, th, zh), -2 * free[2]])
+    # residuals and errors to cm, g stays in m/s^2
+    results[n_fit] = np.array(rows) * [100, 100, 100, 100, 1]</pre>
+  <pre data-lang="matlab" hidden data-notes="2|One table per fit length, in a cell array in the same order as FIT_LENGTHS.;18|Adds a row to the bottom of the table.;22|.* multiplies each column by its own factor.">% both models, three fit lengths, scored on the unseen part of the flight
+results = cell(1, numel(FIT_LENGTHS));
+for k = 1:numel(FIT_LENGTHS)
+    n_fit = FIT_LENGTHS(k);
+    rows = [];
+    for m = 1:numel(arc_t)
+        t = arc_t{m};
+        z = arc_z{m};
+        if numel(t) - n_fit &lt; MIN_HELD_OUT
+            continue
+        end
+        tf = t(1:n_fit);          % the fitted frames
+        zf = z(1:n_fit);
+        th = t(n_fit+1:end);      % the held-out frames
+        zh = z(n_fit+1:end);
+        free = fit(tf, zf, false, G);
+        fixed = fit(tf, zf, true, G);
+        rows(end+1, :) = [rms_error(free, tf, zf), rms_error(fixed, tf, zf), ...
+                          rms_error(free, th, zh), rms_error(fixed, th, zh), -2 * free(3)];
+    end
+    % residuals and errors to cm, g stays in m/s^2
+    results{k} = rows .* [100, 100, 100, 100, 1];
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 156 to 172 (Python) and lines 76 to 98 (MATLAB).</div>
+</div>
+<h2 id="the-summary">The Summary</h2>
+
+<p>Each fit length gets a heading line and three more: the median residual, the median held-out
+error, and the median and range of the fitted gravity, over all the arcs. Medians are used so that
+a few arcs with large errors cannot pull the summary around, and the counts beside them (how many
+arcs one model matches or beats the other on) say whether a difference is consistent.</p>
+<div class="codetabs" id="s11">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="3|Each fit length with its table ([Dictionaries](py-dicts.html)). r is now one fit length's table, no longer a release frame.;4|The median of each column. axis=0 runs down the rows. Using the median is a choice (the mean is the other option).;7|r[:, 0] is the first column. The comparison gives True or False per arc, and np.sum counts the Trues ([numpy arrays](py-numpy.html))."># the summary, one block of lines per fit length
+print()
+for n_fit, r in results.items():
+    med = np.median(r, axis=0)
+    print(f'{n_fit} frames fitted, {len(r)} arcs (medians over the arcs)')
+    print(f'  residual (cm):     free {med[0]:.2f}  fixed {med[1]:.2f}  '
+          f'free &lt;= fixed on {np.sum(r[:, 0] &lt;= r[:, 1])}')
+    print(f'  held-out (cm):     free {med[2]:.1f}  fixed {med[3]:.1f}  '
+          f'fixed closer on {np.sum(r[:, 3] &lt; r[:, 2])}')
+    print(f'  fitted g (m/s^2):  {med[4]:.2f}, '
+          f'range {np.min(r[:, 4]):.1f} to {np.max(r[:, 4]):.1f}')</pre>
+  <pre data-lang="matlab" hidden data-notes="5|The median of each column.;8|Counts the arcs where the free residual is no larger.">% the summary, one block of lines per fit length
+fprintf('\n');
+for k = 1:numel(FIT_LENGTHS)
+    r = results{k};
+    med = median(r, 1);
+    fprintf('%d frames fitted, %d arcs (medians over the arcs)\n', FIT_LENGTHS(k), size(r, 1));
+    fprintf('  residual (cm):     free %.2f  fixed %.2f  free &lt;= fixed on %d\n', ...
+            med(1), med(2), sum(r(:, 1) &lt;= r(:, 2)));
+    fprintf('  held-out (cm):     free %.1f  fixed %.1f  fixed closer on %d\n', ...
+            med(3), med(4), sum(r(:, 4) &lt; r(:, 3)));
+    fprintf('  fitted g (m/s^2):  %.2f, range %.1f to %.1f\n', ...
+            med(5), min(r(:, 5)), max(r(:, 5)));
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 174 to 184 (Python) and lines 100 to 112 (MATLAB).</div>
+</div>
+<h2 id="gravity-over-whole-flights">Gravity Over Whole Flights</h2>
+
+<p>As a check, the free model is fitted to each whole flight. With every frame to work from, the
+gravity it finds would be expected near 9.81&nbsp;m/s&sup2;. The median comes out at 9.61, a little
+low, and the report lists that as an anomaly whose cause has not been found.</p>
+<div class="codetabs" id="s12">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="4|The t squared coefficient is -g/2, so -2 times it is g."># whole flights, gravity fitted
+g_whole = []
+for arc_id, t, z in arcs:
+    g_whole.append(-2 * fit(t, z, False)[2])
+print()
+print(f'g fitted to whole flights: median {np.median(g_whole):.2f}, '
+      f'range {min(g_whole):.2f} to {max(g_whole):.2f} m/s^2, {len(g_whole)} arcs')</pre>
+  <pre data-lang="matlab" hidden data-notes="5|c(3) is the t squared coefficient, since fit returns c0, c1, c2 in that order (the reverse of polyfit).">% whole flights, gravity fitted
+g_whole = zeros(numel(arc_t), 1);
+for m = 1:numel(arc_t)
+    c = fit(arc_t{m}, arc_z{m}, false, G);
+    g_whole(m) = -2 * c(3);
+end
+fprintf('\n');
+fprintf('g fitted to whole flights: median %.2f, range %.2f to %.2f m/s^2, %d arcs\n', ...
+        median(g_whole), min(g_whole), max(g_whole), numel(g_whole));</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 186 to 192 (Python) and lines 114 to 122 (MATLAB).</div>
+</div>
+<h2 id="figure-1-finding-the-release">Figure 1, Finding the Release</h2>
+
+<p>The first figure shows how the release is found on one arc: the heights with the flight picked
+out, and the acceleration estimates with the band around &minus;9.81 drawn in.</p>
+<div class="codetabs" id="s13">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="8|Two plots stacked, sharing the time axis ([Figures](py-plots.html)).;11|'.' draws a dot at each point and no line.;16|A shaded band from -G - TOL to -G + TOL, the band the acceleration has to settle in.;22|The same two vertical lines go on both plots.;30|The file the report uses."># Figure 1: how the release is found, on one arc
+s = find_shot(shots, 1223)
+t = np.array(s['t'])
+z = np.array(s['z'])
+a = accel(t, z)
+r = release(t, z)
+e = flight_end(t, z)
+fig, axes = plt.subplots(2, 1, figsize=(7, 5.5), sharex=True)
+ax1 = axes[0]
+ax2 = axes[1]
+ax1.plot(t, z, '.', color='gray')
+ax1.plot(t[r:e + 1], z[r:e + 1], '.', color='black')
+ax1.set_ylabel('ball height (m)')
+ax1.set_title('Arc 1223: height, and the free flight found in it (black)')
+ax2.plot(t, a, '-', marker='.')
+ax2.axhspan(-G - TOL, -G + TOL, color='tab:green', alpha=0.2,
+            label='within 5 m/s² of -9.81')
+ax2.axhline(0, color='gray', linewidth=0.8)
+ax2.set_ylabel('vertical acceleration (m/s²)')
+ax2.set_xlabel('time from first frame (s)')
+ax2.set_title('Vertical acceleration, 9-frame parabola at each frame')
+for ax in (ax1, ax2):
+    ax.axvline(t[r], color='tab:red', linestyle='--', linewidth=0.8,
+               label=f'release (frame {r})')
+    ax.axvline(t[e], color='tab:blue', linestyle='--', linewidth=0.8,
+               label=f'end of flight (frame {e})')
+ax1.legend(fontsize=8, loc='upper left')
+ax2.legend(fontsize=8, loc='upper left')
+fig.tight_layout()
+fig.savefig('release.svg')
+plt.close(fig)</pre>
+  <pre data-lang="matlab" hidden data-notes="9|subplot picks the top plot of a 2 by 1 grid. Calls after it draw there.;12|hold on, the line before, keeps what is already drawn so this plot adds to it.;30|The same file name as the Python version.">% Figure 1: how the release is found, on one arc
+s = find_shot(shots, 1223);
+t = s.t;
+z = s.z;
+a = accel(t, z, WINDOW);
+r = release(t, z, WINDOW, G, TOL, RUN);
+e = flight_end(t, z, WINDOW, G, TOL, RUN, RIM);
+fig = figure('Position', [100 100 700 550]);
+subplot(2, 1, 1);
+plot(t, z, '.', 'Color', [0.5 0.5 0.5]);
+hold on
+plot(t(r:e), z(r:e), 'k.');
+xline(t(r), '--r');
+xline(t(e), '--b');
+ylabel('ball height (m)');
+title('Arc 1223: height, and the free flight found in it (black)');
+legend({'all frames', 'free flight', sprintf('release (frame %d)', r - 1), ...
+        sprintf('end of flight (frame %d)', e - 1)}, 'Location', 'northwest');
+subplot(2, 1, 2);
+plot(t, a, '.-');
+hold on
+yline(-G - TOL, ':g');
+yline(-G + TOL, ':g');
+yline(0, '-', 'Color', [0.5 0.5 0.5]);
+xline(t(r), '--r');
+xline(t(e), '--b');
+ylabel('vertical acceleration (m/s^2)');
+xlabel('time from first frame (s)');
+title('Vertical acceleration, 9-frame parabola at each frame');
+saveas(fig, 'release.svg');
+close(fig);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 194 to 224 (Python) and lines 124 to 154 (MATLAB).</div>
+</div>
+<h2 id="figure-2-error-against-fit-length">Figure 2, Error Against Fit Length</h2>
+
+<p>The second figure plots the median residual (left) and the median held-out error (right) for
+both models at each fit length, side by side.</p>
+<div class="codetabs" id="s14">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="5|For each model, its column in the results table, its legend label and its marker.;6|Each tuple of three is unpacked into three names.;11|The held-out errors sit two columns after the residuals."># Figure 2: residual and held-out error against frames fitted
+fig, axes = plt.subplots(1, 2, figsize=(9, 3.8))
+ax1 = axes[0]
+ax2 = axes[1]
+models = [(0, 'gravity fitted', 'o-'), (1, 'gravity held at 9.81', 's-')]
+for col, label, mark in models:
+    resid = []
+    held_out = []
+    for n in FIT_LENGTHS:
+        resid.append(np.median(results[n][:, col]))
+        held_out.append(np.median(results[n][:, col + 2]))
+    ax1.plot(FIT_LENGTHS, resid, mark, label=label)
+    ax2.plot(FIT_LENGTHS, held_out, mark, label=label)
+ax1.set_title('Residual on the fitted frames')
+ax2.set_title('Error on the unseen frames')
+for ax in (ax1, ax2):
+    ax.set_xlabel('frames fitted (25 per second)')
+    ax.set_ylabel('median rms height error (cm)')
+    ax.set_xticks(FIT_LENGTHS)
+    ax.legend(fontsize=8)
+fig.tight_layout()
+fig.savefig('errors_by_window.svg')
+plt.close(fig)</pre>
+  <pre data-lang="matlab" hidden data-notes="4|Markers in a cell array, picked out by col in the loop. The labels go to legend all at once at the end.">% Figure 2: residual and held-out error against frames fitted
+fig = figure('Position', [100 100 900 380]);
+labels = {'gravity fitted', 'gravity held at 9.81'};
+marks = {'o-', 's-'};
+for col = 1:2
+    resid = zeros(1, numel(FIT_LENGTHS));
+    held_out = zeros(1, numel(FIT_LENGTHS));
+    for k = 1:numel(FIT_LENGTHS)
+        resid(k) = median(results{k}(:, col));
+        held_out(k) = median(results{k}(:, col + 2));
+    end
+    subplot(1, 2, 1);
+    plot(FIT_LENGTHS, resid, marks{col});
+    hold on
+    subplot(1, 2, 2);
+    plot(FIT_LENGTHS, held_out, marks{col});
+    hold on
+end
+titles = {'Residual on the fitted frames', 'Error on the unseen frames'};
+for col = 1:2
+    subplot(1, 2, col);
+    title(titles{col});
+    xlabel('frames fitted (25 per second)');
+    ylabel('median rms height error (cm)');
+    xticks(FIT_LENGTHS);
+    legend(labels);
+end
+saveas(fig, 'errors_by_window.svg');
+close(fig);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 226 to 248 (Python) and lines 156 to 184 (MATLAB).</div>
+</div>
+<h2 id="figure-3-the-filled-in-arc">Figure 3, the Filled-In Arc</h2>
+
+<p>The last figure shows arc 325, which was left out because its height runs along straight lines
+where the tracker probably filled in frames it did not see.</p>
+<div class="codetabs" id="s15">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="5|The pair the function hands back, unpacked into two names.;8|The filled-in frames, drawn over the whole arc in red."># Figure 3: the filled gap in arc 325
+s = find_shot(shots, 325)
+t = np.array(s['t'])
+z = np.array(s['z'])
+lo, hi = straight_runs(z)
+plt.figure(figsize=(7, 3.5))
+plt.plot(t, z, '.-', color='gray', linewidth=0.6)
+plt.plot(t[lo:hi + 1], z[lo:hi + 1], '.', color='tab:red',
+         label=f'straight lines, frames {lo} to {hi}')
+plt.title('Arc 325: ball height, with a stretch the tracker filled in')
+plt.xlabel('time from first frame (s)')
+plt.ylabel('ball height (m)')
+plt.legend(fontsize=8)
+plt.tight_layout()
+plt.savefig('arc_325.svg')
+plt.close()</pre>
+  <pre data-lang="matlab" hidden data-notes="15|Python's frame numbers again, to match the report.">% Figure 3: the filled gap in arc 325
+s = find_shot(shots, 325);
+t = s.t;
+z = s.z;
+gap = straight_runs(z, 6);
+lo = gap(1);
+hi = gap(2);
+fig = figure('Position', [100 100 700 350]);
+plot(t, z, '.-', 'Color', [0.5 0.5 0.5], 'LineWidth', 0.6);
+hold on
+plot(t(lo:hi), z(lo:hi), 'r.');
+title('Arc 325: ball height, with a stretch the tracker filled in');
+xlabel('time from first frame (s)');
+ylabel('ball height (m)');
+legend({'ball height', sprintf('straight lines, frames %d to %d', lo - 1, hi - 1)});
+saveas(fig, 'arc_325.svg');
+close(fig);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 250 to 265 (Python) and lines 186 to 202 (MATLAB).</div>
+</div>
+
+<h2 id="decisions-in-this-program">Decisions in This Program</h2>
+
+<p>Every line below holds a decision the student made, and the report states most of them. Gravity
+at 9.81 is not on the list, since Bob set it. The line numbers are those of the downloadable files.
+It is a good idea to check your own program with the test on <a href="ai-use.html">Using AI</a>
+(pick a line and say why it is that way). For these lines the answer is a choice, and a different
+student could reasonably have chosen otherwise.</p>
+
+<table class="data">
+  <tr><th class="num">Python line</th><th class="num">MATLAB line</th><th>The decision</th><th>What else could have been chosen</th></tr>
+  <tr><td class="num">20</td><td class="num">18</td><td>Each acceleration comes from a parabola through 9 frames</td><td>fewer frames (noisier estimates) or more (a release blurred over more time)</td></tr>
+  <tr><td class="num">21</td><td class="num">19</td><td>Free flight means within 5&nbsp;m/s&sup2; of &minus;9.81</td><td>a narrower band, which would likely start flights later (or miss some)</td></tr>
+  <tr><td class="num">22</td><td class="num">20</td><td>The acceleration has to stay in the band for 4 frames</td><td>fewer frames, which lets single noisy estimates through</td></tr>
+  <tr><td class="num">78</td><td class="num">274</td><td>A flight ends when the ball drops below rim height</td><td>the memo&rsquo;s rule, the last frame 1&nbsp;m or more from the hoop (measured across the floor)</td></tr>
+  <tr><td class="num">83</td><td class="num">56</td><td>A filled-in stretch is six steps (seven frames) on a straight line</td><td>a different length, or keeping arc 325</td></tr>
+  <tr><td class="num">87</td><td class="num">287</td><td>A step counts as straight when the second difference is under 1&nbsp;mm</td><td>a larger threshold, which would catch noisier stretches too</td></tr>
+  <tr><td class="num">24</td><td class="num">22</td><td>The models are fitted to 6, 10 and 14 frames</td><td>other lengths, chosen from what the test records give</td></tr>
+  <tr><td class="num">25</td><td class="num">23</td><td>An arc needs 3 unseen frames to be scored</td><td>a larger minimum, which above 7 frames would start dropping arcs at 14 frames fitted</td></tr>
+  <tr><td class="num">177</td><td class="num">104</td><td>The summary reports medians over the arcs</td><td>means, which a few very large errors would pull up</td></tr>
+</table>
+
+<h2 id="what-it-prints">What It Prints</h2>
+
+<p>This is everything the program prints, run on the example pack. The MATLAB version prints the
+same lines character for character, with frame numbers counted from 0 to match the report.</p>
+
+<pre class="nb-out">vertical tracking noise from the header (m): 0.0307
+test_short  frames after the last upward push: median 7, range 6 to 10
+test_mid    frames after the last upward push: median 11, range 10 to 14
+test_long   frames after the last upward push: median 15, range 14 to 18
+
+  arc release  end frames  steps not 40 ms
+ 1092      13   37     25                0
+  163      11   36     26                0
+  583      11   36     26                0
+  541      19   42     24                0
+  325  dropped: height is a straight line, frames 25 to 44
+ 1223      14   38     25                0
+  289       8   31     24                2
+  794      12   34     23                0
+ 1111      17   38     22                0
+  662      13   37     25                0
+ 1144      12   39     28                0
+ 1283      15   39     25                2
+   83      13   42     30                1
+  707      12   33     22                0
+ 1095       9   31     23                0
+  677      13   35     23                0
+  700       8   35     28                0
+ 1039      13   40     28                0
+  739       6   27     22                3
+ 1151      20   45     26                0
+  749       8   35     28                0
+  372       7   27     21                0
+ 1307      20   45     26                0
+  693      15   39     25                0
+steps other than 40 ms inside the flights: 8, from 30 to 50 ms
+
+6 frames fitted, 23 arcs (medians over the arcs)
+  residual (cm):     free 1.56  fixed 1.60  free &lt;= fixed on 23
+  held-out (cm):     free 55.0  fixed 7.9  fixed closer on 22
+  fitted g (m/s^2):  9.42, range -3.0 to 18.0
+10 frames fitted, 23 arcs (medians over the arcs)
+  residual (cm):     free 1.62  fixed 1.85  free &lt;= fixed on 23
+  held-out (cm):     free 13.6  fixed 3.7  fixed closer on 19
+  fitted g (m/s^2):  9.79, range 5.9 to 12.3
+14 frames fitted, 23 arcs (medians over the arcs)
+  residual (cm):     free 2.15  fixed 2.24  free &lt;= fixed on 23
+  held-out (cm):     free 7.1  fixed 3.9  fixed closer on 16
+  fitted g (m/s^2):  9.87, range 7.8 to 10.7
+
+g fitted to whole flights: median 9.61, range 8.80 to 10.28 m/s^2, 23 arcs</pre>
+
+<h2 id="running-it-yourself">Running It Yourself</h2>
+
+<p>Both versions are downloads: <a href="data/example/code/a5_model_selection.py" download><code>a5_model_selection.py</code></a>
+and <a href="data/example/code/a5_model_selection.m" download><code>a5_model_selection.m</code></a>. Unzip a data pack, put
+the program in the pack's top folder beside <code>crash</code> and <code>shots</code>, and run it
+from there (<a href="py-files.html">Files and libraries</a> explains why the folder matters). On your own pack it reads your data, so its numbers will differ from the ones above. The MATLAB
+version should run as it is in MATLAB R2018b or later. GNU Octave, which is free, needs a script's functions defined
+before they are used, so to run it there, move the functions to the top of the file and put a line
+<code>1;</code> above them.</p>
+
+  </main>
+
+  
+
+  <script src="js/page.js?v=20261027131534"></script>
+
+  <footer class="site-footer">
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-27">October 27, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Algorithms');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  
+  
+  
+    
+  
+  
+  <script src="https://uwt-tutor-backend.onrender.com/widget.js"
+          data-key="wk_bcb80c4ee2d5718131d24548528577c3"
+          data-content-selector="main"
+          data-color="#5F7038"></script>
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

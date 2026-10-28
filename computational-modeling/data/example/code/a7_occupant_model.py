@@ -83,7 +83,8 @@ def travel(t, a_car, h):
     return 1000 * u[i], 1000 * times[i]
 
 
-with open(os.path.join('crash', os.listdir('crash')[0])) as f:
+name = os.listdir('crash')[0]           # the crash folder holds one file
+with open(os.path.join('crash', name)) as f:
     test = json.load(f)
 ch = test['channels']['vehicle_x']
 dt = ch['dt']
@@ -164,7 +165,7 @@ print(f"   largest push back: model {a_occ[io] / G:+.1f} g at "
       f"{1000 * times[io]:.1f} ms, "
       f"chest {chest[ic] / G:+.1f} g at {1000 * t[ic]:.1f} ms")
 
-# ---- figures
+# ---- figure 1, travel against time
 plt.figure(figsize=(7, 4))
 plt.plot(1000 * times, 1000 * u)
 plt.plot(1000 * when, 1000 * top, 'o', color='tab:red')
@@ -179,6 +180,7 @@ plt.tight_layout()
 plt.savefig('travel.svg')
 plt.close()
 
+# ---- figure 2, the drive as recorded and filtered
 plt.figure(figsize=(7, 4))
 plt.plot(1000 * t, raw / G, linewidth=0.6, label='as recorded')
 plt.plot(1000 * t, a180 / G, label='CFC 180')
@@ -191,6 +193,7 @@ plt.tight_layout()
 plt.savefig('drive.svg')
 plt.close()
 
+# ---- figure 3, the step study
 plt.figure(figsize=(7, 4))
 steps_ms = []
 for s in steps:
@@ -207,6 +210,7 @@ plt.tight_layout()
 plt.savefig('steps.svg')
 plt.close()
 
+# ---- figure 4, the model against the chest
 plt.figure(figsize=(7, 4))
 plt.plot(1000 * t, chest / G, label='driver chest X, measured (CFC 180)')
 plt.plot(1000 * times, a_occ / G, label='model occupant')

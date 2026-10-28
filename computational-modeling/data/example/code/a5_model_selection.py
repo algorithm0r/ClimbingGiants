@@ -171,6 +171,7 @@ for n_fit in FIT_LENGTHS:
     # residuals and errors to cm, g stays in m/s^2
     results[n_fit] = np.array(rows) * [100, 100, 100, 100, 1]
 
+# the summary, one block of lines per fit length
 print()
 for n_fit, r in results.items():
     med = np.median(r, axis=0)

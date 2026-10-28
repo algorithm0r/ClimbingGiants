@@ -1,0 +1,1780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reading the assignment 4 program — Computational Physical Modeling</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="css/blocks.css?v=20261027131534">
+  <link rel="stylesheet" href="css/demos.css?v=20261027131534">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (olive). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #5F7038;
+      --course-accent-dark: #47542A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    /* ── Week page video and class cards (media-cards.js) ── */
+    .media-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+      gap: 0.9rem;
+      margin: 1rem 0;
+    }
+    .media-card {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-top: 4px solid var(--course-accent);
+      border-radius: 4px;
+      padding: 0.75rem 0.9rem 0.85rem;
+    }
+    .media-card.class { border-top-color: #C8860A; }
+    .media-card p { margin: 0; }
+    .mc-kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .mc-title { font-weight: 600; line-height: 1.3; margin: 0.25rem 0 0.35rem !important; }
+    .mc-sub { font-size: 0.85rem; color: #5A5550; line-height: 1.4; }
+    .mc-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.7rem; }
+    .mc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--course-accent);
+      border-radius: 3px;
+      text-decoration: none;
+      color: var(--course-accent-dark);
+    }
+    a.mc-btn:visited { color: var(--course-accent-dark); }
+    a.mc-btn:hover { background: #F0EDE7; }
+    .mc-btn svg { width: 1em; height: 1em; flex: none; }
+    .mc-btn.primary, a.mc-btn.primary:visited { background: var(--course-accent); color: #fff; }
+    a.mc-btn.primary:hover { background: var(--course-accent-dark); }
+    .mc-btn.pending { border-style: dashed; border-color: #b8b2a8; color: #5A5550; }
+    .mc-total { font-size: 0.9rem; color: #5A5550; }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+    /* the remembered data phrase; filled in by page.js */
+    .cg-phrase { display: inline-flex; align-items: center; gap: .3rem; margin-right: .6rem;
+      font-size: .82rem; flex-shrink: 0; }
+    /* The header row is a fixed 780px. The title, the toggle, "Your data", Search and
+       "Report a problem" only just fit in it, so the chip shows the label alone (the
+       phrase is in the link's title and on the data page) and Search shows its icon.
+       An earlier chip that held the phrase and was allowed to shrink squeezed the
+       label down to "Yo" on a classroom projector. */
+    .cg-phrase a { color: rgba(230,238,222,.92); text-decoration: none; white-space: nowrap; }
+    .header-links .search-btn .sb-label { display: none; }
+    .header-links button.report-btn { white-space: nowrap; }
+    /* the title keeps its own width */
+    .site-header-top .site-title { white-space: nowrap; flex-shrink: 0; }
+    .site-header-top .header-links { min-width: 0; margin-left: 1rem; }
+    @media (max-width: 780px) {
+      /* below the 780px row: the report button's short form, as on phones */
+      .header-links .report-btn .rb-full { display: none; }
+      .header-links .report-btn .rb-short { display: inline; }
+      .cg-phrase { margin-right: .2rem; }
+    }
+    .cg-phrase a:hover { color: #fff; text-decoration: underline; }
+    .cg-phrase button { background: none; border: none; cursor: pointer; padding: 0 .2rem;
+      color: rgba(230,238,222,.7); font: inherit; font-size: 1rem; line-height: 1; }
+    .cg-phrase button:hover { color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* Two rules the other course sites do not define. The header's top
+       row carries a report button beside the title, and a page with a
+       wide demo in it needs more than the reading measure. */
+    .site-header-top { border-bottom: 1px solid rgba(200,222,180,0.15); }
+    main.wide { max-width: 1180px; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Computational Physical Modeling</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <span class="cg-phrase" id="cg-phrase"></span>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        
+          <a href="syllabus.html">Syllabus</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="notes.html">Notes</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reports.html">Examples</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reflection.html">Reflection</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="meeting.html">Meeting</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="ai-use.html">AI Use</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="tools.html">Tools</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="python.html">Python</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="workbench.html">Workbench</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="extra-labor.html">Extra Labor</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="canvas-grades.html">Canvas Grades</a>
+          
+        
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+          
+          
+          
+          <a href="week-01.html">1</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-02.html">2</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-03.html">3</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-04.html">4</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          <span class="week-gap" title="Week 5 is a break week">5<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <a href="week-06.html">6</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-07.html">7</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-08.html">8</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-09.html">9</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-10.html">10</a>
+          
+        
+      </div>
+    </nav>
+
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+
+  <main data-pagefind-body>
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <div class="eyebrow"><a href="reports-04.html">Example reports &middot; Assignment 4</a></div>
+<h1>Reading the assignment 4 program</h1>
+
+<p>This page reads <code>a4_filter_report.py</code>, the program behind the technical report in
+the <a href="reports-04.html">assignment&nbsp;4 example reports</a>, one section at a time. The
+program filters the crossmember channel with the SAE&nbsp;J211-1 filter, run forward and then
+backward, and reports its peak at CFC&nbsp;60. Before that it checks the filter, and after it
+gives the peak at every class J211 defines and shows what a single forward pass would have done.
+Each section shows the Python beside a MATLAB version that prints the same results (checked by
+running both on the example pack, the MATLAB version in GNU Octave), and the line notes say what
+each line does.</p>
+
+<p>The filter is the one from <a href="smoothing.html">Smoothing and phase lag</a>, written as three
+small functions. <a href="program-shape-state-and-flow.html">Program shape I</a> suggests reading
+unfamiliar code by finding what comes in, what goes out and the state each loop builds, and the next
+section starts there. In the Python file the functions come first and the main part follows, from
+the top down. A MATLAB script has to keep its functions at the end, so its line ranges jump. A line
+you cannot read is usually covered on one of the <a href="python.html">Reading Python</a> pages,
+which the notes link to, and the MATLAB lines have notes of their own.</p>
+
+<h2 id="what-comes-in-and-what-goes-out">What Comes In and What Goes Out</h2>
+
+<table class="data">
+  <tr><th>Comes in</th><th>From</th></tr>
+  <tr><td>The crossmember's X acceleration and its header</td><td><code>crash/09793.json</code> (the one file in the pack's crash folder), found by its description, which works on the example pack (see Running It Yourself)</td></tr>
+  <tr><td>The four filter classes J211 defines</td><td>the standard, copied into the program</td></tr>
+</table>
+
+<table class="data">
+  <tr><th>Goes out</th><th>Where</th></tr>
+  <tr><td>The channel's header, and how wide its raw peak is</td><td>printed, and the report's Data section and Errors and Anomalies</td></tr>
+  <tr><td>Checks on the filter and on the choices around it</td><td>printed, and the report's Checks</td></tr>
+  <tr><td>The peak at CFC&nbsp;60</td><td>printed, and the report's summary</td></tr>
+  <tr><td>The peak and change in velocity at every class, and a single pass</td><td>printed, and the report's Results and Checks</td></tr>
+  <tr><td>Three figures</td><td><code>fig_raw.svg</code>, <code>fig_classes.svg</code>, <code>fig_onepass.svg</code></td></tr>
+</table>
+
+<p>The state worth tracking is <code>y60</code>, the channel at CFC&nbsp;60, which gives the
+report's answer, and <code>filtered</code>, the channel at every class, which the table and
+Figure&nbsp;2 read from.</p>
+
+<h2 id="settings">Settings</h2>
+
+<p>The settings are standard gravity, the four filter classes J211 defines, and the pack's
+folder.</p>
+<div class="codetabs" id="s0">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="5|numpy, under the short name np, does arithmetic on whole arrays at once ([Files and libraries](py-files.html)).;7|Standard gravity. The report says which value it uses, and a check prints the peak with both.;8|The four classes, as a list ([Lists](py-lists.html)).;9|'.' means the folder the program is run from.">import json
+import os
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+G = 9.80665          # standard gravity, m/s^2
+CLASSES = [1000, 600, 180, 60]
+PACK = '.'</pre>
+  <pre data-lang="matlab" hidden data-notes="1|In MATLAB % starts a comment, and the semicolon stops MATLAB from printing the value.">G = 9.80665;         % standard gravity, m/s^2
+CLASSES = [1000, 600, 180, 60];
+PACK = '.';</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 10 to 18 (Python) and lines 11 to 13 (MATLAB).</div>
+</div>
+<h2 id="the-filter-s-coefficients">The Filter's Coefficients</h2>
+
+<p>Each output of the filter is a weighted sum of the current input, the two inputs before it and
+the two outputs before it. The five weights depend only on the class and the time between samples,
+and this function works them out as the standard gives them.</p>
+<div class="codetabs" id="s1">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="3|Converts the class number into the filter's design frequency. 2.0775 is a constant of the standard.;4|The design frequency adjusted for sampling, as the standard gives it.;5|** is a power, so wa ** 2 is wa squared. MATLAB writes it ^.;9|Five values, which the caller can unpack into five names ([Functions](py-functions.html)).">def cfc_coefficients(cls, dt):
+    """SAE J211-1 coefficients, as given in the course notes (Smoothing)."""
+    wd = 2 * np.pi * cls * 2.0775
+    wa = np.tan(wd * dt / 2)
+    d = 1 + np.sqrt(2) * wa + wa ** 2
+    a0 = wa ** 2 / d
+    b1 = -2 * (wa ** 2 - 1) / d
+    b2 = (-1 + np.sqrt(2) * wa - wa ** 2) / d
+    return a0, 2 * a0, a0, b1, b2</pre>
+  <pre data-lang="matlab" hidden data-notes="9|The five weights as one row. c(1) is a0, and c(5) is b2.">function c = cfc_coefficients(cls, dt)
+    % SAE J211-1 coefficients, as given in the course notes (Smoothing).
+    wd = 2 * pi * cls * 2.0775;
+    wa = tan(wd * dt / 2);
+    d = 1 + sqrt(2) * wa + wa^2;
+    a0 = wa^2 / d;
+    b1 = -2 * (wa^2 - 1) / d;
+    b2 = (-1 + sqrt(2) * wa - wa^2) / d;
+    c = [a0, 2 * a0, a0, b1, b2];
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 21 to 29 (Python) and lines 146 to 155 (MATLAB).</div>
+</div>
+<h2 id="one-pass">One Pass</h2>
+
+<p>One pass runs the filter over the record in order. Each output needs the two outputs before it,
+so the first two have to be set before the loop. Setting them to zero means the filter starts from
+rest. One of the checks starts it from the first sample instead.</p>
+<div class="codetabs" id="s2">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|start=0.0 is a default, so a call that leaves start out starts from 0 ([Functions](py-functions.html)).;4|Unpacks the five weights into five names.;5|An array of zeros, one per sample, filled in below ([numpy arrays](py-numpy.html)).;6|The first two outputs, which the loop needs before it can begin.;8|From the third sample on, each output uses the two before it ([Loops](py-loops.html)).;9|The parentheses let the sum continue on the next line.">def one_pass(x, c, start=0.0):
+    """One pass in the direction of increasing index. start is what the two
+    outputs before the first sample are taken to be."""
+    a0, a1, a2, b1, b2 = c
+    out = np.zeros(len(x))
+    out[0] = start
+    out[1] = start
+    for i in range(2, len(x)):
+        out[i] = (a0 * x[i] + a1 * x[i - 1] + a2 * x[i - 2]
+                  + b1 * out[i - 1] + b2 * out[i - 2])
+    return out</pre>
+  <pre data-lang="matlab" hidden data-notes="5|MATLAB counts from 1, so out(1) and out(2) are the first two.;7|From the third sample on.;8|... continues the line on the next one.">function out = one_pass(x, c, start)
+    % One pass in the direction of increasing index. start is what the two
+    % outputs before the first sample are taken to be.
+    out = zeros(size(x));
+    out(1) = start;
+    out(2) = start;
+    for i = 3:numel(x)
+        out(i) = c(1) * x(i) + c(2) * x(i-1) + c(3) * x(i-2) ...
+                 + c(4) * out(i-1) + c(5) * out(i-2);
+    end
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 32 to 42 (Python) and lines 158 to 168 (MATLAB).</div>
+</div>
+<h2 id="forward-and-backward">Forward and Backward</h2>
+
+<p>A single pass delays the record. Running a second pass backward over the result delays it the
+same amount the other way, so the two cancel. The function reverses the forward result, runs the
+same one-pass filter over it, and reverses the answer back.</p>
+<div class="codetabs" id="s3">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="7|Only for the check that starts the filter from the first sample ([Conditions](py-conditions.html)).;8|The forward pass, then [::-1] reverses it ([Lists](py-lists.html)).;12|Running forward over the reversed record is running backward in time.;13|Reversed again, so the samples are back in time order.">def cfc(y, dt, cls, start_at_data=False):
+    """Forward, then backward over the forward result. With start_at_data the
+    filter starts from the first sample instead of from zero."""
+    c = cfc_coefficients(cls, dt)
+    start = 0.0
+    if start_at_data:
+        start = y[0]
+    fwd = one_pass(y, c, start)[::-1]       # forward, then reversed
+    start = 0.0
+    if start_at_data:
+        start = fwd[0]
+    back = one_pass(fwd, c, start)          # forward again over the reversed record
+    return back[::-1]</pre>
+  <pre data-lang="matlab" hidden data-notes="9|flip reverses the array.">function out = cfc(y, dt, cls, start_at_data)
+    % Forward, then backward over the forward result. With start_at_data the
+    % filter starts from the first sample instead of from zero.
+    c = cfc_coefficients(cls, dt);
+    start = 0;
+    if start_at_data
+        start = y(1);
+    end
+    fwd = flip(one_pass(y, c, start));      % forward, then reversed
+    start = 0;
+    if start_at_data
+        start = fwd(1);
+    end
+    back = one_pass(fwd, c, start);         % forward again over the reversed record
+    out = flip(back);
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 45 to 57 (Python) and lines 171 to 186 (MATLAB).</div>
+</div>
+<h2 id="the-peak">The Peak</h2>
+
+<p>The peak is the sample with the largest size, whatever its sign, given as the value and its
+time.</p>
+<div class="codetabs" id="s4">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|np.abs gives every sample's size, and np.argmax the position of the largest.;3|The value itself, with its sign, and its time.">def peak(t, y):
+    i = int(np.argmax(np.abs(y)))
+    return y[i], t[i]</pre>
+  <pre data-lang="matlab" hidden data-notes="2|max with two outputs gives the largest value and its position. ~ discards the value.">function [value, at] = peak(t, y)
+    [~, i] = max(abs(y));
+    value = y(i);
+    at = t(i);
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 60 to 62 (Python) and lines 189 to 193 (MATLAB).</div>
+</div>
+<h2 id="reading-the-test-and-finding-the-channel">Reading the Test and Finding the Channel</h2>
+
+<p>The main part starts here. It reads the test and finds the channel whose description names the
+crossmember, then prints its header: where the sensor is, which way it points, its unit, its status
+and the analog filter the logger applied before sampling.</p>
+<div class="codetabs" id="s5">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|The first file the crash folder lists, the only one ([Files and libraries](py-files.html)).;6|None until the loop finds the channel.;7|Each channel's key with the channel ([Dictionaries](py-dicts.html)).;8|in is true if the text contains CROSSMEMBER ([Conditions](py-conditions.html)).;10|Stops at the first match ([Loops](py-loops.html)).;13|The time of every sample, in ms.;18|One over the time between samples, with no decimal places.">name = os.listdir(os.path.join(PACK, 'crash'))[0]
+with open(os.path.join(PACK, 'crash', name)) as f:
+    test = json.load(f)
+
+# the channel whose header comment names the crossmember
+key = None
+for k, c in test['channels'].items():
+    if 'CROSSMEMBER' in c['comment']:
+        key = k
+        break
+ch = test['channels'][key]
+dt = ch['dt']
+t = 1000 * (ch['t0'] + dt * np.arange(ch['n']))      # ms
+raw = np.array(ch['y'])
+print(f"channel '{key}': {ch['comment']} [{ch['code']}]")
+print(f"  {ch['location']}, {ch['direction']}, {ch['unit']}, status {ch['status']}, "
+      f"prefilter {ch['prefilter_hz']} Hz")
+print(f"  {ch['n']} samples, {1 / dt:.0f} samples/s, {t[0]:.0f} to {t[-1]:.0f} ms")
+print(f"  test speed {test['test']['speed_kph']} km/h = {test['test']['speed_kph'] / 3.6:.2f} m/s")</pre>
+  <pre data-lang="matlab" hidden data-notes="8|strfind gives the positions where the text appears, so a non-empty answer means it is there. ~ is not.;13|A field named by a variable.;15|A column of times in ms.">files = dir(fullfile(PACK, 'crash', '*.json'));
+test = jsondecode(fileread(fullfile(PACK, 'crash', files(1).name)));
+
+% the channel whose header comment names the crossmember
+key = '';
+keys = fieldnames(test.channels);
+for m = 1:numel(keys)
+    if ~isempty(strfind(test.channels.(keys{m}).comment, 'CROSSMEMBER'))
+        key = keys{m};
+        break
+    end
+end
+ch = test.channels.(key);
+dt = ch.dt;
+t = 1000 * (ch.t0 + dt * (0:ch.n-1)');      % ms
+raw = ch.y;
+fprintf('channel ''%s'': %s [%s]\n', key, ch.comment, ch.code);
+fprintf('  %s, %s, %s, status %s, prefilter %s Hz\n', ch.location, ch.direction, ch.unit, ...
+        ch.status, ch.prefilter_hz);
+fprintf('  %d samples, %.0f samples/s, %.0f to %.0f ms\n', ch.n, 1 / dt, t(1), t(end));
+fprintf('  test speed %g km/h = %.2f m/s\n', test.test.speed_kph, test.test.speed_kph / 3.6);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 65 to 83 (Python) and lines 15 to 35 (MATLAB).</div>
+</div>
+<h2 id="how-wide-the-raw-peak-is">How Wide the Raw Peak Is</h2>
+
+<p>The raw peak is very narrow, and how narrow decides how much a filter takes off it. Starting
+from the peak, the program steps outward in both directions while the samples stay above half its
+size, and counts them. It also finds the largest positive value near the peak.</p>
+<div class="codetabs" id="s6">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="3|lo and hi start at the peak and move outward.;5|while repeats as long as the sample before lo is above half the peak ([Loops](py-loops.html)).;10|From lo to hi inclusive is hi - lo + 1 samples.;11|&amp; combines two true-or-false arrays sample by sample. 45 to 60 ms is fixed for the example test, whose raw peak is at 52.75 ms. On most tests the peak is elsewhere.;12|np.argmax on true and false gives the position of the first true.;13|raw[window] is a shorter array, so its positions start again at 0. Adding first turns one into a position in raw."># how wide is the unfiltered peak? count the samples around it above half its size
+i = int(np.argmax(np.abs(raw)))
+lo = i
+hi = i
+while abs(raw[lo - 1]) &gt; abs(raw[i]) / 2:
+    lo = lo - 1
+while abs(raw[hi + 1]) &gt; abs(raw[i]) / 2:
+    hi = hi + 1
+print(f"  unfiltered peak {raw[i]:.1f} m/s^2 at {t[i]:.2f} ms, above half that from "
+      f"{t[lo]:.2f} to {t[hi]:.2f} ms ({hi - lo + 1} samples)")
+window = (t &gt; 45) &amp; (t &lt; 60)              # True for the samples between 45 and 60 ms
+first = int(np.argmax(t &gt; 45))             # the index of the first sample after 45 ms
+j = int(np.argmax(raw[window])) + first    # the window's largest value, as an index into raw
+print(f"  largest positive value between 45 and 60 ms: {raw[j]:.1f} m/s^2 at {t[j]:.2f} ms")</pre>
+  <pre data-lang="matlab" hidden data-notes="14|find(..., 1) gives the position of the first true.;16|MATLAB counts from 1, so the shift is first - 1.">% how wide is the unfiltered peak? count the samples around it above half its size
+[~, i] = max(abs(raw));
+lo = i;
+hi = i;
+while abs(raw(lo - 1)) &gt; abs(raw(i)) / 2
+    lo = lo - 1;
+end
+while abs(raw(hi + 1)) &gt; abs(raw(i)) / 2
+    hi = hi + 1;
+end
+fprintf('  unfiltered peak %.1f m/s^2 at %.2f ms, above half that from %.2f to %.2f ms (%d samples)\n', ...
+        raw(i), t(i), t(lo), t(hi), hi - lo + 1);
+window = (t &gt; 45) &amp; (t &lt; 60);             % true for the samples between 45 and 60 ms
+first = find(t &gt; 45, 1);                  % the index of the first sample after 45 ms
+[~, jw] = max(raw(window));
+j = jw + first - 1;                       % the window's largest value, as an index into raw
+fprintf('  largest positive value between 45 and 60 ms: %.1f m/s^2 at %.2f ms\n', raw(j), t(j));</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 85 to 98 (Python) and lines 37 to 53 (MATLAB).</div>
+</div>
+<h2 id="checks">Checks</h2>
+
+<p>The first check is on the filter itself. Fed a constant, a filter of this kind should hand back
+the same constant, so its gain on a constant should be 1. The coefficients also exist only when the
+sample rate is more than 4.155 times the class. The other checks change one choice around the filter and see how
+far the peak moves: starting from the first sample, removing the mean before impact, and taking
+<em>g</em> as 9.81 instead of standard gravity.</p>
+<div class="codetabs" id="s7">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="3|The five weights for this class, each under its own name.;4|The output a constant input settles to, divided by the input. :.12f prints it to 12 decimal places.;5|The sample rate the class needs, about 4 times the class number.;7|The CFC 60 peak and its time, kept for the result below.;8|Naming the input in the call makes clear which choice it changes.;10|The mean before impact, subtracted for one check only.">print("\nchecks")
+for cls in CLASSES:
+    a0, a1, a2, b1, b2 = cfc_coefficients(cls, dt)
+    print(f"  CFC {cls:4}: gain on a constant {(a0 + a1 + a2) / (1 - b1 - b2):.12f}, "
+          f"needs more than {4.155 * cls:.0f} samples/s")
+y60 = cfc(raw, dt, 60)
+p60, tp60 = peak(t, y60)
+p, tp = peak(t, cfc(raw, dt, 60, start_at_data=True))
+print(f"  start from first sample instead of zero: {p:.2f} m/s^2 at {tp:.2f} ms")
+offset = np.mean(raw[t &lt; 0])
+p, tp = peak(t, cfc(raw - offset, dt, 60))
+print(f"  pre-impact mean {offset:.3f} m/s^2 removed first: {p:.2f} m/s^2 at {tp:.2f} ms")
+print(f"  in g: {p60 / G:.3f} with g = {G}, {p60 / 9.81:.3f} with g = 9.81")</pre>
+  <pre data-lang="matlab" hidden data-notes="2|A MATLAB loop over a row takes each value in turn.;5|The same gain, from the row of weights.;8|Two outputs from the program's own function, the value and its time.;9|MATLAB has no named inputs here, so true is the fourth input, start_at_data.">fprintf('\nchecks\n');
+for cls = CLASSES
+    c = cfc_coefficients(cls, dt);
+    fprintf('  CFC %4d: gain on a constant %.12f, needs more than %.0f samples/s\n', cls, ...
+            (c(1) + c(2) + c(3)) / (1 - c(4) - c(5)), 4.155 * cls);
+end
+y60 = cfc(raw, dt, 60, false);
+[p60, tp60] = peak(t, y60);
+[p, tp] = peak(t, cfc(raw, dt, 60, true));
+fprintf('  start from first sample instead of zero: %.2f m/s^2 at %.2f ms\n', p, tp);
+offset = mean(raw(t &lt; 0));
+[p, tp] = peak(t, cfc(raw - offset, dt, 60, false));
+fprintf('  pre-impact mean %.3f m/s^2 removed first: %.2f m/s^2 at %.2f ms\n', offset, p, tp);
+fprintf('  in g: %.3f with g = %g, %.3f with g = 9.81\n', p60 / G, G, p60 / 9.81);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 100 to 112 (Python) and lines 55 to 68 (MATLAB).</div>
+</div>
+<h2 id="the-result">The Result</h2>
+
+<p>This part prints the answer the report gives, the peak at CFC&nbsp;60 in m/s&sup2; and in
+<em>g</em>, and how many times larger the raw peak is.</p>
+<div class="codetabs" id="s8">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="3|The raw record's most negative value over the filtered peak. On the example test that value is the raw peak. On a test whose raw peak is positive (15 of the 200), raw[i] / p60 would be the ratio meant.">print("\nresult at CFC 60, forward and backward")
+print(f"  peak {p60:.2f} m/s^2 = {p60 / G:.2f} g at {tp60:.2f} ms")
+print(f"  the unfiltered peak is {np.min(raw) / p60:.2f} times this")</pre>
+  <pre data-lang="matlab" hidden data-notes="3|The same ratio.">fprintf('\nresult at CFC 60, forward and backward\n');
+fprintf('  peak %.2f m/s^2 = %.2f g at %.2f ms\n', p60, p60 / G, tp60);
+fprintf('  the unfiltered peak is %.2f times this\n', min(raw) / p60);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 114 to 116 (Python) and lines 70 to 72 (MATLAB).</div>
+</div>
+<h2 id="every-class">Every Class</h2>
+
+<p>The table gives the peak at every class, with the change in velocity over the whole record as a
+comparison. A filter takes the top off a spike and spreads it to the sides, so the peak falls while
+the area under the record, the change in velocity, hardly moves.</p>
+<div class="codetabs" id="s9">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="3|A dictionary from each label to its record, starting with the raw one ([Dictionaries](py-dicts.html)).;5|Adds each class under a label such as CFC 60.;6|Each label with its record, in the order they were added.;8|The trapezoid rule over the whole record, the change in velocity.">print("\nevery class")
+print(f"  {'filter':12} {'peak m/s^2':&gt;11} {'peak g':&gt;8} {'at ms':&gt;7} {'delta-v m/s':&gt;12}")
+filtered = {'as recorded': raw}
+for cls in CLASSES:
+    filtered[f'CFC {cls}'] = cfc(raw, dt, cls)
+for label, y in filtered.items():
+    p, tp = peak(t, y)
+    dv = np.sum((y[1:] + y[:-1]) / 2) * dt        # trapezoid rule, whole record
+    print(f"  {label:12} {p:11.1f} {p / G:8.1f} {tp:7.2f} {dv:12.3f}")</pre>
+  <pre data-lang="matlab" hidden data-notes="3|Two cell arrays side by side stand in for the dictionary, one of labels and one of records.;6|end+1 adds to the end.">fprintf('\nevery class\n');
+fprintf('  %-12s %11s %8s %7s %12s\n', 'filter', 'peak m/s^2', 'peak g', 'at ms', 'delta-v m/s');
+labels = {'as recorded'};
+filtered = {raw};
+for cls = CLASSES
+    labels{end+1} = sprintf('CFC %d', cls);
+    filtered{end+1} = cfc(raw, dt, cls, false);
+end
+for m = 1:numel(labels)
+    y = filtered{m};
+    [p, tp] = peak(t, y);
+    dv = sum((y(2:end) + y(1:end-1)) / 2) * dt;    % trapezoid rule, whole record
+    fprintf('  %-12s %11.1f %8.1f %7.2f %12.3f\n', labels{m}, p, p / G, tp, dv);
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 118 to 126 (Python) and lines 74 to 87 (MATLAB).</div>
+</div>
+<h2 id="one-pass-only">One Pass Only</h2>
+
+<p>Last, the filter is run forward only, to show what the backward pass is for. A single pass is a
+weaker, two-pole filter with a delay, so its peak comes later and is slightly larger.</p>
+<div class="codetabs" id="s10">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|One forward pass with the CFC 60 weights, starting from 0. It is not the CFC 60 filter, which takes both passes.;4|:+ prints a sign even on a positive difference, so a later peak reads as +.">one = one_pass(raw, cfc_coefficients(60, dt))
+p1, tp1 = peak(t, one)
+print(f"\nCFC 60 forward pass only: {p1:.2f} m/s^2 = {p1 / G:.2f} g at {tp1:.2f} ms "
+      f"({tp1 - tp60:+.2f} ms)")</pre>
+  <pre data-lang="matlab" hidden data-notes="1|The start, 0, is given, since the MATLAB function has no default.">one = one_pass(raw, cfc_coefficients(60, dt), 0);
+[p1, tp1] = peak(t, one);
+fprintf('\nCFC 60 forward pass only: %.2f m/s^2 = %.2f g at %.2f ms (%+.2f ms)\n', ...
+        p1, p1 / G, tp1, tp1 - tp60);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 128 to 131 (Python) and lines 89 to 92 (MATLAB).</div>
+</div>
+<h2 id="figure-1-the-whole-record">Figure 1, the Whole Record</h2>
+
+<p>The first figure is the whole record, as recorded and at CFC&nbsp;60, with the CFC&nbsp;60 peak
+marked.</p>
+<div class="codetabs" id="s11">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|A new figure, 8 by 3.6 inches ([Figures](py-plots.html)).;3|The raw record in light gray, so the filtered one stands out.;5|'ko' is a black circle.;6|Writes the peak beside the circle, moved 12 points right and 6 down."># Figure 1: the whole record
+plt.figure(figsize=(8, 3.6))
+plt.plot(t, raw / G, color='lightgray', linewidth=0.7, label='as recorded')
+plt.plot(t, y60 / G, linewidth=1.4, label='CFC 60, forward and backward')
+plt.plot(tp60, p60 / G, 'ko', markersize=4)
+plt.annotate(f"{p60 / G:.1f} g at {tp60:.1f} ms", (tp60, p60 / G), xytext=(12, -6),
+             textcoords='offset points', fontsize=8)
+plt.xlabel('time from impact (ms)')
+plt.ylabel('X acceleration (g)')
+plt.title(f"Left rear seat crossmember [{ch['code']}], test {test['testNo']}", fontsize=10)
+plt.legend(loc='lower right', fontsize=8)
+plt.tight_layout()
+plt.savefig('fig_raw.svg')
+plt.close()</pre>
+  <pre data-lang="matlab" hidden data-notes="4|hold on keeps what is already drawn, so the next plot adds to it.;7|text writes at a point in the plot's own units, here 2 ms right of the peak.">% Figure 1: the whole record
+fig = figure('Position', [100 100 800 360]);
+plot(t, raw / G, 'Color', [0.83 0.83 0.83], 'LineWidth', 0.7);
+hold on
+plot(t, y60 / G, 'LineWidth', 1.4);
+plot(tp60, p60 / G, 'ko', 'MarkerSize', 4);
+text(tp60 + 2, p60 / G, sprintf('%.1f g at %.1f ms', p60 / G, tp60), 'FontSize', 8);
+xlabel('time from impact (ms)');
+ylabel('X acceleration (g)');
+title(sprintf('Left rear seat crossmember [%s], test %d', ch.code, test.testNo), 'FontSize', 10);
+legend({'as recorded', 'CFC 60, forward and backward'}, 'Location', 'southeast', 'FontSize', 8);
+saveas(fig, 'fig_raw.svg');
+close(fig);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 133 to 146 (Python) and lines 94 to 106 (MATLAB).</div>
+</div>
+<h2 id="figure-2-every-class">Figure 2, Every Class</h2>
+
+<p>The second figure shows the main pulse at every class, from 40 to 80&nbsp;ms.</p>
+<div class="codetabs" id="s12">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="4|The raw record in gray and thin, the filtered ones in color ([Conditions](py-conditions.html)).;8|The main pulse of the example test. Another test may need a different range."># Figure 2: the main pulse at every class
+plt.figure(figsize=(8, 3.6))
+for label, y in filtered.items():
+    if label == 'as recorded':
+        plt.plot(t, y / G, color='lightgray', linewidth=0.7, label=label)
+    else:
+        plt.plot(t, y / G, linewidth=1.1, label=label)
+plt.xlim(40, 80)
+plt.xlabel('time from impact (ms)')
+plt.ylabel('X acceleration (g)')
+plt.title('Crossmember X acceleration at each J211 filter class, 40 to 80 ms', fontsize=10)
+plt.legend(loc='lower right', fontsize=8)
+plt.tight_layout()
+plt.savefig('fig_classes.svg')
+plt.close()</pre>
+  <pre data-lang="matlab" hidden data-notes="5|strcmp compares two pieces of text.">% Figure 2: the main pulse at every class
+fig = figure('Position', [100 100 800 360]);
+hold on
+for m = 1:numel(labels)
+    if strcmp(labels{m}, 'as recorded')
+        plot(t, filtered{m} / G, 'Color', [0.83 0.83 0.83], 'LineWidth', 0.7);
+    else
+        plot(t, filtered{m} / G, 'LineWidth', 1.1);
+    end
+end
+xlim([40 80]);
+xlabel('time from impact (ms)');
+ylabel('X acceleration (g)');
+title('Crossmember X acceleration at each J211 filter class, 40 to 80 ms', 'FontSize', 10);
+legend(labels, 'Location', 'southeast', 'FontSize', 8);
+saveas(fig, 'fig_classes.svg');
+close(fig);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 148 to 162 (Python) and lines 108 to 124 (MATLAB).</div>
+</div>
+<h2 id="figure-3-one-pass-against-two">Figure 3, One Pass Against Two</h2>
+
+<p>The last figure puts the single pass beside the two-pass result, with a dotted line at each
+peak, so the delay can be seen.</p>
+<div class="codetabs" id="s13">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="6|A dotted vertical line at each peak, in the color of its line.;9|Fixed for this test. Another test may need a different range."># Figure 3: one pass against two
+plt.figure(figsize=(8, 3.6))
+plt.plot(t, raw / G, color='lightgray', linewidth=0.7, label='as recorded')
+plt.plot(t, one / G, linewidth=1.2, label='CFC 60, forward pass only')
+plt.plot(t, y60 / G, linewidth=1.2, label='CFC 60, forward and backward')
+plt.axvline(tp60, color='tab:orange', linestyle=':', linewidth=0.8)
+plt.axvline(tp1, color='tab:blue', linestyle=':', linewidth=0.8)
+plt.xlim(30, 90)
+plt.ylim(-80, 30)
+plt.xlabel('time from impact (ms)')
+plt.ylabel('X acceleration (g)')
+plt.title(f"CFC 60 run once peaks {tp1 - tp60:.2f} ms late (dotted lines mark the peaks)",
+          fontsize=10)
+plt.legend(loc='lower right', fontsize=8)
+plt.tight_layout()
+plt.savefig('fig_onepass.svg')
+plt.close()</pre>
+  <pre data-lang="matlab" hidden data-notes="7|xline draws a vertical line. [1 0.5 0.05] is orange as red, green and blue.">% Figure 3: one pass against two
+fig = figure('Position', [100 100 800 360]);
+plot(t, raw / G, 'Color', [0.83 0.83 0.83], 'LineWidth', 0.7);
+hold on
+plot(t, one / G, 'LineWidth', 1.2);
+plot(t, y60 / G, 'LineWidth', 1.2);
+xline(tp60, ':', 'Color', [1 0.5 0.05]);
+xline(tp1, ':', 'Color', [0.12 0.47 0.71]);
+xlim([30 90]);
+ylim([-80 30]);
+xlabel('time from impact (ms)');
+ylabel('X acceleration (g)');
+title(sprintf('CFC 60 run once peaks %.2f ms late (dotted lines mark the peaks)', tp1 - tp60), ...
+      'FontSize', 10);
+legend({'as recorded', 'CFC 60, forward pass only', 'CFC 60, forward and backward'}, ...
+       'Location', 'southeast', 'FontSize', 8);
+saveas(fig, 'fig_onepass.svg');
+close(fig);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 164 to 180 (Python) and lines 126 to 143 (MATLAB).</div>
+</div>
+
+<h2 id="decisions-in-this-program">Decisions in This Program</h2>
+
+<p>Every line below holds a decision the student made. The line numbers are those of the
+downloadable files. To check your own program, use the test on <a href="ai-use.html">Using
+AI</a>. Pick a line and say why it is that way.</p>
+
+<table class="data">
+  <tr><th class="num">Python line</th><th class="num">MATLAB line</th><th>The decision</th><th>What else could have been chosen</th></tr>
+  <tr><td class="num">105</td><td class="num">61</td><td>The answer is given at CFC&nbsp;60, the class for comparing vehicles</td><td>CFC&nbsp;180 or 600, which J211 gives for other uses (the table gives both)</td></tr>
+  <tr><td class="num">72</td><td class="num">22</td><td>The channel is found by its description</td><td>the key <code>vehicle_x</code>, or the code</td></tr>
+  <tr><td class="num">61</td><td class="num">190</td><td>The peak is the largest size, whatever its sign</td><td>the most negative value</td></tr>
+  <tr><td class="num">49</td><td class="num">175</td><td>Each pass starts from rest</td><td>starting from the first sample (a check)</td></tr>
+  <tr><td class="num">109</td><td class="num">65</td><td>The offset before impact is left in, and removing it is only a check</td><td>removing it first</td></tr>
+  <tr><td class="num">16</td><td class="num">11</td><td>One <em>g</em> is standard gravity</td><td>9.81&nbsp;m/s&sup2; (a check prints both)</td></tr>
+</table>
+
+<h2 id="what-it-prints">What It Prints</h2>
+
+<p>This is everything the program prints, run on the example pack. On that pack the MATLAB version
+prints the same lines (checked in Octave).</p>
+
+<pre class="nb-out">channel 'vehicle_x': V1 LEFT REAR SEAT CROSSMEMBER AX [10SEATLERE00ACXP]
+  Seat, Longitudinal, m/(s*s), status ok, prefilter 4000 Hz
+  7001 samples, 20000 samples/s, -50 to 300 ms
+  test speed 56.15 km/h = 15.60 m/s
+  unfiltered peak -1919.8 m/s^2 at 52.75 ms, above half that from 52.70 to 52.80 ms (3 samples)
+  largest positive value between 45 and 60 ms: 1382.6 m/s^2 at 52.35 ms
+
+checks
+  CFC 1000: gain on a constant 1.000000000000, needs more than 4155 samples/s
+  CFC  600: gain on a constant 1.000000000000, needs more than 2493 samples/s
+  CFC  180: gain on a constant 1.000000000000, needs more than 748 samples/s
+  CFC   60: gain on a constant 1.000000000000, needs more than 249 samples/s
+  start from first sample instead of zero: -437.02 m/s^2 at 55.10 ms
+  pre-impact mean 0.041 m/s^2 removed first: -437.06 m/s^2 at 55.10 ms
+  in g: -44.564 with g = 9.80665, -44.548 with g = 9.81
+
+result at CFC 60, forward and backward
+  peak -437.02 m/s^2 = -44.56 g at 55.10 ms
+  the unfiltered peak is 4.39 times this
+
+every class
+  filter        peak m/s^2   peak g   at ms  delta-v m/s
+  as recorded      -1919.8   -195.8   52.75      -17.429
+  CFC 1000         -1243.1   -126.8   52.75      -17.429
+  CFC 600           -995.2   -101.5   52.75      -17.429
+  CFC 180           -509.6    -52.0   53.35      -17.430
+  CFC 60            -437.0    -44.6   55.10      -17.435
+
+CFC 60 forward pass only: -442.16 m/s^2 = -45.09 g at 56.75 ms (+1.65 ms)</pre>
+
+<h2 id="running-it-yourself">Running It Yourself</h2>
+
+<p>Both versions are downloads: <a href="data/example/code/a4_filter_report.py" download><code>a4_filter_report.py</code></a>
+and <a href="data/example/code/a4_filter_report.m" download><code>a4_filter_report.m</code></a>. Unzip a data pack, put
+the program in the pack's top folder beside <code>crash</code> and <code>shots</code>, and run it
+from there (<a href="py-files.html">Files and libraries</a> explains why the folder matters). On your own pack it reads your data, so its numbers will differ from the ones above.
+On 64 of the course's 200 tests the car-body channel is a sill (its description says SILL or
+ELTA-V), so the search for CROSSMEMBER finds nothing and the program stops. Finding the channel by
+its key, <code>vehicle_x</code>, works on every test. The 45 to 60&nbsp;ms window and the
+figures' ranges are set for the example test. The MATLAB
+version should run as it is in MATLAB R2018b or later. GNU Octave, which is free, needs a script's functions defined
+before they are used, so to run it there, move the functions to the top of the file and put a line
+<code>1;</code> above them.</p>
+
+  </main>
+
+  
+
+  <script src="js/page.js?v=20261027131534"></script>
+
+  <footer class="site-footer">
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-27">October 27, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Algorithms');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  
+  
+  
+    
+  
+  
+  <script src="https://uwt-tutor-backend.onrender.com/widget.js"
+          data-key="wk_bcb80c4ee2d5718131d24548528577c3"
+          data-content-selector="main"
+          data-color="#5F7038"></script>
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reading the assignment 9 program — Computational Physical Modeling</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="css/blocks.css?v=20261027131534">
+  <link rel="stylesheet" href="css/demos.css?v=20261027131534">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (olive). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #5F7038;
+      --course-accent-dark: #47542A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    /* ── Week page video and class cards (media-cards.js) ── */
+    .media-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+      gap: 0.9rem;
+      margin: 1rem 0;
+    }
+    .media-card {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-top: 4px solid var(--course-accent);
+      border-radius: 4px;
+      padding: 0.75rem 0.9rem 0.85rem;
+    }
+    .media-card.class { border-top-color: #C8860A; }
+    .media-card p { margin: 0; }
+    .mc-kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .mc-title { font-weight: 600; line-height: 1.3; margin: 0.25rem 0 0.35rem !important; }
+    .mc-sub { font-size: 0.85rem; color: #5A5550; line-height: 1.4; }
+    .mc-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.7rem; }
+    .mc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--course-accent);
+      border-radius: 3px;
+      text-decoration: none;
+      color: var(--course-accent-dark);
+    }
+    a.mc-btn:visited { color: var(--course-accent-dark); }
+    a.mc-btn:hover { background: #F0EDE7; }
+    .mc-btn svg { width: 1em; height: 1em; flex: none; }
+    .mc-btn.primary, a.mc-btn.primary:visited { background: var(--course-accent); color: #fff; }
+    a.mc-btn.primary:hover { background: var(--course-accent-dark); }
+    .mc-btn.pending { border-style: dashed; border-color: #b8b2a8; color: #5A5550; }
+    .mc-total { font-size: 0.9rem; color: #5A5550; }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+    /* the remembered data phrase; filled in by page.js */
+    .cg-phrase { display: inline-flex; align-items: center; gap: .3rem; margin-right: .6rem;
+      font-size: .82rem; flex-shrink: 0; }
+    /* The header row is a fixed 780px. The title, the toggle, "Your data", Search and
+       "Report a problem" only just fit in it, so the chip shows the label alone (the
+       phrase is in the link's title and on the data page) and Search shows its icon.
+       An earlier chip that held the phrase and was allowed to shrink squeezed the
+       label down to "Yo" on a classroom projector. */
+    .cg-phrase a { color: rgba(230,238,222,.92); text-decoration: none; white-space: nowrap; }
+    .header-links .search-btn .sb-label { display: none; }
+    .header-links button.report-btn { white-space: nowrap; }
+    /* the title keeps its own width */
+    .site-header-top .site-title { white-space: nowrap; flex-shrink: 0; }
+    .site-header-top .header-links { min-width: 0; margin-left: 1rem; }
+    @media (max-width: 780px) {
+      /* below the 780px row: the report button's short form, as on phones */
+      .header-links .report-btn .rb-full { display: none; }
+      .header-links .report-btn .rb-short { display: inline; }
+      .cg-phrase { margin-right: .2rem; }
+    }
+    .cg-phrase a:hover { color: #fff; text-decoration: underline; }
+    .cg-phrase button { background: none; border: none; cursor: pointer; padding: 0 .2rem;
+      color: rgba(230,238,222,.7); font: inherit; font-size: 1rem; line-height: 1; }
+    .cg-phrase button:hover { color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* Two rules the other course sites do not define. The header's top
+       row carries a report button beside the title, and a page with a
+       wide demo in it needs more than the reading measure. */
+    .site-header-top { border-bottom: 1px solid rgba(200,222,180,0.15); }
+    main.wide { max-width: 1180px; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Computational Physical Modeling</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <span class="cg-phrase" id="cg-phrase"></span>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        
+          <a href="syllabus.html">Syllabus</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="notes.html">Notes</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reports.html">Examples</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reflection.html">Reflection</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="meeting.html">Meeting</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="ai-use.html">AI Use</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="tools.html">Tools</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="python.html">Python</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="workbench.html">Workbench</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="extra-labor.html">Extra Labor</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="canvas-grades.html">Canvas Grades</a>
+          
+        
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+          
+          
+          
+          <a href="week-01.html">1</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-02.html">2</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-03.html">3</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-04.html">4</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          <span class="week-gap" title="Week 5 is a break week">5<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <a href="week-06.html">6</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-07.html">7</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-08.html">8</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-09.html">9</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-10.html">10</a>
+          
+        
+      </div>
+    </nav>
+
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+
+  <main data-pagefind-body>
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <div class="eyebrow"><a href="reports-10.html">Example reports &middot; Assignment 9</a></div>
+<h1>Reading the assignment 9 program</h1>
+
+<p>This page reads <code>a9_benchmark.py</code>, the program behind the technical report in the
+<a href="reports-10.html">assignment&nbsp;9 example reports</a>, one section at a time. The
+program puts the customer's car beside two others. It reads three crash tests, treats each one
+the same way (the three head channels filtered at CFC&nbsp;1000, a resultant in <em>g</em>, then
+HIC<sub>15</sub> and its window), prints what each header says about its test, and then places the
+customer's car among the three. Two checks follow, and two figures. Each section shows the Python
+beside a MATLAB version that prints the same results (checked by running both on the example pack, the MATLAB version in GNU Octave), and the line notes say what each line does.</p>
+
+<p>The HIC search is the one from the assignment&nbsp;6 program (<a href="walk-07.html">Reading the
+assignment 6 program</a>), written more compactly. <a href="program-shape-state-and-flow.html">Program
+shape I</a> suggests reading unfamiliar code by finding what comes in, what goes out and the state
+each loop builds, and the next section starts there. In the Python file the functions come first and the main part follows, from the top
+down. A MATLAB script has to keep its functions at the end, so its line ranges jump. A line you cannot read is usually covered on one of the <a
+href="python.html">Reading Python</a> pages, which the notes link to, and the MATLAB lines have
+notes of their own.</p>
+
+<h2 id="what-comes-in-and-what-goes-out">What Comes In and What Goes Out</h2>
+
+<table class="data">
+  <tr><th>Comes in</th><th>From</th></tr>
+  <tr><td>The customer's crash test</td><td><code>crash/09793.json</code>, the one file in the pack's crash folder</td></tr>
+  <tr><td>The two colleagues' tests</td><td><code>fleet/09801.json</code> and <code>fleet/09808.json</code></td></tr>
+  <tr><td>The FMVSS&nbsp;208 limit of 700 on HIC<sub>15</sub></td><td>the standard, copied into the program</td></tr>
+</table>
+
+<table class="data">
+  <tr><th>Goes out</th><th>Where</th></tr>
+  <tr><td>For each car, what its header says and its HIC<sub>15</sub>, window, HIC<sub>36</sub> and peak</td><td>printed, and the report's Data table, Results and Checks</td></tr>
+  <tr><td>Where the customer's car stands among the three</td><td>printed, and the report's summary</td></tr>
+  <tr><td>Two checks, the sample rate and the filter</td><td>printed, and the report's Checks table</td></tr>
+  <tr><td>Two figures</td><td><code>fig1_fleet.svg</code>, <code>fig2_resultants.svg</code></td></tr>
+</table>
+
+<p>The state worth tracking is <code>cars</code>, a list with one record per car, built in the first
+loop of the main part. The rest of the program reads from it.</p>
+
+<h2 id="settings">Settings</h2>
+
+<p>The settings are standard gravity, the limit the report compares against and the folder the
+pack is in. <code>'.'</code> means the folder the program is run from.</p>
+<div class="codetabs" id="s0">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|glob finds the files whose names match a pattern, such as every .json file in a folder ([Files and libraries](py-files.html)).;3|math has sqrt, tan and pi for single numbers. numpy has its own for arrays.;9|Standard gravity, used to convert m/s squared to g.;10|Used only to say how far below the limit the highest HIC15 is.;11|The folder the program is run from. Another path here would read a pack somewhere else.">import glob
+import json
+import math
+import os
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+G = 9.80665      # standard gravity, m/s^2
+LIMIT = 700      # FMVSS 208 limit on HIC15
+PACK = '.'</pre>
+  <pre data-lang="matlab" hidden data-notes="2|The MATLAB version has no PACK. It reads crash and fleet in the folder it is run from.">G = 9.80665;     % standard gravity, m/s^2
+LIMIT = 700;     % FMVSS 208 limit on HIC15</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 11 to 21 (Python) and lines 12 to 13 (MATLAB).</div>
+</div>
+<h2 id="the-filter">The Filter</h2>
+
+<p>The CFC filter is the one from <a href="smoothing.html">Smoothing</a>, copied in. J211 sets
+class 1000 for head acceleration. It runs forward over the record and then backward over the
+result, so the two passes' delays cancel.</p>
+<div class="codetabs" id="s1">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|cls is the filter class, 1000 for head acceleration ([Functions](py-functions.html)).;10|Defined inside cfc, so it can use a0, b1 and b2.;13|The parentheses let the sum continue on the next line. Each output reuses the two outputs before it.;18|forward[::-1] is the forward result reversed ([Lists](py-lists.html)), so this pass runs backward in time.">def cfc(y, dt, cls):
+    """SAE J211-1 filter class: 4-pole Butterworth, forward then backward."""
+    wd = 2 * math.pi * cls * 2.0775
+    wa = math.tan(wd * dt / 2)
+    d = 1 + math.sqrt(2) * wa + wa ** 2
+    a0 = wa ** 2 / d
+    b1 = -2 * (wa ** 2 - 1) / d
+    b2 = (-1 + math.sqrt(2) * wa - wa ** 2) / d
+
+    def one_pass(x):
+        out = np.zeros_like(x)
+        for i in range(2, len(x)):
+            out[i] = (a0 * x[i] + 2 * a0 * x[i - 1] + a0 * x[i - 2]
+                      + b1 * out[i - 1] + b2 * out[i - 2])
+        return out
+
+    forward = one_pass(y)
+    backward = one_pass(forward[::-1])
+    return backward[::-1]</pre>
+  <pre data-lang="matlab" hidden data-notes="9|The three coefficients in one row, handed to one_pass.;16|A separate function in the MATLAB file, so it cannot see cfc's coefficients and takes them as c.;22|... continues the line on the next one.">function out = cfc(y, dt, cls)
+    % SAE J211-1 filter class: 4-pole Butterworth, forward then backward.
+    wd = 2 * pi * cls * 2.0775;
+    wa = tan(wd * dt / 2);
+    d = 1 + sqrt(2) * wa + wa^2;
+    a0 = wa^2 / d;
+    b1 = -2 * (wa^2 - 1) / d;
+    b2 = (-1 + sqrt(2) * wa - wa^2) / d;
+    c = [a0, b1, b2];
+    forward = one_pass(y, c);
+    backward = one_pass(flip(forward), c);
+    out = flip(backward);
+end
+
+
+function out = one_pass(x, c)
+    a0 = c(1);
+    b1 = c(2);
+    b2 = c(3);
+    out = zeros(size(x));
+    for i = 3:numel(x)
+        out(i) = a0 * x(i) + 2 * a0 * x(i-1) + a0 * x(i-2) ...
+                 + b1 * out(i-1) + b2 * out(i-2);
+    end
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 24 to 42 (Python) and lines 169 to 193 (MATLAB).</div>
+</div>
+<h2 id="hic">HIC</h2>
+
+<p>The search loops over window lengths up to the limit. For one length, a running total of the
+integral gives every window's integral by one subtraction, so all the starts are handled at once.
+The function keeps the best HIC found and the first and last sample of its window.</p>
+<div class="codetabs" id="s2">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="3|The trapezoid between each pair of neighboring samples ([numpy arrays](py-numpy.html)).;4|The running total of the integral, with a 0 in front. The integral from sample i to sample j is S[j] - S[i].;5|The limit in samples. 15 ms is 300 samples at 20,000 a second and 150 at 10,000.;8|Every window length from 1 sample to kmax ([Loops](py-loops.html)).;10|S[k:] - S[:-k] is the integral of every window of length k, and dividing by T gives each mean. T times the mean to the power 2.5 is each window's HIC ([A constrained optimum over a window](windowed-optimum.html)). A resultant is never negative, so the clip at 0 is only a guard.;11|Where the best window of this length starts.;12|Keeps this window only if it beats every length before it ([Conditions](py-conditions.html)).;14|The first and last sample of the window, as a pair.;15|Two values: the HIC and its window ([Functions](py-functions.html)).">def hic(a_g, dt, limit_ms):
+    """HIC over every window up to limit_ms. Returns (value, (first, last))."""
+    panels = (a_g[1:] + a_g[:-1]) / 2 * dt
+    S = np.concatenate([[0.0], np.cumsum(panels)])
+    kmax = int(round(limit_ms / 1000 / dt))      # the limit in samples
+    best = 0.0
+    window = (0, 0)
+    for k in range(1, kmax + 1):
+        T = k * dt
+        v = T * np.clip((S[k:] - S[:-k]) / T, 0, None) ** 2.5   # every start at once
+        i = int(np.argmax(v))
+        if v[i] &gt; best:
+            best = float(v[i])
+            window = (i, i + k)
+    return best, window</pre>
+  <pre data-lang="matlab" hidden data-notes="4|The running total with a 0 in front.;10|max(x, 0) compares each element with 0 and keeps the larger, the same guard as np.clip. .^ raises each element to the power.;11|max with one input and two outputs gives the largest value and its position.;14|Sample numbers counted from 1. They are only used to look up times, so the times printed agree with the Python.">function [best, window] = hic(a_g, dt, limit_ms)
+    % HIC over every window up to limit_ms. Returns the value and [first, last].
+    panels = (a_g(2:end) + a_g(1:end-1)) / 2 * dt;
+    S = [0; cumsum(panels)];
+    kmax = round(limit_ms / 1000 / dt);       % the limit in samples
+    best = 0;
+    window = [1, 1];
+    for k = 1:kmax
+        T = k * dt;
+        v = T * max((S(k+1:end) - S(1:end-k)) / T, 0).^2.5;   % every start at once
+        [top, i] = max(v);
+        if top &gt; best
+            best = top;
+            window = [i, i + k];
+        end
+    end
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 45 to 59 (Python) and lines 196 to 212 (MATLAB).</div>
+</div>
+<h2 id="the-resultant">The Resultant</h2>
+
+<p>The resultant filters each axis and then combines the three into one size, whatever the
+direction, in <em>g</em>. Passing no class skips the filter, which the second check uses.</p>
+<div class="codetabs" id="s3">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|cls=1000 is a default, so a call that leaves cls out gets 1000 ([Functions](py-functions.html)).;3|None counts as false, so resultant(axes, dt, None) skips the filter ([Conditions](py-conditions.html)).;6|Each axis filtered on its own.;7|From here on axes means the filtered axes.;8|The square root of the sum of the three squares, sample by sample, converted to g.">def resultant(axes, dt, cls=1000):
+    """Filter each axis (cls=None skips it), then the resultant in g."""
+    if cls:
+        filtered = []
+        for a in axes:
+            filtered.append(cfc(a, dt, cls))
+        axes = filtered
+    return np.sqrt(axes[0] ** 2 + axes[1] ** 2 + axes[2] ** 2) / G</pre>
+  <pre data-lang="matlab" hidden data-notes="1|G is passed in because a MATLAB function cannot see the script's names. axes_g avoids MATLAB's own axes function.;3|An empty cls, [], skips the filter, as None does in Python.">function r = resultant(axes_g, dt, cls, G)
+    % Filter each axis (an empty cls skips it), then the resultant in g.
+    if ~isempty(cls)
+        for m = 1:3
+            axes_g{m} = cfc(axes_g{m}, dt, cls);
+        end
+    end
+    r = sqrt(axes_g{1}.^2 + axes_g{2}.^2 + axes_g{3}.^2) / G;
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 62 to 69 (Python) and lines 215 to 223 (MATLAB).</div>
+</div>
+<h2 id="two-small-helpers">Two Small Helpers</h2>
+
+<p>The two versions each need one helper the other does not. The Python's <code>by_h15</code> tells
+<code>sorted</code> what to sort the cars by, for Figure&nbsp;1. The MATLAB version has no
+<code>.title()</code>, so <code>title_case</code> writes a name such as HYUNDAI as Hyundai, and CR-V as Cr-V, as
+<code>.title()</code> does.</p>
+<div class="codetabs" id="s4">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="3|Given one car, hands back its HIC15. sorted(cars, key=by_h15) calls it on every car ([Functions](py-functions.html)).">def by_h15(car):
+    """What the cars are sorted by."""
+    return car['h15']</pre>
+  <pre data-lang="matlab" hidden data-notes="4|The first letter, and every letter that follows something other than a letter.;5|Those letters in capitals.">function s = title_case(s)
+    % Capital first letter on each word, the rest lower case, like Python's .title().
+    s = lower(s);
+    starts = [1, find(~isletter(s(1:end-1))) + 1];
+    s(starts) = upper(s(starts));
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 72 to 74 (Python) and lines 226 to 231 (MATLAB).</div>
+</div>
+<h2 id="which-files">Which Files</h2>
+
+<p>The main part starts here. It makes a list of the files to read, the customer's test first and
+then the fleet's in order of name, so the output always comes in the same order.</p>
+<div class="codetabs" id="s5">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|The list that will hold one record per car ([Lists](py-lists.html)).;2|Every .json file in the crash folder, as a list of paths ([Files and libraries](py-files.html)).;3|The fleet files added after it. glob does not promise an order, so sorted puts them in order of name.">cars = []
+paths = glob.glob(os.path.join(PACK, 'crash', '*.json'))
+paths = paths + sorted(glob.glob(os.path.join(PACK, 'fleet', '*.json')))</pre>
+  <pre data-lang="matlab" hidden data-notes="1|An empty struct array, filled one car at a time below.;2|dir lists the files that match the pattern.;6|end+1 is one past the last, so this adds to the end of the cell array.;8|{fleet_files.name} collects every name into a cell array, and sort puts them in order.">cars = struct([]);
+crash_files = dir(fullfile('crash', '*.json'));
+fleet_files = dir(fullfile('fleet', '*.json'));
+paths = {};
+for m = 1:numel(crash_files)
+    paths{end+1} = fullfile('crash', crash_files(m).name);
+end
+fleet_names = sort({fleet_files.name});
+for m = 1:numel(fleet_names)
+    paths{end+1} = fullfile('fleet', fleet_names{m});
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 77 to 79 (Python) and lines 15 to 25 (MATLAB).</div>
+</div>
+<h2 id="reading-each-car">Reading Each Car</h2>
+
+<p>The loop reads one test per pass and does the same thing to each. It finds the three head
+channels by their codes, which match across the three files even where the channels' descriptions
+differ. Then it forms the resultant, finds HIC<sub>15</sub> and HIC<sub>36</sub>, and keeps what the
+printing, the checks and the figures will need in one record for the car.</p>
+<div class="codetabs" id="s6">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|Opens the file and closes it again when the indented lines below it end ([Files and libraries](py-files.html)).;3|Reads the whole file as one dictionary.;4|A dictionary from each channel's ISO code to the channel ([Dictionaries](py-dicts.html)).;5|.values() gives each channel in turn, and the next line files it under its code.;7|The driver's head channel in X. Its dt and t0 are used for all three axes.;11|A loop over a string takes one letter at a time, so a is X, then Y, then Z ([Loops](py-loops.html)).;12|The code with the axis letter put in, such as 11HEADCG0000ACYP.;12|np.array turns the list of samples into an array, so arithmetic works on all of them at once ([numpy arrays](py-numpy.html)).;13|Filtered at CFC 1000, the default.;14|The time of each sample in ms. t0 is negative, since the record starts before impact, so impact falls at 0.;15|HIC15 and its first and last sample.;19|A set keeps each value once, so it shows which statuses occur among the channels.;24|True for the file from the crash folder, the customer's car.;27|.title() gives each word a capital first letter and lower case after it, so BMW becomes Bmw. .strip() removes spaces from the ends, which the Cascada's model field has ([Numbers and text](py-values.html)).;33|[0] keeps the HIC and drops the window.;34|The window as times in ms, which is how it is printed.;39|The finished record added to the list.">for path in paths:
+    with open(path) as f:
+        test = json.load(f)
+    ch = {}                                  # each channel under its ISO code
+    for c in test['channels'].values():
+        ch[c['code']] = c
+    hx = ch['11HEADCG0000ACXP']
+    dt = hx['dt']
+    t0 = hx['t0']
+    axes = []
+    for a in 'XYZ':                          # a string loops one letter at a time
+        axes.append(np.array(ch['11HEADCG0000AC' + a + 'P']['y']))
+    res = resultant(axes, dt)
+    t_ms = 1000 * (t0 + dt * np.arange(len(res)))
+    h15, window = hic(res, dt, 15)
+    i = window[0]
+    j = window[1]
+    v = test['vehicle']
+    statuses = set()
+    for c in ch.values():
+        statuses.add(c['status'])
+    car = {}
+    car['no'] = test['testNo']
+    car['mine'] = 'crash' in path
+    car['info'] = test['test']
+    car['model'] = v['model']
+    car['name'] = f"{v['year']} {v['make'].title()} {v['model'].strip().title()}"
+    car['axes'] = axes
+    car['dt'] = dt
+    car['t'] = t_ms
+    car['res'] = res
+    car['h15'] = h15
+    car['h36'] = hic(res, dt, 36)[0]
+    car['win'] = (t_ms[i], t_ms[j])
+    car['peak'] = np.max(res)
+    car['peak_t'] = t_ms[np.argmax(res)]
+    car['descr'] = hx['comment']
+    car['status'] = statuses
+    cars.append(car)</pre>
+  <pre data-lang="matlab" hidden data-notes="3|fileread reads the file as text, and jsondecode turns it into a struct.;5|jsondecode gives the channels as a struct, and fieldnames lists its fields.;8|A field named from text. The c in front is there because a field name cannot start with a digit.;16|letters(m) is the m-th letter of XYZ, joined into the code.;19|The ' turns the row of times into a column, the same shape as res.;31|True for the file from the crash folder.;42|The peak and its position in one line.;45|unique keeps each status once, as a Python set does.;49|Adds the record to the end of the struct array.">for p = 1:numel(paths)
+    path = paths{p};
+    test = jsondecode(fileread(path));
+    ch = struct();                           % each channel under its ISO code
+    keys = fieldnames(test.channels);
+    for m = 1:numel(keys)
+        c = test.channels.(keys{m});
+        ch.(['c' c.code]) = c;               % a field name has to start with a letter
+    end
+    hx = ch.c11HEADCG0000ACXP;
+    dt = hx.dt;
+    t0 = hx.t0;
+    axes_g = cell(1, 3);
+    letters = 'XYZ';
+    for m = 1:3
+        axes_g{m} = ch.(['c11HEADCG0000AC' letters(m) 'P']).y;
+    end
+    res = resultant(axes_g, dt, 1000, G);
+    t_ms = 1000 * (t0 + dt * (0:numel(res)-1)');
+    [h15, window] = hic(res, dt, 15);
+    i = window(1);
+    j = window(2);
+    v = test.vehicle;
+    statuses = {};
+    codes = fieldnames(ch);
+    for m = 1:numel(codes)
+        statuses{end+1} = ch.(codes{m}).status;
+    end
+    car = struct();
+    car.no = test.testNo;
+    car.mine = startsWith(path, 'crash');
+    car.info = test.test;
+    car.model = v.model;
+    car.name = sprintf('%d %s %s', v.year, title_case(v.make), title_case(strtrim(v.model)));
+    car.axes = axes_g;
+    car.dt = dt;
+    car.t = t_ms;
+    car.res = res;
+    car.h15 = h15;
+    car.h36 = hic(res, dt, 36);
+    car.win = [t_ms(i), t_ms(j)];
+    [car.peak, ip] = max(res);
+    car.peak_t = t_ms(ip);
+    car.descr = hx.comment;
+    car.status = unique(statuses);
+    if isempty(cars)
+        cars = car;
+    else
+        cars(end+1) = car;
+    end
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 80 to 118 (Python) and lines 26 to 76 (MATLAB).</div>
+</div>
+<h2 id="printing-each-car">Printing Each Car</h2>
+
+<p>Four lines per car: the name, the test, the header details that could make the cars hard to
+compare, and the results. The report's Errors and Anomalies section comes from reading these
+lines, for instance the trailing space in the Cascada's model field, which the <code>!r</code>
+shows.</p>
+<div class="codetabs" id="s7">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|From here on c is a car. In the reading loop above it was a channel.;3|!r prints the text with its quotes, so a trailing space shows ([Numbers and text](py-values.html)).;6|The sample rate is one over the time between samples.;7|The statuses of all the channels, not only the head channel. The set prints {'ok'} when every channel is ok. With two different statuses Python may print them in either order.">for c in cars:
+    info = c['info']
+    print(f"{c['no']} {c['name']}  (model field {c['model']!r})")
+    print(f"   {info['type']}, {info['config']}, angle {info['angle']}, "
+          f"{info['speed_kph']} km/h")
+    print(f"   {1 / c['dt']:.0f} samples/s, head X described as {c['descr']!r}, "
+          f"status {c['status']}")
+    print(f"   HIC15 {c['h15']:.1f}, window {c['win'][0]:.2f} to {c['win'][1]:.2f} ms,"
+          f" HIC36 {c['h36']:.1f}, peak {c['peak']:.1f} g at {c['peak_t']:.1f} ms")</pre>
+  <pre data-lang="matlab" hidden data-notes="4|Two single quotes inside MATLAB text stand for one, so this prints the field between quotes.;7|Joins the statuses so the line reads as the Python set does. unique sorts them, so with two statuses the order may differ from the Python's.">for k = 1:numel(cars)
+    c = cars(k);
+    info = c.info;
+    fprintf('%d %s  (model field ''%s'')\n', c.no, c.name, c.model);
+    fprintf('   %s, %s, angle %g, %g km/h\n', info.type, info.config, info.angle, info.speed_kph);
+    fprintf('   %.0f samples/s, head X described as ''%s'', status {''%s''}\n', ...
+            1 / c.dt, c.descr, strjoin(c.status, ''', '''));
+    fprintf('   HIC15 %.1f, window %.2f to %.2f ms, HIC36 %.1f, peak %.1f g at %.1f ms\n', ...
+            c.h15, c.win(1), c.win(2), c.h36, c.peak, c.peak_t);
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 120 to 128 (Python) and lines 78 to 87 (MATLAB).</div>
+</div>
+<h2 id="where-the-customer-s-car-stands">Where the Customer's Car Stands</h2>
+
+<p>This part places the customer's car among the three: its rank, the range and median of the three
+HIC<sub>15</sub> values, how close the highest comes to the limit, and the customer's car minus each
+of the others.</p>
+<div class="codetabs" id="s8">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="4|The three values from lowest to highest.;7|The customer's car, kept under its own name.;8|.index finds the position of the customer's value, counted from 0, so + 1 gives its rank ([Lists](py-lists.html)).;9|With three values, the median is the middle one.;12|Every car except the customer's ([Conditions](py-conditions.html)).;13|:+ prints a sign even on a positive difference, so +1.9 reads as higher and -37.1 as lower.">h15 = []
+for c in cars:
+    h15.append(c['h15'])
+h15 = sorted(h15)
+for c in cars:
+    if c['mine']:
+        me = c                               # the customer's car
+print(f"\ncustomer's car is {h15.index(me['h15']) + 1} of {len(cars)}, lowest first")
+print(f"range {h15[0]:.1f} to {h15[-1]:.1f}, median {np.median(h15):.1f}, "
+      f"highest is {100 * h15[-1] / LIMIT:.1f}% of the limit")
+for c in cars:
+    if not c['mine']:
+        print(f"customer minus {c['name']}: HIC15 {me['h15'] - c['h15']:+.1f}, "
+              f"HIC36 {me['h36'] - c['h36']:+.1f}")</pre>
+  <pre data-lang="matlab" hidden data-notes="1|[cars.h15] collects every car's HIC15 into one row.;2|[cars.mine] is true for the customer's car only, so this picks it out.;3|The position of the first value equal to the customer's, counted from 1.;4|%% prints a percent sign.">h15 = sort([cars.h15]);
+me = cars([cars.mine]);                      % the customer's car
+fprintf('\ncustomer''s car is %d of %d, lowest first\n', find(h15 == me.h15, 1), numel(cars));
+fprintf('range %.1f to %.1f, median %.1f, highest is %.1f%% of the limit\n', ...
+        h15(1), h15(end), median(h15), 100 * h15(end) / LIMIT);
+for k = 1:numel(cars)
+    c = cars(k);
+    if ~c.mine
+        fprintf('customer minus %s: HIC15 %+.1f, HIC36 %+.1f\n', c.name, ...
+                me.h15 - c.h15, me.h36 - c.h36);
+    end
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 130 to 143 (Python) and lines 89 to 100 (MATLAB).</div>
+</div>
+<h2 id="two-checks">Two Checks</h2>
+
+<p>The customer's car was recorded at 20,000 samples a second and the other two at 10,000. The first
+check keeps every second sample of the customer's car and recomputes, to see whether the sample rate
+explains any of the difference. The second recomputes every car with no filter at all.</p>
+<div class="codetabs" id="s9">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|This check fits the example pack, where the customer's car is at 20,000 a second and the others at 10,000. Other rates would need a different step, or no check.;5|a[::2] takes every second sample, starting with the first ([Lists](py-lists.html)).;6|Every second sample is twice the time apart, so the step is 2 dt.;11|None skips the filter."># check 1: the customer's car was sampled twice as fast as the other two.
+# Keep every second sample (10,000 a second, like the others) and recompute.
+every_second = []
+for a in me['axes']:
+    every_second.append(a[::2])
+half = resultant(every_second, 2 * me['dt'])
+print(f"\ncheck, customer's car at half the sample rate: "
+      f"HIC15 {hic(half, 2 * me['dt'], 15)[0]:.1f}")
+# check 2: no filter at all, every car
+for c in cars:
+    raw = resultant(c['axes'], c['dt'], None)
+    print(f"check, {c['name']} with no filter: HIC15 {hic(raw, c['dt'], 15)[0]:.1f}")</pre>
+  <pre data-lang="matlab" hidden data-notes="5|1:2:end counts from 1 to the end in steps of 2.;12|[] skips the filter.">% check 1: the customer's car was sampled twice as fast as the other two.
+% Keep every second sample (10,000 a second, like the others) and recompute.
+every_second = cell(1, 3);
+for m = 1:3
+    every_second{m} = me.axes{m}(1:2:end);
+end
+half = resultant(every_second, 2 * me.dt, 1000, G);
+fprintf('\ncheck, customer''s car at half the sample rate: HIC15 %.1f\n', hic(half, 2 * me.dt, 15));
+% check 2: no filter at all, every car
+for k = 1:numel(cars)
+    c = cars(k);
+    raw = resultant(c.axes, c.dt, [], G);
+    fprintf('check, %s with no filter: HIC15 %.1f\n', c.name, hic(raw, c.dt, 15));
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 145 to 156 (Python) and lines 102 to 115 (MATLAB).</div>
+</div>
+<h2 id="figure-1-the-three-cars">Figure 1, the Three Cars</h2>
+
+<p>The first figure puts the three HIC<sub>15</sub> values on one scale, lowest at the bottom, with
+the customer's car in orange. The scale runs from 100 to 220, close enough to see the gaps, and the
+axis label says the limit is off it.</p>
+<div class="codetabs" id="s10">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|The cars from lowest HIC15 to highest. key says what to sort by.;3|A figure with one set of axes. The size is in inches ([Figures](py-plots.html)).;13|One dot per car, at its HIC15 across and its place in the order up.;14|Writes the value 9 points above the dot.;17|The car names in place of the numbers 0, 1 and 2 on the vertical axis.;19|Fixed for these three cars. Other values would need a different range."># Figure 1: the three HIC15 values on a scale close enough to see the gaps
+order = sorted(cars, key=by_h15)             # lowest HIC15 first
+fig, ax = plt.subplots(figsize=(7, 2.6))
+labels = []
+for k in range(len(order)):
+    c = order[k]
+    if c['mine']:
+        color = 'tab:orange'
+        labels.append(c['name'] + ' (customer)')
+    else:
+        color = 'tab:blue'
+        labels.append(c['name'])
+    ax.plot(c['h15'], k, 'o', ms=9, color=color)
+    ax.annotate(f"{c['h15']:.1f}", (c['h15'], k), xytext=(0, 9),
+                textcoords='offset points', ha='center')
+ax.set_yticks(range(len(order)))
+ax.set_yticklabels(labels)
+ax.set_ylim(-0.6, len(order) - 0.2)
+ax.set_xlim(100, 220)
+ax.set_xlabel('driver HIC15, CFC 1000 (no unit; the limit, 700, is off this scale)')
+ax.set_title('Figure 1. Driver HIC15, three cars, same barrier, about 56 km/h',
+             fontsize=10)
+ax.grid(axis='x', alpha=0.3)
+fig.savefig('fig1_fleet.svg', bbox_inches='tight')</pre>
+  <pre data-lang="matlab" hidden data-notes="16|text writes at a point in the plot's own units, here a little above the dot.;19|The car names in place of the numbers on the vertical axis.">% Figure 1: the three HIC15 values on a scale close enough to see the gaps
+[~, order] = sort([cars.h15]);               % lowest HIC15 first
+fig = figure('Position', [100 100 700 260]);
+hold on
+labels = cell(1, numel(order));
+for k = 1:numel(order)
+    c = cars(order(k));
+    if c.mine
+        color = [1 0.5 0.05];
+        labels{k} = [c.name ' (customer)'];
+    else
+        color = [0.12 0.47 0.71];
+        labels{k} = c.name;
+    end
+    plot(c.h15, k, 'o', 'MarkerSize', 9, 'MarkerFaceColor', color, 'Color', color);
+    text(c.h15, k + 0.25, sprintf('%.1f', c.h15), 'HorizontalAlignment', 'center');
+end
+yticks(1:numel(order));
+yticklabels(labels);
+ylim([0.4, numel(order) + 0.8]);
+xlim([100 220]);
+xlabel('driver HIC15, CFC 1000 (no unit; the limit, 700, is off this scale)');
+title('Figure 1. Driver HIC15, three cars, same barrier, about 56 km/h', 'FontSize', 10);
+set(gca, 'XGrid', 'on');             % lines across the x axis only
+saveas(fig, 'fig1_fleet.svg');
+close(fig);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 158 to 181 (Python) and lines 117 to 142 (MATLAB).</div>
+</div>
+<h2 id="figure-2-the-head-resultants">Figure 2, the Head Resultants</h2>
+
+<p>The second figure stacks the three head resultants, one per car, on the same scales, each with
+its HIC<sub>15</sub> window shaded. The shading shows which part of each trace sets its
+HIC<sub>15</sub>.</p>
+<div class="codetabs" id="s11">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|Three sets of axes, one above the other, which fits three cars. sharex and sharey give them the same scales.;4|The k-th set of axes, for the k-th car.;7|Shades the window from its first time to its last.;11|Set on the last axes, and the shared x axis applies it to all three.;15|Moves the three plots so their titles and labels do not overlap."># Figure 2: the head resultant for each car with its HIC15 window shaded
+fig, axs = plt.subplots(3, 1, figsize=(7, 7), sharex=True, sharey=True)
+for k in range(len(cars)):
+    ax = axs[k]
+    c = cars[k]
+    ax.plot(c['t'], c['res'], linewidth=0.9)
+    ax.axvspan(c['win'][0], c['win'][1], color='tab:orange', alpha=0.25)
+    ax.set_title(f"{c['name']} (test {c['no']}): HIC15 {c['h15']:.1f}, "
+                 f"window {c['win'][0]:.1f} to {c['win'][1]:.1f} ms", fontsize=9)
+    ax.set_ylabel('head resultant (g)')
+axs[-1].set_xlim(-10, 200)
+axs[-1].set_xlabel('time from impact (ms)')
+fig.suptitle('Figure 2. Driver head resultant, CFC 1000, HIC15 window shaded',
+             fontsize=10)
+fig.tight_layout()
+fig.savefig('fig2_resultants.svg', bbox_inches='tight')</pre>
+  <pre data-lang="matlab" hidden data-notes="5|The MATLAB version sets one vertical scale for all three, a little above the highest peak, as sharey does.;8|The k-th of the plots, one per car, one above the other. The MATLAB figure has no overall title, since Octave, which checked this version, lacks sgtitle.;11|A shaded rectangle over the window.">% Figure 2: the head resultant for each car with its HIC15 window shaded
+fig = figure('Position', [100 100 700 700]);
+top = 0;                                     % one vertical scale for all three, a little above the highest peak
+for k = 1:numel(cars)
+    top = max(top, 1.05 * cars(k).peak);
+end
+for k = 1:numel(cars)
+    subplot(numel(cars), 1, k);
+    c = cars(k);
+    w = c.win;
+    patch([w(1) w(2) w(2) w(1)], [0 0 top top], [1 0.5 0.05], 'FaceAlpha', 0.25, ...
+          'EdgeColor', 'none');
+    hold on
+    plot(c.t, c.res, 'LineWidth', 0.9);
+    xlim([-10 200]);
+    ylim([0 top]);
+    title(sprintf('%s (test %d): HIC15 %.1f, window %.1f to %.1f ms', ...
+                  c.name, c.no, c.h15, w(1), w(2)), 'FontSize', 9);
+    ylabel('head resultant (g)');
+end
+xlabel('time from impact (ms)');
+saveas(fig, 'fig2_resultants.svg');
+close(fig);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 183 to 198 (Python) and lines 144 to 166 (MATLAB).</div>
+</div>
+
+<h2 id="decisions-in-this-program">Decisions in This Program</h2>
+
+<p>Every line below holds a decision the student made. The 15&nbsp;ms limit and the CFC&nbsp;1000
+class are not on the list, since the standards set them. The line numbers are those of the
+downloadable files. To check your own program, use the test on <a href="ai-use.html">Using
+AI</a>. Pick a line and say why it is that way.</p>
+
+<table class="data">
+  <tr><th class="num">Python line</th><th class="num">MATLAB line</th><th>The decision</th><th>What else could have been chosen</th></tr>
+  <tr><td class="num">86</td><td class="num">35</td><td>Channels are picked by their codes</td><td>by description, which differs between the files</td></tr>
+  <tr><td class="num">67</td><td class="num">219</td><td>Each axis is filtered before the resultant is formed</td><td>forming the resultant first and filtering it once</td></tr>
+  <tr><td class="num">112</td><td class="num">65</td><td>HIC<sub>36</sub> is computed as a comparison</td><td>HIC<sub>15</sub> alone</td></tr>
+  <tr><td class="num">149</td><td class="num">106</td><td>The sample-rate check keeps every second sample</td><td>filtering first and then keeping every second sample, or checking at the original rate only</td></tr>
+  <tr><td class="num">106</td><td class="num">59</td><td>The trailing space in a model field is stripped for labels</td><td>leaving it, or correcting the file</td></tr>
+  <tr><td class="num">176</td><td class="num">137</td><td>Figure&nbsp;1 is drawn on a scale close enough to see the gaps</td><td>a scale from 0 to the limit of 700, where the dots crowd together</td></tr>
+</table>
+
+<h2 id="what-it-prints">What It Prints</h2>
+
+<p>This is everything the program prints, run on the example pack with the two fleet tests. The
+MATLAB version prints the same lines (checked in Octave).</p>
+
+<pre class="nb-out">9793 2017 Hyundai Elantra  (model field 'ELANTRA')
+   NEW CAR ASSESSMENT TEST, VEHICLE INTO BARRIER, angle 0, 56.15 km/h
+   20000 samples/s, head X described as 'V1P1 HEAD CG X ACCELERATION', status {'ok'}
+   HIC15 150.4, window 60.85 to 75.85 ms, HIC36 291.7, peak 45.3 g at 66.5 ms
+9801 2016 Buick Cascada  (model field 'CASCADA ')
+   OPTIONAL NEW CAR ASSESSMENT TEST, VEHICLE INTO BARRIER, angle 0, 56.21 km/h
+   10000 samples/s, head X described as 'DRIVER HEAD X', status {'ok'}
+   HIC15 187.5, window 59.80 to 74.80 ms, HIC36 343.5, peak 45.8 g at 70.1 ms
+9808 2016 Honda Civic  (model field 'CIVIC')
+   OPTIONAL NEW CAR ASSESSMENT TEST, VEHICLE INTO BARRIER, angle 0, 56.17 km/h
+   10000 samples/s, head X described as 'DRIVER HEAD X', status {'ok'}
+   HIC15 148.5, window 71.10 to 86.10 ms, HIC36 268.6, peak 43.8 g at 76.7 ms
+
+customer's car is 2 of 3, lowest first
+range 148.5 to 187.5, median 150.4, highest is 26.8% of the limit
+customer minus 2016 Buick Cascada: HIC15 -37.1, HIC36 -51.8
+customer minus 2016 Honda Civic: HIC15 +1.9, HIC36 +23.1
+
+check, customer's car at half the sample rate: HIC15 150.4
+check, 2017 Hyundai Elantra with no filter: HIC15 150.6
+check, 2016 Buick Cascada with no filter: HIC15 187.5
+check, 2016 Honda Civic with no filter: HIC15 148.6</pre>
+
+<h2 id="running-it-yourself">Running It Yourself</h2>
+
+<p>Both versions are downloads: <a href="data/example/code/a9_benchmark.py" download><code>a9_benchmark.py</code></a>
+and <a href="data/example/code/a9_benchmark.m" download><code>a9_benchmark.m</code></a>. Unzip a data pack, put
+the program in the pack's top folder beside <code>crash</code> and <code>shots</code>, and run it
+from there (<a href="py-files.html">Files and libraries</a> explains why the folder matters). On your own pack it reads your data, so its numbers will differ from the ones above. The MATLAB
+version should run as it is in MATLAB R2018b or later. GNU Octave, which is free, needs a script's functions defined
+before they are used, so to run it there, move the functions to the top of the file and put a line
+<code>1;</code> above them. This program also needs the <code>fleet</code> folder beside <code>crash</code>,
+holding the two colleagues' tests.</p>
+
+  </main>
+
+  
+
+  <script src="js/page.js?v=20261027131534"></script>
+
+  <footer class="site-footer">
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-27">October 27, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Algorithms');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  
+  
+  
+    
+  
+  
+  <script src="https://uwt-tutor-backend.onrender.com/widget.js"
+          data-key="wk_bcb80c4ee2d5718131d24548528577c3"
+          data-content-selector="main"
+          data-color="#5F7038"></script>
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

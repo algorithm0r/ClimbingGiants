@@ -1,0 +1,1826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reading the assignment 2 program — Computational Physical Modeling</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="css/blocks.css?v=20261027131534">
+  <link rel="stylesheet" href="css/demos.css?v=20261027131534">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (olive). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #5F7038;
+      --course-accent-dark: #47542A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    /* ── Week page video and class cards (media-cards.js) ── */
+    .media-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+      gap: 0.9rem;
+      margin: 1rem 0;
+    }
+    .media-card {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-top: 4px solid var(--course-accent);
+      border-radius: 4px;
+      padding: 0.75rem 0.9rem 0.85rem;
+    }
+    .media-card.class { border-top-color: #C8860A; }
+    .media-card p { margin: 0; }
+    .mc-kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .mc-title { font-weight: 600; line-height: 1.3; margin: 0.25rem 0 0.35rem !important; }
+    .mc-sub { font-size: 0.85rem; color: #5A5550; line-height: 1.4; }
+    .mc-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.7rem; }
+    .mc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--course-accent);
+      border-radius: 3px;
+      text-decoration: none;
+      color: var(--course-accent-dark);
+    }
+    a.mc-btn:visited { color: var(--course-accent-dark); }
+    a.mc-btn:hover { background: #F0EDE7; }
+    .mc-btn svg { width: 1em; height: 1em; flex: none; }
+    .mc-btn.primary, a.mc-btn.primary:visited { background: var(--course-accent); color: #fff; }
+    a.mc-btn.primary:hover { background: var(--course-accent-dark); }
+    .mc-btn.pending { border-style: dashed; border-color: #b8b2a8; color: #5A5550; }
+    .mc-total { font-size: 0.9rem; color: #5A5550; }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+    /* the remembered data phrase; filled in by page.js */
+    .cg-phrase { display: inline-flex; align-items: center; gap: .3rem; margin-right: .6rem;
+      font-size: .82rem; flex-shrink: 0; }
+    /* The header row is a fixed 780px. The title, the toggle, "Your data", Search and
+       "Report a problem" only just fit in it, so the chip shows the label alone (the
+       phrase is in the link's title and on the data page) and Search shows its icon.
+       An earlier chip that held the phrase and was allowed to shrink squeezed the
+       label down to "Yo" on a classroom projector. */
+    .cg-phrase a { color: rgba(230,238,222,.92); text-decoration: none; white-space: nowrap; }
+    .header-links .search-btn .sb-label { display: none; }
+    .header-links button.report-btn { white-space: nowrap; }
+    /* the title keeps its own width */
+    .site-header-top .site-title { white-space: nowrap; flex-shrink: 0; }
+    .site-header-top .header-links { min-width: 0; margin-left: 1rem; }
+    @media (max-width: 780px) {
+      /* below the 780px row: the report button's short form, as on phones */
+      .header-links .report-btn .rb-full { display: none; }
+      .header-links .report-btn .rb-short { display: inline; }
+      .cg-phrase { margin-right: .2rem; }
+    }
+    .cg-phrase a:hover { color: #fff; text-decoration: underline; }
+    .cg-phrase button { background: none; border: none; cursor: pointer; padding: 0 .2rem;
+      color: rgba(230,238,222,.7); font: inherit; font-size: 1rem; line-height: 1; }
+    .cg-phrase button:hover { color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* Two rules the other course sites do not define. The header's top
+       row carries a report button beside the title, and a page with a
+       wide demo in it needs more than the reading measure. */
+    .site-header-top { border-bottom: 1px solid rgba(200,222,180,0.15); }
+    main.wide { max-width: 1180px; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Computational Physical Modeling</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <span class="cg-phrase" id="cg-phrase"></span>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        
+          <a href="syllabus.html">Syllabus</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="notes.html">Notes</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reports.html">Examples</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reflection.html">Reflection</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="meeting.html">Meeting</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="ai-use.html">AI Use</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="tools.html">Tools</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="python.html">Python</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="workbench.html">Workbench</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="extra-labor.html">Extra Labor</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="canvas-grades.html">Canvas Grades</a>
+          
+        
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+          
+          
+          
+          <a href="week-01.html">1</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-02.html">2</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-03.html">3</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-04.html">4</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          <span class="week-gap" title="Week 5 is a break week">5<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <a href="week-06.html">6</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-07.html">7</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-08.html">8</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-09.html">9</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-10.html">10</a>
+          
+        
+      </div>
+    </nav>
+
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+
+  <main data-pagefind-body>
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <div class="eyebrow"><a href="reports-02.html">Example reports &middot; Assignment 2</a></div>
+<h1>Reading the assignment 2 program</h1>
+
+<p>This page reads <code>a2_peak_loss.py</code>, the program behind the technical report in the
+<a href="reports-02.html">assignment&nbsp;2 example reports</a>, one section at a time. The
+program asks what a slower logger would have read. A logger running at a twentieth of the recorded
+rate takes one sample for every 20 of ours, so the program makes each slower record by keeping
+every k-th sample. Nothing says which sample the slower logger would start on, so it tries every
+start and keeps the worst and the best. Each section shows the Python beside a MATLAB version that
+prints the same results (checked by running both on the example pack, the MATLAB version in GNU
+Octave), and the line notes say what each line does.</p>
+
+<p><a href="program-shape-state-and-flow.html">Program shape I</a> suggests reading unfamiliar code
+by finding what comes in, what goes out and the state each loop builds, and the next section starts
+there. This program reads the test and works out the rates before it defines its functions, and the
+main part follows them. A MATLAB script has to keep its functions at the end, so its line ranges
+jump. A line you cannot read is usually covered on one of the <a href="python.html">Reading
+Python</a> pages, which the notes link to, and the MATLAB lines have notes of their own.</p>
+
+<h2 id="what-comes-in-and-what-goes-out">What Comes In and What Goes Out</h2>
+
+<table class="data">
+  <tr><th>Comes in</th><th>From</th></tr>
+  <tr><td>The crash test, all eight channels</td><td><code>crash/09793.json</code>, named in the program</td></tr>
+  <tr><td>The proposed logger's rate, 1000&nbsp;Hz</td><td>the assignment, copied into the program</td></tr>
+</table>
+
+<table class="data">
+  <tr><th>Goes out</th><th>Where</th></tr>
+  <tr><td>The test, its timing, and the rates tried</td><td>printed, and the report's Data and Method</td></tr>
+  <tr><td>The peak of every channel at the recorded rate</td><td>printed, and the report's Table&nbsp;1</td></tr>
+  <tr><td>The worst-start peak at every rate, and the first rate to fail</td><td>printed, and the report's Table&nbsp;1 and summary</td></tr>
+  <tr><td>What a 1000&nbsp;Hz logger would read on each channel</td><td>printed, and the report's Table&nbsp;2</td></tr>
+  <tr><td>Two figures</td><td><code>fraction_vs_rate.svg</code>, <code>crossmember_1khz.svg</code></td></tr>
+</table>
+
+<p>The state worth tracking is <code>worst</code>, which holds every channel's worst-start peak at
+every rate as a fraction of its full peak. The pass test and Figure&nbsp;1 both read from it.</p>
+
+<h2 id="settings">Settings</h2>
+
+<p>The settings are the size of one <em>g</em>, the share of each peak a rate has to keep to pass,
+and the rate purchasing has proposed.</p>
+<div class="codetabs" id="s0">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|json reads the test file, and matplotlib draws the figures ([Files and libraries](py-files.html)).;6|The pass mark: a rate passes if every channel keeps at least 95% of its peak. The report chose it.;7|The rate of the cheaper logger, from the assignment.">import json
+
+import matplotlib.pyplot as plt
+
+G = 9.81                 # m/s^2 in one g
+KEEP = 0.95              # a rate passes if every channel keeps 95% of its peak
+PROPOSED = 1000          # Hz, the logger purchasing wants</pre>
+  <pre data-lang="matlab" hidden data-notes="1|In MATLAB % starts a comment, and the semicolon stops MATLAB from printing the value.">G = 9.81;                % m/s^2 in one g
+KEEP = 0.95;             % a rate passes if every channel keeps 95% of its peak
+PROPOSED = 1000;         % Hz, the logger purchasing wants</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 12 to 18 (Python) and lines 13 to 15 (MATLAB).</div>
+</div>
+<h2 id="the-test-and-the-rates-to-try">The Test and the Rates to Try</h2>
+
+<p>The program reads the test and finds the recorded rate from the time between samples. A slower
+logger can only be imitated by keeping every k-th sample, so the rates it can try are the recorded
+rate divided by a whole number. It tries every whole number from 1 to 100 that divides the rate
+exactly, which on the example test gives 14 rates from 20,000 down to 200&nbsp;Hz.</p>
+<div class="codetabs" id="s1">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|The example test's file is named here, so on another pack the program stops with a file-not-found error until the name is changed to that pack's test ([Files and libraries](py-files.html)).;3|The eight channels, as a dictionary from key to channel ([Dictionaries](py-dicts.html)).;5|Samples per second is one over the time between samples. round makes it a whole number.;8|k runs 1, 2, 3 and on up to 100 ([Loops](py-loops.html)).;9|% is the remainder. A remainder of 0 means k divides the rate exactly ([Conditions](py-conditions.html)).;13|// divides and drops any fraction, so the rate stays a whole number.">with open('crash/09793.json') as f:
+    test = json.load(f)
+channels = test['channels']
+
+rate_now = round(1 / channels['head_x']['dt'])
+# every whole-number step down from 20 kHz, to 200 Hz
+factors = []
+for k in range(1, 101):
+    if rate_now % k == 0:              # k divides the rate exactly
+        factors.append(k)
+rates = []
+for k in factors:
+    rates.append(rate_now // k)</pre>
+  <pre data-lang="matlab" hidden data-notes="3|The channel keys, such as head_x, as a cell array.;9|mod is the remainder, Python's %.;10|end+1 is one past the last, so this adds k to the end.;13|All the rates at once. ./ divides by each element.">test = jsondecode(fileread('crash/09793.json'));
+channels = test.channels;
+keys = fieldnames(channels);
+
+rate_now = round(1 / channels.head_x.dt);
+% every whole-number step down from 20 kHz, to 200 Hz
+factors = [];
+for k = 1:100
+    if mod(rate_now, k) == 0           % k divides the rate exactly
+        factors(end+1) = k;
+    end
+end
+rates = rate_now ./ factors;</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 20 to 32 (Python) and lines 17 to 29 (MATLAB).</div>
+</div>
+<h2 id="a-channel-s-values">A Channel's Values</h2>
+
+<p>This function gives a channel's values in the units the report uses: <em>g</em> for the
+accelerations, and millimeters for the chest displacement, whose header says meters while its
+values fit micrometers (assignment&nbsp;1 found this).</p>
+<div class="codetabs" id="s2">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|Given a channel's key, such as head_x, it hands back the values and their unit ([Functions](py-functions.html)).;4|channels belongs to the main part. A function can read it when it is called, as long as it exists by then.;6|Only for the chest displacement ([Conditions](py-conditions.html)).;9|return leaves the function here, so the lines below run only for the other channels.;12|Two values, the list and its unit, which the caller unpacks with y, unit = values(key).">def values(key):
+    """The channel in g, or in mm for the chest displacement.
+    Its header says m, but the values are micrometers (see Errors)."""
+    ch = channels[key]
+    out = []
+    if key == 'chest_d':
+        for v in ch['y']:
+            out.append(v / 1000)
+        return out, 'mm'
+    for v in ch['y']:
+        out.append(v / G)
+    return out, 'g'</pre>
+  <pre data-lang="matlab" hidden data-notes="1|A MATLAB function cannot see the script's names, so channels and G are passed in.;11|return leaves the function here, as in the Python.">function [out, unit] = values(channels, key, G)
+    % The channel in g, or in mm for the chest displacement.
+    % Its header says m, but the values are micrometers (see Errors).
+    y = channels.(key).y;
+    out = zeros(size(y));
+    if strcmp(key, 'chest_d')
+        for i = 1:numel(y)
+            out(i) = y(i) / 1000;
+        end
+        unit = 'mm';
+        return
+    end
+    for i = 1:numel(y)
+        out(i) = y(i) / G;
+    end
+    unit = 'g';
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 35 to 46 (Python) and lines 171 to 187 (MATLAB).</div>
+</div>
+<h2 id="the-peak">The Peak</h2>
+
+<p>The peak is the largest size in a record, ignoring its sign. A crash decelerates, so most of the
+largest values are negative, and <code>peak</code> gives their size, which is always positive.</p>
+<div class="codetabs" id="s3">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="3|Starts with the first value's size as the largest so far.;4|v takes each value in turn ([Loops](py-loops.html)).;5|A larger size replaces the largest so far ([Conditions](py-conditions.html)).">def peak(y):
+    """The largest size in y, ignoring sign."""
+    biggest = abs(y[0])
+    for v in y:
+        if abs(v) &gt; biggest:
+            biggest = abs(v)
+    return biggest</pre>
+  <pre data-lang="matlab" hidden data-notes="3|MATLAB counts from 1, so y(1) is the first value.">function biggest = peak(y)
+    % The largest size in y, ignoring sign.
+    biggest = abs(y(1));
+    for i = 1:numel(y)
+        if abs(y(i)) &gt; biggest
+            biggest = abs(y(i));
+        end
+    end
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 49 to 55 (Python) and lines 190 to 198 (MATLAB).</div>
+</div>
+<h2 id="the-peak-at-every-start">The Peak at Every Start</h2>
+
+<p>This function does the program's main work. For a logger that keeps every k-th sample, there are k
+places it could start, and each gives a different record. The function finds the peak of each one.
+The smallest of them is the worst start and the largest the best.</p>
+<div class="codetabs" id="s4">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="4|start runs 0 to k - 1, every sample the slower logger could start on ([Loops](py-loops.html)).;5|y[start::k] keeps every k-th value, beginning at position start ([Lists](py-lists.html)). That is the record the slower logger would have made.">def peaks_by_start(y, k):
+    """Peak of the record that keeps every k-th sample, for each start 0..k-1."""
+    peaks = []
+    for start in range(k):
+        peaks.append(peak(y[start::k]))
+    return peaks</pre>
+  <pre data-lang="matlab" hidden data-notes="4|The starts counted from 0, as in the Python. peaks(start + 1) stores start 0 in position 1.;5|y(start + 1:k:end) keeps every k-th value from position start + 1, since MATLAB counts from 1.">function peaks = peaks_by_start(y, k)
+    % Peak of the record that keeps every k-th sample, for each start 0..k-1.
+    peaks = zeros(1, k);
+    for start = 0:k-1
+        peaks(start + 1) = peak(y(start + 1:k:end));
+    end
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 58 to 63 (Python) and lines 201 to 207 (MATLAB).</div>
+</div>
+<h2 id="the-test-and-its-timing">The Test and Its Timing</h2>
+
+<p>The main part starts here. It prints the test, then every different combination of number of
+samples, spacing and prefilter among the channels, since the method assumes they all agree. A set
+keeps each combination once, so a single entry shows they do.</p>
+<div class="codetabs" id="s5">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="5|A set holds each value once. Adding the same value again changes nothing.;7|The three values in parentheses form one tuple, so the set holds whole combinations.;9|rates[0] is the first rate and rates[-1] the last ([Lists](py-lists.html)).;10|An empty line.">v = test['vehicle']
+info = test['test']
+print(f"Test {test['testNo']}: {v['year']} {v['make']} {v['model']}, "
+      f"{info['config']} at {info['speed_kph']} km/h")
+timings = set()          # a set keeps each different combination once
+for ch in channels.values():
+    timings.add((ch['n'], ch['dt'], ch['prefilter_hz']))
+print("samples, spacing (s) and prefilter (Hz) of each channel:", timings)
+print(f"recorded rate {rate_now} Hz, {len(rates)} rates tried, {rates[0]} to {rates[-1]} Hz")
+print()</pre>
+  <pre data-lang="matlab" hidden data-notes="8|Each combination as text, written the way Python prints a tuple. Two single quotes inside MATLAB text stand for one.;11|unique keeps each different text once, as the set does, and strjoin joins them with commas.">v = test.vehicle;
+info = test.test;
+fprintf('Test %d: %d %s %s, %s at %g km/h\n', test.testNo, v.year, v.make, v.model, ...
+        info.config, info.speed_kph);
+timings = {};            % each different combination, kept once by unique below
+for m = 1:numel(keys)
+    ch = channels.(keys{m});
+    timings{end+1} = sprintf('(%d, %g, ''%s'')', ch.n, ch.dt, ch.prefilter_hz);
+end
+fprintf('samples, spacing (s) and prefilter (Hz) of each channel: {%s}\n', ...
+        strjoin(unique(timings), ', '));
+fprintf('recorded rate %d Hz, %d rates tried, %d to %d Hz\n', rate_now, numel(rates), ...
+        rates(1), rates(end));
+fprintf('\n');</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 66 to 75 (Python) and lines 31 to 44 (MATLAB).</div>
+</div>
+<h2 id="the-peak-of-every-channel">The Peak of Every Channel</h2>
+
+<p>The first table gives each channel's peak at the recorded rate, in <em>g</em> or millimeters,
+and when it happens. These are the values every slower record is compared with.</p>
+<div class="codetabs" id="s6">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|The table's header. :12 pads text to 12 characters, and :&gt;8 right-aligns it in 8 ([Numbers and text](py-values.html)).;3|Each channel's key with the channel ([Dictionaries](py-dicts.html)).;4|The two values the function hands back, each under its own name.;5|The position of the largest size so far. After the loop it is the peak's position.;9|The time of sample i, in ms."># the 20 kHz peak of every channel, and when it happens
+print(f"{'key':12} {'description':34} {'peak':&gt;8} {'unit':4} {'at (ms)':&gt;8}")
+for key, ch in channels.items():
+    y, unit = values(key)
+    i = 0                                # index of the largest size so far
+    for j in range(len(y)):
+        if abs(y[j]) &gt; abs(y[i]):
+            i = j
+    t_ms = 1000 * (ch['t0'] + i * ch['dt'])
+    print(f"{key:12} {ch['comment']:34} {peak(y):8.2f} {unit:4} {t_ms:8.2f}")</pre>
+  <pre data-lang="matlab" hidden data-notes="2|%-12s left-aligns the text in 12 characters, and %8s right-aligns it in 8.;13|i - 1, since the first sample, i = 1, is at t0.">% the 20 kHz peak of every channel, and when it happens
+fprintf('%-12s %-34s %8s %-4s %8s\n', 'key', 'description', 'peak', 'unit', 'at (ms)');
+for m = 1:numel(keys)
+    key = keys{m};
+    ch = channels.(key);
+    [y, unit] = values(channels, key, G);
+    i = 1;                               % index of the largest size so far
+    for j = 1:numel(y)
+        if abs(y(j)) &gt; abs(y(i))
+            i = j;
+        end
+    end
+    t_ms = 1000 * (ch.t0 + (i - 1) * ch.dt);
+    fprintf('%-12s %-34s %8.2f %-4s %8.2f\n', key, ch.comment, peak(y), unit, t_ms);
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 77 to 86 (Python) and lines 46 to 60 (MATLAB).</div>
+</div>
+<h2 id="the-worst-start-at-each-rate">The Worst Start at Each Rate</h2>
+
+<p>For every channel and every rate the program finds the worst start's peak and stores it as a
+fraction of the full peak. Then it prints the table of those fractions as percentages, one row per
+rate and one column per channel.</p>
+<div class="codetabs" id="s7">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|A dictionary with one list per channel, one value per rate. Looping over a dictionary, as for key in channels does, gives its keys ([Dictionaries](py-dicts.html)).;8|min picks the smallest peak over all the starts, the worst start, as a fraction of the full peak.;13|Each key right-aligned in 11 characters, so the columns line up.;14|' '.join puts the column texts together with a space between each.;15|One row per rate."># worst-start peak at each rate, as a fraction of the 20 kHz peak
+worst = {}
+for key in channels:
+    y, unit = values(key)
+    full = peak(y)
+    worst[key] = []
+    for k in factors:
+        worst[key].append(min(peaks_by_start(y, k)) / full)
+
+print(f"\nworst-start peak as % of the 20 kHz peak")
+columns = []
+for key in channels:
+    columns.append(f"{key:&gt;11}")
+print(f"{'rate (Hz)':&gt;9} " + ' '.join(columns))
+for i in range(len(rates)):
+    columns = []
+    for key in channels:
+        columns.append(f"{100 * worst[key][i]:11.1f}")
+    print(f"{rates[i]:9d} " + ' '.join(columns))</pre>
+  <pre data-lang="matlab" hidden data-notes="2|A struct with one field per channel, each a row of fractions.;7|A field named by a variable, here the channel's key.;14|cellfun runs a small function on each key. @(key) makes the one-line function, keys' turns the column of keys into a row, and 'UniformOutput', false collects the texts in a cell array.;19|Square brackets join text in MATLAB.">% worst-start peak at each rate, as a fraction of the 20 kHz peak
+worst = struct();
+for m = 1:numel(keys)
+    key = keys{m};
+    [y, unit] = values(channels, key, G);
+    full = peak(y);
+    worst.(key) = zeros(1, numel(factors));
+    for f = 1:numel(factors)
+        worst.(key)(f) = min(peaks_by_start(y, factors(f))) / full;
+    end
+end
+
+fprintf('\nworst-start peak as %% of the 20 kHz peak\n');
+fprintf('%9s %s\n', 'rate (Hz)', strjoin(cellfun(@(key) sprintf('%11s', key), keys', ...
+        'UniformOutput', false), ' '));
+for i = 1:numel(rates)
+    row = sprintf('%9d', rates(i));
+    for m = 1:numel(keys)
+        row = [row, sprintf(' %11.1f', 100 * worst.(keys{m})(i))];
+    end
+    disp(row);
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 88 to 106 (Python) and lines 62 to 83 (MATLAB).</div>
+</div>
+<h2 id="the-lowest-rate-that-passes">The Lowest Rate That Passes</h2>
+
+<p>The rates run from fastest to slowest. The loop walks down them and stops at the first rate
+where some channel keeps less than 95% of its peak, so the rate it reports passes and so does
+every faster one. On the example test the first rate below 20,000&nbsp;Hz already fails.</p>
+<div class="codetabs" id="s8">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|If no slower rate passes, the answer stays the recorded rate.;4|The channels that fail at this rate.;6|worst[key][i] is the channel's fraction at rate i ([Conditions](py-conditions.html)).;8|Every channel passed, so this rate is the lowest passing one so far.;12|break leaves the loop at the first rate that fails ([Loops](py-loops.html)).;13|:.0f writes the number with no decimal places."># the lowest rate that every channel passes, with every faster rate passing too
+lowest = rate_now
+for i in range(len(rates)):
+    failing = []
+    for key in channels:
+        if worst[key][i] &lt; KEEP:
+            failing.append(key)
+    if len(failing) == 0:
+        lowest = rates[i]
+    else:
+        print(f"\n{rates[i]} Hz is the first rate to fail: {', '.join(failing)}")
+        break
+print(f"Lowest rate keeping {100 * KEEP:.0f}% of every peak: {lowest} Hz")</pre>
+  <pre data-lang="matlab" hidden data-notes="10|isempty is true for a cell array with nothing in it.;17|%% prints a percent sign.">% the lowest rate that every channel passes, with every faster rate passing too
+lowest = rate_now;
+for i = 1:numel(rates)
+    failing = {};
+    for m = 1:numel(keys)
+        if worst.(keys{m})(i) &lt; KEEP
+            failing{end+1} = keys{m};
+        end
+    end
+    if isempty(failing)
+        lowest = rates(i);
+    else
+        fprintf('\n%d Hz is the first rate to fail: %s\n', rates(i), strjoin(failing, ', '));
+        break
+    end
+end
+fprintf('Lowest rate keeping %.0f%% of every peak: %d Hz\n', 100 * KEEP, lowest);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 108 to 120 (Python) and lines 85 to 101 (MATLAB).</div>
+</div>
+<h2 id="the-proposed-rate">The Proposed Rate</h2>
+
+<p>The last table answers Alice's question for the proposed logger. For the proposed 1000&nbsp;Hz logger it
+gives each channel's full peak and what the logger would read at its worst start, its best start
+and start 0, in <em>g</em>, or millimeters for the chest displacement.</p>
+<div class="codetabs" id="s9">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|20,000 // 1000 is 20, so the proposed logger keeps every 20th sample. On a test at 12,500 samples a second, // gives 12, which is a 1041.7 Hz logger, though the line printed still says 1000 Hz.;6|The peak at each of the 20 starts.;7|The worst start's peak, then the same as a percentage of the full peak.;8|p[0] is the peak from start 0, the logger starting on the same sample as ours."># the proposed rate, worst and best start, in the channel's own units
+k = rate_now // PROPOSED
+print(f"\nAt {PROPOSED} Hz (every {k}th sample), range of peaks over the {k} starts:")
+for key in channels:
+    y, unit = values(key)
+    p = peaks_by_start(y, k)
+    print(f"  {key:12} 20 kHz {peak(y):7.2f}   worst {min(p):7.2f} ({100 * min(p) / peak(y):5.1f}%)"
+          f"   best {max(p):7.2f}   start 0 {p[0]:7.2f} {unit}")</pre>
+  <pre data-lang="matlab" hidden data-notes="2|floor drops the fraction, as Python's // does. On a 12,500 Hz test plain / would give 12.5, and peaks_by_start would fail.;9|p(1) is start 0, since MATLAB counts from 1.">% the proposed rate, worst and best start, in the channel's own units
+k = floor(rate_now / PROPOSED);         % floor, as Python's // does
+fprintf('\nAt %d Hz (every %dth sample), range of peaks over the %d starts:\n', PROPOSED, k, k);
+for m = 1:numel(keys)
+    key = keys{m};
+    [y, unit] = values(channels, key, G);
+    p = peaks_by_start(y, k);
+    fprintf('  %-12s 20 kHz %7.2f   worst %7.2f (%5.1f%%)   best %7.2f   start 0 %7.2f %s\n', ...
+            key, peak(y), min(p), 100 * min(p) / peak(y), max(p), p(1), unit);
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 122 to 129 (Python) and lines 103 to 112 (MATLAB).</div>
+</div>
+<h2 id="figure-1-peak-kept-against-rate">Figure 1, Peak Kept Against Rate</h2>
+
+<p>The first figure is the worst-start table drawn, one line per channel against rate on a log
+scale, with the 95% mark and the proposed rate.</p>
+<div class="codetabs" id="s10">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|A new figure, 7.5 by 4.5 inches ([Figures](py-plots.html)).;6|The fractions as percentages.;7|semilogx puts the rate on a log scale. .title() writes the description with capital first letters.;8|A horizontal line at 95%.;9|A vertical line at 1000 Hz.;10|Tick marks at round rates, labeled as plain numbers."># Figure 1: worst-start fraction against rate, one line per channel
+plt.figure(figsize=(7.5, 4.5))
+for key, ch in channels.items():
+    percent = []
+    for w in worst[key]:
+        percent.append(100 * w)
+    plt.semilogx(rates, percent, '.-', label=ch['comment'].title())
+plt.axhline(100 * KEEP, color='black', linestyle=':', linewidth=0.8, label='95% of the peak')
+plt.axvline(PROPOSED, color='red', linewidth=0.8, label='proposed logger, 1000 Hz')
+plt.xticks([200, 500, 1000, 2000, 5000, 10000, 20000],
+           ['200', '500', '1000', '2000', '5000', '10000', '20000'])
+plt.xlabel('sample rate (Hz, log scale)')
+plt.ylabel('worst-start peak (% of the 20 kHz peak)')
+plt.title('Peak kept at each rate, worst start, test 9793', fontsize=10)
+plt.legend(fontsize=7, loc='lower right')
+plt.tight_layout()
+plt.savefig('fraction_vs_rate.svg')
+plt.close()</pre>
+  <pre data-lang="matlab" hidden data-notes="7|title_case is defined at the end of the file, below.;9|The x and y ranges, so the two lines can run from edge to edge. (MATLAB's yline and xline would also work. Octave, used to check this version, warns about them on a log axis.);21|MATLAB takes the legend labels as one cell array, in the order the lines were drawn.">% Figure 1: worst-start fraction against rate, one line per channel
+fig = figure('Position', [100 100 750 450]);
+labels = {};
+for m = 1:numel(keys)
+    semilogx(rates, 100 * worst.(keys{m}), '.-');
+    hold on
+    labels{end+1} = title_case(channels.(keys{m}).comment);
+end
+xl = xlim;                           % a line across at 95% and one up at 1000 Hz
+yl = ylim;
+plot(xl, [100 * KEEP, 100 * KEEP], ':k');
+plot([PROPOSED, PROPOSED], yl, 'r');
+xlim(xl);
+ylim(yl);
+labels = [labels, {'95% of the peak', 'proposed logger, 1000 Hz'}];
+xticks([200, 500, 1000, 2000, 5000, 10000, 20000]);
+xticklabels({'200', '500', '1000', '2000', '5000', '10000', '20000'});
+xlabel('sample rate (Hz, log scale)');
+ylabel('worst-start peak (% of the 20 kHz peak)');
+title('Peak kept at each rate, worst start, test 9793', 'FontSize', 10);
+legend(labels, 'FontSize', 7, 'Location', 'southeast');
+saveas(fig, 'fraction_vs_rate.svg');
+close(fig);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 131 to 148 (Python) and lines 114 to 136 (MATLAB).</div>
+</div>
+<h2 id="figure-2-the-crossmember-at-1000-hz">Figure 2, the Crossmember at 1000 Hz</h2>
+
+<p>The second figure shows why the crossmember loses so much. It draws the recorded crossmember
+from 40 to 70&nbsp;ms and marks the samples a 1000&nbsp;Hz logger would keep from its best start
+and from its worst. In the Python a small function, <code>plot_kept</code>, draws each set of
+kept samples.</p>
+<div class="codetabs" id="s11">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="4|The time of every sample in ms.;8|.index gives the position of a value in a list, so this is the start with the highest peak.;11|The positions of the samples from 40 to 70 ms.;13|and is true only when both sides are ([Conditions](py-conditions.html)).;23|It reads win, t_ms, y and k from the main part when it is called, so it is called after they exist.;28|Sample i is kept by a logger starting at start if it is a whole number of steps of k after it.;31|mark + '-' makes a style such as 'o-', circles joined by lines.;34|Circles for the best start, squares for the worst."># Figure 2: the crossmember around its peak, and what a 1 kHz logger keeps of it
+ch = channels['vehicle_x']
+y, unit = values('vehicle_x')
+t_ms = []
+for i in range(ch['n']):
+    t_ms.append(1000 * (ch['t0'] + i * ch['dt']))
+p = peaks_by_start(y, k)
+best_start = p.index(max(p))         # index gives the position of a value in a list
+worst_start = p.index(min(p))
+plt.figure(figsize=(7.5, 4))
+win = []                             # the samples from 40 to 70 ms
+for i in range(ch['n']):
+    if 40 &lt;= t_ms[i] and t_ms[i] &lt;= 70:
+        win.append(i)
+win_t = []
+win_y = []
+for i in win:
+    win_t.append(t_ms[i])
+    win_y.append(y[i])
+plt.plot(win_t, win_y, color='gray', linewidth=0.8, label='recorded at 20000 Hz')
+
+
+def plot_kept(start, mark, name):
+    """The samples in the window that a logger starting at sample start keeps."""
+    kept_t = []
+    kept_y = []
+    for i in win:
+        if (i - start) % k == 0:
+            kept_t.append(t_ms[i])
+            kept_y.append(y[i])
+    plt.plot(kept_t, kept_y, mark + '-', label=f'1000 Hz, {name} start (sample {start})')
+
+
+plot_kept(best_start, 'o', 'best')
+plot_kept(worst_start, 's', 'worst')
+plt.xlabel('time from impact (ms)')
+plt.ylabel('acceleration (g)')
+plt.title(ch['comment'].title() + ' [' + ch['code'] + '], 40 to 70 ms',
+          fontsize=10)
+plt.legend(fontsize=8)
+plt.tight_layout()
+plt.savefig('crossmember_1khz.svg')</pre>
+  <pre data-lang="matlab" hidden data-notes="9|~ discards the value and keeps the position, counted from 1.;10|The start counted from 0, as the Python counts it.;16|&amp;&amp; is MATLAB's and.;20|win is a list of positions, so t_ms(win) picks those times.;22|plot_kept is defined at the end of the file. It needs win, t_ms, y and k passed in.">% Figure 2: the crossmember around its peak, and what a 1 kHz logger keeps of it
+ch = channels.vehicle_x;
+[y, unit] = values(channels, 'vehicle_x', G);
+t_ms = zeros(ch.n, 1);
+for i = 1:ch.n
+    t_ms(i) = 1000 * (ch.t0 + (i - 1) * ch.dt);
+end
+p = peaks_by_start(y, k);
+[~, b] = max(p);                     % the position of the largest, counted from 1
+best_start = b - 1;                  % starts are counted from 0, as in the Python
+[~, w] = min(p);
+worst_start = w - 1;
+fig = figure('Position', [100 100 750 400]);
+win = [];                            % the samples from 40 to 70 ms
+for i = 1:ch.n
+    if 40 &lt;= t_ms(i) &amp;&amp; t_ms(i) &lt;= 70
+        win(end+1) = i;
+    end
+end
+plot(t_ms(win), y(win), 'Color', [0.5 0.5 0.5], 'LineWidth', 0.8);
+hold on
+plot_kept(best_start, 'o', win, t_ms, y, k);
+plot_kept(worst_start, 's', win, t_ms, y, k);
+xlabel('time from impact (ms)');
+ylabel('acceleration (g)');
+title([title_case(ch.comment) ' [' ch.code '], 40 to 70 ms'], 'FontSize', 10);
+legend({'recorded at 20000 Hz', ...
+        sprintf('1000 Hz, best start (sample %d)', best_start), ...
+        sprintf('1000 Hz, worst start (sample %d)', worst_start)}, 'FontSize', 8);
+saveas(fig, 'crossmember_1khz.svg');
+close(fig);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 150 to 191 (Python) and lines 138 to 168 (MATLAB).</div>
+</div>
+<h2 id="two-functions-only-the-matlab-version-has">Two Functions Only the MATLAB Version Has</h2>
+
+<p>The MATLAB file ends with two functions the Python does not need in this form. <code>plot_kept</code>
+is the Python's <code>plot_kept</code>, defined partway down the main part, written separately because a MATLAB function cannot see the
+script's names. <code>title_case</code> stands in for Python's <code>.title()</code>.</p>
+<div class="codetabs" id="s12">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="matlab" aria-selected="true">MATLAB</button>
+  </div>
+  <pre data-lang="matlab" data-notes="4|i takes each value in win in turn.;5|i - 1 is the sample counted from 0, so this is the Python's (i - start) % k == 0.;9|[mark '-'] joins the two texts, as + does in Python.;16|The first letter, and every letter that follows something other than a letter.">function plot_kept(start, mark, win, t_ms, y, k)
+    % The samples in the window that a logger starting at sample start keeps.
+    kept = [];
+    for i = win
+        if mod((i - 1) - start, k) == 0      % i - 1 is the sample counted from 0
+            kept(end+1) = i;
+        end
+    end
+    plot(t_ms(kept), y(kept), [mark '-']);
+end
+
+
+function s = title_case(s)
+    % Capital first letter on each word, the rest lower case, like Python's .title().
+    s = lower(s);
+    starts = [1, find(~isletter(s(1:end-1))) + 1];
+    s(starts) = upper(s(starts));
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The MATLAB program's lines 210 to 227.</div>
+</div>
+
+<h2 id="decisions-in-this-program">Decisions in This Program</h2>
+
+<p>Every line below holds a decision the student made. The line numbers are those of the
+downloadable files. To check your own program, use the test on <a href="ai-use.html">Using
+AI</a>. Pick a line and say why it is that way.</p>
+
+<table class="data">
+  <tr><th class="num">Python line</th><th class="num">MATLAB line</th><th>The decision</th><th>What else could have been chosen</th></tr>
+  <tr><td class="num">17</td><td class="num">14</td><td>A rate passes if every channel keeps 95% of its peak</td><td>another share, or a different mark for each channel</td></tr>
+  <tr><td class="num">27</td><td class="num">24</td><td>Rates are tried down to 200&nbsp;Hz, a hundredth of the recorded rate</td><td>stopping at the proposed 1000&nbsp;Hz</td></tr>
+  <tr><td class="num">95</td><td class="num">70</td><td>A rate is judged at its worst start</td><td>start 0 only, or the average over all the starts</td></tr>
+  <tr><td class="num">113</td><td class="num">90</td><td>Every channel counts in the pass test</td><td>only the channels a reader is expected to use</td></tr>
+  <tr><td class="num">40</td><td class="num">176</td><td>The chest displacement is read as micrometers</td><td>leaving the header&rsquo;s meters, which only rescales it</td></tr>
+</table>
+
+<h2 id="what-it-prints">What It Prints</h2>
+
+<p>This is everything the program prints, run on the example pack. On that pack the MATLAB version
+prints the same lines (checked in Octave).</p>
+
+<pre class="nb-out">Test 9793: 2017 HYUNDAI ELANTRA, VEHICLE INTO BARRIER at 56.15 km/h
+samples, spacing (s) and prefilter (Hz) of each channel: {(7001, 5e-05, '4000')}
+recorded rate 20000 Hz, 14 rates tried, 20000 to 200 Hz
+
+key          description                            peak unit  at (ms)
+head_x       V1P1 HEAD CG X ACCELERATION           43.25 g       68.30
+head_y       V1P1 HEAD CG Y ACCELERATION            7.33 g       29.95
+head_z       V1P1 HEAD CG Z ACCELERATION           22.27 g       65.90
+chest_x      V1P1 CHEST X ACCELERATION             54.56 g       69.90
+chest_d      V1P1 CHEST X DISPLACEMENT             31.68 mm      69.35
+pelvis_x     V1P1 PELVIC X ACCELERATION            57.01 g       69.30
+vehicle_x    V1 LEFT REAR SEAT CROSSMEMBER AX     195.70 g       52.75
+pass_head_x  V1P2 HEAD CG X ACCELERATION           52.51 g       73.75
+
+worst-start peak as % of the 20 kHz peak
+rate (Hz)      head_x      head_y      head_z     chest_x     chest_d    pelvis_x   vehicle_x pass_head_x
+    20000       100.0       100.0       100.0       100.0       100.0       100.0       100.0       100.0
+    10000        99.6        80.6        97.9        98.6       100.0       100.0        83.5        99.9
+     5000        98.8        68.4        87.3        95.8       100.0        99.9        69.2        99.4
+     4000        98.9        76.2        85.1        95.1       100.0        99.8        72.0        99.4
+     2500        98.1        66.4        81.5        95.0        99.9        99.3        54.6        99.3
+     2000        96.5        66.5        81.3        94.4        99.8        99.4        49.9        99.3
+     1250        96.5        63.5        78.3        90.2        99.7        98.7        35.4        98.5
+     1000        95.1        59.5        75.4        92.6        99.4        98.6        35.4        98.7
+      800        95.0        48.9        71.4        88.4        99.3        98.7        34.0        98.2
+      625        95.0        50.3        69.5        90.1        99.1        97.5        32.9        97.7
+      500        94.1        51.0        71.9        87.1        98.9        98.2        30.0        97.4
+      400        91.8        48.1        69.9        86.8        98.6        97.6        27.5        97.3
+      250        89.9        32.5        66.1        85.5        97.6        97.0        23.0        95.9
+      200        86.4        37.7        64.3        82.5        96.9        96.7        22.2        94.4
+
+10000 Hz is the first rate to fail: head_y, vehicle_x
+Lowest rate keeping 95% of every peak: 20000 Hz
+
+At 1000 Hz (every 20th sample), range of peaks over the 20 starts:
+  head_x       20 kHz   43.25   worst   41.14 ( 95.1%)   best   43.25   start 0   41.14 g
+  head_y       20 kHz    7.33   worst    4.36 ( 59.5%)   best    7.33   start 0    5.01 g
+  head_z       20 kHz   22.27   worst   16.79 ( 75.4%)   best   22.27   start 0   19.45 g
+  chest_x      20 kHz   54.56   worst   50.53 ( 92.6%)   best   54.56   start 0   50.98 g
+  chest_d      20 kHz   31.68   worst   31.48 ( 99.4%)   best   31.68   start 0   31.58 mm
+  pelvis_x     20 kHz   57.01   worst   56.23 ( 98.6%)   best   57.01   start 0   56.93 g
+  vehicle_x    20 kHz  195.70   worst   69.37 ( 35.4%)   best  195.70   start 0  103.56 g
+  pass_head_x  20 kHz   52.51   worst   51.83 ( 98.7%)   best   52.51   start 0   51.95 g</pre>
+
+<h2 id="running-it-yourself">Running It Yourself</h2>
+
+<p>Both versions are downloads: <a href="data/example/code/a2_peak_loss.py" download><code>a2_peak_loss.py</code></a>
+and <a href="data/example/code/a2_peak_loss.m" download><code>a2_peak_loss.m</code></a>. Unzip a data pack, put
+the program in the pack's top folder beside <code>crash</code> and <code>shots</code>, and run it
+from there (<a href="py-files.html">Files and libraries</a> explains why the folder matters). This program names the example test's file, <code>crash/09793.json</code>, so to
+run it on your own pack, change that name to your test's. Its labels are written for the example
+test too: they say 20&nbsp;kHz and test 9793, which on most packs is not the recorded rate or the
+test. The MATLAB
+version should run as it is in MATLAB R2018b or later. GNU Octave, which is free, needs a script's functions defined
+before they are used, so to run it there, move the functions to the top of the file and put a line
+<code>1;</code> above them.</p>
+
+  </main>
+
+  
+
+  <script src="js/page.js?v=20261027131534"></script>
+
+  <footer class="site-footer">
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-27">October 27, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Algorithms');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  
+  
+  
+    
+  
+  
+  <script src="https://uwt-tutor-backend.onrender.com/widget.js"
+          data-key="wk_bcb80c4ee2d5718131d24548528577c3"
+          data-content-selector="main"
+          data-color="#5F7038"></script>
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>
