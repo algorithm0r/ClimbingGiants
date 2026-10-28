@@ -931,7 +931,7 @@ stored in.</p>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="3|time is used to measure how long each step takes ([Files and libraries](py-files.html)).;8|Standard gravity, used to convert m/s squared to g. The report gives this value.;9|The ISO codes of the driver head channels in X, Y and Z, as a list ([Lists](py-lists.html)).;10|A list, so another limit could be added and the program would search it too.">import json
+  <pre data-lang="python" data-notes="3|time is used to measure how long each step takes ([Files and libraries](py-files.html)).;8|Standard gravity, used to convert m/s squared to g. The student chose it (the Decisions table gives the alternative), and the report says which value it uses.;9|The ISO codes of the driver head channels in X, Y and Z, as a list ([Lists](py-lists.html)).;10|A list, so another limit could be added and the program would search it too.">import json
 import os
 import time
 
@@ -1039,7 +1039,7 @@ which the program checks.</p>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="4|The trapezoid between each pair of neighboring samples ([numpy arrays](py-numpy.html)).;5|The running total of the integral, with a 0 in front. The integral from sample i to sample j is S[j] - S[i].;6|One slot per window length. Slot 0 stays unused, so best[k] is length k.;11|S[k:] - S[:-k] subtracts each running total from the one k samples later, which gives the integral of every window of length k at once ([Lists](py-lists.html)). Dividing by T gives each window's mean.;12|HIC for each of those windows. np.clip sets any negative mean to 0, since a negative number has no real 2.5 power. A resultant is never negative, so this is a guard and does not change the answer.;13|Where the best window of this length starts.;15|Counts the windows looked at, for the cost the report gives.;22|The best length over all of them.;23|Four values: HIC, the window's first and last sample, and the count ([Functions](py-functions.html)).">def best_by_length(a, dt, kmax):
+  <pre data-lang="python" data-notes="4|The trapezoid between each pair of neighboring samples ([numpy arrays](py-numpy.html)).;5|The running total of the integral, with a 0 in front. The integral from sample i to sample j is S[j] - S[i].;6|One slot per window length. Slot 0 stays unused, so best[k] is length k.;11|S[k:] - S[:-k] subtracts each running total from the one k samples later, which gives the integral of every window of length k at once ([Lists](py-lists.html)). Dividing by T gives each window's mean.;12|HIC for each of those windows: the length T in seconds times its mean acceleration in g to the power 2.5. np.clip sets any negative mean to 0, since a negative number has no real 2.5 power. A resultant is never negative, so this is a guard and does not change the answer.;13|Where the best window of this length starts.;15|Counts the windows looked at, for the cost the report gives.;22|The best length over all of them.;23|Four values: HIC, the window's first and last sample, and the count ([Functions](py-functions.html)).">def best_by_length(a, dt, kmax):
     """For each window length k = 1..kmax samples, the best HIC over every
     start. The prefix sum S makes each window's integral one subtraction."""
     panels = (a[1:] + a[:-1]) / 2 * dt
@@ -1298,7 +1298,7 @@ HIC<sub>15</sub> search, and multiplies by 200.</p>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="6|There are n - k windows of length k, and integrating one directly takes about k additions.;7|The five values stored for the 15 ms search, unpacked.;11|The window count of the no-limit search, the fourth value stored.;13|One test costs its reading and filtering plus one HIC15 search."># ---- what the search costs
+  <pre data-lang="python" data-notes="2|15 is typed again here, so changing LIMITS_MS alone leaves this section on 15 ms.;6|There are n - k windows of length k, and integrating one directly takes about k additions.;7|The five values stored for the 15 ms search, unpacked.;11|The window count of the no-limit search, the fourth value stored.;13|One test costs its reading and filtering plus one HIC15 search."># ---- what the search costs
 kmax = round(15 / 1000 / dt)
 # integrating directly: one addition per sample, for every window
 direct = 0
@@ -1502,14 +1502,14 @@ close(fig);</pre>
 <h2 id="decisions-in-this-program">Decisions in This Program</h2>
 
 <p>Every line below holds a decision the student made. The 15&nbsp;ms limit and the CFC&nbsp;1000
-class are not on the list, since the standards set them. The line numbers are those of the
-downloadable files. To check your own program, use the test on <a href="ai-use.html">Using
+class are not on the list, since the standards set them. The line numbers are those of the downloadable files, and the hint under each code box
+gives the lines it shows. To check your own program, use the test on <a href="ai-use.html">Using
 AI</a>. Pick a line and say why it is that way.</p>
 
 <table class="data">
   <tr><th class="num">Python line</th><th class="num">MATLAB line</th><th>The decision</th><th>What else could have been chosen</th></tr>
   <tr><td class="num">19</td><td class="num">17</td><td>Accelerations are converted to <em>g</em> with standard gravity</td><td>9.81&nbsp;m/s&sup2;, the rounded value</td></tr>
-  <tr><td class="num">64</td><td class="num">219</td><td>Windows may start anywhere in the record, before impact included</td><td>starting the search at impact, which the notebook does</td></tr>
+  <tr><td class="num">64</td><td class="num">219</td><td>Windows may start anywhere in the record, before impact included</td><td>starting the search at impact, by handing hic only the samples from impact on, which the notebook does</td></tr>
   <tr><td class="num">57</td><td class="num">212</td><td>Each window&rsquo;s integral uses the trapezoid rule</td><td>the rectangle rule, which differs slightly on short windows</td></tr>
   <tr><td class="num">114</td><td class="num">42</td><td>Each component is filtered before the resultant is formed</td><td>forming the resultant first and filtering it once</td></tr>
   <tr><td class="num">115</td><td class="num">44</td><td>The baseline before impact is left in, and removing it is only a check</td><td>subtracting each channel&rsquo;s mean before impact first</td></tr>

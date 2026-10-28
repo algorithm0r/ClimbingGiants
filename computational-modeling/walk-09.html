@@ -1,0 +1,1909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reading the assignment 8 program — Computational Physical Modeling</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="css/blocks.css?v=20261027131534">
+  <link rel="stylesheet" href="css/demos.css?v=20261027131534">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (olive). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #5F7038;
+      --course-accent-dark: #47542A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    /* ── Week page video and class cards (media-cards.js) ── */
+    .media-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+      gap: 0.9rem;
+      margin: 1rem 0;
+    }
+    .media-card {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-top: 4px solid var(--course-accent);
+      border-radius: 4px;
+      padding: 0.75rem 0.9rem 0.85rem;
+    }
+    .media-card.class { border-top-color: #C8860A; }
+    .media-card p { margin: 0; }
+    .mc-kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .mc-title { font-weight: 600; line-height: 1.3; margin: 0.25rem 0 0.35rem !important; }
+    .mc-sub { font-size: 0.85rem; color: #5A5550; line-height: 1.4; }
+    .mc-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.7rem; }
+    .mc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--course-accent);
+      border-radius: 3px;
+      text-decoration: none;
+      color: var(--course-accent-dark);
+    }
+    a.mc-btn:visited { color: var(--course-accent-dark); }
+    a.mc-btn:hover { background: #F0EDE7; }
+    .mc-btn svg { width: 1em; height: 1em; flex: none; }
+    .mc-btn.primary, a.mc-btn.primary:visited { background: var(--course-accent); color: #fff; }
+    a.mc-btn.primary:hover { background: var(--course-accent-dark); }
+    .mc-btn.pending { border-style: dashed; border-color: #b8b2a8; color: #5A5550; }
+    .mc-total { font-size: 0.9rem; color: #5A5550; }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+    /* the remembered data phrase; filled in by page.js */
+    .cg-phrase { display: inline-flex; align-items: center; gap: .3rem; margin-right: .6rem;
+      font-size: .82rem; flex-shrink: 0; }
+    /* The header row is a fixed 780px. The title, the toggle, "Your data", Search and
+       "Report a problem" only just fit in it, so the chip shows the label alone (the
+       phrase is in the link's title and on the data page) and Search shows its icon.
+       An earlier chip that held the phrase and was allowed to shrink squeezed the
+       label down to "Yo" on a classroom projector. */
+    .cg-phrase a { color: rgba(230,238,222,.92); text-decoration: none; white-space: nowrap; }
+    .header-links .search-btn .sb-label { display: none; }
+    .header-links button.report-btn { white-space: nowrap; }
+    /* the title keeps its own width */
+    .site-header-top .site-title { white-space: nowrap; flex-shrink: 0; }
+    .site-header-top .header-links { min-width: 0; margin-left: 1rem; }
+    @media (max-width: 780px) {
+      /* below the 780px row: the report button's short form, as on phones */
+      .header-links .report-btn .rb-full { display: none; }
+      .header-links .report-btn .rb-short { display: inline; }
+      .cg-phrase { margin-right: .2rem; }
+    }
+    .cg-phrase a:hover { color: #fff; text-decoration: underline; }
+    .cg-phrase button { background: none; border: none; cursor: pointer; padding: 0 .2rem;
+      color: rgba(230,238,222,.7); font: inherit; font-size: 1rem; line-height: 1; }
+    .cg-phrase button:hover { color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* Two rules the other course sites do not define. The header's top
+       row carries a report button beside the title, and a page with a
+       wide demo in it needs more than the reading measure. */
+    .site-header-top { border-bottom: 1px solid rgba(200,222,180,0.15); }
+    main.wide { max-width: 1180px; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Computational Physical Modeling</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <span class="cg-phrase" id="cg-phrase"></span>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        
+          <a href="syllabus.html">Syllabus</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="notes.html">Notes</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reports.html">Examples</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reflection.html">Reflection</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="meeting.html">Meeting</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="ai-use.html">AI Use</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="tools.html">Tools</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="python.html">Python</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="workbench.html">Workbench</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="extra-labor.html">Extra Labor</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="canvas-grades.html">Canvas Grades</a>
+          
+        
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+          
+          
+          
+          <a href="week-01.html">1</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-02.html">2</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-03.html">3</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-04.html">4</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          <span class="week-gap" title="Week 5 is a break week">5<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <a href="week-06.html">6</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-07.html">7</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-08.html">8</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-09.html">9</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-10.html">10</a>
+          
+        
+      </div>
+    </nav>
+
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+
+  <main data-pagefind-body>
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <div class="eyebrow"><a href="reports-09.html">Example reports &middot; Assignment 8</a></div>
+<h1>Reading the assignment 8 program</h1>
+
+<p>This page reads <code>a8_noise_intervals.py</code>, the program behind the technical report in
+the <a href="reports-09.html">assignment&nbsp;8 example reports</a>, one section at a time. The
+program puts an interval on the driver's HIC<sub>15</sub>. It measures the noise in the 50&nbsp;ms
+before impact, then adds noise like it to the record and reruns the whole calculation 1000 times,
+for two models of the noise. The spread of the 1000 answers gives the interval. Last, it changes
+the two choices that were held fixed, one at a time, to compare how far each moves the answer with
+the interval's width. Each section shows the Python beside a MATLAB version that does the same
+steps, and the line notes say what each line does.</p>
+
+<p>The two versions draw different random numbers, so their intervals differ a little. Everything
+that does not depend on the draws prints the same in both (checked by running both on the example
+pack, the MATLAB version in GNU Octave). There the intervals' ends agree to within 0.04.
+<a href="program-shape-state-and-flow.html">Program shape I</a> suggests reading unfamiliar code by
+finding what comes in, what goes out and the state each loop builds, and the next section starts
+there. In the Python file the functions come first and the main part follows, from the top down. A
+MATLAB script has to keep its functions at the end, so its line ranges jump. A line you cannot read
+is usually covered on one of the <a href="python.html">Reading Python</a> pages, which the notes
+link to, and the MATLAB lines have notes of their own.</p>
+
+<h2 id="what-comes-in-and-what-goes-out">What Comes In and What Goes Out</h2>
+
+<table class="data">
+  <tr><th>Comes in</th><th>From</th></tr>
+  <tr><td>The driver's head acceleration in X, Y and Z</td><td><code>crash/09793.json</code> (the one file in the pack's crash folder), found by their codes</td></tr>
+  <tr><td>The number of reruns and the block length</td><td>chosen, in the program's settings</td></tr>
+</table>
+
+<table class="data">
+  <tr><th>Goes out</th><th>Where</th></tr>
+  <tr><td>The noise before impact: each channel's mean, spread and autocorrelation</td><td>printed, and the report's Table&nbsp;1</td></tr>
+  <tr><td>HIC<sub>15</sub> on the record, and the intervals under both noise models</td><td>printed, and the report's Table&nbsp;2 and summary</td></tr>
+  <tr><td>How far each fixed choice moves HIC<sub>15</sub></td><td>printed, and the report's Table&nbsp;3</td></tr>
+  <tr><td>Three figures</td><td><code>noise_before_impact.svg</code>, <code>noise_autocorrelation.svg</code>, <code>hic_draws.svg</code></td></tr>
+</table>
+
+<p>The state worth tracking is <code>pre</code>, each channel's samples before impact, which both
+noise models are built from, and <code>draws</code>, the 1000 answers under each model, which the intervals
+and Figure&nbsp;3 read from.</p>
+
+<h2 id="settings">Settings</h2>
+
+<p>The settings are standard gravity, the number of reruns for each noise model, the length of a
+block for the second model, and the codes of the three head channels.</p>
+<div class="codetabs" id="s0">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|math for single numbers, numpy for arrays, matplotlib for the figures ([Files and libraries](py-files.html)).;9|More reruns make the interval's ends steadier and take longer.;10|200 samples is 10 ms at 20,000 samples a second. On a test sampled at another rate it is a different length of time. It has to be well under the number of samples before impact: if that stretch holds only BLOCK samples, every piece is the whole stretch, all the reruns agree, and the interval has no width.;11|The ISO codes of the driver's head channels in X, Y and Z ([Lists](py-lists.html)).">import json
+import math
+import os
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+G = 9.80665        # standard gravity, m/s^2 in one g
+DRAWS = 1000       # reruns per noise model
+BLOCK = 200        # samples per block for the 'blocks' model (10 ms at 20 kHz)
+CODES = ['11HEADCG0000ACXP', '11HEADCG0000ACYP', '11HEADCG0000ACZP']</pre>
+  <pre data-lang="matlab" hidden data-notes="1|In MATLAB % starts a comment, and the semicolon stops MATLAB from printing the value.;4|A cell array of text, MATLAB's list of strings.">G = 9.80665;       % standard gravity, m/s^2 in one g
+DRAWS = 1000;      % reruns per noise model
+BLOCK = 200;       % samples per block for the 'blocks' model (10 ms at 20 kHz)
+CODES = {'11HEADCG0000ACXP', '11HEADCG0000ACYP', '11HEADCG0000ACZP'};</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 15 to 25 (Python) and lines 19 to 22 (MATLAB).</div>
+</div>
+<h2 id="the-filter">The Filter</h2>
+
+<p>The CFC filter is the one from <a href="smoothing.html">Smoothing and phase lag</a>, copied in.
+J211 sets class 1000 for head acceleration. It runs forward over the record and then backward over
+the result, so the two passes' delays cancel.</p>
+<div class="codetabs" id="s1">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="3|Converts the class number into the filter's design frequency. 2.0775 is a constant of the standard.;10|Defined inside cfc, so it can use a0, b1 and b2.;12|The first two outputs stay at 0, so each pass starts from rest.;18|forward[::-1] is the forward result reversed ([Lists](py-lists.html)), so this pass runs backward in time.">def cfc(y, dt, cls):
+    """SAE J211-1 four-pole Butterworth (Smoothing notes), forward then backward."""
+    wd = 2 * math.pi * cls * 2.0775
+    wa = math.tan(wd * dt / 2)
+    d = 1 + math.sqrt(2) * wa + wa ** 2
+    a0 = wa ** 2 / d
+    b1 = -2 * (wa ** 2 - 1) / d
+    b2 = (-1 + math.sqrt(2) * wa - wa ** 2) / d
+
+    def one_pass(x):
+        out = np.zeros(len(x))
+        for i in range(2, len(x)):
+            out[i] = (a0 * x[i] + 2 * a0 * x[i - 1] + a0 * x[i - 2]
+                      + b1 * out[i - 1] + b2 * out[i - 2])
+        return out
+
+    forward = one_pass(y)
+    backward = one_pass(forward[::-1])
+    return backward[::-1]</pre>
+  <pre data-lang="matlab" hidden data-notes="16|A separate function in the MATLAB file, so it cannot see cfc's coefficients and takes them as c.;22|... continues the line on the next one.">function out = cfc(y, dt, cls)
+    % SAE J211-1 four-pole Butterworth (Smoothing notes), forward then backward.
+    wd = 2 * pi * cls * 2.0775;
+    wa = tan(wd * dt / 2);
+    d = 1 + sqrt(2) * wa + wa^2;
+    a0 = wa^2 / d;
+    b1 = -2 * (wa^2 - 1) / d;
+    b2 = (-1 + sqrt(2) * wa - wa^2) / d;
+    c = [a0, b1, b2];
+    forward = one_pass(y, c);
+    backward = one_pass(flip(forward), c);
+    out = flip(backward);
+end
+
+
+function out = one_pass(x, c)
+    a0 = c(1);
+    b1 = c(2);
+    b2 = c(3);
+    out = zeros(size(x));
+    for i = 3:numel(x)
+        out(i) = a0 * x(i) + 2 * a0 * x(i-1) + a0 * x(i-2) ...
+                 + b1 * out(i-1) + b2 * out(i-2);
+    end
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 28 to 46 (Python) and lines 190 to 214 (MATLAB).</div>
+</div>
+<h2 id="hic">HIC</h2>
+
+<p>The search loops over window lengths up to 15&nbsp;ms. For one length, a running total of the
+integral gives every window's integral by one subtraction, so all the starts are handled at once.
+Only the value is kept, since the reruns need nothing else.</p>
+<div class="codetabs" id="s2">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="4|The trapezoid between each pair of neighboring samples ([numpy arrays](py-numpy.html)).;5|The running total of the integral, with a 0 in front. The integral from sample i to sample j is S[j] - S[i].;10|The mean of every window of length k. A resultant is never negative, so the clip at 0 is only a guard.;11|T times the mean to the power 2.5 is each window's HIC. max keeps the larger of the best so far and this length's best.">def hic(a, dt, limit_ms):
+    """Largest HIC over every window up to limit_ms, a = resultant in g.
+    Prefix sum of the trapezoid integral, one numpy pass per window length."""
+    panels = (a[1:] + a[:-1]) / 2 * dt
+    S = np.concatenate([[0.0], np.cumsum(panels)])
+    kmax = round(limit_ms / 1000 / dt)          # the limit in samples
+    best = 0.0
+    for k in range(1, kmax + 1):
+        T = k * dt
+        mean = np.clip((S[k:] - S[:-k]) / T, 0, None)   # every window of length k at once
+        best = max(best, np.max(T * mean ** 2.5))
+    return best</pre>
+  <pre data-lang="matlab" hidden data-notes="10|max(x, 0) compares each element with 0. Named mean_a so it does not hide MATLAB's mean function.;11|The inner max finds this length's best. .^ raises each element to the power.">function best = hic(a, dt, limit_ms)
+    % Largest HIC over every window up to limit_ms, a = resultant in g.
+    % Prefix sum of the trapezoid integral, one pass per window length.
+    panels = (a(2:end) + a(1:end-1)) / 2 * dt;
+    S = [0; cumsum(panels)];
+    kmax = round(limit_ms / 1000 / dt);         % the limit in samples
+    best = 0;
+    for k = 1:kmax
+        T = k * dt;
+        mean_a = max((S(k+1:end) - S(1:end-k)) / T, 0);   % every window of length k at once
+        best = max(best, max(T * mean_a.^2.5));
+    end
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 49 to 60 (Python) and lines 217 to 229 (MATLAB).</div>
+</div>
+<h2 id="the-whole-calculation">The Whole Calculation</h2>
+
+<p><code>pipeline</code> is the whole calculation in one function: filter each channel, form the
+resultant in <em>g</em>, and search for HIC<sub>15</sub>. Every rerun calls it, and so does each
+change to a fixed choice, so all of them do exactly the same steps.</p>
+<div class="codetabs" id="s3">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|Three defaults, so pipeline(raw, dt) gives the standard calculation and a call can change one choice by name ([Functions](py-functions.html)).;4|None skips the filter ([Conditions](py-conditions.html)).;11|Adds each channel squared, sample by sample.">def pipeline(chs, dt, cls=1000, limit_ms=15, g=G):
+    """The whole analysis: filter each component, resultant in g, HIC search.
+    cls=None skips the filter."""
+    if cls is not None:
+        filtered = []
+        for c in chs:
+            filtered.append(cfc(c, dt, cls))
+        chs = filtered
+    total = 0
+    for c in chs:
+        total = total + c ** 2
+    return hic(np.sqrt(total) / g, dt, limit_ms)</pre>
+  <pre data-lang="matlab" hidden data-notes="1|MATLAB has no defaults here, so every call gives all five.;6|chs is a cell array, so curly braces take out the m-th channel.">function v = pipeline(chs, dt, cls, limit_ms, g)
+    % The whole analysis: filter each component, resultant in g, HIC search.
+    % An empty cls skips the filter.
+    if ~isempty(cls)
+        for m = 1:numel(chs)
+            chs{m} = cfc(chs{m}, dt, cls);
+        end
+    end
+    total = 0;
+    for m = 1:numel(chs)
+        total = total + chs{m}.^2;
+    end
+    v = hic(sqrt(total) / g, dt, limit_ms);
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 63 to 74 (Python) and lines 232 to 245 (MATLAB).</div>
+</div>
+<h2 id="autocorrelation">Autocorrelation</h2>
+
+<p>The autocorrelation at a lag says how much each sample resembles the one that many samples later.
+It is the correlation between the noise and a copy of itself shifted by the lag: near 1 when
+neighbors move together, and 0 for noise that is independent from sample to sample.</p>
+<div class="codetabs" id="s4">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="3|r[:-lag] drops the last lag samples and r[lag:] the first lag, so the two line up shifted. np.corrcoef gives a 2 by 2 table, and [0, 1] is the correlation between the two.">def autocorr(r, lag):
+    """Correlation between the noise and itself shifted by lag samples."""
+    return np.corrcoef(r[:-lag], r[lag:])[0, 1]</pre>
+  <pre data-lang="matlab" hidden data-notes="3|With fewer than two pairs left there is no correlation. numpy gives nan there, and corrcoef in Octave would fail, so this gives NaN.;7|The same two shifted copies, counting from 1.">function c = autocorr(r, lag)
+    % Correlation between the noise and itself shifted by lag samples.
+    if numel(r) - lag &lt; 2
+        c = NaN;                         % too few pairs left, as numpy gives nan
+        return
+    end
+    cc = corrcoef(r(1:end-lag), r(1+lag:end));
+    c = cc(1, 2);
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 77 to 79 (Python) and lines 248 to 256 (MATLAB).</div>
+</div>
+<h2 id="two-models-of-the-noise">Two Models of the Noise</h2>
+
+<p>The two functions make one record's worth of noise each time they are called. The first draws
+each sample on its own from a normal distribution with the pre-impact spread. The second cuts
+10&nbsp;ms pieces at random from the pre-impact record itself and joins them (10&nbsp;ms at this pack's rate), so each piece keeps
+the way the real noise wanders.</p>
+<div class="codetabs" id="s5">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|n samples from a normal distribution with mean 0 and the pre-impact spread. rng is the random number generator made in the main part.;7|The pre-impact record with its mean removed, so the pieces add noise and no offset.;9|Enough pieces to cover the record, one more than n divided by BLOCK, rounded down.;10|A random whole number from 0 up to len(r) - BLOCK, so a piece always fits.;12|The pieces joined end to end, cut to exactly n samples.">def independent_noise(pre, n, rng):
+    return rng.normal(0, np.std(pre), n)
+
+
+def block_noise(pre, n, rng):
+    """Join random 10 ms pieces of the (mean-removed) pre-impact record."""
+    r = pre - np.mean(pre)
+    pieces = []
+    for k in range(n // BLOCK + 1):
+        s = rng.integers(0, len(r) - BLOCK + 1)     # a random start
+        pieces.append(r[s:s + BLOCK])
+    return np.concatenate(pieces)[:n]</pre>
+  <pre data-lang="matlab" hidden data-notes="3|randn gives numbers from a normal distribution with mean 0 and spread 1, so multiplying by the spread scales them. The 1 in std makes it divide by n, as np.std does.;7|Both functions take the same three inputs, so the main part can call either one the same way.;12|randi(m) is a random whole number from 1 to m.;13|The semicolon stacks each piece under the ones before.">function noise = independent_noise(pre, n, block)
+    % Gaussian noise with the pre-impact record's sigma. block is not used.
+    noise = std(pre, 1) * randn(n, 1);
+end
+
+
+function noise = block_noise(pre, n, block)
+    % Join random 10 ms pieces of the (mean-removed) pre-impact record.
+    r = pre - mean(pre);
+    pieces = [];
+    for k = 1:floor(n / block) + 1
+        s = randi(numel(r) - block + 1);        % a random start, counted from 1
+        pieces = [pieces; r(s:s + block - 1)];
+    end
+    noise = pieces(1:n);
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 82 to 93 (Python) and lines 259 to 274 (MATLAB).</div>
+</div>
+<h2 id="percentiles-in-matlab">Percentiles in MATLAB</h2>
+
+<p>MATLAB's own <code>prctile</code> reads percentiles by a slightly different rule from numpy's,
+so the MATLAB version has a small function that follows numpy's rule.</p>
+<div class="codetabs" id="s6">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="matlab" aria-selected="true">MATLAB</button>
+  </div>
+  <pre data-lang="matlab" data-notes="6|Where the percentile falls among the sorted values, counted from 1. For the median of 1000 values it is 500.5, halfway between the 500th and the 501st.;8|A guard for the 100th percentile, where there is no value above.;9|A straight line between the two values on either side.">function p = percentile(d, q)
+    % The q-th percentile, found the way numpy's np.percentile does by default:
+    % sort, then go a fraction q/100 of the way from the first value to the last,
+    % reading between two values on a straight line.
+    d = sort(d);
+    pos = (numel(d) - 1) * q / 100 + 1;
+    lo = floor(pos);
+    hi = min(lo + 1, numel(d));
+    p = d(lo) + (pos - lo) * (d(hi) - d(lo));
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The MATLAB program's lines 277 to 286.</div>
+</div>
+<h2 id="reading-the-head-channels">Reading the Head Channels</h2>
+
+<p>The main part starts here. It reads the test, keeps the three head channels by their codes, and
+for each one keeps both the whole record and the part before impact.</p>
+<div class="codetabs" id="s7">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|The first file the crash folder lists, the only one. A hidden file, such as the .DS_Store a Mac can add, would also be listed ([Files and libraries](py-files.html)).;5|.values() gives each channel in turn ([Dictionaries](py-dicts.html)).;6|in is true if the code is one of the three in the list ([Conditions](py-conditions.html)).;8|The three head channels share one rate and length, so the first one's are used.;11|The time of every sample, in ms.;12|True for every sample before impact. y[before] then keeps only those ([numpy arrays](py-numpy.html)).">name = os.listdir('crash')[0]           # the crash folder holds one file
+with open(os.path.join('crash', name)) as f:
+    test = json.load(f)
+chans = []
+for c in test['channels'].values():
+    if c['code'] in CODES:
+        chans.append(c)
+dt = chans[0]['dt']
+n = chans[0]['n']
+t0 = chans[0]['t0']
+t_ms = 1000 * (t0 + dt * np.arange(n))
+before = t_ms &lt; 0
+raw = []                                # each channel's samples
+pre = []                                # the part of each before impact
+for c in chans:
+    y = np.array(c['y'])
+    raw.append(y)
+    pre.append(y[before])</pre>
+  <pre data-lang="matlab" hidden data-notes="6|A field named by a variable: the m-th channel.;7|strcmp compares the code with each entry of CODES, and any is true if one matched.;8|Adds the channel to the end of the cell array.;20|The m-th channel's samples before impact.">files = dir(fullfile('crash', '*.json'));   % the crash folder holds one file
+test = jsondecode(fileread(fullfile('crash', files(1).name)));
+chans = {};
+keys = fieldnames(test.channels);
+for m = 1:numel(keys)
+    c = test.channels.(keys{m});
+    if any(strcmp(c.code, CODES))
+        chans{end+1} = c;
+    end
+end
+dt = chans{1}.dt;
+n = chans{1}.n;
+t0 = chans{1}.t0;
+t_ms = 1000 * (t0 + dt * (0:n-1)');
+before = t_ms &lt; 0;
+raw = cell(1, numel(chans));            % each channel's samples
+pre = cell(1, numel(chans));            % the part of each before impact
+for m = 1:numel(chans)
+    raw{m} = chans{m}.y;
+    pre{m} = raw{m}(before);
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 96 to 113 (Python) and lines 24 to 44 (MATLAB).</div>
+</div>
+<h2 id="the-noise">The Noise</h2>
+
+<p>The first table describes the noise before impact on each channel: the analog prefilter from its
+header, its mean and spread, and its autocorrelation at four lags. The report reads it to choose a
+noise model, since noise this alike from one sample to the next is far from independent.</p>
+<div class="codetabs" id="s8">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|:g writes the number in its shortest form, 0.05 here.;4|Summing true and false values counts the trues.;5|t_ms[before] is the times before impact, and [-1] the last of them.;6|In samples: 0.05, 1, 5 and 10 ms at this test's rate.;9|The column headings, each lag in ms.;15|Removes the mean. corrcoef also removes each copy's mean, so this line only matches the definition.;18|Each autocorrelation as text 9 characters wide.;20|The spread in g as well as in m/s squared.;21|'  '.join puts the column texts together with two spaces between."># 1. the noise
+print(f"{len(chans)} head channels, {n} samples every {dt * 1000:g} ms, "
+      f"{t_ms[0]:.2f} to {t_ms[-1]:.2f} ms")
+print(f"pre-impact stretch: {np.sum(before)} samples, "
+      f"{t_ms[0]:.2f} to {t_ms[before][-1]:.2f} ms")
+LAGS = [1, 20, 100, 200]
+columns = []
+for lag in LAGS:
+    columns.append(f'r({lag * dt * 1000:g} ms)')
+print(f"{'code':18} {'prefilter':&gt;9} {'mean':&gt;7} {'sigma':&gt;6} {'sigma':&gt;7}   "
+      + '  '.join(columns))
+for m in range(len(chans)):
+    c = chans[m]
+    p = pre[m]
+    r = p - np.mean(p)
+    columns = []
+    for lag in LAGS:
+        columns.append(f'{autocorr(r, lag):9.2f}')
+    print(f"{c['code']:18} {c['prefilter_hz']:&gt;6} Hz {np.mean(p):7.3f} {np.std(p):6.3f} "
+          f"{np.std(p) / G:6.4f}g   "
+          + '  '.join(columns))</pre>
+  <pre data-lang="matlab" hidden data-notes="4|MATLAB cannot index the result of indexing in one go, so the times before impact get a name first.;12|strjoin is MATLAB's join.">% 1. the noise
+fprintf('%d head channels, %d samples every %g ms, %.2f to %.2f ms\n', numel(chans), n, ...
+        dt * 1000, t_ms(1), t_ms(end));
+t_before = t_ms(before);
+fprintf('pre-impact stretch: %d samples, %.2f to %.2f ms\n', sum(before), t_ms(1), t_before(end));
+LAGS = [1, 20, 100, 200];
+columns = {};
+for lag = LAGS
+    columns{end+1} = sprintf('r(%g ms)', lag * dt * 1000);
+end
+fprintf('%-18s %9s %7s %6s %7s   %s\n', 'code', 'prefilter', 'mean', 'sigma', 'sigma', ...
+        strjoin(columns, '  '));
+for m = 1:numel(chans)
+    c = chans{m};
+    p = pre{m};
+    r = p - mean(p);
+    columns = {};
+    for lag = LAGS
+        columns{end+1} = sprintf('%9.2f', autocorr(r, lag));
+    end
+    fprintf('%-18s %6s Hz %7.3f %6.3f %6.4fg   %s\n', c.code, c.prefilter_hz, mean(p), ...
+            std(p, 1), std(p, 1) / G, strjoin(columns, '  '));
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 115 to 135 (Python) and lines 46 to 68 (MATLAB).</div>
+</div>
+<h2 id="the-reruns">The Reruns</h2>
+
+<p>This part computes HIC<sub>15</sub> on the record, then for each noise
+model reruns the whole calculation 1000 times, each time with fresh noise added to all three raw
+channels. The random number generator is started from a fixed seed, so a run gives the same answers
+every time.</p>
+<div class="codetabs" id="s9">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|The answer on the record, with no noise added.;4|A random number generator started from the seed 310, so the draws are the same on every run.;5|A dictionary whose values are the two functions, kept to be called later ([Dictionaries](py-dicts.html)).;7|noise is one of the two functions, so noise(...) calls it.;12|Each channel with a fresh record of noise added.;13|The whole calculation on the noisy channels.;14|The 1000 answers for this model, as an array."># 2. the value, then the reruns
+value = pipeline(raw, dt)
+print(f"\nHIC15 on the record: {value:.2f}")
+rng = np.random.default_rng(310)
+models = {'independent': independent_noise, 'blocks': block_noise}
+draws = {}
+for name, noise in models.items():      # noise is a function: one of the two above
+    runs = []
+    for k in range(DRAWS):
+        noisy = []
+        for m in range(len(raw)):
+            noisy.append(raw[m] + noise(pre[m], n, rng))
+        runs.append(pipeline(noisy, dt))
+    draws[name] = np.array(runs)</pre>
+  <pre data-lang="matlab" hidden data-notes="4|Starts MATLAB's generator from 310. Its numbers differ from numpy's, so the answers differ a little.;6|@ makes a handle to a function, so the function can be kept in a cell array and called later.;14|MATLAB has one shared generator, so the functions need no generator passed in. Their third input is BLOCK.">% 2. the value, then the reruns
+value = pipeline(raw, dt, 1000, 15, G);
+fprintf('\nHIC15 on the record: %.2f\n', value);
+rng(310);                               % the same random numbers on every run
+names = {'independent', 'blocks'};
+models = {@independent_noise, @block_noise};   % each one a function
+draws = cell(1, 2);
+for k = 1:2
+    noise = models{k};
+    runs = zeros(DRAWS, 1);
+    for j = 1:DRAWS
+        noisy = cell(1, numel(raw));
+        for m = 1:numel(raw)
+            noisy{m} = raw{m} + noise(pre{m}, n, BLOCK);
+        end
+        runs(j) = pipeline(noisy, dt, 1000, 15, G);
+    end
+    draws{k} = runs;
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 137 to 150 (Python) and lines 70 to 88 (MATLAB).</div>
+</div>
+<h2 id="the-intervals">The Intervals</h2>
+
+<p>For each model the interval runs between two percentiles of the 1000 answers: the 5th and 95th
+for a 90% interval, and the 2.5th and 97.5th for a 95% interval. Percentiles make no assumption
+about the shape of the spread.</p>
+<div class="codetabs" id="s10">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="5|Four percentiles at once, unpacked into four names.;6|The middle of the 1000 answers."># 3. the intervals
+print(f"\n{'noise model':12} {'median':&gt;7} {'90% interval':&gt;17} {'width':&gt;6} "
+      f"{'95% interval':&gt;17} {'width':&gt;6}")
+for name, d in draws.items():
+    l90, h90, l95, h95 = np.percentile(d, [5, 95, 2.5, 97.5])
+    print(f"{name:12} {np.median(d):7.2f} {l90:8.2f} to {h90:6.2f} {h90 - l90:6.2f} "
+          f"{l95:8.2f} to {h95:6.2f} {h95 - l95:6.2f}")</pre>
+  <pre data-lang="matlab" hidden data-notes="6|The function defined at the end of the file, one percentile at a time.">% 3. the intervals
+fprintf('\n%-12s %7s %17s %6s %17s %6s\n', 'noise model', 'median', '90% interval', 'width', ...
+        '95% interval', 'width');
+for k = 1:2
+    d = draws{k};
+    l90 = percentile(d, 5);
+    h90 = percentile(d, 95);
+    l95 = percentile(d, 2.5);
+    h95 = percentile(d, 97.5);
+    fprintf('%-12s %7.2f %8.2f to %6.2f %6.2f %8.2f to %6.2f %6.2f\n', names{k}, median(d), ...
+            l90, h90, h90 - l90, l95, h95, h95 - l95);
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 152 to 158 (Python) and lines 90 to 101 (MATLAB).</div>
+</div>
+<h2 id="what-was-held-fixed">What Was Held Fixed</h2>
+
+<p>Two choices were held fixed in every rerun: the size of one <em>g</em>, and leaving the baseline
+before impact in. The program changes each on its own, recomputes HIC<sub>15</sub>, and gives the
+shift as a fraction of the 95% interval's width under the blocks model. A fraction well below 1
+means the choice moves the answer less than the noise does.</p>
+<div class="codetabs" id="s11">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|The blocks model's 95% interval, the one the report uses.;6|The standard calculation with one choice changed by name.;9|Each channel with its mean before impact subtracted.;12|The size of the shift over the interval's width. If the interval has no width this divides by 0 and prints inf."># 4. what was held fixed, changed one at a time
+l95, h95 = np.percentile(draws['blocks'], [2.5, 97.5])
+print(f"\n{'held fixed, changed to':34} {'HIC15':&gt;7} {'shift':&gt;7} "
+      f"{'x 95% width':&gt;11}")
+changes = {}
+changes['g = 9.81'] = pipeline(raw, dt, g=9.81)
+corrected = []
+for m in range(len(raw)):
+    corrected.append(raw[m] - np.mean(pre[m]))
+changes['pre-impact mean subtracted'] = pipeline(corrected, dt)
+for name, v in changes.items():
+    ratio = abs(v - value) / (h95 - l95)
+    print(f"{name:34} {v:7.2f} {v - value:+7.2f} {ratio:11.2f}")</pre>
+  <pre data-lang="matlab" hidden data-notes="7|All five inputs given, with g changed.">% 4. what was held fixed, changed one at a time
+l95 = percentile(draws{2}, 2.5);
+h95 = percentile(draws{2}, 97.5);
+fprintf('\n%-34s %7s %7s %11s\n', 'held fixed, changed to', 'HIC15', 'shift', 'x 95% width');
+change_names = {'g = 9.81', 'pre-impact mean subtracted'};
+changes = zeros(1, 2);
+changes(1) = pipeline(raw, dt, 1000, 15, 9.81);
+corrected = cell(1, numel(raw));
+for m = 1:numel(raw)
+    corrected{m} = raw{m} - mean(pre{m});
+end
+changes(2) = pipeline(corrected, dt, 1000, 15, G);
+for k = 1:2
+    v = changes(k);
+    ratio = abs(v - value) / (h95 - l95);
+    fprintf('%-34s %7.2f %+7.2f %11.2f\n', change_names{k}, v, v - value, ratio);
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 160 to 172 (Python) and lines 103 to 119 (MATLAB).</div>
+</div>
+<h2 id="figure-1-the-noise-before-impact">Figure 1, the Noise Before Impact</h2>
+
+<p>The first figure shows each head channel over the 50&nbsp;ms before impact, one above the other,
+titled from its header.</p>
+<div class="codetabs" id="s12">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|Three sets of axes, one above the other, sharing the time axis ([Figures](py-plots.html)).;8|$^2$ writes the 2 raised.;10|A title over all three plots, typed in for the example test. The MATLAB figure has none, since the version was tested in GNU Octave, which has no sgtitle."># Figure 1: the pre-impact stretch of each channel
+fig, axs = plt.subplots(3, 1, figsize=(8, 6), sharex=True)
+for m in range(len(chans)):
+    ax = axs[m]
+    c = chans[m]
+    ax.plot(t_ms[before], pre[m], linewidth=0.7)
+    ax.set_title(f"{c['comment']}  [{c['code']}]", fontsize=9)
+    ax.set_ylabel('acceleration (m/s$^2$)', fontsize=8)
+axs[-1].set_xlabel('time from impact (ms)')
+fig.suptitle('Driver head acceleration in the 50 ms before impact, test 9793',
+             fontsize=10)
+fig.tight_layout()
+fig.savefig('noise_before_impact.svg')
+plt.close(fig)</pre>
+  <pre data-lang="matlab" hidden data-notes="4|The m-th of three plots, one above the other.">% Figure 1: the pre-impact stretch of each channel
+fig = figure('Position', [100 100 800 600]);
+for m = 1:numel(chans)
+    subplot(numel(chans), 1, m);
+    c = chans{m};
+    plot(t_before, pre{m}, 'LineWidth', 0.7);
+    title(sprintf('%s  [%s]', c.comment, c.code), 'FontSize', 9);
+    ylabel('acceleration (m/s^2)', 'FontSize', 8);
+end
+xlabel('time from impact (ms)');
+saveas(fig, 'noise_before_impact.svg');
+close(fig);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 174 to 187 (Python) and lines 121 to 132 (MATLAB).</div>
+</div>
+<h2 id="figure-2-the-autocorrelation">Figure 2, the Autocorrelation</h2>
+
+<p>The second figure is each channel's autocorrelation at every lag up to 500 samples (25&nbsp;ms at
+this pack's rate), with the block length marked. Independent noise would sit on the zero line. Near
+the length of the stretch before impact only a few pairs are left, and on a pack whose stretch is
+500 samples or shorter the last lags have none, so the curve there means little.</p>
+<div class="codetabs" id="s13">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="2|Every lag from 1 to 500 samples. On a pack with fewer samples before impact, the longest lags give nan.;9|The lags in ms across the bottom.;11|A dashed line at the block length.;12|Typed in for the example test. At 10,000 samples a second 200 samples is 20 ms."># Figure 2: how alike neighboring samples are
+lags = np.arange(1, 501)
+plt.figure(figsize=(8, 3.6))
+for m in range(len(chans)):
+    r = pre[m] - np.mean(pre[m])
+    corr = []
+    for lag in lags:
+        corr.append(autocorr(r, lag))
+    plt.plot(lags * dt * 1000, corr, label=chans[m]['code'])
+plt.axhline(0, color='gray', linewidth=0.8)
+plt.axvline(BLOCK * dt * 1000, color='gray', linestyle='--', linewidth=0.8,
+            label='block length, 10 ms')
+plt.title('Autocorrelation of the pre-impact noise (independent noise would sit at 0)')
+plt.xlabel('lag (ms)')
+plt.ylabel('autocorrelation (no units)')
+plt.legend(fontsize=8)
+plt.tight_layout()
+plt.savefig('noise_autocorrelation.svg')
+plt.close()</pre>
+  <pre data-lang="matlab" hidden data-notes="13|The x and y ranges, so the zero line and the block line can run from edge to edge.;15|HandleVisibility off leaves the zero line out of the legend.">% Figure 2: how alike neighboring samples are
+lags = 1:500;
+fig = figure('Position', [100 100 800 360]);
+hold on
+for m = 1:numel(chans)
+    r = pre{m} - mean(pre{m});
+    corr = zeros(size(lags));
+    for k = 1:numel(lags)
+        corr(k) = autocorr(r, lags(k));
+    end
+    plot(lags * dt * 1000, corr);
+end
+xl = xlim;
+yl = ylim;
+plot(xl, [0 0], 'Color', [0.5 0.5 0.5], 'HandleVisibility', 'off');
+plot([BLOCK * dt * 1000, BLOCK * dt * 1000], yl, '--', 'Color', [0.5 0.5 0.5]);
+title('Autocorrelation of the pre-impact noise (independent noise would sit at 0)');
+xlabel('lag (ms)');
+ylabel('autocorrelation (no units)');
+legend({chans{1}.code, chans{2}.code, chans{3}.code, 'block length, 10 ms'}, 'FontSize', 8);
+saveas(fig, 'noise_autocorrelation.svg');
+close(fig);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 189 to 207 (Python) and lines 134 to 155 (MATLAB).</div>
+</div>
+<h2 id="figure-3-the-reruns">Figure 3, the Reruns</h2>
+
+<p>The last figure shows the 1000 answers under each model as a histogram, a count of how many fall
+in each of 49 bins, with each model's 95% interval dashed and the value on the record marked.</p>
+<div class="codetabs" id="s14">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="5|50 evenly spaced bin edges from the lowest answer to the highest, so both models share the same bins.;6|One color per model.;10|The histogram. alpha=0.6 makes the bars partly see-through, so one model shows through the other.;12|A dashed line at each end of the interval."># Figure 3: the reruns under both noise models, 95% intervals marked
+plt.figure(figsize=(8, 3.8))
+lowest = min(np.min(draws['independent']), np.min(draws['blocks']))
+highest = max(np.max(draws['independent']), np.max(draws['blocks']))
+bins = np.linspace(lowest, highest, 50)
+colors = {'independent': 'tab:blue', 'blocks': 'tab:orange'}
+for name, d in draws.items():
+    col = colors[name]
+    lo, hi = np.percentile(d, [2.5, 97.5])
+    plt.hist(d, bins=bins, alpha=0.6, color=col,
+             label=f'{name}: 95% interval {lo:.2f} to {hi:.2f}')
+    for v in (lo, hi):
+        plt.axvline(v, color=col, linestyle='--', linewidth=1)
+plt.axvline(value, color='black', linewidth=1.2,
+            label=f'value on the record, {value:.2f}')
+plt.title(f'HIC15 over {DRAWS} reruns for each noise model')
+plt.xlabel('HIC15 (a in g, t in s)')
+plt.ylabel('number of reruns')
+plt.legend(fontsize=8)
+plt.tight_layout()
+plt.savefig('hic_draws.svg')</pre>
+  <pre data-lang="matlab" hidden data-notes="12|hist counts the answers nearest each bin center.;13|The counts drawn as outlines, so the two models can be seen through each other. stairs needs one value per edge, so the last count is repeated to close the last bin.">% Figure 3: the reruns under both noise models, 95% intervals marked
+fig = figure('Position', [100 100 800 380]);
+hold on
+lowest = min(min(draws{1}), min(draws{2}));
+highest = max(max(draws{1}), max(draws{2}));
+edges = linspace(lowest, highest, 50);
+centers = (edges(1:end-1) + edges(2:end)) / 2;
+colors = {[0.12 0.47 0.71], [1 0.5 0.05]};
+labels = {};
+for k = 1:2
+    d = draws{k};
+    counts = hist(d, centers);           % how many reruns fall in each bin
+    stairs(edges, [counts, counts(end)], 'Color', colors{k}, 'LineWidth', 1.2);
+    lo = percentile(d, 2.5);
+    hi = percentile(d, 97.5);
+    labels{end+1} = sprintf('%s: 95%% interval %.2f to %.2f', names{k}, lo, hi);
+end
+yl = ylim;
+for k = 1:2
+    d = draws{k};
+    for v = [percentile(d, 2.5), percentile(d, 97.5)]
+                plot([v v], yl, '--', 'Color', colors{k}, 'HandleVisibility', 'off');
+    end
+end
+plot([value value], yl, 'k', 'LineWidth', 1.2);
+title(sprintf('HIC15 over %d reruns for each noise model', DRAWS));
+xlabel('HIC15 (a in g, t in s)');
+ylabel('number of reruns');
+legend([labels, {sprintf('value on the record, %.2f', value)}], 'FontSize', 8);
+saveas(fig, 'hic_draws.svg');
+close(fig);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 209 to 229 (Python) and lines 157 to 187 (MATLAB).</div>
+</div>
+
+<h2 id="decisions-in-this-program">Decisions in This Program</h2>
+
+<p>Every line below holds a decision the student made. The CFC&nbsp;1000 class and the 15&nbsp;ms
+limit are not on the list, since the standards set them. The line numbers are those of the downloadable files, and the hint under each code box
+gives the lines it shows. To check your own program, use the test on <a href="ai-use.html">Using
+AI</a>. Pick a line and say why it is that way.</p>
+
+<table class="data">
+  <tr><th class="num">Python line</th><th class="num">MATLAB line</th><th>The decision</th><th>What else could have been chosen</th></tr>
+  <tr><td class="num">23</td><td class="num">20</td><td>1000 reruns for each model</td><td>more, for steadier ends, at more cost</td></tr>
+  <tr><td class="num">24</td><td class="num">21</td><td>Blocks of 10&nbsp;ms</td><td>longer blocks, which keep more of the wander but give fewer different pieces</td></tr>
+  <tr><td class="num">91</td><td class="num">270</td><td>The noise is cut from the record before impact</td><td>independent noise, the program&rsquo;s other model</td></tr>
+  <tr><td class="num">156</td><td class="num">95</td><td>The interval is read from percentiles</td><td>the mean plus and minus two standard deviations, which assumes a shape</td></tr>
+  <tr><td class="num">140</td><td class="num">73</td><td>A fixed seed</td><td>a new seed each run, which moves the ends a little each time</td></tr>
+</table>
+
+<h2 id="what-it-prints">What It Prints</h2>
+
+<p>This is everything the program prints, run on the example pack. On that pack the MATLAB version
+prints the same lines apart from the numbers that depend on the random draws (checked in Octave).</p>
+
+<pre class="nb-out">3 head channels, 7001 samples every 0.05 ms, -50.00 to 300.00 ms
+pre-impact stretch: 1000 samples, -50.00 to -0.05 ms
+code               prefilter    mean  sigma   sigma   r(0.05 ms)  r(1 ms)  r(5 ms)  r(10 ms)
+11HEADCG0000ACXP     4000 Hz   0.054  0.811 0.0827g        0.79       0.36       0.13       0.02
+11HEADCG0000ACYP     4000 Hz  -0.205  1.061 0.1082g        0.89       0.64       0.46       0.17
+11HEADCG0000ACZP     4000 Hz   0.097  0.929 0.0948g        0.83       0.47       0.37       0.21
+
+HIC15 on the record: 150.39
+
+noise model   median      90% interval  width      95% interval  width
+independent   150.39   150.31 to 150.46   0.15   150.31 to 150.48   0.17
+blocks        150.53   150.07 to 150.94   0.87   150.01 to 151.01   1.00
+
+held fixed, changed to               HIC15   shift x 95% width
+g = 9.81                            150.26   -0.13        0.13
+pre-impact mean subtracted          150.41   +0.02        0.02</pre>
+
+<h2 id="running-it-yourself">Running It Yourself</h2>
+
+<p>Both versions are downloads: <a href="data/example/code/a8_noise_intervals.py" download><code>a8_noise_intervals.py</code></a>
+and <a href="data/example/code/a8_noise_intervals.m" download><code>a8_noise_intervals.m</code></a>. Unzip a data pack, put
+the program in the pack's top folder beside <code>crash</code> and <code>shots</code>, and run it
+from there (<a href="py-files.html">Files and libraries</a> explains why the folder matters). On your own pack it reads your data, so its numbers will differ from the ones above.
+Check the stretch before impact first. On many packs it is 20 or 30&nbsp;ms, and at 10,000 samples
+a second a 20&nbsp;ms stretch is exactly 200 samples, one block, so the blocks interval comes out
+with no width. The figures' titles and the block length in the legend are typed in for the
+example test. The MATLAB
+version should run as it is in MATLAB R2018b or later. GNU Octave, which is free, needs a script's functions defined
+before they are used, so to run it there, move the functions to the top of the file and put a line
+<code>1;</code> above them.</p>
+
+  </main>
+
+  
+
+  <script src="js/page.js?v=20261027131534"></script>
+
+  <footer class="site-footer">
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-27">October 27, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Algorithms');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  
+  
+  
+    
+  
+  
+  <script src="https://uwt-tutor-backend.onrender.com/widget.js"
+          data-key="wk_bcb80c4ee2d5718131d24548528577c3"
+          data-content-selector="main"
+          data-color="#5F7038"></script>
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

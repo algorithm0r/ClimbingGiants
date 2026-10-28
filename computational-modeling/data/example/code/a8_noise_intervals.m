@@ -145,12 +145,12 @@ for m = 1:numel(chans)
 end
 xl = xlim;
 yl = ylim;
-plot(xl, [0 0], 'Color', [0.5 0.5 0.5]);
+plot(xl, [0 0], 'Color', [0.5 0.5 0.5], 'HandleVisibility', 'off');
 plot([BLOCK * dt * 1000, BLOCK * dt * 1000], yl, '--', 'Color', [0.5 0.5 0.5]);
 title('Autocorrelation of the pre-impact noise (independent noise would sit at 0)');
 xlabel('lag (ms)');
 ylabel('autocorrelation (no units)');
-legend({chans{1}.code, chans{2}.code, chans{3}.code, '', 'block length, 10 ms'}, 'FontSize', 8);
+legend({chans{1}.code, chans{2}.code, chans{3}.code, 'block length, 10 ms'}, 'FontSize', 8);
 saveas(fig, 'noise_autocorrelation.svg');
 close(fig);
 
@@ -175,14 +175,14 @@ yl = ylim;
 for k = 1:2
     d = draws{k};
     for v = [percentile(d, 2.5), percentile(d, 97.5)]
-        plot([v v], yl, '--', 'Color', colors{k});
+                plot([v v], yl, '--', 'Color', colors{k}, 'HandleVisibility', 'off');
     end
 end
 plot([value value], yl, 'k', 'LineWidth', 1.2);
 title(sprintf('HIC15 over %d reruns for each noise model', DRAWS));
 xlabel('HIC15 (a in g, t in s)');
 ylabel('number of reruns');
-legend([labels, {'', '', '', '', sprintf('value on the record, %.2f', value)}], 'FontSize', 8);
+legend([labels, {sprintf('value on the record, %.2f', value)}], 'FontSize', 8);
 saveas(fig, 'hic_draws.svg');
 close(fig);
 
@@ -247,6 +247,10 @@ end
 
 function c = autocorr(r, lag)
     % Correlation between the noise and itself shifted by lag samples.
+    if numel(r) - lag < 2
+        c = NaN;                         % too few pairs left, as numpy gives nan
+        return
+    end
     cc = corrcoef(r(1:end-lag), r(1+lag:end));
     c = cc(1, 2);
 end
