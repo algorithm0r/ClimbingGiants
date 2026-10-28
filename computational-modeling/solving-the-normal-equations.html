@@ -998,7 +998,10 @@ convergence to check, and the global minimum. All of that is true, though all of
 <strong>ill-conditioned</strong> when small changes in its entries produce large changes in the
 solution. The condition number $\kappa$ measures it, and a rule of thumb follows from it.</p>
 
-<p><strong>You lose about $\log_{10}\kappa$ of your sixteen significant digits.</strong> Polynomial
+<p><strong>You lose about $\log_{10}\kappa$ of your sixteen significant digits.</strong> The sixteen
+comes from <dfn data-g="machine-epsilon">machine epsilon</dfn>, the gap between 1 and the next number a
+double can store, about $2.2\times10^{-16}$. Each arithmetic step can be off by about that fraction of
+its result, and $\kappa$ multiplies it. Polynomial
 fitting produces ill-conditioned normal equations quickly, because $1, x, x^2, x^3$ look
 increasingly alike over a fixed interval, so the columns of the matrix become nearly parallel
 and $\kappa$ becomes large.</p>
