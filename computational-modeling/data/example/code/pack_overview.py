@@ -3,6 +3,7 @@
 Run this from the unzipped pack folder. It lists the files, prints a line for
 each crash channel, and draws every channel on one page (all_channels.svg).
 """
+import glob
 import json
 import os
 
@@ -17,8 +18,8 @@ for folder in ['', 'crash', 'shots']:
         label = folder
     print(label, sorted(os.listdir(os.path.join(PACK, folder))))
 
-name = os.listdir(os.path.join(PACK, 'crash'))[0]
-with open(os.path.join(PACK, 'crash', name)) as f:
+name = glob.glob(os.path.join(PACK, 'crash', '*.json'))[0]   # the one test file
+with open(name) as f:
     test = json.load(f)
 print(test['vehicle'], test['test'])
 

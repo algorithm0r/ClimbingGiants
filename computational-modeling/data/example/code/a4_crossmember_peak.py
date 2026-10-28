@@ -5,6 +5,7 @@ filters it at CFC 60 (forward, then backward), prints the peak, prints the
 other numbers someone could get out of the same file, and saves the memo's
 figure (crossmember_cfc60.svg).
 """
+import glob
 import json
 import math
 import os
@@ -53,16 +54,12 @@ def peak(t, y):
     return y[i], t[i]
 
 
-name = os.listdir(os.path.join(PACK, 'crash'))[0]
-with open(os.path.join(PACK, 'crash', name)) as f:
+name = glob.glob(os.path.join(PACK, 'crash', '*.json'))[0]   # the one test file
+with open(name) as f:
     test = json.load(f)
 
-# Alice's channel is the one whose header comment names the crossmember
-key = None
-for k, c in test['channels'].items():
-    if 'CROSSMEMBER' in c['comment']:
-        key = k
-        break
+# Alice's channel is the car-body one: its header names the crossmember, or on some packs the sill
+key = 'vehicle_x'
 ch = test['channels'][key]
 dt = ch['dt']
 t_ms = []

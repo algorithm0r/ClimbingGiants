@@ -933,7 +933,7 @@ strong evidence and a single ratio of 3.7 is weak evidence.</p>
 <p>Euler takes the rate at the start of a step and uses it for the whole step. Heun's method and
 RK4 evaluate the rate at more than one point inside the step and step with a weighted average of
 those evaluations. Each evaluation is called a slope, meaning the rate function $f$ evaluated at
-some time and some state (writing the state as $s$, as the code on page 25 does).</p>
+some time and some state (writing the state as $s$, as the code on <a href="from-a-rate-to-a-trajectory.html" title="Euler&#x27;s method">page 25</a> does).</p>
 
 <p>Heun's method takes two slopes. The first is Euler's, $k_1 = f(t, s)$. The second is taken at
 the end of the step, at the state Euler would have reached, $k_2 = f(t + h,\ s + h k_1)$, and the
@@ -977,10 +977,15 @@ step goes on.</p>
 
 <p>The reference is RK4 at $h = 10^{-5}$, which reaches 3.875229&nbsp;m. Euler uses only the
 release speed and so overshoots. Heun averages the speed at the start with an estimate at the
-end, and RK4 adds two estimates at the midpoint. In code each is the Euler stepper from page 25
+end, and RK4 adds two estimates at the midpoint. In code each is the Euler stepper from <a href="from-a-rate-to-a-trajectory.html" title="Euler&#x27;s method">page 25</a>
 with its update line replaced by the lines that take the slopes:</p>
 
-<div class="codetabs"><pre data-lang="python" data-notes="1|The same shape as the Euler stepper: a starting state, a step dt and a number of steps n ([Functions](py-functions.html)).;8|The slope at the end of the step, estimated by taking a full Euler step with the first slope.;9|Heun's update: the average of the slope at the start and the estimate at the end.;13|The same again, with four slopes in place of two.;20|Two estimates at the midpoint of the step, each built from the one before it.;22|An estimate at the end of the step.;23|The weighted average of the four slopes, with the two midpoint slopes counted twice.">def heun(f, s0, t0, dt, n):
+<div class="codetabs">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|The same shape as the Euler stepper: a starting state, a step dt and a number of steps n ([Functions](py-functions.html)).;8|The slope at the end of the step, estimated by taking a full Euler step with the first slope.;9|Heun's update: the average of the slope at the start and the estimate at the end.;13|The same again, with four slopes in place of two.;20|Two estimates at the midpoint of the step, each built from the one before it.;22|An estimate at the end of the step.;23|The weighted average of the four slopes, with the two midpoint slopes counted twice.">def heun(f, s0, t0, dt, n):
     s = np.array(s0, dtype=float)
     out = np.empty((n + 1, s.size))
     out[0] = s
@@ -1005,6 +1010,33 @@ def rk4(f, s0, t0, dt, n):
         s = s + dt/6 * (k1 + 2*k2 + 2*k3 + k4)
         out[k + 1] = s
     return out</pre>
+  <pre data-lang="matlab" hidden data-notes="1|The same shape as the Euler stepper, with the state kept as a column.;8|The slope at the end of the step, estimated by taking a full Euler step with the first slope.;9|Heun's update: the average of the slope at the start and the estimate at the end.;14|The same again, with four slopes in place of two.;21|Two estimates at the midpoint of the step, each built from the one before it.;23|An estimate at the end of the step.;24|The weighted average of the four slopes, with the two midpoint slopes counted twice.">function out = heun(f, s0, t0, dt, n)
+    s = s0(:);
+    out = zeros(n+1, numel(s));
+    out(1,:) = s.';
+    for k = 0:n-1
+        t = t0 + k*dt;
+        k1 = f(t, s);
+        k2 = f(t + dt, s + dt*k1);
+        s = s + dt/2 * (k1 + k2);
+        out(k+2,:) = s.';
+    end
+end
+
+function out = rk4(f, s0, t0, dt, n)
+    s = s0(:);
+    out = zeros(n+1, numel(s));
+    out(1,:) = s.';
+    for k = 0:n-1
+        t = t0 + k*dt;
+        k1 = f(t, s);
+        k2 = f(t + dt/2, s + dt/2*k1);
+        k3 = f(t + dt/2, s + dt/2*k2);
+        k4 = f(t + dt, s + dt*k3);
+        s = s + dt/6 * (k1 + 2*k2 + 2*k3 + k4);
+        out(k+2,:) = s.';
+    end
+end</pre>
   <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
 </div>
 

@@ -928,7 +928,8 @@ size of one <em>g</em>, to give accelerations in <em>g</em> as well, and the fol
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="1|json reads the test file. os builds file paths that work on any computer ([Files and libraries](py-files.html)).;4|The plotting library, under the short name plt.;6|A name for a value used later. The text after # is a comment, which Python ignores ([Names and assignment](py-names.html)).;7|'.' means the folder the program is run from, which should be the unzipped pack.">import json
+  <pre data-lang="python" data-notes="1|glob finds files by a pattern, json reads the test file, and os builds file paths that work on any computer ([Files and libraries](py-files.html)).;5|The plotting library, under the short name plt.;7|A name for a value used later. The text after # is a comment, which Python ignores ([Names and assignment](py-names.html)).;8|'.' means the folder the program is run from, which should be the unzipped pack.">import glob
+import json
 import os
 
 import matplotlib.pyplot as plt
@@ -937,7 +938,7 @@ G = 9.81      # m/s^2 in one g
 PACK = '.'    # the unzipped pack folder</pre>
   <pre data-lang="matlab" hidden data-notes="1|In MATLAB % starts a comment, and the semicolon stops MATLAB from printing the value.">G = 9.81;      % m/s^2 in one g
 PACK = '.';    % the unzipped pack folder</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 8 to 14 (Python) and lines 8 to 9 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 8 to 15 (Python) and lines 8 to 9 (MATLAB).</div>
 </div>
 <h2 id="loading-the-test">Loading the Test</h2>
 
@@ -949,18 +950,18 @@ becomes a dictionary, so <code>test['vehicle']</code>, <code>test['test']</code>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="1|def starts a function. pack is the folder it is given ([Functions](py-functions.html)).;2|A docstring, the function's own description.;3|The path to the crash folder inside the pack.;4|os.listdir lists the folder's files, and [0] takes the first, the only one. A hidden file, such as the .DS_Store a Mac can add, would also be listed ([Lists](py-lists.html)).;5|Opens the file and closes it again when the indented line ends ([Files and libraries](py-files.html)).;6|Reads the whole file into a dictionary and hands it back ([Dictionaries](py-dicts.html)).">def load_test(pack):
+  <pre data-lang="python" data-notes="1|def starts a function. pack is the folder it is given ([Functions](py-functions.html)).;2|A docstring, the function's own description.;3|The path to the crash folder inside the pack.;4|glob.glob lists the files in the crash folder whose names end in .json, and [0] takes the first, the only one. A hidden file, such as the .DS_Store a Mac can add, does not match ([Lists](py-lists.html)).;5|Opens the file and closes it again when the indented line ends ([Files and libraries](py-files.html)).;6|Reads the whole file into a dictionary and hands it back ([Dictionaries](py-dicts.html)).">def load_test(pack):
     """The crash folder holds one file, the test."""
     folder = os.path.join(pack, 'crash')
-    name = os.listdir(folder)[0]
-    with open(os.path.join(folder, name)) as f:
+    name = glob.glob(os.path.join(folder, '*.json'))[0]
+    with open(name) as f:
         return json.load(f)</pre>
   <pre data-lang="matlab" hidden data-notes="3|dir lists the files that match the pattern, here every .json file in the crash folder.;4|fileread reads the file as text, and jsondecode turns it into a struct.">function test = load_test(pack)
     % The crash folder holds one file, the test.
     files = dir(fullfile(pack, 'crash', '*.json'));
     test = jsondecode(fileread(fullfile(pack, 'crash', files(1).name)));
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 17 to 22 (Python) and lines 77 to 81 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 18 to 23 (Python) and lines 77 to 81 (MATLAB).</div>
 </div>
 <h2 id="the-times">The Times</h2>
 
@@ -985,7 +986,7 @@ end</pre>
         t(i) = 1000 * (ch.t0 + (i - 1) * ch.dt);
     end
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 25 to 30 (Python) and lines 84 to 90 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 26 to 31 (Python) and lines 84 to 90 (MATLAB).</div>
 </div>
 <h2 id="micrometers-to-millimeters">Micrometers to Millimeters</h2>
 
@@ -1009,7 +1010,7 @@ Errors and Anomalies). This function divides every value by 1000 to give millime
         out(k) = y(k) / 1000;
     end
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 33 to 38 (Python) and lines 93 to 99 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 34 to 39 (Python) and lines 93 to 99 (MATLAB).</div>
 </div>
 <h2 id="the-test-s-description">The Test's Description</h2>
 
@@ -1030,7 +1031,7 @@ v = test.vehicle;
 info = test.test;
 fprintf('Test %d: %d %s %s, %s at %g km/h\n', test.testNo, v.year, v.make, v.model, ...
         info.config, info.speed_kph);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 41 to 45 (Python) and lines 11 to 15 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 42 to 46 (Python) and lines 11 to 15 (MATLAB).</div>
 </div>
 <h2 id="the-largest-value-in-each-channel">The Largest Value in Each Channel</h2>
 
@@ -1076,7 +1077,7 @@ for m = 1:numel(keys)
     end
     fprintf('%-36s %-8s %9.1f %s %8.1f\n', ch.comment, ch.unit, y(i), in_g, t(i));
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 47 to 60 (Python) and lines 17 to 36 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 48 to 61 (Python) and lines 17 to 36 (MATLAB).</div>
 </div>
 <h2 id="one-figure-per-channel">One Figure per Channel</h2>
 
@@ -1127,7 +1128,7 @@ for m = 1:numel(keys)
     saveas(fig, sprintf('channel_%s.svg', key));
     close(fig);
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 62 to 79 (Python) and lines 38 to 58 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 63 to 80 (Python) and lines 38 to 58 (MATLAB).</div>
 </div>
 <h2 id="the-chest-displacement-both-ways">The Chest Displacement Both Ways</h2>
 
@@ -1168,7 +1169,7 @@ ylabel('chest displacement (mm)');
 xlabel('time from impact (ms)');
 saveas(fig, 'chest_d_units.svg');
 close(fig);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 81 to 95 (Python) and lines 60 to 74 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 82 to 96 (Python) and lines 60 to 74 (MATLAB).</div>
 </div>
 
 <h2 id="decisions-in-this-program">Decisions in This Program</h2>
@@ -1179,11 +1180,11 @@ AI</a>. Pick a line and say why it is that way.</p>
 
 <table class="data">
   <tr><th class="num">Python line</th><th class="num">MATLAB line</th><th>The decision</th><th>What else could have been chosen</th></tr>
-  <tr><td class="num">13</td><td class="num">8</td><td>One <em>g</em> is taken as 9.81&nbsp;m/s&sup2;</td><td>standard gravity, 9.80665&nbsp;m/s&sup2;</td></tr>
-  <tr><td class="num">54</td><td class="num">26</td><td>The largest value is the largest size, whatever its sign</td><td>the most positive or the most negative value</td></tr>
-  <tr><td class="num">67</td><td class="num">45</td><td>The chest displacement is read as micrometers and shown in millimeters</td><td>plotting it in the header&rsquo;s meters, or leaving it out</td></tr>
-  <tr><td class="num">73</td><td class="num">52</td><td>Impact is at time zero, the zero the file declares</td><td>finding impact from the data, such as the first large deceleration</td></tr>
-  <tr><td class="num">74</td><td class="num">53</td><td>Each figure is titled from its own header</td><td>the file&rsquo;s keys, such as <code>vehicle_x</code>, which are labels added to the file</td></tr>
+  <tr><td class="num">14</td><td class="num">8</td><td>One <em>g</em> is taken as 9.81&nbsp;m/s&sup2;</td><td>standard gravity, 9.80665&nbsp;m/s&sup2;</td></tr>
+  <tr><td class="num">55</td><td class="num">26</td><td>The largest value is the largest size, whatever its sign</td><td>the most positive or the most negative value</td></tr>
+  <tr><td class="num">68</td><td class="num">45</td><td>The chest displacement is read as micrometers and shown in millimeters</td><td>plotting it in the header&rsquo;s meters, or leaving it out</td></tr>
+  <tr><td class="num">74</td><td class="num">52</td><td>Impact is at time zero, the zero the file declares</td><td>finding impact from the data, such as the first large deceleration</td></tr>
+  <tr><td class="num">75</td><td class="num">53</td><td>Each figure is titled from its own header</td><td>the file&rsquo;s keys, such as <code>vehicle_x</code>, which are labels added to the file</td></tr>
 </table>
 
 <h2 id="what-it-prints">What It Prints</h2>

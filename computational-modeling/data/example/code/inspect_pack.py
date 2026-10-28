@@ -5,6 +5,7 @@ largest value in each channel, and saves the figures used in the report:
 one per channel (channel_<key>.svg) and the chest displacement both ways
 (chest_d_units.svg).
 """
+import glob
 import json
 import os
 
@@ -17,8 +18,8 @@ PACK = '.'    # the unzipped pack folder
 def load_test(pack):
     """The crash folder holds one file, the test."""
     folder = os.path.join(pack, 'crash')
-    name = os.listdir(folder)[0]
-    with open(os.path.join(folder, name)) as f:
+    name = glob.glob(os.path.join(folder, '*.json'))[0]
+    with open(name) as f:
         return json.load(f)
 
 

@@ -18,7 +18,7 @@
 
 G = 9.80665;       % standard gravity, m/s^2 in one g
 DRAWS = 1000;      % reruns per noise model
-BLOCK = 200;       % samples per block for the 'blocks' model (10 ms at 20 kHz)
+BLOCK_MS = 10;     % length of a block for the 'blocks' model
 CODES = {'11HEADCG0000ACXP', '11HEADCG0000ACYP', '11HEADCG0000ACZP'};
 
 files = dir(fullfile('crash', '*.json'));   % the crash folder holds one file
@@ -42,13 +42,21 @@ for m = 1:numel(chans)
     raw{m} = chans{m}.y;
     pre{m} = raw{m}(before);
 end
+% a block is 10 ms of samples, and never more than half the stretch before impact,
+% so the blocks can start in more than one place
+BLOCK = min(round(BLOCK_MS / 1000 / dt), floor(numel(pre{1}) / 2));
 
 % 1. the noise
 fprintf('%d head channels, %d samples every %g ms, %.2f to %.2f ms\n', numel(chans), n, ...
         dt * 1000, t_ms(1), t_ms(end));
 t_before = t_ms(before);
 fprintf('pre-impact stretch: %d samples, %.2f to %.2f ms\n', sum(before), t_ms(1), t_before(end));
-LAGS = [1, 20, 100, 200];
+LAGS = [];
+for lag = [1, 20, 100, 200]               % in samples, kept only if the stretch is long enough
+    if lag < floor(numel(pre{1}) / 2)
+        LAGS(end+1) = lag;
+    end
+end
 columns = {};
 for lag = LAGS
     columns{end+1} = sprintf('r(%g ms)', lag * dt * 1000);
@@ -132,7 +140,7 @@ saveas(fig, 'noise_before_impact.svg');
 close(fig);
 
 % Figure 2: how alike neighboring samples are
-lags = 1:500;
+lags = 1:min(500, floor(numel(pre{1}) / 2));   % up to half the stretch
 fig = figure('Position', [100 100 800 360]);
 hold on
 for m = 1:numel(chans)
@@ -150,7 +158,7 @@ plot([BLOCK * dt * 1000, BLOCK * dt * 1000], yl, '--', 'Color', [0.5 0.5 0.5]);
 title('Autocorrelation of the pre-impact noise (independent noise would sit at 0)');
 xlabel('lag (ms)');
 ylabel('autocorrelation (no units)');
-legend({chans{1}.code, chans{2}.code, chans{3}.code, 'block length, 10 ms'}, 'FontSize', 8);
+legend({chans{1}.code, chans{2}.code, chans{3}.code, sprintf('block length, %g ms', BLOCK * dt * 1000)}, 'FontSize', 8);
 saveas(fig, 'noise_autocorrelation.svg');
 close(fig);
 

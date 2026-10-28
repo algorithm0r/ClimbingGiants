@@ -998,7 +998,7 @@ function out = one_pass(x, c)
                  + b1 * out(i-1) + b2 * out(i-2);
     end
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 24 to 42 (Python) and lines 169 to 193 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 24 to 42 (Python) and lines 175 to 199 (MATLAB).</div>
 </div>
 <h2 id="hic">HIC</h2>
 
@@ -1042,7 +1042,7 @@ The function keeps the best HIC found and the first and last sample of its windo
         end
     end
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 45 to 59 (Python) and lines 196 to 212 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 45 to 59 (Python) and lines 202 to 218 (MATLAB).</div>
 </div>
 <h2 id="the-resultant">The Resultant</h2>
 
@@ -1070,7 +1070,7 @@ direction, in <em>g</em>. Passing no class skips the filter, which the second ch
     end
     r = sqrt(axes_g{1}.^2 + axes_g{2}.^2 + axes_g{3}.^2) / G;
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 62 to 69 (Python) and lines 215 to 223 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 62 to 69 (Python) and lines 221 to 229 (MATLAB).</div>
 </div>
 <h2 id="two-small-helpers">Two Small Helpers</h2>
 
@@ -1092,7 +1092,7 @@ end</pre>
     starts = [1, find(~isletter(s(1:end-1))) + 1];
     s(starts) = upper(s(starts));
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 72 to 74 (Python) and lines 226 to 231 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 72 to 74 (Python) and lines 232 to 237 (MATLAB).</div>
 </div>
 <h2 id="which-files">Which Files</h2>
 
@@ -1130,7 +1130,7 @@ printing, the checks and the figures will need in one record for the car.</p>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="2|Opens the file and closes it again when the indented lines below it end ([Files and libraries](py-files.html)).;3|Reads the whole file as one dictionary.;4|A dictionary from each channel's ISO code to the channel ([Dictionaries](py-dicts.html)).;5|.values() gives each channel in turn, and the next line files it under its code.;7|The driver's head channel in X. Its dt and t0 are used for all three axes.;11|A loop over a string takes one letter at a time, so a is X, then Y, then Z ([Loops](py-loops.html)).;12|The code with the axis letter put in, such as 11HEADCG0000ACYP, picks the channel. np.array turns its list of samples into an array, so arithmetic works on all of them at once ([numpy arrays](py-numpy.html)).;13|Filtered at CFC 1000, the default.;14|The time of each sample in ms. t0 is negative, since the record starts before impact, so impact falls at 0.;15|HIC15 and its first and last sample.;19|A set keeps each value once, so it shows which statuses occur among the channels.;24|True for the file from the crash folder, the customer's car.;27|.title() gives each word a capital first letter and lower case after it, so BMW becomes Bmw. .strip() removes spaces from the ends, which the Cascada's model field has ([Numbers and text](py-values.html)).;33|[0] keeps the HIC and drops the window.;34|The window as times in ms, which is how it is printed.;39|The finished record added to the list.">for path in paths:
+  <pre data-lang="python" data-notes="2|Opens the file and closes it again when the indented lines below it end ([Files and libraries](py-files.html)).;3|Reads the whole file as one dictionary.;4|A dictionary from each channel's ISO code to the channel ([Dictionaries](py-dicts.html)).;5|.values() gives each channel in turn, and the next line files it under its code.;7|The driver's head channel in X. Its dt and t0 are used for all three axes.;11|A loop over a string takes one letter at a time, so a is X, then Y, then Z ([Loops](py-loops.html)).;12|The code with the axis letter put in, such as 11HEADCG0000ACYP, picks the channel. np.array turns its list of samples into an array, so arithmetic works on all of them at once ([numpy arrays](py-numpy.html)).;13|Filtered at CFC 1000, the default.;14|The time of each sample in ms. t0 is negative, since the record starts before impact, so impact falls at 0.;15|HIC15 and its first and last sample.;19|A set keeps each value once, so it shows which statuses occur among the channels.;24|True for the file in the crash folder, the customer's car. os.path.dirname gives the folder the file is in and os.path.basename the last part of it.;27|.title() gives each word a capital first letter and lower case after it, so BMW becomes Bmw. .strip() removes spaces from the ends, which the Cascada's model field has ([Numbers and text](py-values.html)).;33|[0] keeps the HIC and drops the window.;34|The window as times in ms, which is how it is printed.;38|Each status once, in alphabetical order, joined with commas, so the line prints the same way on every run.;39|The finished record added to the list.">for path in paths:
     with open(path) as f:
         test = json.load(f)
     ch = {}                                  # each channel under its ISO code
@@ -1153,7 +1153,7 @@ printing, the checks and the figures will need in one record for the car.</p>
         statuses.add(c['status'])
     car = {}
     car['no'] = test['testNo']
-    car['mine'] = 'crash' in path
+    car['mine'] = os.path.basename(os.path.dirname(path)) == 'crash'   # in the crash folder
     car['info'] = test['test']
     car['model'] = v['model']
     car['name'] = f"{v['year']} {v['make'].title()} {v['model'].strip().title()}"
@@ -1167,9 +1167,9 @@ printing, the checks and the figures will need in one record for the car.</p>
     car['peak'] = np.max(res)
     car['peak_t'] = t_ms[np.argmax(res)]
     car['descr'] = hx['comment']
-    car['status'] = statuses
+    car['status'] = ', '.join(sorted(statuses))   # each status once, in a fixed order
     cars.append(car)</pre>
-  <pre data-lang="matlab" hidden data-notes="3|fileread reads the file as text, and jsondecode turns it into a struct.;5|jsondecode gives the channels as a struct, and fieldnames lists its fields.;8|A field named from text. The c in front is there because a field name cannot start with a digit.;16|letters(m) is the m-th letter of XYZ, joined into the code.;19|The ' turns the row of times into a column, the same shape as res.;31|True for the file from the crash folder.;42|The peak and its position in one line.;45|unique keeps each status once, as a Python set does.;49|Adds the record to the end of the struct array.">for p = 1:numel(paths)
+  <pre data-lang="matlab" hidden data-notes="3|fileread reads the file as text, and jsondecode turns it into a struct.;5|jsondecode gives the channels as a struct, and fieldnames lists its fields.;8|A field named from text. The c in front is there because a field name cannot start with a digit.;16|letters(m) is the m-th letter of XYZ, joined into the code.;19|The ' turns the row of times into a column, the same shape as res.;31|True for the file from the crash folder.;42|The peak and its position in one line.;45|unique keeps each status once, in sorted order, as the Python does, and strjoin joins them with commas.;49|Adds the record to the end of the struct array.">for p = 1:numel(paths)
     path = paths{p};
     test = jsondecode(fileread(path));
     ch = struct();                           % each channel under its ISO code
@@ -1213,7 +1213,7 @@ printing, the checks and the figures will need in one record for the car.</p>
     [car.peak, ip] = max(res);
     car.peak_t = t_ms(ip);
     car.descr = hx.comment;
-    car.status = unique(statuses);
+    car.status = strjoin(unique(statuses), ', ');   % each status once, in a fixed order
     if isempty(cars)
         cars = car;
     else
@@ -1233,22 +1233,22 @@ shows.</p>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="2|From here on c is a car. In the reading loop above it was a channel.;3|!r prints the text with its quotes, so a trailing space shows ([Numbers and text](py-values.html)).;6|The sample rate is one over the time between samples.;7|The statuses of all the channels, not only the head channel. The set prints {'ok'} when every channel is ok. With two different statuses Python may print them in either order.">for c in cars:
+  <pre data-lang="python" data-notes="2|From here on c is a car. In the reading loop above it was a channel.;3|!r prints the text with its quotes, so a trailing space shows ([Numbers and text](py-values.html)).;6|The sample rate is one over the time between samples.;7|The statuses of all the channels, ok when every channel is ok.">for c in cars:
     info = c['info']
     print(f"{c['no']} {c['name']}  (model field {c['model']!r})")
     print(f"   {info['type']}, {info['config']}, angle {info['angle']}, "
           f"{info['speed_kph']} km/h")
     print(f"   {1 / c['dt']:.0f} samples/s, head X described as {c['descr']!r}, "
-          f"status {c['status']}")
+          f"statuses of all channels: {c['status']}")
     print(f"   HIC15 {c['h15']:.1f}, window {c['win'][0]:.2f} to {c['win'][1]:.2f} ms,"
           f" HIC36 {c['h36']:.1f}, peak {c['peak']:.1f} g at {c['peak_t']:.1f} ms")</pre>
-  <pre data-lang="matlab" hidden data-notes="4|Two single quotes inside MATLAB text stand for one, so this prints the field between quotes.;7|Joins the statuses so the line reads as the Python set does. unique sorts them, so with two statuses the order may differ from the Python's.">for k = 1:numel(cars)
+  <pre data-lang="matlab" hidden data-notes="4|Two single quotes inside MATLAB text stand for one, so this prints the field between quotes.">for k = 1:numel(cars)
     c = cars(k);
     info = c.info;
     fprintf('%d %s  (model field ''%s'')\n', c.no, c.name, c.model);
     fprintf('   %s, %s, angle %g, %g km/h\n', info.type, info.config, info.angle, info.speed_kph);
-    fprintf('   %.0f samples/s, head X described as ''%s'', status {''%s''}\n', ...
-            1 / c.dt, c.descr, strjoin(c.status, ''', '''));
+    fprintf('   %.0f samples/s, head X described as ''%s'', statuses of all channels: %s\n', ...
+            1 / c.dt, c.descr, c.status);
     fprintf('   HIC15 %.1f, window %.2f to %.2f ms, HIC36 %.1f, peak %.1f g at %.1f ms\n', ...
             c.h15, c.win(1), c.win(2), c.h36, c.peak, c.peak_t);
 end</pre>
@@ -1295,40 +1295,53 @@ end</pre>
 <h2 id="two-checks">Two Checks</h2>
 
 <p>The customer's car was recorded at 20,000 samples a second and the other two at 10,000. The first
-check keeps every second sample of the customer's car and recomputes, to see whether the sample rate
-explains any of the difference. The second recomputes every car with no filter at all.</p>
+check keeps every second sample of the customer's car (every step-th, in general, to match the
+slowest other car) and recomputes, to see whether the sample rate explains any of the difference. The second recomputes every car with no filter at all.</p>
 <div class="codetabs" id="s9">
   <div class="tabs" role="tablist">
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="1|This check fits the example pack, where the customer's car is at 20,000 a second and the others at 10,000. Other rates would need a different step, or no check.;5|a[::2] takes every second sample, starting with the first ([Lists](py-lists.html)).;6|Every second sample is twice the time apart, so the step is 2 dt.;11|None skips the filter."># check 1: the customer's car was sampled twice as fast as the other two.
-# Keep every second sample (10,000 a second, like the others) and recompute.
-every_second = []
-for a in me['axes']:
-    every_second.append(a[::2])
-half = resultant(every_second, 2 * me['dt'])
-print(f"\ncheck, customer's car at half the sample rate: "
-      f"HIC15 {hic(half, 2 * me['dt'], 15)[0]:.1f}")
+  <pre data-lang="python" data-notes="1|On the example pack the customer's car is at 20,000 samples a second and the others at 10,000, so step is 2. With other rates step is whatever matches the slowest car, and if no car is slower the check does not apply.;10|a[::step] takes every step-th sample, starting with the first ([Lists](py-lists.html)).;11|Every step-th sample is step times as far apart, so the time between samples is step dt.;18|None skips the filter."># check 1: the customer's car at the slowest other car's sample rate. Keep every
+# step-th sample, step being how many of its samples fit in one of the slower car's.
+slowest_dt = me['dt']
+for c in cars:
+    slowest_dt = max(slowest_dt, c['dt'])
+step = round(slowest_dt / me['dt'])
+if step &gt; 1:
+    kept = []
+    for a in me['axes']:
+        kept.append(a[::step])
+    slower = resultant(kept, step * me['dt'])
+    print(f"\ncheck, customer's car at {1 / (step * me['dt']):.0f} samples/s (every {step} samples): "
+          f"HIC15 {hic(slower, step * me['dt'], 15)[0]:.1f}")
+else:
+    print("\ncheck, no other car was sampled more slowly, so the sample-rate check does not apply")
 # check 2: no filter at all, every car
 for c in cars:
     raw = resultant(c['axes'], c['dt'], None)
     print(f"check, {c['name']} with no filter: HIC15 {hic(raw, c['dt'], 15)[0]:.1f}")</pre>
-  <pre data-lang="matlab" hidden data-notes="5|1:2:end counts from 1 to the end in steps of 2.;12|[] skips the filter.">% check 1: the customer's car was sampled twice as fast as the other two.
-% Keep every second sample (10,000 a second, like the others) and recompute.
-every_second = cell(1, 3);
-for m = 1:3
-    every_second{m} = me.axes{m}(1:2:end);
+  <pre data-lang="matlab" hidden data-notes="7|1:step:end counts from 1 to the end in steps of step.;18|[] skips the filter.">% check 1: the customer's car at the slowest other car's sample rate. Keep every
+% step-th sample, step being how many of its samples fit in one of the slower car's.
+step = round(max([cars.dt]) / me.dt);
+if step &gt; 1
+    kept = cell(1, 3);
+    for m = 1:3
+        kept{m} = me.axes{m}(1:step:end);
+    end
+    slower = resultant(kept, step * me.dt, 1000, G);
+    fprintf('\ncheck, customer''s car at %.0f samples/s (every %d samples): HIC15 %.1f\n', ...
+            1 / (step * me.dt), step, hic(slower, step * me.dt, 15));
+else
+    fprintf('\ncheck, no other car was sampled more slowly, so the sample-rate check does not apply\n');
 end
-half = resultant(every_second, 2 * me.dt, 1000, G);
-fprintf('\ncheck, customer''s car at half the sample rate: HIC15 %.1f\n', hic(half, 2 * me.dt, 15));
 % check 2: no filter at all, every car
 for k = 1:numel(cars)
     c = cars(k);
     raw = resultant(c.axes, c.dt, [], G);
     fprintf('check, %s with no filter: HIC15 %.1f\n', c.name, hic(raw, c.dt, 15));
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 145 to 156 (Python) and lines 102 to 115 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 145 to 163 (Python) and lines 102 to 121 (MATLAB).</div>
 </div>
 <h2 id="figure-1-the-three-cars">Figure 1, the Three Cars</h2>
 
@@ -1390,7 +1403,7 @@ title('Figure 1. Driver HIC15, three cars, same barrier, about 56 km/h', 'FontSi
 set(gca, 'XGrid', 'on');             % lines across the x axis only
 saveas(fig, 'fig1_fleet.svg');
 close(fig);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 158 to 181 (Python) and lines 117 to 142 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 165 to 188 (Python) and lines 123 to 148 (MATLAB).</div>
 </div>
 <h2 id="figure-2-the-head-resultants">Figure 2, the Head Resultants</h2>
 
@@ -1402,8 +1415,10 @@ HIC<sub>15</sub>.</p>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="2|Three sets of axes, one above the other, which fits three cars. sharex and sharey give them the same scales.;4|The k-th set of axes, for the k-th car.;7|Shades the window from its first time to its last.;11|Set on the last axes, and the shared x axis applies it to all three.;15|Moves the three plots so their titles and labels do not overlap."># Figure 2: the head resultant for each car with its HIC15 window shaded
-fig, axs = plt.subplots(3, 1, figsize=(7, 7), sharex=True, sharey=True)
+  <pre data-lang="python" data-notes="2|One set of axes per car, one above the other. sharex and sharey give them the same scales.;6|The k-th set of axes, for the k-th car.;9|Shades the window from its first time to its last.;13|Set on the last axes, and the shared x axis applies it to all three.;17|Moves the three plots so their titles and labels do not overlap."># Figure 2: the head resultant for each car with its HIC15 window shaded
+fig, axs = plt.subplots(len(cars), 1, figsize=(7, 7 / 3 * len(cars)), sharex=True, sharey=True)
+if len(cars) == 1:
+    axs = [axs]                              # one car gives a single set of axes, not a list
 for k in range(len(cars)):
     ax = axs[k]
     c = cars[k]
@@ -1441,7 +1456,7 @@ end
 xlabel('time from impact (ms)');
 saveas(fig, 'fig2_resultants.svg');
 close(fig);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 183 to 198 (Python) and lines 144 to 166 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 190 to 207 (Python) and lines 150 to 172 (MATLAB).</div>
 </div>
 
 <h2 id="decisions-in-this-program">Decisions in This Program</h2>
@@ -1454,11 +1469,11 @@ AI</a>. Pick a line and say why it is that way.</p>
 <table class="data">
   <tr><th class="num">Python line</th><th class="num">MATLAB line</th><th>The decision</th><th>What else could have been chosen</th></tr>
   <tr><td class="num">86</td><td class="num">35</td><td>Channels are picked by their codes</td><td>by description, which differs between the files</td></tr>
-  <tr><td class="num">67</td><td class="num">219</td><td>Each axis is filtered before the resultant is formed</td><td>forming the resultant first and filtering it once</td></tr>
+  <tr><td class="num">67</td><td class="num">225</td><td>Each axis is filtered before the resultant is formed</td><td>forming the resultant first and filtering it once</td></tr>
   <tr><td class="num">112</td><td class="num">65</td><td>HIC<sub>36</sub> is computed as a comparison</td><td>HIC<sub>15</sub> alone</td></tr>
-  <tr><td class="num">149</td><td class="num">106</td><td>The sample-rate check keeps every second sample</td><td>filtering first and then keeping every second sample, or checking at the original rate only</td></tr>
+  <tr><td class="num">154</td><td class="num">108</td><td>The sample-rate check keeps every step-th sample, matching the slowest other car</td><td>filtering first and then keeping every second sample, or checking at the original rate only</td></tr>
   <tr><td class="num">106</td><td class="num">59</td><td>The trailing space in a model field is stripped for labels</td><td>leaving it, or correcting the file</td></tr>
-  <tr><td class="num">176</td><td class="num">137</td><td>Figure&nbsp;1 is drawn on a scale close enough to see the gaps</td><td>a scale from 0 to the limit of 700, where the dots crowd together</td></tr>
+  <tr><td class="num">183</td><td class="num">143</td><td>Figure&nbsp;1 is drawn on a scale close enough to see the gaps</td><td>a scale from 0 to the limit of 700, where the dots crowd together</td></tr>
 </table>
 
 <h2 id="what-it-prints">What It Prints</h2>
@@ -1468,15 +1483,15 @@ MATLAB version prints the same lines (checked in Octave).</p>
 
 <pre class="nb-out">9793 2017 Hyundai Elantra  (model field 'ELANTRA')
    NEW CAR ASSESSMENT TEST, VEHICLE INTO BARRIER, angle 0, 56.15 km/h
-   20000 samples/s, head X described as 'V1P1 HEAD CG X ACCELERATION', status {'ok'}
+   20000 samples/s, head X described as 'V1P1 HEAD CG X ACCELERATION', statuses of all channels: ok
    HIC15 150.4, window 60.85 to 75.85 ms, HIC36 291.7, peak 45.3 g at 66.5 ms
 9801 2016 Buick Cascada  (model field 'CASCADA ')
    OPTIONAL NEW CAR ASSESSMENT TEST, VEHICLE INTO BARRIER, angle 0, 56.21 km/h
-   10000 samples/s, head X described as 'DRIVER HEAD X', status {'ok'}
+   10000 samples/s, head X described as 'DRIVER HEAD X', statuses of all channels: ok
    HIC15 187.5, window 59.80 to 74.80 ms, HIC36 343.5, peak 45.8 g at 70.1 ms
 9808 2016 Honda Civic  (model field 'CIVIC')
    OPTIONAL NEW CAR ASSESSMENT TEST, VEHICLE INTO BARRIER, angle 0, 56.17 km/h
-   10000 samples/s, head X described as 'DRIVER HEAD X', status {'ok'}
+   10000 samples/s, head X described as 'DRIVER HEAD X', statuses of all channels: ok
    HIC15 148.5, window 71.10 to 86.10 ms, HIC36 268.6, peak 43.8 g at 76.7 ms
 
 customer's car is 2 of 3, lowest first
@@ -1484,7 +1499,7 @@ range 148.5 to 187.5, median 150.4, highest is 26.8% of the limit
 customer minus 2016 Buick Cascada: HIC15 -37.1, HIC36 -51.8
 customer minus 2016 Honda Civic: HIC15 +1.9, HIC36 +23.1
 
-check, customer's car at half the sample rate: HIC15 150.4
+check, customer's car at 10000 samples/s (every 2 samples): HIC15 150.4
 check, 2017 Hyundai Elantra with no filter: HIC15 150.6
 check, 2016 Buick Cascada with no filter: HIC15 187.5
 check, 2016 Honda Civic with no filter: HIC15 148.6</pre>

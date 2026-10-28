@@ -906,9 +906,9 @@ notes of their own.</p>
 <table class="data">
   <tr><th>Comes in</th><th>From</th></tr>
   <tr><td>The car's acceleration, the left rear seat crossmember in X</td><td><code>crash/09793.json</code> (the one file in the pack's crash folder), channel <code>vehicle_x</code></td></tr>
-  <tr><td>The driver's chest acceleration, for one check</td><td>the same file, channel <code>chest_x</code></td></tr>
+  <tr><td>The driver's chest acceleration, for one check</td><td>the same file, channel <code>chest_x</code> (a few tests have none, and then check&nbsp;3 is skipped)</td></tr>
   <tr><td>The occupant's mass, the belt's stiffness and its damping</td><td>the restraint group's values in the assignment, copied into the program</td></tr>
-  <tr><td>The approach speed, 15.60&nbsp;m/s</td><td>the test record, copied into the program (it could be read from the file, as the speed in kilometers per hour)</td></tr>
+  <tr><td>The approach speed</td><td>the same file's test header, in km/h</td></tr>
 </table>
 
 <table class="data">
@@ -934,8 +934,8 @@ approach speed and the threshold the settling test uses. The threshold is a hund
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="4|numpy for arrays, and matplotlib for the figures ([Files and libraries](py-files.html)).;7|The occupant's mass in kg. M, K and C are the restraint group's values, used as given.;10|Used to convert m/s squared to g for printing. The report says one g is 9.81 m/s squared.;11|The approach speed from the test record, used only by check 2.;12|In mm. A step counts as settled when the next two halvings each move the travel less than this.">import json
-import os
+  <pre data-lang="python" data-notes="4|numpy for arrays, and matplotlib for the figures ([Files and libraries](py-files.html)).;7|The occupant's mass in kg. M, K and C are the restraint group's values, used as given.;10|Used to convert m/s squared to g for printing. The report says one g is 9.81 m/s squared.;11|In mm. A step counts as settled when the next two halvings each move the travel less than this.">import glob
+import json
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -944,15 +944,13 @@ M = 75.0        # occupant mass, kg
 K = 296000.0    # belt stiffness, N/m
 C = 2800.0      # belt damping, N*s/m
 G = 9.81        # m/s^2 per g
-V0 = 15.60      # approach speed, m/s (56.15 km/h from the test record)
 SETTLED = 0.001  # mm, a hundredth of the 0.1 mm I quote (RK4 makes this cheap)</pre>
   <pre data-lang="matlab" hidden data-notes="1|In MATLAB % starts a comment, as # does in Python.">M = 75.0;        % occupant mass, kg
 K = 296000.0;    % belt stiffness, N/m
 C = 2800.0;      % belt damping, N*s/m
 G = 9.81;        % m/s^2 per g
-V0 = 15.60;      % approach speed, m/s (56.15 km/h from the test record)
 SETTLED = 0.001; % mm, a hundredth of the 0.1 mm I quote (RK4 makes this cheap)</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 17 to 28 (Python) and lines 18 to 23 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 17 to 27 (Python) and lines 18 to 22 (MATLAB).</div>
 </div>
 <h2 id="the-filter">The Filter</h2>
 
@@ -1008,7 +1006,7 @@ function out = one_pass(x, c)
         out(i) = c(1)*x(i) + c(2)*x(i-1) + c(3)*x(i-2) + c(4)*out(i-1) + c(5)*out(i-2);
     end
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 31 to 50 (Python) and lines 167 to 189 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 30 to 49 (Python) and lines 174 to 196 (MATLAB).</div>
 </div>
 <h2 id="stepping-the-model-with-rk4">Stepping the Model with RK4</h2>
 
@@ -1072,7 +1070,7 @@ function [times, u, w] = rk4(t, a_car, h, M, K, C)
         w(n+1) = wn + h/6 * (k1w + 2*k2w + 2*k3w + k4w);
     end
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 53 to 74 (Python) and lines 192 to 218 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 52 to 73 (Python) and lines 199 to 225 (MATLAB).</div>
 </div>
 <h2 id="the-largest-travel">The Largest Travel</h2>
 
@@ -1086,23 +1084,25 @@ difference is small at the step used.</p>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="5|Runs the model at step h.;6|The position of the largest travel.;7|Converted to mm and ms, the units the report quotes ([Functions](py-functions.html)).">def travel(t, a_car, h):
+  <pre data-lang="python" data-notes="6|Runs the model at step h.;7|The position of the largest travel.;8|Converted to mm and ms, the units the report quotes ([Functions](py-functions.html)).">def travel(t, a_car, h):
     """Largest forward travel (mm) and when it happens (ms), at step h. This is
-    the largest value on the step grid, so it can only be at or below the true
-    peak; the step study shows how much that matters."""
+    the largest value on the step grid. The true peak can fall between two steps,
+    and at a coarse step the step's own error can move the value either way, which
+    the step study measures."""
     times, u, w = rk4(t, a_car, h)
     i = np.argmax(u)
     return 1000 * u[i], 1000 * times[i]</pre>
-  <pre data-lang="matlab" hidden data-notes="5|~ discards w, which travel does not need.;6|max with two outputs gives the largest value and its position.">function [x, at] = travel(t, a_car, h, M, K, C)
+  <pre data-lang="matlab" hidden data-notes="6|~ discards w, which travel does not need.;7|max with two outputs gives the largest value and its position.">function [x, at] = travel(t, a_car, h, M, K, C)
     % Largest forward travel (mm) and when it happens (ms), at step h. This is
-    % the largest value on the step grid, so it can only be at or below the true
-    % peak; the step study shows how much that matters.
+    % the largest value on the step grid. The true peak can fall between two steps,
+    % and at a coarse step the step's own error can move the value either way, which
+    % the step study measures.
     [times, u, ~] = rk4(t, a_car, h, M, K, C);
     [top, i] = max(u);
     x = 1000 * top;
     at = 1000 * times(i);
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 77 to 83 (Python) and lines 221 to 229 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 76 to 83 (Python) and lines 228 to 237 (MATLAB).</div>
 </div>
 <h2 id="reading-the-drive">Reading the Drive</h2>
 
@@ -1115,14 +1115,15 @@ strongly the damper slows that swing.</p>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="1|The name of the one file in the crash folder ([Files and libraries](py-files.html)).;4|The crossmember channel, used as the car's motion ([Dictionaries](py-dicts.html)).;6|The time of every sample in seconds, built from the header.;7|The samples as a numpy array, so arithmetic works on all of them at once ([numpy arrays](py-numpy.html)).;8|The drive filtered at CFC 180. The model runs on this.;11|The most negative value, the hardest deceleration, in g, and when it happens ([Numbers and text](py-values.html)).;13|The natural frequency in Hz. The square root of K over M is in radians per second, and dividing by 2 pi turns that into cycles per second.;15|The damping ratio. Below 1, the occupant swings back past zero before settling, which the run shows.">name = os.listdir('crash')[0]           # the crash folder holds one file
-with open(os.path.join('crash', name)) as f:
+  <pre data-lang="python" data-notes="1|glob.glob lists the files in the crash folder whose names end in .json, and [0] takes the first, the only one. A hidden file, such as the .DS_Store a Mac can add, does not match ([Files and libraries](py-files.html)).;4|The crossmember channel, used as the car's motion ([Dictionaries](py-dicts.html)).;6|The time of every sample in seconds, built from the header.;7|The samples as a numpy array, so arithmetic works on all of them at once ([numpy arrays](py-numpy.html)).;8|The drive filtered at CFC 180. The model runs on this.;9|The approach speed in m/s, from the km/h in the test record. Only check 2 uses it.;12|The most negative value, the hardest deceleration, in g, and when it happens ([Numbers and text](py-values.html)).;14|The natural frequency in Hz. The square root of K over M is in radians per second, and dividing by 2 pi turns that into cycles per second.;16|The damping ratio. Below 1, the occupant swings back past zero before settling, which the run shows.">name = glob.glob('crash/*.json')[0]     # the crash folder holds one test file
+with open(name) as f:
     test = json.load(f)
 ch = test['channels']['vehicle_x']
 dt = ch['dt']
 t = ch['t0'] + dt * np.arange(ch['n'])
 raw = np.array(ch['y'])
 a180 = cfc(raw, dt, 180)
+V0 = test['test']['speed_kph'] / 3.6     # approach speed, m/s, from the test record
 print(f"drive: {ch['comment']} [{ch['code']}], "
       f"{ch['n']} samples every {1000 * dt} ms")
 print(f"peak raw {np.min(raw) / G:.1f} g at {1000 * t[np.argmin(raw)]:.2f} ms, "
@@ -1130,13 +1131,14 @@ print(f"peak raw {np.min(raw) / G:.1f} g at {1000 * t[np.argmin(raw)]:.2f} ms, "
 fn = np.sqrt(K / M) / (2 * np.pi)
 print(f"belt natural frequency {fn:.2f} Hz (period {1000 / fn:.0f} ms), "
       f"damping ratio {C / (2 * np.sqrt(K * M)):.3f}")</pre>
-  <pre data-lang="matlab" hidden data-notes="1|dir lists the files that match the pattern. files(1).name is the first one's name.;2|fileread reads the file as text, and jsondecode turns it into a struct.;5|A column of the sample times.;9|min with two outputs gives the value and its position.">files = dir(fullfile('crash', '*.json'));
+  <pre data-lang="matlab" hidden data-notes="1|dir lists the files that match the pattern. files(1).name is the first one's name.;2|fileread reads the file as text, and jsondecode turns it into a struct.;5|A column of the sample times.;10|min with two outputs gives the value and its position.">files = dir(fullfile('crash', '*.json'));
 test = jsondecode(fileread(fullfile('crash', files(1).name)));
 ch = test.channels.vehicle_x;
 dt = ch.dt;
 t = ch.t0 + dt * (0:ch.n-1)';
 raw = ch.y;
 a180 = cfc(raw, dt, 180);
+V0 = test.test.speed_kph / 3.6;          % approach speed, m/s, from the test record
 fprintf('drive: %s [%s], %d samples every %g ms\n', ch.comment, ch.code, ch.n, 1000 * dt);
 [low_raw, i_raw] = min(raw);
 [low_180, i_180] = min(a180);
@@ -1145,7 +1147,7 @@ fprintf('peak raw %.1f g at %.2f ms, CFC 180 %.1f g at %.2f ms\n', ...
 fn = sqrt(K / M) / (2 * pi);
 fprintf('belt natural frequency %.2f Hz (period %.0f ms), damping ratio %.3f\n', ...
         fn, 1000 / fn, C / (2 * sqrt(K * M)));</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 86 to 100 (Python) and lines 25 to 39 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 86 to 101 (Python) and lines 24 to 39 (MATLAB).</div>
 </div>
 <h2 id="the-step-study">The Step Study</h2>
 
@@ -1158,7 +1160,7 @@ the settling test reads.</p>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="3|Nine steps: 128 samples, then halved eight times ([Loops](py-loops.html)).;4|2**k is 2 to the power k.;5|One list of travels per drive, in step order ([Dictionaries](py-dicts.html)).;6|The table's header. :&gt;10 right-aligns the text in 10 characters, so the columns line up ([Numbers and text](py-values.html)).;8|The two drives the study runs on.;12|.items() gives each key with its value, here each drive's name and samples ([Dictionaries](py-dicts.html)).;13|The largest travel at this step, and when.;14|Adds the travel to the end of that drive's list, which sits inside the dictionary.;15|The first step has nothing to compare with, so its change column is left blank ([Conditions](py-conditions.html)).;18|The change from the step before. :12.4f writes 4 decimal places in 12 characters, and :+ prints a sign even on a positive change."># ---- step study: halve from 6.4 ms (128 samples) down to 0.025 ms (half a sample)
+  <pre data-lang="python" data-notes="3|Nine steps: 128 samples, then halved eight times ([Loops](py-loops.html)).;4|2**k is 2 to the power k.;5|One list of travels per drive, in step order ([Dictionaries](py-dicts.html)).;6|The table's header. :&gt;10 right-aligns the text in 10 characters, so the columns line up ([Numbers and text](py-values.html)).;8|The two drives the study runs on.;12|.items() gives each key with its value, here each drive's name and samples ([Dictionaries](py-dicts.html)).;13|The largest travel at this step, and when.;14|Adds the travel to the end of that drive's list, which sits inside the dictionary.;15|The first step has nothing to compare with, so its change column is left blank ([Conditions](py-conditions.html)).;18|The change from the step before. :12.4f writes 4 decimal places in 12 characters, and :+ prints a sign even on a positive change."># ---- step study: halve from 128 samples down to half a sample (6.4 to 0.025 ms at 20 kHz)
 steps = []
 for k in range(9):
     steps.append(128 * dt / 2**k)
@@ -1177,7 +1179,7 @@ for k in range(len(steps)):
         else:
             row = row + f" {x:12.4f} {x - results[name][k-1]:+9.4f}"
     print(row)</pre>
-  <pre data-lang="matlab" hidden data-notes="2|All nine steps at once. ./ and .^ work on each element.;3|A cell array holds the two drives. drives{d}, with braces, takes one out.;4|A table of travels, one row per step and one column per drive.;16|Square brackets join text in MATLAB.">% ---- step study: halve from 6.4 ms (128 samples) down to 0.025 ms (half a sample)
+  <pre data-lang="matlab" hidden data-notes="2|All nine steps at once. ./ and .^ work on each element.;3|A cell array holds the two drives. drives{d}, with braces, takes one out.;4|A table of travels, one row per step and one column per drive.;16|Square brackets join text in MATLAB.">% ---- step study: halve from 128 samples down to half a sample (6.4 to 0.025 ms at 20 kHz)
 steps = 128 * dt ./ 2.^(0:8);
 drives = {a180, raw};
 results = zeros(numel(steps), 2);        % one column per drive
@@ -1197,7 +1199,7 @@ for k = 1:numel(steps)
     end
     disp(row);
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 102 to 120 (Python) and lines 41 to 60 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 103 to 121 (Python) and lines 41 to 60 (MATLAB).</div>
 </div>
 <h2 id="choosing-the-step">Choosing the Step</h2>
 
@@ -1239,7 +1241,7 @@ fprintf('\nchosen step %.2f ms (%.0f samples), step x natural frequency %.3f\n',
         1000 * h, h / dt, h * sqrt(K / M));
 fprintf('the next two halvings move the travel %+.4f and %+.4f mm\n', ...
         s180(k+1) - s180(k), s180(k+2) - s180(k+1));</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 122 to 134 (Python) and lines 62 to 76 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 123 to 135 (Python) and lines 62 to 76 (MATLAB).</div>
 </div>
 <h2 id="the-run-at-that-step">The Run at That Step</h2>
 
@@ -1267,7 +1269,7 @@ when = times(i);
 fprintf('TRAVEL %.2f mm at %.1f ms\n', 1000 * top, 1000 * when);
 fprintf('most negative travel %.1f mm at %.1f ms, at the end of the record %.1f mm\n', ...
         1000 * u(j), 1000 * times(j), 1000 * u(end));</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 136 to 143 (Python) and lines 78 to 84 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 137 to 144 (Python) and lines 78 to 84 (MATLAB).</div>
 </div>
 <h2 id="three-checks">Three Checks</h2>
 
@@ -1281,7 +1283,7 @@ the travel itself.</p>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="4|Three versions of the drive: the one used, a stronger filter and no filter.;6|Each run at the record's own step, dt, finer than the step chosen.;8|The trapezoid integral of the drive over the whole record, which is the car's change of velocity. raw[1:] and raw[:-1] are the samples shifted by one, so each pair gives one trapezoid ([numpy arrays](py-numpy.html)).;10|The car slows, so dv is negative and -dv is its size. What it has beyond the approach speed is the rebound.;11|The occupant's own acceleration at every step: the belt's force divided by the mass.;12|The driver's chest accelerometer, filtered at CFC 180 to compare with the model.;13|Where the model occupant slows hardest. The chest's times are the record's, t, and the model's are the steps', times.;18|Now the largest positive value. The occupant is behind their start, and the compressed spring pushes them forward."># ---- checks
+  <pre data-lang="python" data-notes="4|Three versions of the drive: the one used, a stronger filter and no filter.;6|Each run at the record's own step, dt, finer than the step chosen.;8|The trapezoid integral of the drive over the whole record, which is the car's change of velocity. raw[1:] and raw[:-1] are the samples shifted by one, so each pair gives one trapezoid ([numpy arrays](py-numpy.html)).;10|The car slows, so dv is negative and -dv is its size. What it has beyond the approach speed is the rebound.;11|The occupant's own acceleration at every step: the belt's force divided by the mass.;12|True when the test has a driver chest channel. A few do not, and then check 3 is skipped ([Conditions](py-conditions.html)).;14|The driver's chest accelerometer, filtered at CFC 180 to compare with the model.;15|Where the model occupant slows hardest. The chest's times are the record's, t, and the model's are the steps', times.;20|Now the largest positive value. The occupant is behind their start, and the compressed spring pushes them forward."># ---- checks
 print("\nchecks")
 print("1. the drive filtered three ways, all at the record's own step:")
 checks = {'CFC 180': a180, 'CFC 60': cfc(raw, dt, 60), 'raw': raw}
@@ -1292,17 +1294,21 @@ dv = np.sum((raw[1:] + raw[:-1]) / 2) * dt
 print(f"2. velocity change in the drive {dv:.2f} m/s against an approach of "
       f"{V0:.2f} m/s, rebound {-dv - V0:.2f} m/s")
 a_occ = -(K * u + C * w) / M                     # occupant's own acceleration, m/s^2
-chest = cfc(np.array(test['channels']['chest_x']['y']), dt, 180)
-io = np.argmin(a_occ)
-ic = np.argmin(chest)
-print(f"3. model occupant peak {a_occ[io] / G:.1f} g at {1000 * times[io]:.1f} ms, "
-      f"driver chest (CFC 180) {chest[ic] / G:.1f} g at {1000 * t[ic]:.1f} ms")
-# after the peak the model's spring pushes back. Does the chest show that?
-io = np.argmax(a_occ)
-ic = np.argmax(chest)
-print(f"   largest push back: model {a_occ[io] / G:+.1f} g at "
-      f"{1000 * times[io]:.1f} ms, "
-      f"chest {chest[ic] / G:+.1f} g at {1000 * t[ic]:.1f} ms")</pre>
+has_chest = 'chest_x' in test['channels']        # a few tests have no chest channel
+if has_chest:
+    chest = cfc(np.array(test['channels']['chest_x']['y']), dt, 180)
+    io = np.argmin(a_occ)
+    ic = np.argmin(chest)
+    print(f"3. model occupant peak {a_occ[io] / G:.1f} g at {1000 * times[io]:.1f} ms, "
+          f"driver chest (CFC 180) {chest[ic] / G:.1f} g at {1000 * t[ic]:.1f} ms")
+    # after the peak the model's spring pushes back. Does the chest show that?
+    io = np.argmax(a_occ)
+    ic = np.argmax(chest)
+    print(f"   largest push back: model {a_occ[io] / G:+.1f} g at "
+          f"{1000 * times[io]:.1f} ms, "
+          f"chest {chest[ic] / G:+.1f} g at {1000 * t[ic]:.1f} ms")
+else:
+    print("3. this test has no driver chest channel, so check 3 cannot be made")</pre>
   <pre data-lang="matlab" hidden data-notes="3|Two single quotes inside MATLAB text stand for one.;5|The three drives, with their names in check_names.;10|raw(2:end) and raw(1:end-1) are the samples shifted by one, so each pair gives one trapezoid.">% ---- checks
 fprintf('\nchecks\n');
 fprintf('1. the drive filtered three ways, all at the record''s own step:\n');
@@ -1316,17 +1322,22 @@ dv = sum((raw(2:end) + raw(1:end-1)) / 2) * dt;
 fprintf('2. velocity change in the drive %.2f m/s against an approach of %.2f m/s, rebound %.2f m/s\n', ...
         dv, V0, -dv - V0);
 a_occ = -(K * u + C * w) / M;                    % occupant's own acceleration, m/s^2
-chest = cfc(test.channels.chest_x.y, dt, 180);
-[~, io] = min(a_occ);
-[~, ic] = min(chest);
-fprintf('3. model occupant peak %.1f g at %.1f ms, driver chest (CFC 180) %.1f g at %.1f ms\n', ...
-        a_occ(io) / G, 1000 * times(io), chest(ic) / G, 1000 * t(ic));
-% after the peak the model's spring pushes back. Does the chest show that?
-[~, io] = max(a_occ);
-[~, ic] = max(chest);
-fprintf('   largest push back: model %+.1f g at %.1f ms, chest %+.1f g at %.1f ms\n', ...
-        a_occ(io) / G, 1000 * times(io), chest(ic) / G, 1000 * t(ic));</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 145 to 166 (Python) and lines 86 to 108 (MATLAB).</div>
+has_chest = isfield(test.channels, 'chest_x');   % a few tests have no chest channel
+if has_chest
+    chest = cfc(test.channels.chest_x.y, dt, 180);
+    [~, io] = min(a_occ);
+    [~, ic] = min(chest);
+    fprintf('3. model occupant peak %.1f g at %.1f ms, driver chest (CFC 180) %.1f g at %.1f ms\n', ...
+            a_occ(io) / G, 1000 * times(io), chest(ic) / G, 1000 * t(ic));
+    % after the peak the model's spring pushes back. Does the chest show that?
+    [~, io] = max(a_occ);
+    [~, ic] = max(chest);
+    fprintf('   largest push back: model %+.1f g at %.1f ms, chest %+.1f g at %.1f ms\n', ...
+            a_occ(io) / G, 1000 * times(io), chest(ic) / G, 1000 * t(ic));
+else
+    fprintf('3. this test has no driver chest channel, so check 3 cannot be made\n');
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 146 to 171 (Python) and lines 86 to 113 (MATLAB).</div>
 </div>
 <h2 id="figure-1-the-travel">Figure 1, the Travel</h2>
 
@@ -1363,7 +1374,7 @@ ylabel('occupant travel relative to the car (mm)');
 title(sprintf('Occupant travel, RK4 at %.1f ms, CFC 180 drive', 1000 * h));
 saveas(fig, 'travel.svg');
 close(fig);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 168 to 181 (Python) and lines 110 to 122 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 173 to 186 (Python) and lines 115 to 127 (MATLAB).</div>
 </div>
 <h2 id="figure-2-the-drive">Figure 2, the Drive</h2>
 
@@ -1381,7 +1392,7 @@ plt.plot(1000 * t, a180 / G, label='CFC 180')
 plt.xlim(-10, 150)
 plt.xlabel('time from impact (ms)')
 plt.ylabel('acceleration (g)')
-plt.title('Crossmember X acceleration [10SEATLERE00ACXP]')
+plt.title(f"Car body X acceleration [{ch['code']}]")
 plt.legend()
 plt.tight_layout()
 plt.savefig('drive.svg')
@@ -1394,11 +1405,11 @@ plot(1000 * t, a180 / G);
 xlim([-10 150]);
 xlabel('time from impact (ms)');
 ylabel('acceleration (g)');
-title('Crossmember X acceleration [10SEATLERE00ACXP]');
+title(sprintf('Car body X acceleration [%s]', ch.code));
 legend({'as recorded', 'CFC 180'});
 saveas(fig, 'drive.svg');
 close(fig);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 183 to 194 (Python) and lines 124 to 135 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 188 to 199 (Python) and lines 129 to 140 (MATLAB).</div>
 </div>
 <h2 id="figure-3-the-step-study">Figure 3, the Step Study</h2>
 
@@ -1440,7 +1451,7 @@ title('Largest occupant travel against RK4 step');
 legend({'CFC 180 drive', 'raw drive', 'record sample interval', 'step used'});
 saveas(fig, 'steps.svg');
 close(fig);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 196 to 211 (Python) and lines 137 to 151 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 201 to 216 (Python) and lines 142 to 156 (MATLAB).</div>
 </div>
 <h2 id="figure-4-the-model-against-the-chest">Figure 4, the Model Against the Chest</h2>
 
@@ -1450,31 +1461,34 @@ close(fig);</pre>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="4|The model at its own step times, so the two lines use different times."># ---- figure 4, the model against the chest
-plt.figure(figsize=(7, 4))
-plt.plot(1000 * t, chest / G, label='driver chest X, measured (CFC 180)')
-plt.plot(1000 * times, a_occ / G, label='model occupant')
-plt.xlim(-10, 200)
-plt.xlabel('time from impact (ms)')
-plt.ylabel('acceleration (g)')
-plt.title('Occupant acceleration: model against the dummy chest')
-plt.legend()
-plt.tight_layout()
-plt.savefig('chest_check.svg')
-plt.close()</pre>
-  <pre data-lang="matlab" hidden data-notes="5|The model at its own step times, so the two lines use different times.">% ---- figure 4, the model against the chest
-fig = figure('Position', [100 100 700 400]);
-plot(1000 * t, chest / G);
-hold on
-plot(1000 * times, a_occ / G);
-xlim([-10 200]);
-xlabel('time from impact (ms)');
-ylabel('acceleration (g)');
-title('Occupant acceleration: model against the dummy chest');
-legend({'driver chest X, measured (CFC 180)', 'model occupant'});
-saveas(fig, 'chest_check.svg');
-close(fig);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 213 to 224 (Python) and lines 153 to 164 (MATLAB).</div>
+  <pre data-lang="python" data-notes="5|The model at its own step times, so the two lines use different times."># ---- figure 4, the model against the chest
+if has_chest:
+    plt.figure(figsize=(7, 4))
+    plt.plot(1000 * t, chest / G, label='driver chest X, measured (CFC 180)')
+    plt.plot(1000 * times, a_occ / G, label='model occupant')
+    plt.xlim(-10, 200)
+    plt.xlabel('time from impact (ms)')
+    plt.ylabel('acceleration (g)')
+    plt.title('Occupant acceleration: model against the dummy chest')
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig('chest_check.svg')
+    plt.close()</pre>
+  <pre data-lang="matlab" hidden data-notes="6|The model at its own step times, so the two lines use different times.">% ---- figure 4, the model against the chest
+if has_chest
+    fig = figure('Position', [100 100 700 400]);
+    plot(1000 * t, chest / G);
+    hold on
+    plot(1000 * times, a_occ / G);
+    xlim([-10 200]);
+    xlabel('time from impact (ms)');
+    ylabel('acceleration (g)');
+    title('Occupant acceleration: model against the dummy chest');
+    legend({'driver chest X, measured (CFC 180)', 'model occupant'});
+    saveas(fig, 'chest_check.svg');
+    close(fig);
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 218 to 230 (Python) and lines 158 to 171 (MATLAB).</div>
 </div>
 
 <h2 id="decisions-in-this-program">Decisions in This Program</h2>
@@ -1487,12 +1501,12 @@ AI</a>. Pick a line and say why it is that way.</p>
 
 <table class="data">
   <tr><th class="num">Python line</th><th class="num">MATLAB line</th><th>The decision</th><th>What else could have been chosen</th></tr>
-  <tr><td class="num">93</td><td class="num">31</td><td>The drive is filtered at CFC&nbsp;180</td><td>CFC&nbsp;60, or the raw record (check&nbsp;1 runs both)</td></tr>
-  <tr><td class="num">57</td><td class="num">194</td><td>Between samples the drive is a straight line</td><td>holding each sample until the next one</td></tr>
-  <tr><td class="num">62</td><td class="num">205</td><td>The occupant starts at rest at the start of the record, 50&nbsp;ms before impact</td><td>starting at impact</td></tr>
-  <tr><td class="num">105</td><td class="num">42</td><td>The steps halve from 128 samples down to half a sample</td><td>starting smaller, or stopping at the record&rsquo;s own step</td></tr>
-  <tr><td class="num">28</td><td class="num">23</td><td>Settled means two halvings each under 0.001&nbsp;mm</td><td>one halving, or a looser threshold such as 0.01&nbsp;mm</td></tr>
-  <tr><td class="num">82</td><td class="num">226</td><td>The travel is the largest value on the step grid</td><td>estimating the peak between steps, for example from a curve through the three largest values</td></tr>
+  <tr><td class="num">93</td><td class="num">30</td><td>The drive is filtered at CFC&nbsp;180</td><td>CFC&nbsp;60, or the raw record (check&nbsp;1 runs both)</td></tr>
+  <tr><td class="num">56</td><td class="num">201</td><td>Between samples the drive is a straight line</td><td>holding each sample until the next one</td></tr>
+  <tr><td class="num">61</td><td class="num">212</td><td>The occupant starts at rest at the start of the record, 50&nbsp;ms before impact</td><td>starting at impact</td></tr>
+  <tr><td class="num">106</td><td class="num">42</td><td>The steps halve from 128 samples down to half a sample</td><td>starting smaller, or stopping at the record&rsquo;s own step</td></tr>
+  <tr><td class="num">27</td><td class="num">22</td><td>Settled means two halvings each under 0.001&nbsp;mm</td><td>one halving, or a looser threshold such as 0.01&nbsp;mm</td></tr>
+  <tr><td class="num">82</td><td class="num">234</td><td>The travel is the largest value on the step grid</td><td>estimating the peak between steps, for example from a curve through the three largest values</td></tr>
 </table>
 
 <h2 id="what-it-prints">What It Prints</h2>
@@ -1539,9 +1553,7 @@ upload the program beside your unzipped pack and run it in a cell with <code>%ru
 (the <a href="tools-colab.html#a-downloaded-program">Colab guide</a> shows how). On your own pack it reads your data, so its numbers will differ from the ones above. The MATLAB
 version should run as it is in MATLAB R2018b or later. GNU Octave, which is free, needs a script's functions defined
 before they are used, so to run it there, move the functions to the top of the file and put a line
-<code>1;</code> above them. The program needs a <code>chest_x</code> channel for its third check, which 11 of
-the course's tests do not have. Its approach speed, Figure&nbsp;2's title and the step study's
-comment are written for the example test, so change them for yours.</p>
+<code>1;</code> above them.</p>
 
   </main>
 

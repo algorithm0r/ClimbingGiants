@@ -1054,7 +1054,7 @@ to generate cases whose answers are known, and then it counts.</p>
     median_half_width = sorted(widths)[n // 2]
     return {'claimed': level, 'measured': hits / n,
             'median_half_width': median_half_width}</pre>
-  <pre data-lang="matlab" hidden data-notes="1|procedure is a handle returning [value, half], and makeCase returns [case, truth].;6|One trial on a case whose answer is known.;9|A trial is a hit when the truth lies within half of the value.;14|Report the measured rate beside the claimed one.">function r = coverage(procedure, makeCase, n, level)
+  <pre data-lang="matlab" hidden data-notes="1|procedure is a handle returning [value, half], and makeCase returns [case, truth].;6|One trial on a case whose answer is known.;9|A trial is a hit when the truth lies within half of the value.;14|Report the measured rate beside the claimed one." data-notes="14|sort puts the widths in order, and the one at position floor(n/2) + 1 is the middle one, as in the Python (median would average the two middle values for an even n).">function r = coverage(procedure, makeCase, n, level)
     hits   = 0;
     widths = zeros(n, 1);
 
@@ -1067,9 +1067,10 @@ to generate cases whose answers are known, and then it counts.</p>
         end
     end
 
+    w = sort(widths);
     r.claimed         = level;
     r.measured        = hits / n;
-    r.medianHalfWidth = median(widths);
+    r.medianHalfWidth = w(floor(n/2) + 1);
 end</pre>
   <pre data-lang="js" hidden data-notes="1|procedure(c) returns {value, half}, and makeCase() returns {c, truth}.;6|One trial on a case whose answer is known.;9|A trial is a hit when the truth lies within half of the value.;16|Report the measured rate beside the claimed one.">function coverage(procedure, makeCase, n = 1000, level = 0.90) {
   let hits = 0;

@@ -1,12 +1,12 @@
-% Assignment 2: peak loss at lower sample rates, every channel of test 9793 (MATLAB version).
+% Assignment 2: peak loss at lower sample rates, every channel of the test (MATLAB version).
 %
 % The same program as a2_peak_loss.py, written for MATLAB. Run this from the
-% unzipped pack folder. A record at a lower rate is made from the 20 kHz one by
+% unzipped pack folder. A record at a lower rate is made from the recorded one by
 % keeping every k-th sample. Which sample the slower logger starts on is not
 % known, so every start from 0 to k-1 is tried and the lowest peak (the worst
 % start) and highest peak (the best start) are both kept.
 %
-% Prints the 20 kHz peak of each channel, the worst-start peak at each rate, and
+% Prints the full-rate peak of each channel, the worst-start peak at each rate, and
 % the lowest rate at which every channel keeps 95% of its peak. Saves
 % fraction_vs_rate.svg (Figure 1) and crossmember_1khz.svg (Figure 2).
 
@@ -14,12 +14,14 @@ G = 9.81;                % m/s^2 in one g
 KEEP = 0.95;             % a rate passes if every channel keeps 95% of its peak
 PROPOSED = 1000;         % Hz, the logger purchasing wants
 
-test = jsondecode(fileread('crash/09793.json'));
+files = dir(fullfile('crash', '*.json'));   % the crash folder holds one test file
+test = jsondecode(fileread(fullfile('crash', files(1).name)));
 channels = test.channels;
 keys = fieldnames(channels);
 
 rate_now = round(1 / channels.head_x.dt);
-% every whole-number step down from 20 kHz, to 200 Hz
+full_rate = sprintf('%g kHz', rate_now / 1000);   % the recorded rate, for labels
+% every whole-number step down from the recorded rate, to a hundredth of it
 factors = [];
 for k = 1:100
     if mod(rate_now, k) == 0           % k divides the rate exactly
@@ -43,7 +45,7 @@ fprintf('recorded rate %d Hz, %d rates tried, %d to %d Hz\n', rate_now, numel(ra
         rates(1), rates(end));
 fprintf('\n');
 
-% the 20 kHz peak of every channel, and when it happens
+% the full-rate peak of every channel, and when it happens
 fprintf('%-12s %-34s %8s %-4s %8s\n', 'key', 'description', 'peak', 'unit', 'at (ms)');
 for m = 1:numel(keys)
     key = keys{m};
@@ -59,7 +61,7 @@ for m = 1:numel(keys)
     fprintf('%-12s %-34s %8.2f %-4s %8.2f\n', key, ch.comment, peak(y), unit, t_ms);
 end
 
-% worst-start peak at each rate, as a fraction of the 20 kHz peak
+% worst-start peak at each rate, as a fraction of the full-rate peak
 worst = struct();
 for m = 1:numel(keys)
     key = keys{m};
@@ -71,7 +73,7 @@ for m = 1:numel(keys)
     end
 end
 
-fprintf('\nworst-start peak as %% of the 20 kHz peak\n');
+fprintf('\nworst-start peak as %% of the %s peak\n', full_rate);
 fprintf('%9s %s\n', 'rate (Hz)', strjoin(cellfun(@(key) sprintf('%11s', key), keys', ...
         'UniformOutput', false), ' '));
 for i = 1:numel(rates)
@@ -102,13 +104,13 @@ fprintf('Lowest rate keeping %.0f%% of every peak: %d Hz\n', 100 * KEEP, lowest)
 
 % the proposed rate, worst and best start, in the channel's own units
 k = floor(rate_now / PROPOSED);         % floor, as Python's // does
-fprintf('\nAt %d Hz (every %dth sample), range of peaks over the %d starts:\n', PROPOSED, k, k);
+fprintf('\nAt %g Hz (every %dth sample), range of peaks over the %d starts:\n', rate_now / k, k, k);
 for m = 1:numel(keys)
     key = keys{m};
     [y, unit] = values(channels, key, G);
     p = peaks_by_start(y, k);
-    fprintf('  %-12s 20 kHz %7.2f   worst %7.2f (%5.1f%%)   best %7.2f   start 0 %7.2f %s\n', ...
-            key, peak(y), min(p), 100 * min(p) / peak(y), max(p), p(1), unit);
+    fprintf('  %-12s %s %7.2f   worst %7.2f (%5.1f%%)   best %7.2f   start 0 %7.2f %s\n', ...
+            key, full_rate, peak(y), min(p), 100 * min(p) / peak(y), max(p), p(1), unit);
 end
 
 % Figure 1: worst-start fraction against rate, one line per channel
@@ -129,8 +131,8 @@ labels = [labels, {'95% of the peak', 'proposed logger, 1000 Hz'}];
 xticks([200, 500, 1000, 2000, 5000, 10000, 20000]);
 xticklabels({'200', '500', '1000', '2000', '5000', '10000', '20000'});
 xlabel('sample rate (Hz, log scale)');
-ylabel('worst-start peak (% of the 20 kHz peak)');
-title('Peak kept at each rate, worst start, test 9793', 'FontSize', 10);
+ylabel(sprintf('worst-start peak (%% of the %s peak)', full_rate));
+title(sprintf('Peak kept at each rate, worst start, test %d', test.testNo), 'FontSize', 10);
 legend(labels, 'FontSize', 7, 'Location', 'southeast');
 saveas(fig, 'fraction_vs_rate.svg');
 close(fig);
@@ -161,9 +163,9 @@ plot_kept(worst_start, 's', win, t_ms, y, k);
 xlabel('time from impact (ms)');
 ylabel('acceleration (g)');
 title([title_case(ch.comment) ' [' ch.code '], 40 to 70 ms'], 'FontSize', 10);
-legend({'recorded at 20000 Hz', ...
-        sprintf('1000 Hz, best start (sample %d)', best_start), ...
-        sprintf('1000 Hz, worst start (sample %d)', worst_start)}, 'FontSize', 8);
+legend({sprintf('recorded at %d Hz', rate_now), ...
+        sprintf('%g Hz, best start (sample %d)', rate_now / k, best_start), ...
+        sprintf('%g Hz, worst start (sample %d)', rate_now / k, worst_start)}, 'FontSize', 8);
 saveas(fig, 'crossmember_1khz.svg');
 close(fig);
 

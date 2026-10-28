@@ -1113,6 +1113,7 @@ choices) and saves the three figures:
     fig2_delta_v.svg        change in velocity since contact, constant set to zero
     fig3_velocity_crush.svg velocity with the lab's speed added, and distance
 """
+import glob
 import json
 import os
 
@@ -1124,8 +1125,8 @@ G = 9.81   # m/s^2 in one g
 
 def load_test(pack='.'):
     folder = os.path.join(pack, 'crash')
-    name = os.listdir(folder)[0]          # the crash folder holds one file
-    with open(os.path.join(folder, name)) as f:
+    name = glob.glob(os.path.join(folder, '*.json'))[0]   # the crash folder holds one test file
+    with open(name) as f:
         return json.load(f)
 
 

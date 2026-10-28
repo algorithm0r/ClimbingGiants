@@ -1009,7 +1009,7 @@ compare against.</p>
 <em>outside</em> the two values. Both runs are on
 the same side of the answer, so the estimate is further out than either. Averaging them, the
 instinct when two runs disagree, gives 3.39 and is worse than the finer run alone. The same
-manoeuvre with a factor of 4 in place of 2 is the trapezoid extrapolation on page 5.</p></div></details></li>
+manoeuvre with a factor of 4 in place of 2 is the trapezoid extrapolation on <a href="area-under-a-curve.html" title="Area under a curve">page 5</a>.</p></div></details></li>
     <li>Why does an error in one Euler step affect every later step, when an error in one panel
     of a
     week-3 integral does not?
@@ -1055,13 +1055,13 @@ that is often a stronger statement than an error estimate.</p></div></details></
         s = s + dt * f(t0 + k*dt, s)
         out[k + 1] = s
     return out</pre>
-  <pre data-lang="matlab" hidden data-notes="2|s0(:).' forces a row vector, so a scalar problem and a two-component one behave the same.;6|The whole method is this line.">function out = euler(f, s0, t0, dt, n)
-    s = s0(:).';
+  <pre data-lang="matlab" hidden data-notes="2|s0(:).' forces a row vector, so a scalar problem and a two-component one behave the same.;6|The whole method is this line." data-notes="2|s0(:) makes the state a column, the shape the rate functions on these pages return, so a scalar problem and a two-component one behave the same.;4|Each row of out is one time. .' turns the column into a row to store it.">function out = euler(f, s0, t0, dt, n)
+    s = s0(:);
     out = zeros(n+1, numel(s));
-    out(1,:) = s;
+    out(1,:) = s.';
     for k = 0:n-1
         s = s + dt * f(t0 + k*dt, s);
-        out(k+2,:) = s;
+        out(k+2,:) = s.';
     end
 end</pre>
   <pre data-lang="js" hidden data-notes="5|The rate of every component at this time and state.;8|Each component advances by its own rate, so the same code advances a state of any length.">function euler(f, s0, t0, dt, n) {

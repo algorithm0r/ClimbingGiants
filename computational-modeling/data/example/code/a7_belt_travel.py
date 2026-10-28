@@ -7,6 +7,7 @@ stepped with forward Euler at the record's own sample interval, then again at
 half and a quarter of it, to show the answer has settled.
 Saves travel.svg and drive.svg.
 """
+import glob
 import json
 import os
 
@@ -58,7 +59,7 @@ def euler_travel(t, a_car, h):
 
 # the crash folder holds one file, the test
 folder = 'crash'
-with open(os.path.join(folder, os.listdir(folder)[0])) as f:
+with open(glob.glob(os.path.join(folder, '*.json'))[0]) as f:
     test = json.load(f)
 ch = test['channels']['vehicle_x']   # header: left rear seat crossmember
 print(ch['comment'], ch['code'], ch['unit'])

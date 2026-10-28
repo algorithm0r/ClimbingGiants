@@ -15,15 +15,8 @@ PACK = '.';
 files = dir(fullfile(PACK, 'crash', '*.json'));
 test = jsondecode(fileread(fullfile(PACK, 'crash', files(1).name)));
 
-% the channel whose header comment names the crossmember
-key = '';
-keys = fieldnames(test.channels);
-for m = 1:numel(keys)
-    if ~isempty(strfind(test.channels.(keys{m}).comment, 'CROSSMEMBER'))
-        key = keys{m};
-        break
-    end
-end
+% the car-body channel: its header names the crossmember, or on some packs the sill
+key = 'vehicle_x';
 ch = test.channels.(key);
 dt = ch.dt;
 t = 1000 * (ch.t0 + dt * (0:ch.n-1)');      % ms
@@ -69,7 +62,7 @@ fprintf('  in g: %.3f with g = %g, %.3f with g = 9.81\n', p60 / G, G, p60 / 9.81
 
 fprintf('\nresult at CFC 60, forward and backward\n');
 fprintf('  peak %.2f m/s^2 = %.2f g at %.2f ms\n', p60, p60 / G, tp60);
-fprintf('  the unfiltered peak is %.2f times this\n', min(raw) / p60);
+fprintf('  the unfiltered peak is %.2f times this\n', raw(i) / p60);
 
 fprintf('\nevery class\n');
 fprintf('  %-12s %11s %8s %7s %12s\n', 'filter', 'peak m/s^2', 'peak g', 'at ms', 'delta-v m/s');
@@ -156,8 +149,8 @@ end
 
 
 function out = one_pass(x, c, start)
-    % One pass in the direction of increasing index. start is what the two
-    % outputs before the first sample are taken to be.
+    % One pass in the direction of increasing index. start is the value given to
+    % the first two outputs, which the formula cannot compute.
     out = zeros(size(x));
     out(1) = start;
     out(2) = start;

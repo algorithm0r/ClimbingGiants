@@ -905,7 +905,7 @@ which the notes link to, and the MATLAB lines have notes of their own.</p>
 
 <table class="data">
   <tr><th>Comes in</th><th>From</th></tr>
-  <tr><td>The crossmember's X acceleration and its header</td><td><code>crash/09793.json</code> (the one file in the pack's crash folder), found by its description, which works on the example pack (see Running It Yourself)</td></tr>
+  <tr><td>The crossmember's X acceleration and its header</td><td><code>crash/09793.json</code> (the one file in the pack's crash folder), its key <code>vehicle_x</code></td></tr>
   <tr><td>The four filter classes J211 defines</td><td>the standard, copied into the program</td></tr>
 </table>
 
@@ -931,7 +931,8 @@ folder.</p>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="5|numpy, under the short name np, does arithmetic on whole arrays at once ([Files and libraries](py-files.html)).;7|Standard gravity. The report says which value it uses, and a check prints the peak with both.;8|The four classes, as a list ([Lists](py-lists.html)).;9|'.' means the folder the program is run from.">import json
+  <pre data-lang="python" data-notes="6|numpy, under the short name np, does arithmetic on whole arrays at once ([Files and libraries](py-files.html)).;8|Standard gravity. The report says which value it uses, and a check prints the peak with both.;9|The four classes, as a list ([Lists](py-lists.html)).;10|'.' means the folder the program is run from.">import glob
+import json
 import os
 
 import matplotlib.pyplot as plt
@@ -943,7 +944,7 @@ PACK = '.'</pre>
   <pre data-lang="matlab" hidden data-notes="1|In MATLAB % starts a comment, and the semicolon stops MATLAB from printing the value.">G = 9.80665;         % standard gravity, m/s^2
 CLASSES = [1000, 600, 180, 60];
 PACK = '.';</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 10 to 18 (Python) and lines 11 to 13 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 10 to 19 (Python) and lines 11 to 13 (MATLAB).</div>
 </div>
 <h2 id="the-filter-s-coefficients">The Filter's Coefficients</h2>
 
@@ -974,7 +975,7 @@ and this function works them out as the standard gives them.</p>
     b2 = (-1 + sqrt(2) * wa - wa^2) / d;
     c = [a0, 2 * a0, a0, b1, b2];
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 21 to 29 (Python) and lines 146 to 155 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 22 to 30 (Python) and lines 139 to 148 (MATLAB).</div>
 </div>
 <h2 id="one-pass">One Pass</h2>
 
@@ -987,8 +988,8 @@ rest. One of the checks starts it from the first sample instead.</p>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
   <pre data-lang="python" data-notes="1|start=0.0 is a default, so a call that leaves start out starts from 0 ([Functions](py-functions.html)).;4|Unpacks the five weights into five names.;5|An array of zeros, one per sample, filled in below ([numpy arrays](py-numpy.html)).;6|The first two outputs, which the loop needs before it can begin.;8|From the third sample on, each output uses the two before it ([Loops](py-loops.html)).;9|The parentheses let the sum continue on the next line.">def one_pass(x, c, start=0.0):
-    """One pass in the direction of increasing index. start is what the two
-    outputs before the first sample are taken to be."""
+    """One pass in the direction of increasing index. start is the value given to
+    the first two outputs, which the formula cannot compute."""
     a0, a1, a2, b1, b2 = c
     out = np.zeros(len(x))
     out[0] = start
@@ -998,8 +999,8 @@ rest. One of the checks starts it from the first sample instead.</p>
                   + b1 * out[i - 1] + b2 * out[i - 2])
     return out</pre>
   <pre data-lang="matlab" hidden data-notes="5|MATLAB counts from 1, so out(1) and out(2) are the first two.;7|From the third sample on.;8|... continues the line on the next one.">function out = one_pass(x, c, start)
-    % One pass in the direction of increasing index. start is what the two
-    % outputs before the first sample are taken to be.
+    % One pass in the direction of increasing index. start is the value given to
+    % the first two outputs, which the formula cannot compute.
     out = zeros(size(x));
     out(1) = start;
     out(2) = start;
@@ -1008,7 +1009,7 @@ rest. One of the checks starts it from the first sample instead.</p>
                  + c(4) * out(i-1) + c(5) * out(i-2);
     end
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 32 to 42 (Python) and lines 158 to 168 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 33 to 43 (Python) and lines 151 to 161 (MATLAB).</div>
 </div>
 <h2 id="forward-and-backward">Forward and Backward</h2>
 
@@ -1049,7 +1050,7 @@ same one-pass filter over it, and reverses the answer back.</p>
     back = one_pass(fwd, c, start);         % forward again over the reversed record
     out = flip(back);
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 45 to 57 (Python) and lines 171 to 186 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 46 to 58 (Python) and lines 164 to 179 (MATLAB).</div>
 </div>
 <h2 id="the-peak">The Peak</h2>
 
@@ -1068,28 +1069,25 @@ time.</p>
     value = y(i);
     at = t(i);
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 60 to 62 (Python) and lines 189 to 193 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 61 to 63 (Python) and lines 182 to 186 (MATLAB).</div>
 </div>
 <h2 id="reading-the-test-and-finding-the-channel">Reading the Test and Finding the Channel</h2>
 
-<p>The main part starts here. It reads the test and finds the channel whose description names the
-crossmember, then prints its header: where the sensor is, which way it points, its unit, its status
+<p>The main part starts here. It reads the test and takes the car-body channel by its key,
+<code>vehicle_x</code>. Its header names the crossmember on the example pack and the sill on some
+others. Then it prints the header: where the sensor is, which way it points, its unit, its status
 and the analog filter the logger applied before sampling.</p>
 <div class="codetabs" id="s5">
   <div class="tabs" role="tablist">
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="1|The first file the crash folder lists, the only one ([Files and libraries](py-files.html)).;6|None until the loop finds the channel.;7|Each channel's key with the channel ([Dictionaries](py-dicts.html)).;8|in is true if the text contains CROSSMEMBER ([Conditions](py-conditions.html)).;10|Stops at the first match ([Loops](py-loops.html)).;13|The time of every sample, in ms.;18|One over the time between samples, with no decimal places.">name = os.listdir(os.path.join(PACK, 'crash'))[0]
-with open(os.path.join(PACK, 'crash', name)) as f:
+  <pre data-lang="python" data-notes="1|glob.glob lists the files in the crash folder whose names end in .json, and [0] takes the first, the only one. A hidden file, such as the .DS_Store a Mac can add, does not match ([Files and libraries](py-files.html)).;6|The channel by its key ([Dictionaries](py-dicts.html)). Every pack has it, whatever its header calls the sensor.;9|The time of every sample, in ms.;14|One over the time between samples, with no decimal places.">name = glob.glob(os.path.join(PACK, 'crash', '*.json'))[0]   # the one test file
+with open(name) as f:
     test = json.load(f)
 
-# the channel whose header comment names the crossmember
-key = None
-for k, c in test['channels'].items():
-    if 'CROSSMEMBER' in c['comment']:
-        key = k
-        break
+# the car-body channel: its header names the crossmember, or on some packs the sill
+key = 'vehicle_x'
 ch = test['channels'][key]
 dt = ch['dt']
 t = 1000 * (ch['t0'] + dt * np.arange(ch['n']))      # ms
@@ -1099,18 +1097,11 @@ print(f"  {ch['location']}, {ch['direction']}, {ch['unit']}, status {ch['status'
       f"prefilter {ch['prefilter_hz']} Hz")
 print(f"  {ch['n']} samples, {1 / dt:.0f} samples/s, {t[0]:.0f} to {t[-1]:.0f} ms")
 print(f"  test speed {test['test']['speed_kph']} km/h = {test['test']['speed_kph'] / 3.6:.2f} m/s")</pre>
-  <pre data-lang="matlab" hidden data-notes="8|strfind gives the positions where the text appears, so a non-empty answer means it is there. ~ is not.;13|A field named by a variable.;15|A column of times in ms.">files = dir(fullfile(PACK, 'crash', '*.json'));
+  <pre data-lang="matlab" hidden data-notes="5|The channel by its key, the name of its field in test.channels.;6|A field named by a variable.;8|A column of times in ms.">files = dir(fullfile(PACK, 'crash', '*.json'));
 test = jsondecode(fileread(fullfile(PACK, 'crash', files(1).name)));
 
-% the channel whose header comment names the crossmember
-key = '';
-keys = fieldnames(test.channels);
-for m = 1:numel(keys)
-    if ~isempty(strfind(test.channels.(keys{m}).comment, 'CROSSMEMBER'))
-        key = keys{m};
-        break
-    end
-end
+% the car-body channel: its header names the crossmember, or on some packs the sill
+key = 'vehicle_x';
 ch = test.channels.(key);
 dt = ch.dt;
 t = 1000 * (ch.t0 + dt * (0:ch.n-1)');      % ms
@@ -1120,7 +1111,7 @@ fprintf('  %s, %s, %s, status %s, prefilter %s Hz\n', ch.location, ch.direction,
         ch.status, ch.prefilter_hz);
 fprintf('  %d samples, %.0f samples/s, %.0f to %.0f ms\n', ch.n, 1 / dt, t(1), t(end));
 fprintf('  test speed %g km/h = %.2f m/s\n', test.test.speed_kph, test.test.speed_kph / 3.6);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 65 to 83 (Python) and lines 15 to 35 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 66 to 80 (Python) and lines 15 to 28 (MATLAB).</div>
 </div>
 <h2 id="how-wide-the-raw-peak-is">How Wide the Raw Peak Is</h2>
 
@@ -1163,7 +1154,7 @@ first = find(t &gt; 45, 1);                  % the index of the first sample aft
 [~, jw] = max(raw(window));
 j = jw + first - 1;                       % the window's largest value, as an index into raw
 fprintf('  largest positive value between 45 and 60 ms: %.1f m/s^2 at %.2f ms\n', raw(j), t(j));</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 85 to 98 (Python) and lines 37 to 53 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 82 to 95 (Python) and lines 30 to 46 (MATLAB).</div>
 </div>
 <h2 id="checks">Checks</h2>
 
@@ -1204,7 +1195,7 @@ offset = mean(raw(t &lt; 0));
 [p, tp] = peak(t, cfc(raw - offset, dt, 60, false));
 fprintf('  pre-impact mean %.3f m/s^2 removed first: %.2f m/s^2 at %.2f ms\n', offset, p, tp);
 fprintf('  in g: %.3f with g = %g, %.3f with g = 9.81\n', p60 / G, G, p60 / 9.81);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 100 to 112 (Python) and lines 55 to 68 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 97 to 109 (Python) and lines 48 to 61 (MATLAB).</div>
 </div>
 <h2 id="the-result">The Result</h2>
 
@@ -1215,13 +1206,13 @@ fprintf('  in g: %.3f with g = %g, %.3f with g = 9.81\n', p60 / G, G, p60 / 9.81
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="3|The raw record's most negative value over the filtered peak. On the example test that value is the raw peak. On a test whose raw peak is positive (15 of the 200), raw[i] / p60 would be the ratio meant.">print("\nresult at CFC 60, forward and backward")
+  <pre data-lang="python" data-notes="3|The raw peak over the filtered peak. raw[i] is the sample of largest size found above, so the ratio is right whichever sign the peak has.">print("\nresult at CFC 60, forward and backward")
 print(f"  peak {p60:.2f} m/s^2 = {p60 / G:.2f} g at {tp60:.2f} ms")
-print(f"  the unfiltered peak is {np.min(raw) / p60:.2f} times this")</pre>
+print(f"  the unfiltered peak is {raw[i] / p60:.2f} times this")</pre>
   <pre data-lang="matlab" hidden data-notes="3|The same ratio.">fprintf('\nresult at CFC 60, forward and backward\n');
 fprintf('  peak %.2f m/s^2 = %.2f g at %.2f ms\n', p60, p60 / G, tp60);
-fprintf('  the unfiltered peak is %.2f times this\n', min(raw) / p60);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 114 to 116 (Python) and lines 70 to 72 (MATLAB).</div>
+fprintf('  the unfiltered peak is %.2f times this\n', raw(i) / p60);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 111 to 113 (Python) and lines 63 to 65 (MATLAB).</div>
 </div>
 <h2 id="every-class">Every Class</h2>
 
@@ -1256,7 +1247,7 @@ for m = 1:numel(labels)
     dv = sum((y(2:end) + y(1:end-1)) / 2) * dt;    % trapezoid rule, whole record
     fprintf('  %-12s %11.1f %8.1f %7.2f %12.3f\n', labels{m}, p, p / G, tp, dv);
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 118 to 126 (Python) and lines 74 to 87 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 115 to 123 (Python) and lines 67 to 80 (MATLAB).</div>
 </div>
 <h2 id="one-pass-only">One Pass Only</h2>
 
@@ -1275,7 +1266,7 @@ print(f"\nCFC 60 forward pass only: {p1:.2f} m/s^2 = {p1 / G:.2f} g at {tp1:.2f}
 [p1, tp1] = peak(t, one);
 fprintf('\nCFC 60 forward pass only: %.2f m/s^2 = %.2f g at %.2f ms (%+.2f ms)\n', ...
         p1, p1 / G, tp1, tp1 - tp60);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 128 to 131 (Python) and lines 89 to 92 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 125 to 128 (Python) and lines 82 to 85 (MATLAB).</div>
 </div>
 <h2 id="figure-1-the-whole-record">Figure 1, the Whole Record</h2>
 
@@ -1313,7 +1304,7 @@ title(sprintf('Left rear seat crossmember [%s], test %d', ch.code, test.testNo),
 legend({'as recorded', 'CFC 60, forward and backward'}, 'Location', 'southeast', 'FontSize', 8);
 saveas(fig, 'fig_raw.svg');
 close(fig);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 133 to 146 (Python) and lines 94 to 106 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 130 to 143 (Python) and lines 87 to 99 (MATLAB).</div>
 </div>
 <h2 id="figure-2-every-class">Figure 2, Every Class</h2>
 
@@ -1355,7 +1346,7 @@ title('Crossmember X acceleration at each J211 filter class, 40 to 80 ms', 'Font
 legend(labels, 'Location', 'southeast', 'FontSize', 8);
 saveas(fig, 'fig_classes.svg');
 close(fig);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 148 to 162 (Python) and lines 108 to 124 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 145 to 159 (Python) and lines 101 to 117 (MATLAB).</div>
 </div>
 <h2 id="figure-3-one-pass-against-two">Figure 3, One Pass Against Two</h2>
 
@@ -1401,7 +1392,7 @@ legend({'as recorded', 'CFC 60, forward pass only', 'CFC 60, forward and backwar
        'Location', 'southeast', 'FontSize', 8);
 saveas(fig, 'fig_onepass.svg');
 close(fig);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 164 to 180 (Python) and lines 126 to 143 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 161 to 177 (Python) and lines 119 to 136 (MATLAB).</div>
 </div>
 
 <h2 id="decisions-in-this-program">Decisions in This Program</h2>
@@ -1412,12 +1403,12 @@ AI</a>. Pick a line and say why it is that way.</p>
 
 <table class="data">
   <tr><th class="num">Python line</th><th class="num">MATLAB line</th><th>The decision</th><th>What else could have been chosen</th></tr>
-  <tr><td class="num">105</td><td class="num">61</td><td>The answer is given at CFC&nbsp;60, the class for comparing vehicles</td><td>CFC&nbsp;180 or 600, which J211 gives for other uses (the table gives both)</td></tr>
-  <tr><td class="num">72</td><td class="num">22</td><td>The channel is found by its description</td><td>the key <code>vehicle_x</code>, or the code</td></tr>
-  <tr><td class="num">61</td><td class="num">190</td><td>The peak is the largest size, whatever its sign</td><td>the most negative value</td></tr>
-  <tr><td class="num">49</td><td class="num">175</td><td>Each pass starts from rest</td><td>starting from the first sample (a check)</td></tr>
-  <tr><td class="num">109</td><td class="num">65</td><td>The offset before impact is left in, and removing it is only a check</td><td>removing it first</td></tr>
-  <tr><td class="num">16</td><td class="num">11</td><td>One <em>g</em> is standard gravity</td><td>9.81&nbsp;m/s&sup2; (a check prints both)</td></tr>
+  <tr><td class="num">102</td><td class="num">54</td><td>The answer is given at CFC&nbsp;60, the class for comparing vehicles</td><td>CFC&nbsp;180 or 600, which J211 gives for other uses (the table gives both)</td></tr>
+  <tr><td class="num">71</td><td class="num">19</td><td>The channel is taken by its key, <code>vehicle_x</code></td><td>by its description, which names the crossmember on some packs and the sill on others</td></tr>
+  <tr><td class="num">62</td><td class="num">183</td><td>The peak is the largest size, whatever its sign</td><td>the most negative value</td></tr>
+  <tr><td class="num">50</td><td class="num">168</td><td>Each pass starts from rest</td><td>starting from the first sample (a check)</td></tr>
+  <tr><td class="num">106</td><td class="num">58</td><td>The offset before impact is left in, and removing it is only a check</td><td>removing it first</td></tr>
+  <tr><td class="num">17</td><td class="num">11</td><td>One <em>g</em> is standard gravity</td><td>9.81&nbsp;m/s&sup2; (a check prints both)</td></tr>
 </table>
 
 <h2 id="what-it-prints">What It Prints</h2>
@@ -1463,10 +1454,7 @@ the program in the pack's top folder beside <code>crash</code> and <code>shots</
 from there (<a href="py-files.html">Files and libraries</a> explains why the folder matters). In Colab,
 upload the program beside your unzipped pack and run it in a cell with <code>%run a4_filter_report.py</code>
 (the <a href="tools-colab.html#a-downloaded-program">Colab guide</a> shows how). On your own pack it reads your data, so its numbers will differ from the ones above.
-On 64 of the course's 200 tests the car-body channel is a sill (its description says SILL or
-ELTA-V), so the search for CROSSMEMBER finds nothing and the program stops. Finding the channel by
-its key, <code>vehicle_x</code>, works on every test. The 45 to 60&nbsp;ms window and the
-figures' ranges are set for the example test. The MATLAB
+The 45 to 60&nbsp;ms window and the figures' ranges are set for the example test. The MATLAB
 version should run as it is in MATLAB R2018b or later. GNU Octave, which is free, needs a script's functions defined
 before they are used, so to run it there, move the functions to the top of the file and put a line
 <code>1;</code> above them.</p>

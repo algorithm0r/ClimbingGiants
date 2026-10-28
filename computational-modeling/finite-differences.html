@@ -1073,15 +1073,15 @@ answer (the tracked basketball arcs are exactly this case).</p>
 
 # equivalently:
 d = np.gradient(y, dt)</pre>
-  <pre data-lang="matlab" hidden data-notes="2|Set d to the size of y first, so d(end) below is the last sample.;3|The interior, central difference.;4|Forward at the first sample. How to treat the two ends is a choice.;5|Backward at the last.;9|gradient does the same thing.">function d = derivative(y, dt)
+  <pre data-lang="matlab" hidden data-notes="2|Set d to the size of y first, so d(end) below is the last sample.;3|The interior, central difference.;4|Forward at the first sample. How to treat the two ends is a choice.;5|Backward at the last.;9|gradient does the same thing." data-notes="9|gradient does the same thing. It is written as a comment because a file that starts with a function cannot have script lines after the function.">function d = derivative(y, dt)
     d = zeros(size(y));
     d(2:numel(y)-1) = (y(3:end) - y(1:end-2)) / (2*dt);
     d(1)   = (y(2) - y(1)) / dt;
     d(end) = (y(end) - y(end-1)) / dt;
 end
 
-% equivalently:
-d = gradient(y, dt);</pre>
+% equivalently, in a script, in place of the function:
+% d = gradient(y, dt);</pre>
   <pre data-lang="js" hidden data-notes="4|Forward at the first sample. How to treat the two ends is a choice.;5|Backward at the last.;7|Central everywhere in between.">function derivative(y, dt) {
   const n = y.length;
   const d = new Array(n).fill(0);

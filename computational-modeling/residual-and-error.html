@@ -987,7 +987,7 @@ is uncertain by a little. Multiplied by the square of a distance about three tim
 observed span, a little becomes a lot. That amplification is the subject of week 9.</p>
 
 <p><strong>The residual has been made small on purpose.</strong> Adding parameters drives it toward
-zero regardless of whether the model is right, and page 13's demo shows the residual reaching
+zero regardless of whether the model is right, and <a href="model-form-and-parameters.html" title="Model form and free parameters">page 13</a>'s demo shows the residual reaching
 0.00005 at degree 9 while the error against the truth climbs back to 0.442, twenty-five times
 its value at degree 2.</p>
 
@@ -1035,13 +1035,13 @@ for.</p>
 
 <p>The ordering follows how much integration the quantity involves. A least-squares residual is
 near zero-mean over the fitted window, so <strong>integrating cancels it</strong>, which is the
-argument page 8 makes about noise, arriving here about fit error instead. The peak is a single
+argument <a href="bias-and-noise.html" title="Bias and noise accumulate at different rates">page 8</a> makes about noise, arriving here about fit error instead. The peak is a single
 point, nothing cancels, and the fit's inability to turn sharply is most of the error. HIC sits
 between, being an integral over a short window, and improves with degree because that window is
 short enough for the cancellation to be only partial. Thus the question to ask of a fit is whether the
 quantity you want is an averaging one, and the size of the residual does not answer it. Integrals
 of a fit tend to be robust. Peaks, slopes, extrema and endpoints are not, and neither is anything
-evaluated outside the fitted range, page 32.</p>
+evaluated outside the fitted range, <a href="extrapolation-amplifies.html" title="Extrapolation and uncertainty">page 32</a>.</p>
 </div></details>
 
 <h2 id="prediction-error-needs-held-out-data">Estimating Prediction Error</h2>
@@ -1065,8 +1065,8 @@ something it was not fitted to.</p>
 
 <p>Holding data back is also how two models are compared. Consider the parabola for a shot's
 height, fitted two ways, with $g$ as a third parameter or with $g$ held at 9.81&nbsp;m/s² by
-moving $\tfrac{1}{2}gt^2$ to the data side, as page 13 does for the velocities. Each shot's free
-flight, found by the rules on page 13, is split in half. Both models are fitted to the first half
+moving $\tfrac{1}{2}gt^2$ to the data side, as <a href="model-form-and-parameters.html" title="Model form and free parameters">page 13</a> does for the velocities. Each shot's free
+flight, found by the rules on <a href="model-form-and-parameters.html" title="Model form and free parameters">page 13</a>, is split in half. Both models are fitted to the first half
 of each shot, and each is scored by the RMS error of its predictions on the second half, which
 neither fit has seen. The example pack has 24 shots. Shot 325 is left out, so the comparison runs
 on 23. From its apex at frame 25 its height falls by a fixed amount at each of the next 19 frames
@@ -1111,7 +1111,12 @@ within 1&nbsp;m of the hoop. <code>fit_free</code> fits $a + bt + ct^2$ to $z$, 
 it, both by least squares. <code>rms</code> evaluates the parabola at the given times and returns
 the RMS of its difference from the heights, in centimetres.</p>
 
-<div class="codetabs"><pre data-lang="python" data-notes="1|Two empty lists, one for each model, that gain one error per shot.;3|One pass per shot ([Loops](py-loops.html)).;4|Shot 325 has a stretch the tracker filled in with a straight line, so it is left out. continue skips straight to the next pass of the loop ([Loops](py-loops.html)). Leaving it out is a choice.;6|free_flight hands back two arrays, the times and the heights of the free flight, and each gets its own name ([Functions](py-functions.html)).;7|The midpoint of the flight. // divides and drops the remainder, so half is a whole number. Splitting at the middle is a choice.;8|t[:half] is the first half, the frames the model is fitted to ([Lists](py-lists.html)).;10|t[half:] is the second half, which the fit never saw, so this is an error and not a residual.">out_free = []
+<div class="codetabs">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|Two empty lists, one for each model, that gain one error per shot.;3|One pass per shot ([Loops](py-loops.html)).;4|Shot 325 has a stretch the tracker filled in with a straight line, so it is left out. continue skips straight to the next pass of the loop ([Loops](py-loops.html)). Leaving it out is a choice.;6|free_flight hands back two arrays, the times and the heights of the free flight, and each gets its own name ([Functions](py-functions.html)).;7|The midpoint of the flight. // divides and drops the remainder, so half is a whole number. Splitting at the middle is a choice.;8|t[:half] is the first half, the frames the model is fitted to ([Lists](py-lists.html)).;10|t[half:] is the second half, which the fit never saw, so this is an error and not a residual.">out_free = []
 out_held = []
 for s in train['shots']:
     if s['id'] == 325:
@@ -1122,6 +1127,20 @@ for s in train['shots']:
     c_held = fit_held(t[:half], z[:half])
     out_free.append(rms(c_free, t[half:], z[half:]))
     out_held.append(rms(c_held, t[half:], z[half:]))</pre>
+  <pre data-lang="matlab" hidden data-notes="3|One pass per shot. train.shots(m) is the m-th shot.;6|continue skips to the next pass of the loop.;8|free_flight hands back two arrays, each under its own name.;9|floor drops the remainder, as Python's // does.;10|t(1:half) is the first half, the frames the model is fitted to.;12|end+1 adds to the end. t(half+1:end) is the second half, which the fit never saw. Here rms is the page's own function, which hides MATLAB's rms of the same name.">out_free = [];
+out_held = [];
+for m = 1:numel(train.shots)
+    s = train.shots(m);
+    if s.id == 325
+        continue
+    end
+    [t, z] = free_flight(s);
+    half = floor(numel(t) / 2);
+    c_free = fit_free(t(1:half), z(1:half));
+    c_held = fit_held(t(1:half), z(1:half));
+    out_free(end+1) = rms(c_free, t(half+1:end), z(half+1:end));
+    out_held(end+1) = rms(c_held, t(half+1:end), z(half+1:end));
+end</pre>
   <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
 </div>
 
@@ -1151,7 +1170,7 @@ residual on the data it was fitted to. That is guaranteed, and it happens whethe
 parameter corresponds to anything. Prediction usually gets worse.</p>
      <p>Tell them apart by <strong>holding data back</strong>. Fit both versions on part of the data and
 measure the error on the part neither saw. The real parameter improves the held-out error. The
-spurious one degrades it. That is the whole of page 34, and it is the most reliable test that separates
+spurious one degrades it. That is the whole of <a href="fit-error-and-prediction-error.html" title="Fit error and prediction error">page 34</a>, and it is the most reliable test that separates
 these two cases.</p>
      <p>A cheaper hint beforehand is to look at where the residual fell. Structure removed from one
 region is a sign of the first case. A uniform shrink everywhere is a sign of the second.</p></div></details></li>
@@ -1166,7 +1185,7 @@ parameters, and the residual scatter underestimates &sigma; by a factor of about
 parameters that is 16% low, and at four points and three parameters it is nearly useless.</p>
      <p>Even when it is a fair estimate of &sigma;, it is not the prediction error, because prediction
 error has two more parts. The <strong>parameters are uncertain</strong>, and that uncertainty is
-carried to the prediction point and amplified by the distance extrapolated, page 32. In addition,
+carried to the prediction point and amplified by the distance extrapolated, <a href="extrapolation-amplifies.html" title="Extrapolation and uncertainty">page 32</a>. In addition,
 any <strong>model-form error</strong> is added on top, and a residual computed under the same
 wrong form may not show it. That is, &sigma; describes the instrument, while prediction error
 describes your whole pipeline at a place it has never been.</p></div></details></li>

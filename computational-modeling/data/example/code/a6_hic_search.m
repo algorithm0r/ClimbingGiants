@@ -137,11 +137,12 @@ close(fig);
 % ---- figure 2: the resultant with the HIC15 window
 fig = figure('Position', [100 100 800 400]);
 hold on
-patch([t(i15) t(j15) t(j15) t(i15)], [0 0 62 62], [1 0.5 0], 'FaceAlpha', 0.4, ...
+top = max(62, 1.35 * max(res));     % room for the legend above the trace
+patch([t(i15) t(j15) t(j15) t(i15)], [0 0 top top], [1 0.5 0], 'FaceAlpha', 0.4, ...
       'EdgeColor', 'none');
 plot(t, res, 'k', 'LineWidth', 0.8);
 xlim([0 160]);
-ylim([0 62]);    % room for the legend above the trace
+ylim([0 top]);
 xlabel('time from impact (ms)');
 ylabel('resultant head acceleration (g)');
 title(sprintf('Test %d, driver head resultant and the best window', test.testNo));

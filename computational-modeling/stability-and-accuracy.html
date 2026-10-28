@@ -1000,12 +1000,12 @@ limit, and the threshold depends on the method and the system through the produc
   <tr><th>Method</th><th class="num">stable while</th><th class="num">for this system</th>
       <th class="num">rate evaluations per step</th></tr>
   <tr><td>explicit Euler</td><td class="num">never, on an undamped oscillator</td>
-      <td class="num">energy grows at every h</td><td class="num">1</td></tr>
-  <tr><td>Heun</td><td class="num">hω<sub>n</sub> &lt; 2</td><td class="num">h &lt; 0.316 s</td><td class="num">2</td></tr>
-  <tr><td>RK4</td><td class="num">hω<sub>n</sub> &lt; 2.785</td><td class="num">h &lt; 0.440 s</td><td class="num">4</td></tr>
+      <td class="num">h &lt; 0.0075 s, only because of the damping</td><td class="num">1</td></tr>
+  <tr><td>Heun</td><td class="num">never, on an undamped oscillator</td><td class="num">h &lt; 0.096 s, only because of the damping</td><td class="num">2</td></tr>
+  <tr><td>RK4</td><td class="num">hω<sub>n</sub> &lt; 2.83</td><td class="num">h &lt; 0.45 s</td><td class="num">4</td></tr>
 </table>
 
-<p>RK4 stays <em>stable</em> up to a step of 0.44 s (about two steps per cycle), while an <em>accurate</em> answer needs something
+<p>RK4 stays <em>stable</em> up to a step of about 0.45 s (about two steps per cycle), while an <em>accurate</em> answer needs something
 nearer 0.005 s. The stability limit is roughly a hundred times the useful step, so by the time
 you reach it the answer has long been unusable. Instability announces itself, and it sets in at
 step sizes far larger than those where accuracy is lost.</p>
@@ -1063,7 +1063,7 @@ on this plot is about ten pixels while a 0.5% error is one.</p>
      <p>The criterion that works is the convergence study. Halve the step and compare the
 <em>answer</em> and not the picture, and stop when the change is smaller than what you need. Each
 halving costs one extra run, and it measures the answer itself.</p></div></details></li>
-    <li>RK4 is stable on this system up to <em>h</em> = 0.44 s and useful up to about 0.005 s. In
+    <li>RK4 is stable on this system up to about <em>h</em> = 0.45 s and useful up to about 0.005 s. In
     one sentence, why is the stability limit almost never the constraint that matters?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Because accuracy demands a step almost a hundred times smaller than stability does, so by the
 time the answer is good enough to use you are far inside the stable region and the stability

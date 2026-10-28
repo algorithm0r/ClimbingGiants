@@ -1193,11 +1193,23 @@ comparison reversed, and several criteria in other fields are defined that way.<
 <code>time.perf_counter()</code> reads a clock whose resolution is typically finer than a
 microsecond, so the difference between the two readings is the time the call took:</p>
 
-<div class="codetabs"><pre data-lang="python" data-notes="3|perf_counter reads a clock with very fine resolution. The time taken is the difference between two readings.;4|The function hands back three values, and each gets a name. The limit is 15 ms plus a nanosecond, for the reason in the next paragraph.">import time
+<div class="codetabs">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+    <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
+  </div>
+  <pre data-lang="python" data-notes="3|perf_counter reads a clock with very fine resolution. The time taken is the difference between two readings.;4|The function hands back three values, and each gets a name. The limit is 15 ms plus a nanosecond, for the reason in the next paragraph.">import time
 
 start = time.perf_counter()
 score, t1, t2 = windowed_optimum(t, a, 0.015 + 1e-9)
 elapsed = time.perf_counter() - start</pre>
+  <pre data-lang="matlab" hidden data-notes="1|tic starts a clock and toc reads it, in seconds.;2|The function hands back three values. The limit is 15 ms plus a nanosecond, for the reason in the next paragraph.">tic;
+[score, t1, t2] = windowedOptimum(t, a, 0.015 + 1e-9, 'max');
+elapsed = toc;</pre>
+  <pre data-lang="js" hidden data-notes="1|performance.now reads a clock in milliseconds.;2|The function hands back an object with score, start and end. The limit is 15 ms plus a nanosecond, for the reason in the next paragraph.;3|Divided by 1000 for seconds.">const start = performance.now();
+const result = windowedOptimum(t, a, 0.015 + 1e-9);
+const elapsed = (performance.now() - start) / 1000;</pre>
   <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
 </div>
 
@@ -1213,15 +1225,15 @@ a second, and 150 at 10&nbsp;000).</p>
 20&nbsp;000 samples a second, 7001 samples in all. A 15&nbsp;ms limit admits windows up to 300
 sample intervals long, and with a window starting at every sample (those before the impact
 included) the search examines 2&nbsp;055&nbsp;150 of them. On the machine that produced this page
-(Python 3.11) it returns HIC<sub>15</sub> = 150.39 on the window from 60.85 to 75.85&nbsp;ms in
-0.69&nbsp;s, the median of three runs that agreed to within 0.01&nbsp;s. MATLAB's
+(Python 3.11) it returns HIC<sub>15</sub> = 150.39 on the window from 60.85 to 75.85&nbsp;ms in about
+0.7&nbsp;s (a time like this varies a little from run to run, and more from machine to machine). MATLAB's
 <code>tic</code> and <code>toc</code> and JavaScript's <code>performance.now()</code> do the
 same job.</p>
 
 <p>The time for many searches is the time for one multiplied by the number of searches. Two
-hundred tests like this one would take about 200&nbsp;&times;&nbsp;0.69&nbsp;s, or 2.3 minutes.
+hundred tests like this one would take about 200&nbsp;&times;&nbsp;0.7&nbsp;s, or about 2.3 minutes.
 Without the limit the same record has 24&nbsp;503&nbsp;500 windows, twelve times as many, and one
-search took 8.47&nbsp;s (returning 334.02, which is not HIC<sub>15</sub>), so two hundred would
+search took about 8.5&nbsp;s (returning 334.02, which is not HIC<sub>15</sub>), so two hundred would
 take about 28 minutes. The time per window, about a third of a microsecond here, depends on the
 machine and the language, while the count does not. For this reason it is a good idea to report
 both.</p>

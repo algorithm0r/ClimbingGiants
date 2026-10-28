@@ -7,6 +7,7 @@ that with the speed the lab measured, then adds the lab's speed as the constant
 of integration and integrates again to get the distance the compartment moved.
 It prints every number in the memo and saves speed_and_crush.svg.
 """
+import glob
 import json
 import os
 
@@ -16,8 +17,8 @@ import matplotlib.pyplot as plt
 G = 9.81   # m/s^2 in one g
 
 folder = 'crash'
-name = os.listdir(folder)[0]               # the crash folder holds one file
-with open(os.path.join(folder, name)) as f:
+name = glob.glob(os.path.join(folder, '*.json'))[0]   # the crash folder holds one test file
+with open(name) as f:
     test = json.load(f)
 
 # the only channel on the car body (header: V1 LEFT REAR SEAT CROSSMEMBER AX)

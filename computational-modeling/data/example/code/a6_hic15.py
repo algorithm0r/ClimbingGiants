@@ -6,9 +6,9 @@ no longer than 15 ms for the largest HIC. It counts the windows and times
 the search, then runs the same search with no length limit to see what
 the limit saves. Saves the figure hic15_window.svg.
 """
+import glob
 import json
 import math
-import os
 import time
 
 import matplotlib.pyplot as plt
@@ -67,8 +67,8 @@ def search(a, dt, kmax):
 
 
 start = time.perf_counter()
-name = os.listdir('crash')[0]
-with open(os.path.join('crash', name)) as f:
+name = glob.glob('crash/*.json')[0]     # the crash folder holds one test file
+with open(name) as f:
     test = json.load(f)
 v = test['vehicle']
 print(f"Test {test['testNo']}: {v['year']} {v['make']} {v['model']}, "

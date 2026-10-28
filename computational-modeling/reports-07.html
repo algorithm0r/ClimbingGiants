@@ -1127,8 +1127,8 @@ Run this from the unzipped pack folder. It:
   5. runs three checks (a plain double loop, no filter, baseline removed).
 Figures saved: head_components.svg, hic_windows.svg, hic_vs_limit.svg
 """
+import glob
 import json
-import os
 import time
 
 import matplotlib.pyplot as plt
@@ -1212,8 +1212,8 @@ def hic_loops(a, dt, kmax):
 
 # ---- read and filter
 t_start = time.perf_counter()
-name = os.listdir('crash')[0]
-with open(os.path.join('crash', name)) as f:
+name = glob.glob('crash/*.json')[0]     # the crash folder holds one test file
+with open(name) as f:
     test = json.load(f)
 by_code = {}                            # each channel under its ISO code
 for c in test['channels'].values():
@@ -1318,7 +1318,7 @@ plt.plot(t, res, linewidth=0.8, color='k', label='resultant, CFC 1000', zorder=3
 plt.axvspan(t[i15], t[j15], color='tab:orange', alpha=0.4,
             label=f'HIC15 = {h15:.1f}, {t[i15]:.2f} to {t[j15]:.2f} ms')
 plt.xlim(0, 160)
-plt.ylim(0, 62)    # room for the legend above the trace
+plt.ylim(0, max(62, 1.35 * np.max(res)))    # room for the legend above the trace
 plt.xlabel('time from impact (ms)')
 plt.ylabel('resultant head acceleration (g)')
 plt.title(f"Test {test['testNo']}, driver head resultant and the best window")

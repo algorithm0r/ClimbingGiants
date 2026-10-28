@@ -928,7 +928,7 @@
 
 <p>A <dfn data-g="bracket">bracket</dfn> is a pair $[a, b]$ with $f(a)f(b) < 0$. The intermediate
 value theorem then guarantees a root inside, provided $f$ is continuous, which is the assumption
-that page 22's pole example violates. Each step evaluates the midpoint $m$ and replaces $a$ or
+that <a href="root-finding-fails.html" title="Root-finding failures">page 22</a>'s pole example violates. Each step evaluates the midpoint $m$ and replaces $a$ or
 $b$ with it, whichever keeps the signs opposite, so the bracket is halved and it still contains
 a root. Two things follow, and they are what distinguish bisection from every other method in
 this week:</p>
@@ -1013,7 +1013,7 @@ can tell you which case you are in. The defence is the one week 2 gives, which i
   <p>A sign change means an <em>odd</em> number of roots in the interval, which is not the same as
 one. Bisection on an interval containing three roots converges to one of them and never mentions
 the other two. The converse is the one that bites, because no sign change means an <em>even</em>
-number of roots, and that includes two. The whole-flight bracket on page 22 fails for this reason, on a function with two ordinary roots inside it.</p>
+number of roots, and that includes two. The whole-flight bracket on <a href="root-finding-fails.html" title="Root-finding failures">page 22</a> fails for this reason, on a function with two ordinary roots inside it.</p>
 </div>
 
 <h2 id="in-code">In Code</h2>
@@ -1043,7 +1043,7 @@ number of roots, and that includes two. The whole-flight bracket on page 22 fail
             fa = fm
 
     return 0.5 * (a + b), (b - a) / 2, evals</pre>
-  <pre data-lang="matlab" hidden data-notes="5|Stop with an error, since without a sign change there is no bracket to halve.;9|This version has no cap on evaluations, so a tol below what floating point can resolve would never be reached. The Python and JavaScript tabs stop after max_evals.;11|One evaluation per step.;13|Keep the half that still brackets.">function [x, halfwidth, evals] = bisect(f, a, b, tol)
+  <pre data-lang="matlab" hidden data-notes="5|Stop with an error, since without a sign change there is no bracket to halve.;9|This version has no cap on evaluations, so a tol below what floating point can resolve would never be reached. The Python and JavaScript tabs stop after max_evals.;11|One evaluation per step.;13|Keep the half that still brackets." data-notes="1|MATLAB has no default values in a function line, so a call gives tol and max_evals, for instance 1e-10 and 200. Both are choices: how narrow the bracket has to get, and how many evaluations to spend at most.;9|Halve until the bracket is narrower than tol, or max_evals evaluations have been spent, whichever comes first.">function [x, halfwidth, evals] = bisect(f, a, b, tol, max_evals)
     fa = f(a);
     fb = f(b);
     if fa*fb &gt; 0
@@ -1051,7 +1051,7 @@ number of roots, and that includes two. The whole-flight bracket on page 22 fail
     end
 
     evals = 2;
-    while (b - a) &gt; tol
+    while (b - a) &gt; tol &amp;&amp; evals &lt; max_evals
         m = 0.5*(a + b);
         fm = f(m);
         evals = evals + 1;
@@ -1121,7 +1121,7 @@ a bound.</p></div></details></li>
 crossings inside one interval return the sign to where it started, so the scan sees nothing. A sign change detects an <em>odd</em> number of roots, so a pair is invisible to it.</p>
      <p>A third explanation is a root of even multiplicity, where <em>f</em> touches zero and turns back
 without crossing, and no scan of any fineness will fix it. There the sign never changes, and
-bracketing methods cannot find it in principle. This is the double-root case on page 22. To separate the first two, refine the grid or offset it by half a step. To find the third,
+bracketing methods cannot find it in principle. This is the double-root case on <a href="root-finding-fails.html" title="Root-finding failures">page 22</a>. To separate the first two, refine the grid or offset it by half a step. To find the third,
 look for minima of |<em>f</em>| instead of sign changes.</p></div></details></li>
   </ol>
 </div>

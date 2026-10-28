@@ -100,7 +100,7 @@ for path in paths:
         statuses.add(c['status'])
     car = {}
     car['no'] = test['testNo']
-    car['mine'] = 'crash' in path
+    car['mine'] = os.path.basename(os.path.dirname(path)) == 'crash'   # in the crash folder
     car['info'] = test['test']
     car['model'] = v['model']
     car['name'] = f"{v['year']} {v['make'].title()} {v['model'].strip().title()}"
@@ -114,7 +114,7 @@ for path in paths:
     car['peak'] = np.max(res)
     car['peak_t'] = t_ms[np.argmax(res)]
     car['descr'] = hx['comment']
-    car['status'] = statuses
+    car['status'] = ', '.join(sorted(statuses))   # each status once, in a fixed order
     cars.append(car)
 
 for c in cars:
@@ -123,7 +123,7 @@ for c in cars:
     print(f"   {info['type']}, {info['config']}, angle {info['angle']}, "
           f"{info['speed_kph']} km/h")
     print(f"   {1 / c['dt']:.0f} samples/s, head X described as {c['descr']!r}, "
-          f"status {c['status']}")
+          f"statuses of all channels: {c['status']}")
     print(f"   HIC15 {c['h15']:.1f}, window {c['win'][0]:.2f} to {c['win'][1]:.2f} ms,"
           f" HIC36 {c['h36']:.1f}, peak {c['peak']:.1f} g at {c['peak_t']:.1f} ms")
 
@@ -142,14 +142,21 @@ for c in cars:
         print(f"customer minus {c['name']}: HIC15 {me['h15'] - c['h15']:+.1f}, "
               f"HIC36 {me['h36'] - c['h36']:+.1f}")
 
-# check 1: the customer's car was sampled twice as fast as the other two.
-# Keep every second sample (10,000 a second, like the others) and recompute.
-every_second = []
-for a in me['axes']:
-    every_second.append(a[::2])
-half = resultant(every_second, 2 * me['dt'])
-print(f"\ncheck, customer's car at half the sample rate: "
-      f"HIC15 {hic(half, 2 * me['dt'], 15)[0]:.1f}")
+# check 1: the customer's car at the slowest other car's sample rate. Keep every
+# step-th sample, step being how many of its samples fit in one of the slower car's.
+slowest_dt = me['dt']
+for c in cars:
+    slowest_dt = max(slowest_dt, c['dt'])
+step = round(slowest_dt / me['dt'])
+if step > 1:
+    kept = []
+    for a in me['axes']:
+        kept.append(a[::step])
+    slower = resultant(kept, step * me['dt'])
+    print(f"\ncheck, customer's car at {1 / (step * me['dt']):.0f} samples/s (every {step} samples): "
+          f"HIC15 {hic(slower, step * me['dt'], 15)[0]:.1f}")
+else:
+    print("\ncheck, no other car was sampled more slowly, so the sample-rate check does not apply")
 # check 2: no filter at all, every car
 for c in cars:
     raw = resultant(c['axes'], c['dt'], None)
@@ -181,7 +188,9 @@ ax.grid(axis='x', alpha=0.3)
 fig.savefig('fig1_fleet.svg', bbox_inches='tight')
 
 # Figure 2: the head resultant for each car with its HIC15 window shaded
-fig, axs = plt.subplots(3, 1, figsize=(7, 7), sharex=True, sharey=True)
+fig, axs = plt.subplots(len(cars), 1, figsize=(7, 7 / 3 * len(cars)), sharex=True, sharey=True)
+if len(cars) == 1:
+    axs = [axs]                              # one car gives a single set of axes, not a list
 for k in range(len(cars)):
     ax = axs[k]
     c = cars[k]

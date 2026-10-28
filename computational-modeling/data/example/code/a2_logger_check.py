@@ -10,6 +10,7 @@ It prints the worst-case peak of each dummy measurement at each rate (and of
 the head's sideways and vertical channels, for reference), the lowest rate that keeps every dummy measurement within 5%, and what the proposed
 1 kHz logger would read. It saves the figure in the memo (worst_case_peaks.svg).
 """
+import glob
 import json
 
 import matplotlib.pyplot as plt
@@ -19,7 +20,8 @@ RATES = [20000, 10000, 5000, 2000, 1000, 500]   # Hz, the usual 1-2-5 steps
 TOLERANCE = 0.05            # a peak may read at most 5% low
 PROPOSED = 1000             # Hz, the cheaper logger
 
-with open('crash/09793.json') as f:
+name = glob.glob('crash/*.json')[0]     # the crash folder holds one test file
+with open(name) as f:
     test = json.load(f)
 channels = test['channels']
 

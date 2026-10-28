@@ -1014,13 +1014,26 @@ Looking two frames back as well as one keeps a single noisy speed from stopping 
 18, for instance, the speed one frame earlier is lower (3.65 against 3.74&nbsp;m/s), while the
 speed two frames earlier (3.83&nbsp;m/s) keeps the rule going.</p>
 
-<div class="codetabs"><pre data-lang="python" data-notes="1|Returns the frame where the ball left the hand, given the times t and heights z of one shot ([Functions](py-functions.html)).;2|An array of nan (not a number), one per frame, for the vertical speeds. The first two and last two frames keep nan, since they have no neighbour two frames away.;3|The vertical speed at every frame except the two at each end, all at once: the height two frames ahead minus the height two frames behind, over the time between them ([numpy arrays](py-numpy.html)).;4|Start at the highest point, where the ball is certainly in free flight. np.argmax gives the index of the largest height.;5|Step back while the speed one or two frames earlier was higher ([Loops](py-loops.html)). Looking two frames back as well as one is a choice, made so a single noisy speed cannot stop the walk early. i &gt; 3 stops it before it runs into the nan at the start.;6|One frame back.;7|The frame where the speed stopped growing, taken as the release.">def release(t, z):
+<div class="codetabs">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|Returns the frame where the ball left the hand, given the times t and heights z of one shot ([Functions](py-functions.html)).;2|An array of nan (not a number), one per frame, for the vertical speeds. The first two and last two frames keep nan, since they have no neighbour two frames away.;3|The vertical speed at every frame except the two at each end, all at once: the height two frames ahead minus the height two frames behind, over the time between them ([numpy arrays](py-numpy.html)).;4|Start at the highest point, where the ball is certainly in free flight. np.argmax gives the index of the largest height.;5|Step back while the speed one or two frames earlier was higher ([Loops](py-loops.html)). Looking two frames back as well as one is a choice, made so a single noisy speed cannot stop the walk early. i &gt; 3 stops it before it runs into the nan at the start.;6|One frame back.;7|The frame where the speed stopped growing, taken as the release.">def release(t, z):
     vz = np.full(len(t), np.nan)
     vz[2:-2] = (z[4:] - z[:-4]) / (t[4:] - t[:-4])
     i = int(np.argmax(z))
     while i &gt; 3 and (vz[i - 1] &gt; vz[i] or vz[i - 2] &gt; vz[i]):
         i = i - 1
     return i</pre>
+  <pre data-lang="matlab" hidden data-notes="1|Returns the frame where the ball left the hand, counted from 1.;2|nan(size(t)) is an array of nan the shape of t.;3|./ divides element by element.;4|max with two outputs gives the largest height and its position.;5|i &gt; 4 is the Python's i &gt; 3, counted from 1. || is or.">function i = release(t, z)
+    vz = nan(size(t));
+    vz(3:end-2) = (z(5:end) - z(1:end-4)) ./ (t(5:end) - t(1:end-4));
+    [~, i] = max(z);
+    while i &gt; 4 &amp;&amp; (vz(i-1) &gt; vz(i) || vz(i-2) &gt; vz(i))
+        i = i - 1;
+    end
+end</pre>
   <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
 </div>
 

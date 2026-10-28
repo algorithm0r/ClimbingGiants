@@ -904,7 +904,7 @@ Python</a> pages, which the notes link to, and the MATLAB lines have notes of th
 
 <table class="data">
   <tr><th>Comes in</th><th>From</th></tr>
-  <tr><td>The crash test, all eight channels</td><td><code>crash/09793.json</code>, named in the program</td></tr>
+  <tr><td>The crash test, all eight channels</td><td><code>crash/09793.json</code>, the one file in the pack's crash folder</td></tr>
   <tr><td>The proposed logger's rate, 1000&nbsp;Hz</td><td>the assignment, copied into the program</td></tr>
 </table>
 
@@ -929,7 +929,8 @@ and the rate purchasing has proposed.</p>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="1|json reads the test file, and matplotlib draws the figures ([Files and libraries](py-files.html)).;6|The pass mark: a rate passes if every channel keeps at least 95% of its peak. The report chose it.;7|The rate of the cheaper logger, from the assignment.">import json
+  <pre data-lang="python" data-notes="1|glob finds files by a pattern, json reads the test file, and matplotlib draws the figures ([Files and libraries](py-files.html)).;7|The pass mark: a rate passes if every channel keeps at least 95% of its peak. The report chose it.;8|The rate of the cheaper logger, from the assignment.">import glob
+import json
 
 import matplotlib.pyplot as plt
 
@@ -939,7 +940,7 @@ PROPOSED = 1000          # Hz, the logger purchasing wants</pre>
   <pre data-lang="matlab" hidden data-notes="1|In MATLAB % starts a comment, and the semicolon stops MATLAB from printing the value.">G = 9.81;                % m/s^2 in one g
 KEEP = 0.95;             % a rate passes if every channel keeps 95% of its peak
 PROPOSED = 1000;         % Hz, the logger purchasing wants</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 12 to 18 (Python) and lines 13 to 15 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 12 to 19 (Python) and lines 13 to 15 (MATLAB).</div>
 </div>
 <h2 id="the-test-and-the-rates-to-try">The Test and the Rates to Try</h2>
 
@@ -952,12 +953,14 @@ exactly, which on the example test gives 14 rates from 20,000 down to 200&nbsp;H
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="1|The example test's file is named here, so on another pack the program stops with a file-not-found error until the name is changed to that pack's test ([Files and libraries](py-files.html)).;3|The eight channels, as a dictionary from key to channel ([Dictionaries](py-dicts.html)).;5|Samples per second is one over the time between samples. round makes it a whole number.;8|k runs 1, 2, 3 and on up to 100 ([Loops](py-loops.html)).;9|% is the remainder. A remainder of 0 means k divides the rate exactly ([Conditions](py-conditions.html)).;13|// divides and drops any fraction, so the rate stays a whole number.">with open('crash/09793.json') as f:
+  <pre data-lang="python" data-notes="1|glob.glob lists the files in the crash folder whose names end in .json, and [0] takes the first, the only one. A hidden file, such as the .DS_Store a Mac can add, does not match ([Files and libraries](py-files.html)).;4|The eight channels, as a dictionary from key to channel ([Dictionaries](py-dicts.html)).;6|Samples per second is one over the time between samples. round makes it a whole number.;7|The recorded rate as text, such as 20 kHz, for the labels below. :g writes the number in its shortest form.;10|k runs 1, 2, 3 and on up to 100 ([Loops](py-loops.html)).;11|% is the remainder. A remainder of 0 means k divides the rate exactly ([Conditions](py-conditions.html)).;15|// divides and drops any fraction, so the rate stays a whole number.">name = glob.glob('crash/*.json')[0]     # the crash folder holds one test file
+with open(name) as f:
     test = json.load(f)
 channels = test['channels']
 
 rate_now = round(1 / channels['head_x']['dt'])
-# every whole-number step down from 20 kHz, to 200 Hz
+full_rate = f"{rate_now / 1000:g} kHz"       # the recorded rate, for labels
+# every whole-number step down from the recorded rate, to a hundredth of it
 factors = []
 for k in range(1, 101):
     if rate_now % k == 0:              # k divides the rate exactly
@@ -965,12 +968,14 @@ for k in range(1, 101):
 rates = []
 for k in factors:
     rates.append(rate_now // k)</pre>
-  <pre data-lang="matlab" hidden data-notes="3|The channel keys, such as head_x, as a cell array.;9|mod is the remainder, Python's %.;10|end+1 is one past the last, so this adds k to the end.;13|All the rates at once. ./ divides by each element.">test = jsondecode(fileread('crash/09793.json'));
+  <pre data-lang="matlab" hidden data-notes="4|The channel keys, such as head_x, as a cell array.;11|mod is the remainder, Python's %.;12|end+1 is one past the last, so this adds k to the end.;15|All the rates at once. ./ divides by each element.">files = dir(fullfile('crash', '*.json'));   % the crash folder holds one test file
+test = jsondecode(fileread(fullfile('crash', files(1).name)));
 channels = test.channels;
 keys = fieldnames(channels);
 
 rate_now = round(1 / channels.head_x.dt);
-% every whole-number step down from 20 kHz, to 200 Hz
+full_rate = sprintf('%g kHz', rate_now / 1000);   % the recorded rate, for labels
+% every whole-number step down from the recorded rate, to a hundredth of it
 factors = [];
 for k = 1:100
     if mod(rate_now, k) == 0           % k divides the rate exactly
@@ -978,7 +983,7 @@ for k = 1:100
     end
 end
 rates = rate_now ./ factors;</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 20 to 32 (Python) and lines 17 to 29 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 21 to 35 (Python) and lines 17 to 31 (MATLAB).</div>
 </div>
 <h2 id="a-channel-s-values">A Channel's Values</h2>
 
@@ -1019,7 +1024,7 @@ values fit micrometers (assignment&nbsp;1 found this).</p>
     end
     unit = 'g';
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 35 to 46 (Python) and lines 171 to 187 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 38 to 49 (Python) and lines 173 to 189 (MATLAB).</div>
 </div>
 <h2 id="the-peak">The Peak</h2>
 
@@ -1046,7 +1051,7 @@ largest values are negative, and <code>peak</code> gives their size, which is al
         end
     end
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 49 to 55 (Python) and lines 190 to 198 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 52 to 58 (Python) and lines 192 to 200 (MATLAB).</div>
 </div>
 <h2 id="the-peak-at-every-start">The Peak at Every Start</h2>
 
@@ -1071,7 +1076,7 @@ The smallest of them is the worst start and the largest the best.</p>
         peaks(start + 1) = peak(y(start + 1:k:end));
     end
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 58 to 63 (Python) and lines 201 to 207 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 61 to 66 (Python) and lines 203 to 209 (MATLAB).</div>
 </div>
 <h2 id="the-test-and-its-timing">The Test and Its Timing</h2>
 
@@ -1107,7 +1112,7 @@ fprintf('samples, spacing (s) and prefilter (Hz) of each channel: {%s}\n', ...
 fprintf('recorded rate %d Hz, %d rates tried, %d to %d Hz\n', rate_now, numel(rates), ...
         rates(1), rates(end));
 fprintf('\n');</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 66 to 75 (Python) and lines 31 to 44 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 69 to 78 (Python) and lines 33 to 46 (MATLAB).</div>
 </div>
 <h2 id="the-peak-of-every-channel">The Peak of Every Channel</h2>
 
@@ -1118,7 +1123,7 @@ and when it happens. These are the values every slower record is compared with.<
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="2|The table's header. :12 pads text to 12 characters, and :&gt;8 right-aligns it in 8 ([Numbers and text](py-values.html)).;3|Each channel's key with the channel ([Dictionaries](py-dicts.html)).;4|The two values the function hands back, each under its own name.;5|The position of the largest size so far. After the loop it is the peak's position.;9|The time of sample i, in ms."># the 20 kHz peak of every channel, and when it happens
+  <pre data-lang="python" data-notes="2|The table's header. :12 pads text to 12 characters, and :&gt;8 right-aligns it in 8 ([Numbers and text](py-values.html)).;3|Each channel's key with the channel ([Dictionaries](py-dicts.html)).;4|The two values the function hands back, each under its own name.;5|The position of the largest size so far. After the loop it is the peak's position.;9|The time of sample i, in ms."># the full-rate peak of every channel, and when it happens
 print(f"{'key':12} {'description':34} {'peak':&gt;8} {'unit':4} {'at (ms)':&gt;8}")
 for key, ch in channels.items():
     y, unit = values(key)
@@ -1128,7 +1133,7 @@ for key, ch in channels.items():
             i = j
     t_ms = 1000 * (ch['t0'] + i * ch['dt'])
     print(f"{key:12} {ch['comment']:34} {peak(y):8.2f} {unit:4} {t_ms:8.2f}")</pre>
-  <pre data-lang="matlab" hidden data-notes="2|%-12s left-aligns the text in 12 characters, and %8s right-aligns it in 8.;13|i - 1, since the first sample, i = 1, is at t0.">% the 20 kHz peak of every channel, and when it happens
+  <pre data-lang="matlab" hidden data-notes="2|%-12s left-aligns the text in 12 characters, and %8s right-aligns it in 8.;13|i - 1, since the first sample, i = 1, is at t0.">% the full-rate peak of every channel, and when it happens
 fprintf('%-12s %-34s %8s %-4s %8s\n', 'key', 'description', 'peak', 'unit', 'at (ms)');
 for m = 1:numel(keys)
     key = keys{m};
@@ -1143,7 +1148,7 @@ for m = 1:numel(keys)
     t_ms = 1000 * (ch.t0 + (i - 1) * ch.dt);
     fprintf('%-12s %-34s %8.2f %-4s %8.2f\n', key, ch.comment, peak(y), unit, t_ms);
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 77 to 86 (Python) and lines 46 to 60 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 80 to 89 (Python) and lines 48 to 62 (MATLAB).</div>
 </div>
 <h2 id="the-worst-start-at-each-rate">The Worst Start at Each Rate</h2>
 
@@ -1155,7 +1160,7 @@ rate and one column per channel.</p>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="2|A dictionary with one list per channel, one value per rate. Looping over a dictionary, as for key in channels does, gives its keys ([Dictionaries](py-dicts.html)).;8|min picks the smallest peak over all the starts, the worst start, as a fraction of the full peak.;13|Each key right-aligned in 11 characters, so the columns line up.;14|' '.join puts the column texts together with a space between each.;15|One row per rate."># worst-start peak at each rate, as a fraction of the 20 kHz peak
+  <pre data-lang="python" data-notes="2|A dictionary with one list per channel, one value per rate. Looping over a dictionary, as for key in channels does, gives its keys ([Dictionaries](py-dicts.html)).;8|min picks the smallest peak over all the starts, the worst start, as a fraction of the full peak.;13|Each key right-aligned in 11 characters, so the columns line up.;14|' '.join puts the column texts together with a space between each.;15|One row per rate."># worst-start peak at each rate, as a fraction of the full-rate peak
 worst = {}
 for key in channels:
     y, unit = values(key)
@@ -1164,7 +1169,7 @@ for key in channels:
     for k in factors:
         worst[key].append(min(peaks_by_start(y, k)) / full)
 
-print(f"\nworst-start peak as % of the 20 kHz peak")
+print(f"\nworst-start peak as % of the {full_rate} peak")
 columns = []
 for key in channels:
     columns.append(f"{key:&gt;11}")
@@ -1174,7 +1179,7 @@ for i in range(len(rates)):
     for key in channels:
         columns.append(f"{100 * worst[key][i]:11.1f}")
     print(f"{rates[i]:9d} " + ' '.join(columns))</pre>
-  <pre data-lang="matlab" hidden data-notes="2|A struct with one field per channel, each a row of fractions.;7|A field named by a variable, here the channel's key.;14|cellfun runs a small function on each key. @(key) makes the one-line function, keys' turns the column of keys into a row, and 'UniformOutput', false collects the texts in a cell array.;19|Square brackets join text in MATLAB.">% worst-start peak at each rate, as a fraction of the 20 kHz peak
+  <pre data-lang="matlab" hidden data-notes="2|A struct with one field per channel, each a row of fractions.;7|A field named by a variable, here the channel's key.;14|cellfun runs a small function on each key. @(key) makes the one-line function, keys' turns the column of keys into a row, and 'UniformOutput', false collects the texts in a cell array.;19|Square brackets join text in MATLAB.">% worst-start peak at each rate, as a fraction of the full-rate peak
 worst = struct();
 for m = 1:numel(keys)
     key = keys{m};
@@ -1186,7 +1191,7 @@ for m = 1:numel(keys)
     end
 end
 
-fprintf('\nworst-start peak as %% of the 20 kHz peak\n');
+fprintf('\nworst-start peak as %% of the %s peak\n', full_rate);
 fprintf('%9s %s\n', 'rate (Hz)', strjoin(cellfun(@(key) sprintf('%11s', key), keys', ...
         'UniformOutput', false), ' '));
 for i = 1:numel(rates)
@@ -1196,7 +1201,7 @@ for i = 1:numel(rates)
     end
     disp(row);
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 88 to 106 (Python) and lines 62 to 83 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 91 to 109 (Python) and lines 64 to 85 (MATLAB).</div>
 </div>
 <h2 id="the-lowest-rate-that-passes">The Lowest Rate That Passes</h2>
 
@@ -1238,7 +1243,7 @@ for i = 1:numel(rates)
     end
 end
 fprintf('Lowest rate keeping %.0f%% of every peak: %d Hz\n', 100 * KEEP, lowest);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 108 to 120 (Python) and lines 85 to 101 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 111 to 123 (Python) and lines 87 to 103 (MATLAB).</div>
 </div>
 <h2 id="the-proposed-rate">The Proposed Rate</h2>
 
@@ -1250,25 +1255,25 @@ and start 0, in <em>g</em>, or millimeters for the chest displacement.</p>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="2|20,000 // 1000 is 20, so the proposed logger keeps every 20th sample. On a test at 12,500 samples a second, // gives 12, which is a 1041.7 Hz logger, though the line printed still says 1000 Hz.;6|The peak at each of the 20 starts.;7|The worst start's peak, then the same as a percentage of the full peak.;8|p[0] is the peak from start 0, the logger starting on the same sample as ours."># the proposed rate, worst and best start, in the channel's own units
-k = rate_now // PROPOSED
-print(f"\nAt {PROPOSED} Hz (every {k}th sample), range of peaks over the {k} starts:")
+  <pre data-lang="python" data-notes="2|20,000 // 1000 is 20, so the proposed logger keeps every 20th sample. // keeps whole samples, so on a test at 12,500 samples a second k is 12, a 1041.7 Hz logger, and the line printed below gives that rate.;6|The peak at each of the 20 starts.;7|The worst start's peak, then the same as a percentage of the full peak.;8|p[0] is the peak from start 0, the logger starting on the same sample as ours."># the proposed rate, worst and best start, in the channel's own units
+k = rate_now // PROPOSED                 # whole samples, so not exactly PROPOSED if it does not divide
+print(f"\nAt {rate_now / k:g} Hz (every {k}th sample), range of peaks over the {k} starts:")
 for key in channels:
     y, unit = values(key)
     p = peaks_by_start(y, k)
-    print(f"  {key:12} 20 kHz {peak(y):7.2f}   worst {min(p):7.2f} ({100 * min(p) / peak(y):5.1f}%)"
+    print(f"  {key:12} {full_rate} {peak(y):7.2f}   worst {min(p):7.2f} ({100 * min(p) / peak(y):5.1f}%)"
           f"   best {max(p):7.2f}   start 0 {p[0]:7.2f} {unit}")</pre>
   <pre data-lang="matlab" hidden data-notes="2|floor drops the fraction, as Python's // does. On a 12,500 Hz test plain / would give 12.5, and peaks_by_start would fail.;9|p(1) is start 0, since MATLAB counts from 1.">% the proposed rate, worst and best start, in the channel's own units
 k = floor(rate_now / PROPOSED);         % floor, as Python's // does
-fprintf('\nAt %d Hz (every %dth sample), range of peaks over the %d starts:\n', PROPOSED, k, k);
+fprintf('\nAt %g Hz (every %dth sample), range of peaks over the %d starts:\n', rate_now / k, k, k);
 for m = 1:numel(keys)
     key = keys{m};
     [y, unit] = values(channels, key, G);
     p = peaks_by_start(y, k);
-    fprintf('  %-12s 20 kHz %7.2f   worst %7.2f (%5.1f%%)   best %7.2f   start 0 %7.2f %s\n', ...
-            key, peak(y), min(p), 100 * min(p) / peak(y), max(p), p(1), unit);
+    fprintf('  %-12s %s %7.2f   worst %7.2f (%5.1f%%)   best %7.2f   start 0 %7.2f %s\n', ...
+            key, full_rate, peak(y), min(p), 100 * min(p) / peak(y), max(p), p(1), unit);
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 122 to 129 (Python) and lines 103 to 112 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 125 to 132 (Python) and lines 105 to 114 (MATLAB).</div>
 </div>
 <h2 id="figure-1-peak-kept-against-rate">Figure 1, Peak Kept Against Rate</h2>
 
@@ -1291,8 +1296,8 @@ plt.axvline(PROPOSED, color='red', linewidth=0.8, label='proposed logger, 1000 H
 plt.xticks([200, 500, 1000, 2000, 5000, 10000, 20000],
            ['200', '500', '1000', '2000', '5000', '10000', '20000'])
 plt.xlabel('sample rate (Hz, log scale)')
-plt.ylabel('worst-start peak (% of the 20 kHz peak)')
-plt.title('Peak kept at each rate, worst start, test 9793', fontsize=10)
+plt.ylabel(f'worst-start peak (% of the {full_rate} peak)')
+plt.title(f"Peak kept at each rate, worst start, test {test['testNo']}", fontsize=10)
 plt.legend(fontsize=7, loc='lower right')
 plt.tight_layout()
 plt.savefig('fraction_vs_rate.svg')
@@ -1315,12 +1320,12 @@ labels = [labels, {'95% of the peak', 'proposed logger, 1000 Hz'}];
 xticks([200, 500, 1000, 2000, 5000, 10000, 20000]);
 xticklabels({'200', '500', '1000', '2000', '5000', '10000', '20000'});
 xlabel('sample rate (Hz, log scale)');
-ylabel('worst-start peak (% of the 20 kHz peak)');
-title('Peak kept at each rate, worst start, test 9793', 'FontSize', 10);
+ylabel(sprintf('worst-start peak (%% of the %s peak)', full_rate));
+title(sprintf('Peak kept at each rate, worst start, test %d', test.testNo), 'FontSize', 10);
 legend(labels, 'FontSize', 7, 'Location', 'southeast');
 saveas(fig, 'fraction_vs_rate.svg');
 close(fig);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 131 to 148 (Python) and lines 114 to 136 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 134 to 151 (Python) and lines 116 to 138 (MATLAB).</div>
 </div>
 <h2 id="figure-2-the-crossmember-at-1000-hz">Figure 2, the Crossmember at 1000 Hz</h2>
 
@@ -1352,7 +1357,7 @@ win_y = []
 for i in win:
     win_t.append(t_ms[i])
     win_y.append(y[i])
-plt.plot(win_t, win_y, color='gray', linewidth=0.8, label='recorded at 20000 Hz')
+plt.plot(win_t, win_y, color='gray', linewidth=0.8, label=f'recorded at {rate_now} Hz')
 
 
 def plot_kept(start, mark, name):
@@ -1363,7 +1368,7 @@ def plot_kept(start, mark, name):
         if (i - start) % k == 0:
             kept_t.append(t_ms[i])
             kept_y.append(y[i])
-    plt.plot(kept_t, kept_y, mark + '-', label=f'1000 Hz, {name} start (sample {start})')
+    plt.plot(kept_t, kept_y, mark + '-', label=f'{rate_now / k:g} Hz, {name} start (sample {start})')
 
 
 plot_kept(best_start, 'o', 'best')
@@ -1401,12 +1406,12 @@ plot_kept(worst_start, 's', win, t_ms, y, k);
 xlabel('time from impact (ms)');
 ylabel('acceleration (g)');
 title([title_case(ch.comment) ' [' ch.code '], 40 to 70 ms'], 'FontSize', 10);
-legend({'recorded at 20000 Hz', ...
-        sprintf('1000 Hz, best start (sample %d)', best_start), ...
-        sprintf('1000 Hz, worst start (sample %d)', worst_start)}, 'FontSize', 8);
+legend({sprintf('recorded at %d Hz', rate_now), ...
+        sprintf('%g Hz, best start (sample %d)', rate_now / k, best_start), ...
+        sprintf('%g Hz, worst start (sample %d)', rate_now / k, worst_start)}, 'FontSize', 8);
 saveas(fig, 'crossmember_1khz.svg');
 close(fig);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 150 to 191 (Python) and lines 138 to 168 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 153 to 194 (Python) and lines 140 to 170 (MATLAB).</div>
 </div>
 <h2 id="two-functions-only-the-matlab-version-has">Two Functions Only the MATLAB Version Has</h2>
 
@@ -1435,7 +1440,7 @@ function s = title_case(s)
     starts = [1, find(~isletter(s(1:end-1))) + 1];
     s(starts) = upper(s(starts));
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The MATLAB program's lines 210 to 227.</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The MATLAB program's lines 212 to 229.</div>
 </div>
 
 <h2 id="decisions-in-this-program">Decisions in This Program</h2>
@@ -1446,11 +1451,11 @@ AI</a>. Pick a line and say why it is that way.</p>
 
 <table class="data">
   <tr><th class="num">Python line</th><th class="num">MATLAB line</th><th>The decision</th><th>What else could have been chosen</th></tr>
-  <tr><td class="num">17</td><td class="num">14</td><td>A rate passes if every channel keeps 95% of its peak</td><td>another share, or a different mark for each channel</td></tr>
-  <tr><td class="num">27</td><td class="num">24</td><td>Rates are tried down to 200&nbsp;Hz, a hundredth of the recorded rate</td><td>stopping at the proposed 1000&nbsp;Hz</td></tr>
-  <tr><td class="num">95</td><td class="num">70</td><td>A rate is judged at its worst start</td><td>start 0 only, or the average over all the starts</td></tr>
-  <tr><td class="num">113</td><td class="num">90</td><td>Every channel counts in the pass test</td><td>only the channels a reader is expected to use</td></tr>
-  <tr><td class="num">40</td><td class="num">176</td><td>The chest displacement is read as micrometers</td><td>leaving the header&rsquo;s meters, which only rescales it</td></tr>
+  <tr><td class="num">18</td><td class="num">14</td><td>A rate passes if every channel keeps 95% of its peak</td><td>another share, or a different mark for each channel</td></tr>
+  <tr><td class="num">30</td><td class="num">26</td><td>Rates are tried down to 200&nbsp;Hz, a hundredth of the recorded rate</td><td>stopping at the proposed 1000&nbsp;Hz</td></tr>
+  <tr><td class="num">98</td><td class="num">72</td><td>A rate is judged at its worst start</td><td>start 0 only, or the average over all the starts</td></tr>
+  <tr><td class="num">116</td><td class="num">92</td><td>Every channel counts in the pass test</td><td>only the channels a reader is expected to use</td></tr>
+  <tr><td class="num">43</td><td class="num">178</td><td>The chest displacement is read as micrometers</td><td>leaving the header&rsquo;s meters, which only rescales it</td></tr>
 </table>
 
 <h2 id="what-it-prints">What It Prints</h2>
@@ -1509,10 +1514,7 @@ and <a href="data/example/code/a2_peak_loss.m" download><code>a2_peak_loss.m</co
 the program in the pack's top folder beside <code>crash</code> and <code>shots</code>, and run it
 from there (<a href="py-files.html">Files and libraries</a> explains why the folder matters). In Colab,
 upload the program beside your unzipped pack and run it in a cell with <code>%run a2_peak_loss.py</code>
-(the <a href="tools-colab.html#a-downloaded-program">Colab guide</a> shows how). This program names the example test's file, <code>crash/09793.json</code>, so to
-run it on your own pack, change that name to your test's. Its labels are written for the example
-test too: they say 20&nbsp;kHz and test 9793, which on most packs is not the recorded rate or the
-test. The MATLAB
+(the <a href="tools-colab.html#a-downloaded-program">Colab guide</a> shows how). On your own pack it reads your data, so its numbers will differ from the ones above. The MATLAB
 version should run as it is in MATLAB R2018b or later. GNU Octave, which is free, needs a script's functions defined
 before they are used, so to run it there, move the functions to the top of the file and put a line
 <code>1;</code> above them.</p>

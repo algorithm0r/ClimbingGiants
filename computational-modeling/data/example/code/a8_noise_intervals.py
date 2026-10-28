@@ -12,16 +12,16 @@ Run this from the unzipped pack folder. It
      at a time, to see how far it moves HIC15.
 Saves noise_before_impact.svg, noise_autocorrelation.svg and hic_draws.svg.
 """
+import glob
 import json
 import math
-import os
 
 import numpy as np
 import matplotlib.pyplot as plt
 
 G = 9.80665        # standard gravity, m/s^2 in one g
 DRAWS = 1000       # reruns per noise model
-BLOCK = 200        # samples per block for the 'blocks' model (10 ms at 20 kHz)
+BLOCK_MS = 10      # length of a block for the 'blocks' model
 CODES = ['11HEADCG0000ACXP', '11HEADCG0000ACYP', '11HEADCG0000ACZP']
 
 
@@ -93,8 +93,8 @@ def block_noise(pre, n, rng):
     return np.concatenate(pieces)[:n]
 
 
-name = os.listdir('crash')[0]           # the crash folder holds one file
-with open(os.path.join('crash', name)) as f:
+name = glob.glob('crash/*.json')[0]     # the crash folder holds one test file
+with open(name) as f:
     test = json.load(f)
 chans = []
 for c in test['channels'].values():
@@ -111,13 +111,19 @@ for c in chans:
     y = np.array(c['y'])
     raw.append(y)
     pre.append(y[before])
+# a block is 10 ms of samples, and never more than half the stretch before impact,
+# so the blocks can start in more than one place
+BLOCK = min(round(BLOCK_MS / 1000 / dt), len(pre[0]) // 2)
 
 # 1. the noise
 print(f"{len(chans)} head channels, {n} samples every {dt * 1000:g} ms, "
       f"{t_ms[0]:.2f} to {t_ms[-1]:.2f} ms")
 print(f"pre-impact stretch: {np.sum(before)} samples, "
       f"{t_ms[0]:.2f} to {t_ms[before][-1]:.2f} ms")
-LAGS = [1, 20, 100, 200]
+LAGS = []
+for lag in [1, 20, 100, 200]:             # in samples, kept only if the stretch is long enough
+    if lag < len(pre[0]) // 2:
+        LAGS.append(lag)
 columns = []
 for lag in LAGS:
     columns.append(f'r({lag * dt * 1000:g} ms)')
@@ -180,14 +186,14 @@ for m in range(len(chans)):
     ax.set_title(f"{c['comment']}  [{c['code']}]", fontsize=9)
     ax.set_ylabel('acceleration (m/s$^2$)', fontsize=8)
 axs[-1].set_xlabel('time from impact (ms)')
-fig.suptitle('Driver head acceleration in the 50 ms before impact, test 9793',
+fig.suptitle(f"Driver head acceleration in the {-t_ms[0]:.0f} ms before impact, test {test['testNo']}",
              fontsize=10)
 fig.tight_layout()
 fig.savefig('noise_before_impact.svg')
 plt.close(fig)
 
 # Figure 2: how alike neighboring samples are
-lags = np.arange(1, 501)
+lags = np.arange(1, min(501, len(pre[0]) // 2 + 1))   # up to half the stretch
 plt.figure(figsize=(8, 3.6))
 for m in range(len(chans)):
     r = pre[m] - np.mean(pre[m])
@@ -197,7 +203,7 @@ for m in range(len(chans)):
     plt.plot(lags * dt * 1000, corr, label=chans[m]['code'])
 plt.axhline(0, color='gray', linewidth=0.8)
 plt.axvline(BLOCK * dt * 1000, color='gray', linestyle='--', linewidth=0.8,
-            label='block length, 10 ms')
+            label=f'block length, {BLOCK * dt * 1000:g} ms')
 plt.title('Autocorrelation of the pre-impact noise (independent noise would sit at 0)')
 plt.xlabel('lag (ms)')
 plt.ylabel('autocorrelation (no units)')

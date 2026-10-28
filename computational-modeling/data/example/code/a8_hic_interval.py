@@ -6,9 +6,9 @@ calculation again each time, and takes the middle 90% of the answers as the
 interval. The size of the noise comes from the 50 ms before impact, when the
 car is not decelerating yet. Saves the figure hic_interval.svg.
 """
+import glob
 import json
 import math
-import os
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -64,8 +64,8 @@ def whole_calculation(x, y, z, dt):
     return hic15(np.sqrt(fx ** 2 + fy ** 2 + fz ** 2) / G, dt)
 
 
-name = os.listdir('crash')[0]           # the crash folder holds one file
-with open(os.path.join('crash', name)) as f:
+name = glob.glob('crash/*.json')[0]     # the crash folder holds one test file
+with open(name) as f:
     test = json.load(f)
 chans = []
 for c in test['channels'].values():

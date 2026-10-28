@@ -19,7 +19,6 @@ M = 75.0;        % occupant mass, kg
 K = 296000.0;    % belt stiffness, N/m
 C = 2800.0;      % belt damping, N*s/m
 G = 9.81;        % m/s^2 per g
-V0 = 15.60;      % approach speed, m/s (56.15 km/h from the test record)
 SETTLED = 0.001; % mm, a hundredth of the 0.1 mm I quote (RK4 makes this cheap)
 
 files = dir(fullfile('crash', '*.json'));
@@ -29,6 +28,7 @@ dt = ch.dt;
 t = ch.t0 + dt * (0:ch.n-1)';
 raw = ch.y;
 a180 = cfc(raw, dt, 180);
+V0 = test.test.speed_kph / 3.6;          % approach speed, m/s, from the test record
 fprintf('drive: %s [%s], %d samples every %g ms\n', ch.comment, ch.code, ch.n, 1000 * dt);
 [low_raw, i_raw] = min(raw);
 [low_180, i_180] = min(a180);
@@ -38,7 +38,7 @@ fn = sqrt(K / M) / (2 * pi);
 fprintf('belt natural frequency %.2f Hz (period %.0f ms), damping ratio %.3f\n', ...
         fn, 1000 / fn, C / (2 * sqrt(K * M)));
 
-% ---- step study: halve from 6.4 ms (128 samples) down to 0.025 ms (half a sample)
+% ---- step study: halve from 128 samples down to half a sample (6.4 to 0.025 ms at 20 kHz)
 steps = 128 * dt ./ 2.^(0:8);
 drives = {a180, raw};
 results = zeros(numel(steps), 2);        % one column per drive
@@ -96,16 +96,21 @@ dv = sum((raw(2:end) + raw(1:end-1)) / 2) * dt;
 fprintf('2. velocity change in the drive %.2f m/s against an approach of %.2f m/s, rebound %.2f m/s\n', ...
         dv, V0, -dv - V0);
 a_occ = -(K * u + C * w) / M;                    % occupant's own acceleration, m/s^2
-chest = cfc(test.channels.chest_x.y, dt, 180);
-[~, io] = min(a_occ);
-[~, ic] = min(chest);
-fprintf('3. model occupant peak %.1f g at %.1f ms, driver chest (CFC 180) %.1f g at %.1f ms\n', ...
-        a_occ(io) / G, 1000 * times(io), chest(ic) / G, 1000 * t(ic));
-% after the peak the model's spring pushes back. Does the chest show that?
-[~, io] = max(a_occ);
-[~, ic] = max(chest);
-fprintf('   largest push back: model %+.1f g at %.1f ms, chest %+.1f g at %.1f ms\n', ...
-        a_occ(io) / G, 1000 * times(io), chest(ic) / G, 1000 * t(ic));
+has_chest = isfield(test.channels, 'chest_x');   % a few tests have no chest channel
+if has_chest
+    chest = cfc(test.channels.chest_x.y, dt, 180);
+    [~, io] = min(a_occ);
+    [~, ic] = min(chest);
+    fprintf('3. model occupant peak %.1f g at %.1f ms, driver chest (CFC 180) %.1f g at %.1f ms\n', ...
+            a_occ(io) / G, 1000 * times(io), chest(ic) / G, 1000 * t(ic));
+    % after the peak the model's spring pushes back. Does the chest show that?
+    [~, io] = max(a_occ);
+    [~, ic] = max(chest);
+    fprintf('   largest push back: model %+.1f g at %.1f ms, chest %+.1f g at %.1f ms\n', ...
+            a_occ(io) / G, 1000 * times(io), chest(ic) / G, 1000 * t(ic));
+else
+    fprintf('3. this test has no driver chest channel, so check 3 cannot be made\n');
+end
 
 % ---- figure 1, travel against time
 fig = figure('Position', [100 100 700 400]);
@@ -129,7 +134,7 @@ plot(1000 * t, a180 / G);
 xlim([-10 150]);
 xlabel('time from impact (ms)');
 ylabel('acceleration (g)');
-title('Crossmember X acceleration [10SEATLERE00ACXP]');
+title(sprintf('Car body X acceleration [%s]', ch.code));
 legend({'as recorded', 'CFC 180'});
 saveas(fig, 'drive.svg');
 close(fig);
@@ -151,17 +156,19 @@ saveas(fig, 'steps.svg');
 close(fig);
 
 % ---- figure 4, the model against the chest
-fig = figure('Position', [100 100 700 400]);
-plot(1000 * t, chest / G);
-hold on
-plot(1000 * times, a_occ / G);
-xlim([-10 200]);
-xlabel('time from impact (ms)');
-ylabel('acceleration (g)');
-title('Occupant acceleration: model against the dummy chest');
-legend({'driver chest X, measured (CFC 180)', 'model occupant'});
-saveas(fig, 'chest_check.svg');
-close(fig);
+if has_chest
+    fig = figure('Position', [100 100 700 400]);
+    plot(1000 * t, chest / G);
+    hold on
+    plot(1000 * times, a_occ / G);
+    xlim([-10 200]);
+    xlabel('time from impact (ms)');
+    ylabel('acceleration (g)');
+    title('Occupant acceleration: model against the dummy chest');
+    legend({'driver chest X, measured (CFC 180)', 'model occupant'});
+    saveas(fig, 'chest_check.svg');
+    close(fig);
+end
 
 
 function out = cfc(y, dt, cls)
@@ -220,8 +227,9 @@ end
 
 function [x, at] = travel(t, a_car, h, M, K, C)
     % Largest forward travel (mm) and when it happens (ms), at step h. This is
-    % the largest value on the step grid, so it can only be at or below the true
-    % peak; the step study shows how much that matters.
+    % the largest value on the step grid. The true peak can fall between two steps,
+    % and at a coarse step the step's own error can move the value either way, which
+    % the step study measures.
     [times, u, ~] = rk4(t, a_car, h, M, K, C);
     [top, i] = max(u);
     x = 1000 * top;

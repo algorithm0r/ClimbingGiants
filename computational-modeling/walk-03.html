@@ -930,7 +930,8 @@ standard choices. Every result the program computes is read from it.</p>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="4|numpy, under the short name np, does arithmetic on whole arrays at once ([Files and libraries](py-files.html)).;7|One g in m/s squared, used only to print and plot accelerations in g.">import json
+  <pre data-lang="python" data-notes="5|numpy, under the short name np, does arithmetic on whole arrays at once ([Files and libraries](py-files.html)).;8|One g in m/s squared, used only to print and plot accelerations in g.">import glob
+import json
 import os
 
 import numpy as np
@@ -938,7 +939,7 @@ import matplotlib.pyplot as plt
 
 G = 9.81   # m/s^2 in one g</pre>
   <pre data-lang="matlab" hidden data-notes="1|In MATLAB % starts a comment, and the semicolon stops MATLAB from printing the value.">G = 9.81;  % m/s^2 in one g</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 10 to 16 (Python) and line 12 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 10 to 17 (Python) and line 12 (MATLAB).</div>
 </div>
 <h2 id="loading-the-test">Loading the Test</h2>
 
@@ -949,16 +950,16 @@ dictionary.</p>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="1|pack='.' is a default, so load_test() with nothing in the brackets reads the folder the program is run from ([Functions](py-functions.html)).;3|The first file the folder lists, the only one ([Lists](py-lists.html)).;4|Opens the file and closes it again when the indented line below ends ([Files and libraries](py-files.html)).">def load_test(pack='.'):
+  <pre data-lang="python" data-notes="1|pack='.' is a default, so load_test() with nothing in the brackets reads the folder the program is run from ([Functions](py-functions.html)).;3|glob.glob lists the files in the crash folder whose names end in .json, and [0] takes the first, the only one. A hidden file, such as the .DS_Store a Mac can add, does not match ([Lists](py-lists.html)).;4|Opens the file and closes it again when the indented line below ends ([Files and libraries](py-files.html)).">def load_test(pack='.'):
     folder = os.path.join(pack, 'crash')
-    name = os.listdir(folder)[0]          # the crash folder holds one file
-    with open(os.path.join(folder, name)) as f:
+    name = glob.glob(os.path.join(folder, '*.json'))[0]   # the crash folder holds one test file
+    with open(name) as f:
         return json.load(f)</pre>
   <pre data-lang="matlab" hidden data-notes="2|dir lists the files that match the pattern.;3|fileread reads the file as text, and jsondecode turns it into a struct.">function test = load_test(pack)
     files = dir(fullfile(pack, 'crash', '*.json'));   % the crash folder holds one file
     test = jsondecode(fileread(fullfile(pack, 'crash', files(1).name)));
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 19 to 23 (Python) and lines 124 to 127 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 20 to 24 (Python) and lines 124 to 127 (MATLAB).</div>
 </div>
 <h2 id="the-running-integral">The Running Integral</h2>
 
@@ -987,7 +988,7 @@ rectangle rule is there for one of the checks.</p>
     end
     out = [0; cumsum(panels)];
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 26 to 32 (Python) and lines 130 to 138 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 27 to 33 (Python) and lines 130 to 138 (MATLAB).</div>
 </div>
 <h2 id="one-analysis">One Analysis</h2>
 
@@ -1037,7 +1038,7 @@ sample.</p>
     r = struct('a', a, 'dv', dv, 'v', v, 'x', x, 'stop', stop, 'peak', peak, ...
                'crush', x(stop));
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 35 to 47 (Python) and lines 141 to 162 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 36 to 48 (Python) and lines 141 to 162 (MATLAB).</div>
 </div>
 <h2 id="reading-the-channel">Reading the Channel</h2>
 
@@ -1075,7 +1076,7 @@ fprintf('lab speed %g km/h = %.2f m/s\n', test.test.speed_kph, lab);
 before = raw(t &lt; 0);
 fprintf('before contact: mean %.3f m/s^2, standard deviation %.3f m/s^2\n', ...
         mean(before), std(before, 1));</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 50 to 62 (Python) and lines 14 to 26 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 51 to 63 (Python) and lines 14 to 26 (MATLAB).</div>
 </div>
 <h2 id="the-answers">The Answers</h2>
 
@@ -1115,7 +1116,7 @@ fprintf('mean acceleration from %.1f to 150 ms: %.2f g\n', 1000 * t(peak), mean(
 fprintf('mean acceleration over the last 50 ms: %.3f m/s^2\n', mean(r.a(t &gt; 0.25)));
 fprintf('stopped at %.1f ms, crush %.0f mm\n', 1000 * t(stop), 1000 * r.crush);
 fprintf('velocity at end of record %.2f m/s\n', r.v(end));</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 64 to 78 (Python) and lines 28 to 39 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 65 to 79 (Python) and lines 28 to 39 (MATLAB).</div>
 </div>
 <h2 id="how-much-each-choice-moves-the-answers">How Much Each Choice Moves the Answers</h2>
 
@@ -1157,7 +1158,7 @@ for m = 1:3
     fprintf('%-9s %-10s %8.2f %7.2f %8.1f %9.0f\n', label, rules{m}, -s.dv(s.peak), ...
             -s.dv(end), 1000 * t(s.stop), 1000 * s.crush);
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 80 to 93 (Python) and lines 41 to 56 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 81 to 94 (Python) and lines 41 to 56 (MATLAB).</div>
 </div>
 <h2 id="how-much-the-constant-moves-the-crush">How Much the Constant Moves the Crush</h2>
 
@@ -1181,7 +1182,7 @@ for c = [lab - 0.1, lab + 0.1, -r.dv(end)]
     fprintf('constant %.2f m/s: stop %.1f ms, crush %.0f mm\n', c, 1000 * t(s.stop), ...
             1000 * s.crush);
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 95 to 100 (Python) and lines 58 to 64 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 96 to 101 (Python) and lines 58 to 64 (MATLAB).</div>
 </div>
 <h2 id="figure-1-the-acceleration">Figure 1, the Acceleration</h2>
 
@@ -1219,7 +1220,7 @@ title('Left rear seat crossmember, X acceleration [10SEATLERE00ACXP]');
 legend({'as recorded, offset removed'}, 'Location', 'southeast');
 saveas(fig, 'fig1_acceleration.svg');
 close(fig);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 102 to 115 (Python) and lines 66 to 78 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 103 to 116 (Python) and lines 66 to 78 (MATLAB).</div>
 </div>
 <h2 id="figure-2-the-change-in-velocity">Figure 2, the Change in Velocity</h2>
 
@@ -1267,7 +1268,7 @@ ylabel('change in velocity (m/s)');
 title('Change in velocity since contact (crossmember, constant = 0)');
 saveas(fig, 'fig2_delta_v.svg');
 close(fig);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 117 to 134 (Python) and lines 80 to 97 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 118 to 135 (Python) and lines 80 to 97 (MATLAB).</div>
 </div>
 <h2 id="figure-3-velocity-and-crush">Figure 3, Velocity and Crush</h2>
 
@@ -1321,7 +1322,7 @@ ylabel('distance since contact (mm)');
 title('(b) Distance travelled toward the barrier');
 saveas(fig, 'fig3_velocity_crush.svg');
 close(fig);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 136 to 155 (Python) and lines 99 to 121 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 137 to 156 (Python) and lines 99 to 121 (MATLAB).</div>
 </div>
 
 <h2 id="decisions-in-this-program">Decisions in This Program</h2>
@@ -1332,12 +1333,12 @@ AI</a>. Pick a line and say why it is that way.</p>
 
 <table class="data">
   <tr><th class="num">Python line</th><th class="num">MATLAB line</th><th>The decision</th><th>What else could have been chosen</th></tr>
-  <tr><td class="num">38</td><td class="num">150</td><td>The mean before contact is subtracted as an offset</td><td>leaving it in (the second row of the choices table)</td></tr>
-  <tr><td class="num">35</td><td class="num">147</td><td>The trapezoid rule</td><td>the rectangle rule (the third row)</td></tr>
-  <tr><td class="num">42</td><td class="num">155</td><td>The lab&rsquo;s speed is the constant of integration</td><td>the change over the whole record, which the last check uses</td></tr>
-  <tr><td class="num">47</td><td class="num">159</td><td>The change in velocity is read where it is largest</td><td>the change over the whole record, which is also printed</td></tr>
-  <tr><td class="num">43</td><td class="num">156</td><td>The crush is the distance at the first sample with the velocity at or below zero</td><td>interpolating between samples to where the velocity crosses zero</td></tr>
-  <tr><td class="num">51</td><td class="num">15</td><td>The channel is not filtered</td><td>filtering at CFC&nbsp;180 first, which J211 gives for this use (assignment&nbsp;4)</td></tr>
+  <tr><td class="num">39</td><td class="num">150</td><td>The mean before contact is subtracted as an offset</td><td>leaving it in (the second row of the choices table)</td></tr>
+  <tr><td class="num">36</td><td class="num">147</td><td>The trapezoid rule</td><td>the rectangle rule (the third row)</td></tr>
+  <tr><td class="num">43</td><td class="num">155</td><td>The lab&rsquo;s speed is the constant of integration</td><td>the change over the whole record, which the last check uses</td></tr>
+  <tr><td class="num">48</td><td class="num">159</td><td>The change in velocity is read where it is largest</td><td>the change over the whole record, which is also printed</td></tr>
+  <tr><td class="num">44</td><td class="num">156</td><td>The crush is the distance at the first sample with the velocity at or below zero</td><td>interpolating between samples to where the velocity crosses zero</td></tr>
+  <tr><td class="num">52</td><td class="num">15</td><td>The channel is not filtered</td><td>filtering at CFC&nbsp;180 first, which J211 gives for this use (assignment&nbsp;4)</td></tr>
 </table>
 
 <h2 id="what-it-prints">What It Prints</h2>

@@ -7,6 +7,7 @@ the numbers in the report. It saves three figures:
   fig_classes.svg  the main pulse at each filter class
   fig_onepass.svg  CFC 60 run once and run forward and backward
 """
+import glob
 import json
 import os
 
@@ -30,8 +31,8 @@ def cfc_coefficients(cls, dt):
 
 
 def one_pass(x, c, start=0.0):
-    """One pass in the direction of increasing index. start is what the two
-    outputs before the first sample are taken to be."""
+    """One pass in the direction of increasing index. start is the value given to
+    the first two outputs, which the formula cannot compute."""
     a0, a1, a2, b1, b2 = c
     out = np.zeros(len(x))
     out[0] = start
@@ -62,16 +63,12 @@ def peak(t, y):
     return y[i], t[i]
 
 
-name = os.listdir(os.path.join(PACK, 'crash'))[0]
-with open(os.path.join(PACK, 'crash', name)) as f:
+name = glob.glob(os.path.join(PACK, 'crash', '*.json'))[0]   # the one test file
+with open(name) as f:
     test = json.load(f)
 
-# the channel whose header comment names the crossmember
-key = None
-for k, c in test['channels'].items():
-    if 'CROSSMEMBER' in c['comment']:
-        key = k
-        break
+# the car-body channel: its header names the crossmember, or on some packs the sill
+key = 'vehicle_x'
 ch = test['channels'][key]
 dt = ch['dt']
 t = 1000 * (ch['t0'] + dt * np.arange(ch['n']))      # ms
@@ -113,7 +110,7 @@ print(f"  in g: {p60 / G:.3f} with g = {G}, {p60 / 9.81:.3f} with g = 9.81")
 
 print("\nresult at CFC 60, forward and backward")
 print(f"  peak {p60:.2f} m/s^2 = {p60 / G:.2f} g at {tp60:.2f} ms")
-print(f"  the unfiltered peak is {np.min(raw) / p60:.2f} times this")
+print(f"  the unfiltered peak is {raw[i] / p60:.2f} times this")
 
 print("\nevery class")
 print(f"  {'filter':12} {'peak m/s^2':>11} {'peak g':>8} {'at ms':>7} {'delta-v m/s':>12}")

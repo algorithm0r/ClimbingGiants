@@ -14,8 +14,8 @@ Prints a table of travel against step for the filtered and the raw drive,
 picks the step, then runs three checks. Saves travel.svg, drive.svg,
 steps.svg and chest_check.svg.
 """
+import glob
 import json
-import os
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -24,7 +24,6 @@ M = 75.0        # occupant mass, kg
 K = 296000.0    # belt stiffness, N/m
 C = 2800.0      # belt damping, N*s/m
 G = 9.81        # m/s^2 per g
-V0 = 15.60      # approach speed, m/s (56.15 km/h from the test record)
 SETTLED = 0.001  # mm, a hundredth of the 0.1 mm I quote (RK4 makes this cheap)
 
 
@@ -76,21 +75,23 @@ def rk4(t, a_car, h):
 
 def travel(t, a_car, h):
     """Largest forward travel (mm) and when it happens (ms), at step h. This is
-    the largest value on the step grid, so it can only be at or below the true
-    peak; the step study shows how much that matters."""
+    the largest value on the step grid. The true peak can fall between two steps,
+    and at a coarse step the step's own error can move the value either way, which
+    the step study measures."""
     times, u, w = rk4(t, a_car, h)
     i = np.argmax(u)
     return 1000 * u[i], 1000 * times[i]
 
 
-name = os.listdir('crash')[0]           # the crash folder holds one file
-with open(os.path.join('crash', name)) as f:
+name = glob.glob('crash/*.json')[0]     # the crash folder holds one test file
+with open(name) as f:
     test = json.load(f)
 ch = test['channels']['vehicle_x']
 dt = ch['dt']
 t = ch['t0'] + dt * np.arange(ch['n'])
 raw = np.array(ch['y'])
 a180 = cfc(raw, dt, 180)
+V0 = test['test']['speed_kph'] / 3.6     # approach speed, m/s, from the test record
 print(f"drive: {ch['comment']} [{ch['code']}], "
       f"{ch['n']} samples every {1000 * dt} ms")
 print(f"peak raw {np.min(raw) / G:.1f} g at {1000 * t[np.argmin(raw)]:.2f} ms, "
@@ -99,7 +100,7 @@ fn = np.sqrt(K / M) / (2 * np.pi)
 print(f"belt natural frequency {fn:.2f} Hz (period {1000 / fn:.0f} ms), "
       f"damping ratio {C / (2 * np.sqrt(K * M)):.3f}")
 
-# ---- step study: halve from 6.4 ms (128 samples) down to 0.025 ms (half a sample)
+# ---- step study: halve from 128 samples down to half a sample (6.4 to 0.025 ms at 20 kHz)
 steps = []
 for k in range(9):
     steps.append(128 * dt / 2**k)
@@ -153,17 +154,21 @@ dv = np.sum((raw[1:] + raw[:-1]) / 2) * dt
 print(f"2. velocity change in the drive {dv:.2f} m/s against an approach of "
       f"{V0:.2f} m/s, rebound {-dv - V0:.2f} m/s")
 a_occ = -(K * u + C * w) / M                     # occupant's own acceleration, m/s^2
-chest = cfc(np.array(test['channels']['chest_x']['y']), dt, 180)
-io = np.argmin(a_occ)
-ic = np.argmin(chest)
-print(f"3. model occupant peak {a_occ[io] / G:.1f} g at {1000 * times[io]:.1f} ms, "
-      f"driver chest (CFC 180) {chest[ic] / G:.1f} g at {1000 * t[ic]:.1f} ms")
-# after the peak the model's spring pushes back. Does the chest show that?
-io = np.argmax(a_occ)
-ic = np.argmax(chest)
-print(f"   largest push back: model {a_occ[io] / G:+.1f} g at "
-      f"{1000 * times[io]:.1f} ms, "
-      f"chest {chest[ic] / G:+.1f} g at {1000 * t[ic]:.1f} ms")
+has_chest = 'chest_x' in test['channels']        # a few tests have no chest channel
+if has_chest:
+    chest = cfc(np.array(test['channels']['chest_x']['y']), dt, 180)
+    io = np.argmin(a_occ)
+    ic = np.argmin(chest)
+    print(f"3. model occupant peak {a_occ[io] / G:.1f} g at {1000 * times[io]:.1f} ms, "
+          f"driver chest (CFC 180) {chest[ic] / G:.1f} g at {1000 * t[ic]:.1f} ms")
+    # after the peak the model's spring pushes back. Does the chest show that?
+    io = np.argmax(a_occ)
+    ic = np.argmax(chest)
+    print(f"   largest push back: model {a_occ[io] / G:+.1f} g at "
+          f"{1000 * times[io]:.1f} ms, "
+          f"chest {chest[ic] / G:+.1f} g at {1000 * t[ic]:.1f} ms")
+else:
+    print("3. this test has no driver chest channel, so check 3 cannot be made")
 
 # ---- figure 1, travel against time
 plt.figure(figsize=(7, 4))
@@ -187,7 +192,7 @@ plt.plot(1000 * t, a180 / G, label='CFC 180')
 plt.xlim(-10, 150)
 plt.xlabel('time from impact (ms)')
 plt.ylabel('acceleration (g)')
-plt.title('Crossmember X acceleration [10SEATLERE00ACXP]')
+plt.title(f"Car body X acceleration [{ch['code']}]")
 plt.legend()
 plt.tight_layout()
 plt.savefig('drive.svg')
@@ -211,14 +216,15 @@ plt.savefig('steps.svg')
 plt.close()
 
 # ---- figure 4, the model against the chest
-plt.figure(figsize=(7, 4))
-plt.plot(1000 * t, chest / G, label='driver chest X, measured (CFC 180)')
-plt.plot(1000 * times, a_occ / G, label='model occupant')
-plt.xlim(-10, 200)
-plt.xlabel('time from impact (ms)')
-plt.ylabel('acceleration (g)')
-plt.title('Occupant acceleration: model against the dummy chest')
-plt.legend()
-plt.tight_layout()
-plt.savefig('chest_check.svg')
-plt.close()
+if has_chest:
+    plt.figure(figsize=(7, 4))
+    plt.plot(1000 * t, chest / G, label='driver chest X, measured (CFC 180)')
+    plt.plot(1000 * times, a_occ / G, label='model occupant')
+    plt.xlim(-10, 200)
+    plt.xlabel('time from impact (ms)')
+    plt.ylabel('acceleration (g)')
+    plt.title('Occupant acceleration: model against the dummy chest')
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig('chest_check.svg')
+    plt.close()

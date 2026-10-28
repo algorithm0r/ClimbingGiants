@@ -67,7 +67,7 @@ for p = 1:numel(paths)
     [car.peak, ip] = max(res);
     car.peak_t = t_ms(ip);
     car.descr = hx.comment;
-    car.status = unique(statuses);
+    car.status = strjoin(unique(statuses), ', ');   % each status once, in a fixed order
     if isempty(cars)
         cars = car;
     else
@@ -80,8 +80,8 @@ for k = 1:numel(cars)
     info = c.info;
     fprintf('%d %s  (model field ''%s'')\n', c.no, c.name, c.model);
     fprintf('   %s, %s, angle %g, %g km/h\n', info.type, info.config, info.angle, info.speed_kph);
-    fprintf('   %.0f samples/s, head X described as ''%s'', status {''%s''}\n', ...
-            1 / c.dt, c.descr, strjoin(c.status, ''', '''));
+    fprintf('   %.0f samples/s, head X described as ''%s'', statuses of all channels: %s\n', ...
+            1 / c.dt, c.descr, c.status);
     fprintf('   HIC15 %.1f, window %.2f to %.2f ms, HIC36 %.1f, peak %.1f g at %.1f ms\n', ...
             c.h15, c.win(1), c.win(2), c.h36, c.peak, c.peak_t);
 end
@@ -99,14 +99,20 @@ for k = 1:numel(cars)
     end
 end
 
-% check 1: the customer's car was sampled twice as fast as the other two.
-% Keep every second sample (10,000 a second, like the others) and recompute.
-every_second = cell(1, 3);
-for m = 1:3
-    every_second{m} = me.axes{m}(1:2:end);
+% check 1: the customer's car at the slowest other car's sample rate. Keep every
+% step-th sample, step being how many of its samples fit in one of the slower car's.
+step = round(max([cars.dt]) / me.dt);
+if step > 1
+    kept = cell(1, 3);
+    for m = 1:3
+        kept{m} = me.axes{m}(1:step:end);
+    end
+    slower = resultant(kept, step * me.dt, 1000, G);
+    fprintf('\ncheck, customer''s car at %.0f samples/s (every %d samples): HIC15 %.1f\n', ...
+            1 / (step * me.dt), step, hic(slower, step * me.dt, 15));
+else
+    fprintf('\ncheck, no other car was sampled more slowly, so the sample-rate check does not apply\n');
 end
-half = resultant(every_second, 2 * me.dt, 1000, G);
-fprintf('\ncheck, customer''s car at half the sample rate: HIC15 %.1f\n', hic(half, 2 * me.dt, 15));
 % check 2: no filter at all, every car
 for k = 1:numel(cars)
     c = cars(k);

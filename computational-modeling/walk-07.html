@@ -931,8 +931,8 @@ stored in.</p>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="3|time is used to measure how long each step takes ([Files and libraries](py-files.html)).;8|Standard gravity, used to convert m/s squared to g. The student chose it (the Decisions table gives the alternative), and the report says which value it uses.;9|The ISO codes of the driver head channels in X, Y and Z, as a list ([Lists](py-lists.html)).;10|A list, so another limit could be added and the program would search it too.">import json
-import os
+  <pre data-lang="python" data-notes="3|time is used to measure how long each step takes ([Files and libraries](py-files.html)).;8|Standard gravity, used to convert m/s squared to g. The student chose it (the Decisions table gives the alternative), and the report says which value it uses.;9|The ISO codes of the driver head channels in X, Y and Z, as a list ([Lists](py-lists.html)).;10|A list, so another limit could be added and the program would search it too.">import glob
+import json
 import time
 
 import matplotlib.pyplot as plt
@@ -1001,7 +1001,7 @@ function out = one_pass(x, c)
                  + c(4) * out(i - 1) + c(5) * out(i - 2);
     end
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 24 to 44 (Python) and lines 174 to 197 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 24 to 44 (Python) and lines 175 to 198 (MATLAB).</div>
 </div>
 <h2 id="the-resultant">The Resultant</h2>
 
@@ -1025,7 +1025,7 @@ of the three components squared, converted to <em>g</em>. HIC is defined on the 
     end
     r = sqrt(total) / G;
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 47 to 51 (Python) and lines 200 to 206 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 47 to 51 (Python) and lines 201 to 207 (MATLAB).</div>
 </div>
 <h2 id="the-best-window-of-each-length">The Best Window of Each Length</h2>
 
@@ -1088,7 +1088,7 @@ function [value, i, j, windows] = hic(a, dt, kmax)
     i = start(k);
     j = start(k) + k;
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 54 to 76 (Python) and lines 209 to 234 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 54 to 76 (Python) and lines 210 to 235 (MATLAB).</div>
 </div>
 <h2 id="the-plain-double-loop">The Plain Double Loop</h2>
 
@@ -1138,7 +1138,7 @@ function s = with_commas(n)
     % A whole number written with commas between thousands, as Python's {n:,} does.
     s = regexprep(sprintf('%d', n), '(\d)(?=(\d{3})+$)', '$1,');
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 79 to 92 (Python) and lines 237 to 259 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 79 to 92 (Python) and lines 238 to 260 (MATLAB).</div>
 </div>
 <h2 id="reading-and-filtering">Reading and Filtering</h2>
 
@@ -1153,8 +1153,8 @@ start has disturbed anything.</p>
   </div>
   <pre data-lang="python" data-notes="2|Starts the clock for reading and filtering.;6|A dictionary from each channel's ISO code to the channel ([Dictionaries](py-dicts.html)).;14|The times in milliseconds, built from the header.;20|Each channel filtered at CFC 1000.;21|The resultant of the filtered channels, in g. The HIC searches and the plain-loop check run on this.;22|The time since the clock started, in seconds.;28|The largest size of the raw and the filtered channel, in g ([Numbers and text](py-values.html)).;35|Four samples near the end of the record, counted back from the last ([Lists](py-lists.html))."># ---- read and filter
 t_start = time.perf_counter()
-name = os.listdir('crash')[0]
-with open(os.path.join('crash', name)) as f:
+name = glob.glob('crash/*.json')[0]     # the crash folder holds one test file
+with open(name) as f:
     test = json.load(f)
 by_code = {}                            # each channel under its ISO code
 for c in test['channels'].values():
@@ -1417,13 +1417,13 @@ close(fig);</pre>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="4|Shades the window from its first sample to its last.;7|62 g leaves room for the legend on this test. On a test whose resultant goes higher, raise it, or the peak is cut off."># ---- figure 2: the resultant with the HIC15 window
+  <pre data-lang="python" data-notes="4|Shades the window from its first sample to its last.;7|At least 62 g, or a third more than the peak if that is higher, so the legend has room above the trace and a high peak is never cut off."># ---- figure 2: the resultant with the HIC15 window
 plt.figure(figsize=(8, 4))
 plt.plot(t, res, linewidth=0.8, color='k', label='resultant, CFC 1000', zorder=3)
 plt.axvspan(t[i15], t[j15], color='tab:orange', alpha=0.4,
             label=f'HIC15 = {h15:.1f}, {t[i15]:.2f} to {t[j15]:.2f} ms')
 plt.xlim(0, 160)
-plt.ylim(0, 62)    # room for the legend above the trace
+plt.ylim(0, max(62, 1.35 * np.max(res)))    # room for the legend above the trace
 plt.xlabel('time from impact (ms)')
 plt.ylabel('resultant head acceleration (g)')
 plt.title(f"Test {test['testNo']}, driver head resultant and the best window")
@@ -1431,14 +1431,15 @@ plt.legend(loc='upper left', fontsize=8)
 plt.tight_layout()
 plt.savefig('hic_windows.svg')
 plt.close()</pre>
-  <pre data-lang="matlab" hidden data-notes="4|A shaded rectangle from the window's first time to its last.">% ---- figure 2: the resultant with the HIC15 window
+  <pre data-lang="matlab" hidden data-notes="5|A shaded rectangle from the window's first time to its last.">% ---- figure 2: the resultant with the HIC15 window
 fig = figure('Position', [100 100 800 400]);
 hold on
-patch([t(i15) t(j15) t(j15) t(i15)], [0 0 62 62], [1 0.5 0], 'FaceAlpha', 0.4, ...
+top = max(62, 1.35 * max(res));     % room for the legend above the trace
+patch([t(i15) t(j15) t(j15) t(i15)], [0 0 top top], [1 0.5 0], 'FaceAlpha', 0.4, ...
       'EdgeColor', 'none');
 plot(t, res, 'k', 'LineWidth', 0.8);
 xlim([0 160]);
-ylim([0 62]);    % room for the legend above the trace
+ylim([0 top]);
 xlabel('time from impact (ms)');
 ylabel('resultant head acceleration (g)');
 title(sprintf('Test %d, driver head resultant and the best window', test.testNo));
@@ -1446,7 +1447,7 @@ legend({sprintf('HIC15 = %.1f, %.2f to %.2f ms', h15, t(i15), t(j15)), ...
         'resultant, CFC 1000'}, 'Location', 'northwest');
 saveas(fig, 'hic_windows.svg');
 close(fig);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 197 to 210 (Python) and lines 137 to 151 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 197 to 210 (Python) and lines 137 to 152 (MATLAB).</div>
 </div>
 <h2 id="figure-3-hic-against-the-limit">Figure 3, HIC Against the Limit</h2>
 
@@ -1496,7 +1497,7 @@ legend({'best HIC within the limit', '', sprintf('no limit: %.1f over %.2f ms', 
         (jn - inn) * dt * 1000)}, 'Location', 'southeast');
 saveas(fig, 'hic_vs_limit.svg');
 close(fig);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 212 to 231 (Python) and lines 153 to 171 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 212 to 231 (Python) and lines 154 to 172 (MATLAB).</div>
 </div>
 
 <h2 id="decisions-in-this-program">Decisions in This Program</h2>
@@ -1509,8 +1510,8 @@ AI</a>. Pick a line and say why it is that way.</p>
 <table class="data">
   <tr><th class="num">Python line</th><th class="num">MATLAB line</th><th>The decision</th><th>What else could have been chosen</th></tr>
   <tr><td class="num">19</td><td class="num">17</td><td>Accelerations are converted to <em>g</em> with standard gravity</td><td>9.81&nbsp;m/s&sup2;, the rounded value</td></tr>
-  <tr><td class="num">64</td><td class="num">219</td><td>Windows may start anywhere in the record, before impact included</td><td>starting the search at impact, by handing hic only the samples from impact on, which the notebook in the example reports does</td></tr>
-  <tr><td class="num">57</td><td class="num">212</td><td>Each window&rsquo;s integral uses the trapezoid rule</td><td>the rectangle rule, which differs slightly on short windows</td></tr>
+  <tr><td class="num">64</td><td class="num">220</td><td>Windows may start anywhere in the record, before impact included</td><td>starting the search at impact, by handing hic only the samples from impact on, which the notebook in the example reports does</td></tr>
+  <tr><td class="num">57</td><td class="num">213</td><td>Each window&rsquo;s integral uses the trapezoid rule</td><td>the rectangle rule, which differs slightly on short windows</td></tr>
   <tr><td class="num">114</td><td class="num">42</td><td>Each component is filtered before the resultant is formed</td><td>forming the resultant first and filtering it once</td></tr>
   <tr><td class="num">115</td><td class="num">44</td><td>The baseline before impact is left in, and removing it is only a check</td><td>subtracting each channel&rsquo;s mean before impact first</td></tr>
 </table>
@@ -1553,8 +1554,7 @@ upload the program beside your unzipped pack and run it in a cell with <code>%ru
 (the <a href="tools-colab.html#a-downloaded-program">Colab guide</a> shows how). On your own pack it reads your data, so its numbers will differ from the ones above. The MATLAB
 version should run as it is in MATLAB R2018b or later. GNU Octave, which is free, needs a script's functions defined
 before they are used, so to run it there, move the functions to the top of the file and put a line
-<code>1;</code> above them. Figure&nbsp;2's vertical axis stops at 62&nbsp;<em>g</em>, so raise it if your resultant
-goes higher.</p>
+<code>1;</code> above them.</p>
 
   </main>
 

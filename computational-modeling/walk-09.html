@@ -932,20 +932,20 @@ block for the second model, and the codes of the three head channels.</p>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="2|math for single numbers, numpy for arrays, matplotlib for the figures ([Files and libraries](py-files.html)).;9|More reruns make the interval's ends steadier and take longer.;10|200 samples is 10 ms at 20,000 samples a second. On a test sampled at another rate it is a different length of time. It has to be well under the number of samples before impact: if that stretch holds only BLOCK samples, every piece is the whole stretch, all the reruns agree, and the interval has no width.;11|The ISO codes of the driver's head channels in X, Y and Z ([Lists](py-lists.html)).">import json
+  <pre data-lang="python" data-notes="3|math for single numbers, numpy for arrays, matplotlib for the figures ([Files and libraries](py-files.html)).;9|More reruns make the interval's ends steadier and take longer.;10|The length of a block in ms. The program turns it into samples once it knows the sample rate.;11|The ISO codes of the driver's head channels in X, Y and Z ([Lists](py-lists.html)).">import glob
+import json
 import math
-import os
 
 import numpy as np
 import matplotlib.pyplot as plt
 
 G = 9.80665        # standard gravity, m/s^2 in one g
 DRAWS = 1000       # reruns per noise model
-BLOCK = 200        # samples per block for the 'blocks' model (10 ms at 20 kHz)
+BLOCK_MS = 10      # length of a block for the 'blocks' model
 CODES = ['11HEADCG0000ACXP', '11HEADCG0000ACYP', '11HEADCG0000ACZP']</pre>
   <pre data-lang="matlab" hidden data-notes="1|In MATLAB % starts a comment, and the semicolon stops MATLAB from printing the value.;4|A cell array of text, MATLAB's list of strings.">G = 9.80665;       % standard gravity, m/s^2 in one g
 DRAWS = 1000;      % reruns per noise model
-BLOCK = 200;       % samples per block for the 'blocks' model (10 ms at 20 kHz)
+BLOCK_MS = 10;     % length of a block for the 'blocks' model
 CODES = {'11HEADCG0000ACXP', '11HEADCG0000ACYP', '11HEADCG0000ACZP'};</pre>
   <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 15 to 25 (Python) and lines 19 to 22 (MATLAB).</div>
 </div>
@@ -1003,7 +1003,7 @@ function out = one_pass(x, c)
                  + b1 * out(i-1) + b2 * out(i-2);
     end
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 28 to 46 (Python) and lines 190 to 214 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 28 to 46 (Python) and lines 198 to 222 (MATLAB).</div>
 </div>
 <h2 id="hic">HIC</h2>
 
@@ -1040,7 +1040,7 @@ Only the value is kept, since the reruns need nothing else.</p>
         best = max(best, max(T * mean_a.^2.5));
     end
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 49 to 60 (Python) and lines 217 to 229 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 49 to 60 (Python) and lines 225 to 237 (MATLAB).</div>
 </div>
 <h2 id="the-whole-calculation">The Whole Calculation</h2>
 
@@ -1078,7 +1078,7 @@ change to a fixed choice, so all of them do exactly the same steps.</p>
     end
     v = hic(sqrt(total) / g, dt, limit_ms);
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 63 to 74 (Python) and lines 232 to 245 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 63 to 74 (Python) and lines 240 to 253 (MATLAB).</div>
 </div>
 <h2 id="autocorrelation">Autocorrelation</h2>
 
@@ -1102,7 +1102,7 @@ neighbors move together, and 0 for noise that is independent from sample to samp
     cc = corrcoef(r(1:end-lag), r(1+lag:end));
     c = cc(1, 2);
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 77 to 79 (Python) and lines 248 to 256 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 77 to 79 (Python) and lines 256 to 264 (MATLAB).</div>
 </div>
 <h2 id="two-models-of-the-noise">Two Models of the Noise</h2>
 
@@ -1143,7 +1143,7 @@ function noise = block_noise(pre, n, block)
     end
     noise = pieces(1:n);
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 82 to 93 (Python) and lines 259 to 274 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 82 to 93 (Python) and lines 267 to 282 (MATLAB).</div>
 </div>
 <h2 id="percentiles-in-matlab">Percentiles in MATLAB</h2>
 
@@ -1163,7 +1163,7 @@ so the MATLAB version has a small function that follows numpy's rule.</p>
     hi = min(lo + 1, numel(d));
     p = d(lo) + (pos - lo) * (d(hi) - d(lo));
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The MATLAB program's lines 277 to 286.</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The MATLAB program's lines 285 to 294.</div>
 </div>
 <h2 id="reading-the-head-channels">Reading the Head Channels</h2>
 
@@ -1174,8 +1174,8 @@ for each one keeps both the whole record and the part before impact.</p>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="1|The first file the crash folder lists, the only one. A hidden file, such as the .DS_Store a Mac can add, would also be listed ([Files and libraries](py-files.html)).;5|.values() gives each channel in turn ([Dictionaries](py-dicts.html)).;6|in is true if the code is one of the three in the list ([Conditions](py-conditions.html)).;8|The three head channels share one rate and length, so the first one's are used.;11|The time of every sample, in ms.;12|True for every sample before impact. y[before] then keeps only those ([numpy arrays](py-numpy.html)).">name = os.listdir('crash')[0]           # the crash folder holds one file
-with open(os.path.join('crash', name)) as f:
+  <pre data-lang="python" data-notes="1|glob.glob lists the files in the crash folder whose names end in .json, and [0] takes the first, the only one. A hidden file, such as the .DS_Store a Mac can add, does not match ([Files and libraries](py-files.html)).;5|.values() gives each channel in turn ([Dictionaries](py-dicts.html)).;6|in is true if the code is one of the three in the list ([Conditions](py-conditions.html)).;8|The three head channels share one rate and length, so the first one's are used.;11|The time of every sample, in ms.;12|True for every sample before impact. y[before] then keeps only those ([numpy arrays](py-numpy.html)).;21|10 ms in samples (200 at 20,000 samples a second, 100 at 10,000), and never more than half the stretch before impact, so the pieces can start in more than one place.">name = glob.glob('crash/*.json')[0]     # the crash folder holds one test file
+with open(name) as f:
     test = json.load(f)
 chans = []
 for c in test['channels'].values():
@@ -1191,7 +1191,10 @@ pre = []                                # the part of each before impact
 for c in chans:
     y = np.array(c['y'])
     raw.append(y)
-    pre.append(y[before])</pre>
+    pre.append(y[before])
+# a block is 10 ms of samples, and never more than half the stretch before impact,
+# so the blocks can start in more than one place
+BLOCK = min(round(BLOCK_MS / 1000 / dt), len(pre[0]) // 2)</pre>
   <pre data-lang="matlab" hidden data-notes="6|A field named by a variable: the m-th channel.;7|strcmp compares the code with each entry of CODES, and any is true if one matched.;8|Adds the channel to the end of the cell array.;20|The m-th channel's samples before impact.">files = dir(fullfile('crash', '*.json'));   % the crash folder holds one file
 test = jsondecode(fileread(fullfile('crash', files(1).name)));
 chans = {};
@@ -1212,8 +1215,11 @@ pre = cell(1, numel(chans));            % the part of each before impact
 for m = 1:numel(chans)
     raw{m} = chans{m}.y;
     pre{m} = raw{m}(before);
-end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 96 to 113 (Python) and lines 24 to 44 (MATLAB).</div>
+end
+% a block is 10 ms of samples, and never more than half the stretch before impact,
+% so the blocks can start in more than one place
+BLOCK = min(round(BLOCK_MS / 1000 / dt), floor(numel(pre{1}) / 2));</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 96 to 116 (Python) and lines 24 to 47 (MATLAB).</div>
 </div>
 <h2 id="the-noise">The Noise</h2>
 
@@ -1225,12 +1231,15 @@ noise model, since noise this alike from one sample to the next is far from inde
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="2|:g writes the number in its shortest form, 0.05 here.;4|Summing true and false values counts the trues.;5|t_ms[before] is the times before impact, and [-1] the last of them.;6|In samples: 0.05, 1, 5 and 10 ms at this test's rate.;9|The column headings, each lag in ms.;15|Removes the mean. corrcoef also removes each copy's mean, so this line only matches the definition.;18|Each autocorrelation as text 9 characters wide.;20|The spread in g as well as in m/s squared.;21|'  '.join puts the column texts together with two spaces between."># 1. the noise
+  <pre data-lang="python" data-notes="2|:g writes the number in its shortest form, 0.05 here.;4|Summing true and false values counts the trues.;5|t_ms[before] is the times before impact, and [-1] the last of them.;8|The four lags are in samples (0.05, 1, 5 and 10 ms at this test's rate), and a lag is kept only when the stretch has at least twice as many samples.;12|The column headings, each lag in ms.;18|Removes the mean. corrcoef also removes each copy's mean, so this line only matches the definition.;21|Each autocorrelation as text 9 characters wide.;23|The spread in g as well as in m/s squared.;24|'  '.join puts the column texts together with two spaces between."># 1. the noise
 print(f"{len(chans)} head channels, {n} samples every {dt * 1000:g} ms, "
       f"{t_ms[0]:.2f} to {t_ms[-1]:.2f} ms")
 print(f"pre-impact stretch: {np.sum(before)} samples, "
       f"{t_ms[0]:.2f} to {t_ms[before][-1]:.2f} ms")
-LAGS = [1, 20, 100, 200]
+LAGS = []
+for lag in [1, 20, 100, 200]:             # in samples, kept only if the stretch is long enough
+    if lag &lt; len(pre[0]) // 2:
+        LAGS.append(lag)
 columns = []
 for lag in LAGS:
     columns.append(f'r({lag * dt * 1000:g} ms)')
@@ -1246,12 +1255,17 @@ for m in range(len(chans)):
     print(f"{c['code']:18} {c['prefilter_hz']:&gt;6} Hz {np.mean(p):7.3f} {np.std(p):6.3f} "
           f"{np.std(p) / G:6.4f}g   "
           + '  '.join(columns))</pre>
-  <pre data-lang="matlab" hidden data-notes="4|MATLAB cannot index the result of indexing in one go, so the times before impact get a name first.;12|strjoin is MATLAB's join.">% 1. the noise
+  <pre data-lang="matlab" hidden data-notes="4|MATLAB cannot index the result of indexing in one go, so the times before impact get a name first.;17|strjoin is MATLAB's join.">% 1. the noise
 fprintf('%d head channels, %d samples every %g ms, %.2f to %.2f ms\n', numel(chans), n, ...
         dt * 1000, t_ms(1), t_ms(end));
 t_before = t_ms(before);
 fprintf('pre-impact stretch: %d samples, %.2f to %.2f ms\n', sum(before), t_ms(1), t_before(end));
-LAGS = [1, 20, 100, 200];
+LAGS = [];
+for lag = [1, 20, 100, 200]               % in samples, kept only if the stretch is long enough
+    if lag &lt; floor(numel(pre{1}) / 2)
+        LAGS(end+1) = lag;
+    end
+end
 columns = {};
 for lag = LAGS
     columns{end+1} = sprintf('r(%g ms)', lag * dt * 1000);
@@ -1269,7 +1283,7 @@ for m = 1:numel(chans)
     fprintf('%-18s %6s Hz %7.3f %6.3f %6.4fg   %s\n', c.code, c.prefilter_hz, mean(p), ...
             std(p, 1), std(p, 1) / G, strjoin(columns, '  '));
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 115 to 135 (Python) and lines 46 to 68 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 118 to 141 (Python) and lines 49 to 76 (MATLAB).</div>
 </div>
 <h2 id="the-reruns">The Reruns</h2>
 
@@ -1315,7 +1329,7 @@ for k = 1:2
     end
     draws{k} = runs;
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 137 to 150 (Python) and lines 70 to 88 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 143 to 156 (Python) and lines 78 to 96 (MATLAB).</div>
 </div>
 <h2 id="the-intervals">The Intervals</h2>
 
@@ -1346,7 +1360,7 @@ for k = 1:2
     fprintf('%-12s %7.2f %8.2f to %6.2f %6.2f %8.2f to %6.2f %6.2f\n', names{k}, median(d), ...
             l90, h90, h90 - l90, l95, h95, h95 - l95);
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 152 to 158 (Python) and lines 90 to 101 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 158 to 164 (Python) and lines 98 to 109 (MATLAB).</div>
 </div>
 <h2 id="what-was-held-fixed">What Was Held Fixed</h2>
 
@@ -1389,7 +1403,7 @@ for k = 1:2
     ratio = abs(v - value) / (h95 - l95);
     fprintf('%-34s %7.2f %+7.2f %11.2f\n', change_names{k}, v, v - value, ratio);
 end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 160 to 172 (Python) and lines 103 to 119 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 166 to 178 (Python) and lines 111 to 127 (MATLAB).</div>
 </div>
 <h2 id="figure-1-the-noise-before-impact">Figure 1, the Noise Before Impact</h2>
 
@@ -1409,7 +1423,7 @@ for m in range(len(chans)):
     ax.set_title(f"{c['comment']}  [{c['code']}]", fontsize=9)
     ax.set_ylabel('acceleration (m/s$^2$)', fontsize=8)
 axs[-1].set_xlabel('time from impact (ms)')
-fig.suptitle('Driver head acceleration in the 50 ms before impact, test 9793',
+fig.suptitle(f"Driver head acceleration in the {-t_ms[0]:.0f} ms before impact, test {test['testNo']}",
              fontsize=10)
 fig.tight_layout()
 fig.savefig('noise_before_impact.svg')
@@ -1426,21 +1440,20 @@ end
 xlabel('time from impact (ms)');
 saveas(fig, 'noise_before_impact.svg');
 close(fig);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 174 to 187 (Python) and lines 121 to 132 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 180 to 193 (Python) and lines 129 to 140 (MATLAB).</div>
 </div>
 <h2 id="figure-2-the-autocorrelation">Figure 2, the Autocorrelation</h2>
 
 <p>The second figure is each channel's autocorrelation at every lag up to 500 samples (25&nbsp;ms at
-this pack's rate), with the block length marked. Independent noise would sit on the zero line. Near
-the length of the stretch before impact only a few pairs are left, and on a pack whose stretch is
-500 samples or shorter the last lags have none, so the curve there means little.</p>
+this pack's rate) or half the stretch before impact, with the block length marked. Independent
+noise would sit on the zero line.</p>
 <div class="codetabs" id="s13">
   <div class="tabs" role="tablist">
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="2|Every lag from 1 to 500 samples. On a pack with fewer samples before impact, the longest lags give nan.;9|The lags in ms across the bottom.;11|A dashed line at the block length.;12|Typed in for the example test. At 10,000 samples a second 200 samples is 20 ms."># Figure 2: how alike neighboring samples are
-lags = np.arange(1, 501)
+  <pre data-lang="python" data-notes="2|Every lag from 1 sample up to 500, or up to half the stretch before impact if that is shorter.;9|The lags in ms across the bottom.;11|A dashed line at the block length.;12|The block length in ms, from BLOCK and the time between samples."># Figure 2: how alike neighboring samples are
+lags = np.arange(1, min(501, len(pre[0]) // 2 + 1))   # up to half the stretch
 plt.figure(figsize=(8, 3.6))
 for m in range(len(chans)):
     r = pre[m] - np.mean(pre[m])
@@ -1450,7 +1463,7 @@ for m in range(len(chans)):
     plt.plot(lags * dt * 1000, corr, label=chans[m]['code'])
 plt.axhline(0, color='gray', linewidth=0.8)
 plt.axvline(BLOCK * dt * 1000, color='gray', linestyle='--', linewidth=0.8,
-            label='block length, 10 ms')
+            label=f'block length, {BLOCK * dt * 1000:g} ms')
 plt.title('Autocorrelation of the pre-impact noise (independent noise would sit at 0)')
 plt.xlabel('lag (ms)')
 plt.ylabel('autocorrelation (no units)')
@@ -1459,7 +1472,7 @@ plt.tight_layout()
 plt.savefig('noise_autocorrelation.svg')
 plt.close()</pre>
   <pre data-lang="matlab" hidden data-notes="13|The x and y ranges, so the zero line and the block line can run from edge to edge.;15|HandleVisibility off leaves the zero line out of the legend.">% Figure 2: how alike neighboring samples are
-lags = 1:500;
+lags = 1:min(500, floor(numel(pre{1}) / 2));   % up to half the stretch
 fig = figure('Position', [100 100 800 360]);
 hold on
 for m = 1:numel(chans)
@@ -1477,10 +1490,10 @@ plot([BLOCK * dt * 1000, BLOCK * dt * 1000], yl, '--', 'Color', [0.5 0.5 0.5]);
 title('Autocorrelation of the pre-impact noise (independent noise would sit at 0)');
 xlabel('lag (ms)');
 ylabel('autocorrelation (no units)');
-legend({chans{1}.code, chans{2}.code, chans{3}.code, 'block length, 10 ms'}, 'FontSize', 8);
+legend({chans{1}.code, chans{2}.code, chans{3}.code, sprintf('block length, %g ms', BLOCK * dt * 1000)}, 'FontSize', 8);
 saveas(fig, 'noise_autocorrelation.svg');
 close(fig);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 189 to 207 (Python) and lines 134 to 155 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 195 to 213 (Python) and lines 142 to 163 (MATLAB).</div>
 </div>
 <h2 id="figure-3-the-reruns">Figure 3, the Reruns</h2>
 
@@ -1543,7 +1556,7 @@ ylabel('number of reruns');
 legend([labels, {sprintf('value on the record, %.2f', value)}], 'FontSize', 8);
 saveas(fig, 'hic_draws.svg');
 close(fig);</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 209 to 229 (Python) and lines 157 to 187 (MATLAB).</div>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does. The program's lines 215 to 235 (Python) and lines 165 to 195 (MATLAB).</div>
 </div>
 
 <h2 id="decisions-in-this-program">Decisions in This Program</h2>
@@ -1557,9 +1570,9 @@ AI</a>. Pick a line and say why it is that way.</p>
   <tr><th class="num">Python line</th><th class="num">MATLAB line</th><th>The decision</th><th>What else could have been chosen</th></tr>
   <tr><td class="num">23</td><td class="num">20</td><td>1000 reruns for each model</td><td>more, for steadier ends, at more cost</td></tr>
   <tr><td class="num">24</td><td class="num">21</td><td>Blocks of 10&nbsp;ms</td><td>longer blocks, which keep more of the wander but give fewer different pieces</td></tr>
-  <tr><td class="num">91</td><td class="num">270</td><td>The noise is cut from the record before impact</td><td>independent noise, the program&rsquo;s other model</td></tr>
-  <tr><td class="num">156</td><td class="num">95</td><td>The interval is read from percentiles</td><td>the mean plus and minus two standard deviations, which assumes a shape</td></tr>
-  <tr><td class="num">140</td><td class="num">73</td><td>A fixed seed</td><td>a new seed each run, which moves the ends a little each time</td></tr>
+  <tr><td class="num">91</td><td class="num">278</td><td>The noise is cut from the record before impact</td><td>independent noise, the program&rsquo;s other model</td></tr>
+  <tr><td class="num">162</td><td class="num">103</td><td>The interval is read from percentiles</td><td>the mean plus and minus two standard deviations, which assumes a shape</td></tr>
+  <tr><td class="num">146</td><td class="num">81</td><td>A fixed seed</td><td>a new seed each run, which moves the ends a little each time</td></tr>
 </table>
 
 <h2 id="what-it-prints">What It Prints</h2>
@@ -1592,10 +1605,8 @@ the program in the pack's top folder beside <code>crash</code> and <code>shots</
 from there (<a href="py-files.html">Files and libraries</a> explains why the folder matters). In Colab,
 upload the program beside your unzipped pack and run it in a cell with <code>%run a8_noise_intervals.py</code>
 (the <a href="tools-colab.html#a-downloaded-program">Colab guide</a> shows how). On your own pack it reads your data, so its numbers will differ from the ones above.
-Check the stretch before impact first. On many packs it is 20 or 30&nbsp;ms, and at 10,000 samples
-a second a 20&nbsp;ms stretch is exactly 200 samples, one block, so the blocks interval comes out
-with no width. The figures' titles and the block length in the legend are typed in for the
-example test. The MATLAB
+On a pack whose stretch before impact is short (20&nbsp;ms at 10,000 samples a second is 200
+samples), the blocks are capped at half of it, so they are shorter than 10&nbsp;ms there. The MATLAB
 version should run as it is in MATLAB R2018b or later. GNU Octave, which is free, needs a script's functions defined
 before they are used, so to run it there, move the functions to the top of the file and put a line
 <code>1;</code> above them.</p>
