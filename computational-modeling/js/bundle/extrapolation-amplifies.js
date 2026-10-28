@@ -130,7 +130,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
       if(by<2)by=py+18;
       if(by+LH>height-2)by=Math.max(2,height-LH-2);
       gLens.setAttribute('transform',`translate(${bx} ${by})`);
-      /* map the magnified point to the centre of the box */
+      /* map the magnified point to the center of the box */
       use.setAttribute('transform',
         `translate(${LW/2} ${LH/2}) scale(${zx} ${zy}) translate(${-px} ${-py})`);
       cross.setAttribute('cx',px);cross.setAttribute('cy',py);
@@ -263,7 +263,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
     gBand.textContent='';
     /* a horizontal threshold: a design limit, a tolerance, a level the prose
        names. Drawn in the band group so it sits under the trace rather than
-       over it, and labelled at the left where the axis already is. */
+       over it, and labeled at the left where the axis already is. */
     for(const hl of hlines){
       if(!inY(hl.y))continue;
       const hy=Y(hl.y);
@@ -578,7 +578,7 @@ function diagram(parent, spec) {
    italic (KaTeX_Math), digits, brackets and operators are upright (KaTeX_Main),
    '-' is a true minus, and _x or _{...} is a subscript, set smaller and
    dropped. The drop is done with dy on the subscript and undone on whatever
-   follows, because baseline-shift is not honoured by every browser. */
+   follows, because baseline-shift is not honored by every browser. */
 function texInto(t, src) {
   const SUB = 0.72, DROP = 0.22;            /* subscript size, and its drop in ems */
   let pending = 0;                          /* rise owed after a subscript, in ems */
@@ -826,7 +826,7 @@ function differentiate(y, dt, kind = 'central') {
   return d;
 }
 
-/* a centred moving average of odd width w */
+/* a centered moving average of odd width w */
 function movingAverage(y, w) {
   const n = y.length, half = (w - 1) >> 1, out = new Float64Array(n);
   for (let i = 0; i < n; i++) {
@@ -1018,7 +1018,7 @@ mountDemo({
              'and carried out to the plane of the hoop; the frames are then resampled 240 times ' +
              'within the tracker&rsquo;s own measured noise and refitted. The event predicted is ' +
              'always the same one, so the only thing that changes is how far the fit has to reach.',
-    source: {kind: 'measured', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz, in metres. The resampling noise is the tracker&rsquo;s own, measured across the set: 3.07&nbsp;cm vertical and 2.84&nbsp;cm horizontal per frame.'},
+    source: {kind: 'measured', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz, in meters. The resampling noise is the tracker&rsquo;s own, measured across the set: 3.07&nbsp;cm vertical and 2.84&nbsp;cm horizontal per frame.'},
     caption: 'The shaded block is the window the fit was given; the amber pair is the 5th and 95th ' +
              'percentile of 240 refits, drawn at every time. It is tight where the frames are and ' +
              'opens out beyond them.',
@@ -1092,7 +1092,7 @@ mountDemo({
         readouts: {
           seen: T[T.length - 1].toFixed(2) + ' s of flight',
           fac:  (keyT / T[T.length - 1]).toFixed(1) + '×',
-          pred: base ? cm(base.miss) + ' from the centre' : 'never reaches the rim',
+          pred: base ? cm(base.miss) + ' from the center' : 'never reaches the rim',
           band: ok ? cm(qlo) + ' to ' + cm(qhi) : '—',
           half: ok ? '±' + cm((qhi - qlo) / 2) : '—',
           /* Two things go wrong with a naive ± here, and both are worth naming.
@@ -1105,7 +1105,7 @@ mountDemo({
               ? 'Every resample landed further from the hoop than the unperturbed estimate of ' +
                 cm(base.miss) + '. The reported quantity is a distance, so noise in any ' +
                 'direction increases it: the interval is biased away from zero, and cannot be ' +
-                'centred on the estimate.'
+                'centered on the estimate.'
             : base && (qhi - base.miss) > 3 * Math.max(base.miss - qlo, 1e-9)
               ? 'The interval is lopsided: ' + cm(base.miss - qlo) + ' below the estimate and ' +
                 cm(qhi - base.miss) + ' above it. A single ± understates how wrong this can be, ' +

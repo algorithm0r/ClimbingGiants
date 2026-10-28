@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smoothing and phase lag — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261027232552">
-  <link rel="stylesheet" href="css/demos.css?v=20261027232552">
+  <link rel="stylesheet" href="css/blocks.css?v=20261028082814">
+  <link rel="stylesheet" href="css/demos.css?v=20261028082814">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -911,7 +911,7 @@
 
 <div class="claim">
   <span class="label">Claim</span>
-  <p class="exact">Smoothing replaces each sample by a weighted combination of its neighbours, which reduces the
+  <p class="exact">Smoothing replaces each sample by a weighted combination of its neighbors, which reduces the
   noise by averaging it and generally reduces the signal by averaging that too. The total error
   against the true signal therefore has a minimum at a finite window width. Too narrow leaves noise, and too wide removes the thing being measured.
   A frequency-specified filter, such as the standard's, applied once in the direction of increasing time, also shifts events later.
@@ -927,7 +927,7 @@
 <h2 id="the-simplest-smoother">The Simplest Smoother</h2>
 
 <p>A <dfn data-g="moving-average">moving average</dfn> of width $w$ replaces each sample by the
-mean of the $w$ samples centred on it:</p>
+mean of the $w$ samples centered on it:</p>
 
 $$\tilde y_i \;=\; \frac{1}{w} \sum_{k=-(w-1)/2}^{(w-1)/2} y_{i+k}$$
 
@@ -949,13 +949,13 @@ window of 400. Each halving costs four times the width of the one before it, and
 consequence below is what that width does to the signal.</p>
 
 <p><strong>The signal is reduced too.</strong> The average of a curve over a window is not the
-value of the curve at the centre unless the curve is straight there, so wherever it bends, which
+value of the curve at the center unless the curve is straight there, so wherever it bends, which
 is to say at every peak and every trough, the average is pulled toward the surroundings and the
 peak comes out lower than it is. The peak is commonly the number you were after.</p>
 
 <figure class="figure mini" id="fig-month">
   <div class="fig-body"></div>
-  <figcaption>A year of daily temperatures in grey, and a 31-day centred average through them.
+  <figcaption>A year of daily temperatures in gray, and a 31-day centered average through them.
   The average is a fair picture of the season and it has removed the one night that anybody
   wanted to know about, marked by the ringed dot where the smoothed curve runs instead. Nothing
   in the smoothed curve records that the removal happened.</figcaption>
@@ -1033,7 +1033,7 @@ frequencies it should reject and rejects some it should pass. Better weightings,
 Gaussian, Savitzky-Golay and Butterworth, trade a little more computation for a much cleaner
 separation.</p>
   <p>The trade-off this page describes survives all of them. Every smoother reduces noise by mixing
-neighbouring samples, and most therefore distort anything that varies within the
+neighboring samples, and most therefore distort anything that varies within the
 region they mix over. The shape of the U-curve changes. Its existence does not.</p>
 </div>
 
@@ -1116,14 +1116,14 @@ immediately. When the input rises sharply the output at that instant is still mo
 earlier, lower samples, so it rises later, and the sharper the feature and the heavier the
 filter, the further behind the output falls.</p>
 
-<p>The centred moving average at the start of this page is not causal. It
+<p>The centered moving average at the start of this page is not causal. It
 uses as many samples after each point as before it, so it weighs the future and the past alike
 and has no delay to correct. The lag comes from looking in one direction, and one
 pass of the CFC filter looks in one direction only.</p>
 
 <figure class="figure mini" id="fig-thermo">
   <div class="fig-body"></div>
-  <figcaption>The grey step is the water the thermometer was plunged into. The solid trace is
+  <figcaption>The gray step is the water the thermometer was plunged into. The solid trace is
   what the thermometer reads. At every instant on the way up it is reporting a temperature from
   a little while earlier, and nothing about the instrument is broken: it cannot respond to heat
   it has not yet absorbed. A filter that can only see the samples before it is in the same
@@ -1147,7 +1147,7 @@ starting at 20 ms, with its peak at exactly 30.000 ms.</p>
 
 <p>The lag grows as the filter gets heavier, by roughly the factor the cut-off falls by. The
 forward-backward column is 30.000 ms in every row, exactly and not approximately.
-These lags are quoted to the nearest sample, which at 12.5 kHz is 0.08 ms. That quantisation is
+These lags are quoted to the nearest sample, which at 12.5 kHz is 0.08 ms. That quantization is
 why the numbers are exact multiples of 0.08, and it is the same limit <a href="discrete-evaluation.html">discrete evaluation</a>
 describes, since a peak is located only as precisely as the sampling allows.</p>
 
@@ -1165,7 +1165,7 @@ afterwards.</p>
 
 <figure class="figure mini" id="fig-twopass">
   <div class="fig-body"></div>
-  <figcaption>The grey pulse is the record, repeated in all three panels. One pass of the filter
+  <figcaption>The gray pulse is the record, repeated in all three panels. One pass of the filter
   moves the peak later. Running the same filter again over that output, from the end of the
   record back to the beginning, moves it earlier by the same amount, so the two shifts cancel
   exactly. The cost is that the third panel needed samples from later in the record to produce
@@ -1300,7 +1300,7 @@ crash data</a>.</p></div>
 <p>Two channels filtered at different classes are shifted by different amounts, so any comparison
 between them acquires a timing error equal to the difference. That is a mistake that produces
 plausible numbers, and it is the reason a standard specifies the class per measurement instead
-of leaving it to whoever is analysing.</p>
+of leaving it to whoever is analyzing.</p>
 
 <h2 id="the-minimum-rate">The Minimum Rate</h2>
 
@@ -1368,7 +1368,7 @@ attenuation has to be looked for.</p></div></details></li>
 being evidence for anything.</p>
      <p>Two errors are moving in opposite directions as <em>w</em> grows. Noise is being suppressed and
 signal is being flattened. At one width they happen to cancel. That cancellation is a property
-of this record, this noise realisation and this peak. A different sample of the same
+of this record, this noise realization and this peak. A different sample of the same
 experiment would cancel at a different width, and you would have no way to find it without
 already knowing the true peak. It is also unjustifiable to a reader. "I chose <em>w</em> = 13"
 invites the question "why", and the honest answer is "because it gave 1.0001", which is the same
@@ -1453,7 +1453,7 @@ class, one pass or forward-and-backward, with the peak and the integral reported
   </script>
   
 
-  <script type="module" src="js/bundle/smoothing.js?v=20261027232552"></script>
+  <script type="module" src="js/bundle/smoothing.js?v=20261028082814"></script>
   
 
   <footer class="site-footer">

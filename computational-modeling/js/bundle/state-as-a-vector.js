@@ -130,7 +130,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
       if(by<2)by=py+18;
       if(by+LH>height-2)by=Math.max(2,height-LH-2);
       gLens.setAttribute('transform',`translate(${bx} ${by})`);
-      /* map the magnified point to the centre of the box */
+      /* map the magnified point to the center of the box */
       use.setAttribute('transform',
         `translate(${LW/2} ${LH/2}) scale(${zx} ${zy}) translate(${-px} ${-py})`);
       cross.setAttribute('cx',px);cross.setAttribute('cy',py);
@@ -263,7 +263,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
     gBand.textContent='';
     /* a horizontal threshold: a design limit, a tolerance, a level the prose
        names. Drawn in the band group so it sits under the trace rather than
-       over it, and labelled at the left where the axis already is. */
+       over it, and labeled at the left where the axis already is. */
     for(const hl of hlines){
       if(!inY(hl.y))continue;
       const hy=Y(hl.y);
@@ -578,7 +578,7 @@ function diagram(parent, spec) {
    italic (KaTeX_Math), digits, brackets and operators are upright (KaTeX_Main),
    '-' is a true minus, and _x or _{...} is a subscript, set smaller and
    dropped. The drop is done with dy on the subscript and undone on whatever
-   follows, because baseline-shift is not honoured by every browser. */
+   follows, because baseline-shift is not honored by every browser. */
 function texInto(t, src) {
   const SUB = 0.72, DROP = 0.22;            /* subscript size, and its drop in ems */
   let pending = 0;                          /* rise owed after a subscript, in ems */
@@ -826,7 +826,7 @@ function differentiate(y, dt, kind = 'central') {
   return d;
 }
 
-/* a centred moving average of odd width w */
+/* a centered moving average of odd width w */
 function movingAverage(y, w) {
   const n = y.length, half = (w - 1) >> 1, out = new Float64Array(n);
   for (let i = 0; i < n; i++) {
@@ -998,7 +998,7 @@ mountDemo({
     setting: 'A real three-pointer, carried forward with quadratic drag from its measured release ' +
              'state: 3.452&nbsp;m up, 7.78&nbsp;m/s at 37.6°. The drag on each axis depends on the ' +
              'total speed, so the two axes are coupled.',
-    source: {kind: 'mixed', text: 'The release state is measured: a least-squares fit to the free-flight frames of one tracked three-pointer, SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz. The drag coefficient is a modelling choice, not a measurement. Both the coupled and the decoupled version are integrated, so the difference between them is computed rather than argued.'},
+    source: {kind: 'mixed', text: 'The release state is measured: a least-squares fit to the free-flight frames of one tracked three-pointer, SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz. The drag coefficient is a modeling choice, not a measurement. Both the coupled and the decoupled version are integrated, so the difference between them is computed rather than argued.'},
     caption: 'The trajectory in the plane: height against horizontal distance, not against time. ' +
              'The ghost is the same flight integrated as two separate one-dimensional problems, ' +
              'each using only its own velocity component — the coupling through |v| dropped.',

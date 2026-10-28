@@ -131,7 +131,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
       if(by<2)by=py+18;
       if(by+LH>height-2)by=Math.max(2,height-LH-2);
       gLens.setAttribute('transform',`translate(${bx} ${by})`);
-      /* map the magnified point to the centre of the box */
+      /* map the magnified point to the center of the box */
       use.setAttribute('transform',
         `translate(${LW/2} ${LH/2}) scale(${zx} ${zy}) translate(${-px} ${-py})`);
       cross.setAttribute('cx',px);cross.setAttribute('cy',py);
@@ -264,7 +264,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
     gBand.textContent='';
     /* a horizontal threshold: a design limit, a tolerance, a level the prose
        names. Drawn in the band group so it sits under the trace rather than
-       over it, and labelled at the left where the axis already is. */
+       over it, and labeled at the left where the axis already is. */
     for(const hl of hlines){
       if(!inY(hl.y))continue;
       const hy=Y(hl.y);
@@ -579,7 +579,7 @@ function diagram(parent, spec) {
    italic (KaTeX_Math), digits, brackets and operators are upright (KaTeX_Main),
    '-' is a true minus, and _x or _{...} is a subscript, set smaller and
    dropped. The drop is done with dy on the subscript and undone on whatever
-   follows, because baseline-shift is not honoured by every browser. */
+   follows, because baseline-shift is not honored by every browser. */
 function texInto(t, src) {
   const SUB = 0.72, DROP = 0.22;            /* subscript size, and its drop in ems */
   let pending = 0;                          /* rise owed after a subscript, in ems */
@@ -827,7 +827,7 @@ function differentiate(y, dt, kind = 'central') {
   return d;
 }
 
-/* a centred moving average of odd width w */
+/* a centered moving average of odd width w */
 function movingAverage(y, w) {
   const n = y.length, half = (w - 1) >> 1, out = new Float64Array(n);
   for (let i = 0; i < n; i++) {
@@ -990,7 +990,7 @@ const NORMS = {
 };
 
 /* Nelder-Mead in two dimensions: enough for this, and it means all three fits
-   use the identical optimiser. */
+   use the identical optimizer. */
 function fit(objective) {
   const f = p => objective(residuals(p[0], p[1]));
   let s = [[0, 0], [1, 0], [0, 1]].map(p => ({p, v: f(p)}));
@@ -1027,7 +1027,7 @@ mountDemo({
   norms: {
     setting: 'Ten points on <em>y</em> = 2 + 1.5<em>x</em> with small scatter, and one point at ' +
              '<em>x</em>&nbsp;=&nbsp;6 moved up by 6.0. All three lines come from the same ' +
-             'optimiser with only the objective changed.',
+             'optimizer with only the objective changed.',
     source: {kind: 'constructed', text: 'Ten points on a known line with one deliberately corrupted, so each norm can be judged against the truth as well as against its own rule.'},
     caption: 'The ghost is the true line, y = 2 + 1.5x. The amber rings are the data; the ring at ' +
              'x = 6 is the bad point. Switch norms and watch which line moves.',
@@ -1143,7 +1143,7 @@ function whiteboard(root, def) {
       if (!fast) anim(E[k], [{transform: `rotate(${r}) scaleX(0)`}, {transform: `rotate(${r}) scaleX(1)`}],
                       420, {pseudoElement: '::after', easing: 'ease-out'}); },
     unstrike(...ks) { ks.forEach(k => E[k].classList.remove('on')); },
-    /* a cancelled piece fades and then closes up, so what survives slides
+    /* a canceled piece fades and then closes up, so what survives slides
        together into the next line. It must be a box (inline-block or a flex
        item); data-fold="y" closes it vertically instead, as for the bottom of
        a fraction that cancels away, bar and all */
@@ -1157,7 +1157,7 @@ function whiteboard(root, def) {
                            Object.assign({opacity: 0}, to)], 1300, {easing: 'ease-in-out'}); },
     uncollapse(...ks) { ks.forEach(k => ['width', 'height', 'marginRight', 'borderTopWidth', 'opacity']
       .forEach(p => { E[k].style[p] = ''; })); },
-    /* ink changes colour (a term added in blue joins the line in black) */
+    /* ink changes color (a term added in blue joins the line in black) */
     tint(k, c, fast) { const was = getComputedStyle(E[k]).color; E[k].style.color = c;
       if (!fast) anim(E[k], [{color: was}, {color: c}], 900, {easing: 'ease-in-out'}); },
     untint(...ks) { ks.forEach(k => { E[k].style.color = ''; }); },
@@ -1266,7 +1266,7 @@ setTimeout(() => {
 
 /* Lecture 14's own figures, all on the notes page's ten points (X, Y, a line
    y = 2 + 1.5x with the point at x = 6 moved up by 6.0) and its three fits
-   (FITS, from the page's own optimiser). Checked against the page:
+   (FITS, from the page's own optimizer). Checked against the page:
      norm 1   a 2.120  b 1.502  sum|r| 7.72   sum r^2 35.56  max|r| 5.92
      norm 2   a 2.121  b 1.614  sum|r| 10.49  sum r^2 31.99  max|r| 5.24
      norm inf a 4.835  b 1.510  sum|r| 28.77  sum r^2 83.33  max|r| 3.16
@@ -1438,7 +1438,7 @@ if (slides.length) {
 
   /* Three inks, chosen against what is actually on a slide. The first is the
      site's own "what is said about it" gold, which is what an annotation is.
-     The other two are colours the course does not use anywhere: ink has to
+     The other two are colors the course does not use anywhere: ink has to
      read over a figure, and the term green is exactly the green every plot
      trace is drawn in, so a circle round a curve in it vanishes. */
   const INKS = ['#B07A08', '#1F5FA8', '#C2381F'];
@@ -1529,7 +1529,7 @@ if (slides.length) {
     if (!drawing && !pointer) { hud.textContent = ''; return; }
     hud.innerHTML = drawing
       ? `<i style="background:${INKS[ink]}"></i>${erasing ? 'erase' : 'draw'}` +
-        `<span>1 2 3 colour &nbsp;e erase &nbsp;u undo &nbsp;c clear &nbsp;d off</span>`
+        `<span>1 2 3 color &nbsp;e erase &nbsp;u undo &nbsp;c clear &nbsp;d off</span>`
       : `<i></i>pointer<span>p off</span>`;
   }
 

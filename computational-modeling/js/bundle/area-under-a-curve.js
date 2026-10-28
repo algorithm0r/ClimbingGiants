@@ -130,7 +130,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
       if(by<2)by=py+18;
       if(by+LH>height-2)by=Math.max(2,height-LH-2);
       gLens.setAttribute('transform',`translate(${bx} ${by})`);
-      /* map the magnified point to the centre of the box */
+      /* map the magnified point to the center of the box */
       use.setAttribute('transform',
         `translate(${LW/2} ${LH/2}) scale(${zx} ${zy}) translate(${-px} ${-py})`);
       cross.setAttribute('cx',px);cross.setAttribute('cy',py);
@@ -263,7 +263,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
     gBand.textContent='';
     /* a horizontal threshold: a design limit, a tolerance, a level the prose
        names. Drawn in the band group so it sits under the trace rather than
-       over it, and labelled at the left where the axis already is. */
+       over it, and labeled at the left where the axis already is. */
     for(const hl of hlines){
       if(!inY(hl.y))continue;
       const hy=Y(hl.y);
@@ -578,7 +578,7 @@ function diagram(parent, spec) {
    italic (KaTeX_Math), digits, brackets and operators are upright (KaTeX_Main),
    '-' is a true minus, and _x or _{...} is a subscript, set smaller and
    dropped. The drop is done with dy on the subscript and undone on whatever
-   follows, because baseline-shift is not honoured by every browser. */
+   follows, because baseline-shift is not honored by every browser. */
 function texInto(t, src) {
   const SUB = 0.72, DROP = 0.22;            /* subscript size, and its drop in ems */
   let pending = 0;                          /* rise owed after a subscript, in ems */
@@ -826,7 +826,7 @@ function differentiate(y, dt, kind = 'central') {
   return d;
 }
 
-/* a centred moving average of odd width w */
+/* a centered moving average of odd width w */
 function movingAverage(y, w) {
   const n = y.length, half = (w - 1) >> 1, out = new Float64Array(n);
   for (let i = 0; i < n; i++) {
@@ -1269,7 +1269,7 @@ for (const [id, kind] of [['fig-rect', 'rect'], ['fig-trap', 'trap']]) {
     w: 660, h: 250, xRange: [A, Bx], yRange: [-1.75, 5.7], zero: true,
     title: 'x³ − 3x + 3, and the four sections of it',
     alt: 'A cubic curve that stays above the axis, divided into four equal sections by vertical '
-       + 'lines, each section labelled with its slope and its curvature: rising concave, falling '
+       + 'lines, each section labeled with its slope and its curvature: rising concave, falling '
        + 'concave, falling convex, rising convex.',
     curves: [{x, y}],
     leads: [-1, 0, 1].map(v => ({from: [v, 0.45], to: [v, 5.35], cls: 'level'})),

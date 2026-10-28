@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Least squares and the choice of norm — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261027232552">
-  <link rel="stylesheet" href="css/demos.css?v=20261027232552">
+  <link rel="stylesheet" href="css/blocks.css?v=20261028082814">
+  <link rel="stylesheet" href="css/demos.css?v=20261028082814">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -916,8 +916,8 @@
 <div class="claim">
   <span class="label">Claim</span>
   <p class="exact">Fitting requires a rule for turning a vector of residuals into one number to be
-  minimised. <dfn data-g="least-squares">Least squares</dfn> minimises the 2-norm of that vector.
-  Minimising the 1-norm or the ∞-norm instead gives different parameters from the same data and
+  minimized. <dfn data-g="least-squares">Least squares</dfn> minimizes the 2-norm of that vector.
+  Minimizing the 1-norm or the ∞-norm instead gives different parameters from the same data and
   the
   same model, and each is optimal under its own rule.</p>
   <p class="plain">  "Best fit" sounds like a property of the data, when it is a property of the data together with
@@ -937,7 +937,7 @@ $$\|r\|_p \;=\; \left( \sum_{i=1}^{m} |r_i|^p \right)^{1/p}$$
 heavily a large residual counts against a set of parameters compared with several small ones.</p>
 
 <table class="data">
-  <tr><th>Norm</th><th>Minimises</th><th>A residual twice as big counts</th><th>Name</th></tr>
+  <tr><th>Norm</th><th>Minimizes</th><th>A residual twice as big counts</th><th>Name</th></tr>
   <tr><td>$p = 1$</td><td>$\sum |r_i|$</td><td>twice as much</td><td>least absolute deviations</td></tr>
   <tr><td>$p = 2$</td><td>$\sum r_i^2$</td><td>four times as much</td><td>least squares</td></tr>
   <tr><td>$p = \infty$</td><td>$\max |r_i|$</td><td>everything, if it is the largest</td>
@@ -972,7 +972,7 @@ they give three different lines.</p>
 
 <p>Now read the slopes against the truth of 1.500. Norm 1 gives 1.502 and norm ∞ gives 1.510, while
 least squares gives 1.614, off by 7.6%. Squaring the residuals means the outlier, about four times
-the next largest residual and about ten times the median of the other nine, makes up 86% of the sum being minimised,
+the next largest residual and about ten times the median of the other nine, makes up 86% of the sum being minimized,
 so the line tilts to reduce it. The intercepts show the opposite failure. Norm ∞ gives 4.835 against a true
 2.000, because it cares only about the worst point and will move the entire line to shave the
 maximum by a little.</p>
@@ -998,7 +998,7 @@ maximum by a little.</p>
 <div class="aside">
   <span class="label">Least squares as the default</span>
   <details class="ans"><summary><span>Optional, open to read</span></summary><div class="body">
-  <p>For a model linear in its parameters, minimising Σr² gives a system of linear equations with a
+  <p>For a model linear in its parameters, minimizing Σr² gives a system of linear equations with a
 closed-form solution, so there is no iteration, no starting guess, and no convergence to check.
 Neither of the other two norms has that property. This is a computational advantage, though no
 statistical claim comes with it. It likely explains why least squares became the default, though
@@ -1033,9 +1033,9 @@ residual of 1".</p></div></details></li>
     <li>You are fitting a calibration curve that must be within ±0.02 of every measured point
     across
     its range. Which norm states that requirement, and why is least squares the wrong tool?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>The &infin;-norm</strong>, which minimises the largest deviation. The requirement is a
-bound on the <em>worst</em> point, and that is the only norm that optimises the worst point.</p>
-     <p>Least squares is the wrong tool because it will happily trade. It minimises a sum, so accepting
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>The &infin;-norm</strong>, which minimizes the largest deviation. The requirement is a
+bound on the <em>worst</em> point, and that is the only norm that optimizes the worst point.</p>
+     <p>Least squares is the wrong tool because it will happily trade. It minimizes a sum, so accepting
 one deviation of 0.05 to buy twenty improvements of 0.01 is a win by its objective and a failed
 calibration by yours. A fit can have an excellent RMS and violate the specification at a point,
 and the RMS will not mention it.</p>
@@ -1052,7 +1052,7 @@ when the residuals are well-behaved and diverge when a small number of points ar
 gap in slope is likely that signature. It suggests the least-squares answer is being steered by a few
 points, and the 1-norm answer is not. What you find there decides what to do, and the fit
 cannot tell you which case you are in. If the outlying points are transcription errors or a failed sensor, remove them
-and refit. If they are real measurements of real behaviour, they may be the most informative
+and refit. If they are real measurements of real behavior, they may be the most informative
 points you have, and the model form is what needs to change.</p></div></details></li>
   </ol>
 </div>
@@ -1083,7 +1083,7 @@ outside it reported separately.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/least-squares-is-one-norm.js?v=20261027232552"></script>
+  <script type="module" src="js/bundle/least-squares-is-one-norm.js?v=20261028082814"></script>
   
 
   <footer class="site-footer">

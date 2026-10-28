@@ -116,7 +116,7 @@ ylim([-100 750]);
 xlim([-10 160]);
 xlabel('time from contact (ms)');
 ylabel('distance since contact (mm)');
-title('(b) Distance travelled toward the barrier');
+title('(b) Distance traveled toward the barrier');
 saveas(fig, 'fig3_velocity_crush.svg');
 close(fig);
 

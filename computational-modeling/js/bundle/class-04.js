@@ -131,7 +131,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
       if(by<2)by=py+18;
       if(by+LH>height-2)by=Math.max(2,height-LH-2);
       gLens.setAttribute('transform',`translate(${bx} ${by})`);
-      /* map the magnified point to the centre of the box */
+      /* map the magnified point to the center of the box */
       use.setAttribute('transform',
         `translate(${LW/2} ${LH/2}) scale(${zx} ${zy}) translate(${-px} ${-py})`);
       cross.setAttribute('cx',px);cross.setAttribute('cy',py);
@@ -264,7 +264,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
     gBand.textContent='';
     /* a horizontal threshold: a design limit, a tolerance, a level the prose
        names. Drawn in the band group so it sits under the trace rather than
-       over it, and labelled at the left where the axis already is. */
+       over it, and labeled at the left where the axis already is. */
     for(const hl of hlines){
       if(!inY(hl.y))continue;
       const hy=Y(hl.y);
@@ -579,7 +579,7 @@ function diagram(parent, spec) {
    italic (KaTeX_Math), digits, brackets and operators are upright (KaTeX_Main),
    '-' is a true minus, and _x or _{...} is a subscript, set smaller and
    dropped. The drop is done with dy on the subscript and undone on whatever
-   follows, because baseline-shift is not honoured by every browser. */
+   follows, because baseline-shift is not honored by every browser. */
 function texInto(t, src) {
   const SUB = 0.72, DROP = 0.22;            /* subscript size, and its drop in ems */
   let pending = 0;                          /* rise owed after a subscript, in ems */
@@ -827,7 +827,7 @@ function differentiate(y, dt, kind = 'central') {
   return d;
 }
 
-/* a centred moving average of odd width w */
+/* a centered moving average of odd width w */
 function movingAverage(y, w) {
   const n = y.length, half = (w - 1) >> 1, out = new Float64Array(n);
   for (let i = 0; i < n; i++) {
@@ -1126,7 +1126,7 @@ function whiteboard(root, def) {
       if (!fast) anim(E[k], [{transform: `rotate(${r}) scaleX(0)`}, {transform: `rotate(${r}) scaleX(1)`}],
                       420, {pseudoElement: '::after', easing: 'ease-out'}); },
     unstrike(...ks) { ks.forEach(k => E[k].classList.remove('on')); },
-    /* a cancelled piece fades and then closes up, so what survives slides
+    /* a canceled piece fades and then closes up, so what survives slides
        together into the next line. It must be a box (inline-block or a flex
        item); data-fold="y" closes it vertically instead, as for the bottom of
        a fraction that cancels away, bar and all */
@@ -1140,7 +1140,7 @@ function whiteboard(root, def) {
                            Object.assign({opacity: 0}, to)], 1300, {easing: 'ease-in-out'}); },
     uncollapse(...ks) { ks.forEach(k => ['width', 'height', 'marginRight', 'borderTopWidth', 'opacity']
       .forEach(p => { E[k].style[p] = ''; })); },
-    /* ink changes colour (a term added in blue joins the line in black) */
+    /* ink changes color (a term added in blue joins the line in black) */
     tint(k, c, fast) { const was = getComputedStyle(E[k]).color; E[k].style.color = c;
       if (!fast) anim(E[k], [{color: was}, {color: c}], 900, {easing: 'ease-in-out'}); },
     untint(...ks) { ks.forEach(k => { E[k].style.color = ''; }); },
@@ -1381,7 +1381,7 @@ setTimeout(() => {
     return {X, Y, svg, add};
   }
 
-  /* one colour per class, darkest for the heaviest filter */
+  /* one color per class, darkest for the heaviest filter */
   const SHADE = {1000: '#d9a59d', 600: '#c47468', 180: '#b0443a', 60: '#6e231c'};
   const lineStyle = k => `fill:none;stroke:${SHADE[k]};stroke-width:2.4`;
 
@@ -1455,7 +1455,7 @@ setTimeout(() => {
     moment(host, T) {
       const p = peak(T, T.raw), q = peak(T, T.f[60]);
       chart(host, {h: 470, y: {lo: -1050, hi: 650, ticks: [-1000, -500, 0, 500], zero: true,
-          label: 'Civic crossmember (m/s²): as recorded (grey) and CFC 60'},
+          label: 'Civic crossmember (m/s²): as recorded (gray) and CFC 60'},
         x: {lo: 0, hi: 0.1, fmt: ms, label: 'time (ms)'},
         vlines: [{x: p.t, text: ms(p.t) + ' ms', anchor: 'start', dx: 6}, {x: q.t, text: ms(q.t) + ' ms', anchor: 'start', dx: 6}],
         series: [{x: T.t, y: T.raw, cls: 'c2-faint'}, {x: T.t, y: T.f[60], style: lineStyle(60)},
@@ -1468,7 +1468,7 @@ setTimeout(() => {
     /* outside crash testing: three small figures */
 
     /* the A-weighting a sound level meter applies, from the formula in IEC
-       61672-1 (normalised to 0 dB at 1 kHz) */
+       61672-1 (normalized to 0 dB at 1 kHz) */
     sound(host) {
       const RA = f => 12194 ** 2 * f ** 4 / ((f * f + 20.6 ** 2) *
         Math.sqrt((f * f + 107.7 ** 2) * (f * f + 737.9 ** 2)) * (f * f + 12194 ** 2));
@@ -1562,7 +1562,7 @@ setTimeout(() => {
     auto:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 3.5 20.5 7 17 10.5M3.5 11.5V10a3 3 0 0 1 3-3h14M7 20.5 3.5 17 7 13.5M20.5 12.5V14a3 3 0 0 1-3 3h-14"/></svg>'
   };
 
-  /* ---------- Player (from the 490 week 2 deck, same behaviour) ---------- */
+  /* ---------- Player (from the 490 week 2 deck, same behavior) ---------- */
   function Player(cfg){
     const S = cfg.steps, el = cfg.el, cap = cfg.cap;
     const RATE = 0.75;
@@ -1982,7 +1982,7 @@ setTimeout(() => {
     }
 
     /* The files are drawn zoomed out: each line is a bar as long as the line
-       and indented as it is, coloured by what kind of line it is, so the shape
+       and indented as it is, colored by what kind of line it is, so the shape
        of the program and the report shows as they change. Report lines wrap
        at WRAP characters, as they would on screen. */
     const WRAP = 92;
@@ -2186,7 +2186,7 @@ if (slides.length) {
 
   /* Three inks, chosen against what is actually on a slide. The first is the
      site's own "what is said about it" gold, which is what an annotation is.
-     The other two are colours the course does not use anywhere: ink has to
+     The other two are colors the course does not use anywhere: ink has to
      read over a figure, and the term green is exactly the green every plot
      trace is drawn in, so a circle round a curve in it vanishes. */
   const INKS = ['#B07A08', '#1F5FA8', '#C2381F'];
@@ -2277,7 +2277,7 @@ if (slides.length) {
     if (!drawing && !pointer) { hud.textContent = ''; return; }
     hud.innerHTML = drawing
       ? `<i style="background:${INKS[ink]}"></i>${erasing ? 'erase' : 'draw'}` +
-        `<span>1 2 3 colour &nbsp;e erase &nbsp;u undo &nbsp;c clear &nbsp;d off</span>`
+        `<span>1 2 3 color &nbsp;e erase &nbsp;u undo &nbsp;c clear &nbsp;d off</span>`
       : `<i></i>pointer<span>p off</span>`;
   }
 

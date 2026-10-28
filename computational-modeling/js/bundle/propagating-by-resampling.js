@@ -130,7 +130,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
       if(by<2)by=py+18;
       if(by+LH>height-2)by=Math.max(2,height-LH-2);
       gLens.setAttribute('transform',`translate(${bx} ${by})`);
-      /* map the magnified point to the centre of the box */
+      /* map the magnified point to the center of the box */
       use.setAttribute('transform',
         `translate(${LW/2} ${LH/2}) scale(${zx} ${zy}) translate(${-px} ${-py})`);
       cross.setAttribute('cx',px);cross.setAttribute('cy',py);
@@ -263,7 +263,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
     gBand.textContent='';
     /* a horizontal threshold: a design limit, a tolerance, a level the prose
        names. Drawn in the band group so it sits under the trace rather than
-       over it, and labelled at the left where the axis already is. */
+       over it, and labeled at the left where the axis already is. */
     for(const hl of hlines){
       if(!inY(hl.y))continue;
       const hy=Y(hl.y);
@@ -578,7 +578,7 @@ function diagram(parent, spec) {
    italic (KaTeX_Math), digits, brackets and operators are upright (KaTeX_Main),
    '-' is a true minus, and _x or _{...} is a subscript, set smaller and
    dropped. The drop is done with dy on the subscript and undone on whatever
-   follows, because baseline-shift is not honoured by every browser. */
+   follows, because baseline-shift is not honored by every browser. */
 function texInto(t, src) {
   const SUB = 0.72, DROP = 0.22;            /* subscript size, and its drop in ems */
   let pending = 0;                          /* rise owed after a subscript, in ems */
@@ -826,7 +826,7 @@ function differentiate(y, dt, kind = 'central') {
   return d;
 }
 
-/* a centred moving average of odd width w */
+/* a centered moving average of odd width w */
 function movingAverage(y, w) {
   const n = y.length, half = (w - 1) >> 1, out = new Float64Array(n);
   for (let i = 0; i < n; i++) {
@@ -1016,14 +1016,14 @@ mountDemo({
     },
     setting: 'Ten tracked frames of a real three-point attempt &mdash; 0.36&nbsp;s of flight. Each ' +
              'draw perturbs every frame by the tracker&rsquo;s own measured noise, refits the ' +
-             'parabola, re-solves for the hoop plane, and records how far from the centre the ' +
+             'parabola, re-solves for the hoop plane, and records how far from the center the ' +
              'ball is predicted to pass.',
-    source: {kind: 'measured', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz, in metres. The perturbation is the tracker&rsquo;s measured per-frame noise, 3.07&nbsp;cm vertical and 2.84&nbsp;cm horizontal &mdash; not a figure chosen to make the demonstration work.'},
+    source: {kind: 'measured', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz, in meters. The perturbation is the tracker&rsquo;s measured per-frame noise, 3.07&nbsp;cm vertical and 2.84&nbsp;cm horizontal &mdash; not a figure chosen to make the demonstration work.'},
     caption: 'The amber band is the 90% interval read off the draws so far; the marked line is what ' +
              'the unperturbed frames give. The distribution stops moving long before it looks ' +
              'smooth, which is the practical stopping rule.',
     controls: [{key: 'n', label: 'draws', min: 20, max: 1500, step: 20, value: 1000, dp: 0}],
-    panels: [{hist: true, label: 'predicted distance from the hoop centre', unit: 'cm',
+    panels: [{hist: true, label: 'predicted distance from the hoop center', unit: 'cm',
               height: 250, xLabel: 'predicted miss', xUnit: 'cm', nbins: 54}],
     readouts: [
       {key: 'n',    label: 'draws'},

@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bias and noise accumulate at different rates — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261027232552">
-  <link rel="stylesheet" href="css/demos.css?v=20261027232552">
+  <link rel="stylesheet" href="css/blocks.css?v=20261028082814">
+  <link rel="stylesheet" href="css/demos.css?v=20261028082814">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -991,7 +991,7 @@ $$\Delta t \sum_{i=1}^{n} \varepsilon_i
 <p>That result needs the $\varepsilon_i$ to be uncorrelated with one another, which is to say that
 knowing one sample's noise tells you nothing about the next one's. Being equally likely to be
 positive or negative is not enough on its own. Noise that has been smoothed or filtered fails
-this, because a filter that removes fast content makes neighbouring samples resemble each other,
+this, because a filter that removes fast content makes neighboring samples resemble each other,
 and its sum grows faster than $\sqrt{n}$. <a href="differentiation-amplifies-noise.html">Week
 4</a> measures a record where exactly that happens.</p>
 
@@ -1013,7 +1013,7 @@ nothing. Noise is reduced by averaging or by filtering. It is not removed by cor
   <figcaption>The two error terms are different kinds of thing, and this is the difference. The
   offset error is one number, drawn as one line, and it can be computed from <em>b</em> and
   <em>T</em>. The noise error is a distribution of width
-  &sigma;&radic;(&Delta;<em>tT</em>) centred on zero, and a record is one draw from it. The
+  &sigma;&radic;(&Delta;<em>tT</em>) centered on zero, and a record is one draw from it. The
   draw marked is this record's, at +0.0001&nbsp;m/s. Another test would land somewhere else under
   the same curve.</figcaption>
   <div class="source constructed"><span class="tag">Constructed</span><span>A normal curve of
@@ -1081,7 +1081,7 @@ different value of similar order.</p>
   <span class="label">The trapezoid weighting</span>
   <p>The code on this page uses the <dfn data-g="trapezoid-rule">trapezoid rule</dfn>, which weights
 the two end samples by a half instead of giving every sample equal weight. That changes $bT$ by
-one sample's worth, $b\,\Delta t$, and leaves the $\sqrt{n}$ behaviour of the noise term
+one sample's worth, $b\,\Delta t$, and leaves the $\sqrt{n}$ behavior of the noise term
 unchanged. For $n$ in the hundreds or thousands neither difference is visible, and the results
 above are used as written.</p>
 </div>
@@ -1091,7 +1091,7 @@ above are used as written.</p>
 <p>Separating the three terms requires a stretch of record where the first one is zero.</p>
 
 <p>Every crash test recording begins before the impact. During those samples the vehicle is
-travelling at constant speed on a tow line, so its true acceleration is zero. Anything the
+traveling at constant speed on a tow line, so its true acceleration is zero. Anything the
 instrument records in that window is offset plus noise, with no signal underneath. The recording
 used throughout this page is from a 2019 BMW X5 driven into a <dfn data-g="rigid-barrier">rigid
 barrier</dfn> at 15.65 m/s. The <dfn data-g="channel">channel</dfn> is a <dfn
@@ -1117,7 +1117,7 @@ about the mean is the noise.</p>
 </figure>
 
 <cg-demo name="bias-noise" src="data/test10642-crossmember-x.json"
-  caption="Left rear seat crossmember, longitudinal. The dashed grey curve is the same record
+  caption="Left rear seat crossmember, longitudinal. The dashed gray curve is the same record
   with the offset subtracted. The dotted red line on the velocity panel is bT, the error
   predicted from the offset alone."></cg-demo>
 
@@ -1155,7 +1155,7 @@ the measured curve.</p>
 <p>The noise error is a predicted spread. Reading it as a predicted value claims more than it says.
 Subtracting <var>b</var> from every sample removes the <var>bT</var> term and leaves the noise
 sum on its own. The corrected curve ends at +0.0001 m/s. That is one draw from a distribution
-centred on zero with a width of 0.0048 m/s, and this draw came out small. The same calculation
+centered on zero with a width of 0.0048 m/s, and this draw came out small. The same calculation
 on a different test would give a different value of similar size.</p>
 
 <div class="aside">
@@ -1179,7 +1179,7 @@ distinguishable from the change in speed alone:</p>
 <ul class="plain">
   <li>An uncorrected offset. A negative <var>b</var> accumulates over the record as <var>bT</var>
   and inflates the total.</li>
-  <li>A rebound. If the vehicle leaves the barrier travelling backwards, the total change in speed
+  <li>A rebound. If the vehicle leaves the barrier traveling backwards, the total change in speed
   is the approach speed plus the rebound speed, and genuinely exceeds 15.65&nbsp;m/s.</li>
 </ul>
 
@@ -1196,7 +1196,7 @@ settled by looking at the speed itself and not at the change in speed. Adding th
 </figure>
 
 <p>The speed falls, crosses zero at <strong>62&nbsp;ms</strong>, and continues into negative
-values. A negative speed means the vehicle is travelling backwards, away from the barrier. The
+values. A negative speed means the vehicle is traveling backwards, away from the barrier. The
 curve reaches &minus;2.52&nbsp;m/s at 87&nbsp;ms, comes back up, and is level at
 <strong>&minus;1.86&nbsp;m/s</strong> from about 180&nbsp;ms to the end of the record. The
 rebound is therefore observed directly, and it accounts for the discrepancy, since 15.65 + 1.86
@@ -1261,7 +1261,7 @@ seconds, from the same instrument, would not be.</p>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="1|Cumulative trapezoid: each output is the running total up to that sample ([Functions](py-functions.html)).;2|The area of each panel between two neighbouring samples, all at once ([numpy arrays](py-numpy.html)).;4|Prepend a zero so the output has the same length as the input.;7|t &lt; 0 is True or False for each sample, and a[...] keeps the samples where it is True, the ones before impact ([numpy arrays](py-numpy.html)). Their mean estimates the offset. Taking every sample before impact is a choice, made because the car is towed at a steady speed then.;9|b is the offset in m/s^2: -0.2135 for this channel.;10|Subtracting b from every sample removes the constant offset, which would otherwise integrate into a straight-line drift in v.;11|Integrating a second time gives displacement.">def integrate(y, dt):
+  <pre data-lang="python" data-notes="1|Cumulative trapezoid: each output is the running total up to that sample ([Functions](py-functions.html)).;2|The area of each panel between two neighboring samples, all at once ([numpy arrays](py-numpy.html)).;4|Prepend a zero so the output has the same length as the input.;7|t &lt; 0 is True or False for each sample, and a[...] keeps the samples where it is True, the ones before impact ([numpy arrays](py-numpy.html)). Their mean estimates the offset. Taking every sample before impact is a choice, made because the car is towed at a steady speed then.;9|b is the offset in m/s^2: -0.2135 for this channel.;10|Subtracting b from every sample removes the constant offset, which would otherwise integrate into a straight-line drift in v.;11|Integrating a second time gives displacement.">def integrate(y, dt):
     panels = (y[1:] + y[:-1]) * 0.5 * dt
     running = np.cumsum(panels)
     return np.concatenate([[0.0], running])
@@ -1327,7 +1327,7 @@ gives 0.05 &times; 2 = 0.1&nbsp;m/s.</p>
 0.5 &times; 0.05 &times; 4 = 0.1&nbsp;m.</p>
      <p>Note what happened to the exponent. The offset is constant, its effect on velocity grows as
 <em>t</em>, and its effect on displacement grows as <em>t</em>&sup2;. A bias too small to see on
-the acceleration trace, 0.05 against peaks of hundreds, becomes ten centimetres of displacement,
+the acceleration trace, 0.05 against peaks of hundreds, becomes ten centimeters of displacement,
 and would become 40&nbsp;cm in four seconds.</p></div></details></li>
     <li>The same instrument has a noise standard deviation of 2 m/s² and samples at 10 kHz. Over
     the same two seconds, is the velocity error dominated by the offset or by the noise?
@@ -1382,7 +1382,7 @@ change the spacing.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/bias-and-noise.js?v=20261027232552"></script>
+  <script type="module" src="js/bundle/bias-and-noise.js?v=20261028082814"></script>
   
 
   <footer class="site-footer">

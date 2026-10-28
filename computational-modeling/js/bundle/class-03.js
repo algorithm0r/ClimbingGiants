@@ -131,7 +131,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
       if(by<2)by=py+18;
       if(by+LH>height-2)by=Math.max(2,height-LH-2);
       gLens.setAttribute('transform',`translate(${bx} ${by})`);
-      /* map the magnified point to the centre of the box */
+      /* map the magnified point to the center of the box */
       use.setAttribute('transform',
         `translate(${LW/2} ${LH/2}) scale(${zx} ${zy}) translate(${-px} ${-py})`);
       cross.setAttribute('cx',px);cross.setAttribute('cy',py);
@@ -264,7 +264,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
     gBand.textContent='';
     /* a horizontal threshold: a design limit, a tolerance, a level the prose
        names. Drawn in the band group so it sits under the trace rather than
-       over it, and labelled at the left where the axis already is. */
+       over it, and labeled at the left where the axis already is. */
     for(const hl of hlines){
       if(!inY(hl.y))continue;
       const hy=Y(hl.y);
@@ -579,7 +579,7 @@ function diagram(parent, spec) {
    italic (KaTeX_Math), digits, brackets and operators are upright (KaTeX_Main),
    '-' is a true minus, and _x or _{...} is a subscript, set smaller and
    dropped. The drop is done with dy on the subscript and undone on whatever
-   follows, because baseline-shift is not honoured by every browser. */
+   follows, because baseline-shift is not honored by every browser. */
 function texInto(t, src) {
   const SUB = 0.72, DROP = 0.22;            /* subscript size, and its drop in ems */
   let pending = 0;                          /* rise owed after a subscript, in ems */
@@ -827,7 +827,7 @@ function differentiate(y, dt, kind = 'central') {
   return d;
 }
 
-/* a centred moving average of odd width w */
+/* a centered moving average of odd width w */
 function movingAverage(y, w) {
   const n = y.length, half = (w - 1) >> 1, out = new Float64Array(n);
   for (let i = 0; i < n; i++) {
@@ -1023,7 +1023,7 @@ class CgDemo extends HTMLElement{
     root.querySelectorAll('[data-win]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.win===win));
 
     /* The axes hold still while the offset changes. Each window's range covers
-       the record as measured and with the offset cancelled, the two states the
+       the record as measured and with the offset canceled, the two states the
        buttons set, so pressing one moves the curve on fixed axes and the change
        is visible. It widens only when the slider goes past both. */
     const curves=off=>{
@@ -1136,7 +1136,7 @@ async function growthDemo(host) {
       <div><span class="k">they cross at</span><span class="v" data-r="x"></span></div>
     </div>
     <div class="cgd-caption">The offset term is a straight line on logarithmic axes, slope 1,
-      because it is a number accumulating. The noise term is not a line: it is one realisation of a
+      because it is a number accumulating. The noise term is not a line: it is one realization of a
       random walk, and it wanders. The dotted red curve is its <em>predicted</em> size,
       &sigma;&radic;(&Delta;t&thinsp;T), which does have slope one half &mdash; and the difference
       between a curve you can draw and a curve you can only bound is the difference between the two
@@ -1159,7 +1159,7 @@ async function growthDemo(host) {
   for (let i = 0; i < n; i++) eps[i] = a[i % c] - b0;
 
   /* the predicted noise size uses sigma from the pre-impact residuals:
-     sigma*sqrt(dt*T) is a bound on a distribution, not a value the realisation
+     sigma*sqrt(dt*T) is a bound on a distribution, not a value the realization
      has to take */
   let sd = 0;
   for (let i = 0; i < c; i++) sd += eps[i] * eps[i];
@@ -1250,7 +1250,7 @@ async function growthDemo(host) {
   diagram(host, {
     w: 660, h: 250, xRange: [X0, X1], yRange: [0, 1.30],
     title: 'velocity error (m/s) after integrating the 50 ms pre-impact window',
-    alt: 'A bell curve centred on zero with one standard deviation shaded, and a single vertical '
+    alt: 'A bell curve centered on zero with one standard deviation shaded, and a single vertical '
        + 'line well to its left marking the offset error, which is one fixed number.',
     areas: [{cls: 'fill', pts: [{x: -SD, y: 0}, ...band, {x: SD, y: 0}]}],
     curves: [{x, y}],
@@ -1366,7 +1366,7 @@ function whiteboard(root, def) {
       if (!fast) anim(E[k], [{transform: `rotate(${r}) scaleX(0)`}, {transform: `rotate(${r}) scaleX(1)`}],
                       420, {pseudoElement: '::after', easing: 'ease-out'}); },
     unstrike(...ks) { ks.forEach(k => E[k].classList.remove('on')); },
-    /* a cancelled piece fades and then closes up, so what survives slides
+    /* a canceled piece fades and then closes up, so what survives slides
        together into the next line. It must be a box (inline-block or a flex
        item); data-fold="y" closes it vertically instead, as for the bottom of
        a fraction that cancels away, bar and all */
@@ -1380,7 +1380,7 @@ function whiteboard(root, def) {
                            Object.assign({opacity: 0}, to)], 1300, {easing: 'ease-in-out'}); },
     uncollapse(...ks) { ks.forEach(k => ['width', 'height', 'marginRight', 'borderTopWidth', 'opacity']
       .forEach(p => { E[k].style[p] = ''; })); },
-    /* ink changes colour (a term added in blue joins the line in black) */
+    /* ink changes color (a term added in blue joins the line in black) */
     tint(k, c, fast) { const was = getComputedStyle(E[k]).color; E[k].style.color = c;
       if (!fast) anim(E[k], [{color: was}, {color: c}], 900, {easing: 'ease-in-out'}); },
     untint(...ks) { ks.forEach(k => { E[k].style.color = ''; }); },
@@ -1731,7 +1731,7 @@ setTimeout(() => {
     },
 
     /* the vote's four constants, each added to the running total. C and D take
-       the colours of the A and B read points later, since C is at rest at A
+       the colors of the A and B read points later, since C is at rest at A
        and D is at rest at the end */
     vote(host, D) {
       const T = D[9808], end = T.n - 1;
@@ -1776,7 +1776,7 @@ setTimeout(() => {
         series: vs.map(s => ({x: T.t, y: cumulative(s.v, T.dt), cls: s.cls}))});
     },
 
-    /* step 7: acceleration, velocity and distance on one time axis, labelled
+    /* step 7: acceleration, velocity and distance on one time axis, labeled
        with what each check found. Every number is computed here from the
        record, so the labels cannot drift from the data. */
     checks(host, D) {
@@ -2066,7 +2066,7 @@ setTimeout(() => {
       labels.push({x: T.t[end], y: T.dv[end], dy: 34, anchor: 'end', cls: 'c2lab',
         text: 'end ' + f2(T.dv[end]) + ' m/s'});
     }
-    /* the lab's line is labelled at the left, clear of the end of the curve */
+    /* the lab's line is labeled at the left, clear of the end of the curve */
     chart(host, {h: 460, y: {lo: -23, hi: 2, ticks: [-20, -15, -10, -5, 0], zero: true,
         label: 'Civic crossmember, change in velocity since contact (m/s)'},
       x: {lo: -0.01, hi: T.t[end] + 0.008, fmt: ms, label: 'time (ms)'},
@@ -2325,7 +2325,7 @@ if (slides.length) {
 
   /* Three inks, chosen against what is actually on a slide. The first is the
      site's own "what is said about it" gold, which is what an annotation is.
-     The other two are colours the course does not use anywhere: ink has to
+     The other two are colors the course does not use anywhere: ink has to
      read over a figure, and the term green is exactly the green every plot
      trace is drawn in, so a circle round a curve in it vanishes. */
   const INKS = ['#B07A08', '#1F5FA8', '#C2381F'];
@@ -2416,7 +2416,7 @@ if (slides.length) {
     if (!drawing && !pointer) { hud.textContent = ''; return; }
     hud.innerHTML = drawing
       ? `<i style="background:${INKS[ink]}"></i>${erasing ? 'erase' : 'draw'}` +
-        `<span>1 2 3 colour &nbsp;e erase &nbsp;u undo &nbsp;c clear &nbsp;d off</span>`
+        `<span>1 2 3 color &nbsp;e erase &nbsp;u undo &nbsp;c clear &nbsp;d off</span>`
       : `<i></i>pointer<span>p off</span>`;
   }
 

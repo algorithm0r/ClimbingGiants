@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Solving the normal equations — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261027232552">
-  <link rel="stylesheet" href="css/demos.css?v=20261027232552">
+  <link rel="stylesheet" href="css/blocks.css?v=20261028082814">
+  <link rel="stylesheet" href="css/demos.css?v=20261028082814">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -977,7 +977,7 @@ procedure.</p>
 
 <p>The cost is about $\tfrac{2}{3}p^3$ operations, independent of $n$, because the data enter only
 when the sums are formed. Twelve parameters is a thousand operations, which is why this is done
-once at the end and not repeatedly inside a search (and why it is usually not worth optimising).</p>
+once at the end and not repeatedly inside a search (and why it is usually not worth optimizing).</p>
 
 <div class="aside">
   <span class="label">Pivoting</span>
@@ -1025,7 +1025,7 @@ problem is stated by a tall matrix $A$ whose rows are the model functions evalua
 point, and multiplying by $A^{\!\top}$ to make it square costs $\kappa(A^{\!\top}\!A) =
 \kappa(A)^2$, exactly. At degree six the tall problem has $\kappa(A) = 1.8\times10^4$ and the
 normal equations have $3.4\times10^8$, which is four digits thrown away by a step taken for
-convenience. Methods that avoid forming $A^{\!\top}\!A$, such as the QR factorisation, keep
+convenience. Methods that avoid forming $A^{\!\top}\!A$, such as the QR factorization, keep
 $\kappa(A)$ and lose half as many digits, which is why a library's least-squares routine uses
 one of them.</p>
 
@@ -1036,7 +1036,7 @@ differing only in how $x$ is expressed:</p>
   <tr><th>$x$ as</th><th class="num">condition number</th><th class="num">digits lost</th></tr>
   <tr><td>0 to 100, as measured</td><td class="num">2.0×10²⁰</td><td class="num">all 16</td></tr>
   <tr><td>0 to 1</td><td class="num">1.1×10⁷</td><td class="num">7.0</td></tr>
-  <tr><td>−1 to 1, centred</td><td class="num">1.5×10³</td><td class="num">3.2</td></tr>
+  <tr><td>−1 to 1, centered</td><td class="num">1.5×10³</td><td class="num">3.2</td></tr>
 </table>
 
 <p>Nothing about the physics or the data has changed. Shifting $x$ to sit around zero and scaling
@@ -1072,7 +1072,7 @@ was for.</p>
   <li><strong>Reporting or interpreting a coefficient.</strong> Fragile, and this is usually the
   point, because <a href="model-form-and-parameters.html" title="Model form and free parameters">page 13</a> says the parameters are what the model <em>means</em>. A fitted gravity, a decay constant and a stiffness are all coefficients, so they are the first to lose digits.</li>
   <li><strong>Evaluating outside the data.</strong> Worst of all, because extrapolation is where
-  the near-cancelling directions stop cancelling, and <a href="extrapolation-amplifies.html" title="Extrapolation and uncertainty">page 32</a> shows what distance does to an
+  the near-cancelling directions stop canceling, and <a href="extrapolation-amplifies.html" title="Extrapolation and uncertainty">page 32</a> shows what distance does to an
   error in a coefficient.</li>
 </ul>
 </div></details>
@@ -1113,14 +1113,14 @@ second method.</p>
 <h2 id="how-many-digits-you-can-report">Reportable Digits</h2>
 
 <ol class="plain">
-  <li><strong>Centre and scale $x$.</strong> Two lines, and worth several digits.</li>
+  <li><strong>Center and scale $x$.</strong> Two lines, and worth several digits.</li>
   <li><strong>Use the library's least-squares routine, not your own normal equations.</strong> It
-  will factorise and not square, and it will usually report a condition number or a rank if
+  will factorize and not square, and it will usually report a condition number or a rank if
   you
   ask.</li>
   <li><strong>Keep the degree low.</strong> The conditioning problem is often a symptom of
   asking
-  for more parameters than the data supports, which <a href="fit-error-and-prediction-error.html" title="Fit error and prediction error">page 34</a> shows is also a modelling
+  for more parameters than the data supports, which <a href="fit-error-and-prediction-error.html" title="Fit error and prediction error">page 34</a> shows is also a modeling
   mistake.</li>
   <li><strong>Check by substitution.</strong> Put the coefficients back and compute
   $A^{\!\top}\!Ac - A^{\!\top}\!y$. It is cheap, and a large result is proof of trouble, though a small one is not proof of its absence, for the reason <a href="residual-and-error.html" title="Residual and error">page 18</a> gives.</li>
@@ -1138,27 +1138,27 @@ log&#8321;&#8320;(10&#8313;) = 9 of them are gone, leaving seven (an optimistic
 reading, since the rule is only approximate). Before reporting anything, three things,
 in order of effort:</p>
      <ol>
-     <li><strong>Centre and scale <em>x</em>.</strong> Two lines. On the example above it moved
+     <li><strong>Center and scale <em>x</em>.</strong> Two lines. On the example above it moved
      the condition number by seventeen orders of magnitude, and it may remove the problem.</li>
      <li><strong>Solve it again by a method that does not form
      <em>A</em><sup>&#8868;</sup><em>A</em></strong>, the library's least-squares routine,
-     which factorises instead. If the coefficients agree to the digits you intend to print, print
+     which factorizes instead. If the coefficients agree to the digits you intend to print, print
      them.</li>
      <li><strong>Ask whether you need that many parameters.</strong> A condition number of
      10&#8313; on a polynomial fit usually means the degree is higher than the data supports,
-     which <a href="fit-error-and-prediction-error.html" title="Fit error and prediction error">page 34</a> shows is a modelling problem before it is an arithmetic one.</li>
+     which <a href="fit-error-and-prediction-error.html" title="Fit error and prediction error">page 34</a> shows is a modeling problem before it is an arithmetic one.</li>
      </ol>
      <p>Report the digits you have and not the digits the computer printed (here, seven of the
 sixteen returned).</p></div></details></li>
-    <li>Why does centring $x$ about its mean help, when shifting the data cannot change the
+    <li>Why does centering $x$ about its mean help, when shifting the data cannot change the
     underlying relationship?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Centring leaves the relationship alone and changes the <strong>basis</strong> it is
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Centering leaves the relationship alone and changes the <strong>basis</strong> it is
 expressed in, and conditioning is a property of the basis.</p>
      <p>Over 0 to 100, the functions 1, <em>x</em>, <em>x</em>&sup2;, <em>x</em>&sup3; are all large,
 all positive, and all increasing together. As vectors sampled at the data points they are nearly
 parallel, and their entries already differ by a factor of a million at <em>x</em>&sup3;. At degree
 five the entries of the normal equations span twenty orders of magnitude, which is the
-10&sup2;&#8304; in the table. Centred on zero and scaled to &plusmn;1, the even powers stay positive while the odd ones
+10&sup2;&#8304; in the table. Centered on zero and scaled to &plusmn;1, the even powers stay positive while the odd ones
 change sign halfway, the columns become far closer to orthogonal, and every entry is of order
 one. The fitted <em>curve</em> is identical either way, the same polynomial, written
 differently. What changes is how much <dfn data-g="cancellation">cancellation</dfn> the elimination has to do to find it, and
@@ -1170,7 +1170,7 @@ the same idea taken further.</p></div></details></li>
     routine, and the coefficients differ in the fourth digit while both fits have the same
     residual.
     Which do you trust, and why can the residual not settle it?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>The library routine.</strong> It almost certainly factorises the tall matrix and does
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>The library routine.</strong> It almost certainly factorizes the tall matrix and does
 not form <em>A</em><sup>&#8868;</sup><em>A</em>, so it works at &kappa;(<em>A</em>) where your
 normal equations work at &kappa;(<em>A</em>)&sup2;, twice as many digits, from the same data.</p>
      <p>The residual cannot settle it because <strong>the residual is nearly blind to this
@@ -1181,7 +1181,7 @@ figure while the curve is right to 10<sup>&minus;7</sup>&nbsp;V. So two coeffici
 differ in the fourth digit and produce residuals that agree to every digit printed. Both fits
 pass through the data equally well. They disagree about what the data <em>means</em>, and the
 residual does not measure that. If it matters, a smaller residual will not settle it.
-The check is an independent solve, meaning a different method, or the same one after centring,
+The check is an independent solve, meaning a different method, or the same one after centering,
 and agreement between them to the digits you intend to use.</p></div></details></li>
   </ol>
 </div>
@@ -1209,11 +1209,11 @@ error outside it reported separately.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/solving-the-normal-equations.js?v=20261027232552"></script>
+  <script type="module" src="js/bundle/solving-the-normal-equations.js?v=20261028082814"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-27">October 27, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

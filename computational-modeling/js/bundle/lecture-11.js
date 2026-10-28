@@ -131,7 +131,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
       if(by<2)by=py+18;
       if(by+LH>height-2)by=Math.max(2,height-LH-2);
       gLens.setAttribute('transform',`translate(${bx} ${by})`);
-      /* map the magnified point to the centre of the box */
+      /* map the magnified point to the center of the box */
       use.setAttribute('transform',
         `translate(${LW/2} ${LH/2}) scale(${zx} ${zy}) translate(${-px} ${-py})`);
       cross.setAttribute('cx',px);cross.setAttribute('cy',py);
@@ -264,7 +264,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
     gBand.textContent='';
     /* a horizontal threshold: a design limit, a tolerance, a level the prose
        names. Drawn in the band group so it sits under the trace rather than
-       over it, and labelled at the left where the axis already is. */
+       over it, and labeled at the left where the axis already is. */
     for(const hl of hlines){
       if(!inY(hl.y))continue;
       const hy=Y(hl.y);
@@ -579,7 +579,7 @@ function diagram(parent, spec) {
    italic (KaTeX_Math), digits, brackets and operators are upright (KaTeX_Main),
    '-' is a true minus, and _x or _{...} is a subscript, set smaller and
    dropped. The drop is done with dy on the subscript and undone on whatever
-   follows, because baseline-shift is not honoured by every browser. */
+   follows, because baseline-shift is not honored by every browser. */
 function texInto(t, src) {
   const SUB = 0.72, DROP = 0.22;            /* subscript size, and its drop in ems */
   let pending = 0;                          /* rise owed after a subscript, in ems */
@@ -827,7 +827,7 @@ function differentiate(y, dt, kind = 'central') {
   return d;
 }
 
-/* a centred moving average of odd width w */
+/* a centered moving average of odd width w */
 function movingAverage(y, w) {
   const n = y.length, half = (w - 1) >> 1, out = new Float64Array(n);
   for (let i = 0; i < n; i++) {
@@ -1014,7 +1014,7 @@ const peakTime = y => {
 mountDemo({
   smooth: {
     setting: 'A 2&nbsp;Hz sine of amplitude 1 at 1&nbsp;kHz with σ&nbsp;=&nbsp;0.01 noise, ' +
-             'smoothed by a centred moving average. The ghost is the noise-free signal.',
+             'smoothed by a centered moving average. The ghost is the noise-free signal.',
     source: {kind: 'mixed', text: 'A constructed 2&nbsp;Hz sine carrying <strong>real instrument noise</strong> from the pre-impact window of channel 093, so the smoothing is removing noise an accelerometer actually produced. NHTSA test 10642, 2019 BMW&nbsp;X5 into a rigid barrier at 15.65&nbsp;m/s, TRC of Ohio, 7 January 2019.'},
     caption: 'Above: the smoothed record against the truth. Below: the error against the truth at ' +
              'every window width, with the current one marked. The minimum is found by search, ' +
@@ -1282,7 +1282,7 @@ function whiteboard(root, def) {
       if (!fast) anim(E[k], [{transform: `rotate(${r}) scaleX(0)`}, {transform: `rotate(${r}) scaleX(1)`}],
                       420, {pseudoElement: '::after', easing: 'ease-out'}); },
     unstrike(...ks) { ks.forEach(k => E[k].classList.remove('on')); },
-    /* a cancelled piece fades and then closes up, so what survives slides
+    /* a canceled piece fades and then closes up, so what survives slides
        together into the next line. It must be a box (inline-block or a flex
        item); data-fold="y" closes it vertically instead, as for the bottom of
        a fraction that cancels away, bar and all */
@@ -1296,7 +1296,7 @@ function whiteboard(root, def) {
                            Object.assign({opacity: 0}, to)], 1300, {easing: 'ease-in-out'}); },
     uncollapse(...ks) { ks.forEach(k => ['width', 'height', 'marginRight', 'borderTopWidth', 'opacity']
       .forEach(p => { E[k].style[p] = ''; })); },
-    /* ink changes colour (a term added in blue joins the line in black) */
+    /* ink changes color (a term added in blue joins the line in black) */
     tint(k, c, fast) { const was = getComputedStyle(E[k]).color; E[k].style.color = c;
       if (!fast) anim(E[k], [{color: was}, {color: c}], 900, {easing: 'ease-in-out'}); },
     untint(...ks) { ks.forEach(k => { E[k].style.color = ''; }); },
@@ -1406,14 +1406,14 @@ setTimeout(() => {
 /* Lecture 11's own figures, all on the crash record, test 10642 channel 093,
    h = 8e-5 s. Checked against the file:
      raw peak -1540.6 m/s^2 at 10.80 ms; pre-impact sd 2.377
-     9-sample centred average: peak -968.3 at 10.80 ms, sd 1.204
+     9-sample centered average: peak -968.3 at 10.80 ms, sd 1.204
      jerk (central difference) over the 625 pre-impact samples: sd 16,507 raw,
      4,434 after the 9-sample average, the average taken over the whole record
      one-sided average of the sample and the 4 before it: -1317.7 at 10.96 ms,
      2 samples late; that average forward then backward: -1169.3 at 10.80 ms,
-     weights 1-2-3-4-5-4-3-2-1 over the same 9 samples as the centred average;
-     pre-impact sd 1.44 against 1.21 for the centred 9
-   centred average on the spike, lowest point between 8.5 and 13.5 ms:
+     weights 1-2-3-4-5-4-3-2-1 over the same 9 samples as the centered average;
+     pre-impact sd 1.44 against 1.21 for the centered 9
+   centered average on the spike, lowest point between 8.5 and 13.5 ms:
      w = 5 -1317.7, w = 9 -968.3, w = 25 -477.4 (at 11.12 ms)
    Hosts are found by data-fig so a figure can sit under more than one claim. */
 (() => {
@@ -1472,7 +1472,7 @@ setTimeout(() => {
       const absmax = (ys, ix) => ix.reduce((m, i) => Math.max(m, Math.abs(ys[i])), 0);
       const left = {L: 78, R: 470, x0: -0.05, x1: 0.1, xt: [-0.05, 0, 0.05, 0.1], idx: full, band: [-0.05, 0]};
       const right = {L: 584, R: 884, x0: -0.05, x1: 0, xt: [-0.05, -0.04, -0.03, -0.02, -0.01, 0], idx: pre};
-      /* the zoom sits in a frame the colour of the band it magnifies */
+      /* the zoom sits in a frame the color of the band it magnifies */
       const frame = (svg, title) => {
         el(svg, 'rect', {x: 506, y: 2, width: 392, height: HT - 4, rx: 4, fill: '#f6f7f2', stroke: '#c3d2ac'});
         el(svg, 'text', {x: 518, y: 22, class: 'mk'}, title);
@@ -1497,7 +1497,7 @@ setTimeout(() => {
                 fy: v => minus(v.toLocaleString('en-US')), raw: jr, sm: js});
     });
 
-    /* the centred average at three widths on the spike, one strip each; the
+    /* the centered average at three widths on the spike, one strip each; the
        value read is the lowest point inside the zoomed window */
     each('l11-widths', host => {
       const z0 = 0.0085, z1 = 0.0135, W = [5, 9, 25];
@@ -1516,7 +1516,7 @@ setTimeout(() => {
     });
 
     /* the average of the w samples up to and including each one: all it
-       needs is the past, and it is the centred average moved (w - 1)/2 late */
+       needs is the past, and it is the centered average moved (w - 1)/2 late */
     const trailing = (y, w) => {
       const out = new Float64Array(y.length); let s = 0;
       for (let i = 0; i < y.length; i++) {
@@ -1534,7 +1534,7 @@ setTimeout(() => {
     const ms = s => (s * 1000).toFixed(2) + ' ms';
 
     /* one pass of the sample and the 4 before it: reaches as far back as the
-       centred 9 and lags 2 samples */
+       centered 9 and lags 2 samples */
     const one = trailing(a, 5), two = rev(trailing(rev(one), 5)), c9 = movingAverage(a, 9);
     const kr = peakOf(a), k1 = peakOf(one), k2 = peakOf(two), kc = peakOf(c9);
     const lab = (name, y, k) => name + ': ' + MINUS(Math.round(y[k])) + ' at ' + ms(t[k]);
@@ -1555,13 +1555,13 @@ setTimeout(() => {
       });
     });
 
-    /* the two passes against the centred 9: the same 9 samples, weighted
+    /* the two passes against the centered 9: the same 9 samples, weighted
        1-2-3-4-5-4-3-2-1 against equally */
     each('l11-vs9', host => {
       panel(host, zoom)(t, two, a, span, {
         curves: [{...cut(c9), cls: 'pred'}],
         marks: [{t: t[k2], y: two[k2], text: lab('two passes', two, k2), dx: -10, dy: 4, anchor: 'end'},
-                {t: t[kc], y: c9[kc], text: lab('centred 9', c9, kc), dx: 10, dy: 4}]
+                {t: t[kc], y: c9[kc], text: lab('centered 9', c9, kc), dx: 10, dy: 4}]
       });
     });
   });
@@ -1653,7 +1653,7 @@ if (slides.length) {
 
   /* Three inks, chosen against what is actually on a slide. The first is the
      site's own "what is said about it" gold, which is what an annotation is.
-     The other two are colours the course does not use anywhere: ink has to
+     The other two are colors the course does not use anywhere: ink has to
      read over a figure, and the term green is exactly the green every plot
      trace is drawn in, so a circle round a curve in it vanishes. */
   const INKS = ['#B07A08', '#1F5FA8', '#C2381F'];
@@ -1744,7 +1744,7 @@ if (slides.length) {
     if (!drawing && !pointer) { hud.textContent = ''; return; }
     hud.innerHTML = drawing
       ? `<i style="background:${INKS[ink]}"></i>${erasing ? 'erase' : 'draw'}` +
-        `<span>1 2 3 colour &nbsp;e erase &nbsp;u undo &nbsp;c clear &nbsp;d off</span>`
+        `<span>1 2 3 color &nbsp;e erase &nbsp;u undo &nbsp;c clear &nbsp;d off</span>`
       : `<i></i>pointer<span>p off</span>`;
   }
 

@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Conditions — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261027232552">
-  <link rel="stylesheet" href="css/demos.css?v=20261027232552">
+  <link rel="stylesheet" href="css/blocks.css?v=20261028082814">
+  <link rel="stylesheet" href="css/demos.css?v=20261028082814">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -948,7 +948,7 @@ checks each channel and prints a flag for one whose values do not fit its unit.<
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
   <div class="panes">
-  <pre data-lang="python" data-notes="10|The condition. The indented line below runs only on a pass where this sample is below -100 m/s squared.;11|The index and the time of that sample.;12|break leaves the loop at once, so only the first such sample is printed.;15|!= means is not equal to. This line runs for a channel whose status is anything other than &#x27;ok&#x27;.;17|elif is checked only when the line above was false. and needs both sides to be true.;18|A displacement over a metre in a crash dummy&#x27;s chest cannot be right, so the header&#x27;s unit is suspect.;19|else runs when none of the conditions above were true.">import json
+  <pre data-lang="python" data-notes="10|The condition. The indented line below runs only on a pass where this sample is below -100 m/s squared.;11|The index and the time of that sample.;12|break leaves the loop at once, so only the first such sample is printed.;15|!= means is not equal to. This line runs for a channel whose status is anything other than &#x27;ok&#x27;.;17|elif is checked only when the line above was false. and needs both sides to be true.;18|A displacement over a meter in a crash dummy&#x27;s chest cannot be right, so the header&#x27;s unit is suspect.;19|else runs when none of the conditions above were true.">import json
 
 with open('crash/10642.json') as f:
     test = json.load(f)
@@ -965,7 +965,7 @@ for key, ch in test['channels'].items():
     if ch['status'] != 'ok':
         print(key, 'has status', ch['status'])
     elif ch['unit'] == 'm' and max(ch['y']) &gt; 1:
-        print(key, 'reads over a metre, so check its unit')
+        print(key, 'reads over a meter, so check its unit')
     else:
         print(key, 'ok')</pre>
   <pre data-lang="matlab" hidden data-notes="6|The same condition. MATLAB closes each if with end.;7|%g writes the time in its shortest form.;15|strcmp compares two pieces of text, and ~ means not. MATLAB&#x27;s == on text compares letter by letter.;17|elseif, one word. &amp;&amp; is and.;19|else, as in Python.">test = jsondecode(fileread('crash/10642.json'));
@@ -985,7 +985,7 @@ for k = 1:numel(names)
     if ~strcmp(ch.status, 'ok')
         fprintf('%s has status %s\n', names{k}, ch.status);
     elseif strcmp(ch.unit, 'm') &amp;&amp; max(ch.y) &gt; 1
-        fprintf('%s reads over a metre, so check its unit\n', names{k});
+        fprintf('%s reads over a meter, so check its unit\n', names{k});
     else
         fprintf('%s ok\n', names{k});
     end
@@ -997,7 +997,7 @@ head_x ok
 head_y ok
 head_z ok
 chest_x ok
-chest_d reads over a metre, so check its unit
+chest_d reads over a meter, so check its unit
 pelvis_x ok
 vehicle_x ok
 pass_head_x ok</div>
@@ -1009,7 +1009,7 @@ head_x ok
 head_y ok
 head_z ok
 chest_x ok
-chest_d reads over a metre, so check its unit
+chest_d reads over a meter, so check its unit
 pelvis_x ok
 vehicle_x ok
 pass_head_x ok</div>
@@ -1115,7 +1115,7 @@ page is listed here.</p>
 
   
 
-  <script src="js/page.js?v=20261027232552"></script>
+  <script src="js/page.js?v=20261028082814"></script>
 
   <footer class="site-footer">
     <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-27">October 27, 2026</time>.</span>

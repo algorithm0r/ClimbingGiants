@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Program shape I, state and flow — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261027232552">
-  <link rel="stylesheet" href="css/demos.css?v=20261027232552">
+  <link rel="stylesheet" href="css/blocks.css?v=20261028082814">
+  <link rel="stylesheet" href="css/demos.css?v=20261028082814">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -1114,7 +1114,7 @@ for i in range(len(a)):
     total = total + a[i]
 
 dv = total * dt</pre>
-  <pre data-lang="matlab" hidden data-notes="1|a is the whole record under one name.;2|The sampling interval, the dt value from the channel header, typed in for the example.;4|The accumulator, initialised before the loop.;6|i is scratch. It takes a new value every pass, and nothing after the loop uses it.;7|The only line that carries state between passes.">a  = loadChannel(10642, '093');
+  <pre data-lang="matlab" hidden data-notes="1|a is the whole record under one name.;2|The sampling interval, the dt value from the channel header, typed in for the example.;4|The accumulator, initialized before the loop.;6|i is scratch. It takes a new value every pass, and nothing after the loop uses it.;7|The only line that carries state between passes.">a  = loadChannel(10642, '093');
 dt = 8.0e-5;
 
 total = 0.0;
@@ -1187,7 +1187,7 @@ each line achieves it can wait.</p>
     does it have to be set before the loop, when setting it inside looks equivalent?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Zero.</strong> <code>total = 0.0</code> runs once, before the loop begins, so that on
 the first pass there is something for <code>total + a[i]</code> to add to. It has to be outside
-because the loop body runs once per pass. Move the initialisation inside and it re-runs every
+because the loop body runs once per pass. Move the initialization inside and it re-runs every
 pass, resetting the sum immediately before extending it. <code>total</code> then ends holding the
 last sample, and the sum of all of them is lost. An accumulator is a name whose value has to
 survive from one pass to the next, so it has to be created before the loop.</p></div></details></li>
@@ -1198,14 +1198,14 @@ so nothing survives from one pass to the next, and after the loop <code>peak</co
 last sample while the largest is never kept. The single change is a guard:</p>
      <p><code>if a[i] &gt; peak: peak = a[i]</code> Now the assignment depends on what previous passes
 left behind, so the value carries across and <code>peak</code> is an accumulator. Being an
-accumulator, it now needs initialising before the loop, so the one change forces the other.</p></div></details></li>
+accumulator, it now needs initializing before the loop, so the one change forces the other.</p></div></details></li>
     <li>You are handed 60 lines of unfamiliar code containing two loops. Which four things do you
     look for first?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><ol>
      <li><strong>Which names survive a pass and which do not.</strong> That splits the state
      into accumulators and scratch, and the accumulators are what the loop was written to
      build.</li>
-     <li><strong>Where each of those names is initialised</strong>, and whether it is inside or
+     <li><strong>Where each of those names is initialized</strong>, and whether it is inside or
      outside the loop. This is where the common bug lives.</li>
      <li><strong>The bounds.</strong> Where each loop starts and stops, and whether the last
      index is included. Off-by-one at an array end is the other common bug.</li>
@@ -1239,11 +1239,11 @@ page is listed here.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/program-shape-state-and-flow.js?v=20261027232552"></script>
+  <script type="module" src="js/bundle/program-shape-state-and-flow.js?v=20261028082814"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-27">October 27, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

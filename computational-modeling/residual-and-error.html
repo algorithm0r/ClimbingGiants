@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Residual and error — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261027232552">
-  <link rel="stylesheet" href="css/demos.css?v=20261027232552">
+  <link rel="stylesheet" href="css/blocks.css?v=20261028082814">
+  <link rel="stylesheet" href="css/demos.css?v=20261028082814">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -920,7 +920,7 @@
   it was fitted to. The error is the gap between the model and the truth. They are computed from different things. The residual comes from data you have, and the error from a truth you usually do not,
   and a small residual does not imply a small error.</p>
   <p class="plain">  How close the curve came to your points is not how close it came to being right. Fitting
-  minimises the first of those, and nothing has minimised the second.</p>
+  minimizes the first of those, and nothing has minimized the second.</p>
 </div>
 
 <h2 id="residual-and-error-defined">Definitions</h2>
@@ -929,7 +929,7 @@
   <tr><th></th><th>Residual</th><th>Error</th></tr>
   <tr><td>measured against</td><td>the data used to fit</td><td>the true value</td></tr>
   <tr><td>available?</td><td>always</td><td>only when the truth is known</td></tr>
-  <tr><td>what the fit did to it</td><td>minimised it</td><td>nothing</td></tr>
+  <tr><td>what the fit did to it</td><td>minimized it</td><td>nothing</td></tr>
   <tr><td>evaluated where</td><td>at the fitted points</td><td>anywhere, including outside them</td></tr>
   <tr><td>gets smaller with more parameters</td><td>always</td><td>only up to a point</td></tr>
 </table>
@@ -942,7 +942,7 @@ to read as evidence about the truth, though what it reports is that the algorith
 <p>140 real three-point attempts. Each one gets a parabola fitted to its first few frames after
 release, extrapolated to the plane of the hoop at 3.048&nbsp;m, and compared against the answer.
 Every arc has been screened for free flight, so what follows is unlikely to be a tracking
-artefact. One point per shot: how well the fit matched its own frames, against how far it
+artifact. One point per shot: how well the fit matched its own frames, against how far it
 landed.</p>
 
 <cg-demo case="resid"></cg-demo>
@@ -965,7 +965,7 @@ how far its prediction will land from the answer.</p>
 <strong>tightest</strong> fit in the whole set, residual 0.53&nbsp;cm, a sixth of the tracker's
 own noise, lands 5&nbsp;cm from the answer. The <strong>loosest</strong> fit, residual
 4.88&nbsp;cm, nine times worse by the only measure available at the time, lands 7&nbsp;cm from
-the answer. Their errors are two centimetres apart, on fits that look like different species. Elsewhere in the
+the answer. Their errors are two centimeters apart, on fits that look like different species. Elsewhere in the
 same cloud, a fit of 0.81&nbsp;cm, the fourth tightest of the 140, lands 186&nbsp;cm out.</p>
 
 <p>The median residual <em>rises</em> from 1.27 to
@@ -977,7 +977,7 @@ lets the parabola bend to the noise. The number that improves is the error, whic
 
 <p>Three mechanisms, and they compound:</p>
 
-<p><strong>The fit is judged where the data are.</strong> Least squares minimises the residual at
+<p><strong>The fit is judged where the data are.</strong> Least squares minimizes the residual at
 the ten frames and says nothing about $t = 1.07$ s, which in the first three rows is beyond all
 of them. A curve constrained at one end is free at the other, and the residual is computed
 entirely at the constrained end, which is why it can be small while the free end wanders.</p>
@@ -1109,7 +1109,7 @@ better on 14 of 23.</p>
 within 1&nbsp;m of the hoop. <code>fit_free</code> fits $a + bt + ct^2$ to $z$, and
 <code>fit_held</code> fits $a + bt$ to $z + \tfrac{1}{2}(9.81)t^2$ and returns $c = -9.81/2$ with
 it, both by least squares. <code>rms</code> evaluates the parabola at the given times and returns
-the RMS of its difference from the heights, in centimetres.</p>
+the RMS of its difference from the heights, in centimeters.</p>
 
 <div class="codetabs">
   <div class="tabs" role="tablist">
@@ -1156,7 +1156,7 @@ accuracy, meaning the error at any point outside the data, whether the model for
 whether the parameters mean what their names suggest. The demo on this page measures the
 relationship across 140 real shots and finds a correlation of &minus;0.003, so on this evidence
 the residual carries no usable information about the error.</p>
-     <p>The misleading word is "good". It attaches a judgement of quality to a number that only
+     <p>The misleading word is "good". It attaches a judgment of quality to a number that only
 describes the fit's relationship with its own inputs. A useful reply is to ask what the model is
 <em>for</em>, and then what the error is at that point, which almost always requires holding
 data back.</p></div></details></li>
@@ -1178,7 +1178,7 @@ region is a sign of the first case. A uniform shrink everywhere is a sign of the
     why
     is that still not the prediction error?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>It is fair when the <strong>model form is correct</strong>, so that what is left over is noise
-and not unmodelled signal, and when there are <strong>many more points than parameters</strong>.
+and not unmodeled signal, and when there are <strong>many more points than parameters</strong>.
 With <em>n</em> points and <em>p</em> parameters the fit absorbs some of the noise into the
 parameters, and the residual scatter underestimates &sigma; by a factor of about
 &radic;((<em>n</em>&nbsp;&minus;&nbsp;<em>p</em>)/<em>n</em>). At ten points and three
@@ -1218,11 +1218,11 @@ outside it reported separately.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/residual-and-error.js?v=20261027232552"></script>
+  <script type="module" src="js/bundle/residual-and-error.js?v=20261028082814"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-27">October 27, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

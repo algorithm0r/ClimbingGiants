@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Model form and free parameters — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261027232552">
-  <link rel="stylesheet" href="css/demos.css?v=20261027232552">
+  <link rel="stylesheet" href="css/blocks.css?v=20261028082814">
+  <link rel="stylesheet" href="css/demos.css?v=20261028082814">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -968,7 +968,7 @@ Gravity gives the ball a nearly constant downward acceleration (air resistance a
 its vertical velocity decreases steadily during the flight, $v = v_0 - gt$. This is the
 form of a line of best fit, with $v_0$ as the intercept and $-g$ as the slope. The velocities come
 from the heights by the <a href="finite-differences.html">central difference</a> from week 4,
-one for each frame that has a neighbour on both sides (29 of the 31).</p>
+one for each frame that has a neighbor on both sides (29 of the 31).</p>
 
 <p>With both parameters fitted, the fit returns $v_0 = 5.85$&nbsp;m/s and $g = 9.60$&nbsp;m/s², within 2.1% of 9.81&nbsp;m/s². The
 velocities scatter widely about their line (0.51&nbsp;m/s RMS, and up to 1.2&nbsp;m/s), because
@@ -1019,7 +1019,7 @@ speed two frames earlier (3.83&nbsp;m/s) keeps the rule going.</p>
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="1|Returns the frame where the ball left the hand, given the times t and heights z of one shot ([Functions](py-functions.html)).;2|An array of nan (not a number), one per frame, for the vertical speeds. The first two and last two frames keep nan, since they have no neighbour two frames away.;3|The vertical speed at every frame except the two at each end, all at once: the height two frames ahead minus the height two frames behind, over the time between them ([numpy arrays](py-numpy.html)).;4|Start at the highest point, where the ball is certainly in free flight. np.argmax gives the index of the largest height.;5|Step back while the speed one or two frames earlier was higher ([Loops](py-loops.html)). Looking two frames back as well as one is a choice, made so a single noisy speed cannot stop the walk early. i &gt; 3 stops it before it runs into the nan at the start.;6|One frame back.;7|The frame where the speed stopped growing, taken as the release.">def release(t, z):
+  <pre data-lang="python" data-notes="1|Returns the frame where the ball left the hand, given the times t and heights z of one shot ([Functions](py-functions.html)).;2|An array of nan (not a number), one per frame, for the vertical speeds. The first two and last two frames keep nan, since they have no neighbor two frames away.;3|The vertical speed at every frame except the two at each end, all at once: the height two frames ahead minus the height two frames behind, over the time between them ([numpy arrays](py-numpy.html)).;4|Start at the highest point, where the ball is certainly in free flight. np.argmax gives the index of the largest height.;5|Step back while the speed one or two frames earlier was higher ([Loops](py-loops.html)). Looking two frames back as well as one is a choice, made so a single noisy speed cannot stop the walk early. i &gt; 3 stops it before it runs into the nan at the start.;6|One frame back.;7|The frame where the speed stopped growing, taken as the release.">def release(t, z):
     vz = np.full(len(t), np.nan)
     vz[2:-2] = (z[4:] - z[:-4]) / (t[4:] - t[:-4])
     i = int(np.argmax(z))
@@ -1037,12 +1037,12 @@ end</pre>
   <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
 </div>
 
-<p>The first two and last two frames have no neighbours two frames away, so their speeds are left
+<p>The first two and last two frames have no neighbors two frames away, so their speeds are left
 as <code>nan</code> (not a number), and the slices <code>z[4:]</code> and <code>z[:-4]</code> line
 up the frame two ahead of each frame with the frame two behind it.</p>
 
 <p>The example pack's own programs end the window at the first frame within 1&nbsp;m of the hoop
-centre, measured horizontally (from <em>x</em> and <em>y</em>, ignoring height), which comes before
+center, measured horizontally (from <em>x</em> and <em>y</em>, ignoring height), which comes before
 the ball can reach the rim or the backboard. For shot 1092 that is frame 37, so the free-flight window is frames 11 to 36,
 26 frames in all. Across the 24 example shots the two rules put the release anywhere from frame 3
 to frame 19 (on one shot the speed is already falling at the start of the record, so the rule
@@ -1072,7 +1072,7 @@ reading them is a separate page in week 10.</p>
   <li><strong>The physics.</strong> The straight line for the distance above came from here
   (gravity pulls only downward, so the horizontal speed stays nearly steady). A projectile under gravity gives
   $y = y_0 + v_0 t - \tfrac{1}{2}gt^2$, a parabola with three parameters that are a height, a speed and an acceleration. Fitting then measures physical quantities, and each has units.</li>
-  <li><strong>A known limiting behaviour.</strong> Something that decays to zero suggests
+  <li><strong>A known limiting behavior.</strong> Something that decays to zero suggests
   $a e^{-kx}$. Something that saturates suggests $a x /(b + x)$. The parameters mean less than in
   the
   first case but the form is still constrained by an argument.</li>
@@ -1093,15 +1093,15 @@ fit. That is, they restate the data, with the noise included as if it were signa
 in it move in opposite directions. The residual falls monotonically toward zero, while the error
 against the true curve falls, reaches a minimum at the correct degree, and then rises sharply.
 Only one of the two is available to you on real data. The degree at which the residual stops
-falling <em>usefully</em> is the one to take, and "usefully" is a judgement that week 10 gives a
+falling <em>usefully</em> is the one to take, and "usefully" is a judgment that week 10 gives a
 sharper edge. For now the rule is that a model with more parameters than the physics calls for
 is <dfn data-g="overfitting">describing the noise</dfn>, and the noise will be different next
 time.</p>
 
 <div class="aside">
   <span class="label">Parameter units</span>
-  <p>In $y = y_0 + v_0 t - \tfrac{1}{2}gt^2$ fitted to metres against seconds, the three coefficients
-come out in metres, metres per second, and metres per second squared. A fitted $g$ of 9.7 m/s²
+  <p>In $y = y_0 + v_0 t - \tfrac{1}{2}gt^2$ fitted to meters against seconds, the three coefficients
+come out in meters, meters per second, and meters per second squared. A fitted $g$ of 9.7 m/s²
 is then checkable against 9.81, and a fitted $g$ of 340 is a signal that something is wrong
 before any residual has been inspected. A polynomial fitted for convenience has coefficients in
 m, m/s, m/s² too, but nothing to check them against, and that is what is given up by
@@ -1145,7 +1145,7 @@ curvature the parabola has to absorb into <em>g</em>.</p>
 problem usually shows as structure concentrated at one end. A model-form problem usually shows as
 structure spread through the middle. The window is also the cheaper thing to be wrong about and the easier
 to fix. There is one more reason to look at the window first, which is that 11.4 is
-<em>above</em> 9.81. Drag reduces the fitted curvature, so unmodelled drag cannot explain a value
+<em>above</em> 9.81. Drag reduces the fitted curvature, so unmodeled drag cannot explain a value
 above 9.81.</p></div></details></li>
   </ol>
 </div>
@@ -1176,11 +1176,11 @@ outside it reported separately.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/model-form-and-parameters.js?v=20261027232552"></script>
+  <script type="module" src="js/bundle/model-form-and-parameters.js?v=20261028082814"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-27">October 27, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

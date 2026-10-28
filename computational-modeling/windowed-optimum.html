@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>A constrained optimum over a window — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261027232552">
-  <link rel="stylesheet" href="css/demos.css?v=20261027232552">
+  <link rel="stylesheet" href="css/blocks.css?v=20261028082814">
+  <link rel="stylesheet" href="css/demos.css?v=20261028082814">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -991,7 +991,7 @@ the maximum, evaluated for the window you have placed, and then you run the sear
 <cg-demo case="hic"></cg-demo>
 
 <p>Placing the window by eye over the peak gets close, though it falls short of the optimum. The peak resultant
-is 48.7 <em>g</em> at 78.6 ms, though the optimal window does not centre on it, because the
+is 48.7 <em>g</em> at 78.6 ms, though the optimal window does not center on it, because the
 score rewards a sustained high average and so settles slightly earlier where the trace is broad,
 and not where it is tallest.</p>
 
@@ -1029,13 +1029,13 @@ Beyond it the score falls again, because extending the window adds low-accelerat
 pull the mean down faster than the extra length pushes the product up. So the problem is well posed without
 the limit, and the limit is there because
 the criterion is a statement about head loading sustained over a particular duration, and 15 ms
-is the duration the standard is about. It is a modelling decision written into the definition,
+is the duration the standard is about. It is a modeling decision written into the definition,
 and on this record that decision changes the answer by a factor of nearly two
 (HIC<sub>15</sub> against HIC<sub>36</sub>).</p>
 
 <div class="aside standard"><span class="label">The standard</span>
 <p><strong>FMVSS 208</strong> S6.2 fixes the limit. HIC is computed over any
-interval no longer than <strong>15 ms</strong>, on the resultant acceleration at the head centre
+interval no longer than <strong>15 ms</strong>, on the resultant acceleration at the head center
 of gravity, and must not exceed <strong>700</strong> for the 50th percentile male. An earlier
 version of the rule used 36 ms against 1000, and numbers from the two are not comparable. See <a
 href="standards.html">The standards behind the crash data</a>.</p></div>
@@ -1043,7 +1043,7 @@ href="standards.html">The standards behind the crash data</a>.</p></div>
 <h2 id="avoiding-recomputation">Prefix Sums</h2>
 
 <p>Each candidate window needs $\int_{t_1}^{t_2} a\,\mathrm{d}t$. Computing that separately for
-every window repeats almost all of the work, because neighbouring windows share almost all of
+every window repeats almost all of the work, because neighboring windows share almost all of
 their samples. Build the cumulative integral once:</p>
 
 $$S_k \;=\; \int_{t_0}^{t_k} a\,\mathrm{d}t
@@ -1085,7 +1085,7 @@ exceeds the limit, which is what keeps the candidate set to the diagonal band.</
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="3|wmax is the longest window allowed, and mode says whether to look for the largest or smallest score ([Functions](py-functions.html)).;4|np.diff(t) is the spacing between each pair of neighbouring times ([numpy arrays](py-numpy.html)).;5|The prefix sum, built once. Every window's integral comes from this array.;7|Start below any real score, so the first window always beats it. best holds the score and the two ends of its window.;11|Every admissible start ([Loops](py-loops.html)).;12|Every end after that start.;14|Stop extending this window once it exceeds the limit, which is the constraint. break leaves the inner loop only.;16|The mean over the window. Its integral is one subtraction, S[j] - S[i], whatever the window's length, and dividing by T gives the mean.;17|The quantity inside the maximum, for this one window.;23|best holds the score and the window's two ends, as a tuple.">import numpy as np
+  <pre data-lang="python" data-notes="3|wmax is the longest window allowed, and mode says whether to look for the largest or smallest score ([Functions](py-functions.html)).;4|np.diff(t) is the spacing between each pair of neighboring times ([numpy arrays](py-numpy.html)).;5|The prefix sum, built once. Every window's integral comes from this array.;7|Start below any real score, so the first window always beats it. best holds the score and the two ends of its window.;11|Every admissible start ([Loops](py-loops.html)).;12|Every end after that start.;14|Stop extending this window once it exceeds the limit, which is the constraint. break leaves the inner loop only.;16|The mean over the window. Its integral is one subtraction, S[j] - S[i], whatever the window's length, and dividing by T gives the mean.;17|The quantity inside the maximum, for this one window.;23|best holds the score and the window's two ends, as a tuple.">import numpy as np
 
 def windowed_optimum(t, a, wmax, mode="max"):
     panels = (a[1:] + a[:-1]) * 0.5 * np.diff(t)
@@ -1226,15 +1226,15 @@ a second, and 150 at 10&nbsp;000).</p>
 sample intervals long, and with a window starting at every sample (those before the impact
 included) the search examines 2&nbsp;055&nbsp;150 of them. On the machine that produced this page
 (Python 3.11) it returns HIC<sub>15</sub> = 150.39 on the window from 60.85 to 75.85&nbsp;ms in about
-0.7&nbsp;s (a time like this varies a little from run to run, and more from machine to machine). MATLAB's
+0.75&nbsp;s (a time like this varies a little from run to run, and more from machine to machine). MATLAB's
 <code>tic</code> and <code>toc</code> and JavaScript's <code>performance.now()</code> do the
 same job.</p>
 
 <p>The time for many searches is the time for one multiplied by the number of searches. Two
-hundred tests like this one would take about 200&nbsp;&times;&nbsp;0.7&nbsp;s, or about 2.3 minutes.
+hundred tests like this one would take about 200&nbsp;&times;&nbsp;0.75&nbsp;s, or about 2.5 minutes.
 Without the limit the same record has 24&nbsp;503&nbsp;500 windows, twelve times as many, and one
-search took about 8.5&nbsp;s (returning 334.02, which is not HIC<sub>15</sub>), so two hundred would
-take about 28 minutes. The time per window, about a third of a microsecond here, depends on the
+search took about 8.9&nbsp;s (returning 334.02, which is not HIC<sub>15</sub>), so two hundred would
+take about 30 minutes. The time per window, about a third of a microsecond here, depends on the
 machine and the language, while the count does not. For this reason it is a good idea to report
 both.</p>
 
@@ -1245,20 +1245,20 @@ both.</p>
     definition alone, why HIC<sub>36</sub> can never be smaller than HIC<sub>15</sub> for any
     record.
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Because the HIC36 search is over a <strong>superset</strong> of the windows HIC15 searches. Both
-maximise the same functional. They differ only in the constraint: HIC15 admits windows of length
+maximize the same functional. They differ only in the constraint: HIC15 admits windows of length
 up to 15&nbsp;ms, HIC36 up to 36&nbsp;ms. Every window admissible for HIC15 is admissible for
 HIC36, so HIC36's search includes HIC15's winner as a candidate and cannot return less than its
 value.</p>
      <p>A maximum over a larger feasible set is never smaller. No property of the record is needed.
 Smoothness, shape and the particular numbers 389.4 and 208.2 are all irrelevant. It is a fact
-about constrained optimisation. This also means the pair carries information. HIC36 = HIC15
+about constrained optimization. This also means the pair carries information. HIC36 = HIC15
 says the best window is shorter than 15&nbsp;ms and the looser limit bought nothing. Here HIC36 is
 larger, so the best window is longer than 15&nbsp;ms.</p></div></details></li>
     <li>The optimal 15 ms window is 69.92 to 84.88 ms, and the peak acceleration is at 78.6 ms.
-    Why is the peak not at the centre of the window?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Because the window is positioned to maximise a functional of the <em>average</em> over its
+    Why is the peak not at the center of the window?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Because the window is positioned to maximize a functional of the <em>average</em> over its
 length, and the record is not symmetric about its peak.</p>
-     <p>The window runs 69.92 to 84.88&nbsp;ms, so its centre is 77.40&nbsp;ms and the peak is at 78.60,
+     <p>The window runs 69.92 to 84.88&nbsp;ms, so its center is 77.40&nbsp;ms and the peak is at 78.60,
 1.2&nbsp;ms late. The optimum is where the marginal contributions at the two ends balance.
 Extending the leading edge adds whatever acceleration is there, and the trailing edge likewise,
 and the window settles where those are equal. If the record rises more slowly than it falls, the
@@ -1310,11 +1310,11 @@ constrained windowed optimum with the exponent and the window limit both free.</
   </script>
   
 
-  <script type="module" src="js/bundle/windowed-optimum.js?v=20261027232552"></script>
+  <script type="module" src="js/bundle/windowed-optimum.js?v=20261028082814"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-27">October 27, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

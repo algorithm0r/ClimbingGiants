@@ -130,7 +130,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
       if(by<2)by=py+18;
       if(by+LH>height-2)by=Math.max(2,height-LH-2);
       gLens.setAttribute('transform',`translate(${bx} ${by})`);
-      /* map the magnified point to the centre of the box */
+      /* map the magnified point to the center of the box */
       use.setAttribute('transform',
         `translate(${LW/2} ${LH/2}) scale(${zx} ${zy}) translate(${-px} ${-py})`);
       cross.setAttribute('cx',px);cross.setAttribute('cy',py);
@@ -263,7 +263,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
     gBand.textContent='';
     /* a horizontal threshold: a design limit, a tolerance, a level the prose
        names. Drawn in the band group so it sits under the trace rather than
-       over it, and labelled at the left where the axis already is. */
+       over it, and labeled at the left where the axis already is. */
     for(const hl of hlines){
       if(!inY(hl.y))continue;
       const hy=Y(hl.y);
@@ -578,7 +578,7 @@ function diagram(parent, spec) {
    italic (KaTeX_Math), digits, brackets and operators are upright (KaTeX_Main),
    '-' is a true minus, and _x or _{...} is a subscript, set smaller and
    dropped. The drop is done with dy on the subscript and undone on whatever
-   follows, because baseline-shift is not honoured by every browser. */
+   follows, because baseline-shift is not honored by every browser. */
 function texInto(t, src) {
   const SUB = 0.72, DROP = 0.22;            /* subscript size, and its drop in ems */
   let pending = 0;                          /* rise owed after a subscript, in ems */
@@ -826,7 +826,7 @@ function differentiate(y, dt, kind = 'central') {
   return d;
 }
 
-/* a centred moving average of odd width w */
+/* a centered moving average of odd width w */
 function movingAverage(y, w) {
   const n = y.length, half = (w - 1) >> 1, out = new Float64Array(n);
   for (let i = 0; i < n; i++) {
@@ -989,7 +989,7 @@ mountDemo({
     setting: 'The integrated crossmember channel from the previous page. The laboratory measured ' +
              'this vehicle into the barrier at 15.65&nbsp;m/s.',
     source: {kind: 'measured', text: 'Channel 093 integrated once. The tow speed of 15.65&nbsp;m/s is the laboratory&rsquo;s own measurement. NHTSA test 10642, 2019 BMW&nbsp;X5 into a rigid barrier at 15.65&nbsp;m/s, TRC of Ohio, 7 January 2019.'},
-    caption: 'The dashed grey curve is the same integral with C = 0. Every curve here is an equally ' +
+    caption: 'The dashed gray curve is the same integral with C = 0. Every curve here is an equally ' +
              'valid integral of the same acceleration; only one of them is the vehicle&rsquo;s speed.',
     controls: [{key: 'C', label: 'constant C', min: -2, max: 20, step: 'any',
                 value: 0, dp: 2, unit: 'm/s'}],
@@ -1107,7 +1107,7 @@ const CI_VEL = t => {
   const X0 = 0.5, V0 = 2.0;
   const cells = diagramRow(host, 2);
 
-  /* one pair of axes cannot show half a metre and twenty metres at once, so
+  /* one pair of axes cannot show half a meter and twenty meters at once, so
      the first second and the first ten get a panel each */
   const series = T => {
     const t = [], pos = [], vel = [];
@@ -1121,7 +1121,7 @@ const CI_VEL = t => {
   diagram(cells[0], {
     w: 330, h: 230, xRange: [0, 1], yRange: [0, 2.2],
     title: 'the first second',
-    alt: 'Over one second the constant position error is a flat line at half a metre and the '
+    alt: 'Over one second the constant position error is a flat line at half a meter and the '
        + 'velocity error rises through it at a quarter of a second.',
     curves: [{x: a.t, y: a.vel}, {x: a.t, y: a.pos, cls: 'alt'}],
     points: [{x: 0.25, y: 0.5, r: 4, cls: 'miss'}, {x: 1, y: 2, r: 4}],
@@ -1136,8 +1136,8 @@ const CI_VEL = t => {
   diagram(cells[1], {
     w: 330, h: 230, xRange: [0, 10], yRange: [0, 22],
     title: 'the first ten seconds',
-    alt: 'Over ten seconds the velocity error reaches twenty metres and the constant position '
-       + 'error is still half a metre, flat along the axis.',
+    alt: 'Over ten seconds the velocity error reaches twenty meters and the constant position '
+       + 'error is still half a meter, flat along the axis.',
     curves: [{x: b.t, y: b.vel}, {x: b.t, y: b.pos, cls: 'alt'}],
     points: [{x: 1, y: 2, r: 3.6}, {x: 2, y: 4, r: 3.6}, {x: 10, y: 20, r: 4}],
     notes: [

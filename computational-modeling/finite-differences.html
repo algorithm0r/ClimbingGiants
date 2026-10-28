@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Finite differences — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261027232552">
-  <link rel="stylesheet" href="css/demos.css?v=20261027232552">
+  <link rel="stylesheet" href="css/blocks.css?v=20261028082814">
+  <link rel="stylesheet" href="css/demos.css?v=20261028082814">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -938,7 +938,7 @@ $$\text{central:}\quad f'(x) \approx \frac{f(x+h) - f(x-h)}{2h}$$
 <figure class="figure mini" id="fig-stencils">
   <div class="fig-body"></div>
   <figcaption>The same curve and the same point in all three panels. The gold dots are the samples
-  each rule uses, the red line is the chord through them, and its slope is the estimate. The grey
+  each rule uses, the red line is the chord through them, and its slope is the estimate. The gray
   dashed line is the true tangent. Forward reads the slope too shallow and backward reads it too
   steep, which is what the algebra below predicts for a curve bending this way. The central chord is exactly the average
   of the other two, and it lands far closer to the tangent than either. Central also skips the
@@ -1064,7 +1064,7 @@ answer (the tracked basketball arcs are exactly this case).</p>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="2|An array the same size as y, to be filled in below. Its starting values are whatever happened to be in memory, so every entry has to be set.;3|The interior: every sample that has a neighbour on both sides. y[2:] - y[:-2] gives, for each interior sample, the next sample minus the previous one, all at once ([numpy arrays](py-numpy.html)).;4|First sample: forward, because there is nothing to its left. How to treat the two ends is a choice.;5|Last sample: backward. These two values are order 1 where the rest are order 2.;9|numpy.gradient does the same thing, and I recommend calling it in your own programs.">def derivative(y, dt):
+  <pre data-lang="python" data-notes="2|An array the same size as y, to be filled in below. Its starting values are whatever happened to be in memory, so every entry has to be set.;3|The interior: every sample that has a neighbor on both sides. y[2:] - y[:-2] gives, for each interior sample, the next sample minus the previous one, all at once ([numpy arrays](py-numpy.html)).;4|First sample: forward, because there is nothing to its left. How to treat the two ends is a choice.;5|Last sample: backward. These two values are order 1 where the rest are order 2.;9|numpy.gradient does the same thing, and I recommend calling it in your own programs.">def derivative(y, dt):
     d = np.empty_like(y)
     d[1:-1] = (y[2:] - y[:-2]) / (2 * dt)
     d[0]    = (y[1] - y[0]) / dt
@@ -1118,7 +1118,7 @@ bottom of that curve, and a smaller step is unlikely to help.</p></div></details
 difference is too large by <em>h</em><em>f</em>&Prime;/2 and the backward difference is too
 small by the same amount, which is the same error with opposite signs.
 Averaging cancels it exactly, and the first term to survive is of order <em>h</em>&sup2;. The
-manoeuvre is worth more than the one formula it produced here. Two estimates whose leading
+maneuver is worth more than the one formula it produced here. Two estimates whose leading
 errors are equal and opposite may be combined into a better one, and the same move gives Heun's
 method in week 8 and Richardson extrapolation wherever it appears.</p></div></details></li>
     <li>A library returns a derivative array the same length as its input. What must it have done
@@ -1126,7 +1126,7 @@ method in week 8 and Richardson extrapolation wherever it appears.</p></div></de
     the ends, and when would you care?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>A central difference needs a sample either side, so it cannot be formed at the first or last
 point. To return an array of the same length the library must have done something else there,
-such as a one-sided difference, a copy of the neighbouring value, or a padded extrapolation. All
+such as a one-sided difference, a copy of the neighboring value, or a padded extrapolation. All
 three are common and libraries seldom say which one they used. You care whenever <strong>the
 answer lives near an end</strong>, as it does for a peak in the first millisecond of a record, a
 release frame at the start of a tracked arc, or a slope read at <em>t</em>&nbsp;=&nbsp;0 for an
@@ -1162,11 +1162,11 @@ forward and central differences at any spacing. On a generated signal the exact 
   </script>
   
 
-  <script type="module" src="js/bundle/finite-differences.js?v=20261027232552"></script>
+  <script type="module" src="js/bundle/finite-differences.js?v=20261028082814"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-27">October 27, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

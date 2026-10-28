@@ -130,7 +130,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
       if(by<2)by=py+18;
       if(by+LH>height-2)by=Math.max(2,height-LH-2);
       gLens.setAttribute('transform',`translate(${bx} ${by})`);
-      /* map the magnified point to the centre of the box */
+      /* map the magnified point to the center of the box */
       use.setAttribute('transform',
         `translate(${LW/2} ${LH/2}) scale(${zx} ${zy}) translate(${-px} ${-py})`);
       cross.setAttribute('cx',px);cross.setAttribute('cy',py);
@@ -263,7 +263,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
     gBand.textContent='';
     /* a horizontal threshold: a design limit, a tolerance, a level the prose
        names. Drawn in the band group so it sits under the trace rather than
-       over it, and labelled at the left where the axis already is. */
+       over it, and labeled at the left where the axis already is. */
     for(const hl of hlines){
       if(!inY(hl.y))continue;
       const hy=Y(hl.y);
@@ -578,7 +578,7 @@ function diagram(parent, spec) {
    italic (KaTeX_Math), digits, brackets and operators are upright (KaTeX_Main),
    '-' is a true minus, and _x or _{...} is a subscript, set smaller and
    dropped. The drop is done with dy on the subscript and undone on whatever
-   follows, because baseline-shift is not honoured by every browser. */
+   follows, because baseline-shift is not honored by every browser. */
 function texInto(t, src) {
   const SUB = 0.72, DROP = 0.22;            /* subscript size, and its drop in ems */
   let pending = 0;                          /* rise owed after a subscript, in ems */
@@ -826,7 +826,7 @@ function differentiate(y, dt, kind = 'central') {
   return d;
 }
 
-/* a centred moving average of odd width w */
+/* a centered moving average of odd width w */
 function movingAverage(y, w) {
   const n = y.length, half = (w - 1) >> 1, out = new Float64Array(n);
   for (let i = 0; i < n; i++) {
@@ -1045,7 +1045,7 @@ mountDemo({
       {value: 'pct', label: 'Percentiles'}, {value: 'sd', label: 'Mean ± k&sigma;'}]}],
     controls: [{key: 'lvl', label: 'confidence level', min: 0, max: 4, step: 1, value: 2, dp: 0,
                 fmt: v => ['50%', '68%', '90%', '95%', '99%'][Math.round(v)]}],
-    panels: [{hist: true, label: 'predicted distance from the hoop centre', unit: 'cm',
+    panels: [{hist: true, label: 'predicted distance from the hoop center', unit: 'cm',
               height: 250, xLabel: 'predicted miss', xUnit: 'cm', nbins: 54}],
     readouts: [
       {key: 'lvl',  label: 'level'},
@@ -1095,10 +1095,10 @@ mountDemo({
           other: cm(other[0]) + ' to ' + cm(other[1]),
           cov: (100 * inside / n).toFixed(1) + '% of ' + n.toLocaleString(),
           /* the normal convention places mass below zero on a quantity that is a
-             distance. That is not a rounding artefact, it is the model being wrong. */
+             distance. That is not a rounding artifact, it is the model being wrong. */
           note: !usePct && sLo < 0
             ? 'This interval extends to ' + cm(sLo) + '. The quantity is a distance from the ' +
-              'hoop centre and cannot be negative, so the normal model places ' +
+              'hoop center and cannot be negative, so the normal model places ' +
               (100 * normBelowZero).toFixed(0) + '% of its total probability on values that ' +
               'cannot occur. A percentile interval cannot do this, because it only ever ' +
               'reports values the pipeline actually produced.'

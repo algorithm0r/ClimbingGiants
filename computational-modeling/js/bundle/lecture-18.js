@@ -131,7 +131,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
       if(by<2)by=py+18;
       if(by+LH>height-2)by=Math.max(2,height-LH-2);
       gLens.setAttribute('transform',`translate(${bx} ${by})`);
-      /* map the magnified point to the centre of the box */
+      /* map the magnified point to the center of the box */
       use.setAttribute('transform',
         `translate(${LW/2} ${LH/2}) scale(${zx} ${zy}) translate(${-px} ${-py})`);
       cross.setAttribute('cx',px);cross.setAttribute('cy',py);
@@ -264,7 +264,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
     gBand.textContent='';
     /* a horizontal threshold: a design limit, a tolerance, a level the prose
        names. Drawn in the band group so it sits under the trace rather than
-       over it, and labelled at the left where the axis already is. */
+       over it, and labeled at the left where the axis already is. */
     for(const hl of hlines){
       if(!inY(hl.y))continue;
       const hy=Y(hl.y);
@@ -579,7 +579,7 @@ function diagram(parent, spec) {
    italic (KaTeX_Math), digits, brackets and operators are upright (KaTeX_Main),
    '-' is a true minus, and _x or _{...} is a subscript, set smaller and
    dropped. The drop is done with dy on the subscript and undone on whatever
-   follows, because baseline-shift is not honoured by every browser. */
+   follows, because baseline-shift is not honored by every browser. */
 function texInto(t, src) {
   const SUB = 0.72, DROP = 0.22;            /* subscript size, and its drop in ems */
   let pending = 0;                          /* rise owed after a subscript, in ems */
@@ -827,7 +827,7 @@ function differentiate(y, dt, kind = 'central') {
   return d;
 }
 
-/* a centred moving average of odd width w */
+/* a centered moving average of odd width w */
 function movingAverage(y, w) {
   const n = y.length, half = (w - 1) >> 1, out = new Float64Array(n);
   for (let i = 0; i < n; i++) {
@@ -974,7 +974,7 @@ function realNoiseRaw(n, sd = 1) {
    An earlier version of this demo followed one chosen arc. That was a mistake of
    method: ranking arcs by largest error selects contaminated tracks, and the one
    it picked had been interpolated by the tracker rather than measured — smooth to
-   under a millimetre where 3 cm of noise should be. The claim is about a
+   under a millimeter where 3 cm of noise should be. The claim is about a
    population, so it is measured on one. */
 
 const RIM = 3.048, FLOOR = 0.3;      // cm; the log axis needs a floor
@@ -1037,7 +1037,7 @@ mountDemo({
     setting: '140 real three-point attempts, each screened to be genuine free flight. Every one ' +
              'gets the same treatment: fit a parabola to its first few frames after release, ' +
              'extrapolate to the plane of the hoop, compare against the answer. One point per shot.',
-    source: {kind: 'measured', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz, in metres. Every arc here passes a free-flight screen &mdash; residual scatter, second-difference scatter, fitted gravity and residual structure all within the 5th to 95th percentile of the full set &mdash; so nothing in this cloud is a tracking artefact.'},
+    source: {kind: 'measured', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz, in meters. Every arc here passes a free-flight screen &mdash; residual scatter, second-difference scatter, fitted gravity and residual structure all within the 5th to 95th percentile of the full set &mdash; so nothing in this cloud is a tracking artifact.'},
     caption: 'Horizontal is how well the fit matched the frames it was given. Vertical is how far ' +
              'its prediction landed from the answer, on a log scale. If the residual predicted the ' +
              'error, the cloud would lie along a rising diagonal. Ringed are the tightest and the ' +
@@ -1238,7 +1238,7 @@ function whiteboard(root, def) {
       if (!fast) anim(E[k], [{transform: `rotate(${r}) scaleX(0)`}, {transform: `rotate(${r}) scaleX(1)`}],
                       420, {pseudoElement: '::after', easing: 'ease-out'}); },
     unstrike(...ks) { ks.forEach(k => E[k].classList.remove('on')); },
-    /* a cancelled piece fades and then closes up, so what survives slides
+    /* a canceled piece fades and then closes up, so what survives slides
        together into the next line. It must be a box (inline-block or a flex
        item); data-fold="y" closes it vertically instead, as for the bottom of
        a fraction that cancels away, bar and all */
@@ -1252,7 +1252,7 @@ function whiteboard(root, def) {
                            Object.assign({opacity: 0}, to)], 1300, {easing: 'ease-in-out'}); },
     uncollapse(...ks) { ks.forEach(k => ['width', 'height', 'marginRight', 'borderTopWidth', 'opacity']
       .forEach(p => { E[k].style[p] = ''; })); },
-    /* ink changes colour (a term added in blue joins the line in black) */
+    /* ink changes color (a term added in blue joins the line in black) */
     tint(k, c, fast) { const was = getComputedStyle(E[k]).color; E[k].style.color = c;
       if (!fast) anim(E[k], [{color: was}, {color: c}], 900, {easing: 'ease-in-out'}); },
     untint(...ks) { ks.forEach(k => { E[k].style.color = ''; }); },
@@ -1541,7 +1541,7 @@ if (slides.length) {
 
   /* Three inks, chosen against what is actually on a slide. The first is the
      site's own "what is said about it" gold, which is what an annotation is.
-     The other two are colours the course does not use anywhere: ink has to
+     The other two are colors the course does not use anywhere: ink has to
      read over a figure, and the term green is exactly the green every plot
      trace is drawn in, so a circle round a curve in it vanishes. */
   const INKS = ['#B07A08', '#1F5FA8', '#C2381F'];
@@ -1632,7 +1632,7 @@ if (slides.length) {
     if (!drawing && !pointer) { hud.textContent = ''; return; }
     hud.innerHTML = drawing
       ? `<i style="background:${INKS[ink]}"></i>${erasing ? 'erase' : 'draw'}` +
-        `<span>1 2 3 colour &nbsp;e erase &nbsp;u undo &nbsp;c clear &nbsp;d off</span>`
+        `<span>1 2 3 color &nbsp;e erase &nbsp;u undo &nbsp;c clear &nbsp;d off</span>`
       : `<i></i>pointer<span>p off</span>`;
   }
 

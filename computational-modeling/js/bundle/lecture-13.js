@@ -131,7 +131,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
       if(by<2)by=py+18;
       if(by+LH>height-2)by=Math.max(2,height-LH-2);
       gLens.setAttribute('transform',`translate(${bx} ${by})`);
-      /* map the magnified point to the centre of the box */
+      /* map the magnified point to the center of the box */
       use.setAttribute('transform',
         `translate(${LW/2} ${LH/2}) scale(${zx} ${zy}) translate(${-px} ${-py})`);
       cross.setAttribute('cx',px);cross.setAttribute('cy',py);
@@ -264,7 +264,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
     gBand.textContent='';
     /* a horizontal threshold: a design limit, a tolerance, a level the prose
        names. Drawn in the band group so it sits under the trace rather than
-       over it, and labelled at the left where the axis already is. */
+       over it, and labeled at the left where the axis already is. */
     for(const hl of hlines){
       if(!inY(hl.y))continue;
       const hy=Y(hl.y);
@@ -579,7 +579,7 @@ function diagram(parent, spec) {
    italic (KaTeX_Math), digits, brackets and operators are upright (KaTeX_Main),
    '-' is a true minus, and _x or _{...} is a subscript, set smaller and
    dropped. The drop is done with dy on the subscript and undone on whatever
-   follows, because baseline-shift is not honoured by every browser. */
+   follows, because baseline-shift is not honored by every browser. */
 function texInto(t, src) {
   const SUB = 0.72, DROP = 0.22;            /* subscript size, and its drop in ems */
   let pending = 0;                          /* rise owed after a subscript, in ems */
@@ -827,7 +827,7 @@ function differentiate(y, dt, kind = 'central') {
   return d;
 }
 
-/* a centred moving average of odd width w */
+/* a centered moving average of odd width w */
 function movingAverage(y, w) {
   const n = y.length, half = (w - 1) >> 1, out = new Float64Array(n);
   for (let i = 0; i < n; i++) {
@@ -1015,7 +1015,7 @@ const polyval = (c, x) => { let s = 0; for (let k = c.length - 1; k >= 0; k--) s
 
 /* One shot from the example pack (held back, so in no student's data): shot 700,
    frames 8-38 of free flight, 25 Hz, time from frame 8. SHOT_D is the horizontal
-   distance from the hoop and SHOT_Z the height, both in metres, as recorded. */
+   distance from the hoop and SHOT_Z the height, both in meters, as recorded. */
 const SHOT_H = 0.04;
 const SHOT_T = Array.from({length: 31}, (_, i) => i * SHOT_H);
 const SHOT_D = [7.9054, 7.6249, 7.3730, 7.1166, 6.8507, 6.5963, 6.3330, 6.1048, 5.8236, 5.5750, 5.3412, 5.0792, 4.8344, 4.5811, 4.3325, 4.0536, 3.8338, 3.5966, 3.3265, 3.0730, 2.8377, 2.5786, 2.3472, 2.0915, 1.8832, 1.6246, 1.3825, 1.1429, 0.9050, 0.6659, 0.4235];
@@ -1151,7 +1151,7 @@ mountDemo({
   diagram(cells[0], {
     w: 320, h: 190, xRange: [-0.05, 1.25], yRange: [-0.6, 8.6],
     title: 'distance from the hoop',
-    alt: 'Thirty-one points falling steadily from about 7.9 metres to 0.4 metres over '
+    alt: 'Thirty-one points falling steadily from about 7.9 meters to 0.4 meters over '
        + '1.2 seconds, with a straight line through them that every point sits on.',
     curves: [ends(fd)],
     points: D.map((y, i) => ({x: T[i], y, r: 2.6})),
@@ -1166,9 +1166,9 @@ mountDemo({
   diagram(cells[1], {
     w: 320, h: 190, xRange: [-0.05, 1.25], yRange: [2.95, 5.45],
     title: 'height above the floor',
-    alt: 'Thirty-one points rising from 3.3 metres to a peak of 5.1 metres and falling to '
-       + '3.4 metres, with a nearly flat straight line fitted through them that misses '
-       + 'both ends by about a metre.',
+    alt: 'Thirty-one points rising from 3.3 meters to a peak of 5.1 meters and falling to '
+       + '3.4 meters, with a nearly flat straight line fitted through them that misses '
+       + 'both ends by about a meter.',
     curves: [ends(fz)],
     points: Z.map((y, i) => ({x: T[i], y, r: 2.6})),
     leads: [{from: [0, Z[0]], to: [0, fz.a], cls: 'level'},
@@ -1213,8 +1213,8 @@ mountDemo({
     w: 660, h: 250, xRange: [1, end + 1], yRange: [-5.2, 7.0], zero: true,
     title: 'vertical speed (m/s) by frame, shot 1092',
     alt: 'Vertical speed at each frame. It dips, then climbs to a peak of '
-       + vz[r].toFixed(2) + ' metres per second at frame ' + r + ', then falls along a straight '
-       + 'dashed line to about minus four metres per second at frame ' + end + '.',
+       + vz[r].toFixed(2) + ' meters per second at frame ' + r + ', then falls along a straight '
+       + 'dashed line to about minus four meters per second at frame ' + end + '.',
     curves: [{x: [r, end], y: [vz[r], vz[r] - G * dt * (end - r)], cls: 'ghost'}],
     leads: [{from: [r, -5.2], to: [r, 7.0], cls: 'level'},
             {from: [end, -5.2], to: [end, 7.0], cls: 'level'}],
@@ -1297,7 +1297,7 @@ function whiteboard(root, def) {
       if (!fast) anim(E[k], [{transform: `rotate(${r}) scaleX(0)`}, {transform: `rotate(${r}) scaleX(1)`}],
                       420, {pseudoElement: '::after', easing: 'ease-out'}); },
     unstrike(...ks) { ks.forEach(k => E[k].classList.remove('on')); },
-    /* a cancelled piece fades and then closes up, so what survives slides
+    /* a canceled piece fades and then closes up, so what survives slides
        together into the next line. It must be a box (inline-block or a flex
        item); data-fold="y" closes it vertically instead, as for the bottom of
        a fraction that cancels away, bar and all */
@@ -1311,7 +1311,7 @@ function whiteboard(root, def) {
                            Object.assign({opacity: 0}, to)], 1300, {easing: 'ease-in-out'}); },
     uncollapse(...ks) { ks.forEach(k => ['width', 'height', 'marginRight', 'borderTopWidth', 'opacity']
       .forEach(p => { E[k].style[p] = ''; })); },
-    /* ink changes colour (a term added in blue joins the line in black) */
+    /* ink changes color (a term added in blue joins the line in black) */
     tint(k, c, fast) { const was = getComputedStyle(E[k]).color; E[k].style.color = c;
       if (!fast) anim(E[k], [{color: was}, {color: c}], 900, {easing: 'ease-in-out'}); },
     untint(...ks) { ks.forEach(k => { E[k].style.color = ''; }); },
@@ -1651,7 +1651,7 @@ setTimeout(() => {
     }));
   });
 
-  /* residual and error against degree, labelled where the lines end */
+  /* residual and error against degree, labeled where the lines end */
   each('lec13-curve', host => {
     const degs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
     const res = [], err = [];
@@ -1800,7 +1800,7 @@ if (slides.length) {
 
   /* Three inks, chosen against what is actually on a slide. The first is the
      site's own "what is said about it" gold, which is what an annotation is.
-     The other two are colours the course does not use anywhere: ink has to
+     The other two are colors the course does not use anywhere: ink has to
      read over a figure, and the term green is exactly the green every plot
      trace is drawn in, so a circle round a curve in it vanishes. */
   const INKS = ['#B07A08', '#1F5FA8', '#C2381F'];
@@ -1891,7 +1891,7 @@ if (slides.length) {
     if (!drawing && !pointer) { hud.textContent = ''; return; }
     hud.innerHTML = drawing
       ? `<i style="background:${INKS[ink]}"></i>${erasing ? 'erase' : 'draw'}` +
-        `<span>1 2 3 colour &nbsp;e erase &nbsp;u undo &nbsp;c clear &nbsp;d off</span>`
+        `<span>1 2 3 color &nbsp;e erase &nbsp;u undo &nbsp;c clear &nbsp;d off</span>`
       : `<i></i>pointer<span>p off</span>`;
   }
 

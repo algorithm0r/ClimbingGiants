@@ -130,7 +130,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
       if(by<2)by=py+18;
       if(by+LH>height-2)by=Math.max(2,height-LH-2);
       gLens.setAttribute('transform',`translate(${bx} ${by})`);
-      /* map the magnified point to the centre of the box */
+      /* map the magnified point to the center of the box */
       use.setAttribute('transform',
         `translate(${LW/2} ${LH/2}) scale(${zx} ${zy}) translate(${-px} ${-py})`);
       cross.setAttribute('cx',px);cross.setAttribute('cy',py);
@@ -263,7 +263,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
     gBand.textContent='';
     /* a horizontal threshold: a design limit, a tolerance, a level the prose
        names. Drawn in the band group so it sits under the trace rather than
-       over it, and labelled at the left where the axis already is. */
+       over it, and labeled at the left where the axis already is. */
     for(const hl of hlines){
       if(!inY(hl.y))continue;
       const hy=Y(hl.y);
@@ -578,7 +578,7 @@ function diagram(parent, spec) {
    italic (KaTeX_Math), digits, brackets and operators are upright (KaTeX_Main),
    '-' is a true minus, and _x or _{...} is a subscript, set smaller and
    dropped. The drop is done with dy on the subscript and undone on whatever
-   follows, because baseline-shift is not honoured by every browser. */
+   follows, because baseline-shift is not honored by every browser. */
 function texInto(t, src) {
   const SUB = 0.72, DROP = 0.22;            /* subscript size, and its drop in ems */
   let pending = 0;                          /* rise owed after a subscript, in ems */
@@ -826,7 +826,7 @@ function differentiate(y, dt, kind = 'central') {
   return d;
 }
 
-/* a centred moving average of odd width w */
+/* a centered moving average of odd width w */
 function movingAverage(y, w) {
   const n = y.length, half = (w - 1) >> 1, out = new Float64Array(n);
   for (let i = 0; i < n; i++) {
@@ -1176,7 +1176,7 @@ customElements.define('cg-demo', CgDemo);
   /* closed: everything arrives and leaves through the boundary */
   diagram(cells[0], Object.assign({}, common, {
     title: 'the boundary closed',
-    alt: 'A box labelled done. Two arrows enter from the left, labelled residual and tol, and '
+    alt: 'A box labeled done. Two arrows enter from the left, labeled residual and tol, and '
        + 'one leaves to the right. Nothing crosses the top or bottom of the box.',
     areas: [box(0.30, 0.74, 0.28, 0.80)],
     leads: [{from: [0.04, 0.68], to: [0.30, 0.68]},
@@ -1196,8 +1196,8 @@ customElements.define('cg-demo', CgDemo);
   /* leaking: one value comes through the wall instead */
   diagram(cells[1], Object.assign({}, common, {
     title: 'a hole in the boundary',
-    alt: 'The same box. One arrow enters from the left labelled residual and one leaves to the '
-       + 'right, but a third arrow labelled tol comes down through the top wall of the box, '
+    alt: 'The same box. One arrow enters from the left labeled residual and one leaves to the '
+       + 'right, but a third arrow labeled tol comes down through the top wall of the box, '
        + 'which is broken where it passes through.',
     areas: [box(0.30, 0.74, 0.28, 0.80)],
     leads: [{from: [0.04, 0.56], to: [0.30, 0.56]},

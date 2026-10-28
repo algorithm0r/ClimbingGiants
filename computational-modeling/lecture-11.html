@@ -6,8 +6,8 @@
 <title>Lecture 11 — Smoothing noise from a channel</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261027232552">
-<link rel="stylesheet" href="css/demos.css?v=20261027232552">
+<link rel="stylesheet" href="css/blocks.css?v=20261028082814">
+<link rel="stylesheet" href="css/demos.css?v=20261028082814">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -704,9 +704,9 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Okay. So the simplest smoother there is, is what we call a moving average. We replace every sample by the mean of the w samples centred on it, w for the width of the window. So with a width of nine, each sample becomes the average of itself and the four on each side.</p><p>And here's what the width does, on the crossmember spike. Each strip is the same raw record, the grey dashed line, smoothed at a different width. Five samples, that's 0.4 milliseconds, takes the spike from minus 1541 to minus 1318. Nine samples takes it to minus 968. And by 25 samples, two milliseconds, the spike is down to under a third of its depth, minus 477. So the wider the window, the smoother the trace, and the lower the peak.</p><p>And the first question is how much noise it takes out.</p>">
+<section class="deck-slide full" data-notes="<p>Okay. So the simplest smoother there is, is what we call a moving average. We replace every sample by the mean of the w samples centered on it, w for the width of the window. So with a width of nine, each sample becomes the average of itself and the four on each side.</p><p>And here's what the width does, on the crossmember spike. Each strip is the same raw record, the gray dashed line, smoothed at a different width. Five samples, that's 0.4 milliseconds, takes the spike from minus 1541 to minus 1318. Nine samples takes it to minus 968. And by 25 samples, two milliseconds, the spike is down to under a third of its depth, minus 477. So the wider the window, the smoother the trace, and the lower the peak.</p><p>And the first question is how much noise it takes out.</p>">
   <div class="head">
-    <p class="say">A <span class="term">moving average</span> replaces each sample by <span class="def">the mean of the $w$ samples centred on it</span>.</p>
+    <p class="say">A <span class="term">moving average</span> replaces each sample by <span class="def">the mean of the $w$ samples centered on it</span>.</p>
     <p class="sub">The crossmember spike at three widths $w$, raw dashed.</p>
   </div>
   <div class="stage">
@@ -714,7 +714,7 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So how much noise does it take out? Well, we can work it out in three lines. Say each sample's noise has size sigma, and the samples are independent.</p><p>First we add up the w samples. Like in the last video, the variances add, so the sum has variance w times sigma squared, and its standard deviation is the square root of that, sigma root w.</p><p>Then the average divides that sum by w, so the noise divides by w too. And sigma root w over w is sigma over root w.</p><p>And that square root is what makes this expensive. To halve the noise, root w has to double, so w has to go up four times. A window of 25 leaves a fifth of the noise, 100 leaves a tenth, and 400 a twentieth. So each halving costs four times the width of the one before.</p><p>Now that's for independent samples. On our crash record neighbouring samples move together, like we saw in the last video, so a nine-sample average only halves the noise, where root nine would say a third.</p>">
+<section class="deck-slide full" data-notes="<p>So how much noise does it take out? Well, we can work it out in three lines. Say each sample's noise has size sigma, and the samples are independent.</p><p>First we add up the w samples. Like in the last video, the variances add, so the sum has variance w times sigma squared, and its standard deviation is the square root of that, sigma root w.</p><p>Then the average divides that sum by w, so the noise divides by w too. And sigma root w over w is sigma over root w.</p><p>And that square root is what makes this expensive. To halve the noise, root w has to double, so w has to go up four times. A window of 25 leaves a fifth of the noise, 100 leaves a tenth, and 400 a twentieth. So each halving costs four times the width of the one before.</p><p>Now that's for independent samples. On our crash record neighboring samples move together, like we saw in the last video, so a nine-sample average only halves the noise, where root nine would say a third.</p>">
   <div class="head">
     <p class="say">Make the window four times as wide and <span class="def">the noise halves</span>.</p>
     <p class="sub">Average $w$ independent samples, each with noise $\sigma$ (sigma).</p>
@@ -737,7 +737,7 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Okay. So the average we've been using is centred. To smooth the sample at 10.8 milliseconds, it uses the four samples before it and the four after it. And that's fine for a record that's already on disk.</p><p>Now say the averaging has to happen during the crash, in the airbag computer for instance. It doesn't have the samples after now, because they haven't happened yet. So let's average what it does have, the sample now and the four before it. That reaches back exactly as far as the centred average does, it just doesn't look forward.</p><p>And here's what that does. The grey dashed line is the raw record, with the spike at 10.80 milliseconds. The solid line is that one-sided average, and its peak lands at 10.96. So that's two samples late, 0.16 milliseconds. And looking at the solid line alone, we'd have no way to tell it's late.</p>">
+<section class="deck-slide full" data-notes="<p>Okay. So the average we've been using is centered. To smooth the sample at 10.8 milliseconds, it uses the four samples before it and the four after it. And that's fine for a record that's already on disk.</p><p>Now say the averaging has to happen during the crash, in the airbag computer for instance. It doesn't have the samples after now, because they haven't happened yet. So let's average what it does have, the sample now and the four before it. That reaches back exactly as far as the centered average does, it just doesn't look forward.</p><p>And here's what that does. The gray dashed line is the raw record, with the spike at 10.80 milliseconds. The solid line is that one-sided average, and its peak lands at 10.96. So that's two samples late, 0.16 milliseconds. And looking at the solid line alone, we'd have no way to tell it's late.</p>">
   <div class="head">
     <p class="say">Averaging the sample and the 4 before it puts the peak <span class="def">0.16&nbsp;ms late</span>.</p>
     <p class="sub">Raw dashed, one-sided 5-sample average solid.</p>
@@ -757,7 +757,7 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Now look at how far the two passes reach. The forward pass looks four samples back, and the backward pass looks four samples forward. So between them they use the same nine samples as the centred average.</p><p>So does it look like the centred average? Well, not quite. The dotted line is the centred nine, peaking at minus 968. The two passes peak at minus 1169. Same nine samples, but they don't count them equally. The middle sample counts five times, its neighbours four, then three, two, one. So the two passes lean on the middle, and they keep more of the peak. And they keep a bit more of the noise too, about 1.4 before impact where the centred nine leaves 1.2.</p>">
+<section class="deck-slide full" data-notes="<p>Now look at how far the two passes reach. The forward pass looks four samples back, and the backward pass looks four samples forward. So between them they use the same nine samples as the centered average.</p><p>So does it look like the centered average? Well, not quite. The dotted line is the centered nine, peaking at minus 968. The two passes peak at minus 1169. Same nine samples, but they don't count them equally. The middle sample counts five times, its neighbors four, then three, two, one. So the two passes lean on the middle, and they keep more of the peak. And they keep a bit more of the noise too, about 1.4 before impact where the centered nine leaves 1.2.</p>">
   <div class="head">
     <p class="say">Two one-sided passes use the same 9 samples, <span class="def">weighted toward the middle</span>.</p>
     <p class="sub">Weights 1, 2, 3, 4, 5, 4, 3, 2, 1 (solid) against 9 equal weights (dotted). Raw dashed.</p>
@@ -788,6 +788,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <div class="deck-notes"></div>
 
 
-<script type="module" src="js/bundle/lecture-11.js?v=20261027232552"></script>
+<script type="module" src="js/bundle/lecture-11.js?v=20261028082814"></script>
 </body>
 </html>

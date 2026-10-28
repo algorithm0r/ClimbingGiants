@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Anatomy of a measured signal — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261027232552">
-  <link rel="stylesheet" href="css/demos.css?v=20261027232552">
+  <link rel="stylesheet" href="css/blocks.css?v=20261028082814">
+  <link rel="stylesheet" href="css/demos.css?v=20261028082814">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -923,7 +923,7 @@ one. What reaches you is a list:</p>
 −0.674 &nbsp; −0.982 &nbsp; 0.113 &nbsp; −1.447 &nbsp; 0.226 &nbsp; −0.531 &nbsp; … &nbsp;
 −470.913 &nbsp; … &nbsp; 242.406</p>
 
-<p>On their own these numbers are ambiguous. They could be metres per second squared or newtons,
+<p>On their own these numbers are ambiguous. They could be meters per second squared or newtons,
 and they could span 50 milliseconds or 50 seconds. You could guess, and with a familiar signal
 you would often guess right. However, you would not know how close your guess was, and the
 sample interval is the one you could pin down least well. For this reason the format stores the
@@ -1058,7 +1058,7 @@ will typically survive a glance at the plot.</p>
 <div class="aside">
   <span class="label">The channel code</span>
   <p><code>11HEADCG0000ACXP</code> is a positional code. Read it in pieces. <code>11</code> is the
-driver dummy, <code>HEADCG</code> is the head centre of gravity, <code>0000</code> is unused
+driver dummy, <code>HEADCG</code> is the head center of gravity, <code>0000</code> is unused
 fine position, <code>AC</code> is acceleration, <code>X</code> is the longitudinal axis, and
 <code>P</code> is the filter class. <code>P</code> means prefiltered, that is, the channel has been
 through the analog filter before sampling (the header's cut-off frequency) and no CFC filter.
@@ -1132,7 +1132,7 @@ for (let i = 0; i &lt; ch.n; i++) {
 // plot t against ch.y, with the axis text taken from
 // ch.dimension, ch.unit, ch.comment and ch.code</pre>
   <div class="out" data-lang="python">
-    <img src="data/img/anatomy-sample-plot.png?v=20261027232552"
+    <img src="data/img/anatomy-sample-plot.png?v=20261028082814"
          alt="A line plot of driver head longitudinal acceleration against time, from
               &minus;0.05 to 0.31 seconds, flat until about 0.02 s and then falling to a
               minimum near &minus;471 m/s&sup2; around 0.08 s before returning towards zero.">
@@ -1142,7 +1142,7 @@ for (let i = 0; i &lt; ch.n; i++) {
     without anything being typed in.</p>
   </div>
   <div class="out" data-lang="matlab" hidden>
-    <img src="data/img/anatomy-sample-plot-octave.png?v=20261027232552"
+    <img src="data/img/anatomy-sample-plot-octave.png?v=20261028082814"
          alt="The same head acceleration curve drawn by Octave, in a boxed frame with ticks
               on all four sides, from &minus;0.1 to 0.4 seconds and &minus;600 to 400
               m/s&sup2;.">
@@ -1175,9 +1175,9 @@ href="standards.html">The standards behind the crash data</a>.</p></div>
 <h2 id="why-the-times-start-negative">Why the Times Start Negative</h2>
 
 <p>The header above gives a time of first sample of −0.050 s. Negative times are not an error. The
-recording starts before the event, while the vehicle is still travelling at a steady speed, so
+recording starts before the event, while the vehicle is still traveling at a steady speed, so
 the true acceleration over that stretch is zero. That makes it the part of the record where the
-true value is known. For this reason it is used to characterise what the instrument adds on its
+true value is known. For this reason it is used to characterize what the instrument adds on its
 own account. Week 3 uses it for exactly that, and the noise on several
 later pages is taken from it.</p>
 
@@ -1199,7 +1199,7 @@ did. The header gives the same answer in one field. The channel codes differ in 
 <code>0000</code> against <code>RE00</code>.</p>
 
 <p>The other two channels are not accelerations. <code>11CHST000000DSXP</code> is driver chest
-deflection, a distance in metres, and <code>11NECKUP0000FOXP</code> is upper neck force in
+deflection, a distance in meters, and <code>11NECKUP0000FOXP</code> is upper neck force in
 newtons. All four rise and fall over the same few tens of milliseconds. Plotted without their
 units the four shapes leave you comparing magnitudes and reasoning about what each one could be.
 The header gives the quantity and the unit in one line each.</p>
@@ -1211,14 +1211,14 @@ read its values. The largest is <strong>−32798.0</strong>.</p>
 
 <table class="data">
   <tr><th>Read As</th><th class="num">peak deflection</th><th>Plausible?</th></tr>
-  <tr><td>metres, as the header says</td><td class="num">32.8 km</td>
+  <tr><td>meters, as the header says</td><td class="num">32.8 km</td>
       <td>no, larger than the test facility</td></tr>
-  <tr><td>millimetres</td><td class="num">32.8 m</td><td>no</td></tr>
-  <tr><td><strong>micrometres</strong></td><td class="num"><strong>32.8 mm</strong></td>
+  <tr><td>millimeters</td><td class="num">32.8 m</td><td>no</td></tr>
+  <tr><td><strong>micrometers</strong></td><td class="num"><strong>32.8 mm</strong></td>
       <td>yes, an ordinary chest deflection against a 63 mm limit</td></tr>
 </table>
 
-<p>The values are consistent with micrometres and the header says metres, an error of a factor of a
+<p>The values are consistent with micrometers and the header says meters, an error of a factor of a
 million. Three things follow.</p>
 
 <ul class="plain">
@@ -1280,7 +1280,7 @@ factor of a million.</p></div></details></li>
     not
     contain.
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Compare the value against the physical scale of the thing being measured.</strong> A
-peak of 32&nbsp;798 in units of metres is a chest deflecting 33&nbsp;kilometres. In micrometres
+peak of 32&nbsp;798 in units of meters is a chest deflecting 33&nbsp;kilometers. In micrometers
 it is 32.8&nbsp;mm, which is what a chest does in a barrier test. What that check needs, and the
 file does not have, is <strong>knowledge from outside the file</strong>: what a chest is, that
 it is part of a human-sized body, and roughly how far such a thing can move. Internal consistency
@@ -1314,7 +1314,7 @@ channel in the curated store, 112 records from 35 tests, with the headers they a
   </script>
   
 
-  <script type="module" src="js/bundle/anatomy-of-a-measured-signal.js?v=20261027232552"></script>
+  <script type="module" src="js/bundle/anatomy-of-a-measured-signal.js?v=20261028082814"></script>
   
 
   <footer class="site-footer">

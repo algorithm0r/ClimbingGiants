@@ -130,7 +130,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
       if(by<2)by=py+18;
       if(by+LH>height-2)by=Math.max(2,height-LH-2);
       gLens.setAttribute('transform',`translate(${bx} ${by})`);
-      /* map the magnified point to the centre of the box */
+      /* map the magnified point to the center of the box */
       use.setAttribute('transform',
         `translate(${LW/2} ${LH/2}) scale(${zx} ${zy}) translate(${-px} ${-py})`);
       cross.setAttribute('cx',px);cross.setAttribute('cy',py);
@@ -263,7 +263,7 @@ function panel(parent,{label,unit,height=128,xAxis=false,xLabel='time',xUnit='ms
     gBand.textContent='';
     /* a horizontal threshold: a design limit, a tolerance, a level the prose
        names. Drawn in the band group so it sits under the trace rather than
-       over it, and labelled at the left where the axis already is. */
+       over it, and labeled at the left where the axis already is. */
     for(const hl of hlines){
       if(!inY(hl.y))continue;
       const hy=Y(hl.y);
@@ -578,7 +578,7 @@ function diagram(parent, spec) {
    italic (KaTeX_Math), digits, brackets and operators are upright (KaTeX_Main),
    '-' is a true minus, and _x or _{...} is a subscript, set smaller and
    dropped. The drop is done with dy on the subscript and undone on whatever
-   follows, because baseline-shift is not honoured by every browser. */
+   follows, because baseline-shift is not honored by every browser. */
 function texInto(t, src) {
   const SUB = 0.72, DROP = 0.22;            /* subscript size, and its drop in ems */
   let pending = 0;                          /* rise owed after a subscript, in ems */
@@ -826,7 +826,7 @@ function differentiate(y, dt, kind = 'central') {
   return d;
 }
 
-/* a centred moving average of odd width w */
+/* a centered moving average of odd width w */
 function movingAverage(y, w) {
   const n = y.length, half = (w - 1) >> 1, out = new Float64Array(n);
   for (let i = 0; i < n; i++) {
@@ -989,7 +989,7 @@ const NORMS = {
 };
 
 /* Nelder-Mead in two dimensions: enough for this, and it means all three fits
-   use the identical optimiser. */
+   use the identical optimizer. */
 function fit(objective) {
   const f = p => objective(residuals(p[0], p[1]));
   let s = [[0, 0], [1, 0], [0, 1]].map(p => ({p, v: f(p)}));
@@ -1026,7 +1026,7 @@ mountDemo({
   norms: {
     setting: 'Ten points on <em>y</em> = 2 + 1.5<em>x</em> with small scatter, and one point at ' +
              '<em>x</em>&nbsp;=&nbsp;6 moved up by 6.0. All three lines come from the same ' +
-             'optimiser with only the objective changed.',
+             'optimizer with only the objective changed.',
     source: {kind: 'constructed', text: 'Ten points on a known line with one deliberately corrupted, so each norm can be judged against the truth as well as against its own rule.'},
     caption: 'The ghost is the true line, y = 2 + 1.5x. The amber rings are the data; the ring at ' +
              'x = 6 is the bad point. Switch norms and watch which line moves.',
