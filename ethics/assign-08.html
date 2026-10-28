@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -751,12 +799,12 @@
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <h1>Week 8 Assignment · Edit at Paper and Paragraph Level</h1>
 <p><em>Skill: Structural Editing · <a href="toolkit.html#structural-editing">See toolkit</a></em></p>
-<p>You have been building, and this week you step back and look at the whole structure. Good paragraph-level writing does not guarantee a good essay, since the paragraphs also have to be in the right order and each do a clear job, so that together they add up to a coherent argument from start to finish. This week you work with the content you already have and ask whether it holds together. Does a reader follow a clear path from my thesis to my conclusion? Does each section do one job cleanly?</p>
+<p>You have been building, and this week you step back and look at the whole structure. Good paragraph-level writing does not guarantee a good essay, since the paragraphs also have to be in the right order and each do a clear job, so that together they add up to a coherent <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a> from start to finish. This week you work with the content you already have and ask whether it holds together. Does a reader follow a clear path from my <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a> to my conclusion? Does each section do one job cleanly?</p>
 <hr>
 <h2 id="steps">Steps</h2>
 <ol>
 <li>
-<p>Read your entire document from start to finish without editing. As you read, write a one-sentence summary of what each paragraph is doing. Describe the job it does in the argument. When you are done you should have a list of one-liners that maps your essay's structure.</p>
+<p>Read your entire document from start to finish without editing. As you read, write a one-sentence summary of what each paragraph is doing. Describe the job it does in the <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a>. When you are done you should have a list of one-liners that maps your essay's structure.</p>
 </li>
 <li>
 <p>Look at that list. Ask:</p>
@@ -771,23 +819,23 @@
 <p>Reorder, combine, split, or cut paragraphs based on what you found. Make the structural changes before touching individual sentences.</p>
 </li>
 <li>
-<p>For each paragraph, verify it has a clear topic sentence (one sentence at the start that states the paragraph's claim). If it does not, write one. If the paragraph does not match the topic sentence you wrote, revise the paragraph until it does.</p>
+<p>For each paragraph, verify it has a clear <a class="gl" href="glossary.html#g-topic-sentence" data-tip="A sentence, usually the first in a paragraph, that states the paragraph's claim.">topic sentence</a> (one sentence at the start that states the paragraph's claim). If it does not, write one. If the paragraph does not match the topic sentence you wrote, revise the paragraph until it does.</p>
 </li>
 <li>
-<p>Check your document against the four required sections. Each should be labeled and present: <strong>Introduction</strong>, <strong>Stakeholder Analysis and Ethical Argument</strong>, <strong>Policy Proposal</strong>, <strong>Conclusion</strong>. If any is missing or unnamed, create it now. Then check three things:</p>
+<p>Check your document against the four required sections. Each should be labeled and present: <strong>Introduction</strong>, <strong><a class="gl" href="glossary.html#g-stakeholder-analysis" data-tip="A closer look at the most important groups on a stakeholder map: what each stands to gain or lose, and where their interests conflict. It is the Week 4 writing goal.">Stakeholder Analysis</a> and Ethical Argument</strong>, <strong><a class="gl" href="glossary.html#g-policy-proposal" data-tip="A specific recommendation that names what should change, who carries it out, who pays, and what tradeoffs it creates. It is Section 3 of the course essay.">Policy Proposal</a></strong>, <strong>Conclusion</strong>. If any is missing or unnamed, create it now. Then check three things:</p>
 <ul>
-<li><strong>Policy proposal:</strong> Does it name who implements it, who pays for it, and what tradeoffs it creates? A proposal names these specifics (for instance, &quot;there should be legislation&quot; names none of them). If those specifics are missing that is a content gap, which structural editing will not fix.</li>
-<li><strong>Steelman:</strong> Is the strongest case against your thesis visible in your Stakeholder Analysis section, with your response following it? If it got buried in your key claims or dropped during earlier revisions, put it back.</li>
-<li><strong>Word count:</strong> A well-developed essay at this stage should be approaching 2000 words. If you are significantly under, the most common gaps are: no technology description in the introduction, stakeholder analysis that lists groups without applying the toolkit questions, and a policy proposal that is still a rough sketch.</li>
+<li><strong>Policy proposal:</strong> Does it name who implements it, who pays for it, and what tradeoffs it creates? A proposal names these specifics (for instance, &quot;there should be legislation&quot; names none of them). If those specifics are missing that is a content gap, which <a class="tk" href="toolkit.html#structural-editing" data-tip="Structural editing means revising a whole paper at the level of sections and paragraphs by cutting, reordering, combining, and splitting them. (A click opens it in the toolkit.)">structural editing</a> will not fix.</li>
+<li><strong><a class="tk" href="toolkit.html#steelmanning" data-tip="Steelmanning means stating the strongest version of the case against your own position before you respond to it. (A click opens it in the toolkit.)">Steelman</a>:</strong> Is the strongest case against your <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a> visible in your Stakeholder Analysis section, with your response following it? If it got buried in your key claims or dropped during earlier revisions, put it back.</li>
+<li><strong>Word count:</strong> A well-developed essay at this stage should be approaching 2000 words. If you are significantly under, the most common gaps are: no technology description in the introduction, stakeholder analysis that lists groups without applying the <a class="tk" href="toolkit.html#section-1-the-three-toolkit-questions" data-tip="Who is harmed? What are our obligations? What would a person of integrity do? Each question draws on a different family of ethical theory. (A click opens it in the toolkit.)">toolkit questions</a>, and a policy proposal that is still a rough sketch.</li>
 </ul>
 </li>
 </ol>
 <hr>
 <h2 id="what-your-document-should-show">What Your Document Should Show</h2>
-<p>A document whose paragraphs are in a logical order that a reader can follow. Every paragraph has a clear topic sentence. No two paragraphs are doing the same job. The four required sections are labeled and present. The structure you would describe to someone in two minutes matches what is actually on the page.</p>
+<p>A document whose paragraphs are in a logical order that a reader can follow. Every paragraph has a clear <a class="gl" href="glossary.html#g-topic-sentence" data-tip="A sentence, usually the first in a paragraph, that states the paragraph's claim.">topic sentence</a>. No two paragraphs are doing the same job. The four required sections are labeled and present. The structure you would describe to someone in two minutes matches what is actually on the page.</p>
 <hr>
 <h2 id="completion-criteria">Completion Criteria</h2>
-<p>You can summarize every paragraph's job in one sentence, and those sentences form a coherent outline of your argument. Every paragraph opens with a topic sentence. The document shows evidence of structural revision. That is, paragraphs have been reordered, combined, split, or cut (new content added on top of old content does not count). The four sections are labeled. The policy proposal names an actor, a mechanism, and a tradeoff. The steelman and response are visible in the stakeholder analysis section.</p>
+<p>You can summarize every paragraph's job in one sentence, and those sentences form a coherent outline of your <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a>. Every paragraph opens with a <a class="gl" href="glossary.html#g-topic-sentence" data-tip="A sentence, usually the first in a paragraph, that states the paragraph's claim.">topic sentence</a>. The document shows evidence of <a class="tk" href="toolkit.html#structural-editing" data-tip="Structural editing means revising a whole paper at the level of sections and paragraphs by cutting, reordering, combining, and splitting them. (A click opens it in the toolkit.)">structural revision</a>. That is, paragraphs have been reordered, combined, split, or cut (new content added on top of old content does not count). The four sections are labeled. The <a class="gl" href="glossary.html#g-policy-proposal" data-tip="A specific recommendation that names what should change, who carries it out, who pays, and what tradeoffs it creates. It is Section 3 of the course essay.">policy proposal</a> names an actor, a mechanism, and a tradeoff. The <a class="tk" href="toolkit.html#steelmanning" data-tip="Steelmanning means stating the strongest version of the case against your own position before you respond to it. (A click opens it in the toolkit.)">steelman</a> and response are visible in the <a class="gl" href="glossary.html#g-stakeholder-analysis" data-tip="A closer look at the most important groups on a stakeholder map: what each stands to gain or lose, and where their interests conflict. It is the Week 4 writing goal.">stakeholder analysis</a> section.</p>
 
   </main>
 
@@ -883,6 +931,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

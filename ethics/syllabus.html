@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -752,12 +800,12 @@
 <strong>Communication:</strong> Discord</p>
 <hr>
 <h2 id="course-description">Course Description</h2>
-<p>This course teaches two inseparable things: critical writing and thinking skills, and exploration of personal values and how they shape choices in technical work. It builds both together, using generative AI ethics as the vehicle.</p>
+<p>This course teaches two inseparable things: critical writing and thinking skills, and exploration of personal values and how they shape choices in technical work. It builds both together, using <a class="gl" href="glossary.html#g-generative-ai" data-tip="AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples.">generative AI</a> ethics as the vehicle.</p>
 <hr>
 <h2 id="grading-labor-based-grading-lbg">Grading: Labor-Based Grading (LBG)</h2>
 <p>This course uses <strong>labor-based grading</strong>. You are evaluated on completion and genuine engagement (your ethical conclusions are not graded). You will not receive a lower grade for reaching different ethical conclusions than I do.</p>
 <h3 id="grade-structure">Grade Structure</h3>
-<p>Complete all assigned work and you earn a <strong>B (3.1)</strong>. That is the baseline this system is built around, so if you do the work every week you finish with a solid grade. Missing or incomplete work lowers that grade, and extra labors raise it.</p>
+<p>Complete all assigned work and you earn a <strong>B (3.1)</strong>. That is the baseline this system is built around, so if you do the work every week you finish with a solid grade. Missing or incomplete work lowers that grade, and <a class="gl" href="glossary.html#g-extra-labor" data-tip="Optional work that raises your grade above the base B: +0.1 for each extra reflection and +0.3 for a larger project, up to a 4.0.">extra labors</a> raise it.</p>
 <h3 id="assignment-categories">Assignment Categories</h3>
 <p>Every piece of work you submit falls into one of three categories:</p>
 <table>
@@ -809,12 +857,12 @@
 <h2 id="the-four-deliverables">The Four Deliverables</h2>
 <p>In Weeks 1 to 4 and 6 to 9 you complete four things each week (Week 5 is a break week, and Week 10 has only the final essay):</p>
 <p><strong>Quiz</strong>: Vocabulary and concept check from the week's sources. Completion-based with infinite attempts. The quiz is a tool to make sure you have the factual foundation you need to think and write clearly.</p>
-<p><strong>Assignment</strong>: You update your living essay document with work shaped by that week's writing goal. Every week you add to or revise the same Google Doc. This is the primary effort you will put into this class this quarter.</p>
-<p><strong>Reflection</strong>: You choose one of that week's sources and prompts and engage with it through a three-step structure: gut check (your honest reaction), trace it (where does that reaction come from), challenge it (what is the strongest case against your position). About 150 words.</p>
-<p><strong>Meeting</strong>: Your fixed small group meets using the week's prompts as starting points. Discussion moves wherever it goes. You close with one collaborative paragraph capturing your shared thinking. The facilitator role rotates each week.</p>
+<p><strong>Assignment</strong>: You update your <a class="gl" href="glossary.html#g-living-essay" data-tip="The single Google Doc you revise every week, which grows into your final paper by Week 10.">living essay</a> document with work shaped by that week's writing goal. Every week you add to or revise the same Google Doc. This is the primary effort you will put into this class this quarter.</p>
+<p><strong>Reflection</strong>: You choose one of that week's sources and prompts and engage with it through a three-step structure: <a class="gl" href="glossary.html#g-gut-check" data-tip="The first step of a reflection. You write your honest, immediate reaction to something specific in a source.">gut check</a> (your honest reaction), trace it (where does that reaction come from), challenge it (what is the strongest case against your position). About 150 words.</p>
+<p><strong>Meeting</strong>: Your fixed small group meets using the week's prompts as starting points. Discussion moves wherever it goes. You close with one <a class="gl" href="glossary.html#g-collaborative-paragraph" data-tip="The paragraph of 150 to 200 words your group writes together at the end of each meeting, recording what you explored and where you agreed or disagreed.">collaborative paragraph</a> capturing your shared thinking. The <a class="gl" href="glossary.html#g-facilitator" data-tip="The group member who hosts a week's meeting by opening it, watching the time, and inviting quieter people in. The role rotates each week.">facilitator</a> role rotates each week.</p>
 <hr>
 <h2 id="the-essay">The Essay</h2>
-<p>You build one 2000-word policy paper across 9 working weeks (Week 5 is a break, and Week 10 is final submission). You work in one living Google Doc, updated each week. Each week you revise the whole document, shaped by that week's writing goal, so by Week 10 you will have a complete draft built through 9 weeks of iterative work.</p>
+<p>You build one 2000-word <a class="gl" href="glossary.html#g-position-paper" data-tip="An essay that takes a position on a problem, argues for it with evidence, and proposes what should be done. The course essay is a 2000-word position paper.">policy paper</a> across 9 working weeks (Week 5 is a break, and Week 10 is final submission). You work in one living Google Doc, updated each week. Each week you revise the whole document, shaped by that week's writing goal, so by Week 10 you will have a complete draft built through 9 weeks of iterative work.</p>
 <p>See <a href="essay.html">Essay Instructions</a> for the full structure, writing sequence, and AI process note guidance.</p>
 <hr>
 <h2 id="ai-use-policy">AI Use Policy</h2>
@@ -823,7 +871,7 @@
 <p>See <a href="ai-use.html">AI Use</a> for the full philosophy, a spectrum of AI use patterns from least to most skill-building, and guidance specific to each deliverable type.</p>
 <hr>
 <h2 id="academic-integrity">Academic Integrity</h2>
-<p>See <a href="https://www.tacoma.uw.edu/faculty-assembly/required-suggested-syllabi-service-statements">Required Syllabi Statements</a> for the current institutional academic integrity statement.</p>
+<p>See <a href="https://www.tacoma.uw.edu/faculty-assembly/required-suggested-syllabi-service-statements">Required Syllabi Statements</a> for the current institutional academic <a class="gl" href="glossary.html#g-integrity" data-tip="Acting consistently with your values, and being willing to explain and stand behind your decisions to the people they affect.">integrity</a> statement.</p>
 <hr>
 <h2 id="accessibility-accommodations">Accessibility &amp; Accommodations</h2>
 <p>See <a href="https://www.tacoma.uw.edu/faculty-assembly/required-suggested-syllabi-service-statements">Required Syllabi Statements</a> for the current disability accommodations, religious accommodations, and Title IX statements.</p>
@@ -834,7 +882,7 @@
 <hr>
 <h2 id="course-resources">Course Resources</h2>
 <ul>
-<li><a href="essay.html">Essay Instructions</a>: Full guide to the living essay model</li>
+<li><a href="essay.html">Essay Instructions</a>: Full guide to the <a class="gl" href="glossary.html#g-living-essay" data-tip="The single Google Doc you revise every week, which grows into your final paper by Week 10.">living essay</a> model</li>
 <li><a href="toolkit.html">Writing Toolkit</a>: Thinking and writing skills used throughout the course</li>
 <li><a href="reflection-instructions.html">Reflection Instructions</a>: How to engage with reflection prompts</li>
 <li><a href="meeting-instructions.html">Meeting Instructions</a>: How to run your discussion group</li>
@@ -938,6 +986,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

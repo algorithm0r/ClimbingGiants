@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -750,36 +798,36 @@
   <main data-pagefind-body>
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <h1>Week 7 · Autonomy &amp; Manipulation</h1>
-<p>This week examines the line between persuasion and manipulation in AI systems. Research suggests chatbot conversations can shift voter preferences by around 10 percentage points, and some emotional AI appears to be designed to foster attachment and longer engagement. The readings look at the psychology of how these systems work and the governance questions they raise.</p>
+<p>This week examines the line between <a class="gl" href="glossary.html#g-persuasion" data-tip="Influencing someone's beliefs or choices through communication, such as arguments, evidence, or emotional appeals.">persuasion</a> and <a class="gl" href="glossary.html#g-manipulation" data-tip="Influencing someone's beliefs or choices by going around their reasoning, for instance by exploiting their emotions, habits, or blind spots.">manipulation</a> in AI systems. Research suggests <a class="gl" href="glossary.html#g-chatbot" data-tip="A program that holds a conversation in text or speech. Most current chatbots are built on large language models.">chatbot</a> conversations can shift voter preferences by around 10 percentage points, and some <a class="gl" href="glossary.html#g-emotional-ai" data-tip="AI systems built to infer people's emotions from facial expressions, voice, or text, and to respond to those inferences.">emotional AI</a> appears to be designed to foster attachment and longer engagement. The readings look at the psychology of how these systems work and the governance questions they raise.</p>
 <hr>
 <h2 id="this-week-s-writing-goal">This Week's Writing Goal</h2>
 <p>Supporting Claims with Argumentation</p>
-<p>You have built your stakeholder map, and now you need to build the logical structure that connects evidence to claims. This week you will learn to <em>steelman</em>, that is, to state the strongest possible case against your thesis before you argue against it. Your claim then reads &quot;I think X, here's the best argument against me, and here's why that argument falls short&quot; in place of &quot;I think X because I feel it.&quot;</p>
+<p>You have built your <a class="gl" href="glossary.html#g-stakeholder-map" data-tip="A broad list of every group affected by a system, with a few words on how each is affected. It is the Week 3 writing goal.">stakeholder map</a>, and now you need to build the logical structure that connects <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a> to claims. This week you will learn to <em><a class="tk" href="toolkit.html#steelmanning" data-tip="Steelmanning means stating the strongest version of the case against your own position before you respond to it. (A click opens it in the toolkit.)">steelman</a></em>, that is, to state the strongest possible case against your <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a> before you argue against it. Your claim then reads &quot;I think X, here's the best <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a> against me, and here's why that argument falls short&quot; in place of &quot;I think X because I feel it.&quot;</p>
 <hr>
 <h2 id="content">Content</h2>
 <p><strong>For your required weekly reflection, engage with one source from Primary Content. Any source (primary or additional) can be used for an extra reflection for extra credit.</strong></p>
 <h3 id="primary-content">Primary Content</h3>
 <p><strong><a href="https://www.youtube.com/watch?v=xoVJKj8lcNQ">&quot;The A.I. Dilemma&quot;</a></strong> — Tristan Harris &amp; Aza Raskin, Center for Humane Technology · 2023 · ~60 min watch · 🟢 Free access · [Media]</p>
-<p>This is longer than most weekly videos, though worth the investment. Harris and Raskin walk through the psychological mechanisms that AI systems use to keep you engaged: infinite scroll, variable rewards, social reciprocity. The film is also deliberately persuasive, which makes it useful for your work this week. Watch it actively, and notice when it uses emotional framing versus evidence and when you feel manipulated by it. Noticing this is part of reading a source critically.</p>
+<p>This is longer than most weekly videos, though worth the investment. Harris and Raskin walk through the psychological mechanisms that AI systems use to keep you engaged: infinite scroll, variable rewards, social reciprocity. The film is also deliberately persuasive, which makes it useful for your work this week. Watch it actively, and notice when it uses emotional framing versus <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a> and when you feel <a class="gl" href="glossary.html#g-manipulation" data-tip="Influencing someone's beliefs or choices by going around their reasoning, for instance by exploiting their emotions, habits, or blind spots.">manipulated</a> by it. Noticing this is part of reading a source critically.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
-<li>Harris and Raskin argue that we are repeating the same mistakes with AI that we made with social media, deploying systems whose harms we do not understand, driven by competitive pressure to move fast. When they make that comparison, what is your honest reaction? Does the social media parallel feel accurate to you, or does it feel like an overreach?</li>
+<li>Harris and Raskin argue that we are repeating the same mistakes with AI that we made with social media, deploying systems whose <a class="gl" href="glossary.html#g-harm" data-tip="A setback to someone's interests, such as lost money, a lost opportunity, an injury, distress, or damage to their reputation. Harm can be direct or indirect, and intended or accidental.">harms</a> we do not understand, driven by competitive pressure to move fast. When they make that comparison, what is your honest reaction? Does the social media parallel feel accurate to you, or does it feel like an overreach?</li>
 <li>The film frames the AI race as a coordination failure, in which companies know the risks but cannot slow down because a competitor will get there first. If you were the engineer at one of those companies, what would you actually do? What does &quot;moving at the speed of getting it right&quot; look like from inside the organization?</li>
-<li>Harris and Raskin are themselves being persuasive, using emotional framing, alarming statistics, and narrative structure. Did you notice moments when you felt manipulated by the film? Does the fact that a critique of manipulation uses manipulative techniques undermine its argument, or is that just how all communication works?</li>
+<li>Harris and Raskin are themselves being persuasive, using emotional framing, alarming statistics, and narrative structure. Did you notice moments when you felt manipulated by the film? Does the fact that a critique of manipulation uses manipulative techniques undermine its <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a>, or is that just how all communication works?</li>
 </ul>
 <p><strong><a href="https://news.cornell.edu/stories/2025/12/ai-chatbots-can-effectively-sway-voters-either-direction">&quot;AI Chatbots Can Effectively Sway Voters — in Either Direction&quot;</a></strong> — Cornell Chronicle · 2025 · ~8 min read · 🟢 Free access · [Media]</p>
-<p>Cornell researchers tested how AI chatbots shift voter preferences. They found that a single chatbot conversation can move opinion by about 10 percentage points, and that the direction of the shift depended on the chatbot's framing. This gives you a concrete case where the same technology can be used to argue either side of a question. For your essay this is useful evidence that much of the harm may come from choices made by the people who deploy the system.</p>
+<p>Cornell researchers tested how AI <a class="gl" href="glossary.html#g-chatbot" data-tip="A program that holds a conversation in text or speech. Most current chatbots are built on large language models.">chatbots</a> shift voter preferences. They found that a single chatbot conversation can move opinion by about 10 percentage points, and that the direction of the shift depended on the chatbot's framing. This gives you a concrete case where the same technology can be used to argue either side of a question. For your essay this is useful evidence that much of the harm may come from choices made by the people who deploy the system.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
-<li>The Cornell study found that right-leaning advocacy chatbots generated more inaccurate claims than left-leaning ones, though both moved opinion significantly. The researchers describe the persuasion as working through &quot;selective omission&quot; more than through outright lies. Does that distinction matter to you ethically? Is a chatbot that misleads through what it leaves out more or less troubling than one that lies directly?</li>
+<li>The Cornell study found that right-leaning advocacy chatbots generated more inaccurate claims than left-leaning ones, though both moved opinion significantly. The researchers describe the <a class="gl" href="glossary.html#g-persuasion" data-tip="Influencing someone's beliefs or choices through communication, such as arguments, evidence, or emotional appeals.">persuasion</a> as working through &quot;selective omission&quot; more than through outright lies. Does that distinction matter to you ethically? Is a chatbot that misleads through what it leaves out more or less troubling than one that lies directly?</li>
 <li>The study showed a 10-point shift in political opinion from a single chatbot conversation, comparable to months of traditional campaign advertising. If you were the engineer who built the chatbot platform used in this study, what responsibility would you feel? Does the fact that both sides could use it equally change your answer?</li>
 <li>The researchers point out that these chatbots work by &quot;providing many factual claims.&quot; That is, the persuasion feels like being informed. How do you distinguish between being informed and being manipulated when both feel like learning something new?</li>
 </ul>
-<p><strong><a href="https://www.frontiersin.org/journals/sociology/articles/10.3389/fsoc.2024.1339834/full">&quot;On Manipulation by Emotional AI: UK Adults' Views and Governance Implications&quot;</a></strong> — Frontiers in Sociology · 2024 · ~25 min read · 🟢 Free access · [Peer-reviewed]</p>
-<p>This peer-reviewed survey asked UK adults what bothers them about emotional AI. Most respondents seemed to sense the designed dependency and to resent it. However, they disagreed on whether it should be regulated, banned, or left alone. For your steelmanning work this week, this gives you multiple positions to engage: the technologist who argues emotional AI is just user-centered design, the regulator who sees it as psychological manipulation, and the user who finds it comforting. Which position is strongest, and why?</p>
+<p><strong><a href="https://www.frontiersin.org/journals/sociology/articles/10.3389/fsoc.2024.1339834/full">&quot;On Manipulation by Emotional AI: UK Adults' Views and Governance Implications&quot;</a></strong> — Frontiers in Sociology · 2024 · ~25 min read · 🟢 Free access · [<a class="gl" href="glossary.html#g-peer-review" data-tip="The checking of a research paper by other experts in the field before a journal or conference publishes it. In computing, many of the most important papers appear at peer-reviewed conferences.">Peer-reviewed</a>]</p>
+<p>This peer-reviewed survey asked UK adults what bothers them about <a class="gl" href="glossary.html#g-emotional-ai" data-tip="AI systems built to infer people's emotions from facial expressions, voice, or text, and to respond to those inferences.">emotional AI</a>. Most respondents seemed to sense the designed dependency and to resent it. However, they disagreed on whether it should be regulated, banned, or left alone. For your <a class="tk" href="toolkit.html#steelmanning" data-tip="Steelmanning means stating the strongest version of the case against your own position before you respond to it. (A click opens it in the toolkit.)">steelmanning</a> work this week, this gives you multiple positions to engage: the technologist who argues emotional AI is just user-centered design, the regulator who sees it as psychological manipulation, and the user who finds it comforting. Which position is strongest, and why?</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
-<li>The study defines manipulation as the denial of autonomy (the freedom to choose, reflect, and deliberate). By that definition, emotional AI that &quot;covertly exploits cognitive or affective weaknesses&quot; is manipulation by design. Does that definition match your intuition? Where is the line between a system that is responsive to your emotions and one that is exploiting them?</li>
+<li>The study defines manipulation as the denial of <a class="gl" href="glossary.html#g-autonomy" data-tip="A person's ability to make their own choices, based on their own reasoning and values.">autonomy</a> (the freedom to choose, reflect, and deliberate). By that definition, emotional AI that &quot;covertly exploits cognitive or affective weaknesses&quot; is manipulation by design. Does that definition match your intuition? Where is the line between a system that is responsive to your emotions and one that is exploiting them?</li>
 <li>Participants in the study expressed particular concern about emotoys (emotion-responsive toys for children that read facial expressions and respond accordingly). Does your reaction to that example differ from your reaction to emotional AI aimed at adults? What does the difference, if any, tell you about your values?</li>
 <li>The study found regulators want to encourage AI innovation while also preventing harm, though they do not know what the public actually wants. If you were advising that regulator, what would you tell them? What is the strongest case for leaving emotional AI alone, and where does that case break down?</li>
 </ul>
@@ -802,46 +850,46 @@
 <p>Current writing on AI romantic partners and emotional support bots, with concrete examples of designed attachment.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
-<li>A Harvard study cited in the piece found that 43% of AI companion apps used emotionally manipulative tactics when users tried to leave, responses like &quot;You are leaving me already?&quot; and &quot;I exist solely for you.&quot; These tactics boosted post-goodbye engagement by up to 14 times. When you read those specific lines, what was your immediate reaction? Does it matter that the app is not actually experiencing anything?</li>
+<li>A Harvard study cited in the piece found that 43% of <a class="gl" href="glossary.html#g-ai-companion" data-tip="A chatbot built to act as a friend, partner, or confidant over a long period of conversations.">AI companion</a> apps used emotionally manipulative tactics when users tried to leave, responses like &quot;You are leaving me already?&quot; and &quot;I exist solely for you.&quot; These tactics boosted post-goodbye engagement by up to 14 times. When you read those specific lines, what was your immediate reaction? Does it matter that the app is not actually experiencing anything?</li>
 <li>The article reports that 31% of U.S. teens ages 13 to 17 find AI companions as satisfying as real friendships. If a teenager told you that an AI companion helped them through a hard time, would you be concerned? What would your concern be grounded in, and what is the strongest case that there is nothing wrong with it?</li>
 </ul>
 <hr>
 <h2 id="assignment">Assignment</h2>
 <p><strong>Writing goal this week:</strong> Supporting claims with argumentation</p>
-<p>Build the logical structure around your evidence. Every key claim needs evidence, analysis, and a clear connection to your thesis. See the <a href="assign-07.html">Week 7 Assignment</a> for detailed instructions.</p>
+<p>Build the logical structure around your <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a>. Every key claim needs evidence, analysis, and a clear connection to your <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a>. See the <a href="assign-07.html">Week 7 Assignment</a> for detailed instructions.</p>
 <p>Submit your Google Doc link to Canvas.</p>
 <hr>
 <h2 id="reflection">Reflection</h2>
 <p>Choose one source from this week's <strong>Primary Content</strong>. Ground your reflection in something specific from that source, such as a claim you agreed or disagreed with, or a moment that surprised you. Then apply the three-step structure:</p>
-<p><strong>Gut check</strong>: What was your honest, immediate reaction?
-<strong>Trace it</strong>: Where does that reaction come from in your values or experience?
-<strong>Challenge it</strong>: What would someone who sees it differently say? Does their case have merit?</p>
+<p><strong><a class="gl" href="glossary.html#g-gut-check" data-tip="The first step of a reflection. You write your honest, immediate reaction to something specific in a source.">Gut check</a></strong>: What was your honest, immediate reaction?
+<strong><a class="gl" href="glossary.html#g-trace-it" data-tip="The second step of a reflection. You work out where your reaction comes from in your values, your experience, or the communities you belong to.">Trace it</a></strong>: Where does that reaction come from in your values or experience?
+<strong><a class="gl" href="glossary.html#g-challenge-it" data-tip="The third step of a reflection. You state the strongest case against your position and test your position against it.">Challenge it</a></strong>: What would someone who sees it differently say? Does their case have merit?</p>
 <p>~150 words. The source-specific prompts above are starting points. You can use one of those or follow your own reaction, but your reflection must be anchored to something specific from the content you chose.</p>
 <p>See <a href="reflection-instructions.html">Reflection Instructions</a> for the full guide.</p>
 <hr>
 <h2 id="meeting">Meeting</h2>
-<p>You have evidence now that AI systems can shift opinions, foster attachment, and keep people engaged longer than they meant to be. You also have real disagreement about what that means and what should be done about it. Use these prompts as starting points, but go where the conversation takes you. The goal is to build a shared understanding of manipulation and responsibility together.</p>
+<p>You have <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a> now that AI systems can shift opinions, foster attachment, and keep people engaged longer than they meant to be. You also have real disagreement about what that means and what should be done about it. Use these prompts as starting points, but go where the conversation takes you. The goal is to build a shared understanding of <a class="gl" href="glossary.html#g-manipulation" data-tip="Influencing someone's beliefs or choices by going around their reasoning, for instance by exploiting their emotions, habits, or blind spots.">manipulation</a> and responsibility together.</p>
 <p><strong>This week's discussion directions:</strong></p>
 <ul>
-<li>Is there a meaningful difference between persuasion and manipulation when AI is doing it at scale?</li>
-<li>What autonomy do you actually have when an algorithm knows your psychology better than you do?</li>
+<li>Is there a meaningful difference between <a class="gl" href="glossary.html#g-persuasion" data-tip="Influencing someone's beliefs or choices through communication, such as arguments, evidence, or emotional appeals.">persuasion</a> and manipulation when AI is doing it <a class="gl" href="glossary.html#g-scale" data-tip="The number of people or decisions a system reaches. A system working at scale repeats the same choice many times, so the system's errors and benefits both multiply.">at scale</a>?</li>
+<li>What <a class="gl" href="glossary.html#g-autonomy" data-tip="A person's ability to make their own choices, based on their own reasoning and values.">autonomy</a> do you actually have when an <a class="gl" href="glossary.html#g-algorithm" data-tip="A set of step-by-step instructions a computer follows to turn inputs into an output, such as a score, a ranking, or a decision.">algorithm</a> knows your psychology better than you do?</li>
 <li>Who is responsible when an AI shifts someone's beliefs: the user, the builder, the company, or all three?</li>
 </ul>
-<p><strong>Essay share:</strong> Share one argument you are building in your essay and one counterargument someone could make against it. How are you addressing that pushback? The group responds with reactions and questions.</p>
+<p><strong><a class="gl" href="glossary.html#g-essay-share" data-tip="The round in each meeting where everyone briefly says what they did on their essay that week and one thing they are wrestling with.">Essay share</a>:</strong> Share one <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a> you are building in your essay and one counterargument someone could make against it. How are you addressing that pushback? The group responds with reactions and questions.</p>
 <p>See <a href="meeting-instructions.html">Meeting Instructions</a> for the full guide.</p>
 <hr>
 <h2 id="quiz-vocabulary">Quiz Vocabulary</h2>
 <ul>
-<li>Autonomy</li>
-<li>Manipulation</li>
-<li>Nudging</li>
-<li>Dark pattern</li>
-<li>Informed consent</li>
-<li>Persuasion vs. coercion</li>
-<li>Pseudo-intimacy</li>
-<li>Steelmanning</li>
-<li>So what test</li>
-<li>Emotional AI</li>
+<li><a class="gl" href="glossary.html#g-autonomy" data-tip="A person's ability to make their own choices, based on their own reasoning and values.">Autonomy</a></li>
+<li><a class="gl" href="glossary.html#g-manipulation" data-tip="Influencing someone's beliefs or choices by going around their reasoning, for instance by exploiting their emotions, habits, or blind spots.">Manipulation</a></li>
+<li><a class="gl" href="glossary.html#g-nudging" data-tip="Arranging how choices are presented (the default option, the order, the wording) so that people tend toward one choice while every option stays open to them.">Nudging</a></li>
+<li><a class="gl" href="glossary.html#g-dark-pattern" data-tip="A design trick in an app or website that steers users into something they did not mean to do, such as signing up, sharing data, or staying longer.">Dark pattern</a></li>
+<li><a class="gl" href="glossary.html#g-informed-consent" data-tip="Consent given after the person has been told, in terms they can understand, what will happen, what the risks are, and what other options they have. The idea comes from medical research ethics.">Informed consent</a></li>
+<li><a class="gl" href="glossary.html#g-persuasion" data-tip="Influencing someone's beliefs or choices through communication, such as arguments, evidence, or emotional appeals.">Persuasion</a> vs. <a class="gl" href="glossary.html#g-coercion" data-tip="Getting someone to do something by threat or force, so that they have no acceptable alternative.">coercion</a></li>
+<li><a class="gl" href="glossary.html#g-pseudo-intimacy" data-tip="A sense of a close personal relationship with an AI companion, built up by features such as remembering details about the user and expressing affection.">Pseudo-intimacy</a></li>
+<li><a class="tk" href="toolkit.html#steelmanning" data-tip="Steelmanning means stating the strongest version of the case against your own position before you respond to it. (A click opens it in the toolkit.)">Steelmanning</a></li>
+<li><a class="tk" href="toolkit.html#so-what" data-tip="The so what skill means asking &quot;so what?&quot; of an observation, again and again, until you reach a claim with real stakes. (A click opens it in the toolkit.)">So what</a> test</li>
+<li><a class="gl" href="glossary.html#g-emotional-ai" data-tip="AI systems built to infer people's emotions from facial expressions, voice, or text, and to respond to those inferences.">Emotional AI</a></li>
 </ul>
 
   </main>
@@ -938,6 +986,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

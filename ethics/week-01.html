@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -750,26 +798,26 @@
   <main data-pagefind-body>
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <h1>Week 1 · Introduction to Ethical Reasoning</h1>
-<p>This week introduces the ethical reasoning framework that runs through the course. Three questions give you a structure for analyzing the cases you will study. They are: who is harmed, what are our obligations, and what would a person of integrity do. You will apply these questions to generative AI, since CS professionals build these systems and their decisions affect large numbers of people.</p>
+<p>This week introduces the <a class="gl" href="glossary.html#g-ethical-reasoning" data-tip="Working through a question of right and wrong step by step, with reasons that someone else can follow, check, and challenge.">ethical reasoning</a> framework that runs through the course. Three questions give you a structure for analyzing the cases you will study. They are: <a class="tk" href="toolkit.html#who-is-harmed" data-tip="This toolkit question asks who is affected by a system or decision and what specific harms they could face. (A click opens it in the toolkit.)">who is harmed</a>, <a class="tk" href="toolkit.html#what-are-our-obligations" data-tip="This toolkit question asks what duties, rules, or principles should guide a decision, whatever its consequences. (A click opens it in the toolkit.)">what are our obligations</a>, and <a class="tk" href="toolkit.html#what-would-a-person-of-integrity-do" data-tip="This toolkit question asks what the situation asks of you as a person with values, and whether you could explain your decision to the people it affects. (A click opens it in the toolkit.)">what would a person of integrity do</a>. You will apply these questions to <a class="gl" href="glossary.html#g-generative-ai" data-tip="AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples.">generative AI</a>, since CS professionals build these systems and their decisions affect large numbers of people.</p>
 <hr>
 <h2 id="this-week-s-writing-goal">This Week's Writing Goal</h2>
-<p>Brainstorming</p>
-<p>You are starting a living essay that will grow across nine weeks. This week the job is to generate material, and the answer can come later. You will apply the three toolkit questions to a specific case of generative AI and then use AI as a thinking partner to push your brainstorm further. The goal is range and quantity, since exploring more directions now will likely give you more to ground your essay in later.</p>
+<p><a class="gl" href="glossary.html#g-brainstorming" data-tip="Writing down as many ideas as you can in a set time, without judging them, so you have raw material to choose from later. It is the Week 1 writing goal.">Brainstorming</a></p>
+<p>You are starting a <a class="gl" href="glossary.html#g-living-essay" data-tip="The single Google Doc you revise every week, which grows into your final paper by Week 10.">living essay</a> that will grow across nine weeks. This week the job is to generate material, and the answer can come later. You will apply the <a class="tk" href="toolkit.html#section-1-the-three-toolkit-questions" data-tip="Who is harmed? What are our obligations? What would a person of integrity do? Each question draws on a different family of ethical theory. (A click opens it in the toolkit.)">three toolkit questions</a> to a specific case of <a class="gl" href="glossary.html#g-generative-ai" data-tip="AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples.">generative AI</a> and then use AI as a thinking partner to push your brainstorm further. The goal is range and quantity, since exploring more directions now will likely give you more to ground your essay in later.</p>
 <hr>
 <h2 id="content">Content</h2>
 <p><strong>For your required weekly reflection you will engage with one source from Primary Content. Any source, primary or additional, can be used for an extra reflection for extra credit.</strong></p>
 <h3 id="primary-content">Primary Content</h3>
 <p><strong><a href="https://www.ted.com/talks/toby_walsh_ai_and_ethics">Toby Walsh: AI and Ethics</a></strong> — TED · 2018 · ~10 min watch · 🟢 Free access · [Media]</p>
-<p>In this foundational talk, computer scientist Toby Walsh explains why AI systems need ethical reasoning and what happens when they lack it. He covers real cases where AI made decisions that seemed reasonable in code but caused harm in the world. It is a strong introduction to why ethical questions come up in ordinary CS work.</p>
+<p>In this foundational talk, computer scientist Toby Walsh explains why AI systems need <a class="gl" href="glossary.html#g-ethical-reasoning" data-tip="Working through a question of right and wrong step by step, with reasons that someone else can follow, check, and challenge.">ethical reasoning</a> and what happens when they lack it. He covers real cases where AI made decisions that seemed reasonable in code but caused <a class="gl" href="glossary.html#g-harm" data-tip="A setback to someone's interests, such as lost money, a lost opportunity, an injury, distress, or damage to their reputation. Harm can be direct or indirect, and intended or accidental.">harm</a> in the world. It is a strong introduction to why ethical questions come up in ordinary CS work.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
-<li>Walsh's central claim is that AI creates no new ethical problems, and that it gives us new and more powerful ways to commit old ones. Faking an identity, deceiving people, and manipulating outcomes have always been wrong. Does that framing land for you, or does AI seem different in kind as well as in scale? Where does your instinct come from?</li>
-<li>Think of a specific AI capability that concerns you, such as deepfakes, impersonation bots, or automated scams. If Walsh is right that the underlying wrong is the same as it has always been, does that make the ethical question simpler or more complicated? What does applying existing ethics to a new tool actually require of the person doing the applying?</li>
-<li>AI operates at a scale and with a level of autonomy that human actors never could. A con artist can deceive dozens of people, while an AI system can deceive millions at once without any single person making each choice. What does that change about how we apply ethics? Do scale and autonomy require new thinking, or more careful application of what we already have?</li>
+<li>Walsh's central claim is that AI creates no new ethical problems, and that it gives us new and more powerful ways to commit old ones. Faking an identity, deceiving people, and <a class="gl" href="glossary.html#g-manipulation" data-tip="Influencing someone's beliefs or choices by going around their reasoning, for instance by exploiting their emotions, habits, or blind spots.">manipulating</a> outcomes have always been wrong. Does that framing land for you, or does AI seem different in kind as well as in <a class="gl" href="glossary.html#g-scale" data-tip="The number of people or decisions a system reaches. A system working at scale repeats the same choice many times, so the system's errors and benefits both multiply.">scale</a>? Where does your instinct come from?</li>
+<li>Think of a specific AI capability that concerns you, such as <a class="gl" href="glossary.html#g-deepfake" data-tip="Synthetic media that shows a real person saying or doing something they never said or did.">deepfakes</a>, impersonation bots, or automated scams. If Walsh is right that the underlying wrong is the same as it has always been, does that make the ethical question simpler or more complicated? What does applying existing ethics to a new tool actually require of the person doing the applying?</li>
+<li>AI operates at a scale and with a level of <a class="gl" href="glossary.html#g-autonomy" data-tip="A person's ability to make their own choices, based on their own reasoning and values.">autonomy</a> that human actors never could. A con artist can deceive dozens of people, while an AI system can deceive millions at once without any single person making each choice. What does that change about how we apply ethics? Do scale and autonomy require new thinking, or more careful application of what we already have?</li>
 </ul>
 <hr>
 <p><strong><a href="https://www.pbs.org/video/the-future-of-ai-1683317973/">&quot;'Godfather of AI' Geoffrey Hinton on the dangers AI poses to society&quot;</a></strong> — PBS NewsHour · 2023 · ~10 min watch · 🟢 Free access · [Media]</p>
-<p>Hinton, one of the pioneers of modern AI, discusses the real risks AI systems pose and why the people building them need to think carefully about consequences. Note: this talk focuses on safety risk (ethical reasoning in general gets less attention). If you watch it, pair it with at least one of the readings to ground the three toolkit questions.</p>
+<p>Hinton, one of the pioneers of modern AI, discusses the real risks AI systems pose and why the people building them need to think carefully about <a class="gl" href="glossary.html#g-consequence" data-tip="A result that follows from an action or decision, including results nobody intended.">consequences</a>. Note: this talk focuses on safety risk (ethical reasoning in general gets less attention). If you watch it, pair it with at least one of the readings to ground the <a class="tk" href="toolkit.html#section-1-the-three-toolkit-questions" data-tip="Who is harmed? What are our obligations? What would a person of integrity do? Each question draws on a different family of ethical theory. (A click opens it in the toolkit.)">three toolkit questions</a>.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
 <li>Hinton compares the relationship between humans and a superintelligent AI to the relationship between an adult and a two-year-old, where the adult can easily manipulate the child into choices that serve the adult's interests. When you heard that analogy, what was your gut reaction? Does it feel alarmist, or does it clarify something real?</li>
@@ -788,7 +836,7 @@
 </ul>
 <hr>
 <p>➕ <strong><a href="https://www.reuters.com/article/us-amazon-com-jobs-automation-insight-idUSKCN1MK08G">&quot;Amazon Scrapped a Secret AI Recruiting Tool That Showed Bias Against Women&quot;</a></strong> — Jeffrey Dastin, Reuters · 2018 · ~8 min read · 🟢 Free access · [Media]</p>
-<p>This is a specific, close case of an AI system built with good intentions that ended up encoding and amplifying bias. Read this after you have brainstormed, since it will help you see how the three toolkit questions apply to a real scenario.</p>
+<p>This is a specific, close case of an AI system built with good intentions that ended up encoding and amplifying <a class="gl" href="glossary.html#g-bias" data-tip="A consistent tilt in a person's or a system's judgments that favors some people or outcomes over others. In AI it usually means outputs that are less accurate or less favorable for a particular group.">bias</a>. Read this after you have <a class="gl" href="glossary.html#g-brainstorming" data-tip="Writing down as many ideas as you can in a set time, without judging them, so you have raw material to choose from later. It is the Week 1 writing goal.">brainstormed</a>, since it will help you see how the three toolkit questions apply to a real scenario.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
 <li>Amazon's recruiting tool was trained on resumes submitted over a decade, and those resumes reflected a male-dominated field. The tool learned to penalize resumes that included the word &quot;women's&quot;, as in &quot;women's chess club&quot;. Nobody programmed that rule in. What does it mean to be responsible for an outcome your system produced without your explicit instruction?</li>
@@ -797,15 +845,15 @@
 </ul>
 <hr>
 <h2 id="assignment">Assignment</h2>
-<p><strong>Writing goal this week:</strong> Brainstorming. Get everything down.</p>
-<p>Apply the three toolkit questions to gen AI cases that interest you and generate as much raw material as you can. Please see the <a href="assign-01.html">Week 1 Assignment</a> for detailed instructions.</p>
+<p><strong>Writing goal this week:</strong> <a class="gl" href="glossary.html#g-brainstorming" data-tip="Writing down as many ideas as you can in a set time, without judging them, so you have raw material to choose from later. It is the Week 1 writing goal.">Brainstorming</a>. Get everything down.</p>
+<p>Apply the <a class="tk" href="toolkit.html#section-1-the-three-toolkit-questions" data-tip="Who is harmed? What are our obligations? What would a person of integrity do? Each question draws on a different family of ethical theory. (A click opens it in the toolkit.)">three toolkit questions</a> to <a class="gl" href="glossary.html#g-generative-ai" data-tip="AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples.">gen AI</a> cases that interest you and generate as much raw material as you can. Please see the <a href="assign-01.html">Week 1 Assignment</a> for detailed instructions.</p>
 <p>Submit your Google Doc link to Canvas.</p>
 <hr>
 <h2 id="reflection">Reflection</h2>
 <p>Choose one source from this week's <strong>Primary Content</strong>. Ground your reflection in something specific from that source, such as a claim you agreed or disagreed with, or a moment that surprised you. Then apply the three-step structure:</p>
-<p><strong>Gut check.</strong> What was your honest, immediate reaction?
-<strong>Trace it.</strong> Where does that reaction come from in your values or experience?
-<strong>Challenge it.</strong> What would someone who sees it differently say? Does their case have merit?</p>
+<p><strong><a class="gl" href="glossary.html#g-gut-check" data-tip="The first step of a reflection. You write your honest, immediate reaction to something specific in a source.">Gut check</a>.</strong> What was your honest, immediate reaction?
+<strong><a class="gl" href="glossary.html#g-trace-it" data-tip="The second step of a reflection. You work out where your reaction comes from in your values, your experience, or the communities you belong to.">Trace it</a>.</strong> Where does that reaction come from in your values or experience?
+<strong><a class="gl" href="glossary.html#g-challenge-it" data-tip="The third step of a reflection. You state the strongest case against your position and test your position against it.">Challenge it</a>.</strong> What would someone who sees it differently say? Does their case have merit?</p>
 <p>Write about 150 words. The source-specific prompts above are starting points. You may use one of those or follow your own reaction. Make sure your reflection is anchored to something specific from the content you chose.</p>
 <p>See <a href="reflection-instructions.html">Reflection Instructions</a> for the full guide.</p>
 <hr>
@@ -814,32 +862,32 @@
 <p><strong>This week's discussion directions:</strong></p>
 <ul>
 <li>
-<p>What concerns you most about gen AI right now?</p>
+<p>What concerns you most about <a class="gl" href="glossary.html#g-generative-ai" data-tip="AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples.">gen AI</a> right now?</p>
 </li>
 <li>
-<p>What is your gut reaction to the idea that the tools you build as a CS professional could cause harm you did not intend?</p>
+<p>What is your gut reaction to the idea that the tools you build as a CS professional could cause <a class="gl" href="glossary.html#g-harm" data-tip="A setback to someone's interests, such as lost money, a lost opportunity, an injury, distress, or damage to their reputation. Harm can be direct or indirect, and intended or accidental.">harm</a> you did not intend?</p>
 </li>
 <li>
 <p>Does ethical responsibility end when you hand off your code, or does it follow the system into the world?</p>
 </li>
 </ul>
-<p><strong>Essay share:</strong> Each person briefly shares the case of gen AI they chose to brainstorm about and one thing they found themselves wrestling with. The group responds with reactions and questions. Close with one collaborative paragraph capturing what the group is thinking about ethics and AI.</p>
+<p><strong><a class="gl" href="glossary.html#g-essay-share" data-tip="The round in each meeting where everyone briefly says what they did on their essay that week and one thing they are wrestling with.">Essay share</a>:</strong> Each person briefly shares the case of gen AI they chose to <a class="gl" href="glossary.html#g-brainstorming" data-tip="Writing down as many ideas as you can in a set time, without judging them, so you have raw material to choose from later. It is the Week 1 writing goal.">brainstorm</a> about and one thing they found themselves wrestling with. The group responds with reactions and questions. Close with one <a class="gl" href="glossary.html#g-collaborative-paragraph" data-tip="The paragraph of 150 to 200 words your group writes together at the end of each meeting, recording what you explored and where you agreed or disagreed.">collaborative paragraph</a> capturing what the group is thinking about ethics and AI.</p>
 <p>See <a href="meeting-instructions.html">Meeting Instructions</a> for the full guide.</p>
 <hr>
 <h2 id="quiz-vocabulary">Quiz Vocabulary</h2>
 <ul>
-<li>Algorithm</li>
-<li>Stakeholder</li>
-<li>Harm</li>
-<li>Bias</li>
-<li>Brainstorming</li>
-<li>The three toolkit questions: Who is harmed? What are our obligations? What would a person of integrity do?</li>
-<li>Generative AI</li>
-<li>Ethical reasoning</li>
-<li>Consequence</li>
-<li>Obligation</li>
-<li>Integrity</li>
-<li>Scale</li>
+<li><a class="gl" href="glossary.html#g-algorithm" data-tip="A set of step-by-step instructions a computer follows to turn inputs into an output, such as a score, a ranking, or a decision.">Algorithm</a></li>
+<li><a class="gl" href="glossary.html#g-stakeholder" data-tip="Any person or group affected by a system or a decision. This includes the people who build it, use it, profit from it, and are judged by it.">Stakeholder</a></li>
+<li><a class="gl" href="glossary.html#g-harm" data-tip="A setback to someone's interests, such as lost money, a lost opportunity, an injury, distress, or damage to their reputation. Harm can be direct or indirect, and intended or accidental.">Harm</a></li>
+<li><a class="gl" href="glossary.html#g-bias" data-tip="A consistent tilt in a person's or a system's judgments that favors some people or outcomes over others. In AI it usually means outputs that are less accurate or less favorable for a particular group.">Bias</a></li>
+<li><a class="gl" href="glossary.html#g-brainstorming" data-tip="Writing down as many ideas as you can in a set time, without judging them, so you have raw material to choose from later. It is the Week 1 writing goal.">Brainstorming</a></li>
+<li>The <a class="tk" href="toolkit.html#section-1-the-three-toolkit-questions" data-tip="Who is harmed? What are our obligations? What would a person of integrity do? Each question draws on a different family of ethical theory. (A click opens it in the toolkit.)">three toolkit questions</a>: <a class="tk" href="toolkit.html#who-is-harmed" data-tip="This toolkit question asks who is affected by a system or decision and what specific harms they could face. (A click opens it in the toolkit.)">Who is harmed</a>? <a class="tk" href="toolkit.html#what-are-our-obligations" data-tip="This toolkit question asks what duties, rules, or principles should guide a decision, whatever its consequences. (A click opens it in the toolkit.)">What are our obligations</a>? <a class="tk" href="toolkit.html#what-would-a-person-of-integrity-do" data-tip="This toolkit question asks what the situation asks of you as a person with values, and whether you could explain your decision to the people it affects. (A click opens it in the toolkit.)">What would a person of integrity do</a>?</li>
+<li><a class="gl" href="glossary.html#g-generative-ai" data-tip="AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples.">Generative AI</a></li>
+<li><a class="gl" href="glossary.html#g-ethical-reasoning" data-tip="Working through a question of right and wrong step by step, with reasons that someone else can follow, check, and challenge.">Ethical reasoning</a></li>
+<li><a class="gl" href="glossary.html#g-consequence" data-tip="A result that follows from an action or decision, including results nobody intended.">Consequence</a></li>
+<li><a class="gl" href="glossary.html#g-obligation" data-tip="Something you owe to others (or to yourself) because of a duty, a promise, a role, or a principle. An obligation can hold even when meeting it costs you something.">Obligation</a></li>
+<li><a class="gl" href="glossary.html#g-integrity" data-tip="Acting consistently with your values, and being willing to explain and stand behind your decisions to the people they affect.">Integrity</a></li>
+<li><a class="gl" href="glossary.html#g-scale" data-tip="The number of people or decisions a system reaches. A system working at scale repeats the same choice many times, so the system's errors and benefits both multiply.">Scale</a></li>
 </ul>
 
   </main>
@@ -936,6 +984,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

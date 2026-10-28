@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -745,28 +793,28 @@
 <hr>
 <h2 id="what-reflections-are">What Reflections Are</h2>
 <p>Reflections are an honest look at your own reactions, values, and assumptions through the lens of that week's topic. Analysis looks at a topic from a distance, while reflection looks at where you stand on it, what shaped that position, and whether it holds up when you look at it closely.</p>
-<p>For instance, an analysis of AI bias might examine how disparate impact occurs mathematically. A reflection asks questions like these: have I ever benefited from bias without noticing? Have I ever assumed an algorithm was more objective than it was? What do I actually believe about fairness?</p>
+<p>For instance, an analysis of AI <a class="gl" href="glossary.html#g-bias" data-tip="A consistent tilt in a person's or a system's judgments that favors some people or outcomes over others. In AI it usually means outputs that are less accurate or less favorable for a particular group.">bias</a> might examine how <a class="gl" href="glossary.html#g-disparate-impact" data-tip="A pattern where a rule or system applied to everyone produces noticeably worse outcomes for a group defined by a protected characteristic such as race or sex. In US employment and housing law it can count as discrimination without any intent, unless the organization shows the rule serves a legitimate need.">disparate impact</a> occurs mathematically. A reflection asks questions like these: have I ever benefited from bias without noticing? Have I ever assumed an <a class="gl" href="glossary.html#g-algorithm" data-tip="A set of step-by-step instructions a computer follows to turn inputs into an output, such as a score, a ranking, or a decision.">algorithm</a> was more objective than it was? What do I actually believe about <a class="gl" href="glossary.html#g-fairness" data-tip="Treating people justly, so that nobody is disadvantaged for reasons that should not matter. Computer scientists have written several precise definitions of fairness, and some of them conflict, so a system usually cannot meet all of them at once.">fairness</a>?</p>
 <p>Reflections are low-stakes, and genuine engagement earns full credit. There is no correct ethical position. A reflection that does not say what you think misses the point of the exercise.</p>
 <hr>
 <h2 id="anchoring-to-a-source">Anchoring to a Source</h2>
 <p>Every reflection must be grounded in a specific piece of content you engaged with that week (a specific video, article, documentary, or other source). There are two reasons for this. First, it confirms you actually engaged with the material. Second, it gives you something concrete to react to. The gut check works best when it comes from a real moment, something you watched or read that actually landed somewhere.</p>
-<p>Your reflection is about your reaction (not a summary of the source). Your gut reaction should still trace back to something specific: a claim the speaker made, a statistic that surprised you, a scene that unsettled you, an argument you found yourself resisting. If you can write your reflection without mentioning what you watched or read, that is a sign you are drifting into abstraction. If so, go back to the specific moment in the source.</p>
+<p>Your reflection is about your reaction (not a summary of the source). Your gut reaction should still trace back to something specific: a claim the speaker made, a statistic that surprised you, a scene that unsettled you, an <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a> you found yourself resisting. If you can write your reflection without mentioning what you watched or read, that is a sign you are drifting into abstraction. If so, go back to the specific moment in the source.</p>
 <hr>
 <h2 id="the-three-part-structure">The Three-Part Structure</h2>
 <p>Every week uses the same structure. You will do this nine times, so it becomes a familiar rhythm.</p>
 <p><strong>Part 1: Gut Check</strong></p>
 <p>Your honest, unfiltered reaction to something specific you watched or read this week. Write this first, before you analyze anything, and write down your actual response without editing it.</p>
 <p>This might be anger, confusion, defensiveness, excitement, grief, certainty, or contradiction. All of those are valid. The point is to capture what you actually think before the thinking deepens.</p>
-<p><strong>How to write it:</strong> Short, direct, and tied to a specific source. <em>&quot;I watched the Walsh TED talk and when he described an AI that couldn't explain its own decisions, I felt unsettled in a way I didn't expect.&quot;</em> Or: <em>&quot;I read the Amazon hiring algorithm article and I felt angry. The company knew it was biased and deployed it anyway.&quot;</em> Or: <em>&quot;Watching the Hinton interview, I had no idea he'd actually left Google over this. That changed how I heard the rest of what he said.&quot;</em> This is only the starting point.</p>
+<p><strong>How to write it:</strong> Short, direct, and tied to a specific source. <em>&quot;I watched the Walsh TED talk and when he described an AI that couldn't explain its own decisions, I felt unsettled in a way I didn't expect.&quot;</em> Or: <em>&quot;I read the Amazon hiring <a class="gl" href="glossary.html#g-algorithm" data-tip="A set of step-by-step instructions a computer follows to turn inputs into an output, such as a score, a ranking, or a decision.">algorithm</a> article and I felt angry. The company knew it was <a class="gl" href="glossary.html#g-bias" data-tip="A consistent tilt in a person's or a system's judgments that favors some people or outcomes over others. In AI it usually means outputs that are less accurate or less favorable for a particular group.">biased</a> and deployed it anyway.&quot;</em> Or: <em>&quot;Watching the Hinton interview, I had no idea he'd actually left Google over this. That changed how I heard the rest of what he said.&quot;</em> This is only the starting point.</p>
 <p><strong>Part 2: Trace It</strong></p>
 <p>Now ask where that reaction comes from. The purpose is to understand your reaction, and you might find out something about yourself you did not know.</p>
-<p>A reaction usually comes from somewhere: a value you hold (fairness, honesty, autonomy), an experience you have had (you were treated unfairly, you trusted someone who lied, you felt controlled), a community you belong to (engineers, people of color, people from working-class backgrounds, people who love building things), or a person who shaped you (a parent, a mentor, someone who stood up for you).</p>
+<p>A reaction usually comes from somewhere: a value you hold (<a class="gl" href="glossary.html#g-fairness" data-tip="Treating people justly, so that nobody is disadvantaged for reasons that should not matter. Computer scientists have written several precise definitions of fairness, and some of them conflict, so a system usually cannot meet all of them at once.">fairness</a>, honesty, <a class="gl" href="glossary.html#g-autonomy" data-tip="A person's ability to make their own choices, based on their own reasoning and values.">autonomy</a>), an experience you have had (you were treated unfairly, you trusted someone who lied, you felt controlled), a community you belong to (engineers, people of color, people from working-class backgrounds, people who love building things), or a person who shaped you (a parent, a mentor, someone who stood up for you).</p>
 <p><strong>How to write it:</strong> Be specific. Do not write &quot;I care about justice.&quot; Write something like &quot;my parents were immigrants and I watched them navigate systems designed against them, and it taught me that systems matter.&quot; Do not write &quot;I believe in fairness.&quot; Write something like &quot;I once had a teacher who graded based on demographics instead of actual work, and I realized then that neutrality doesn't exist, since every system advantages someone.&quot;</p>
 <p><strong>Part 3: Challenge It</strong></p>
-<p>Now ask what the strongest case against your position is. Look for the steel-man, that is, the smartest and most compelling version of the opposing view (the opposite of a strawman, which is the weakest version of the other side).</p>
+<p>Now ask what the strongest case against your position is. Look for the <a class="tk" href="toolkit.html#steelmanning" data-tip="Steelmanning means stating the strongest version of the case against your own position before you respond to it. (A click opens it in the toolkit.)">steel-man</a>, that is, the smartest and most compelling version of the opposing view (the opposite of a <a class="gl" href="glossary.html#g-strawman" data-tip="A weakened or distorted version of an opposing view, set up so it is easy to knock down.">strawman</a>, which is the weakest version of the other side).</p>
 <p>Your gut reaction might be right, incomplete, or wrong. Either way, test it. What would a thoughtful person who disagrees with you say? What do they see that you might be missing?</p>
 <p><strong>How to write it:</strong> Articulate the best possible version of the opposing view. Then ask whether your position holds up against that version or changes.</p>
-<p>For instance, say you came in angry that a company deployed a biased hiring algorithm. A steelmanned counter might be: <em>&quot;But the alternative (human hiring) is also biased, and sometimes in ways we can't measure or address. Maybe algorithmic bias is actually more auditable, and with the right oversight, better than pretending humans aren't biased too.&quot;</em> Now does your anger shift? Do you refine it? <em>&quot;No, I still think deployment without transparency is wrong, but I see the company's trade-off between bad options, and that changes what I'd recommend as a policy fix.&quot;</em> You may still disagree with the opposing view, though you need to engage with it honestly.</p>
+<p>For instance, say you came in angry that a company deployed a biased hiring algorithm. A steelmanned counter might be: <em>&quot;But the alternative (human hiring) is also biased, and sometimes in ways we can't measure or address. Maybe <a class="gl" href="glossary.html#g-algorithmic-bias" data-tip="Bias in the outputs of an algorithm. It usually comes from the training data, from proxy variables, or from choices about what the system is built to optimize.">algorithmic bias</a> is actually more auditable, and with the right oversight, better than pretending humans aren't biased too.&quot;</em> Now does your anger shift? Do you refine it? <em>&quot;No, I still think deployment without <a class="gl" href="glossary.html#g-transparency" data-tip="Openness about how systems work, what data they use, and how they are used, so that outsiders can understand and question them.">transparency</a> is wrong, but I see the company's trade-off between bad options, and that changes what I'd recommend as a policy fix.&quot;</em> You may still disagree with the opposing view, though you need to engage with it honestly.</p>
 <hr>
 <h2 id="using-the-weekly-prompts">Using the Weekly Prompts</h2>
 <p>Each weekly page has two kinds of reflection prompts.</p>
@@ -810,7 +858,7 @@
 <td>Good. You are still doing the inner work, and AI is helping you find words for what is already there.</td>
 </tr>
 <tr>
-<td>You use AI to generate the strongest steelman for Part 3</td>
+<td>You use AI to generate the strongest <a class="tk" href="toolkit.html#steelmanning" data-tip="Steelmanning means stating the strongest version of the case against your own position before you respond to it. (A click opens it in the toolkit.)">steelman</a> for Part 3</td>
 <td>A legitimate and useful application. The opposing view can come from AI, as long as you engage with it yourself.</td>
 </tr>
 </tbody>
@@ -827,10 +875,10 @@
 <p>The distinction is between honest thinking and performance, and it is usually easy to tell the difference.</p>
 <hr>
 <h2 id="a-note-on-the-through-line">A Note on the Through-Line</h2>
-<p>By Week 9 you will have nine reflections, nine records of your own reactions and values across the quarter. Read them together sometime around Week 8 or 9. You will likely find that your thinking has moved. That is, you will likely be clearer about what you believe and why. This record is useful evidence of your own development.</p>
+<p>By Week 9 you will have nine reflections, nine records of your own reactions and values across the quarter. Read them together sometime around Week 8 or 9. You will likely find that your thinking has moved. That is, you will likely be clearer about what you believe and why. This record is useful <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a> of your own development.</p>
 <hr>
 <h2 id="getting-started">Getting Started</h2>
-<p>For this week's reflection, go to the weekly page and find the source-specific prompts tied to the Primary Content. Pick one, or follow your own reaction. Write gut check first (no filter, anchored to something specific you watched or read). Then trace where that reaction comes from (specific, honest). Then challenge your own position with the strongest case against it (steelman it).</p>
+<p>For this week's reflection, go to the weekly page and find the source-specific prompts tied to the Primary Content. Pick one, or follow your own reaction. Write gut check first (no filter, anchored to something specific you watched or read). Then trace where that reaction comes from (specific, honest). Then challenge your own position with the strongest case against it (<a class="tk" href="toolkit.html#steelmanning" data-tip="Steelmanning means stating the strongest version of the case against your own position before you respond to it. (A click opens it in the toolkit.)">steelman</a> it).</p>
 <p>The question may remain unresolved, as long as you have examined your own position honestly.</p>
 
   </main>
@@ -927,6 +975,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

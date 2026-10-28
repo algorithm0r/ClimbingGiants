@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <strong>AI Use</strong>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -746,15 +794,15 @@
 <hr>
 <h2 id="the-core-distinction">The Core Distinction</h2>
 <p>The guiding question for AI use in this course is what AI did for your thinking. Using AI to <strong>enhance your critical thinking</strong> and using AI to <strong>replace it</strong> are very different.</p>
-<p><strong>Enhancement</strong> looks like this. You brought something (a position, a question, a draft, an argument) and AI helped you see it more clearly, push it further, or stress-test it. You are still the one doing the thinking.</p>
+<p><strong>Enhancement</strong> looks like this. You brought something (a position, a question, a draft, an <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a>) and AI helped you see it more clearly, push it further, or stress-test it. You are still the one doing the thinking.</p>
 <p><strong>Replacement</strong> looks like this. AI generated the thinking, and you accepted, selected, or lightly edited it. The output may look fine. However, you did not do the thinking yourself, so you may not have the skill when you need it later (for instance in a job interview, a later course, or a career where you are asked to make ethical judgments about systems you help build).</p>
 <p>The cost of replacement is often hard to see during the quarter, though it is likely to matter later, and I would like you to notice that cost early.</p>
 <hr>
 <h2 id="this-is-an-ethical-situation">This Is an Ethical Situation</h2>
 <p>The three questions that anchor this course apply directly to your own AI use:</p>
-<p><strong>Who is harmed?</strong> If you let AI do your thinking, you are the primary person harmed. You came here to develop the capacity to reason about hard problems, and outsourcing that reasoning means you lose practice you will likely need later.</p>
-<p><strong>What are your obligations?</strong> You have an obligation to yourself to develop the skills this course is designed to build. You also have an obligation to your discussion group, who are there to engage with your ideas. Finally, you have an obligation to engage honestly with the grading system, which is built on genuine effort.</p>
-<p><strong>What would a person of integrity do?</strong> Be honest about how you use AI, and notice when it starts doing the thinking for you.</p>
+<p><strong><a class="tk" href="toolkit.html#who-is-harmed" data-tip="This toolkit question asks who is affected by a system or decision and what specific harms they could face. (A click opens it in the toolkit.)">Who is harmed</a>?</strong> If you let AI do your thinking, you are the primary person <a class="gl" href="glossary.html#g-harm" data-tip="A setback to someone's interests, such as lost money, a lost opportunity, an injury, distress, or damage to their reputation. Harm can be direct or indirect, and intended or accidental.">harmed</a>. You came here to develop the capacity to reason about hard problems, and outsourcing that reasoning means you lose practice you will likely need later.</p>
+<p><strong><a class="tk" href="toolkit.html#what-are-our-obligations" data-tip="This toolkit question asks what duties, rules, or principles should guide a decision, whatever its consequences. (A click opens it in the toolkit.)">What are your obligations</a>?</strong> You have an <a class="gl" href="glossary.html#g-obligation" data-tip="Something you owe to others (or to yourself) because of a duty, a promise, a role, or a principle. An obligation can hold even when meeting it costs you something.">obligation</a> to yourself to develop the skills this course is designed to build. You also have an obligation to your discussion group, who are there to engage with your ideas. Finally, you have an obligation to engage honestly with the grading system, which is built on genuine effort.</p>
+<p><strong><a class="tk" href="toolkit.html#what-would-a-person-of-integrity-do" data-tip="This toolkit question asks what the situation asks of you as a person with values, and whether you could explain your decision to the people it affects. (A click opens it in the toolkit.)">What would a person of integrity do</a>?</strong> Be honest about how you use AI, and notice when it starts doing the thinking for you.</p>
 <p>You do not need to answer these questions publicly. However, it is a good idea to ask them privately each week.</p>
 <hr>
 <h2 id="a-spectrum-of-ai-use">A Spectrum of AI Use</h2>
@@ -792,7 +840,7 @@
 <td>Stronger. You practice responding to criticism and making your own decisions about revision.</td>
 </tr>
 <tr>
-<td>You make an argument. AI argues the other side. You respond</td>
+<td>You make an <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a>. AI argues the other side. You respond</td>
 <td>Real critical thinking practice. You have to defend your position or refine it.</td>
 </tr>
 <tr>
@@ -914,6 +962,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

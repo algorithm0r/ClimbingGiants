@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -751,7 +799,7 @@
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <h1>Week 10 Assignment · Final Framing</h1>
 <p><em>Skill: Final Framing · <a href="toolkit.html#final-framing">See toolkit</a></em></p>
-<p>Your essay exists, and this week you frame it. Framing comes last because you can only frame something you fully understand. Writers often write their introduction too early, before they know what they actually argued. You have argued something across nine weeks, and now you are going to figure out what it was and say it clearly. Each step this week builds on the last, moving from the full argument down to a single phrase that names it.</p>
+<p>Your essay exists, and this week you frame it. Framing comes last because you can only frame something you fully understand. Writers often write their introduction too early, before they know what they actually argued. You have argued something across nine weeks, and now you are going to figure out what it was and say it clearly. Each step this week builds on the last, moving from the full <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a> down to a single phrase that names it.</p>
 <hr>
 <h2 id="steps">Steps</h2>
 <ol>
@@ -759,13 +807,13 @@
 <p><strong>Conclusion:</strong> Write or rewrite your conclusion first. Read your entire essay, then ask: what did I actually argue? What is the single most important thing I want a reader to carry away? Your conclusion should restate the problem and your solution briefly, name what is at stake if nothing changes, and end with a sentence addressed directly to you as a future CS professional. Address it to the person who will build systems like the one you have been writing about (for instance, &quot;society&quot; in the abstract is too broad). Aim for 150 to 200 words.</p>
 </li>
 <li>
-<p><strong>Introduction:</strong> Use your conclusion as a guide, since you now know exactly what you argued. Write or rewrite your introduction. It should do three things in order: give the reader enough context to understand the problem, motivate why it matters, and state your thesis clearly. &quot;Enough context&quot; means describing the technology for a reader who may have heard of it but does not know the specifics. Explain what it does, who uses it, and what they use it for. Do not assume your reader already knows. In this way the introduction promises what the body of the essay will argue and the conclusion will deliver. Aim for 150 to 200 words.</p>
+<p><strong>Introduction:</strong> Use your conclusion as a guide, since you now know exactly what you argued. Write or rewrite your introduction. It should do three things in order: give the reader enough context to understand the problem, motivate why it matters, and state your <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a> clearly. &quot;Enough context&quot; means describing the technology for a reader who may have heard of it but does not know the specifics. Explain what it does, who uses it, and what they use it for. Do not assume your reader already knows. In this way the introduction promises what the body of the essay will argue and the conclusion will deliver. Aim for 150 to 200 words.</p>
 </li>
 <li>
-<p><strong>Abstract:</strong> With both your introduction and conclusion in front of you, write one paragraph of 100 to 150 words that compresses the whole essay: what the technology is, what the ethical problem is, and what policy you propose. A reader should know exactly what your essay argues without reading anything else.</p>
+<p><strong><a class="gl" href="glossary.html#g-abstract" data-tip="A single paragraph (about 150 words in this course) that compresses a whole paper: the problem, the position it takes, and what it proposes.">Abstract</a>:</strong> With both your introduction and conclusion in front of you, write one paragraph of 100 to 150 words that compresses the whole essay: what the technology is, what the ethical problem is, and what policy you propose. A reader should know exactly what your essay argues without reading anything else.</p>
 </li>
 <li>
-<p><strong>Title:</strong> Now that you have compressed your argument into an abstract, write a title for it. A title names the specific subject of your paper plainly, in one descriptive phrase. For instance, &quot;Mandatory transparency standards for generative AI hiring tools&quot; names a specific subject, where &quot;Generative AI and Ethics&quot; names only a broad topic. Your title may state your position, though it does not need to. Avoid colons, questions, and wordplay, since the purpose of a title is to tell someone what the paper is about. Draft at least 3 title options and choose the one that most precisely names your subject.</p>
+<p><strong>Title:</strong> Now that you have compressed your <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a> into an abstract, write a title for it. A title names the specific subject of your paper plainly, in one descriptive phrase. For instance, &quot;Mandatory <a class="gl" href="glossary.html#g-transparency" data-tip="Openness about how systems work, what data they use, and how they are used, so that outsiders can understand and question them.">transparency</a> standards for <a class="gl" href="glossary.html#g-generative-ai" data-tip="AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples.">generative AI</a> hiring tools&quot; names a specific subject, where &quot;Generative AI and Ethics&quot; names only a broad topic. Your title may state your position, though it does not need to. Avoid colons, questions, and wordplay, since the purpose of a title is to tell someone what the paper is about. Draft at least 3 title options and choose the one that most precisely names your subject.</p>
 </li>
 <li>
 <p>Read the full essay one final time. Your introduction should match what you actually argued, your conclusion should follow from what the body argued, and your abstract should mirror both. Your title should tell a reader what the paper is about. If anything feels out of sync, revise until it aligns.</p>
@@ -773,10 +821,10 @@
 </ol>
 <hr>
 <h2 id="what-your-document-should-show">What Your Document Should Show</h2>
-<p>A complete 2000-word essay with a conclusion that delivers a final word, an introduction that makes a clear promise, an abstract that stands alone, and a title that names the specific subject of your paper.</p>
+<p>A complete 2000-word essay with a conclusion that delivers a final word, an introduction that makes a clear promise, <a class="gl" href="glossary.html#g-abstract" data-tip="A single paragraph (about 150 words in this course) that compresses a whole paper: the problem, the position it takes, and what it proposes.">an abstract</a> that stands alone, and a title that names the specific subject of your paper.</p>
 <hr>
 <h2 id="completion-criteria">Completion Criteria</h2>
-<p>Your conclusion ends with a sentence that speaks to stakes and to the reader as a future professional (a recap alone does not count). Your introduction states your thesis explicitly. Your abstract stands alone, so that a reader who only reads it knows what you argued and proposed. Your title names the specific subject of your paper in one plain phrase.</p>
+<p>Your conclusion ends with a sentence that speaks to stakes and to the reader as a future professional (a recap alone does not count). Your introduction states your <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a> explicitly. <a class="gl" href="glossary.html#g-abstract" data-tip="A single paragraph (about 150 words in this course) that compresses a whole paper: the problem, the position it takes, and what it proposes.">Your abstract</a> stands alone, so that a reader who only reads it knows what you argued and proposed. Your title names the specific subject of your paper in one plain phrase.</p>
 
   </main>
 
@@ -872,6 +920,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

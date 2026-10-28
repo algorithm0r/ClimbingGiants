@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -751,25 +799,25 @@
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <h1>Week 3 Assignment · Stakeholder Mapping</h1>
 <p><em>Skill: Role Reversal · <a href="toolkit.html#role-reversal">See toolkit</a></em></p>
-<p>You have a thesis, and this week you map the human terrain around it by asking who is affected by the system or practice you are arguing about. The work is broad and rough, since the purpose of this week is to see all the actors before you zoom in on any of them (deeper analysis comes next week). Students who skip this step tend to write essays that argue convincingly for one group while accidentally ignoring everyone else.</p>
+<p>You have a <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a>, and this week you map the human terrain around it by asking who is affected by the system or practice you are arguing about. The work is broad and rough, since the purpose of this week is to see all the actors before you zoom in on any of them (deeper analysis comes next week). Students who skip this step tend to write essays that argue convincingly for one group while accidentally ignoring everyone else.</p>
 <hr>
 <h2 id="steps">Steps</h2>
 <ol>
 <li>
-<p>Create a new section in your document labeled <strong>Stakeholder Map</strong>. List every group you can think of who is affected by your topic. Use these categories as prompts. You do not need entries in every category, but push yourself on each one:</p>
+<p>Create a new section in your document labeled <strong><a class="gl" href="glossary.html#g-stakeholder-map" data-tip="A broad list of every group affected by a system, with a few words on how each is affected. It is the Week 3 writing goal.">Stakeholder Map</a></strong>. List every group you can think of who is affected by your topic. Use these categories as prompts. You do not need entries in every category, but push yourself on each one:</p>
 <ul>
 <li>People directly affected (users, subjects of the system)</li>
 <li>People indirectly affected (communities, families, downstream users)</li>
 <li>People who build or deploy the system</li>
 <li>People who benefit from it working as designed</li>
-<li>People who bear the risk or harm when it goes wrong</li>
+<li>People who bear the risk or <a class="gl" href="glossary.html#g-harm" data-tip="A setback to someone's interests, such as lost money, a lost opportunity, an injury, distress, or damage to their reputation. Harm can be direct or indirect, and intended or accidental.">harm</a> when it goes wrong</li>
 </ul>
 </li>
 <li>
-<p>Aim for at least 8 distinct stakeholder groups. A few words describing their relationship to the system is enough for now.</p>
+<p>Aim for at least 8 distinct <a class="gl" href="glossary.html#g-stakeholder" data-tip="Any person or group affected by a system or a decision. This includes the people who build it, use it, profit from it, and are judged by it.">stakeholder</a> groups. A few words describing their relationship to the system is enough for now.</p>
 </li>
 <li>
-<p>Pick one stakeholder who is very different from you, ideally someone harmed by or left out of the system. Write a short paragraph (4 to 6 sentences) from their perspective using <strong>role reversal</strong>: what do they see when they look at your topic? What do they need that the current system does not provide? What would they ask for if anyone listened?</p>
+<p>Pick one stakeholder who is very different from you, ideally someone harmed by or left out of the system. Write a short paragraph (4 to 6 sentences) from their perspective using <strong><a class="tk" href="toolkit.html#role-reversal" data-tip="Role reversal means imagining a system from one stakeholder's position to see what they need and what the system costs them. (A click opens it in the toolkit.)">role reversal</a></strong>: what do they see when they look at your topic? What do they need that the current system does not provide? What would they ask for if anyone listened?</p>
 </li>
 <li>
 <p>After your role reversal paragraph, write 2 to 3 sentences noting what this perspective revealed that you had not considered from your own viewpoint.</p>
@@ -777,10 +825,10 @@
 </ol>
 <hr>
 <h2 id="what-your-document-should-show">What Your Document Should Show</h2>
-<p>A labeled Stakeholder Map with at least 8 groups across multiple categories, a role reversal paragraph written from a specific stakeholder's perspective, and a brief note on what that exercise revealed.</p>
+<p>A labeled <a class="gl" href="glossary.html#g-stakeholder-map" data-tip="A broad list of every group affected by a system, with a few words on how each is affected. It is the Week 3 writing goal.">Stakeholder Map</a> with at least 8 groups across multiple categories, a <a class="tk" href="toolkit.html#role-reversal" data-tip="Role reversal means imagining a system from one stakeholder's position to see what they need and what the system costs them. (A click opens it in the toolkit.)">role reversal</a> paragraph written from a specific <a class="gl" href="glossary.html#g-stakeholder" data-tip="Any person or group affected by a system or a decision. This includes the people who build it, use it, profit from it, and are judged by it.">stakeholder</a>'s perspective, and a brief note on what that exercise revealed.</p>
 <hr>
 <h2 id="completion-criteria">Completion Criteria</h2>
-<p>You have eight or more stakeholder groups that are distinct from one another (several variations on &quot;users&quot; will not count). The role reversal paragraph is written from inside a specific stakeholder's perspective. The reflection note is honest about what the exercise surfaced.</p>
+<p>You have eight or more <a class="gl" href="glossary.html#g-stakeholder" data-tip="Any person or group affected by a system or a decision. This includes the people who build it, use it, profit from it, and are judged by it.">stakeholder</a> groups that are distinct from one another (several variations on &quot;users&quot; will not count). The <a class="tk" href="toolkit.html#role-reversal" data-tip="Role reversal means imagining a system from one stakeholder's position to see what they need and what the system costs them. (A click opens it in the toolkit.)">role reversal</a> paragraph is written from inside a specific stakeholder's perspective. The reflection note is honest about what the exercise surfaced.</p>
 
   </main>
 
@@ -876,6 +924,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

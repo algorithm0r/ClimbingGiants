@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -750,29 +798,29 @@
   <main data-pagefind-body>
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <h1>Week 4 · Intellectual Property &amp; Ownership</h1>
-<p>This week covers the intellectual property questions that generative AI has opened up. These questions include training on copyrighted work without permission, generating outputs that resemble original creative work, and competing with the artists and writers whose work trained the model. Courts have been ruling on them since 2023, and the law is still unsettled. The readings walk through the major cases and what each one established.</p>
+<p>This week covers the <a class="gl" href="glossary.html#g-intellectual-property" data-tip="Creations of the mind that the law treats as property, such as inventions (patents), brand names (trademarks), and creative works (copyright).">intellectual property</a> questions that <a class="gl" href="glossary.html#g-generative-ai" data-tip="AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples.">generative AI</a> has opened up. These questions include training on <a class="gl" href="glossary.html#g-copyright" data-tip="A legal right that gives the creator of an original work (writing, art, music, code) control over copying, distributing, adapting, and publicly performing or displaying it for a limited time. It covers a work's specific expression, and copyright law leaves ideas and general styles open to others.">copyrighted</a> work without permission, generating outputs that resemble original creative work, and competing with the artists and writers whose work trained the model. Courts have been ruling on them since 2023, and the law is still unsettled. The readings walk through the major cases and what each one established.</p>
 <hr>
 <h2 id="this-week-s-writing-goal">This Week's Writing Goal</h2>
-<p>Stakeholder Analysis (Deepening)</p>
-<p>This week you are moving from a rough stakeholder map to a full analysis. For each group affected by your essay topic, you will apply the three toolkit questions directly: who is harmed, what are we obliged to do, and what would integrity require? You will also develop steelmanning, which means learning to articulate the strongest case against your own position before you argue it down. This analysis will likely become the core of your paper.</p>
+<p><a class="gl" href="glossary.html#g-stakeholder-analysis" data-tip="A closer look at the most important groups on a stakeholder map: what each stands to gain or lose, and where their interests conflict. It is the Week 4 writing goal.">Stakeholder Analysis</a> (Deepening)</p>
+<p>This week you are moving from a rough <a class="gl" href="glossary.html#g-stakeholder-map" data-tip="A broad list of every group affected by a system, with a few words on how each is affected. It is the Week 3 writing goal.">stakeholder map</a> to a full analysis. For each group affected by your essay topic, you will apply the <a class="tk" href="toolkit.html#section-1-the-three-toolkit-questions" data-tip="Who is harmed? What are our obligations? What would a person of integrity do? Each question draws on a different family of ethical theory. (A click opens it in the toolkit.)">three toolkit questions</a> directly: <a class="tk" href="toolkit.html#who-is-harmed" data-tip="This toolkit question asks who is affected by a system or decision and what specific harms they could face. (A click opens it in the toolkit.)">who is harmed</a>, <a class="tk" href="toolkit.html#what-are-our-obligations" data-tip="This toolkit question asks what duties, rules, or principles should guide a decision, whatever its consequences. (A click opens it in the toolkit.)">what are we obliged to do</a>, and <a class="tk" href="toolkit.html#what-would-a-person-of-integrity-do" data-tip="This toolkit question asks what the situation asks of you as a person with values, and whether you could explain your decision to the people it affects. (A click opens it in the toolkit.)">what would integrity require</a>? You will also develop <a class="tk" href="toolkit.html#steelmanning" data-tip="Steelmanning means stating the strongest version of the case against your own position before you respond to it. (A click opens it in the toolkit.)">steelmanning</a>, which means learning to articulate the strongest case against your own position before you argue it down. This analysis will likely become the core of your paper.</p>
 <hr>
 <h2 id="content">Content</h2>
 <p><strong>For your required weekly reflection you will engage with one source from Primary Content. Any source, primary or additional, can be used for an extra reflection for extra credit.</strong></p>
 <h3 id="primary-content">Primary Content</h3>
 <p><strong><a href="https://www.youtube.com/watch?v=G08hY8dSrUY">A.I. Versus The Law</a></strong> — LegalEagle · 2023 · ~20 min watch · 🟢 Free access · [Media]</p>
-<p>LegalEagle walks through the first major AI copyright lawsuits: Andersen v. Stability AI and Getty Images v. Stability AI. He covers what the artists and Getty are actually claiming, what fair use means in this context, and why the legal questions around AI image generators are harder to resolve than they look. This is accessible legal analysis from someone who explains law for a general audience, and it is a useful foundation for everything else this week.</p>
+<p>LegalEagle walks through the first major AI <a class="gl" href="glossary.html#g-copyright" data-tip="A legal right that gives the creator of an original work (writing, art, music, code) control over copying, distributing, adapting, and publicly performing or displaying it for a limited time. It covers a work's specific expression, and copyright law leaves ideas and general styles open to others.">copyright</a> lawsuits: Andersen v. Stability AI and Getty Images v. Stability AI. He covers what the artists and Getty are actually claiming, what <a class="gl" href="glossary.html#g-fair-use" data-tip="A US legal exception that allows some uses of copyrighted work without permission. Courts weigh the purpose of the use, the kind of work, how much was used, and the effect on the market for the original.">fair use</a> means in this context, and why the legal questions around AI image generators are harder to resolve than they look. This is accessible legal analysis from someone who explains law for a general audience, and it is a useful foundation for everything else this week.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
-<li>Getty Images sued Stability AI alleging their copyrighted images were used to train the model without a license, and that outputs sometimes reproduce Getty's watermarks. Artists in Andersen v. Stability AI argued their distinctive styles were captured at scale. Copyright does not protect style, but it does protect specific expression. Where do you think the line is? Does it matter to you whether a company profits from work it did not license?</li>
-<li>The video explains the fair use defense: courts weigh whether the use is transformative, whether it competes with the original, and other factors. AI companies argued that training is transformative because the model learns from work without reproducing it. Does that argument feel convincing to you, or does it feel like a legal technicality that misses something important about what is actually happening?</li>
-<li>LegalEagle notes that existing copyright law was not written with AI training in mind. Courts are being asked to apply 20th-century frameworks to 21st-century technology. If you were on a legislative committee tasked with updating copyright law for generative AI, what would you want the new law to do, and whose interests would you prioritize?</li>
+<li>Getty Images sued Stability AI alleging their copyrighted images were used to train the model without a license, and that outputs sometimes reproduce Getty's watermarks. Artists in Andersen v. Stability AI argued their distinctive styles were captured <a class="gl" href="glossary.html#g-scale" data-tip="The number of people or decisions a system reaches. A system working at scale repeats the same choice many times, so the system's errors and benefits both multiply.">at scale</a>. Copyright does not protect style, but it does protect specific expression. Where do you think the line is? Does it matter to you whether a company profits from work it did not license?</li>
+<li>The video explains the fair use defense: courts weigh whether the use is <a class="gl" href="glossary.html#g-transformative-use" data-tip="A use of a work for a purpose or character different from the original's, such as parody, commentary, or a search index. The more a use differs in purpose, the more it counts toward fair use.">transformative</a>, whether it competes with the original, and other factors. AI companies argued that training is transformative because the model learns from work without reproducing it. Does that <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a> feel convincing to you, or does it feel like a legal technicality that misses something important about what is actually happening?</li>
+<li>LegalEagle notes that existing copyright law was not written with AI training in mind. Courts are being asked to apply 20th-century frameworks to 21st-century technology. If you were on a legislative committee tasked with updating copyright law for <a class="gl" href="glossary.html#g-generative-ai" data-tip="AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples.">generative AI</a>, what would you want the new law to do, and whose interests would you prioritize?</li>
 </ul>
-<p><strong><a href="https://copyrightalliance.org/ai-lawsuit-developments-2024-review/">AI Lawsuit Developments in 2024: A Year in Review</a></strong> — Copyright Alliance · 2024 · ~15 min read · 🟢 Free access · [Think tank]</p>
+<p><strong><a href="https://copyrightalliance.org/ai-lawsuit-developments-2024-review/">AI Lawsuit Developments in 2024: A Year in Review</a></strong> — Copyright Alliance · 2024 · ~15 min read · 🟢 Free access · [<a class="gl" href="glossary.html#g-think-tank" data-tip="An organization that researches policy questions and publishes reports and recommendations. Many are funded by groups with a stake in the issues they study, or hold a political viewpoint, so it is a good idea to check who backs one.">Think tank</a>]</p>
 <p>A clear, current summary of major AI copyright lawsuits filed in 2024, including New York Times v. OpenAI and Getty Images v. Stability AI. It lists who is suing in each case and what they allege.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
 <li>In <em>New York Times v. Microsoft and OpenAI</em>, the Times alleges that ChatGPT was trained on journalistic work and can now produce near-verbatim reproductions of articles, potentially letting users bypass the paywall. OpenAI has argued fair use. When you use an AI tool to summarize a news article you did not pay for, who do you think bears responsibility: you, the AI company, or someone else?</li>
-<li>The article describes how DMCA copyright management information (CMI) removal claims kept getting dismissed because courts imposed a &quot;double scienter&quot; standard, meaning plaintiffs had to prove the company knew it was removing copyright info AND knew that would enable infringement. When legal standards make it nearly impossible to prove harm even when harm is visible, what does that tell you about how well copyright law was designed to protect creators?</li>
+<li>The article describes how <a class="gl" href="glossary.html#g-dmca" data-tip="The Digital Millennium Copyright Act (1998), a US copyright law. Among other things it makes removing copyright information from a work illegal in some cases, and it sets the notice-and-takedown process for websites.">DMCA</a> copyright management information (CMI) removal claims kept getting dismissed because courts imposed a &quot;double scienter&quot; standard, meaning plaintiffs had to prove the company knew it was removing copyright info AND knew that would enable <a class="gl" href="glossary.html#g-copyright-infringement" data-tip="Copying, distributing, or adapting a copyrighted work without the holder's permission and outside a legal exception such as fair use.">infringement</a>. When legal standards make it nearly impossible to prove <a class="gl" href="glossary.html#g-harm" data-tip="A setback to someone's interests, such as lost money, a lost opportunity, an injury, distress, or damage to their reputation. Harm can be direct or indirect, and intended or accidental.">harm</a> even when harm is visible, what does that tell you about how well copyright law was designed to protect creators?</li>
 <li>The <em>Andersen v. Stability AI</em> case involves artists suing over their work being used to train image generators. A 2024 ruling rejected the argument that AI only copies &quot;statistical representations,&quot; establishing that past copyright cases might not apply cleanly to AI. Does it matter to you whether a model trained on someone's art is legally infringing, or do you have a separate moral intuition about it?</li>
 </ul>
 <p><strong><a href="https://www.brookings.edu/articles/ai-and-the-visual-arts-the-case-for-copyright-protection/">AI and the Visual Arts: The Case for Copyright Protection</a></strong> — Brookings Institution · 2025 · ~15 min read · 🟢 Free access · [Think tank]</p>
@@ -787,13 +835,13 @@
 <p>A chronological overview of major AI copyright litigation from 2023 to 2025. Use this to ground yourself in what is actually happening in courts right now.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
-<li>In December 2025, Anthropic reached a $1.5 billion class action settlement with authors and publishers over training data. Music publishers then filed a $3.1 billion lawsuit alleging &quot;Anthropic built Claude AI on a foundation of torrented piracy.&quot; When you read that the AI tools you may already use were built partly on content taken without permission, what is your reaction? Does the size of the settlement change how you think about the harm?</li>
+<li>In December 2025, Anthropic reached a $1.5 billion <a class="gl" href="glossary.html#g-class-action" data-tip="A lawsuit in which one or a few people sue on behalf of a whole group with the same claim, such as all the authors whose books were used to train a model.">class action</a> settlement with authors and publishers over <a class="gl" href="glossary.html#g-training-data" data-tip="The collection of examples (text, images, code, and so on) a model learns its patterns from. A model's outputs reflect what is in the training data and what is missing from the training data.">training data</a>. Music publishers then filed a $3.1 billion lawsuit alleging &quot;Anthropic built Claude AI on a foundation of torrented piracy.&quot; When you read that the AI tools you may already use were built partly on content taken without permission, what is your reaction? Does the size of the settlement change how you think about the harm?</li>
 <li>A Munich Regional Court ruled in November 2025 that OpenAI violated German copyright law, a different outcome than what U.S. courts have been trending toward. When different countries reach different legal conclusions about the same technology, who do you think should set the standard? Does it matter to you whether the law is U.S.-centric?</li>
-<li>The timeline shows lawsuits from individual artists, major news publishers, music companies, and authors, all making the same basic claim: their work was taken without consent to train AI that now competes with them. If you were building a model and had the choice between training on consented data (more expensive, slower) or scraped data (cheaper, faster), what would you do?</li>
+<li>The timeline shows lawsuits from individual artists, major news publishers, music companies, and authors, all making the same basic claim: their work was taken without <a class="gl" href="glossary.html#g-consent" data-tip="Permission a person gives for something to be done to them or with their information.">consent</a> to train AI that now competes with them. If you were building a model and had the choice between training on consented data (more expensive, slower) or <a class="gl" href="glossary.html#g-web-scraping" data-tip="Collecting large amounts of content from websites automatically with a program. Much of the training data for generative AI was gathered this way.">scraped</a> data (cheaper, faster), what would you do?</li>
 </ul>
 <h3 id="additional-content">Additional Content</h3>
 <p>➕ <strong><a href="https://www.youtube.com/watch?v=9vz06QO3UkQ">The Internet's Own Boy</a></strong> — 2014 · ~105 min watch · 🟢 Free access · [Media]</p>
-<p>The documentary about Aaron Swartz and open access to knowledge. It provides historical context for the broader question of what should be openly accessible and who decides.</p>
+<p>The documentary about Aaron Swartz and <a class="gl" href="glossary.html#g-open-access" data-tip="Making research and other knowledge free for anyone to read, with no paywall or subscription.">open access</a> to knowledge. It provides historical context for the broader question of what should be openly accessible and who decides.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
 <li>Aaron Swartz was prosecuted under the Computer Fraud and Abuse Act for downloading millions of academic journal articles from MIT's network, facing up to 35 years in prison. He believed publicly funded research should be publicly accessible. Do you think what he did was wrong? Does the severity of the prosecution change your answer?</li>
@@ -803,7 +851,7 @@
 <p>Swartz's argument for why information should be free, which represents one end of the spectrum on ownership and access. It is a short, provocative read.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
-<li>Swartz writes: &quot;sharing isn't immoral — it's a moral imperative.&quot; He rejects the legal/illegal distinction entirely, arguing that &quot;there is no justice in following unjust laws.&quot; Does that argument land for you, or does it feel like it is rationalizing something self-serving? What is your gut reaction to someone who frames unauthorized downloading as civil disobedience?</li>
+<li>Swartz writes: &quot;sharing isn't immoral — it's a moral imperative.&quot; He rejects the legal/illegal distinction entirely, arguing that &quot;there is no justice in following unjust laws.&quot; Does that argument land for you, or does it feel like it is rationalizing something self-serving? What is your gut reaction to someone who frames unauthorized downloading as <a class="gl" href="glossary.html#g-civil-disobedience" data-tip="Breaking a law openly and on purpose to protest a law or policy you believe is unjust, usually without violence and while accepting the legal consequences.">civil disobedience</a>?</li>
 <li>Swartz specifically names Reed Elsevier and frames academic publishers as extracting enormous fees from research that scholars produce for free and that is often publicly funded. He calls it &quot;private theft of public culture.&quot; If you accept that framing, even partially, what does it do to the AI training data debate? Who is stealing from whom?</li>
 </ul>
 <p>➕ <strong><a href="https://www.darrow.ai/resources/ai-copyright-law">AI's Copyright Dilemma: Recent Lawsuits and Implications</a></strong> — Darrow AI · 2025 · ~15 min read · 🟢 Free access · [Legal]</p>
@@ -816,42 +864,42 @@
 </ul>
 <hr>
 <h2 id="assignment">Assignment</h2>
-<p><strong>Writing goal this week:</strong> Stakeholder analysis. Apply ethical questions to each group.</p>
-<p>Deepen your stakeholder map into a full analysis and steelman the strongest case against your thesis. See the <a href="assign-04.html">Week 4 Assignment</a> for detailed instructions.</p>
+<p><strong>Writing goal this week:</strong> <a class="gl" href="glossary.html#g-stakeholder-analysis" data-tip="A closer look at the most important groups on a stakeholder map: what each stands to gain or lose, and where their interests conflict. It is the Week 4 writing goal.">Stakeholder analysis</a>. Apply ethical questions to each group.</p>
+<p>Deepen your <a class="gl" href="glossary.html#g-stakeholder-map" data-tip="A broad list of every group affected by a system, with a few words on how each is affected. It is the Week 3 writing goal.">stakeholder map</a> into a full analysis and <a class="tk" href="toolkit.html#steelmanning" data-tip="Steelmanning means stating the strongest version of the case against your own position before you respond to it. (A click opens it in the toolkit.)">steelman</a> the strongest case against your <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a>. See the <a href="assign-04.html">Week 4 Assignment</a> for detailed instructions.</p>
 <p>Submit your Google Doc link to Canvas.</p>
 <hr>
 <h2 id="reflection">Reflection</h2>
 <p>Choose one source from this week's <strong>Primary Content</strong>. Ground your reflection in something specific from that source, such as a claim you agreed or disagreed with, or a moment that surprised you. Then apply the three-step structure:</p>
-<p><strong>Gut check.</strong> What was your honest, immediate reaction?
-<strong>Trace it.</strong> Where does that reaction come from in your values or experience?
-<strong>Challenge it.</strong> What would someone who sees it differently say? Does their case have merit?</p>
+<p><strong><a class="gl" href="glossary.html#g-gut-check" data-tip="The first step of a reflection. You write your honest, immediate reaction to something specific in a source.">Gut check</a>.</strong> What was your honest, immediate reaction?
+<strong><a class="gl" href="glossary.html#g-trace-it" data-tip="The second step of a reflection. You work out where your reaction comes from in your values, your experience, or the communities you belong to.">Trace it</a>.</strong> Where does that reaction come from in your values or experience?
+<strong><a class="gl" href="glossary.html#g-challenge-it" data-tip="The third step of a reflection. You state the strongest case against your position and test your position against it.">Challenge it</a>.</strong> What would someone who sees it differently say? Does their case have merit?</p>
 <p>Write about 150 words. The source-specific prompts above are starting points. You may use one of those or follow your own reaction. Make sure your reflection is anchored to something specific from the content you chose.</p>
 <p>See <a href="reflection-instructions.html">Reflection Instructions</a> for the full guide.</p>
 <hr>
 <h2 id="meeting">Meeting</h2>
-<p>Use these prompts as starting points and go where the discussion takes you. The goal is synthesis and dialectic, that is, building understanding together.</p>
+<p>Use these prompts as starting points and go where the discussion takes you. The goal is <a class="gl" href="glossary.html#g-synthesis" data-tip="In a dialectic, the fuller view a group reaches by examining two or more starting positions together. It can keep a disagreement while making clearer what is at stake.">synthesis</a> and <a class="gl" href="glossary.html#g-dialectic" data-tip="A discussion in which people start from different positions and work together toward a fuller understanding of the question.">dialectic</a>, that is, building understanding together.</p>
 <p><strong>This week's discussion directions:</strong></p>
 <ul>
 <li>Is training an AI on someone's work without permission different from a human learning from that work? Why or why not?</li>
-<li>Who benefits from open AI models and who is harmed? Are those the same people?</li>
-<li>What would a fair compensation model for training data actually look like? Who would manage it, and how would it work?</li>
+<li>Who benefits from open AI models and <a class="tk" href="toolkit.html#who-is-harmed" data-tip="This toolkit question asks who is affected by a system or decision and what specific harms they could face. (A click opens it in the toolkit.)">who is harmed</a>? Are those the same people?</li>
+<li>What would a fair compensation model for <a class="gl" href="glossary.html#g-training-data" data-tip="The collection of examples (text, images, code, and so on) a model learns its patterns from. A model's outputs reflect what is in the training data and what is missing from the training data.">training data</a> actually look like? Who would manage it, and how would it work?</li>
 </ul>
-<p><strong>Essay share:</strong> Share what you worked on in your stakeholder analysis this week. Which stakeholder group surprised you? What was hardest to steelman? The group responds with reactions and questions.</p>
+<p><strong><a class="gl" href="glossary.html#g-essay-share" data-tip="The round in each meeting where everyone briefly says what they did on their essay that week and one thing they are wrestling with.">Essay share</a>:</strong> Share what you worked on in your <a class="gl" href="glossary.html#g-stakeholder-analysis" data-tip="A closer look at the most important groups on a stakeholder map: what each stands to gain or lose, and where their interests conflict. It is the Week 4 writing goal.">stakeholder analysis</a> this week. Which <a class="gl" href="glossary.html#g-stakeholder" data-tip="Any person or group affected by a system or a decision. This includes the people who build it, use it, profit from it, and are judged by it.">stakeholder</a> group surprised you? What was hardest to <a class="tk" href="toolkit.html#steelmanning" data-tip="Steelmanning means stating the strongest version of the case against your own position before you respond to it. (A click opens it in the toolkit.)">steelman</a>? The group responds with reactions and questions.</p>
 <p>See <a href="meeting-instructions.html">Meeting Instructions</a> for the full guide.</p>
 <hr>
 <h2 id="quiz-vocabulary">Quiz Vocabulary</h2>
 <ul>
-<li>Copyright</li>
-<li>Fair use</li>
-<li>Training data</li>
-<li>Derivative works</li>
-<li>Steelmanning</li>
-<li>Stakeholder analysis</li>
-<li>The three toolkit questions</li>
-<li>Copyright infringement</li>
-<li>Transformative use</li>
-<li>Intellectual property</li>
-<li>Licensing</li>
+<li><a class="gl" href="glossary.html#g-copyright" data-tip="A legal right that gives the creator of an original work (writing, art, music, code) control over copying, distributing, adapting, and publicly performing or displaying it for a limited time. It covers a work's specific expression, and copyright law leaves ideas and general styles open to others.">Copyright</a></li>
+<li><a class="gl" href="glossary.html#g-fair-use" data-tip="A US legal exception that allows some uses of copyrighted work without permission. Courts weigh the purpose of the use, the kind of work, how much was used, and the effect on the market for the original.">Fair use</a></li>
+<li><a class="gl" href="glossary.html#g-training-data" data-tip="The collection of examples (text, images, code, and so on) a model learns its patterns from. A model's outputs reflect what is in the training data and what is missing from the training data.">Training data</a></li>
+<li><a class="gl" href="glossary.html#g-derivative-work" data-tip="A new work based on an existing one, such as a translation, a sequel, or an adaptation. Making one usually requires the copyright holder's permission.">Derivative works</a></li>
+<li><a class="tk" href="toolkit.html#steelmanning" data-tip="Steelmanning means stating the strongest version of the case against your own position before you respond to it. (A click opens it in the toolkit.)">Steelmanning</a></li>
+<li><a class="gl" href="glossary.html#g-stakeholder-analysis" data-tip="A closer look at the most important groups on a stakeholder map: what each stands to gain or lose, and where their interests conflict. It is the Week 4 writing goal.">Stakeholder analysis</a></li>
+<li>The <a class="tk" href="toolkit.html#section-1-the-three-toolkit-questions" data-tip="Who is harmed? What are our obligations? What would a person of integrity do? Each question draws on a different family of ethical theory. (A click opens it in the toolkit.)">three toolkit questions</a></li>
+<li><a class="gl" href="glossary.html#g-copyright-infringement" data-tip="Copying, distributing, or adapting a copyrighted work without the holder's permission and outside a legal exception such as fair use.">Copyright infringement</a></li>
+<li><a class="gl" href="glossary.html#g-transformative-use" data-tip="A use of a work for a purpose or character different from the original's, such as parody, commentary, or a search index. The more a use differs in purpose, the more it counts toward fair use.">Transformative use</a></li>
+<li><a class="gl" href="glossary.html#g-intellectual-property" data-tip="Creations of the mind that the law treats as property, such as inventions (patents), brand names (trademarks), and creative works (copyright).">Intellectual property</a></li>
+<li><a class="gl" href="glossary.html#g-licensing" data-tip="Permission from a rights holder to use a work under agreed terms, often for payment.">Licensing</a></li>
 </ul>
 
   </main>
@@ -948,6 +996,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

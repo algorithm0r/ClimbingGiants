@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -751,7 +799,7 @@
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <h1>Week 9 Assignment · Edit at Sentence Level</h1>
 <p><em>Skill: Sentence-Level Editing · <a href="toolkit.html#sentence-level-editing">See toolkit</a></em></p>
-<p>Your argument is in place and your structure holds, so this week you work at the smallest scale, the individual sentence. You will make vague sentences precise, fit each hedge to your evidence, and name the actor in passive sentences. Sentence-level editing means making sure every sentence says exactly what you mean, as efficiently as possible, with nothing hiding behind abstraction or unnecessary qualification.</p>
+<p>Your <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a> is in place and your structure holds, so this week you work at the smallest scale, the individual sentence. You will make vague sentences precise, fit each <a class="gl" href="glossary.html#g-hedge" data-tip="A word such as &quot;may&quot;, &quot;likely&quot;, or &quot;often&quot; that tells your reader how strongly your evidence supports a claim. In this course a hedge should match the strength of that evidence.">hedge</a> to your <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a>, and name the actor in <a class="gl" href="glossary.html#g-passive-voice" data-tip="A sentence form in which the subject receives the action, as in &quot;the model was shipped&quot;. The sentence can leave the actor out entirely.">passive</a> sentences. Sentence-level editing means making sure every sentence says exactly what you mean, as efficiently as possible, with nothing hiding behind abstraction or unnecessary qualification.</p>
 <hr>
 <h2 id="steps">Steps</h2>
 <ol>
@@ -760,12 +808,12 @@
 <ul>
 <li><strong>Is it clear?</strong> Can a reader understand it on the first pass? If not, rewrite it.</li>
 <li><strong>Is it precise?</strong> Does it say exactly what you mean, or is it gesturing at something? Replace vague nouns (&quot;the system,&quot; &quot;various groups,&quot; &quot;certain issues&quot;) with specific ones.</li>
-<li><strong>Is it efficient?</strong> Remove any words that do not add meaning. &quot;It is the case that bias exists in this system&quot; becomes &quot;This system is biased.&quot; Cut filler phrases: &quot;it is important to note that,&quot; &quot;as mentioned previously,&quot; &quot;in today's society.&quot;</li>
-<li><strong>Does the hedge match your evidence?</strong> A hedge like &quot;may,&quot; &quot;likely,&quot; or &quot;often&quot; tells your reader how strongly your evidence supports a claim, so keep it where the evidence is partial. Cut hedges that are stacked (&quot;it could perhaps be argued that this might...&quot;) or added out of habit to a claim you can support. Habitual hedges often look like &quot;arguably,&quot; &quot;it could be said,&quot; or &quot;many would argue.&quot;</li>
+<li><strong>Is it efficient?</strong> Remove any words that do not add meaning. &quot;It is the case that <a class="gl" href="glossary.html#g-bias" data-tip="A consistent tilt in a person's or a system's judgments that favors some people or outcomes over others. In AI it usually means outputs that are less accurate or less favorable for a particular group.">bias</a> exists in this system&quot; becomes &quot;This system is biased.&quot; Cut <a class="gl" href="glossary.html#g-filler-language" data-tip="Words and phrases that add length without adding meaning, such as &quot;it is important to note that&quot; or &quot;in today's society&quot;.">filler phrases</a>: &quot;it is important to note that,&quot; &quot;as mentioned previously,&quot; &quot;in today's society.&quot;</li>
+<li><strong>Does the <a class="gl" href="glossary.html#g-hedge" data-tip="A word such as &quot;may&quot;, &quot;likely&quot;, or &quot;often&quot; that tells your reader how strongly your evidence supports a claim. In this course a hedge should match the strength of that evidence.">hedge</a> match your <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a>?</strong> A hedge like &quot;may,&quot; &quot;likely,&quot; or &quot;often&quot; tells your reader how strongly your evidence supports a claim, so keep it where the evidence is partial. Cut hedges that are stacked (&quot;it could perhaps be argued that this might...&quot;) or added out of habit to a claim you can support. Habitual hedges often look like &quot;arguably,&quot; &quot;it could be said,&quot; or &quot;many would argue.&quot;</li>
 </ul>
 </li>
 <li>
-<p>Try to find at least 3 sentences in your document that use passive voice where a specific actor should be named. Rewrite each one in active voice. (&quot;Mistakes were made&quot; → &quot;The engineering team shipped the model without bias testing.&quot;)</p>
+<p>Try to find at least 3 sentences in your document that use <a class="gl" href="glossary.html#g-passive-voice" data-tip="A sentence form in which the subject receives the action, as in &quot;the model was shipped&quot;. The sentence can leave the actor out entirely.">passive voice</a> where a specific actor should be named. Rewrite each one in <a class="gl" href="glossary.html#g-active-voice" data-tip="A sentence form in which the subject performs the action, as in &quot;the team shipped the model&quot;.">active voice</a>. (&quot;Mistakes were made&quot; → &quot;The engineering team shipped the model without bias testing.&quot;)</p>
 </li>
 <li>
 <p>Try to find at least 3 sentences that are doing two jobs at once. A sentence might make two claims, or make a claim and analyze it in the same breath. Split each one into two sentences.</p>
@@ -773,10 +821,10 @@
 </ol>
 <hr>
 <h2 id="what-your-document-should-show">What Your Document Should Show</h2>
-<p>A document where every sentence is doing one job cleanly, with specific nouns where there used to be vague ones and active voice where there used to be passive. Each hedge that remains matches the strength of your evidence.</p>
+<p>A document where every sentence is doing one job cleanly, with specific nouns where there used to be vague ones and <a class="gl" href="glossary.html#g-active-voice" data-tip="A sentence form in which the subject performs the action, as in &quot;the team shipped the model&quot;.">active voice</a> where there used to be <a class="gl" href="glossary.html#g-passive-voice" data-tip="A sentence form in which the subject receives the action, as in &quot;the model was shipped&quot;. The sentence can leave the actor out entirely.">passive</a>. Each <a class="gl" href="glossary.html#g-hedge" data-tip="A word such as &quot;may&quot;, &quot;likely&quot;, or &quot;often&quot; that tells your reader how strongly your evidence supports a claim. In this course a hedge should match the strength of that evidence.">hedge</a> that remains matches the strength of your <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a>.</p>
 <hr>
 <h2 id="completion-criteria">Completion Criteria</h2>
-<p>You can point to specific sentences you revised and explain what was wrong with the original. Passive voice is gone except where you genuinely do not know or do not want to name the actor, and that choice is deliberate. The document reads faster and clearer than it did before this week's work.</p>
+<p>You can point to specific sentences you revised and explain what was wrong with the original. <a class="gl" href="glossary.html#g-passive-voice" data-tip="A sentence form in which the subject receives the action, as in &quot;the model was shipped&quot;. The sentence can leave the actor out entirely.">Passive voice</a> is gone except where you genuinely do not know or do not want to name the actor, and that choice is deliberate. The document reads faster and clearer than it did before this week's work.</p>
 
   </main>
 
@@ -872,6 +920,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

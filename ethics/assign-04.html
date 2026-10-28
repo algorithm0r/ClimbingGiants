@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -751,35 +799,35 @@
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <h1>Week 4 Assignment · Stakeholder Analysis</h1>
 <p><em>Skill: Steelmanning · <a href="toolkit.html#steelmanning">See toolkit</a></em></p>
-<p>You have a map of who is affected, and this week you move from listing stakeholders to analyzing them in depth. You will apply the three toolkit questions to the groups that matter most to your argument. Then you will make the strongest case you can against your own thesis, which is often the hardest part of writing an argument. Students who do not steelman their argument tend to write essays that feel thin, because a reader can see the obvious objection sitting there unaddressed, and the steelman is where you address it.</p>
+<p>You have a map of who is affected, and this week you move from listing <a class="gl" href="glossary.html#g-stakeholder" data-tip="Any person or group affected by a system or a decision. This includes the people who build it, use it, profit from it, and are judged by it.">stakeholders</a> to analyzing them in depth. You will apply the <a class="tk" href="toolkit.html#section-1-the-three-toolkit-questions" data-tip="Who is harmed? What are our obligations? What would a person of integrity do? Each question draws on a different family of ethical theory. (A click opens it in the toolkit.)">three toolkit questions</a> to the groups that matter most to your <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a>. Then you will make the strongest case you can against your own <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a>, which is often the hardest part of writing an argument. Students who do not steelman their argument tend to write essays that feel thin, because a reader can see the obvious objection sitting there unaddressed, and the steelman is where you address it.</p>
 <hr>
 <h2 id="steps">Steps</h2>
 <ol>
 <li>
-<p>From your stakeholder map, select the 3 to 4 groups most central to your argument. Choose the ones whose interests are most in tension with each other, or whose stakes are highest.</p>
+<p>From your <a class="gl" href="glossary.html#g-stakeholder-map" data-tip="A broad list of every group affected by a system, with a few words on how each is affected. It is the Week 3 writing goal.">stakeholder map</a>, select the 3 to 4 groups most central to your <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a>. Choose the ones whose interests are most in tension with each other, or whose stakes are highest.</p>
 </li>
 <li>
-<p>For each selected group, create a short entry in your document (3 to 5 sentences) that says what they stand to gain or lose, and which toolkit question (harm, obligation, or integrity) is most relevant to their situation. You do not need all three questions for every group. Pick the one that illuminates their position most clearly.</p>
+<p>For each selected group, create a short entry in your document (3 to 5 sentences) that says what they stand to gain or lose, and which <a class="tk" href="toolkit.html#section-1-the-three-toolkit-questions" data-tip="Who is harmed? What are our obligations? What would a person of integrity do? Each question draws on a different family of ethical theory. (A click opens it in the toolkit.)">toolkit question</a> (<a class="gl" href="glossary.html#g-harm" data-tip="A setback to someone's interests, such as lost money, a lost opportunity, an injury, distress, or damage to their reputation. Harm can be direct or indirect, and intended or accidental.">harm</a>, <a class="gl" href="glossary.html#g-obligation" data-tip="Something you owe to others (or to yourself) because of a duty, a promise, a role, or a principle. An obligation can hold even when meeting it costs you something.">obligation</a>, or <a class="gl" href="glossary.html#g-integrity" data-tip="Acting consistently with your values, and being willing to explain and stand behind your decisions to the people they affect.">integrity</a>) is most relevant to their situation. You do not need all three questions for every group. Pick the one that illuminates their position most clearly.</p>
 </li>
 <li>
-<p>Identify where two or more stakeholder interests directly conflict. Write 2 to 3 sentences naming that conflict precisely. Name what specifically each side wants and why those wants are incompatible (for instance, &quot;company vs. users&quot; in the abstract is too vague).</p>
+<p>Identify where two or more <a class="gl" href="glossary.html#g-stakeholder" data-tip="Any person or group affected by a system or a decision. This includes the people who build it, use it, profit from it, and are judged by it.">stakeholder</a> interests directly conflict. Write 2 to 3 sentences naming that conflict precisely. Name what specifically each side wants and why those wants are incompatible (for instance, &quot;company vs. users&quot; in the abstract is too vague).</p>
 </li>
 <li>
-<p>Now steelman your thesis. Write a paragraph (5 to 7 sentences) making the strongest, most honest case against your own argument. Find the version of the opposing view that a smart, reasonable person would actually hold. What do they see that you might be missing?</p>
+<p>Now <a class="tk" href="toolkit.html#steelmanning" data-tip="Steelmanning means stating the strongest version of the case against your own position before you respond to it. (A click opens it in the toolkit.)">steelman</a> your <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a>. Write a paragraph (5 to 7 sentences) making the strongest, most honest case against your own argument. Find the version of the opposing view that a smart, reasonable person would actually hold. What do they see that you might be missing?</p>
 </li>
 <li>
 <p>Below the steelman, write 3 to 5 sentences responding to it: does your thesis hold up? Does it need to be refined or qualified? What do you keep, what do you adjust?</p>
 </li>
 <li>
-<p>Now sketch a rough policy response. You have diagnosed the problem and named the central conflict. What would you propose to address it? In 3 to 5 sentences, say what specifically should change, who is responsible for making it happen, and what main tradeoff your proposal creates. Do not look for sources yet, and do not worry about precision. The goal is a first draft of Section 3, something concrete you can develop and test against evidence in later weeks.</p>
+<p>Now sketch a rough policy response. You have diagnosed the problem and named the central conflict. What would you propose to address it? In 3 to 5 sentences, say what specifically should change, who is responsible for making it happen, and what main tradeoff your proposal creates. Do not look for sources yet, and do not worry about <a class="gl" href="glossary.html#g-precision" data-tip="Saying exactly what you mean, with specific nouns and claims in place of vague ones.">precision</a>. The goal is a first draft of Section 3, something concrete you can develop and test against <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a> in later weeks.</p>
 </li>
 </ol>
 <hr>
 <h2 id="what-your-document-should-show">What Your Document Should Show</h2>
-<p>Entries for 3 to 4 key stakeholder groups with toolkit question analysis, a clearly named stakeholder conflict, a steelman paragraph that represents the opposing view fairly, your response to that steelman, and a rough policy sketch that names a proposed change, an actor, and a tradeoff.</p>
+<p>Entries for 3 to 4 key <a class="gl" href="glossary.html#g-stakeholder" data-tip="Any person or group affected by a system or a decision. This includes the people who build it, use it, profit from it, and are judged by it.">stakeholder</a> groups with <a class="tk" href="toolkit.html#section-1-the-three-toolkit-questions" data-tip="Who is harmed? What are our obligations? What would a person of integrity do? Each question draws on a different family of ethical theory. (A click opens it in the toolkit.)">toolkit question</a> analysis, a clearly named stakeholder conflict, a <a class="tk" href="toolkit.html#steelmanning" data-tip="Steelmanning means stating the strongest version of the case against your own position before you respond to it. (A click opens it in the toolkit.)">steelman</a> paragraph that represents the opposing view fairly, your response to that steelman, and a rough policy sketch that names a proposed change, an actor, and a tradeoff.</p>
 <hr>
 <h2 id="completion-criteria">Completion Criteria</h2>
-<p>The stakeholder entries go beyond description by applying a toolkit question with specific reasoning. The steelman is genuinely strong, so that read alone it feels like a real challenge to your thesis. Your response engages with the steelman directly. The policy sketch proposes a specific change by a specific actor. That is, it says who regulates what (for instance, &quot;there should be more regulation&quot; is too vague). The tradeoff is named honestly.</p>
+<p>The <a class="gl" href="glossary.html#g-stakeholder" data-tip="Any person or group affected by a system or a decision. This includes the people who build it, use it, profit from it, and are judged by it.">stakeholder</a> entries go beyond description by applying a <a class="tk" href="toolkit.html#section-1-the-three-toolkit-questions" data-tip="Who is harmed? What are our obligations? What would a person of integrity do? Each question draws on a different family of ethical theory. (A click opens it in the toolkit.)">toolkit question</a> with specific reasoning. The <a class="tk" href="toolkit.html#steelmanning" data-tip="Steelmanning means stating the strongest version of the case against your own position before you respond to it. (A click opens it in the toolkit.)">steelman</a> is genuinely strong, so that read alone it feels like a real challenge to your <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a>. Your response engages with the steelman directly. The policy sketch proposes a specific change by a specific actor. That is, it says who regulates what (for instance, &quot;there should be more regulation&quot; is too vague). The tradeoff is named honestly.</p>
 
   </main>
 
@@ -875,6 +923,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

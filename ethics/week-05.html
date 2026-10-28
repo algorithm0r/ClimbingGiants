@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -742,20 +790,20 @@
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <h1>Week 5 · Labor &amp; Automation</h1>
 <p>This week is a break from deliverables, with no assignment, quiz, reflection, or meeting required.</p>
-<p>The content below is provided for your interest. Engage with as much or as little as you like. If you engage with any of it and want to write a reflection on it, that earns extra labor credit.</p>
+<p>The content below is provided for your interest. Engage with as much or as little as you like. If you engage with any of it and want to write a reflection on it, that earns <a class="gl" href="glossary.html#g-extra-labor" data-tip="Optional work that raises your grade above the base B: +0.1 for each extra reflection and +0.3 for a larger project, up to a 4.0.">extra labor</a> credit.</p>
 <hr>
 <h2 id="this-week-s-topic">This Week's Topic</h2>
-<p>This week looks at how generative AI is changing employment in software development, especially at the entry level. The data is contested, but since 2023 entry-level hiring appears to have contracted sharply while demand for experienced engineers held up. A widely-cited Stanford analysis found employment for early-career developers (ages 22 to 25) fell by roughly 20%, and other research puts the drop in junior postings at 16.3% relative to senior roles. The tools you are being trained to use are likely changing what junior developers get hired to do. The content this week is optional (no assignment, quiz, or meeting), and the readings give you space to think through what these shifts mean.</p>
+<p>This week looks at how <a class="gl" href="glossary.html#g-generative-ai" data-tip="AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples.">generative AI</a> is changing employment in software development, especially at the entry level. The data is contested, but since 2023 entry-level hiring appears to have contracted sharply while demand for experienced engineers held up. A widely-cited Stanford analysis found employment for early-career developers (ages 22 to 25) fell by roughly 20%, and other research puts the drop in junior postings at 16.3% relative to senior roles. The tools you are being trained to use are likely changing what junior developers get hired to do. The content this week is optional (no assignment, quiz, or meeting), and the readings give you space to think through what these shifts mean.</p>
 <hr>
 <h2 id="optional-content">Optional Content</h2>
-<p><strong>All content this week is optional. Any source you engage with can be used for an extra reflection for extra labor credit. See the <a href="extra-labor.html">Extra Labor</a> page for instructions.</strong></p>
+<p><strong>All content this week is optional. Any source you engage with can be used for an extra reflection for <a class="gl" href="glossary.html#g-extra-labor" data-tip="Optional work that raises your grade above the base B: +0.1 for each extra reflection and +0.3 for a larger project, up to a 4.0.">extra labor</a> credit. See the <a href="extra-labor.html">Extra Labor</a> page for instructions.</strong></p>
 <p>➕ <strong><a href="https://www.youtube.com/watch?v=7Pq-S557XQU">Humans Need Not Apply</a></strong> — CGP Grey · 2014 · ~15 min watch · 🟢 Free access · [Media]</p>
-<p>CGP Grey's foundational explainer on automation and technological unemployment. It was made before generative AI, so it is worth thinking about what he got right and what is different now that AI can do cognitive work as well as manual work.</p>
+<p>CGP Grey's foundational explainer on <a class="gl" href="glossary.html#g-automation" data-tip="Using machines or software to do work that people used to do.">automation</a> and <a class="gl" href="glossary.html#g-technological-unemployment" data-tip="Unemployment that results when technology replaces workers faster than new jobs appear for them.">technological unemployment</a>. It was made before <a class="gl" href="glossary.html#g-generative-ai" data-tip="AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples.">generative AI</a>, so it is worth thinking about what he got right and what is different now that AI can do cognitive work as well as manual work.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
 <li>CGP Grey argues that the automation of cognitive work is different from previous industrial revolutions. This time, software can do cognitive work that only people used to do. When you think about the work you are training to do, how much of it feels safe from that? What is your honest reaction to his framing?</li>
-<li>The video compares workers displaced by automation to horses displaced by cars. The horses did not find new work and simply became less necessary. The comparison is likely meant to provoke. Does it feel like an overreach to you, or does something in it land? What is the best argument against it?</li>
-<li>CGP Grey made this video in 2014, before large language models existed. Watch it with that in mind. What did he anticipate correctly, and what has generative AI changed about the picture he was drawing?</li>
+<li>The video compares workers displaced by automation to horses displaced by cars. The horses did not find new work and simply became less necessary. The comparison is likely meant to provoke. Does it feel like an overreach to you, or does something in it land? What is the best <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a> against it?</li>
+<li>CGP Grey made this video in 2014, before <a class="gl" href="glossary.html#g-large-language-model" data-tip="A neural network trained on very large amounts of text to predict the next word, and usually trained further to follow instructions and hold a conversation. ChatGPT, Claude, and Gemini are built on large language models.">large language models</a> existed. Watch it with that in mind. What did he anticipate correctly, and what has generative AI changed about the picture he was drawing?</li>
 </ul>
 <p>➕ <strong><a href="https://www.theatlantic.com/magazine/archive/2015/07/world-without-work/395294/">A World Without Work</a></strong> — Derek Thompson, The Atlantic · 2015 · ~25 min read · 🟡 Limited access · [Media]</p>
 <p>Thompson's essay imagines what happens to society and identity when work itself becomes optional or obsolete. It is less about AI than about identity, and it raises the question of who you are if software can do what you do.</p>
@@ -765,7 +813,7 @@
 <li>The essay looks at communities where employment has already collapsed, where work disappeared and something had to fill the void. What patterns does Thompson find? Do you think those communities' experiences translate to what is happening in software right now, or is this different?</li>
 <li>Thompson wrote this essay a decade before generative AI took off. Some of what he imagined may be arriving sooner than he expected. Does that change how you read his analysis? Does it feel prescient, outdated, or something else?</li>
 </ul>
-<p>➕ <strong><a href="https://www.ilo.org/publications/generative-ai-and-jobs-2025-update">Generative AI and Jobs: A 2025 Update</a></strong> — International Labour Organization · 2025 · ~30 min read · 🟢 Free access · [Think tank]</p>
+<p>➕ <strong><a href="https://www.ilo.org/publications/generative-ai-and-jobs-2025-update">Generative AI and Jobs: A 2025 Update</a></strong> — International Labour Organization · 2025 · ~30 min read · 🟢 Free access · [<a class="gl" href="glossary.html#g-think-tank" data-tip="An organization that researches policy questions and publishes reports and recommendations. Many are funded by groups with a stake in the issues they study, or hold a political viewpoint, so it is a good idea to check who backs one.">Think tank</a>]</p>
 <p>The ILO's latest data on how generative AI is affecting employment across sectors, including software development. It shows which roles are most exposed to AI, which are being transformed (as opposed to replaced), and what policy responses different countries are trying.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
@@ -781,7 +829,7 @@
 <li>If AI tools are absorbing the kinds of tasks that junior roles were hired to do, what does that mean for how you learn and build skill? Junior positions have historically been where people develop into senior engineers. If that pipeline narrows, what replaces it?</li>
 <li>Stack Overflow is itself a platform that AI has significantly disrupted, and many developers now ask an AI assistant instead of searching for answers. Does the source of this analysis, a company navigating the same disruption, affect how you read it?</li>
 </ul>
-<p>➕ <strong><a href="https://aliciasassermodestino.com/wp-content/uploads/2025/06/Impact_of_GenAI_on_SWEs_061625.pdf">The Impact of Generative AI on Job Opportunities for Junior Developers</a></strong> — Alicia Sasser Modestino · 2025 · ~35 min read · 🟢 Free access · [Peer-reviewed]</p>
+<p>➕ <strong><a href="https://aliciasassermodestino.com/wp-content/uploads/2025/06/Impact_of_GenAI_on_SWEs_061625.pdf">The Impact of Generative AI on Job Opportunities for Junior Developers</a></strong> — Alicia Sasser Modestino · 2025 · ~35 min read · 🟢 Free access · [<a class="gl" href="glossary.html#g-peer-review" data-tip="The checking of a research paper by other experts in the field before a journal or conference publishes it. In computing, many of the most important papers appear at peer-reviewed conferences.">Peer-reviewed</a>]</p>
 <p>Rigorous research on how generative AI is changing entry-level job opportunities in software engineering. It shows what is happening to the junior developer market with more methodological rigor than most coverage.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
@@ -795,7 +843,7 @@
 <ul>
 <li>The canary metaphor suggests that what is happening in tech employment now will happen to other high-skill knowledge work later. If software engineers are the canaries, who are the miners? Does that framing change how you think about your responsibility, or your interests, in how AI develops?</li>
 <li>Brynjolfsson and colleagues separate cyclical decline (recession, market conditions) from structural decline (automation-driven). What do they find? If the decline is structural, what does that mean for expecting a recovery once conditions improve?</li>
-<li>High-wage tech workers are not the most vulnerable population affected by automation, but they are among the most politically and economically influential. Does it matter, for policy outcomes, that this particular group is now experiencing displacement? What might change because of that?</li>
+<li>High-wage tech workers are not the most vulnerable population affected by automation, but they are among the most politically and economically influential. Does it matter, for policy outcomes, that this particular group is now experiencing <a class="gl" href="glossary.html#g-labor-displacement" data-tip="Workers losing their jobs or tasks because machines or software now do that work.">displacement</a>? What might change because of that?</li>
 </ul>
 <hr>
 <p>Reminder: no deliverables are due this week.</p>
@@ -894,6 +942,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

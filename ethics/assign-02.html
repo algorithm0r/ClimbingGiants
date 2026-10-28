@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -751,19 +799,19 @@
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <h1>Week 2 Assignment · Topic Narrowing and Thesis Selection</h1>
 <p><em>Skill: So What · <a href="toolkit.html#so-what">See toolkit</a></em></p>
-<p>You have a body of raw ideas from Week 1, and this week you narrow them. That is, you are moving from &quot;here are things I find interesting about gen AI ethics&quot; to &quot;here is a specific claim I am going to argue.&quot; A thesis is a position that someone could reasonably disagree with. By the end of this week you will have a working thesis committed to your document. It will likely change, though having something specific to push against is the purpose of committing to it now.</p>
+<p>You have a body of raw ideas from Week 1, and this week you narrow them. That is, you are moving from &quot;here are things I find interesting about <a class="gl" href="glossary.html#g-generative-ai" data-tip="AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples.">gen AI</a> ethics&quot; to &quot;here is a specific claim I am going to argue.&quot; A <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a> is a position that someone could reasonably disagree with. By the end of this week you will have a working thesis committed to your document. It will likely change, though having something specific to push against is the purpose of committing to it now.</p>
 <p><strong>Proposing an alternative topic?</strong> If you are working on a technology other than generative AI, this is your deadline for approval. Send me a quick email or Discord message with your proposed topic and one or two sentences on why it has comparable ethical stakes. Once approved, apply this week's steps to your topic.</p>
 <hr>
 <h2 id="steps">Steps</h2>
 <ol>
 <li>
-<p>Read back through your Week 1 brainstorm. Circle or mark 2 to 3 directions that feel most interesting or most arguable to you.</p>
+<p>Read back through your Week 1 <a class="gl" href="glossary.html#g-brainstorming" data-tip="Writing down as many ideas as you can in a set time, without judging them, so you have raw material to choose from later. It is the Week 1 writing goal.">brainstorm</a>. Circle or mark 2 to 3 directions that feel most interesting or most arguable to you.</p>
 </li>
 <li>
-<p>For each direction, write one candidate thesis sentence. Make it a specific, arguable claim. A weak thesis says &quot;gen AI raises privacy concerns.&quot; A stronger one says &quot;gen AI companies collect training data in ways that make meaningful consent impossible.&quot; Aim for a claim specific enough that a reasonable person could disagree.</p>
+<p>For each direction, write one candidate <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a> sentence. Make it a specific, arguable claim. A weak thesis says &quot;<a class="gl" href="glossary.html#g-generative-ai" data-tip="AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples.">gen AI</a> raises <a class="gl" href="glossary.html#g-privacy" data-tip="A person's ability to keep information about themselves, and parts of their life, from others. This includes control over who collects and uses that information.">privacy</a> concerns.&quot; A stronger one says &quot;gen AI companies collect <a class="gl" href="glossary.html#g-training-data" data-tip="The collection of examples (text, images, code, and so on) a model learns its patterns from. A model's outputs reflect what is in the training data and what is missing from the training data.">training data</a> in ways that make <a class="gl" href="glossary.html#g-meaningful-consent" data-tip="Consent given by someone who understands what they are agreeing to, has a real option to say no, and can withdraw it later.">meaningful consent</a> impossible.&quot; Aim for a claim specific enough that a reasonable person could disagree.</p>
 </li>
 <li>
-<p>Apply the &quot;so what&quot; test to each candidate by asking what is at stake if you are right, and who is affected and how. Write 2 to 3 sentences for each candidate answering those questions.</p>
+<p>Apply the &quot;<a class="tk" href="toolkit.html#so-what" data-tip="The so what skill means asking &quot;so what?&quot; of an observation, again and again, until you reach a claim with real stakes. (A click opens it in the toolkit.)">so what</a>&quot; test to each candidate by asking what is at stake if you are right, and who is affected and how. Write 2 to 3 sentences for each candidate answering those questions.</p>
 </li>
 <li>
 <p>Choose one thesis. Write it clearly at the top of a new section in your document labeled <strong>Working Thesis</strong>. Below it, write a short paragraph (3 to 5 sentences) explaining why you chose this direction over the others. What makes it feel worth arguing?</p>
@@ -771,10 +819,10 @@
 </ol>
 <hr>
 <h2 id="what-your-document-should-show">What Your Document Should Show</h2>
-<p>A clearly labeled Working Thesis section with your chosen thesis sentence and a brief rationale. Evidence that you considered at least 2 to 3 directions before committing (these can stay in the document as discarded candidates).</p>
+<p>A clearly labeled Working <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">Thesis</a> section with your chosen thesis sentence and a brief rationale. Evidence that you considered at least 2 to 3 directions before committing (these can stay in the document as discarded candidates).</p>
 <hr>
 <h2 id="completion-criteria">Completion Criteria</h2>
-<p>Your thesis is a specific, arguable claim (a topic or a question will not count). The &quot;so what&quot; test is visible in that you have named what is at stake and who it affects. You have shown you considered more than one direction before choosing.</p>
+<p>Your <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a> is a specific, arguable claim (a topic or a question will not count). The &quot;<a class="tk" href="toolkit.html#so-what" data-tip="The so what skill means asking &quot;so what?&quot; of an observation, again and again, until you reach a claim with real stakes. (A click opens it in the toolkit.)">so what</a>&quot; test is visible in that you have named what is at stake and who it affects. You have shown you considered more than one direction before choosing.</p>
 
   </main>
 
@@ -870,6 +918,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -751,38 +799,38 @@
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <h1>Week 7 Assignment · Supporting Claims with Argumentation</h1>
 <p><em>Skill: Paragraph as Unit of Argument · <a href="toolkit.html#paragraph-as-unit-of-argument">See toolkit</a></em></p>
-<p>You have evidence in your document, and this week you build the logical structure around it. A source tells your reader what is true, and your argument explains why it matters and how it connects to your thesis. This week you are making sure every major claim in your essay earns its place. That is, each claim should have evidence, analysis, and a specific job in your overall argument. Paragraphs without a job are revised or cut in step 4.</p>
+<p>You have <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a> in your document, and this week you build the logical structure around it. A source tells your reader what is true, and your <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a> explains why it matters and how it connects to your <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a>. This week you are making sure every major claim in your essay earns its place. That is, each claim should have evidence, analysis, and a specific job in your overall argument. Paragraphs without a job are revised or cut in step 4.</p>
 <hr>
 <h2 id="steps">Steps</h2>
 <ol>
 <li>
-<p>Read through your document and identify your 4 to 5 most important claims, the ones your argument depends on. These should be sentences you could not remove without the thesis falling apart.</p>
+<p>Read through your document and identify your 4 to 5 most important claims, the ones your <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a> depends on. These should be sentences you could not remove without the <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a> falling apart.</p>
 </li>
 <li>
 <p>For each claim, check that its paragraph has all three components of a complete argument:</p>
 <ul>
 <li><strong>The claim itself:</strong> one clear, arguable sentence</li>
-<li><strong>Evidence:</strong> a source, statistic, or concrete example that supports it</li>
+<li><strong><a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">Evidence</a>:</strong> a source, statistic, or concrete example that supports it</li>
 <li><strong>Analysis:</strong> 2 to 3 sentences explaining what the evidence means and why it supports your claim</li>
 </ul>
 <p>If any component is missing, add it now.</p>
 </li>
 <li>
-<p>Apply the &quot;so what&quot; test to each claim by checking whether its paragraph explains why the claim matters to your thesis. Write one connecting sentence at the end of each paragraph that makes that link explicit. How does this claim move your overall argument forward?</p>
+<p>Apply the &quot;<a class="tk" href="toolkit.html#so-what" data-tip="The so what skill means asking &quot;so what?&quot; of an observation, again and again, until you reach a claim with real stakes. (A click opens it in the toolkit.)">so what</a>&quot; test to each claim by checking whether its paragraph explains why the claim matters to your thesis. Write one connecting sentence at the end of each paragraph that makes that link explicit. How does this claim move your overall argument forward?</p>
 </li>
 <li>
 <p>Identify any paragraph that exists but does not directly serve your thesis. Either revise it until it does, or cut it.</p>
 </li>
 <li>
-<p>Map your key claims to the four sections of your final essay (Introduction, Stakeholder Analysis and Ethical Argument, Policy Proposal, and Conclusion), and write each claim's section next to it. At this stage most claims typically cluster in the stakeholder/ethical argument section, and the policy proposal is often still a sketch from Week 4. If your policy section is thin (one paragraph, no tradeoffs named, no actor specified), treat that as a content gap to develop before Week 8, since sentence editing will not fix it.</p>
+<p>Map your key claims to the four sections of your final essay (Introduction, <a class="gl" href="glossary.html#g-stakeholder-analysis" data-tip="A closer look at the most important groups on a stakeholder map: what each stands to gain or lose, and where their interests conflict. It is the Week 4 writing goal.">Stakeholder Analysis</a> and Ethical Argument, <a class="gl" href="glossary.html#g-policy-proposal" data-tip="A specific recommendation that names what should change, who carries it out, who pays, and what tradeoffs it creates. It is Section 3 of the course essay.">Policy Proposal</a>, and Conclusion), and write each claim's section next to it. At this stage most claims typically cluster in the <a class="gl" href="glossary.html#g-stakeholder" data-tip="Any person or group affected by a system or a decision. This includes the people who build it, use it, profit from it, and are judged by it.">stakeholder</a>/ethical argument section, and the policy proposal is often still a sketch from Week 4. If your policy section is thin (one paragraph, no tradeoffs named, no actor specified), treat that as a content gap to develop before Week 8, since <a class="tk" href="toolkit.html#sentence-level-editing" data-tip="Sentence-level editing means revising each sentence for clarity, precision, and efficiency, with hedges that match your evidence. (A click opens it in the toolkit.)">sentence editing</a> will not fix it.</p>
 </li>
 </ol>
 <hr>
 <h2 id="what-your-document-should-show">What Your Document Should Show</h2>
-<p>Four to five key claim paragraphs, each with a clear claim, evidence, and analysis, and each ending with a sentence that connects it to the thesis. Every other paragraph in the document also connects to the thesis. A note next to each claim indicating which of the four final sections it belongs to.</p>
+<p>Four to five key claim paragraphs, each with a clear claim, <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a>, and analysis, and each ending with a sentence that connects it to the <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a>. Every other paragraph in the document also connects to the thesis. A note next to each claim indicating which of the four final sections it belongs to.</p>
 <hr>
 <h2 id="completion-criteria">Completion Criteria</h2>
-<p>Each key paragraph has all three components: claim, evidence, and analysis. The analysis explains what the evidence means for your argument. The document has no major sections that exist without a clear connection to the thesis. You can identify which of the four final sections each key claim belongs to, and you have flagged any section that is missing or thin.</p>
+<p>Each key paragraph has all three components: claim, <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a>, and analysis. The analysis explains what the evidence means for your <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a>. The document has no major sections that exist without a clear connection to the <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a>. You can identify which of the four final sections each key claim belongs to, and you have flagged any section that is missing or thin.</p>
 
   </main>
 
@@ -878,6 +926,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

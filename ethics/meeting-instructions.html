@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -755,7 +803,7 @@
 <p>Every meeting has one person who serves as facilitator for that week. Rotate this role each meeting so everyone leads at least twice across the quarter. The facilitator hosts the meeting and does not need to supply answers. Their job is to create conditions for good discussion.</p>
 <p><strong>What the facilitator does:</strong></p>
 <ul>
-<li>Opens the meeting with a brief framing (a sentence or two), for instance <em>&quot;This week we're talking about manipulation and autonomy. Let's start with the gut-check prompt.&quot;</em></li>
+<li>Opens the meeting with a brief framing (a sentence or two), for instance <em>&quot;This week we're talking about <a class="gl" href="glossary.html#g-manipulation" data-tip="Influencing someone's beliefs or choices by going around their reasoning, for instance by exploiting their emotions, habits, or blind spots.">manipulation</a> and <a class="gl" href="glossary.html#g-autonomy" data-tip="A person's ability to make their own choices, based on their own reasoning and values.">autonomy</a>. Let's start with the <a class="gl" href="glossary.html#g-gut-check" data-tip="The first step of a reflection. You write your honest, immediate reaction to something specific in a source.">gut-check</a> prompt.&quot;</em></li>
 <li>Introduces the prompts and invites the group in</li>
 <li>Watches the time so there is space for both discussion and essay share</li>
 <li>Notices when one person is dominating and gently invites others in (<em>&quot;I want to hear from you on this&quot;</em>)</li>
@@ -765,16 +813,16 @@
 <p><strong>Purpose:</strong> The purpose of the rotation is to practice facilitation, a skill you will likely use in meetings and on teams after graduation. The meeting is low-stakes and its goal is mutual understanding, so it is a good place to practice.</p>
 <hr>
 <h2 id="how-to-use-the-weekly-prompts">How to Use the Weekly Prompts</h2>
-<p>Each week has the same prompts as that week's reflection. You bring your personal thinking (from your reflection) into the group as your material, and the conversation will usually move on from there. Here is how it typically works. Someone shares what their gut check was, and someone else's lands differently. You notice the difference and ask, <em>&quot;Why did that land different for you?&quot;</em> The aim is to understand why each of you lands where you do.</p>
+<p>Each week has the same prompts as that week's reflection. You bring your personal thinking (from your reflection) into the group as your material, and the conversation will usually move on from there. Here is how it typically works. Someone shares what their <a class="gl" href="glossary.html#g-gut-check" data-tip="The first step of a reflection. You write your honest, immediate reaction to something specific in a source.">gut check</a> was, and someone else's lands differently. You notice the difference and ask, <em>&quot;Why did that land different for you?&quot;</em> The aim is to understand why each of you lands where you do.</p>
 <p>The prompts anchor the conversation, so if discussion stalls go back to a prompt. If it goes somewhere unexpected and interesting, follow it (the prompts are a starting point, and the group can leave them when something better comes up).</p>
 <hr>
 <h2 id="the-essay-share">The Essay Share</h2>
-<p>Each meeting includes a round where everyone briefly shares what they did on their essay this week and one thing they are wrestling with. Keep it short (three minutes per person at most) and focus on this week, for instance <em>&quot;This week I mapped my stakeholders and I realized I was missing labor, so I'm wrestling with how deep to go there.&quot;</em> Or <em>&quot;I narrowed to AI and content creation, and now I'm wrestling with whether to focus on music or visual art. They raise different ethics issues.&quot;</em></p>
-<p>After each person shares, the group responds with reactions and questions (not corrections or edits). For instance, <em>&quot;That labor dimension is interesting. Have you thought about unpaid content moderation?&quot;</em> is a reaction, while <em>&quot;You should include content moderation.&quot;</em> is an edit. The purpose is to help each person think more clearly about their own argument. Your group is helping you ask better questions about your essay, and reviewing the draft is not part of the share.</p>
+<p>Each meeting includes a round where everyone briefly shares what they did on their essay this week and one thing they are wrestling with. Keep it short (three minutes per person at most) and focus on this week, for instance <em>&quot;This week I mapped my <a class="gl" href="glossary.html#g-stakeholder" data-tip="Any person or group affected by a system or a decision. This includes the people who build it, use it, profit from it, and are judged by it.">stakeholders</a> and I realized I was missing labor, so I'm wrestling with how deep to go there.&quot;</em> Or <em>&quot;I narrowed to AI and content creation, and now I'm wrestling with whether to focus on music or visual art. They raise different ethics issues.&quot;</em></p>
+<p>After each person shares, the group responds with reactions and questions (not corrections or edits). For instance, <em>&quot;That labor dimension is interesting. Have you thought about unpaid content moderation?&quot;</em> is a reaction, while <em>&quot;You should include content moderation.&quot;</em> is an edit. The purpose is to help each person think more clearly about their own <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a>. Your group is helping you ask better questions about your essay, and reviewing the draft is not part of the share.</p>
 <hr>
 <h2 id="the-collaborative-paragraph">The Collaborative Paragraph</h2>
 <p>Every meeting closes with one paragraph the group writes together, which captures the shared thinking from the discussion.</p>
-<p><strong>What it captures:</strong> The paragraph records the questions you explored together, the tensions you noticed, and the insights that emerged, including disagreements. It does not need to reach consensus or a &quot;correct&quot; answer. If the group landed in different places, the paragraph says so, for instance <em>&quot;We noticed tension between transparency and privacy. Some of us prioritize radical disclosure, others see privacy risks to training data contributors.&quot;</em></p>
+<p><strong>What it captures:</strong> The paragraph records the questions you explored together, the tensions you noticed, and the insights that emerged, including disagreements. It does not need to reach consensus or a &quot;correct&quot; answer. If the group landed in different places, the paragraph says so, for instance <em>&quot;We noticed tension between <a class="gl" href="glossary.html#g-transparency" data-tip="Openness about how systems work, what data they use, and how they are used, so that outsiders can understand and question them.">transparency</a> and <a class="gl" href="glossary.html#g-privacy" data-tip="A person's ability to keep information about themselves, and parts of their life, from others. This includes control over who collects and uses that information.">privacy</a>. Some of us prioritize radical disclosure, others see privacy risks to <a class="gl" href="glossary.html#g-training-data" data-tip="The collection of examples (text, images, code, and so on) a model learns its patterns from. A model's outputs reflect what is in the training data and what is missing from the training data.">training data</a> contributors.&quot;</em></p>
 <p><strong>How to write it:</strong> Rotate who types. One person starts writing what the group is saying, and the others add, adjust, and refine. You are aiming for one paragraph of 150 to 200 words.</p>
 <p><strong>Purpose:</strong> The paragraph is your meeting record, and you submit it on Canvas as evidence that the group met and thought together.</p>
 <hr>
@@ -791,11 +839,11 @@
 <hr>
 <h2 id="understanding-synthesis-and-dialectic">Understanding Synthesis and Dialectic</h2>
 <p><strong>Debate</strong> is trying to win. You each present your position, attack the other side, and hope to convince listeners you are right. <strong>Dialectic</strong> is trying to understand. You start with multiple positions and think together about what each one sees, what it misses, and what is at stake. This may not end in agreement, though it should end with a clearer view of the question.</p>
-<p>The usual pattern is thesis, antithesis, synthesis. Someone starts with a position (thesis), and someone else holds a different one (antithesis). Through examination of both, you arrive somewhere neither of you started, something richer and more honest than either position alone (synthesis). The synthesis may keep the disagreement and still be clearer about what is at stake.</p>
+<p>The usual pattern is <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a>, antithesis, synthesis. Someone starts with a position (thesis), and someone else holds a different one (antithesis). Through examination of both, you arrive somewhere neither of you started, something richer and more honest than either position alone (synthesis). The synthesis may keep the disagreement and still be clearer about what is at stake.</p>
 <p><strong>A concrete example from this course:</strong></p>
 <p><em>Thesis:</em> &quot;AI hiring tools are more fair than human recruiters because they're consistent. They don't have bad days, don't make snap judgments based on how someone looks, and apply the same criteria every time.&quot;</p>
-<p><em>Antithesis:</em> &quot;AI hiring tools encode historical biases at scale and are much harder to challenge than a human decision. At least you can argue with a recruiter. The algorithm just says no.&quot;</p>
-<p><em>Synthesis:</em> &quot;AI tools and human recruiters are both likely to be biased, so the more useful question is whether either system can be audited, challenged, and made accountable. Fair hiring requires designing for accountability, since neither humans nor algorithms are neutral.&quot;</p>
+<p><em>Antithesis:</em> &quot;AI hiring tools encode historical <a class="gl" href="glossary.html#g-bias" data-tip="A consistent tilt in a person's or a system's judgments that favors some people or outcomes over others. In AI it usually means outputs that are less accurate or less favorable for a particular group.">biases</a> <a class="gl" href="glossary.html#g-scale" data-tip="The number of people or decisions a system reaches. A system working at scale repeats the same choice many times, so the system's errors and benefits both multiply.">at scale</a> and are much harder to challenge than a human decision. At least you can argue with a recruiter. The <a class="gl" href="glossary.html#g-algorithm" data-tip="A set of step-by-step instructions a computer follows to turn inputs into an output, such as a score, a ranking, or a decision.">algorithm</a> just says no.&quot;</p>
+<p><em>Synthesis:</em> &quot;AI tools and human recruiters are both likely to be biased, so the more useful question is whether either system can be <a class="gl" href="glossary.html#g-algorithmic-audit" data-tip="A review, often by an outside party, that tests an algorithm's outputs (and where possible the data and code behind them) for errors, bias, and harm.">audited</a>, challenged, and made <a class="gl" href="glossary.html#g-accountability" data-tip="Being answerable for a decision or outcome. That means having to explain it, and facing consequences if it caused harm.">accountable</a>. Fair hiring requires designing for accountability, since neither humans nor algorithms are neutral.&quot;</p>
 <p>Each starting position names a real concern, and the synthesis keeps both. Your meetings work the same way. Bring a position you actually hold and see what changes when it meets someone else's.</p>
 <hr>
 <h2 id="meeting-values">Meeting Values</h2>
@@ -803,7 +851,7 @@
 <p><strong>Come prepared.</strong> You have done your reflection, so you have something to contribute.</p>
 <p><strong>Listen actively.</strong> When someone else is thinking out loud, actually listen. Try to hear what they are saying before planning your reply.</p>
 <p><strong>Ask genuine questions.</strong> Do not ask leading questions designed to change their mind. Ask out of real curiosity, for instance <em>&quot;I hear you prioritizing X. What made that matter to you?&quot;</em></p>
-<p><strong>Push back thoughtfully.</strong> If you disagree, say so. However, steelman the opposing view first (for instance, <em>&quot;I hear your concern, and that matters. I also think...&quot;</em>).</p>
+<p><strong>Push back thoughtfully.</strong> If you disagree, say so. However, <a class="tk" href="toolkit.html#steelmanning" data-tip="Steelmanning means stating the strongest version of the case against your own position before you respond to it. (A click opens it in the toolkit.)">steelman</a> the opposing view first (for instance, <em>&quot;I hear your concern, and that matters. I also think...&quot;</em>).</p>
 <p><strong>Stay humble about what you know.</strong> You are all learning. You might be wrong, and the person you disagree with might see something you are missing.</p>
 <p><strong>Lead with empathy.</strong> Before you respond to what someone said, check whether you actually understand where they are coming from. If not, ask. You do not have to agree with someone's position to understand what makes it feel true to them. Synthesis requires that understanding, though not agreement.</p>
 <p><strong>Extend compassion.</strong> People in this group will say things that feel vulnerable. They will admit uncertainty and take positions that surprise you, so treat those moments with care. Meetings typically go better when people feel safe taking intellectual risks.</p>
@@ -837,8 +885,8 @@
 <td>Good preparation. You arrive with a clearer starting point for the discussion.</td>
 </tr>
 <tr>
-<td>You use AI to steelman a position before the meeting so you can challenge it more precisely</td>
-<td>Strong preparation. You know the best version of the argument before you encounter it.</td>
+<td>You use AI to <a class="tk" href="toolkit.html#steelmanning" data-tip="Steelmanning means stating the strongest version of the case against your own position before you respond to it. (A click opens it in the toolkit.)">steelman</a> a position before the meeting so you can challenge it more precisely</td>
+<td>Strong preparation. You know the best version of the <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a> before you encounter it.</td>
 </tr>
 <tr>
 <td>After the meeting, you use AI to help you understand something a peer said that you did not fully grasp</td>
@@ -953,6 +1001,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

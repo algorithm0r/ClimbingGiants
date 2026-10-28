@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -743,45 +791,45 @@
     <h1>Essay Instructions: Your 2000-Word Policy Paper</h1>
 <hr>
 <h2 id="what-is-this-essay">What Is This Essay?</h2>
-<p>You are writing a <strong>2000-word position paper</strong>, an argued position on a technology with significant ethical dimensions, supported by evidence and grounded in clear reasoning. You make an argument, defend it, and propose what should be done about the problem you identify.</p>
+<p>You are writing a <strong>2000-word position paper</strong>, an argued position on a technology with significant ethical dimensions, supported by <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a> and grounded in clear reasoning. You make an <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a>, defend it, and propose what should be done about the problem you identify.</p>
 <p>The essay is built as a <strong>single living document</strong> across 9 weeks. You create one Google Doc at the start of the course and update it every week. By Week 10, that document is your final submission.</p>
 <hr>
 <h2 id="the-suggested-topic">The Suggested Topic</h2>
-<p><strong>Generative AI and its impact on the CS industry.</strong>
-This topic is suggested because it has multiple ethical dimensions: labor displacement, IP and ownership, bias in hiring systems, autonomy in code generation, safety-critical systems, and the pressure to adopt tools you did not choose. It is directly relevant to your careers, since you will likely meet it in internship interviews, job offers, and early decisions about what you build.</p>
-<p>You may also propose an alternative technology with comparable ethical dimensions, for instance AI-optimized social media, autonomous vehicles, predictive policing, genetic engineering, facial recognition, surveillance hardware or anything with real stakes for real people. Clear it with me before Week 2.</p>
+<p><strong><a class="gl" href="glossary.html#g-generative-ai" data-tip="AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples.">Generative AI</a> and its impact on the CS industry.</strong>
+This topic is suggested because it has multiple ethical dimensions: <a class="gl" href="glossary.html#g-labor-displacement" data-tip="Workers losing their jobs or tasks because machines or software now do that work.">labor displacement</a>, IP and ownership, <a class="gl" href="glossary.html#g-bias" data-tip="A consistent tilt in a person's or a system's judgments that favors some people or outcomes over others. In AI it usually means outputs that are less accurate or less favorable for a particular group.">bias</a> in hiring systems, <a class="gl" href="glossary.html#g-autonomy" data-tip="A person's ability to make their own choices, based on their own reasoning and values.">autonomy</a> in code generation, <a class="gl" href="glossary.html#g-safety-critical-system" data-tip="A system whose failure can injure or kill people, such as a medical device, an aircraft control system, or a self-driving car.">safety-critical systems</a>, and the pressure to adopt tools you did not choose. It is directly relevant to your careers, since you will likely meet it in internship interviews, job offers, and early decisions about what you build.</p>
+<p>You may also propose an alternative technology with comparable ethical dimensions, for instance AI-optimized social media, autonomous vehicles, predictive policing, genetic engineering, <a class="gl" href="glossary.html#g-facial-recognition" data-tip="Software that identifies or verifies a person by comparing an image of their face against stored images.">facial recognition</a>, <a class="gl" href="glossary.html#g-surveillance" data-tip="Systematic watching or recording of people's behavior by a government, a company, or another person, often to predict or influence what they do.">surveillance</a> hardware or anything with real stakes for real people. Clear it with me before Week 2.</p>
 <hr>
 <h2 id="the-four-sections">The Four Sections</h2>
 <p>Your final 2000-word essay contains four sections. You do not write them in order. Each week's work feeds all four sections, and each section grows and changes across the quarter.</p>
 <h3 id="1-introduction-and-technology-description">1. Introduction and Technology Description</h3>
-<p>Introduce the technology clearly: what is it, who uses it, how does it work in practice? Your introduction should give a reader unfamiliar with the technology enough concrete context to follow your argument. Avoid being generic, and give specific examples of how the technology is deployed and what people do with it.</p>
-<p>End your introduction with one thesis sentence, a single arguable claim about what the ethical problem is and what should be done. That is, a thesis states an argument (&quot;generative AI's lack of transparency in content moderation creates accountability gaps that require legislation mandating explainability standards&quot;), where a topic only names an area (&quot;generative AI has ethical problems&quot;).</p>
+<p>Introduce the technology clearly: what is it, who uses it, how does it work in practice? Your introduction should give a reader unfamiliar with the technology enough concrete context to follow your <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a>. Avoid being generic, and give specific examples of how the technology is deployed and what people do with it.</p>
+<p>End your introduction with one <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a> sentence, a single arguable claim about what the ethical problem is and what should be done. That is, a thesis states an argument (&quot;<a class="gl" href="glossary.html#g-generative-ai" data-tip="AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples.">generative AI</a>'s lack of <a class="gl" href="glossary.html#g-transparency" data-tip="Openness about how systems work, what data they use, and how they are used, so that outsiders can understand and question them.">transparency</a> in content moderation creates <a class="gl" href="glossary.html#g-accountability" data-tip="Being answerable for a decision or outcome. That means having to explain it, and facing consequences if it caused harm.">accountability</a> gaps that require legislation mandating <a class="gl" href="glossary.html#g-explainability" data-tip="How well people can understand why a system produced a particular output.">explainability</a> standards&quot;), where a topic only names an area (&quot;generative AI has ethical problems&quot;).</p>
 <h3 id="2-stakeholder-analysis-and-ethical-argument">2. Stakeholder Analysis and Ethical Argument</h3>
-<p>This section holds most of your analysis. Who is affected by the technology? Who benefits, who is harmed, who decides? Where do their interests conflict?</p>
-<p>Apply the three ethical toolkit questions directly to each stakeholder group:</p>
+<p>This section holds most of your analysis. Who is affected by the technology? Who benefits, <a class="tk" href="toolkit.html#who-is-harmed" data-tip="This toolkit question asks who is affected by a system or decision and what specific harms they could face. (A click opens it in the toolkit.)">who is harmed</a>, who decides? Where do their interests conflict?</p>
+<p>Apply the <a class="tk" href="toolkit.html#section-1-the-three-toolkit-questions" data-tip="Who is harmed? What are our obligations? What would a person of integrity do? Each question draws on a different family of ethical theory. (A click opens it in the toolkit.)">three ethical toolkit questions</a> directly to each <a class="gl" href="glossary.html#g-stakeholder" data-tip="Any person or group affected by a system or a decision. This includes the people who build it, use it, profit from it, and are judged by it.">stakeholder</a> group:</p>
 <ul>
 <li>Who is harmed?</li>
-<li>What are our obligations?</li>
-<li>What would a person of integrity do?</li>
+<li><a class="tk" href="toolkit.html#what-are-our-obligations" data-tip="This toolkit question asks what duties, rules, or principles should guide a decision, whatever its consequences. (A click opens it in the toolkit.)">What are our obligations</a>?</li>
+<li><a class="tk" href="toolkit.html#what-would-a-person-of-integrity-do" data-tip="This toolkit question asks what the situation asks of you as a person with values, and whether you could explain your decision to the people it affects. (A click opens it in the toolkit.)">What would a person of integrity do</a>?</li>
 </ul>
-<p>These questions map loosely onto consequentialist, deontological, and virtue ethics. However, you do not need to know that terminology. The questions are thinking tools, so you can use them without the labels.</p>
+<p>These questions map loosely onto <a class="gl" href="glossary.html#g-consequentialism" data-tip="A family of ethical theories that judge actions by their results. The toolkit question &quot;Who is harmed?&quot; draws on it.">consequentialist</a>, <a class="gl" href="glossary.html#g-deontology" data-tip="A family of ethical theories that judge actions by duties and rules, so that some actions are right or wrong whatever their results. The toolkit question &quot;What are our obligations?&quot; draws on it.">deontological</a>, and <a class="gl" href="glossary.html#g-virtue-ethics" data-tip="A family of ethical theories that focus on character, asking what a good person would do and what kind of person an action makes you. The toolkit question &quot;What would a person of integrity do?&quot; draws on it.">virtue ethics</a>. However, you do not need to know that terminology. The questions are thinking tools, so you can use them without the labels.</p>
 <p>State the strongest possible case against your own position in this section. Then explain how you can assimilate or accommodate that challenge. If you cannot articulate a strong counterargument, or adjust your thesis to incorporate the objection, your thesis is probably not strong enough or well developed enough.</p>
 <h3 id="3-policy-proposal">3. Policy Proposal</h3>
-<p>What specifically should be done about the problem you have identified? Be concrete. &quot;There should be more regulation&quot; is not a policy proposal. &quot;The FTC should mandate transparency reports showing how AI hiring systems are evaluated for bias, published quarterly, with third-party auditing&quot; is.</p>
+<p>What specifically should be done about the problem you have identified? Be concrete. &quot;There should be more regulation&quot; is not a <a class="gl" href="glossary.html#g-policy-proposal" data-tip="A specific recommendation that names what should change, who carries it out, who pays, and what tradeoffs it creates. It is Section 3 of the course essay.">policy proposal</a>. &quot;The FTC should mandate transparency reports showing how AI hiring systems are evaluated for <a class="gl" href="glossary.html#g-bias" data-tip="A consistent tilt in a person's or a system's judgments that favors some people or outcomes over others. In AI it usually means outputs that are less accurate or less favorable for a particular group.">bias</a>, published quarterly, with third-party auditing&quot; is.</p>
 <p>Who implements it? Who pays for it? What are the tradeoffs? If your proposal solves one problem, does it create another? Acknowledge the costs and complications.</p>
 <h3 id="4-conclusion">4. Conclusion</h3>
-<p>Restate the problem and your proposed solution. Explain what is at stake if nothing changes. What would be lost? Who would be affected? Why does this matter for the people directly harmed, and for the kind of profession you want to build as a CS engineer?</p>
+<p>Restate the problem and your proposed solution. Explain what is at stake if nothing changes. What would be lost? Who would be affected? Why does this matter for the people directly <a class="gl" href="glossary.html#g-harm" data-tip="A setback to someone's interests, such as lost money, a lost opportunity, an injury, distress, or damage to their reputation. Harm can be direct or indirect, and intended or accidental.">harmed</a>, and for the kind of profession you want to build as a CS engineer?</p>
 <h3 id="abstract-and-title">Abstract and Title</h3>
 <p>These are written last, in Week 10, once you know what you actually argued.</p>
-<p><strong>Abstract:</strong> A single paragraph of 100 to 150 words that compresses your entire paper: the technology, the ethical problem, and the policy you propose. It stands alone, so someone who reads only the abstract should know exactly what you argue and why it matters.</p>
-<p><strong>Title:</strong> A title names the specific subject of your paper plainly, in one descriptive phrase (for instance, &quot;Mandatory bias audits for AI recruiting tools&quot;). It may state your position, though it does not need to. Avoid colons, questions, and wordplay, since the purpose of a title is to tell someone what the paper is about.</p>
+<p><strong><a class="gl" href="glossary.html#g-abstract" data-tip="A single paragraph (about 150 words in this course) that compresses a whole paper: the problem, the position it takes, and what it proposes.">Abstract</a>:</strong> A single paragraph of 100 to 150 words that compresses your entire paper: the technology, the ethical problem, and the policy you propose. It stands alone, so someone who reads only the abstract should know exactly what you argue and why it matters.</p>
+<p><strong>Title:</strong> A title names the specific subject of your paper plainly, in one descriptive phrase (for instance, &quot;Mandatory bias <a class="gl" href="glossary.html#g-algorithmic-audit" data-tip="A review, often by an outside party, that tests an algorithm's outputs (and where possible the data and code behind them) for errors, bias, and harm.">audits</a> for AI recruiting tools&quot;). It may state your position, though it does not need to. Avoid colons, questions, and wordplay, since the purpose of a title is to tell someone what the paper is about.</p>
 <hr>
 <h2 id="tone">Tone</h2>
-<p>Your essay should read like someone who thinks something matters and is willing to argue for it. Every section (introduction, analysis, proposal, conclusion) should make a case for your position. Write to convince a thoughtful reader who takes the argument seriously.</p>
+<p>Your essay should read like someone who thinks something matters and is willing to argue for it. Every section (introduction, analysis, proposal, conclusion) should make a case for your position. Write to convince a thoughtful reader who takes the <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a> seriously.</p>
 <p>In practice this means:</p>
 <ul>
 <li>Write in your own voice</li>
-<li>State your position clearly, with hedges that match your evidence (see <a href="toolkit.html#sentence-level-editing">Sentence Editing</a>)</li>
+<li>State your position clearly, with <a class="gl" href="glossary.html#g-hedge" data-tip="A word such as &quot;may&quot;, &quot;likely&quot;, or &quot;often&quot; that tells your reader how strongly your evidence supports a claim. In this course a hedge should match the strength of that evidence.">hedges</a> that match your <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a> (see <a href="toolkit.html#sentence-level-editing">Sentence Editing</a>)</li>
 <li>Show the stakes, that is, why the problem matters</li>
 <li>Address objections directly</li>
 <li>Use concrete examples and specific cases</li>
@@ -794,21 +842,21 @@ This topic is suggested because it has multiple ethical dimensions: labor displa
 <colgroup><col style="width: 110px"><col style="width: 3.5rem"><col><col style="width: 140px"><col style="width: 130px"></colgroup>
 <thead><tr><th>Phase</th><th>Week</th><th>Task</th><th>Assignment</th><th>Sample Essay</th></tr></thead>
 <tbody>
-<tr><td rowspan="3"><strong>Generative</strong></td><td>1</td><td>Brainstorming</td><td><a href="assign-01.html">Week 1</a></td><td><a href="essay-sample-week-01.html">Week 1 Sample</a></td></tr>
-<tr><td>2</td><td>Topic narrowing and thesis</td><td><a href="assign-02.html">Week 2</a></td><td><a href="essay-sample-week-02.html">Week 2 Sample</a></td></tr>
-<tr><td>3</td><td>Stakeholder mapping</td><td><a href="assign-03.html">Week 3</a></td><td><a href="essay-sample-week-03.html">Week 3 Sample</a></td></tr>
-<tr><td rowspan="4"><strong>Constructive</strong></td><td>4</td><td>Stakeholder analysis</td><td><a href="assign-04.html">Week 4</a></td><td><a href="essay-sample-week-04.html">Week 4 Sample</a></td></tr>
+<tr><td rowspan="3"><strong>Generative</strong></td><td>1</td><td><a class="gl" href="glossary.html#g-brainstorming" data-tip="Writing down as many ideas as you can in a set time, without judging them, so you have raw material to choose from later. It is the Week 1 writing goal.">Brainstorming</a></td><td><a href="assign-01.html">Week 1</a></td><td><a href="essay-sample-week-01.html">Week 1 Sample</a></td></tr>
+<tr><td>2</td><td>Topic narrowing and <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a></td><td><a href="assign-02.html">Week 2</a></td><td><a href="essay-sample-week-02.html">Week 2 Sample</a></td></tr>
+<tr><td>3</td><td><a class="gl" href="glossary.html#g-stakeholder-map" data-tip="A broad list of every group affected by a system, with a few words on how each is affected. It is the Week 3 writing goal.">Stakeholder mapping</a></td><td><a href="assign-03.html">Week 3</a></td><td><a href="essay-sample-week-03.html">Week 3 Sample</a></td></tr>
+<tr><td rowspan="4"><strong>Constructive</strong></td><td>4</td><td><a class="gl" href="glossary.html#g-stakeholder-analysis" data-tip="A closer look at the most important groups on a stakeholder map: what each stands to gain or lose, and where their interests conflict. It is the Week 4 writing goal.">Stakeholder analysis</a></td><td><a href="assign-04.html">Week 4</a></td><td><a href="essay-sample-week-04.html">Week 4 Sample</a></td></tr>
 <tr><td>5</td><td><em>Break (no essay work)</em></td><td>—</td><td>—</td></tr>
 <tr><td>6</td><td>Supporting claims with sources</td><td><a href="assign-06.html">Week 6</a></td><td><a href="essay-sample-week-06.html">Week 6 Sample</a></td></tr>
 <tr><td>7</td><td>Supporting claims with argumentation</td><td><a href="assign-07.html">Week 7</a></td><td><a href="essay-sample-week-07.html">Week 7 Sample</a></td></tr>
 <tr><td rowspan="2"><strong>Reductive</strong></td><td>8</td><td>Edit at paper and paragraph level</td><td><a href="assign-08.html">Week 8</a></td><td><a href="essay-sample-week-08.html">Week 8 Sample</a></td></tr>
 <tr><td>9</td><td>Edit at sentence level</td><td><a href="assign-09.html">Week 9</a></td><td><a href="essay-sample-week-09.html">Week 9 Sample</a></td></tr>
-<tr><td><strong>Final</strong></td><td>10</td><td>Final framing</td><td><a href="assign-10.html">Week 10</a></td><td><a href="essay-sample-week-10.html">Week 10 Sample</a></td></tr>
+<tr><td><strong>Final</strong></td><td>10</td><td><a class="tk" href="toolkit.html#final-framing" data-tip="Final framing means writing the conclusion, introduction, abstract, and title last, once you know what your paper argues. (A click opens it in the toolkit.)">Final framing</a></td><td><a href="assign-10.html">Week 10</a></td><td><a href="essay-sample-week-10.html">Week 10 Sample</a></td></tr>
 </tbody>
 </table>
 <hr>
 <h2 id="how-the-document-grows">How the Document Grows</h2>
-<p>The whole document changes together from week to week (you will not write Section 1, then Section 2, then Section 3). Week 1 work (brainstorming) goes into the doc. Week 2 (working thesis) reshapes how you present ideas. Week 3 (stakeholder mapping) adds new complexity. Week 4 (deep stakeholder analysis) might restructure sections. Week 6 (sources) changes how you support claims everywhere. Week 8 (structural editing) moves paragraphs around. Week 9 (sentence editing) tightens everything.</p>
+<p>The whole document changes together from week to week (you will not write Section 1, then Section 2, then Section 3). Week 1 work (<a class="gl" href="glossary.html#g-brainstorming" data-tip="Writing down as many ideas as you can in a set time, without judging them, so you have raw material to choose from later. It is the Week 1 writing goal.">brainstorming</a>) goes into the doc. Week 2 (working <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a>) reshapes how you present ideas. Week 3 (<a class="gl" href="glossary.html#g-stakeholder-map" data-tip="A broad list of every group affected by a system, with a few words on how each is affected. It is the Week 3 writing goal.">stakeholder mapping</a>) adds new complexity. Week 4 (deep <a class="gl" href="glossary.html#g-stakeholder-analysis" data-tip="A closer look at the most important groups on a stakeholder map: what each stands to gain or lose, and where their interests conflict. It is the Week 4 writing goal.">stakeholder analysis</a>) might restructure sections. Week 6 (sources) changes how you support claims everywhere. Week 8 (<a class="tk" href="toolkit.html#structural-editing" data-tip="Structural editing means revising a whole paper at the level of sections and paragraphs by cutting, reordering, combining, and splitting them. (A click opens it in the toolkit.)">structural editing</a>) moves paragraphs around. Week 9 (<a class="tk" href="toolkit.html#sentence-level-editing" data-tip="Sentence-level editing means revising each sentence for clarity, precision, and efficiency, with hedges that match your evidence. (A click opens it in the toolkit.)">sentence editing</a>) tightens everything.</p>
 <p><strong>Expect to revise earlier work.</strong> You will write a thesis in Week 2. In Week 4 you will do stakeholder analysis, and it might show you that your original thesis was incomplete. When this happens, go back and revise the thesis (this is a normal part of writing).</p>
 <p><strong>Progress is visible in the document's history.</strong> Your Google Doc's version history shows the work. If you are genuinely doing the weekly tasks, the document will look different every week.</p>
 <p><strong>Why this model?</strong> Writing is rarely linear, and you need to live with your ideas long enough to change your mind. Much of the learning in this course is likely to happen during revision (the crossing out, restructuring, and rethinking).</p>
@@ -822,13 +870,13 @@ This topic is suggested because it has multiple ethical dimensions: labor displa
 <hr>
 <h2 id="ai-use-and-the-essay">AI Use and the Essay</h2>
 <p>AI use in this course is optional. See <a href="ai-use.html">AI Use</a> for the full philosophy on which kinds of AI use are likely to build your skills.</p>
-<p>For essay work the most useful approach is likely bringing your own experience and values and having AI help you excavate and articulate what is already there. The least useful is letting AI generate the argument while you edit it into shape.</p>
+<p>For essay work the most useful approach is likely bringing your own experience and values and having AI help you excavate and articulate what is already there. The least useful is letting AI generate the <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a> while you edit it into shape.</p>
 <hr>
 <h2 id="questions">Questions?</h2>
 <ul>
 <li><a href="toolkit.html">Writing Toolkit</a>: the thinking and writing skills used each week</li>
 <li><a href="essay-sample.html">Sample Essay</a>: one student's living document at the end of each working week</li>
-<li>Reach out to me with questions about your topic, thesis, or approach</li>
+<li>Reach out to me with questions about your topic, <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a>, or approach</li>
 </ul>
 
   </main>
@@ -925,6 +973,20 @@ This topic is suggested because it has multiple ethical dimensions: labor displa
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

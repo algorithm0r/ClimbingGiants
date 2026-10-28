@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -750,25 +798,25 @@
   <main data-pagefind-body>
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <h1>Week 9 · Safety &amp; Accountability</h1>
-<p>This week examines safety failures and accountability in AI systems. Among the cases, an Air Canada chatbot invented a bereavement policy, a deepfake video call in Hong Kong transferred $25.6 million to fraudsters, and lawyers filed briefs citing cases that do not exist. When failures are distributed across many hands (developer, deployer, user), it can be hard to say who should answer for them. The readings work through recent cases and the accountability frameworks being built in response.</p>
+<p>This week examines safety failures and <a class="gl" href="glossary.html#g-accountability" data-tip="Being answerable for a decision or outcome. That means having to explain it, and facing consequences if it caused harm.">accountability</a> in AI systems. Among the cases, an Air Canada <a class="gl" href="glossary.html#g-chatbot" data-tip="A program that holds a conversation in text or speech. Most current chatbots are built on large language models.">chatbot</a> invented a bereavement policy, a <a class="gl" href="glossary.html#g-deepfake" data-tip="Synthetic media that shows a real person saying or doing something they never said or did.">deepfake</a> video call in Hong Kong transferred $25.6 million to fraudsters, and lawyers filed briefs citing cases that do not exist. When failures are distributed across <a class="gl" href="glossary.html#g-many-hands-problem" data-tip="The difficulty of holding anyone responsible when many people each made a small contribution to a harmful outcome.">many hands</a> (developer, deployer, user), it can be hard to say who should answer for them. The readings work through recent cases and the accountability frameworks being built in response.</p>
 <hr>
 <h2 id="this-week-s-writing-goal">This Week's Writing Goal</h2>
 <p>Edit at Sentence Level</p>
-<p>You have cut at the paragraph level, and now you will edit sentence by sentence. The purpose is to make each sentence clear and precise, and shorter sentences are often a side effect. Every sentence should do one job and do it well. Hedges should match your evidence. A hedge like &quot;may,&quot; &quot;likely,&quot; or &quot;often&quot; tells your reader how strongly your evidence supports a claim, so keep it where the evidence is partial. Cut hedges that are stacked (&quot;it could perhaps be argued that this might...&quot;) or added out of habit to a claim you can support (&quot;seems like,&quot; &quot;arguably&quot;). Watch for vagueness: &quot;things,&quot; &quot;kind of,&quot; &quot;sort of,&quot; &quot;in a way.&quot; Watch for passive voice hiding responsibility: &quot;mistakes were made&quot; instead of &quot;we made mistakes.&quot;</p>
+<p>You have cut at the paragraph level, and now you will edit sentence by sentence. The purpose is to make each sentence clear and precise, and shorter sentences are often a side effect. Every sentence should do one job and do it well. <a class="gl" href="glossary.html#g-hedge" data-tip="A word such as &quot;may&quot;, &quot;likely&quot;, or &quot;often&quot; that tells your reader how strongly your evidence supports a claim. In this course a hedge should match the strength of that evidence.">Hedges</a> should match your <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a>. A hedge like &quot;may,&quot; &quot;likely,&quot; or &quot;often&quot; tells your reader how strongly your evidence supports a claim, so keep it where the evidence is partial. Cut hedges that are stacked (&quot;it could perhaps be argued that this might...&quot;) or added out of habit to a claim you can support (&quot;seems like,&quot; &quot;arguably&quot;). Watch for vagueness: &quot;things,&quot; &quot;kind of,&quot; &quot;sort of,&quot; &quot;in a way.&quot; Watch for <a class="gl" href="glossary.html#g-passive-voice" data-tip="A sentence form in which the subject receives the action, as in &quot;the model was shipped&quot;. The sentence can leave the actor out entirely.">passive voice</a> hiding responsibility: &quot;mistakes were made&quot; instead of &quot;we made mistakes.&quot;</p>
 <hr>
 <h2 id="content">Content</h2>
 <p><strong>For your required weekly reflection, engage with one source from Primary Content. Any source (primary or additional) can be used for an extra reflection for extra credit.</strong></p>
 <h3 id="primary-content">Primary Content</h3>
 <p><strong><a href="https://www.ted.com/talks/rumman_chowdhury_moral_outsourcing_humanity_in_the_age_of_ai">&quot;Moral Outsourcing: Humanity in the Age of AI&quot;</a></strong> — Rumman Chowdhury, TED · 2023 · ~13 min watch · 🟢 Free access · [Media]</p>
-<p>Rumman Chowdhury (former Director of AI Ethics at Twitter, one of the leading voices in AI accountability) names and argues the pattern this week is about, which she calls &quot;moral outsourcing&quot;. Each party in the chain points to another (engineers say &quot;the algorithm decided,&quot; companies say &quot;the deployer is responsible,&quot; and deployers say &quot;the user should have known better&quot;), and in the end no one is held accountable for the harm. This talk gives you the conceptual vocabulary for the week, so watch it before reading the case studies.</p>
+<p>Rumman Chowdhury (former Director of AI Ethics at Twitter, one of the leading voices in AI <a class="gl" href="glossary.html#g-accountability" data-tip="Being answerable for a decision or outcome. That means having to explain it, and facing consequences if it caused harm.">accountability</a>) names and argues the pattern this week is about, which she calls &quot;<a class="gl" href="glossary.html#g-moral-outsourcing" data-tip="Rumman Chowdhury's name for handing the blame for a decision to a system or to someone else in the chain, as in &quot;the algorithm decided&quot;.">moral outsourcing</a>&quot;. Each party in the chain points to another (engineers say &quot;the <a class="gl" href="glossary.html#g-algorithm" data-tip="A set of step-by-step instructions a computer follows to turn inputs into an output, such as a score, a ranking, or a decision.">algorithm</a> decided,&quot; companies say &quot;the deployer is responsible,&quot; and deployers say &quot;the user should have known better&quot;), and in the end no one is held accountable for the <a class="gl" href="glossary.html#g-harm" data-tip="A setback to someone's interests, such as lost money, a lost opportunity, an injury, distress, or damage to their reputation. Harm can be direct or indirect, and intended or accidental.">harm</a>. This talk gives you the conceptual vocabulary for the week, so watch it before reading the case studies.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
-<li>Chowdhury argues that &quot;I was just doing my job&quot; and &quot;the algorithm decided&quot; are the same evasion, since both hand moral responsibility to a system that cannot hold it. When you look at the Air Canada chatbot case or the hallucinated case citations from the other readings, where does that evasion show up? Who is doing the outsourcing?</li>
+<li>Chowdhury argues that &quot;I was just doing my job&quot; and &quot;the algorithm decided&quot; are the same evasion, since both hand <a class="gl" href="glossary.html#g-moral-responsibility" data-tip="Being the right person to praise or blame for an outcome, because of what you did, decided, or failed to do.">moral responsibility</a> to a system that cannot hold it. When you look at the Air Canada <a class="gl" href="glossary.html#g-chatbot" data-tip="A program that holds a conversation in text or speech. Most current chatbots are built on large language models.">chatbot</a> case or the <a class="gl" href="glossary.html#g-hallucination" data-tip="False or made-up content that an AI system produces in the same fluent, confident way as accurate content, such as an invented court case or citation.">hallucinated</a> case citations from the other readings, where does that evasion show up? Who is doing the outsourcing?</li>
 <li>She argues that when responsibility is distributed, each actor in the chain (engineer, company, deployer, user) still holds a real share of it. Does that framing feel right to you, or does it feel like it spreads accountability so thin it loses meaning? What would it look like to actually assign shares?</li>
-<li>Chowdhury is a practitioner who has worked inside major AI companies on exactly these questions. Does that give her argument more weight, or does it make you want to ask what she was not able to change from the inside?</li>
+<li>Chowdhury is a practitioner who has worked inside major AI companies on exactly these questions. Does that give her <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a> more weight, or does it make you want to ask what she was not able to change from the inside?</li>
 </ul>
 <hr>
-<p><strong><a href="https://responsibleailabs.ai/knowledge-hub/articles/ai-safety-incidents-2024">&quot;AI Safety Incidents of 2024: Lessons from Real-World Cases&quot;</a></strong> — Responsible AI Labs · 2024 · ~15 min read · 🟢 Free access · [Think tank]</p>
+<p><strong><a href="https://responsibleailabs.ai/knowledge-hub/articles/ai-safety-incidents-2024">&quot;AI Safety Incidents of 2024: Lessons from Real-World Cases&quot;</a></strong> — Responsible AI Labs · 2024 · ~15 min read · 🟢 Free access · [<a class="gl" href="glossary.html#g-think-tank" data-tip="An organization that researches policy questions and publishes reports and recommendations. Many are funded by groups with a stake in the issues they study, or hold a political viewpoint, so it is a good idea to check who backs one.">Think tank</a>]</p>
 <p>A year in review of AI failures: chatbots giving wrong medical advice, recommendation algorithms amplifying extremism, hiring systems rejecting candidates systematically. Each case study walks through what happened, why, and what it means for accountability. These cases are a good source of concrete examples for your essay, since they let you point to a specific failure and the party who should answer for it.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
@@ -782,12 +830,12 @@
 <p><strong>Reflection prompts:</strong></p>
 <ul>
 <li>The article notes that tracked incidents represent only &quot;a fraction of the lived realities of everybody experiencing AI harms.&quot; Most harm does not meet reporting thresholds or get media coverage. What does it mean to make policy based on a dataset you know is systematically incomplete? Does the 8-fold increase in malicious incidents since 2022 feel like a signal or just the part of the iceberg that is visible?</li>
-<li>The article identifies a sharp recent shift, in that deepfake incidents now outnumber autonomous vehicle, facial recognition, and content moderation incidents combined. This is a change in what kind of AI harm dominates. Does your understanding of AI risk match what the data shows, or has this week's reading shifted the picture?</li>
+<li>The article identifies a sharp recent shift, in that <a class="gl" href="glossary.html#g-deepfake" data-tip="Synthetic media that shows a real person saying or doing something they never said or did.">deepfake</a> incidents now outnumber autonomous vehicle, <a class="gl" href="glossary.html#g-facial-recognition" data-tip="Software that identifies or verifies a person by comparing an image of their face against stored images.">facial recognition</a>, and content moderation incidents combined. This is a change in what kind of AI harm dominates. Does your understanding of AI risk match what the data shows, or has this week's reading shifted the picture?</li>
 <li>Over a third of recent incidents involved developers who could not be identified. If the person who built a harmful system is unknown, what does accountability even mean? Is there a version of responsibility that does not require identifying an individual?</li>
 </ul>
 <hr>
 <p><strong><a href="https://natlawreview.com/article/ai-hallucinations-are-creating-real-world-risks-businesses">&quot;AI Hallucinations Are Creating Real-World Risks for Businesses&quot;</a></strong> — National Law Review · 2024 · ~12 min read · 🟢 Free access · [Legal]</p>
-<p>Lawyers and business leaders on the cascade of hallucination-related failures, including the Air Canada chatbot inventing bereavement policies, Hong Kong's $25.6 million deepfake fraud, and lawyers hallucinating case citations. In each case an AI system confidently stated something false and people trusted it because of that confidence. For your sentence editing, notice how this article separates the technical failure (hallucination) from the human failure (trusting without verification).</p>
+<p>Lawyers and business leaders on the cascade of hallucination-related failures, including the Air Canada chatbot inventing bereavement policies, Hong Kong's $25.6 million deepfake fraud, and lawyers hallucinating case citations. In each case an AI system confidently stated something false and people trusted it because of that confidence. For your <a class="tk" href="toolkit.html#sentence-level-editing" data-tip="Sentence-level editing means revising each sentence for clarity, precision, and efficiency, with hedges that match your evidence. (A click opens it in the toolkit.)">sentence editing</a>, notice how this article separates the technical failure (hallucination) from the human failure (trusting without verification).</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
 <li>The article makes a pointed observation: &quot;consumers find human mistakes more understandable and forgivable than AI-generated errors because they empathize with human fallibility and expect higher accuracy from AI systems.&quot; We may hold AI to a higher standard than we hold humans, even though AI often fails in ways humans do not. Does that asymmetry seem fair? Does it seem like a design problem, a communication problem, or just how humans work?</li>
@@ -797,14 +845,14 @@
 <hr>
 <h3 id="additional-content">Additional Content</h3>
 <p>➕ <strong><a href="https://www.netflix.com/title/81012137">Challenger: The Final Flight</a></strong> — Netflix · 2020 · ~90 min watch · 🔴 Paywalled · [Media]</p>
-<p>A case study in distributed responsibility and systemic failure. The Challenger disaster came from a cascade of decisions, each reasonable in isolation, that together led to catastrophe. Watch Episodes 1 and 2 and think about how that pattern applies to AI systems.</p>
+<p>A case study in <a class="gl" href="glossary.html#g-diffuse-accountability" data-tip="Accountability spread so thinly across people and organizations that each one can point to another.">distributed responsibility</a> and systemic failure. The Challenger disaster came from a cascade of decisions, each reasonable in isolation, that together led to catastrophe. Watch Episodes 1 and 2 and think about how that pattern applies to AI systems.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
-<li>The Challenger disaster is often described as a case where everyone followed procedure and people still died. If each individual decision seemed defensible at the time, what, if anything, makes someone responsible? Where does moral accountability live when it is distributed across many hands?</li>
+<li>The Challenger disaster is often described as a case where everyone followed procedure and people still died. If each individual decision seemed defensible at the time, what, if anything, makes someone responsible? Where does moral accountability live when it is distributed across <a class="gl" href="glossary.html#g-many-hands-problem" data-tip="The difficulty of holding anyone responsible when many people each made a small contribution to a harmful outcome.">many hands</a>?</li>
 <li>Engineers at Morton Thiokol raised concerns about the O-rings the night before launch and were overruled. If you were that engineer, what would you have done? What does it cost to push back when you are the one who can see the problem?</li>
 </ul>
 <hr>
-<p>➕ <strong><a href="https://www.cs.columbia.edu/~junfeng/08fa-e6998/sched/readings/therac25.pdf">&quot;An Investigation of the Therac-25 Accidents&quot;</a></strong> — Leveson &amp; Turner · 1993 · ~45 min read · 🟢 Free access · [Peer-reviewed]</p>
+<p>➕ <strong><a href="https://www.cs.columbia.edu/~junfeng/08fa-e6998/sched/readings/therac25.pdf">&quot;An Investigation of the Therac-25 Accidents&quot;</a></strong> — Leveson &amp; Turner · 1993 · ~45 min read · 🟢 Free access · [<a class="gl" href="glossary.html#g-peer-review" data-tip="The checking of a research paper by other experts in the field before a journal or conference publishes it. In computing, many of the most important papers appear at peer-reviewed conferences.">Peer-reviewed</a>]</p>
 <p>A technical deep-dive into one of the first major software failures to cause deaths, in which radiation therapy machines killed patients because of bugs. Leveson and Turner show that the failures were organizational, cultural, and systemic as well as technical, and that responsibility was shared across the organization.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
@@ -812,8 +860,8 @@
 <li>The Therac-25 killed people, and nobody was charged with a crime. The legal system could not assign individual culpability to a systemic failure. Is that a problem with the law, with the technology, or with how we think about responsibility?</li>
 </ul>
 <hr>
-<p>➕ <strong><a href="https://arxiv.org/html/2505.22073v2">&quot;A Closer Look at the Existing Risks of Generative AI&quot;</a></strong> — arXiv · 2025 · ~45 min read · 🟢 Free access · [Preprint]</p>
-<p>A comprehensive survey of current research on the known risks of generative AI and the open questions that remain.</p>
+<p>➕ <strong><a href="https://arxiv.org/html/2505.22073v2">&quot;A Closer Look at the Existing Risks of Generative AI&quot;</a></strong> — arXiv · 2025 · ~45 min read · 🟢 Free access · [<a class="gl" href="glossary.html#g-preprint" data-tip="A research paper shared publicly before peer review, often on a site such as arXiv.">Preprint</a>]</p>
+<p>A comprehensive survey of current research on the known risks of <a class="gl" href="glossary.html#g-generative-ai" data-tip="AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples.">generative AI</a> and the open questions that remain.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
 <li>The survey finds that the majority of AI incidents harmed people who never directly interacted with the AI system (third parties, communities, bystanders). The benefits mostly go to users and developers, while the harms often fall on others. Does that distribution seem like an accident, or does it follow from how AI systems are designed and deployed?</li>
@@ -822,43 +870,43 @@
 <hr>
 <h2 id="assignment">Assignment</h2>
 <p><strong>Writing goal this week:</strong> Edit at sentence level</p>
-<p>Work sentence by sentence. Cut hedges that are stacked or added out of habit (keep the ones that match your evidence), replace vague nouns with specific ones, and make sure every sentence does one job cleanly. See the <a href="assign-09.html">Week 9 Assignment</a> for detailed instructions.</p>
+<p>Work sentence by sentence. Cut <a class="gl" href="glossary.html#g-hedge" data-tip="A word such as &quot;may&quot;, &quot;likely&quot;, or &quot;often&quot; that tells your reader how strongly your evidence supports a claim. In this course a hedge should match the strength of that evidence.">hedges</a> that are stacked or added out of habit (keep the ones that match your <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a>), replace vague nouns with specific ones, and make sure every sentence does one job cleanly. See the <a href="assign-09.html">Week 9 Assignment</a> for detailed instructions.</p>
 <p>Submit your Google Doc link to Canvas.</p>
 <hr>
 <h2 id="reflection">Reflection</h2>
 <p>Choose one source from this week's <strong>Primary Content</strong>. Ground your reflection in something specific from that source, such as a claim you agreed or disagreed with, or a moment that surprised you. Then apply the three-step structure:</p>
-<p><strong>Gut check</strong>. What was your honest, immediate reaction?
-<strong>Trace it</strong>. Where does that reaction come from in your values or experience?
-<strong>Challenge it</strong>. What would someone who sees it differently say? Does their case have merit?</p>
+<p><strong><a class="gl" href="glossary.html#g-gut-check" data-tip="The first step of a reflection. You write your honest, immediate reaction to something specific in a source.">Gut check</a></strong>. What was your honest, immediate reaction?
+<strong><a class="gl" href="glossary.html#g-trace-it" data-tip="The second step of a reflection. You work out where your reaction comes from in your values, your experience, or the communities you belong to.">Trace it</a></strong>. Where does that reaction come from in your values or experience?
+<strong><a class="gl" href="glossary.html#g-challenge-it" data-tip="The third step of a reflection. You state the strongest case against your position and test your position against it.">Challenge it</a></strong>. What would someone who sees it differently say? Does their case have merit?</p>
 <p>~150 words. The source-specific prompts above are starting points. You can use one of those or follow your own reaction. However, your reflection must be anchored to something specific from the content you chose.</p>
 <p>See <a href="reflection-instructions.html">Reflection Instructions</a> for the full guide.</p>
 <hr>
 <h2 id="meeting">Meeting</h2>
-<p>You have read cases of chatbots inventing facts, deepfakes used for fraud, and algorithms optimizing for the wrong outcome. You have also edited your own draft to name things precisely and to make your hedges match your evidence. Now think together about accountability when harm is distributed across many hands. These prompts are starting points, but go where the discussion takes you. What is the shared thinking you can build about responsibility?</p>
+<p>You have read cases of <a class="gl" href="glossary.html#g-chatbot" data-tip="A program that holds a conversation in text or speech. Most current chatbots are built on large language models.">chatbots</a> inventing facts, <a class="gl" href="glossary.html#g-deepfake" data-tip="Synthetic media that shows a real person saying or doing something they never said or did.">deepfakes</a> used for fraud, and <a class="gl" href="glossary.html#g-algorithm" data-tip="A set of step-by-step instructions a computer follows to turn inputs into an output, such as a score, a ranking, or a decision.">algorithms</a> optimizing for the wrong outcome. You have also edited your own draft to name things precisely and to make your <a class="gl" href="glossary.html#g-hedge" data-tip="A word such as &quot;may&quot;, &quot;likely&quot;, or &quot;often&quot; that tells your reader how strongly your evidence supports a claim. In this course a hedge should match the strength of that evidence.">hedges</a> match your <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a>. Now think together about <a class="gl" href="glossary.html#g-accountability" data-tip="Being answerable for a decision or outcome. That means having to explain it, and facing consequences if it caused harm.">accountability</a> when <a class="gl" href="glossary.html#g-harm" data-tip="A setback to someone's interests, such as lost money, a lost opportunity, an injury, distress, or damage to their reputation. Harm can be direct or indirect, and intended or accidental.">harm</a> is distributed across <a class="gl" href="glossary.html#g-many-hands-problem" data-tip="The difficulty of holding anyone responsible when many people each made a small contribution to a harmful outcome.">many hands</a>. These prompts are starting points, but go where the discussion takes you. What is the shared thinking you can build about responsibility?</p>
 <p><strong>This week's discussion directions:</strong></p>
 <ul>
 <li>When harm is distributed across many hands (engineers, managers, deployers, users), how should accountability be assigned?</li>
-<li>Is there a difference between being legally liable and being morally responsible? What is the gap?</li>
+<li>Is there a difference between being legally <a class="gl" href="glossary.html#g-liability" data-tip="Legal responsibility for a harm, which can require paying damages or facing other penalties.">liable</a> and being <a class="gl" href="glossary.html#g-moral-responsibility" data-tip="Being the right person to praise or blame for an outcome, because of what you did, decided, or failed to do.">morally responsible</a>? What is the gap?</li>
 <li>At what point does &quot;I was just doing my job&quot; stop being a sufficient answer?</li>
 </ul>
-<p><strong>Essay share:</strong> Share one claim in your essay where you cut or kept a hedge this week. How strongly does your evidence support that claim? The group responds with reactions to the claim.</p>
+<p><strong><a class="gl" href="glossary.html#g-essay-share" data-tip="The round in each meeting where everyone briefly says what they did on their essay that week and one thing they are wrestling with.">Essay share</a>:</strong> Share one claim in your essay where you cut or kept a hedge this week. How strongly does your evidence support that claim? The group responds with reactions to the claim.</p>
 <p>See <a href="meeting-instructions.html">Meeting Instructions</a> for the full guide.</p>
 <hr>
 <h2 id="quiz-vocabulary">Quiz Vocabulary</h2>
 <ul>
-<li>Safety-critical systems</li>
-<li>Moral responsibility</li>
-<li>Moral outsourcing</li>
-<li>Many-hands problem</li>
-<li>Diffuse accountability</li>
-<li>AI hallucination</li>
-<li>Negligence</li>
-<li>Duty of care</li>
-<li>Sentence clarity</li>
-<li>Precision</li>
-<li>Hedging</li>
-<li>Active vs. passive voice</li>
-<li>Filler language</li>
+<li><a class="gl" href="glossary.html#g-safety-critical-system" data-tip="A system whose failure can injure or kill people, such as a medical device, an aircraft control system, or a self-driving car.">Safety-critical systems</a></li>
+<li><a class="gl" href="glossary.html#g-moral-responsibility" data-tip="Being the right person to praise or blame for an outcome, because of what you did, decided, or failed to do.">Moral responsibility</a></li>
+<li><a class="gl" href="glossary.html#g-moral-outsourcing" data-tip="Rumman Chowdhury's name for handing the blame for a decision to a system or to someone else in the chain, as in &quot;the algorithm decided&quot;.">Moral outsourcing</a></li>
+<li><a class="gl" href="glossary.html#g-many-hands-problem" data-tip="The difficulty of holding anyone responsible when many people each made a small contribution to a harmful outcome.">Many-hands problem</a></li>
+<li><a class="gl" href="glossary.html#g-diffuse-accountability" data-tip="Accountability spread so thinly across people and organizations that each one can point to another.">Diffuse accountability</a></li>
+<li><a class="gl" href="glossary.html#g-hallucination" data-tip="False or made-up content that an AI system produces in the same fluent, confident way as accurate content, such as an invented court case or citation.">AI hallucination</a></li>
+<li><a class="gl" href="glossary.html#g-negligence" data-tip="In law, failing to take the care a reasonable person would take, so that someone is harmed.">Negligence</a></li>
+<li><a class="gl" href="glossary.html#g-duty-of-care" data-tip="A legal obligation to take reasonable care to avoid harming others who could be affected by what you do.">Duty of care</a></li>
+<li><a class="gl" href="glossary.html#g-clarity" data-tip="The quality of writing that can be understood on the first reading.">Sentence clarity</a></li>
+<li><a class="gl" href="glossary.html#g-precision" data-tip="Saying exactly what you mean, with specific nouns and claims in place of vague ones.">Precision</a></li>
+<li><a class="gl" href="glossary.html#g-hedge" data-tip="A word such as &quot;may&quot;, &quot;likely&quot;, or &quot;often&quot; that tells your reader how strongly your evidence supports a claim. In this course a hedge should match the strength of that evidence.">Hedging</a></li>
+<li>Active vs. <a class="gl" href="glossary.html#g-passive-voice" data-tip="A sentence form in which the subject receives the action, as in &quot;the model was shipped&quot;. The sentence can leave the actor out entirely.">passive voice</a></li>
+<li><a class="gl" href="glossary.html#g-filler-language" data-tip="Words and phrases that add length without adding meaning, such as &quot;it is important to note that&quot; or &quot;in today's society&quot;.">Filler language</a></li>
 </ul>
 
   </main>
@@ -955,6 +1003,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

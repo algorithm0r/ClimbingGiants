@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -750,27 +798,27 @@
   <main data-pagefind-body>
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <h1>Week 8 · Transparency &amp; Explainability</h1>
-<p>This week examines transparency and explainability in AI systems. Large language models make decisions their builders cannot fully account for, which creates problems when those decisions affect hiring, lending, healthcare, or criminal sentencing. Regulators are beginning to require explanations, and what counts as an adequate one is still being worked out.</p>
+<p>This week examines <a class="gl" href="glossary.html#g-transparency" data-tip="Openness about how systems work, what data they use, and how they are used, so that outsiders can understand and question them.">transparency</a> and <a class="gl" href="glossary.html#g-explainability" data-tip="How well people can understand why a system produced a particular output.">explainability</a> in AI systems. <a class="gl" href="glossary.html#g-large-language-model" data-tip="A neural network trained on very large amounts of text to predict the next word, and usually trained further to follow instructions and hold a conversation. ChatGPT, Claude, and Gemini are built on large language models.">Large language models</a> make decisions their builders cannot fully account for, which creates problems when those decisions affect hiring, lending, healthcare, or criminal sentencing. Regulators are beginning to require explanations, and what counts as an adequate one is still being worked out.</p>
 <hr>
 <h2 id="this-week-s-writing-goal">This Week's Writing Goal</h2>
 <p>Edit at Paper and Paragraph Level</p>
-<p>Up to now you have been adding to your draft, and this week you start cutting it down. You have a draft with ideas, evidence, and arguments scattered across it. This week you will ask whether the overall structure serves the argument and whether each paragraph does one job and only one job. Cut any paragraph that does not support the argument.</p>
-<p>Structural editing is different from sentence editing. This week you are cutting whole sections and paragraphs (sentence editing comes next week). You will ask big questions: Does this section belong here? Should these two paragraphs be one? Does this evidence support a claim?</p>
+<p>Up to now you have been adding to your draft, and this week you start cutting it down. You have a draft with ideas, <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a>, and <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">arguments</a> scattered across it. This week you will ask whether the overall structure serves the argument and whether each paragraph does one job and only one job. Cut any paragraph that does not support the argument.</p>
+<p><a class="tk" href="toolkit.html#structural-editing" data-tip="Structural editing means revising a whole paper at the level of sections and paragraphs by cutting, reordering, combining, and splitting them. (A click opens it in the toolkit.)">Structural editing</a> is different from <a class="tk" href="toolkit.html#sentence-level-editing" data-tip="Sentence-level editing means revising each sentence for clarity, precision, and efficiency, with hedges that match your evidence. (A click opens it in the toolkit.)">sentence editing</a>. This week you are cutting whole sections and paragraphs (sentence editing comes next week). You will ask big questions: Does this section belong here? Should these two paragraphs be one? Does this evidence support a claim?</p>
 <hr>
 <h2 id="content">Content</h2>
 <p><strong>For your required weekly reflection, engage with one source from Primary Content. Any source (primary or additional) can be used for an extra reflection for extra credit.</strong></p>
 <h3 id="primary-content">Primary Content</h3>
 <p><strong><a href="https://www.ted.com/talks/cathy_o_neil_the_era_of_blind_faith_in_big_data_must_end">&quot;The Era of Blind Faith in Big Data Must End&quot;</a></strong> — Cathy O'Neil, TED · 2017 · ~13 min watch · 🟢 Free access · [Media]</p>
-<p>A mathematician turned data ethicist on what goes wrong when algorithms make high-stakes decisions and nobody can see inside them. O'Neil coined the term &quot;weapons of math destruction&quot; for systems that are secret, important, and harmful, which is essentially a lay definition of the black box problem applied to real people's lives. Her examples are concrete: a sentencing algorithm that scored a Black defendant with no priors at 10/10 risk and a white defendant with a felony record at 3/10, and a teacher evaluation model that got 206 teachers fired based on a formula nobody was allowed to see. The talk covers the ethical stakes of this week's topic in 13 minutes.</p>
+<p>A mathematician turned data ethicist on what goes wrong when <a class="gl" href="glossary.html#g-algorithm" data-tip="A set of step-by-step instructions a computer follows to turn inputs into an output, such as a score, a ranking, or a decision.">algorithms</a> make high-stakes decisions and nobody can see inside them. O'Neil coined the term &quot;<a class="gl" href="glossary.html#g-weapons-of-math-destruction" data-tip="Cathy O'Neil's name for algorithms that are important (they shape many people's lives), secret (people cannot see how they work), and harmful to the people they score.">weapons of math destruction</a>&quot; for systems that are secret, important, and <a class="gl" href="glossary.html#g-harm" data-tip="A setback to someone's interests, such as lost money, a lost opportunity, an injury, distress, or damage to their reputation. Harm can be direct or indirect, and intended or accidental.">harmful</a>, which is essentially a lay definition of the <a class="gl" href="glossary.html#g-black-box" data-tip="A system whose inputs and outputs can be seen while the process connecting them is hidden, either kept secret by the owner or too complex to trace.">black box</a> problem applied to real people's lives. Her examples are concrete: a sentencing algorithm that scored a Black defendant with no priors at 10/10 risk and a white defendant with a felony record at 3/10, and a teacher evaluation model that got 206 teachers fired based on a formula nobody was allowed to see. The talk covers the ethical stakes of this week's topic in 13 minutes.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
-<li>O'Neil's central claim is that algorithms are &quot;opinions embedded in code.&quot; That is, they encode choices about what counts as success and who gets to define it. When you cannot see those choices because the system is a black box, what is lost? Who bears the cost of that opacity?</li>
-<li>In the teacher evaluation example, Sarah Wysocki had strong principal recommendations and was still fired based on an algorithm nobody could inspect or challenge. O'Neil calls that a &quot;lack of accountability.&quot; What would accountability actually look like here, and who would have to give something up to make it possible?</li>
-<li>O'Neil ends with a call for algorithmic audits (external review of how these systems work and who they harm). Does that feel like a sufficient response to the problem she describes? What would a more structural solution look like, and what would it cost?</li>
+<li>O'Neil's central claim is that algorithms are &quot;opinions embedded in code.&quot; That is, they encode choices about what counts as success and who gets to define it. When you cannot see those choices because the system is a black box, what is lost? Who bears the cost of that <a class="gl" href="glossary.html#g-opacity" data-tip="The quality of a system whose workings the affected people cannot see or follow.">opacity</a>?</li>
+<li>In the teacher evaluation example, Sarah Wysocki had strong principal recommendations and was still fired based on an algorithm nobody could inspect or challenge. O'Neil calls that a &quot;lack of <a class="gl" href="glossary.html#g-accountability" data-tip="Being answerable for a decision or outcome. That means having to explain it, and facing consequences if it caused harm.">accountability</a>.&quot; What would accountability actually look like here, and who would have to give something up to make it possible?</li>
+<li>O'Neil ends with a call for <a class="gl" href="glossary.html#g-algorithmic-audit" data-tip="A review, often by an outside party, that tests an algorithm's outputs (and where possible the data and code behind them) for errors, bias, and harm.">algorithmic audits</a> (external review of how these systems work and who they harm). Does that feel like a sufficient response to the problem she describes? What would a more structural solution look like, and what would it cost?</li>
 </ul>
 <hr>
-<p><strong><a href="https://trendsresearch.org/insight/decoding-black-box-ai-the-global-push-for-explainability-and-transparency/">&quot;Decoding Black Box AI: The Global Push for Explainability and Transparency&quot;</a></strong> — TRENDS Research &amp; Advisory · 2024 · ~15 min read · 🟢 Free access · [Think tank]</p>
-<p>A policy-focused overview of what regulators want and why. TRENDS walks through the EU AI Act, emerging US legislation, and the tension between performance and explainability. For your essay work this week, this is useful because it shows you how transparency and explainability have become governance questions as well as technical ones. Who gets to decide whether a system is &quot;explained enough&quot;? Deciding this is a question of values.</p>
+<p><strong><a href="https://trendsresearch.org/insight/decoding-black-box-ai-the-global-push-for-explainability-and-transparency/">&quot;Decoding Black Box AI: The Global Push for Explainability and Transparency&quot;</a></strong> — TRENDS Research &amp; Advisory · 2024 · ~15 min read · 🟢 Free access · [<a class="gl" href="glossary.html#g-think-tank" data-tip="An organization that researches policy questions and publishes reports and recommendations. Many are funded by groups with a stake in the issues they study, or hold a political viewpoint, so it is a good idea to check who backs one.">Think tank</a>]</p>
+<p>A policy-focused overview of what regulators want and why. TRENDS walks through the <a class="gl" href="glossary.html#g-eu-ai-act" data-tip="The European Union's law regulating AI systems (adopted in 2024). The stricter rules apply to uses the law classes as high risk, such as hiring and credit scoring.">EU AI Act</a>, emerging US legislation, and the tension between performance and <a class="gl" href="glossary.html#g-explainability" data-tip="How well people can understand why a system produced a particular output.">explainability</a>. For your essay work this week, this is useful because it shows you how <a class="gl" href="glossary.html#g-transparency" data-tip="Openness about how systems work, what data they use, and how they are used, so that outsiders can understand and question them.">transparency</a> and explainability have become governance questions as well as technical ones. Who gets to decide whether a system is &quot;explained enough&quot;? Deciding this is a question of values.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
 <li>The article argues that most national AI strategies treat explainability as a technical problem and leave out its &quot;broader societal or ethical dimensions.&quot; What is the difference between the two? If a system can be explained to an engineer but not to the person it affected, has the explainability requirement been met?</li>
@@ -779,12 +827,12 @@
 </ul>
 <hr>
 <p><strong><a href="https://www.pymnts.com/artificial-intelligence-2/2024/the-black-box-when-ai-calls-shots-we-cant-explain/">&quot;The Black Box: When AI Calls Shots We Can't Explain&quot;</a></strong> — PYMNTS · 2024 · ~10 min read · 🟢 Free access · [Media]</p>
-<p>A concrete journalistic look at explainability failures in the real world: hiring systems that reject qualified candidates for opaque reasons, credit systems that deny loans with no recourse, healthcare algorithms that nobody can trace. This gives you evidence that explainability affects people's access to jobs, credit, and medical care. For your structural editing work this week, a concrete example like this is likely to stay with someone reading your paper.</p>
+<p>A concrete journalistic look at explainability failures in the real world: hiring systems that reject qualified candidates for opaque reasons, credit systems that deny loans with no recourse, healthcare algorithms that nobody can trace. This gives you <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a> that explainability affects people's access to jobs, credit, and medical care. For your <a class="tk" href="toolkit.html#structural-editing" data-tip="Structural editing means revising a whole paper at the level of sections and paragraphs by cutting, reordering, combining, and splitting them. (A click opens it in the toolkit.)">structural editing</a> work this week, a concrete example like this is likely to stay with someone reading your paper.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
 <li>The article describes DeepMind's AlphaFold 2 making breakthrough predictions about protein structures that scientists trust despite not being able to explain the model's reasoning. Scientists accept the results because they can validate them experimentally. Is accepting AI decisions when you can independently verify outcomes a workable standard for other domains? What breaks down in hiring, lending, or criminal justice that does not break down in protein science?</li>
-<li>The article notes that what satisfies an AI researcher explaining a model &quot;might baffle a doctor or a judge.&quot; This implies that what counts as an adequate explanation depends on the audience. Does that complicate your intuition about the right to explanation? Who should the explanation be designed for?</li>
-<li>JPMorgan Chase is developing explainability frameworks to satisfy regulators, and TikTok pledged to open its algorithm to external audit after bias was discovered. Both are reactive moves. Does a company's willingness to explain itself after getting caught feel meaningfully different from building explainability in from the start?</li>
+<li>The article notes that what satisfies an AI researcher explaining a model &quot;might baffle a doctor or a judge.&quot; This implies that what counts as an adequate explanation depends on the audience. Does that complicate your intuition about the <a class="gl" href="glossary.html#g-right-to-explanation" data-tip="The idea that a person affected by an automated decision can get a meaningful explanation of how it was made. EU law includes a version of it.">right to explanation</a>? Who should the explanation be designed for?</li>
+<li>JPMorgan Chase is developing explainability frameworks to satisfy regulators, and TikTok pledged to open its algorithm to external audit after <a class="gl" href="glossary.html#g-bias" data-tip="A consistent tilt in a person's or a system's judgments that favors some people or outcomes over others. In AI it usually means outputs that are less accurate or less favorable for a particular group.">bias</a> was discovered. Both are reactive moves. Does a company's willingness to explain itself after getting caught feel meaningfully different from building explainability in from the start?</li>
 </ul>
 <hr>
 <h3 id="additional-content">Additional Content</h3>
@@ -792,7 +840,7 @@
 <p>A longer documentary on AI systems in the world. It takes more time than the other sources, though it is comprehensive.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
-<li>The documentary examines AI systems operating at scale across multiple industries. Pick one domain it covers (labor, surveillance, medicine, or another). In that domain, who has the power to demand an explanation, and who does not? What creates that gap?</li>
+<li>The documentary examines AI systems operating <a class="gl" href="glossary.html#g-scale" data-tip="The number of people or decisions a system reaches. A system working at scale repeats the same choice many times, so the system's errors and benefits both multiply.">at scale</a> across multiple industries. Pick one domain it covers (labor, <a class="gl" href="glossary.html#g-surveillance" data-tip="Systematic watching or recording of people's behavior by a government, a company, or another person, often to predict or influence what they do.">surveillance</a>, medicine, or another). In that domain, who has the power to demand an explanation, and who does not? What creates that gap?</li>
 <li>Frontline documentaries typically interview people on multiple sides of an issue. If someone in the film argues that the benefits of AI outweigh the costs of opacity, what would you need to hear to find that convincing? What would make it feel like a rationalization?</li>
 </ul>
 <hr>
@@ -800,12 +848,12 @@
 <p>O'Neil's chapter on credit scoring and opacity. Her book is accessible, and it is openly angry.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
-<li>O'Neil argues that opaque scoring systems punish people for things they cannot change or contest, creating feedback loops that deepen inequality. If you have ever been on the wrong side of an automated decision (a credit check, an algorithm, a filter), what did it feel like not to know why? Did you have recourse?</li>
-<li>O'Neil is openly angry about these systems, which is a rhetorical choice. Does advocacy framing make you more or less likely to trust the argument? What is your gut reaction to an author who is not pretending to be neutral?</li>
+<li>O'Neil argues that opaque scoring systems punish people for things they cannot change or contest, creating <a class="gl" href="glossary.html#g-feedback-loop" data-tip="A cycle in which a system's outputs feed back into the system as new inputs. A biased decision can produce data that makes the next decision more biased (bias amplification).">feedback loops</a> that deepen inequality. If you have ever been on the wrong side of an automated decision (a credit check, an algorithm, a filter), what did it feel like not to know why? Did you have recourse?</li>
+<li>O'Neil is openly angry about these systems, which is a rhetorical choice. Does advocacy framing make you more or less likely to trust the <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a>? What is your gut reaction to an author who is not pretending to be neutral?</li>
 </ul>
 <hr>
-<p>➕ <strong><a href="https://aclanthology.org/2024.cl-3.8/">&quot;Bias and Fairness in Large Language Models: A Survey&quot;</a></strong> — MIT Press Computational Linguistics · 2024 · ~45 min read · 🟢 Free access · [Peer-reviewed]</p>
-<p>An academic deep-dive on bias and fairness in LLMs. It is more technical than this week's primary reading, though useful if you are digging into the mechanisms.</p>
+<p>➕ <strong><a href="https://aclanthology.org/2024.cl-3.8/">&quot;Bias and Fairness in Large Language Models: A Survey&quot;</a></strong> — MIT Press Computational Linguistics · 2024 · ~45 min read · 🟢 Free access · [<a class="gl" href="glossary.html#g-peer-review" data-tip="The checking of a research paper by other experts in the field before a journal or conference publishes it. In computing, many of the most important papers appear at peer-reviewed conferences.">Peer-reviewed</a>]</p>
+<p>An academic deep-dive on bias and <a class="gl" href="glossary.html#g-fairness" data-tip="Treating people justly, so that nobody is disadvantaged for reasons that should not matter. Computer scientists have written several precise definitions of fairness, and some of them conflict, so a system usually cannot meet all of them at once.">fairness</a> in <a class="gl" href="glossary.html#g-large-language-model" data-tip="A neural network trained on very large amounts of text to predict the next word, and usually trained further to follow instructions and hold a conversation. ChatGPT, Claude, and Gemini are built on large language models.">LLMs</a>. It is more technical than this week's primary reading, though useful if you are digging into the mechanisms.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
 <li>The survey argues that bias in LLMs shows up differently at the level of embeddings, probability outputs, and generated text, and each level requires different detection and mitigation approaches. Does that complexity change how you think about the idea of &quot;fixing&quot; AI bias? Does it feel like a solvable engineering problem or something else?</li>
@@ -819,37 +867,37 @@
 <hr>
 <h2 id="reflection">Reflection</h2>
 <p>Choose one source from this week's <strong>Primary Content</strong>. Ground your reflection in something specific from that source, such as a claim you agreed or disagreed with, or a moment that surprised you. Then apply the three-step structure:</p>
-<p><strong>Gut check</strong>. What was your honest, immediate reaction?
-<strong>Trace it</strong>. Where does that reaction come from in your values or experience?
-<strong>Challenge it</strong>. What would someone who sees it differently say? Does their case have merit?</p>
+<p><strong><a class="gl" href="glossary.html#g-gut-check" data-tip="The first step of a reflection. You write your honest, immediate reaction to something specific in a source.">Gut check</a></strong>. What was your honest, immediate reaction?
+<strong><a class="gl" href="glossary.html#g-trace-it" data-tip="The second step of a reflection. You work out where your reaction comes from in your values, your experience, or the communities you belong to.">Trace it</a></strong>. Where does that reaction come from in your values or experience?
+<strong><a class="gl" href="glossary.html#g-challenge-it" data-tip="The third step of a reflection. You state the strongest case against your position and test your position against it.">Challenge it</a></strong>. What would someone who sees it differently say? Does their case have merit?</p>
 <p>~150 words. The source-specific prompts above are starting points. You can use one of those or follow your own reaction. However, your reflection must be anchored to something specific from the content you chose.</p>
 <p>See <a href="reflection-instructions.html">Reflection Instructions</a> for the full guide.</p>
 <hr>
 <h2 id="meeting">Meeting</h2>
-<p>Explainability is also a governance question, that is, a question of who gets to know what and who bears the consequences of opacity. These prompts are starting points, but go where the discussion takes you. What is your shared thinking about the right to explanation and the cost of not having it?</p>
+<p><a class="gl" href="glossary.html#g-explainability" data-tip="How well people can understand why a system produced a particular output.">Explainability</a> is also a governance question, that is, a question of who gets to know what and who bears the <a class="gl" href="glossary.html#g-consequence" data-tip="A result that follows from an action or decision, including results nobody intended.">consequences</a> of <a class="gl" href="glossary.html#g-opacity" data-tip="The quality of a system whose workings the affected people cannot see or follow.">opacity</a>. These prompts are starting points, but go where the discussion takes you. What is your shared thinking about the <a class="gl" href="glossary.html#g-right-to-explanation" data-tip="The idea that a person affected by an automated decision can get a meaningful explanation of how it was made. EU law includes a version of it.">right to explanation</a> and the cost of not having it?</p>
 <p><strong>This week's discussion directions:</strong></p>
 <ul>
-<li>Can you hold an AI system accountable if you cannot explain what it did?</li>
-<li>What would meaningful transparency actually look like in practice for a user, for a regulator, and for a developer?</li>
+<li>Can you hold an AI system <a class="gl" href="glossary.html#g-accountability" data-tip="Being answerable for a decision or outcome. That means having to explain it, and facing consequences if it caused harm.">accountable</a> if you cannot explain what it did?</li>
+<li>What would meaningful <a class="gl" href="glossary.html#g-transparency" data-tip="Openness about how systems work, what data they use, and how they are used, so that outsiders can understand and question them.">transparency</a> actually look like in practice for a user, for a regulator, and for a developer?</li>
 <li>Does explainability conflict with performance, and if so, who should decide which wins?</li>
 </ul>
-<p><strong>Essay share:</strong> Share one section of your essay that you restructured this week and one that you cut. Why did the cut section not earn its place? The group responds with thoughts on whether that loss matters.</p>
+<p><strong><a class="gl" href="glossary.html#g-essay-share" data-tip="The round in each meeting where everyone briefly says what they did on their essay that week and one thing they are wrestling with.">Essay share</a>:</strong> Share one section of your essay that you restructured this week and one that you cut. Why did the cut section not earn its place? The group responds with thoughts on whether that loss matters.</p>
 <p>See <a href="meeting-instructions.html">Meeting Instructions</a> for the full guide.</p>
 <hr>
 <h2 id="quiz-vocabulary">Quiz Vocabulary</h2>
 <ul>
-<li>Transparency</li>
-<li>Explainability</li>
-<li>Black-box AI</li>
-<li>Right to explanation</li>
-<li>Auditability</li>
-<li>XAI (explainable AI)</li>
-<li>Paragraph structure</li>
-<li>Topic sentence</li>
-<li>Section coherence</li>
-<li>Structural editing</li>
-<li>Weapons of math destruction</li>
-<li>Algorithmic audit</li>
+<li><a class="gl" href="glossary.html#g-transparency" data-tip="Openness about how systems work, what data they use, and how they are used, so that outsiders can understand and question them.">Transparency</a></li>
+<li><a class="gl" href="glossary.html#g-explainability" data-tip="How well people can understand why a system produced a particular output.">Explainability</a></li>
+<li><a class="gl" href="glossary.html#g-black-box" data-tip="A system whose inputs and outputs can be seen while the process connecting them is hidden, either kept secret by the owner or too complex to trace.">Black-box</a> AI</li>
+<li><a class="gl" href="glossary.html#g-right-to-explanation" data-tip="The idea that a person affected by an automated decision can get a meaningful explanation of how it was made. EU law includes a version of it.">Right to explanation</a></li>
+<li><a class="gl" href="glossary.html#g-auditability" data-tip="How easily outside reviewers can check what a system does. It depends on their access to the system's data, code, and decisions.">Auditability</a></li>
+<li><a class="gl" href="glossary.html#g-xai" data-tip="Methods for making a model's outputs understandable to people, for instance by showing which inputs mattered most to a decision.">XAI</a> (explainable AI)</li>
+<li><a class="tk" href="toolkit.html#paragraph-as-unit-of-argument" data-tip="This skill means building each paragraph as one unit of argument, with a topic sentence, evidence, analysis, and a transition. (A click opens it in the toolkit.)">Paragraph structure</a></li>
+<li><a class="gl" href="glossary.html#g-topic-sentence" data-tip="A sentence, usually the first in a paragraph, that states the paragraph's claim.">Topic sentence</a></li>
+<li><a class="gl" href="glossary.html#g-section-coherence" data-tip="Each section of a paper doing one clear job, in an order where each part sets up the next.">Section coherence</a></li>
+<li><a class="tk" href="toolkit.html#structural-editing" data-tip="Structural editing means revising a whole paper at the level of sections and paragraphs by cutting, reordering, combining, and splitting them. (A click opens it in the toolkit.)">Structural editing</a></li>
+<li><a class="gl" href="glossary.html#g-weapons-of-math-destruction" data-tip="Cathy O'Neil's name for algorithms that are important (they shape many people's lives), secret (people cannot see how they work), and harmful to the people they score.">Weapons of math destruction</a></li>
+<li><a class="gl" href="glossary.html#g-algorithmic-audit" data-tip="A review, often by an outside party, that tests an algorithm's outputs (and where possible the data and code behind them) for errors, bias, and harm.">Algorithmic audit</a></li>
 </ul>
 
   </main>
@@ -946,6 +994,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

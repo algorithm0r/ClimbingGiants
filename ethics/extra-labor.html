@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <strong>Extra Labor</strong>
@@ -753,11 +801,11 @@
 <hr>
 <h2 id="0-1-options-additional-reflections">+0.1 Options — Additional Reflections</h2>
 <p>An additional reflection earns +0.1 and can be submitted anytime during the quarter.</p>
-<p>An additional reflection uses the same structure as your weekly reflections (gut check, trace it, challenge it). You apply it to a piece of additional content you chose to engage with. The reflection must be anchored to a specific source: a specific article, video, documentary, podcast episode, essay, or other piece of content.</p>
+<p>An additional reflection uses the same structure as your weekly reflections (<a class="gl" href="glossary.html#g-gut-check" data-tip="The first step of a reflection. You write your honest, immediate reaction to something specific in a source.">gut check</a>, trace it, challenge it). You apply it to a piece of additional content you chose to engage with. The reflection must be anchored to a specific source: a specific article, video, documentary, podcast episode, essay, or other piece of content.</p>
 <p>The same length and tone norms apply as your weekly reflections: about 150 words, in your own voice, honest. However, for extra credit, the genuine engagement must be clearly present. You may be asked to revisit with more depth.</p>
 <p><strong>Gut check:</strong> What was your immediate, unfiltered reaction? What jumped out, disturbed you, surprised you, or resonated?</p>
-<p><strong>Trace it:</strong> Where does that reaction come from? What value or experience of yours does this content press on? Be specific. Do not write &quot;I care about fairness.&quot; Instead, say what specifically in your background or history makes this land the way it does.</p>
-<p><strong>Challenge it:</strong> What is the strongest case against your reaction or against the content's argument? Steelman the opposition. Does your position hold up?</p>
+<p><strong><a class="gl" href="glossary.html#g-trace-it" data-tip="The second step of a reflection. You work out where your reaction comes from in your values, your experience, or the communities you belong to.">Trace it</a>:</strong> Where does that reaction come from? What value or experience of yours does this content press on? Be specific. Do not write &quot;I care about <a class="gl" href="glossary.html#g-fairness" data-tip="Treating people justly, so that nobody is disadvantaged for reasons that should not matter. Computer scientists have written several precise definitions of fairness, and some of them conflict, so a system usually cannot meet all of them at once.">fairness</a>.&quot; Instead, say what specifically in your background or history makes this land the way it does.</p>
+<p><strong><a class="gl" href="glossary.html#g-challenge-it" data-tip="The third step of a reflection. You state the strongest case against your position and test your position against it.">Challenge it</a>:</strong> What is the strongest case against your reaction or against the content's <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a>? <a class="tk" href="toolkit.html#steelmanning" data-tip="Steelmanning means stating the strongest version of the case against your own position before you respond to it. (A click opens it in the toolkit.)">Steelman</a> the opposition. Does your position hold up?</p>
 <p>There is no formal cap on the number of additional reflections you can submit, though my discretion applies and I will look at quality before quantity.</p>
 <hr>
 <h2 id="0-3-options-scaffolded-projects">+0.3 Options — Scaffolded Projects</h2>
@@ -786,16 +834,16 @@
 </thead>
 <tbody>
 <tr>
-<td>Researching the labor displacement debate pushed me to confront assumptions I had made about technological neutrality that I hadn't noticed I held.</td>
+<td>Researching the <a class="gl" href="glossary.html#g-labor-displacement" data-tip="Workers losing their jobs or tasks because machines or software now do that work.">labor displacement</a> debate pushed me to confront assumptions I had made about technological neutrality that I hadn't noticed I held.</td>
 </tr>
 <tr>
-<td>Engaging seriously with algorithmic fairness arguments (both for and against) changed how I think about what &quot;objective&quot; even means in the context of systems I might build.</td>
+<td>Engaging seriously with algorithmic <a class="gl" href="glossary.html#g-fairness" data-tip="Treating people justly, so that nobody is disadvantaged for reasons that should not matter. Computer scientists have written several precise definitions of fairness, and some of them conflict, so a system usually cannot meet all of them at once.">fairness</a> <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">arguments</a> (both for and against) changed how I think about what &quot;objective&quot; even means in the context of systems I might build.</td>
 </tr>
 <tr>
 <td>The course's emphasis on whose perspective is centered in ethical arguments gave me a new framework for evaluating professional decisions I expect to face.</td>
 </tr>
 <tr>
-<td>Writing my policy paper forced me to choose a position on AI accountability that I initially resisted, and tracking that resistance across the quarter taught me something about my own values.</td>
+<td>Writing my <a class="gl" href="glossary.html#g-position-paper" data-tip="An essay that takes a position on a problem, argues for it with evidence, and proposes what should be done. The course essay is a 2000-word position paper.">policy paper</a> forced me to choose a position on AI <a class="gl" href="glossary.html#g-accountability" data-tip="Being answerable for a decision or outcome. That means having to explain it, and facing consequences if it caused harm.">accountability</a> that I initially resisted, and tracking that resistance across the quarter taught me something about my own values.</td>
 </tr>
 <tr>
 <td>Through meeting discussions and weekly reflections I developed a more honest understanding of where my ethical intuitions come from and where they are more fragile than I thought.</td>
@@ -826,15 +874,15 @@
 <p><em>Time estimate: 6-12 hours</em></p>
 </li>
 <li>
-<p><strong>Submit your final essay (Week 10):</strong> Revised based on my feedback on your draft. Read all feedback carefully. Edit for content and structure, then again for clarity, conciseness, and organization, then again for spelling and grammar. Your final draft should be the highest quality writing you can produce.</p>
+<p><strong>Submit your final essay (Week 10):</strong> Revised based on my feedback on your draft. Read all feedback carefully. Edit for content and structure, then again for <a class="gl" href="glossary.html#g-clarity" data-tip="The quality of writing that can be understood on the first reading.">clarity</a>, conciseness, and organization, then again for spelling and grammar. Your final draft should be the highest quality writing you can produce.</p>
 <p><em>Time estimate: 4-8 hours</em></p>
 </li>
 </ol>
 <hr>
 <h3 id="literature-survey">Literature Survey</h3>
 <p>Research and summarize academic literature on a topic of your choosing. This option develops your ability to find, read, and synthesize scholarly sources, regardless of which discipline they come from.</p>
-<p>This is a CS ethics course, and the relevant academic literature spans many fields: philosophy, law, policy studies, science and technology studies (STS), sociology, communication, journalism studies, public health, and more, as well as ethics-focused CS research. You are expected to find serious academic work (not necessarily technical CS papers) on a topic that matters to you within this course's intellectual terrain.</p>
-<p>Possible topic areas include: AI policy and governance, algorithmic fairness and auditing, surveillance studies, digital rights and civil liberties, labor displacement and the future of work, misinformation and platform responsibility, data privacy law, accessibility and inclusive design, facial recognition and policing, environmental costs of computing, or any other topic you can connect to the course.</p>
+<p>This is a CS ethics course, and the relevant academic literature spans many fields: philosophy, law, policy studies, science and technology studies (STS), sociology, communication, <a class="gl" href="glossary.html#g-journalism" data-tip="Reporting on current events, usually by news organizations, where editors (and at some outlets fact-checkers) check stories before quick publication. Journalism is usually not peer-reviewed.">journalism</a> studies, public health, and more, as well as ethics-focused CS research. You are expected to find serious academic work (not necessarily technical CS papers) on a topic that matters to you within this course's intellectual terrain.</p>
+<p>Possible topic areas include: AI policy and governance, algorithmic fairness and auditing, <a class="gl" href="glossary.html#g-surveillance" data-tip="Systematic watching or recording of people's behavior by a government, a company, or another person, often to predict or influence what they do.">surveillance</a> studies, digital rights and civil liberties, labor displacement and the future of work, <a class="gl" href="glossary.html#g-misinformation" data-tip="False or misleading information shared without an intent to deceive.">misinformation</a> and platform responsibility, data <a class="gl" href="glossary.html#g-privacy" data-tip="A person's ability to keep information about themselves, and parts of their life, from others. This includes control over who collects and uses that information.">privacy</a> law, accessibility and inclusive design, <a class="gl" href="glossary.html#g-facial-recognition" data-tip="Software that identifies or verifies a person by comparing an image of their face against stored images.">facial recognition</a> and policing, environmental costs of computing, or any other topic you can connect to the course.</p>
 <p><strong>Learning outcomes:</strong> Develop research skills. Practice reading academic literature from unfamiliar fields. Practice writing clear, accurate summaries of complex arguments.</p>
 <h4>Deliverables</h4>
 <ol>
@@ -843,7 +891,7 @@
 <p><em>Time estimate: 2-4 hours</em></p>
 </li>
 <li>
-<p><strong>Week 7 (three summaries):</strong> Submit three 1-page summaries (one per article) for three articles selected from your list (I may assign which three). Each summary should cover: the article's central argument or question, the methods or evidence used, the main findings or conclusions, and what you found most significant or surprising. Emphasis is on accurate comprehension, not evaluation.</p>
+<p><strong>Week 7 (three summaries):</strong> Submit three 1-page summaries (one per article) for three articles selected from your list (I may assign which three). Each summary should cover: the article's central argument or question, the methods or <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a> used, the main findings or conclusions, and what you found most significant or surprising. Emphasis is on accurate comprehension, not evaluation.</p>
 <p><em>Time estimate: 6-10 hours</em></p>
 </li>
 <li>
@@ -985,6 +1033,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

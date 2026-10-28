@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -743,26 +791,26 @@
     <h1>Computer Ethics</h1>
 <hr>
 <h2 id="welcome-to-computer-ethics">Welcome to Computer Ethics</h2>
-<p>This course teaches two inseparable things: critical writing and thinking skills, and exploration of your own values and how they shape the choices you make. We use generative AI ethics (a technology directly relevant to your career) as both the subject of inquiry and the medium of work. You will write about AI ethics while possibly using AI tools, and we will discuss that overlap throughout the quarter.</p>
+<p>This course teaches two inseparable things: critical writing and thinking skills, and exploration of your own values and how they shape the choices you make. We use <a class="gl" href="glossary.html#g-generative-ai" data-tip="AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples.">generative AI</a> ethics (a technology directly relevant to your career) as both the subject of inquiry and the medium of work. You will write about AI ethics while possibly using AI tools, and we will discuss that overlap throughout the quarter.</p>
 <p>No prior ethics background is required.</p>
 <hr>
 <h2 id="what-you-ll-submit-each-week">What You'll Submit Each Week</h2>
 <p><strong>Quiz:</strong> Vocabulary and concepts from the week. Completion-based, infinite attempts. Tests the factual knowledge you will use in writing and discussion.</p>
-<p><strong>Assignment:</strong> The week's writing task applied directly to your essay. You update a single living document across the quarter, building it piece by piece.</p>
+<p><strong>Assignment:</strong> The week's writing task applied directly to your essay. You update a single <a class="gl" href="glossary.html#g-living-essay" data-tip="The single Google Doc you revise every week, which grows into your final paper by Week 10.">living document</a> across the quarter, building it piece by piece.</p>
 <p><strong>Reflection:</strong> Personal engagement with the week's ideas. You choose one prompt that resonates and apply a three-step thinking structure. ~150 words. Genuine engagement in English words = full credit.</p>
-<p><strong>Meeting:</strong> Small-group discussion where you bring your personal thinking and share your essay work in progress. Fixed groups all quarter. You will submit one collaborative paragraph capturing the group's shared thinking.</p>
+<p><strong>Meeting:</strong> Small-group discussion where you bring your personal thinking and share your essay work in progress. Fixed groups all quarter. You will submit one <a class="gl" href="glossary.html#g-collaborative-paragraph" data-tip="The paragraph of 150 to 200 words your group writes together at the end of each meeting, recording what you explored and where you agreed or disagreed.">collaborative paragraph</a> capturing the group's shared thinking.</p>
 <hr>
 <h2 id="course-pages">Course Pages</h2>
 <ul>
-<li><a href="essay.html">Essay Instructions</a>: full guide to your 2000-word policy paper</li>
-<li><a href="essay-sample.html">Sample Essay</a>: one student's living essay at the end of each working week</li>
+<li><a href="essay.html">Essay Instructions</a>: full guide to your 2000-word <a class="gl" href="glossary.html#g-position-paper" data-tip="An essay that takes a position on a problem, argues for it with evidence, and proposes what should be done. The course essay is a 2000-word position paper.">policy paper</a></li>
+<li><a href="essay-sample.html">Sample Essay</a>: one student's <a class="gl" href="glossary.html#g-living-essay" data-tip="The single Google Doc you revise every week, which grows into your final paper by Week 10.">living essay</a> at the end of each working week</li>
 <li><a href="toolkit.html">Writing Toolkit</a>: thinking and writing skills you will use all quarter</li>
 <li><a href="reflection-instructions.html">Reflection Instructions</a>: how to engage with reflection prompts</li>
 <li><a href="meeting-instructions.html">Meeting Instructions</a>: how to run your discussion group</li>
 <li><a href="extra-labor.html">Extra Labor</a>: optional content and how to earn extra credit</li>
 <li><a href="ai-use.html">AI Use</a>: philosophy, spectrum, and guidance for using AI in this course</li>
 <li><a href="syllabus.html">Syllabus</a>: course policies, grading, and complete schedule</li>
-<li><a href="canvas-grades.html">Reading Your Canvas Grades</a>: how to interpret Canvas scores under labor-based grading</li>
+<li><a href="canvas-grades.html">Reading Your Canvas Grades</a>: how to interpret Canvas scores under <a class="gl" href="glossary.html#g-labor-based-grading" data-tip="A grading system based on how much of the assigned work you complete with a genuine attempt. In this course completing all required work (with up to 8 late) earns a B (3.1), and extra labor raises it.">labor-based grading</a></li>
 </ul>
 <hr>
 <h2 id="weekly-schedule">Weekly Schedule</h2>
@@ -770,21 +818,21 @@
 <colgroup><col style="width: 4rem"><col style="width: 42%"><col></colgroup>
 <thead><tr><th>Week</th><th>Topic</th><th>Writing Goal</th></tr></thead>
 <tbody>
-<tr><td>1</td><td><a href="week-01.html">Introduction to Ethical Reasoning</a><br><small><a href="assign-01.html">Assignment</a> · <a href="essay-sample-week-01.html">Sample Essay</a></small></td><td>Brainstorming (get all ideas down about gen AI and ethics)</td></tr>
-<tr><td>2</td><td><a href="week-02.html">Privacy &amp; Surveillance</a><br><small><a href="assign-02.html">Assignment</a> · <a href="essay-sample-week-02.html">Sample Essay</a></small></td><td>Topic narrowing and thesis selection (move to one focused angle)</td></tr>
-<tr><td>3</td><td><a href="week-03.html">Algorithmic Bias &amp; Fairness</a><br><small><a href="assign-03.html">Assignment</a> · <a href="essay-sample-week-03.html">Sample Essay</a></small></td><td>Stakeholder mapping (identify who the actors are)</td></tr>
-<tr><td>4</td><td><a href="week-04.html">Intellectual Property &amp; Ownership</a><br><small><a href="assign-04.html">Assignment</a> · <a href="essay-sample-week-04.html">Sample Essay</a></small></td><td>Stakeholder analysis (apply ethical questions to each group)</td></tr>
+<tr><td>1</td><td><a href="week-01.html">Introduction to Ethical Reasoning</a><br><small><a href="assign-01.html">Assignment</a> · <a href="essay-sample-week-01.html">Sample Essay</a></small></td><td><a class="gl" href="glossary.html#g-brainstorming" data-tip="Writing down as many ideas as you can in a set time, without judging them, so you have raw material to choose from later. It is the Week 1 writing goal.">Brainstorming</a> (get all ideas down about <a class="gl" href="glossary.html#g-generative-ai" data-tip="AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples.">gen AI</a> and ethics)</td></tr>
+<tr><td>2</td><td><a href="week-02.html">Privacy &amp; Surveillance</a><br><small><a href="assign-02.html">Assignment</a> · <a href="essay-sample-week-02.html">Sample Essay</a></small></td><td>Topic narrowing and <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a> selection (move to one focused angle)</td></tr>
+<tr><td>3</td><td><a href="week-03.html">Algorithmic Bias &amp; Fairness</a><br><small><a href="assign-03.html">Assignment</a> · <a href="essay-sample-week-03.html">Sample Essay</a></small></td><td><a class="gl" href="glossary.html#g-stakeholder-map" data-tip="A broad list of every group affected by a system, with a few words on how each is affected. It is the Week 3 writing goal.">Stakeholder mapping</a> (identify who the actors are)</td></tr>
+<tr><td>4</td><td><a href="week-04.html">Intellectual Property &amp; Ownership</a><br><small><a href="assign-04.html">Assignment</a> · <a href="essay-sample-week-04.html">Sample Essay</a></small></td><td><a class="gl" href="glossary.html#g-stakeholder-analysis" data-tip="A closer look at the most important groups on a stakeholder map: what each stands to gain or lose, and where their interests conflict. It is the Week 4 writing goal.">Stakeholder analysis</a> (apply ethical questions to each group)</td></tr>
 <tr><td>5</td><td><a href="week-05.html">Labor &amp; Automation</a></td><td><em>Break week (no essay work)</em></td></tr>
-<tr><td>6</td><td><a href="week-06.html">Misinformation &amp; Epistemic Harm</a><br><small><a href="assign-06.html">Assignment</a> · <a href="essay-sample-week-06.html">Sample Essay</a></small></td><td>Supporting claims with sources (attach evidence to claims)</td></tr>
+<tr><td>6</td><td><a href="week-06.html">Misinformation &amp; Epistemic Harm</a><br><small><a href="assign-06.html">Assignment</a> · <a href="essay-sample-week-06.html">Sample Essay</a></small></td><td>Supporting claims with sources (attach <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a> to claims)</td></tr>
 <tr><td>7</td><td><a href="week-07.html">Autonomy &amp; Manipulation</a><br><small><a href="assign-07.html">Assignment</a> · <a href="essay-sample-week-07.html">Sample Essay</a></small></td><td>Supporting claims with argumentation (build logical structure)</td></tr>
 <tr><td>8</td><td><a href="week-08.html">Transparency &amp; Explainability</a><br><small><a href="assign-08.html">Assignment</a> · <a href="essay-sample-week-08.html">Sample Essay</a></small></td><td>Edit at paper and paragraph level (does each section serve the thesis?)</td></tr>
-<tr><td>9</td><td><a href="week-09.html">Safety &amp; Accountability</a><br><small><a href="assign-09.html">Assignment</a> · <a href="essay-sample-week-09.html">Sample Essay</a></small></td><td>Edit at sentence level (clarity, precision, efficiency)</td></tr>
-<tr><td>10</td><td><a href="week-10.html">Professional Ethics &amp; Responsibility</a><br><small><a href="assign-10.html">Assignment</a> · <a href="essay-sample-week-10.html">Sample Essay</a></small></td><td>Write conclusions, introductions, abstracts, titles (final paper due)</td></tr>
+<tr><td>9</td><td><a href="week-09.html">Safety &amp; Accountability</a><br><small><a href="assign-09.html">Assignment</a> · <a href="essay-sample-week-09.html">Sample Essay</a></small></td><td>Edit at sentence level (<a class="gl" href="glossary.html#g-clarity" data-tip="The quality of writing that can be understood on the first reading.">clarity</a>, <a class="gl" href="glossary.html#g-precision" data-tip="Saying exactly what you mean, with specific nouns and claims in place of vague ones.">precision</a>, efficiency)</td></tr>
+<tr><td>10</td><td><a href="week-10.html">Professional Ethics &amp; Responsibility</a><br><small><a href="assign-10.html">Assignment</a> · <a href="essay-sample-week-10.html">Sample Essay</a></small></td><td>Write conclusions, introductions, <a class="gl" href="glossary.html#g-abstract" data-tip="A single paragraph (about 150 words in this course) that compresses a whole paper: the problem, the position it takes, and what it proposes.">abstracts</a>, titles (final paper due)</td></tr>
 </tbody>
 </table>
 <hr>
 <h2 id="a-note-on-grading">A Note on Grading</h2>
-<p>This course uses labor-based grading. This means you are evaluated on completion and genuine engagement (your conclusions do not affect your grade). You will not be penalized for having a different ethical perspective than your peers or me. To earn credit, do the work, think carefully, and show your reasoning.</p>
+<p>This course uses <a class="gl" href="glossary.html#g-labor-based-grading" data-tip="A grading system based on how much of the assigned work you complete with a genuine attempt. In this course completing all required work (with up to 8 late) earns a B (3.1), and extra labor raises it.">labor-based grading</a>. This means you are evaluated on completion and genuine engagement (your conclusions do not affect your grade). You will not be penalized for having a different ethical perspective than your peers or me. To earn credit, do the work, think carefully, and show your reasoning.</p>
 <p>Questions? Start with the <a href="syllabus.html">Syllabus</a>.</p>
 
   </main>
@@ -881,6 +929,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -750,104 +798,104 @@
   <main data-pagefind-body>
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <h1>Week 6 · Misinformation &amp; Epistemic Harm</h1>
-<p>This week examines misinformation and what researchers call epistemic harm, the erosion of our collective ability to know what is true. Deepfakes, confident false outputs from language models, and the psychology of how people update beliefs are all part of the picture. The readings look at where AI-generated misinformation has appeared in elections and public discourse, and what responses have been tried.</p>
+<p>This week examines <a class="gl" href="glossary.html#g-misinformation" data-tip="False or misleading information shared without an intent to deceive.">misinformation</a> and what researchers call <a class="gl" href="glossary.html#g-epistemic-harm" data-tip="Harm to people's ability to know what is true. For instance, a flood of fakes can make it harder to trust any evidence at all.">epistemic harm</a>, the erosion of our collective ability to know what is true. <a class="gl" href="glossary.html#g-deepfake" data-tip="Synthetic media that shows a real person saying or doing something they never said or did.">Deepfakes</a>, confident false outputs from language models, and the psychology of how people update beliefs are all part of the picture. The readings look at where AI-generated misinformation has appeared in elections and public discourse, and what responses have been tried.</p>
 <hr>
 <h2 id="this-week-s-writing-goal">This Week's Writing Goal</h2>
 <p>Supporting Claims with Sources</p>
-<p>This week you will learn to find and evaluate sources and to attach evidence to every claim, which means telling credible evidence apart from mere assertion. You will also learn why some sources are stronger than others and how to build an argument that a reader can check. The evidence you add this week is what your paper's claims will depend on.</p>
+<p>This week you will learn to find and <a class="tk" href="toolkit.html#finding-and-evaluating-sources" data-tip="This skill means telling credible evidence apart from assertion, and choosing the right kind of source (journal, think tank, journalism, blog) for each claim. (A click opens it in the toolkit.)">evaluate sources</a> and to attach <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a> to every claim, which means telling credible evidence apart from mere <a class="gl" href="glossary.html#g-assertion" data-tip="A claim stated without support. It may be true, though you have only the writer's word for it.">assertion</a>. You will also learn why some sources are stronger than others and how to build an <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a> that a reader can check. The evidence you add this week is what your paper's claims will depend on.</p>
 <hr>
 <h2 id="content">Content</h2>
 <p><strong>For your required weekly reflection, engage with one source from Primary Content. Any source (primary or additional) can be used for an extra reflection for extra credit.</strong></p>
 <h3 id="primary-content">Primary Content</h3>
 <p><strong><a href="https://www.npr.org/2023/03/26/1166114364/ai-deepfakes-could-advance-misinformation-in-the-run-up-to-the-2024-election">Social Media Accounts Use AI-Generated Audio to Push Election Misinformation</a></strong> — NPR · 2023 · ~10 min listen · 🟢 Free access · [Media]</p>
-<p>NPR reports on deepfakes and synthetic media being deployed at scale in elections. It provides concrete examples of what AI-generated misinformation actually looks like in the wild. Note: this is audio with a transcript available, so you can listen or read, depending on your preference.</p>
+<p>NPR reports on <a class="gl" href="glossary.html#g-deepfake" data-tip="Synthetic media that shows a real person saying or doing something they never said or did.">deepfakes</a> and <a class="gl" href="glossary.html#g-synthetic-media" data-tip="Images, audio, video, or text generated or altered by AI, often made to look or sound real.">synthetic media</a> being deployed <a class="gl" href="glossary.html#g-scale" data-tip="The number of people or decisions a system reaches. A system working at scale repeats the same choice many times, so the system's errors and benefits both multiply.">at scale</a> in elections. It provides concrete examples of what AI-generated <a class="gl" href="glossary.html#g-misinformation" data-tip="False or misleading information shared without an intent to deceive.">misinformation</a> actually looks like in the wild. Note: this is audio with a transcript available, so you can listen or read, depending on your preference.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
 <li>The NPR report describes a right-wing influencer who created a fake Biden video announcing a military draft, and labeled it AI-generated, framing it as &quot;a preview of something that hadn't happened yet.&quot; Does the label change your reaction? Is disclosing a deepfake while still spreading it a meaningful ethical distinction, or does it not matter once the clip is out there?</li>
 <li>A Wharton professor demonstrated creating a convincing deepfake of himself in eight minutes for $11. When you heard that, what was your immediate gut reaction? Does the accessibility of the tool change who you think is responsible when it gets misused?</li>
 <li>The NPR piece focuses especially on the risk to down-ballot candidates, local races with no resources to counter synthetic content. Does that shift the stakes for you? What does it mean to build tools that can be cheaply weaponized against people who cannot defend themselves?</li>
 </ul>
-<p><strong><a href="https://ash.harvard.edu/articles/the-apocalypse-that-wasnt/">The Apocalypse That Wasn't: AI Was Everywhere in 2024's Elections, But Often in Unexpected Ways</a></strong> — Harvard Ash Center · 2024 · ~15 min read · 🟢 Free access · [Think tank]</p>
-<p>A more measured analysis of where AI actually showed up in the 2024 elections, and where the fears did not materialize. It helps separate real harms from hypothetical ones and is useful for judging how large the risk actually was.</p>
+<p><strong><a href="https://ash.harvard.edu/articles/the-apocalypse-that-wasnt/">The Apocalypse That Wasn't: AI Was Everywhere in 2024's Elections, But Often in Unexpected Ways</a></strong> — Harvard Ash Center · 2024 · ~15 min read · 🟢 Free access · [<a class="gl" href="glossary.html#g-think-tank" data-tip="An organization that researches policy questions and publishes reports and recommendations. Many are funded by groups with a stake in the issues they study, or hold a political viewpoint, so it is a good idea to check who backs one.">Think tank</a>]</p>
+<p>A more measured analysis of where AI actually showed up in the 2024 elections, and where the fears did not materialize. It helps separate real <a class="gl" href="glossary.html#g-harm" data-tip="A setback to someone's interests, such as lost money, a lost opportunity, an injury, distress, or damage to their reputation. Harm can be direct or indirect, and intended or accidental.">harms</a> from hypothetical ones and is useful for judging how large the risk actually was.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
 <li>The Harvard Ash Center piece reports that &quot;nearly eight times as many respondents expected AI to be used for mostly bad purposes&quot; compared to good, but the catastrophic misuse mostly did not materialize. Does that reassure you, or does it make you more anxious about the next election cycle? What does it mean to be right about risk when the harm has not happened yet?</li>
-<li>The report describes AI being used for legitimate campaign work (language translation, voter chatbots, ad generation) alongside documented deepfakes and robocalls. Where does the line fall for you between AI as a helpful campaign tool and AI as manipulation? Is that line clear, or does it depend on who is using it?</li>
+<li>The report describes AI being used for legitimate campaign work (language translation, voter <a class="gl" href="glossary.html#g-chatbot" data-tip="A program that holds a conversation in text or speech. Most current chatbots are built on large language models.">chatbots</a>, ad generation) alongside documented deepfakes and robocalls. Where does the line fall for you between AI as a helpful campaign tool and AI as <a class="gl" href="glossary.html#g-manipulation" data-tip="Influencing someone's beliefs or choices by going around their reasoning, for instance by exploiting their emotions, habits, or blind spots.">manipulation</a>? Is that line clear, or does it depend on who is using it?</li>
 <li>The authors suggest competitive advantage will drive AI adoption in politics regardless of whether it works. If everyone believes AI gives them an edge and deploys it defensively, what kind of environment does that create? Is there an analogy to arms races that lands for you?</li>
 </ul>
 <p><strong><a href="https://www.newyorker.com/magazine/2017/02/27/why-facts-dont-change-our-minds">Why Facts Don't Change Our Minds</a></strong> — Elizabeth Kolbert, The New Yorker · 2017 · ~12 min read · 🟡 Limited access · [Media]</p>
-<p>Kolbert explores the psychology of belief, in particular why people often keep a belief after seeing evidence against it. As a result, false information may persist partly because people tend to resist correcting their beliefs.</p>
+<p>Kolbert explores the psychology of belief, in particular why people often keep a belief after seeing <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a> against it. As a result, false information may persist partly because people tend to resist correcting their beliefs.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
 <li>Kolbert argues that part of the problem of misinformation is that we are built to resist correcting false beliefs, even when shown evidence. Has there been a moment in your own life when you held onto a belief longer than the evidence warranted? What finally shifted you, if anything?</li>
-<li>The piece treats motivated reasoning as a normal part of human cognition. On this view we may have evolved to defend our beliefs in front of others as much as to track the truth. If that is right, what does it mean for the assumption that better information will solve the misinformation problem?</li>
-<li>If correction does not reliably work, what obligation does a builder have when creating tools that can spread false information at scale? Does understanding the psychology of belief change your answer?</li>
+<li>The piece treats <a class="gl" href="glossary.html#g-motivated-reasoning" data-tip="Weighing evidence in a way that favors the conclusion you already want.">motivated reasoning</a> as a normal part of human cognition. On this view we may have evolved to defend our beliefs in front of others as much as to track the truth. If that is right, what does it mean for the assumption that better information will solve the misinformation problem?</li>
+<li>If correction does not reliably work, what <a class="gl" href="glossary.html#g-obligation" data-tip="Something you owe to others (or to yourself) because of a duty, a promise, a role, or a principle. An obligation can hold even when meeting it costs you something.">obligation</a> does a builder have when creating tools that can spread false information at scale? Does understanding the psychology of belief change your answer?</li>
 </ul>
 <h3 id="additional-content">Additional Content</h3>
 <p>➕ <strong><a href="https://www.hbo.com/movies/after-truth-disinformation-and-the-cost-of-fake-news">After Truth: Disinformation and the Cost of Fake News</a></strong> — HBO · 2020 · ~90 min watch · 🔴 Paywalled · [Media]</p>
-<p>A documentary about disinformation and its real-world costs. It takes the broader view beyond AI to show how false information cascades through society.</p>
+<p>A documentary about <a class="gl" href="glossary.html#g-disinformation" data-tip="False information created or spread on purpose to deceive.">disinformation</a> and its real-world costs. It takes the broader view beyond AI to show how false information cascades through society.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
-<li>The film traces the human cost of specific disinformation campaigns, with real people and real consequences. If a disinformation campaign you built or worked on caused harm to a real person, what would your responsibility look like? Would the fact that you did not intend harm change anything?</li>
+<li>The film traces the human cost of specific disinformation campaigns, with real people and real <a class="gl" href="glossary.html#g-consequence" data-tip="A result that follows from an action or decision, including results nobody intended.">consequences</a>. If a disinformation campaign you built or worked on caused harm to a real person, what would your responsibility look like? Would the fact that you did not intend harm change anything?</li>
 <li>The documentary focuses on the cascade (how false information spreads and amplifies beyond its origin point). At what point in that chain does ethical responsibility transfer from the creator to the platform to the sharer?</li>
 </ul>
 <p>➕ <strong><a href="https://www.unesco.org/en/articles/deepfakes-and-crisis-knowing">&quot;Deepfakes and the Crisis of Knowing&quot;</a></strong> — UNESCO · 2025 · ~15 min read · 🟢 Free access · [Org]</p>
-<p>A substantive essay on deepfakes as a threat to epistemic authority itself (our collective ability to know what is true), a harm that goes beyond individual reputations. It introduces the &quot;liar's dividend&quot;, that is, the ability to dismiss authentic recordings as probable fakes. It proposes structural responses centered on &quot;epistemic agency&quot;, with content removal as only one part.</p>
+<p>A substantive essay on deepfakes as a threat to epistemic authority itself (our collective ability to know what is true), a harm that goes beyond individual reputations. It introduces the &quot;<a class="gl" href="glossary.html#g-liars-dividend" data-tip="The benefit a liar gets once deepfakes are common. A real recording can be dismissed as probably fake.">liar's dividend</a>&quot;, that is, the ability to dismiss authentic recordings as probable fakes. It proposes structural responses centered on &quot;<a class="gl" href="glossary.html#g-epistemic-agency" data-tip="Your ability to form your own reliable beliefs by gathering and weighing evidence yourself.">epistemic agency</a>&quot;, with content removal as only one part.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
 <li>The essay introduces the &quot;liar's dividend,&quot; the idea that deepfakes also give bad actors a way to dismiss real evidence as fake. Has that idea shifted how you think about the harm? Is the ability to sow doubt more dangerous than the fake content itself?</li>
 <li>The author argues that epistemic agency (the ability to form your own reliable beliefs) is a right that institutions, as well as individuals, should protect. Do you think of your ability to know what is true as something society has an obligation to protect? Where does that obligation fall?</li>
 <li>The essay proposes that solutions need to include rebuilding trust in institutions and processes as well as detecting fakes. Does that feel more or less achievable than a technical detection solution? What would it take for you to trust a source again after a major deepfake incident?</li>
 </ul>
-<p>➕ <strong><a href="https://www.frontiersin.org/journals/artificial-intelligence/articles/10.3389/frai.2025.1569115/full">&quot;AI-Driven Disinformation: Policy Recommendations for Democratic Resilience&quot;</a></strong> — Frontiers in Artificial Intelligence · 2025 · ~30 min read · 🟢 Free access · [Peer-reviewed]</p>
+<p>➕ <strong><a href="https://www.frontiersin.org/journals/artificial-intelligence/articles/10.3389/frai.2025.1569115/full">&quot;AI-Driven Disinformation: Policy Recommendations for Democratic Resilience&quot;</a></strong> — Frontiers in Artificial Intelligence · 2025 · ~30 min read · 🟢 Free access · [<a class="gl" href="glossary.html#g-peer-review" data-tip="The checking of a research paper by other experts in the field before a journal or conference publishes it. In computing, many of the most important papers appear at peer-reviewed conferences.">Peer-reviewed</a>]</p>
 <p>Recent peer-reviewed research on AI-driven misinformation and policy solutions. It shows what researchers think the structural answer should be.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
-<li>The researchers argue that platform accountability, regulatory harmonization across countries, and digital literacy education are the three structural pillars of a response to AI disinformation. Which of those feels most achievable to you, and which feels like a long shot? What does your answer tell you about where you think power actually sits?</li>
+<li>The researchers argue that platform <a class="gl" href="glossary.html#g-accountability" data-tip="Being answerable for a decision or outcome. That means having to explain it, and facing consequences if it caused harm.">accountability</a>, regulatory harmonization across countries, and digital literacy education are the three structural pillars of a response to AI disinformation. Which of those feels most achievable to you, and which feels like a long shot? What does your answer tell you about where you think power actually sits?</li>
 <li>The paper is co-authored by researchers at a Ukrainian think tank, written during an ongoing war in which AI disinformation has been weaponized by state actors. Does knowing the context of the authors change how you read their urgency? Should it?</li>
 <li>If a policy recommendation would slow down AI development to reduce disinformation risk, what is your honest reaction to that tradeoff?</li>
 </ul>
 <hr>
 <h2 id="assignment">Assignment</h2>
 <p><strong>Writing goal this week:</strong> Supporting claims with sources</p>
-<p>Find credible sources for specific claims in your essay and integrate them into the argument. See the <a href="assign-06.html">Week 6 Assignment</a> for detailed instructions.</p>
+<p>Find credible sources for specific claims in your essay and integrate them into the <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a>. See the <a href="assign-06.html">Week 6 Assignment</a> for detailed instructions.</p>
 <p>Submit your Google Doc link to Canvas.</p>
 <hr>
 <h2 id="reflection">Reflection</h2>
 <p>Choose one source from this week's <strong>Primary Content</strong>. Ground your reflection in something specific from that source, such as a claim you agreed or disagreed with, or a moment that surprised you. Then apply the three-step structure:</p>
-<p><strong>Gut check</strong>: What was your honest, immediate reaction?
-<strong>Trace it</strong>: Where does that reaction come from in your values or experience?
-<strong>Challenge it</strong>: What would someone who sees it differently say? Does their case have merit?</p>
+<p><strong><a class="gl" href="glossary.html#g-gut-check" data-tip="The first step of a reflection. You write your honest, immediate reaction to something specific in a source.">Gut check</a></strong>: What was your honest, immediate reaction?
+<strong><a class="gl" href="glossary.html#g-trace-it" data-tip="The second step of a reflection. You work out where your reaction comes from in your values, your experience, or the communities you belong to.">Trace it</a></strong>: Where does that reaction come from in your values or experience?
+<strong><a class="gl" href="glossary.html#g-challenge-it" data-tip="The third step of a reflection. You state the strongest case against your position and test your position against it.">Challenge it</a></strong>: What would someone who sees it differently say? Does their case have merit?</p>
 <p>~150 words. The source-specific prompts above are starting points. You can use one of those or follow your own reaction, but your reflection must be anchored to something specific from the content you chose.</p>
 <p>See <a href="reflection-instructions.html">Reflection Instructions</a> for the full guide.</p>
 <hr>
 <h2 id="meeting">Meeting</h2>
-<p>Use these prompts as starting points. The goal is to build a shared understanding of how we know what is true and what we are responsible for in a world of synthetic media.</p>
+<p>Use these prompts as starting points. The goal is to build a shared understanding of how we know what is true and what we are responsible for in a world of <a class="gl" href="glossary.html#g-synthetic-media" data-tip="Images, audio, video, or text generated or altered by AI, often made to look or sound real.">synthetic media</a>.</p>
 <p><strong>This week's discussion directions:</strong></p>
 <ul>
-<li>Is a platform responsible for AI-generated misinformation it hosts? What about misinformation created with tools it provided?</li>
+<li>Is a platform responsible for AI-generated <a class="gl" href="glossary.html#g-misinformation" data-tip="False or misleading information shared without an intent to deceive.">misinformation</a> it hosts? What about misinformation created with tools it provided?</li>
 <li>What is the difference between a tool that can be misused and a tool designed to deceive? How do you tell the difference?</li>
 <li>How do you think about your own epistemic responsibility as a consumer and creator of AI content?</li>
 </ul>
-<p><strong>Essay share:</strong> Share the sources you integrated this week and the claims they support. Which source was hardest to find or evaluate? What questions came up about credibility? The group responds with reactions and suggestions.</p>
+<p><strong><a class="gl" href="glossary.html#g-essay-share" data-tip="The round in each meeting where everyone briefly says what they did on their essay that week and one thing they are wrestling with.">Essay share</a>:</strong> Share the sources you integrated this week and the claims they support. Which source was hardest to find or evaluate? What questions came up about <a class="gl" href="glossary.html#g-source-credibility" data-tip="How far a source has earned a reader's trust, judged by who wrote it, how it was checked, who funded it, and how clearly it shows its evidence.">credibility</a>? The group responds with reactions and suggestions.</p>
 <p>See <a href="meeting-instructions.html">Meeting Instructions</a> for the full guide.</p>
 <hr>
 <h2 id="quiz-vocabulary">Quiz Vocabulary</h2>
 <ul>
-<li>Misinformation</li>
-<li>Disinformation</li>
-<li>Deepfake</li>
-<li>Epistemic harm</li>
-<li>Synthetic media</li>
-<li>Source credibility</li>
-<li>Primary source</li>
-<li>Secondary source</li>
-<li>Evidence vs. assertion</li>
-<li>Peer-reviewed</li>
-<li>Think tank</li>
-<li>Journalism</li>
-<li>Motivated reasoning</li>
-<li>Liar's dividend</li>
+<li><a class="gl" href="glossary.html#g-misinformation" data-tip="False or misleading information shared without an intent to deceive.">Misinformation</a></li>
+<li><a class="gl" href="glossary.html#g-disinformation" data-tip="False information created or spread on purpose to deceive.">Disinformation</a></li>
+<li><a class="gl" href="glossary.html#g-deepfake" data-tip="Synthetic media that shows a real person saying or doing something they never said or did.">Deepfake</a></li>
+<li><a class="gl" href="glossary.html#g-epistemic-harm" data-tip="Harm to people's ability to know what is true. For instance, a flood of fakes can make it harder to trust any evidence at all.">Epistemic harm</a></li>
+<li><a class="gl" href="glossary.html#g-synthetic-media" data-tip="Images, audio, video, or text generated or altered by AI, often made to look or sound real.">Synthetic media</a></li>
+<li><a class="gl" href="glossary.html#g-source-credibility" data-tip="How far a source has earned a reader's trust, judged by who wrote it, how it was checked, who funded it, and how clearly it shows its evidence.">Source credibility</a></li>
+<li><a class="gl" href="glossary.html#g-primary-source" data-tip="Original evidence, such as the study, dataset, court ruling, interview, or recording itself.">Primary source</a></li>
+<li><a class="gl" href="glossary.html#g-secondary-source" data-tip="A source that reports on, summarizes, or interprets primary sources, such as a news story about a study.">Secondary source</a></li>
+<li><a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">Evidence</a> vs. <a class="gl" href="glossary.html#g-assertion" data-tip="A claim stated without support. It may be true, though you have only the writer's word for it.">assertion</a></li>
+<li><a class="gl" href="glossary.html#g-peer-review" data-tip="The checking of a research paper by other experts in the field before a journal or conference publishes it. In computing, many of the most important papers appear at peer-reviewed conferences.">Peer-reviewed</a></li>
+<li><a class="gl" href="glossary.html#g-think-tank" data-tip="An organization that researches policy questions and publishes reports and recommendations. Many are funded by groups with a stake in the issues they study, or hold a political viewpoint, so it is a good idea to check who backs one.">Think tank</a></li>
+<li><a class="gl" href="glossary.html#g-journalism" data-tip="Reporting on current events, usually by news organizations, where editors (and at some outlets fact-checkers) check stories before quick publication. Journalism is usually not peer-reviewed.">Journalism</a></li>
+<li><a class="gl" href="glossary.html#g-motivated-reasoning" data-tip="Weighing evidence in a way that favors the conclusion you already want.">Motivated reasoning</a></li>
+<li><a class="gl" href="glossary.html#g-liars-dividend" data-tip="The benefit a liar gets once deepfakes are common. A real recording can be dismissed as probably fake.">Liar's dividend</a></li>
 </ul>
 
   </main>
@@ -944,6 +992,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

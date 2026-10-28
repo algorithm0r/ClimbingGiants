@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -751,34 +799,34 @@
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <h1>Week 6 Assignment · Supporting Claims with Sources</h1>
 <p><em>Skill: Finding and Evaluating Sources · <a href="toolkit.html#finding-and-evaluating-sources">See toolkit</a></em></p>
-<p>You have an argument and a stakeholder analysis, and this week you back them up by moving from assertion to evidence. You will find credible sources that support specific claims you have already made, and you will integrate them into your document in a way that shows why they matter. That is, you start from a specific claim in your essay and find evidence for it.</p>
+<p>You have an <a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">argument</a> and a <a class="gl" href="glossary.html#g-stakeholder-analysis" data-tip="A closer look at the most important groups on a stakeholder map: what each stands to gain or lose, and where their interests conflict. It is the Week 4 writing goal.">stakeholder analysis</a>, and this week you back them up by moving from <a class="gl" href="glossary.html#g-assertion" data-tip="A claim stated without support. It may be true, though you have only the writer's word for it.">assertion</a> to <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a>. You will find credible sources that support specific claims you have already made, and you will integrate them into your document in a way that shows why they matter. That is, you start from a specific claim in your essay and find evidence for it.</p>
 <hr>
 <h2 id="steps">Steps</h2>
 <ol>
 <li>
-<p>Read through your current document and identify 3 specific claims that need evidence. These are statements you have made that a skeptical reader would ask &quot;how do you know that?&quot; about. Mark them clearly. If your document includes a policy sketch from Week 4, treat it as a source of claims, since your proposed solution is itself an assertion that needs support. Include at least one claim from your policy proposal in your three.</p>
+<p>Read through your current document and identify 3 specific claims that need <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a>. These are statements you have made that a skeptical reader would ask &quot;how do you know that?&quot; about. Mark them clearly. If your document includes a policy sketch from Week 4, treat it as a source of claims, since your proposed solution is itself an <a class="gl" href="glossary.html#g-assertion" data-tip="A claim stated without support. It may be true, though you have only the writer's word for it.">assertion</a> that needs support. Include at least one claim from your <a class="gl" href="glossary.html#g-policy-proposal" data-tip="A specific recommendation that names what should change, who carries it out, who pays, and what tradeoffs it creates. It is Section 3 of the course essay.">policy proposal</a> in your three.</p>
 </li>
 <li>
-<p>For each claim, find at least one credible source that directly supports it. Use the source type guidance in the toolkit. Journal articles work for mechanisms and phenomena, think tank reports for policy analysis, and journalism for current events. For each source write:</p>
+<p>For each claim, find at least one credible source that directly supports it. Use the source type guidance in the toolkit. Journal articles work for mechanisms and phenomena, <a class="gl" href="glossary.html#g-think-tank" data-tip="An organization that researches policy questions and publishes reports and recommendations. Many are funded by groups with a stake in the issues they study, or hold a political viewpoint, so it is a good idea to check who backs one.">think tank</a> reports for policy analysis, and <a class="gl" href="glossary.html#g-journalism" data-tip="Reporting on current events, usually by news organizations, where editors (and at some outlets fact-checkers) check stories before quick publication. Journalism is usually not peer-reviewed.">journalism</a> for current events. For each source write:</p>
 <ul>
 <li>What type of source it is and why that makes it credible for this claim</li>
 <li>One sentence summarizing what the source says</li>
-<li>One sentence explaining why it supports your specific claim. For instance, &quot;this study shows X, which supports my claim that Y because Z&quot; works where &quot;this article is about AI bias&quot; does not.</li>
+<li>One sentence explaining why it supports your specific claim. For instance, &quot;this study shows X, which supports my claim that Y because Z&quot; works where &quot;this article is about AI <a class="gl" href="glossary.html#g-bias" data-tip="A consistent tilt in a person's or a system's judgments that favors some people or outcomes over others. In AI it usually means outputs that are less accurate or less favorable for a particular group.">bias</a>&quot; does not.</li>
 </ul>
 </li>
 <li>
 <p>Integrate each source into your essay document by weaving it into the paragraph where its claim lives (a footnote or a list at the end does not count). The source should appear in the sentence it supports or immediately after it. Hyperlink the source name or the claim it supports so a reader can click through.</p>
 </li>
 <li>
-<p>Add a <strong>Bibliography</strong> section at the end of your document. For each source, paste the citation from Google Scholar's cite button, or write it manually if the source is not on Scholar. Pick one citation style and use it consistently. See <a href="toolkit.html#citing-sources">Citing Sources</a> in the toolkit for how.</p>
+<p>Add a <strong><a class="gl" href="glossary.html#g-bibliography" data-tip="The list of full citations for every source a paper uses, placed at the end of the paper.">Bibliography</a></strong> section at the end of your document. For each source, paste the citation from Google Scholar's cite button, or write it manually if the source is not on Scholar. Pick one citation style and use it consistently. See <a href="toolkit.html#citing-sources">Citing Sources</a> in the toolkit for how.</p>
 </li>
 </ol>
 <hr>
 <h2 id="what-your-document-should-show">What Your Document Should Show</h2>
-<p>At least 3 claims now supported by integrated, hyperlinked sources, each with visible reasoning connecting the source to the claim. The sources are from at least 2 different source types. A bibliography section at the end of the document with a citation for each source in a consistent style.</p>
+<p>At least 3 claims now supported by integrated, hyperlinked sources, each with visible reasoning connecting the source to the claim. The sources are from at least 2 different source types. A <a class="gl" href="glossary.html#g-bibliography" data-tip="The list of full citations for every source a paper uses, placed at the end of the paper.">bibliography</a> section at the end of the document with a citation for each source in a consistent style.</p>
 <hr>
 <h2 id="completion-criteria">Completion Criteria</h2>
-<p>Sources are integrated into the body of the essay. Each source is hyperlinked and connected to a specific claim with an explicit explanation of why it is relevant (a bare citation does not count). Claims that were assertions are now backed by evidence a skeptical reader could examine. A bibliography is present with consistently formatted citations.</p>
+<p>Sources are integrated into the body of the essay. Each source is hyperlinked and connected to a specific claim with an explicit explanation of why it is relevant (a bare citation does not count). Claims that were <a class="gl" href="glossary.html#g-assertion" data-tip="A claim stated without support. It may be true, though you have only the writer's word for it.">assertions</a> are now backed by <a class="gl" href="glossary.html#g-evidence" data-tip="Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study.">evidence</a> a skeptical reader could examine. A <a class="gl" href="glossary.html#g-bibliography" data-tip="The list of full citations for every source a paper uses, placed at the end of the paper.">bibliography</a> is present with consistently formatted citations.</p>
 
   </main>
 
@@ -874,6 +922,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

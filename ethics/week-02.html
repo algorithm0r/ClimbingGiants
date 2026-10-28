@@ -402,7 +402,53 @@
       }
       h2 { color: #000; border-bottom-color: #000; }
       a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
     }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
     /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
     .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
 
@@ -623,6 +669,8 @@
         <span class="site-nav-sep">·</span>
         <a href="toolkit.html">Toolkit</a>
         <span class="site-nav-sep">·</span>
+        <a href="glossary.html">Glossary</a>
+        <span class="site-nav-sep">·</span>
         <a href="ai-use.html">AI Use</a>
         <span class="site-nav-sep">·</span>
         <a href="extra-labor.html">Extra Labor</a>
@@ -750,54 +798,54 @@
   <main data-pagefind-body>
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <h1>Week 2 · Privacy &amp; Surveillance</h1>
-<p>This week focuses on data privacy and consent in the context of generative AI. Training models requires large amounts of data, often collected from public sources without clear consent frameworks. Courts, regulators, and the companies building these systems are working out what data ownership and privacy mean in that context. The readings give you the legal and technical landscape as it currently stands.</p>
+<p>This week focuses on data <a class="gl" href="glossary.html#g-privacy" data-tip="A person's ability to keep information about themselves, and parts of their life, from others. This includes control over who collects and uses that information.">privacy</a> and <a class="gl" href="glossary.html#g-consent" data-tip="Permission a person gives for something to be done to them or with their information.">consent</a> in the context of <a class="gl" href="glossary.html#g-generative-ai" data-tip="AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples.">generative AI</a>. Training models requires large amounts of data, often collected from public sources without clear consent frameworks. Courts, regulators, and the companies building these systems are working out what <a class="gl" href="glossary.html#g-data-ownership" data-tip="The question of who has rights over a piece of data: the person it describes, the organization that collected it, or the company that stores it or trains a model on it.">data ownership</a> and privacy mean in that context. The readings give you the legal and technical landscape as it currently stands.</p>
 <hr>
 <h2 id="this-week-s-writing-goal">This Week's Writing Goal</h2>
-<p>Topic Narrowing and Thesis Selection</p>
-<p>You brainstormed in Week 1, and this week you narrow down. You will try on 2 or 3 possible thesis positions (different angles on your topic) and commit to one as your working direction. A thesis is a specific claim worth arguing, and it can change as your essay develops. You will also learn the &quot;so what&quot; skill this week, which is a way to test whether your claim has real stakes.</p>
+<p>Topic Narrowing and <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">Thesis</a> Selection</p>
+<p>You <a class="gl" href="glossary.html#g-brainstorming" data-tip="Writing down as many ideas as you can in a set time, without judging them, so you have raw material to choose from later. It is the Week 1 writing goal.">brainstormed</a> in Week 1, and this week you narrow down. You will try on 2 or 3 possible thesis positions (different angles on your topic) and commit to one as your working direction. A thesis is a specific claim worth arguing, and it can change as your essay develops. You will also learn the &quot;<a class="tk" href="toolkit.html#so-what" data-tip="The so what skill means asking &quot;so what?&quot; of an observation, again and again, until you reach a claim with real stakes. (A click opens it in the toolkit.)">so what</a>&quot; skill this week, which is a way to test whether your claim has real stakes.</p>
 <hr>
 <h2 id="content">Content</h2>
 <p><strong>For your required weekly reflection you will engage with one source from Primary Content. Any source, primary or additional, can be used for an extra reflection for extra credit.</strong></p>
 <h3 id="primary-content">Primary Content</h3>
 <p><strong><a href="https://www.pbs.org/video/the-future-of-ai-1708554067/">&quot;The potential dangers of AI tools creating realistic video&quot;</a></strong> — PBS NewsHour · 2024 · ~10 min watch · 🟢 Free access · [Media]</p>
-<p>This segment is a concrete case of privacy at risk from synthetic media. It covers what happens when AI can generate convincing video of people who did not consent to it, and it connects the abstract idea of &quot;data privacy&quot; to a specific, visceral harm. It also asks who controls images of you.</p>
+<p>This segment is a concrete case of <a class="gl" href="glossary.html#g-privacy" data-tip="A person's ability to keep information about themselves, and parts of their life, from others. This includes control over who collects and uses that information.">privacy</a> at risk from <a class="gl" href="glossary.html#g-synthetic-media" data-tip="Images, audio, video, or text generated or altered by AI, often made to look or sound real.">synthetic media</a>. It covers what happens when AI can generate convincing video of people who did not <a class="gl" href="glossary.html#g-consent" data-tip="Permission a person gives for something to be done to them or with their information.">consent</a> to it, and it connects the abstract idea of &quot;data privacy&quot; to a specific, visceral <a class="gl" href="glossary.html#g-harm" data-tip="A setback to someone's interests, such as lost money, a lost opportunity, an injury, distress, or damage to their reputation. Harm can be direct or indirect, and intended or accidental.">harm</a>. It also asks who controls images of you.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
-<li>The segment describes a hypothetical deepfake scenario: a fabricated video of a political candidate being rushed to a hospital, with fake medical commentary, released just before a close election. Researcher Oren Etzioni said he was &quot;absolutely terrified&quot; when he saw how realistic these videos could be. What is your gut reaction to that scenario (alarm, skepticism, or something else)? What does it reveal about what you think should be protected?</li>
+<li>The segment describes a hypothetical <a class="gl" href="glossary.html#g-deepfake" data-tip="Synthetic media that shows a real person saying or doing something they never said or did.">deepfake</a> scenario: a fabricated video of a political candidate being rushed to a hospital, with fake medical commentary, released just before a close election. Researcher Oren Etzioni said he was &quot;absolutely terrified&quot; when he saw how realistic these videos could be. What is your gut reaction to that scenario (alarm, skepticism, or something else)? What does it reveal about what you think should be protected?</li>
 <li>The segment discusses Biden robocall impersonations and a $25 million deepfake video call scam, both real cases from the last few years. At what point does AI-generated media become a question about what we owe each other as a society, as well as a technology question?</li>
 <li>Etzioni points out that humans are &quot;visual animals.&quot; We are wired to trust what we see, and deepfakes exploit that. Proposed solutions include watermarking and detection tools. Does a technical fix feel adequate to you, or does this seem like a problem that technology alone cannot solve?</li>
 </ul>
 <hr>
 <p><strong><a href="https://stackoverflow.blog/2023/10/23/privacy-in-the-age-of-generative-ai/">&quot;Privacy in the Age of Generative AI&quot;</a></strong> — Stack Overflow Blog · 2023 · ~12 min read · 🟢 Free access · [Blog]</p>
-<p>This is a clear, practical overview written for developers in plain language, without jargon. It covers what happens to data when you feed it to an LLM, what the risks are, and what you should be thinking about as someone who will work with data.</p>
+<p>This is a clear, practical overview written for developers in plain language, without jargon. It covers what happens to data when you feed it to an <a class="gl" href="glossary.html#g-large-language-model" data-tip="A neural network trained on very large amounts of text to predict the next word, and usually trained further to follow instructions and hold a conversation. ChatGPT, Claude, and Gemini are built on large language models.">LLM</a>, what the risks are, and what you should be thinking about as someone who will work with data.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
-<li>The article's central claim is that &quot;LLMs have no delete button.&quot; Once personal data is embedded in model weights during training, there is no way to remove it without retraining the entire model. GDPR gives EU citizens the &quot;right to be forgotten,&quot; though that right becomes technically unenforceable in a world of large language models. Does that tension concern you? Whose problem is it to solve?</li>
-<li>Samsung employees pasted confidential source code into ChatGPT to get help debugging it, and that code then became part of training data available to other users. The employees had no malicious intent and were using the tool the way it was designed to be used. What does that tell you about the gap between how we think about privacy and how AI systems actually work?</li>
+<li>The article's central claim is that &quot;LLMs have no delete button.&quot; Once <a class="gl" href="glossary.html#g-personal-data" data-tip="Any information that identifies a person or could be linked back to them, such as a name, a face, a location, a voice, or a browsing history.">personal data</a> is embedded in model weights during training, there is no way to remove it without retraining the entire model. <a class="gl" href="glossary.html#g-gdpr" data-tip="The General Data Protection Regulation, the European Union's main data protection law (applied since 2018). It covers organizations in the EU, and organizations elsewhere that offer goods or services to people in the EU or track their behavior.">GDPR</a> gives EU citizens the &quot;<a class="gl" href="glossary.html#g-right-to-be-forgotten" data-tip="A right under the EU's GDPR to have an organization delete personal data about you in certain cases (for instance when the data is no longer needed, or you withdraw your consent), with some exceptions.">right to be forgotten</a>,&quot; though that right becomes technically unenforceable in a world of large language models. Does that tension concern you? Whose problem is it to solve?</li>
+<li>Samsung employees pasted confidential source code into ChatGPT to get help debugging it, and that code then became part of <a class="gl" href="glossary.html#g-training-data" data-tip="The collection of examples (text, images, code, and so on) a model learns its patterns from. A model's outputs reflect what is in the training data and what is missing from the training data.">training data</a> available to other users. The employees had no malicious intent and were using the tool the way it was designed to be used. What does that tell you about the gap between how we think about privacy and how AI systems actually work?</li>
 <li>Italy temporarily banned ChatGPT over privacy violations, and Meta was fined €1.3 billion for non-compliant data transfers. The article ultimately argues that we need a different technical architecture as well as bans and fines. As someone entering this field, how do you feel about the idea that you will be responsible for building systems that protect people's data in ways current tools do not?</li>
 </ul>
 <hr>
 <h3 id="additional-content">Additional Content</h3>
 <p>➕ <strong><a href="https://crsreports.congress.gov/product/pdf/R/R47569">&quot;Generative Artificial Intelligence and Data Privacy: A Primer&quot;</a></strong> — Congressional Research Service · 2023 · ~30 min read · 🟢 Free access · [Gov't]</p>
-<p>This is the US government's official overview of the privacy issues at stake with gen AI. It is policy-level thinking, covering the questions regulators are asking and the frameworks that are emerging. Read this to understand how law is trying to catch up to technology.</p>
+<p>This is the US government's official overview of the privacy issues at stake with <a class="gl" href="glossary.html#g-generative-ai" data-tip="AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples.">gen AI</a>. It is policy-level thinking, covering the questions regulators are asking and the frameworks that are emerging. Read this to understand how law is trying to catch up to technology.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
 <li>The report is framed as a &quot;primer&quot; for members of Congress, people who make laws but may not understand the technology they are regulating. What do you think is lost when the people writing the rules do not deeply understand what they are regulating? What is gained by having non-experts weigh in?</li>
 <li>US privacy law is largely sector-specific, with separate rules for health data, education data, and children's data, while the EU's GDPR takes a more comprehensive approach. What does the existence of two incompatible frameworks tell you about whose interests privacy law is designed to protect?</li>
-<li>The report raises the question of who is accountable when an AI system harms someone's privacy: the developer, the deployer, or the user? Where do you land on that question, and why?</li>
+<li>The report raises the question of who is <a class="gl" href="glossary.html#g-accountability" data-tip="Being answerable for a decision or outcome. That means having to explain it, and facing consequences if it caused harm.">accountable</a> when an AI system harms someone's privacy: the developer, the deployer, or the user? Where do you land on that question, and why?</li>
 </ul>
 <hr>
-<p>➕ <strong><a href="https://jipel.law.nyu.edu/privacy-of-personal-data-in-the-generative-ai-data-lifecycle/">&quot;Privacy of Personal Data in the Generative AI Data Lifecycle&quot;</a></strong> — Duffourc, Gerke, and Kollnig, NYU JIPEL · 2024 · ~30 min read · 🟢 Free access · [Peer-reviewed]</p>
+<p>➕ <strong><a href="https://jipel.law.nyu.edu/privacy-of-personal-data-in-the-generative-ai-data-lifecycle/">&quot;Privacy of Personal Data in the Generative AI Data Lifecycle&quot;</a></strong> — Duffourc, Gerke, and Kollnig, NYU JIPEL · 2024 · ~30 min read · 🟢 Free access · [<a class="gl" href="glossary.html#g-peer-review" data-tip="The checking of a research paper by other experts in the field before a journal or conference publishes it. In computing, many of the most important papers appear at peer-reviewed conferences.">Peer-reviewed</a>]</p>
 <p>A detailed legal analysis of how privacy law (both US and EU) is struggling to protect personal data once it enters the AI training pipeline. This article is rigorous but readable. It shows the gap between what privacy law was designed for and what gen AI does.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
 <li>The authors report that researchers re-identified 95% of people in a dataset of 1.5 million using just four location points with timestamps, and the re-identification used only publicly available data. Does that statistic land as alarming, unsurprising, or something else? What does your reaction tell you about your assumptions going into this week?</li>
-<li>Stable Diffusion was trained on 2.3 billion images scraped from the internet, from Pinterest, Tumblr, Flickr, without anyone's permission. The US legal framework largely excludes publicly available data from privacy protections. Do you think &quot;publicly available&quot; and &quot;consented to AI training&quot; mean the same thing? Where is the line for you?</li>
-<li>The article identifies a specific harm: generative AI can produce false information about real, named individuals. This raises questions of defamation, safety, and human dignity as well as bias. If you were building a system capable of this, at what point would you feel personally responsible for what it produces?</li>
+<li>Stable Diffusion was trained on 2.3 billion images <a class="gl" href="glossary.html#g-web-scraping" data-tip="Collecting large amounts of content from websites automatically with a program. Much of the training data for generative AI was gathered this way.">scraped</a> from the internet, from Pinterest, Tumblr, Flickr, without anyone's permission. The US legal framework largely excludes publicly available data from privacy protections. Do you think &quot;publicly available&quot; and &quot;consented to AI training&quot; mean the same thing? Where is the line for you?</li>
+<li>The article identifies a specific harm: generative AI can produce false information about real, named individuals. This raises questions of defamation, safety, and human dignity as well as <a class="gl" href="glossary.html#g-bias" data-tip="A consistent tilt in a person's or a system's judgments that favors some people or outcomes over others. In AI it usually means outputs that are less accurate or less favorable for a particular group.">bias</a>. If you were building a system capable of this, at what point would you feel personally responsible for what it produces?</li>
 </ul>
 <hr>
 <p>➕ <strong><a href="https://www.netflix.com/title/80117542">The Great Hack</a></strong> — Netflix · 2019 · ~114 min watch · 🔴 Paywalled · [Media]</p>
-<p>A documentary about Cambridge Analytica and what happens when data collection and AI meet persuasion at scale. The film is explicitly about political manipulation, though its underlying question (who owns your data and what can they do with it) applies to gen AI as well.</p>
+<p>A documentary about Cambridge Analytica and what happens when data collection and AI meet <a class="gl" href="glossary.html#g-persuasion" data-tip="Influencing someone's beliefs or choices through communication, such as arguments, evidence, or emotional appeals.">persuasion</a> <a class="gl" href="glossary.html#g-scale" data-tip="The number of people or decisions a system reaches. A system working at scale repeats the same choice many times, so the system's errors and benefits both multiply.">at scale</a>. The film is explicitly about political <a class="gl" href="glossary.html#g-manipulation" data-tip="Influencing someone's beliefs or choices by going around their reasoning, for instance by exploiting their emotions, habits, or blind spots.">manipulation</a>, though its underlying question (who owns your data and what can they do with it) applies to gen AI as well.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
 <li>The Great Hack centers on a data company that harvested millions of people's Facebook data without consent and used it to target political advertising. The people whose data was used had no idea it was happening. How does that compare to the way your data is used by the AI tools you use today? Do you feel more informed, or is the dynamic essentially the same?</li>
@@ -805,7 +853,7 @@
 </ul>
 <hr>
 <p>➕ <strong><a href="https://www.nytimes.com/2020/01/24/opinion/sunday/surveillance-capitalism.html">&quot;You Are Now Remotely Controlled&quot;</a></strong> — Shoshana Zuboff, New York Times · 2020 · ~15 min read · 🟡 Limited access · [Media]</p>
-<p>Zuboff's essay on &quot;surveillance capitalism,&quot; the business model of extracting and selling data about behavior. This predates gen AI but describes the infrastructure that makes training data available. It is worth reading if you want to understand the economic forces behind privacy erosion.</p>
+<p>Zuboff's essay on &quot;<a class="gl" href="glossary.html#g-surveillance-capitalism" data-tip="Shoshana Zuboff's name for a business model that collects data about people's behavior and sells predictions about that behavior, often to advertisers.">surveillance capitalism</a>,&quot; the business model of extracting and selling data about behavior. This predates gen AI but describes the infrastructure that makes training data available. It is worth reading if you want to understand the economic forces behind privacy erosion.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
 <li>Zuboff coined the term &quot;surveillance capitalism&quot; to describe a business model where your behavior (what you click, pause on, search for, feel) is the product being sold. She argues this is the core of how these companies make money. Does knowing that change how you use these tools?</li>
@@ -813,15 +861,15 @@
 </ul>
 <hr>
 <h2 id="assignment">Assignment</h2>
-<p><strong>Writing goal this week:</strong> Topic narrowing and thesis selection</p>
-<p>Move from your Week 1 brainstorm to one focused, arguable claim. See the <a href="assign-02.html">Week 2 Assignment</a> for detailed instructions.</p>
+<p><strong>Writing goal this week:</strong> Topic narrowing and <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a> selection</p>
+<p>Move from your Week 1 <a class="gl" href="glossary.html#g-brainstorming" data-tip="Writing down as many ideas as you can in a set time, without judging them, so you have raw material to choose from later. It is the Week 1 writing goal.">brainstorm</a> to one focused, arguable claim. See the <a href="assign-02.html">Week 2 Assignment</a> for detailed instructions.</p>
 <p>Submit your Google Doc link to Canvas.</p>
 <hr>
 <h2 id="reflection">Reflection</h2>
 <p>Choose one source from this week's <strong>Primary Content</strong>. Ground your reflection in something specific from that source, such as a claim you agreed or disagreed with, or a moment that surprised you. Then apply the three-step structure:</p>
-<p><strong>Gut check.</strong> What was your honest, immediate reaction?
-<strong>Trace it.</strong> Where does that reaction come from in your values or experience?
-<strong>Challenge it.</strong> What would someone who sees it differently say? Does their case have merit?</p>
+<p><strong><a class="gl" href="glossary.html#g-gut-check" data-tip="The first step of a reflection. You write your honest, immediate reaction to something specific in a source.">Gut check</a>.</strong> What was your honest, immediate reaction?
+<strong><a class="gl" href="glossary.html#g-trace-it" data-tip="The second step of a reflection. You work out where your reaction comes from in your values, your experience, or the communities you belong to.">Trace it</a>.</strong> Where does that reaction come from in your values or experience?
+<strong><a class="gl" href="glossary.html#g-challenge-it" data-tip="The third step of a reflection. You state the strongest case against your position and test your position against it.">Challenge it</a>.</strong> What would someone who sees it differently say? Does their case have merit?</p>
 <p>Write about 150 words. The source-specific prompts above are starting points. You may use one of those or follow your own reaction. Make sure your reflection is anchored to something specific from the content you chose.</p>
 <p>See <a href="reflection-instructions.html">Reflection Instructions</a> for the full guide.</p>
 <hr>
@@ -830,35 +878,35 @@
 <p><strong>This week's discussion directions:</strong></p>
 <ul>
 <li>
-<p>What would it mean to genuinely consent to how your data is used in AI training? (That is, in practice and not only on paper.)</p>
+<p>What would it mean to genuinely <a class="gl" href="glossary.html#g-consent" data-tip="Permission a person gives for something to be done to them or with their information.">consent</a> to how your data is used in AI training? (That is, in practice and not only on paper.)</p>
 </li>
 <li>
-<p>Who gets to define privacy in a world where the model already knows things about you?</p>
+<p>Who gets to define <a class="gl" href="glossary.html#g-privacy" data-tip="A person's ability to keep information about themselves, and parts of their life, from others. This includes control over who collects and uses that information.">privacy</a> in a world where the model already knows things about you?</p>
 </li>
 <li>
 <p>Where do you personally draw the line between acceptable data use and violation of privacy, and why there?</p>
 </li>
 </ul>
-<p><strong>Essay share:</strong> Each person shares the thesis you are working with and one thing you are wrestling with about it. The group responds with reactions and questions. Does your thesis hold up to their questions? What did they ask that made you think? Close with one collaborative paragraph on what privacy means in the context of gen AI.</p>
+<p><strong><a class="gl" href="glossary.html#g-essay-share" data-tip="The round in each meeting where everyone briefly says what they did on their essay that week and one thing they are wrestling with.">Essay share</a>:</strong> Each person shares the <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a> you are working with and one thing you are wrestling with about it. The group responds with reactions and questions. Does your thesis hold up to their questions? What did they ask that made you think? Close with one <a class="gl" href="glossary.html#g-collaborative-paragraph" data-tip="The paragraph of 150 to 200 words your group writes together at the end of each meeting, recording what you explored and where you agreed or disagreed.">collaborative paragraph</a> on what privacy means in the context of <a class="gl" href="glossary.html#g-generative-ai" data-tip="AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples.">gen AI</a>.</p>
 <p>See <a href="meeting-instructions.html">Meeting Instructions</a> for the full guide.</p>
 <hr>
 <h2 id="quiz-vocabulary">Quiz Vocabulary</h2>
 <ul>
-<li>Privacy</li>
-<li>Surveillance</li>
-<li>Consent</li>
-<li>Data ownership</li>
-<li>Training data</li>
-<li>Right to be forgotten</li>
-<li>Synthetic media</li>
-<li>Thesis</li>
-<li>Argument</li>
-<li>&quot;So what&quot; (the skill of testing whether a claim has stakes)</li>
-<li>Personal data</li>
-<li>Data lifecycle</li>
-<li>Meaningful consent</li>
-<li>Deepfake</li>
-<li>GDPR</li>
+<li><a class="gl" href="glossary.html#g-privacy" data-tip="A person's ability to keep information about themselves, and parts of their life, from others. This includes control over who collects and uses that information.">Privacy</a></li>
+<li><a class="gl" href="glossary.html#g-surveillance" data-tip="Systematic watching or recording of people's behavior by a government, a company, or another person, often to predict or influence what they do.">Surveillance</a></li>
+<li><a class="gl" href="glossary.html#g-consent" data-tip="Permission a person gives for something to be done to them or with their information.">Consent</a></li>
+<li><a class="gl" href="glossary.html#g-data-ownership" data-tip="The question of who has rights over a piece of data: the person it describes, the organization that collected it, or the company that stores it or trains a model on it.">Data ownership</a></li>
+<li><a class="gl" href="glossary.html#g-training-data" data-tip="The collection of examples (text, images, code, and so on) a model learns its patterns from. A model's outputs reflect what is in the training data and what is missing from the training data.">Training data</a></li>
+<li><a class="gl" href="glossary.html#g-right-to-be-forgotten" data-tip="A right under the EU's GDPR to have an organization delete personal data about you in certain cases (for instance when the data is no longer needed, or you withdraw your consent), with some exceptions.">Right to be forgotten</a></li>
+<li><a class="gl" href="glossary.html#g-synthetic-media" data-tip="Images, audio, video, or text generated or altered by AI, often made to look or sound real.">Synthetic media</a></li>
+<li><a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">Thesis</a></li>
+<li><a class="gl" href="glossary.html#g-argument" data-tip="A claim together with the reasons and evidence offered to support it.">Argument</a></li>
+<li>&quot;<a class="tk" href="toolkit.html#so-what" data-tip="The so what skill means asking &quot;so what?&quot; of an observation, again and again, until you reach a claim with real stakes. (A click opens it in the toolkit.)">So what</a>&quot; (the skill of testing whether a claim has stakes)</li>
+<li><a class="gl" href="glossary.html#g-personal-data" data-tip="Any information that identifies a person or could be linked back to them, such as a name, a face, a location, a voice, or a browsing history.">Personal data</a></li>
+<li><a class="gl" href="glossary.html#g-data-lifecycle" data-tip="The full path a piece of data takes, from collection through storage, use (including model training), and sharing, to deletion.">Data lifecycle</a></li>
+<li><a class="gl" href="glossary.html#g-meaningful-consent" data-tip="Consent given by someone who understands what they are agreeing to, has a real option to say no, and can withdraw it later.">Meaningful consent</a></li>
+<li><a class="gl" href="glossary.html#g-deepfake" data-tip="Synthetic media that shows a real person saying or doing something they never said or did.">Deepfake</a></li>
+<li><a class="gl" href="glossary.html#g-gdpr" data-tip="The General Data Protection Regulation, the European Union's main data protection law (applied since 2018). It covers organizations in the EU, and organizations elsewhere that offer goods or services to people in the EU or track their behavior.">GDPR</a></li>
 </ul>
 
   </main>
@@ -955,6 +1003,20 @@
           submit.textContent = 'Send';
         }
       });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
     })();
   </script>
 

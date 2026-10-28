@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glossary — Computer Ethics</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body)"></script>
+  <style>
+    /* Per-course accent (slate blue). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #3A5F8A;
+      --course-accent-dark: #2C4A6B;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes { max-width: 960px; }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+      main a.gl, main a.tk { text-decoration: none; }
+      main a.gl::after, main a.tk::after { display: none; }
+    }
+    /* ── Glossary terms and toolkit skills ──
+       Linked at build time by ../glossary-links.js. The hover text is the
+       data-tip attribute, so it never enters the link text or the search index.
+       Glossary: dotted underline. Toolkit: solid forest-green underline. */
+    main a.gl, main a.gl:visited,
+    main a.tk, main a.tk:visited {
+      color: inherit;
+      text-decoration-line: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 3px;
+      position: relative;
+    }
+    main a.gl, main a.gl:visited { text-decoration-style: dotted; text-decoration-color: var(--course-accent); cursor: help; }
+    main a.tk, main a.tk:visited { text-decoration-style: solid; text-decoration-color: #2D5016; }
+    main a.gl:hover, main a.tk:hover { color: var(--course-accent); }
+    main a.gl::after, main a.tk::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+      width: 22rem; max-width: calc(100vw - 2rem);
+      padding: 0.5rem 0.75rem; border-radius: 3px;
+      background: var(--course-accent-dark); color: #fff;
+      font-size: 0.83rem; line-height: 1.45; font-weight: 400; font-style: normal;
+      text-align: left; text-transform: none; white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      /* display, not visibility: a hidden box near the right edge would
+         otherwise widen the page and add a sideways scrollbar */
+      display: none;
+    }
+    main a.tk::after { background: #1E360E; }
+    main a.tip-left::after { left: auto; right: 0; }
+    main a.gl:hover::after, main a.gl:focus-visible::after,
+    main a.tk:hover::after, main a.tk:focus-visible::after { display: block; }
+    /* On a touch screen a tap follows the link to the full entry. */
+    @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
+
+    .gl-letters { font-size: 0.95rem; line-height: 1.9; }
+    dl.gl-list { margin: 0.75rem 0 0; }
+    dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
+    dl.gl-list dd { margin: 0.15rem 0 0 1.25rem; }
+    dl.gl-list dt:target { background: #F0D090; border-radius: 2px; padding: 0 0.2rem; }
+    .gl-where { font-size: 0.85rem; white-space: nowrap; }
+    .gl-where a { color: #5A5550; }
+
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Computer Ethics</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        <a href="syllabus.html">Syllabus</a>
+        <span class="site-nav-sep">·</span>
+        <a href="essay.html">Essay</a>
+        <span class="site-nav-sep">·</span>
+        <a href="reflection-instructions.html">Reflection</a>
+        <span class="site-nav-sep">·</span>
+        <a href="meeting-instructions.html">Meeting</a>
+        <span class="site-nav-sep">·</span>
+        <a href="toolkit.html">Toolkit</a>
+        <span class="site-nav-sep">·</span>
+        <strong>Glossary</strong>
+        <span class="site-nav-sep">·</span>
+        <a href="ai-use.html">AI Use</a>
+        <span class="site-nav-sep">·</span>
+        <a href="extra-labor.html">Extra Labor</a>
+        <span class="site-nav-sep">·</span>
+        <a href="canvas-grades.html">Canvas Grades</a>
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+        
+          
+            <a href="week-01.html">1</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-02.html">2</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-03.html">3</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-04.html">4</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-05.html">5</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-06.html">6</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-07.html">7</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-08.html">8</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-09.html">9</a>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+            <a href="week-10.html">10</a>
+          
+          
+        
+      </div>
+    </nav>
+
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+  <main data-pagefind-body>
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <h1>Glossary</h1>
+
+<p>This page defines the terms used across the course, including every term on the weekly quiz vocabulary lists. Each entry names the week or page that introduces the term. Elsewhere on the site these terms have a dotted underline, and hovering over one shows its definition (a click brings you here). Skills from the <a href="toolkit.html">Writing Toolkit</a> have a solid green underline, and a click on one opens its section of the toolkit.</p>
+
+<p class="gl-letters"><a href="#letter-a">A</a> · <a href="#letter-b">B</a> · <a href="#letter-c">C</a> · <a href="#letter-d">D</a> · <a href="#letter-e">E</a> · <a href="#letter-f">F</a> · <a href="#letter-g">G</a> · <a href="#letter-h">H</a> · <a href="#letter-i">I</a> · <a href="#letter-j">J</a> · <a href="#letter-l">L</a> · <a href="#letter-m">M</a> · <a href="#letter-n">N</a> · <a href="#letter-o">O</a> · <a href="#letter-p">P</a> · <a href="#letter-r">R</a> · <a href="#letter-s">S</a> · <a href="#letter-t">T</a> · <a href="#letter-u">U</a> · <a href="#letter-v">V</a> · <a href="#letter-w">W</a> · <a href="#letter-x">X</a> · <a href="#toolkit-skills">Toolkit</a></p>
+
+
+<h2 id="letter-a">A</h2>
+<dl class="gl-list">
+  <dt id="g-abstract">abstract</dt>
+  <dd>A single paragraph (about 150 words in this course) that compresses a whole paper: the problem, the position it takes, and what it proposes. <span class="gl-where"><a href="week-10.html">Week 10</a></span></dd>
+  <dt id="g-accountability">accountability</dt>
+  <dd>Being answerable for a decision or outcome. That means having to explain it, and facing consequences if it caused harm. <span class="gl-where"><a href="week-08.html">Week 8</a></span></dd>
+  <dt id="g-active-voice">active voice</dt>
+  <dd>A sentence form in which the subject performs the action, as in &quot;the team shipped the model&quot;. <span class="gl-where"><a href="week-09.html">Week 9</a></span></dd>
+  <dt id="g-ai-companion">AI companion</dt>
+  <dd>A chatbot built to act as a friend, partner, or confidant over a long period of conversations. <span class="gl-where"><a href="week-07.html">Week 7</a></span></dd>
+  <dt id="g-hallucination">AI hallucination</dt>
+  <dd>False or made-up content that an AI system produces in the same fluent, confident way as accurate content, such as an invented court case or citation. <span class="gl-where"><a href="week-09.html">Week 9</a></span></dd>
+  <dt id="g-algorithm">algorithm</dt>
+  <dd>A set of step-by-step instructions a computer follows to turn inputs into an output, such as a score, a ranking, or a decision. <span class="gl-where"><a href="week-01.html">Week 1</a></span></dd>
+  <dt id="g-algorithmic-audit">algorithmic audit</dt>
+  <dd>A review, often by an outside party, that tests an algorithm&#39;s outputs (and where possible the data and code behind them) for errors, bias, and harm. <span class="gl-where"><a href="week-08.html">Week 8</a></span></dd>
+  <dt id="g-algorithmic-bias">algorithmic bias</dt>
+  <dd>Bias in the outputs of an algorithm. It usually comes from the training data, from proxy variables, or from choices about what the system is built to optimize. <span class="gl-where"><a href="week-03.html">Week 3</a></span></dd>
+  <dt id="g-antithesis">antithesis</dt>
+  <dd>In a dialectic, a second position that answers or opposes the first one (the thesis). <span class="gl-where"><a href="meeting-instructions.html">Meeting Instructions</a></span></dd>
+  <dt id="g-argument">argument</dt>
+  <dd>A claim together with the reasons and evidence offered to support it. <span class="gl-where"><a href="week-02.html">Week 2</a></span></dd>
+  <dt id="g-assertion">assertion</dt>
+  <dd>A claim stated without support. It may be true, though you have only the writer&#39;s word for it. <span class="gl-where"><a href="week-06.html">Week 6</a></span></dd>
+  <dt id="g-auditability">auditability</dt>
+  <dd>How easily outside reviewers can check what a system does. It depends on their access to the system&#39;s data, code, and decisions. <span class="gl-where"><a href="week-08.html">Week 8</a></span></dd>
+  <dt id="g-automation">automation</dt>
+  <dd>Using machines or software to do work that people used to do. <span class="gl-where"><a href="week-05.html">Week 5</a></span></dd>
+  <dt id="g-autonomy">autonomy</dt>
+  <dd>A person&#39;s ability to make their own choices, based on their own reasoning and values. <span class="gl-where"><a href="week-07.html">Week 7</a></span></dd>
+</dl>
+
+<h2 id="letter-b">B</h2>
+<dl class="gl-list">
+  <dt id="g-bias">bias</dt>
+  <dd>A consistent tilt in a person&#39;s or a system&#39;s judgments that favors some people or outcomes over others. In AI it usually means outputs that are less accurate or less favorable for a particular group. <span class="gl-where"><a href="week-01.html">Week 1</a></span></dd>
+  <dt id="g-bibliography">bibliography</dt>
+  <dd>The list of full citations for every source a paper uses, placed at the end of the paper. <span class="gl-where"><a href="toolkit.html">Toolkit</a></span></dd>
+  <dt id="g-black-box">black box</dt>
+  <dd>A system whose inputs and outputs can be seen while the process connecting them is hidden, either kept secret by the owner or too complex to trace. <span class="gl-where"><a href="week-08.html">Week 8</a></span></dd>
+  <dt id="g-brainstorming">brainstorming</dt>
+  <dd>Writing down as many ideas as you can in a set time, without judging them, so you have raw material to choose from later. It is the Week 1 writing goal. <span class="gl-where"><a href="week-01.html">Week 1</a></span></dd>
+</dl>
+
+<h2 id="letter-c">C</h2>
+<dl class="gl-list">
+  <dt id="g-challenge-it">challenge it</dt>
+  <dd>The third step of a reflection. You state the strongest case against your position and test your position against it. <span class="gl-where"><a href="reflection-instructions.html">Reflection Instructions</a></span></dd>
+  <dt id="g-chatbot">chatbot</dt>
+  <dd>A program that holds a conversation in text or speech. Most current chatbots are built on large language models. <span class="gl-where"><a href="week-07.html">Week 7</a></span></dd>
+  <dt id="g-civil-disobedience">civil disobedience</dt>
+  <dd>Breaking a law openly and on purpose to protest a law or policy you believe is unjust, usually without violence and while accepting the legal consequences. <span class="gl-where"><a href="week-04.html">Week 4</a></span></dd>
+  <dt id="g-clarity">clarity</dt>
+  <dd>The quality of writing that can be understood on the first reading. <span class="gl-where"><a href="week-09.html">Week 9</a></span></dd>
+  <dt id="g-class-action">class action</dt>
+  <dd>A lawsuit in which one or a few people sue on behalf of a whole group with the same claim, such as all the authors whose books were used to train a model. <span class="gl-where"><a href="week-04.html">Week 4</a></span></dd>
+  <dt id="g-code-of-ethics">code of ethics</dt>
+  <dd>A profession&#39;s written statement of the principles its members agree to follow, such as the ACM Code of Ethics for computing. <span class="gl-where"><a href="week-10.html">Week 10</a></span></dd>
+  <dt id="g-coded-gaze">coded gaze</dt>
+  <dd>Joy Buolamwini&#39;s name for the assumptions and blind spots of a system&#39;s builders that become built into the system. <span class="gl-where"><a href="week-03.html">Week 3</a></span></dd>
+  <dt id="g-coercion">coercion</dt>
+  <dd>Getting someone to do something by threat or force, so that they have no acceptable alternative. <span class="gl-where"><a href="week-07.html">Week 7</a></span></dd>
+  <dt id="g-collaborative-paragraph">collaborative paragraph</dt>
+  <dd>The paragraph of 150 to 200 words your group writes together at the end of each meeting, recording what you explored and where you agreed or disagreed. <span class="gl-where"><a href="meeting-instructions.html">Meeting Instructions</a></span></dd>
+  <dt id="g-consent">consent</dt>
+  <dd>Permission a person gives for something to be done to them or with their information. <span class="gl-where"><a href="week-02.html">Week 2</a></span></dd>
+  <dt id="g-consequence">consequence</dt>
+  <dd>A result that follows from an action or decision, including results nobody intended. <span class="gl-where"><a href="week-01.html">Week 1</a></span></dd>
+  <dt id="g-consequentialism">consequentialism</dt>
+  <dd>A family of ethical theories that judge actions by their results. The toolkit question &quot;Who is harmed?&quot; draws on it. <span class="gl-where"><a href="toolkit.html">Toolkit</a></span></dd>
+  <dt id="g-copyright">copyright</dt>
+  <dd>A legal right that gives the creator of an original work (writing, art, music, code) control over copying, distributing, adapting, and publicly performing or displaying it for a limited time. It covers a work&#39;s specific expression, and copyright law leaves ideas and general styles open to others. <span class="gl-where"><a href="week-04.html">Week 4</a></span></dd>
+  <dt id="g-copyright-infringement">copyright infringement</dt>
+  <dd>Copying, distributing, or adapting a copyrighted work without the holder&#39;s permission and outside a legal exception such as fair use. <span class="gl-where"><a href="week-04.html">Week 4</a></span></dd>
+</dl>
+
+<h2 id="letter-d">D</h2>
+<dl class="gl-list">
+  <dt id="g-dark-pattern">dark pattern</dt>
+  <dd>A design trick in an app or website that steers users into something they did not mean to do, such as signing up, sharing data, or staying longer. <span class="gl-where"><a href="week-07.html">Week 7</a></span></dd>
+  <dt id="g-data-lifecycle">data lifecycle</dt>
+  <dd>The full path a piece of data takes, from collection through storage, use (including model training), and sharing, to deletion. <span class="gl-where"><a href="week-02.html">Week 2</a></span></dd>
+  <dt id="g-data-ownership">data ownership</dt>
+  <dd>The question of who has rights over a piece of data: the person it describes, the organization that collected it, or the company that stores it or trains a model on it. <span class="gl-where"><a href="week-02.html">Week 2</a></span></dd>
+  <dt id="g-deepfake">deepfake</dt>
+  <dd>Synthetic media that shows a real person saying or doing something they never said or did. <span class="gl-where"><a href="week-02.html">Week 2</a></span></dd>
+  <dt id="g-demographic-parity">demographic parity</dt>
+  <dd>One definition of fairness. A system meets it when each group receives the positive outcome (a loan, an interview) at the same rate. <span class="gl-where"><a href="week-03.html">Week 3</a></span></dd>
+  <dt id="g-deontology">deontology</dt>
+  <dd>A family of ethical theories that judge actions by duties and rules, so that some actions are right or wrong whatever their results. The toolkit question &quot;What are our obligations?&quot; draws on it. <span class="gl-where"><a href="toolkit.html">Toolkit</a></span></dd>
+  <dt id="g-derivative-work">derivative work</dt>
+  <dd>A new work based on an existing one, such as a translation, a sequel, or an adaptation. Making one usually requires the copyright holder&#39;s permission. <span class="gl-where"><a href="week-04.html">Week 4</a></span></dd>
+  <dt id="g-dialectic">dialectic</dt>
+  <dd>A discussion in which people start from different positions and work together toward a fuller understanding of the question. <span class="gl-where"><a href="meeting-instructions.html">Meeting Instructions</a></span></dd>
+  <dt id="g-diffuse-accountability">diffuse accountability</dt>
+  <dd>Accountability spread so thinly across people and organizations that each one can point to another. <span class="gl-where"><a href="week-09.html">Week 9</a></span></dd>
+  <dt id="g-disinformation">disinformation</dt>
+  <dd>False information created or spread on purpose to deceive. <span class="gl-where"><a href="week-06.html">Week 6</a></span></dd>
+  <dt id="g-disparate-impact">disparate impact</dt>
+  <dd>A pattern where a rule or system applied to everyone produces noticeably worse outcomes for a group defined by a protected characteristic such as race or sex. In US employment and housing law it can count as discrimination without any intent, unless the organization shows the rule serves a legitimate need. <span class="gl-where"><a href="week-03.html">Week 3</a></span></dd>
+  <dt id="g-dmca">DMCA</dt>
+  <dd>The Digital Millennium Copyright Act (1998), a US copyright law. Among other things it makes removing copyright information from a work illegal in some cases, and it sets the notice-and-takedown process for websites. <span class="gl-where"><a href="week-04.html">Week 4</a></span></dd>
+  <dt id="g-duty-of-care">duty of care</dt>
+  <dd>A legal obligation to take reasonable care to avoid harming others who could be affected by what you do. <span class="gl-where"><a href="week-09.html">Week 9</a></span></dd>
+</dl>
+
+<h2 id="letter-e">E</h2>
+<dl class="gl-list">
+  <dt id="g-emotional-ai">emotional AI</dt>
+  <dd>AI systems built to infer people&#39;s emotions from facial expressions, voice, or text, and to respond to those inferences. <span class="gl-where"><a href="week-07.html">Week 7</a></span></dd>
+  <dt id="g-epistemic-agency">epistemic agency</dt>
+  <dd>Your ability to form your own reliable beliefs by gathering and weighing evidence yourself. <span class="gl-where"><a href="week-06.html">Week 6</a></span></dd>
+  <dt id="g-epistemic-harm">epistemic harm</dt>
+  <dd>Harm to people&#39;s ability to know what is true. For instance, a flood of fakes can make it harder to trust any evidence at all. <span class="gl-where"><a href="week-06.html">Week 6</a></span></dd>
+  <dt id="g-essay-share">essay share</dt>
+  <dd>The round in each meeting where everyone briefly says what they did on their essay that week and one thing they are wrestling with. <span class="gl-where"><a href="meeting-instructions.html">Meeting Instructions</a></span></dd>
+  <dt id="g-ethical-reasoning">ethical reasoning</dt>
+  <dd>Working through a question of right and wrong step by step, with reasons that someone else can follow, check, and challenge. <span class="gl-where"><a href="week-01.html">Week 1</a></span></dd>
+  <dt id="g-eu-ai-act">EU AI Act</dt>
+  <dd>The European Union&#39;s law regulating AI systems (adopted in 2024). The stricter rules apply to uses the law classes as high risk, such as hiring and credit scoring. <span class="gl-where"><a href="week-08.html">Week 8</a></span></dd>
+  <dt id="g-evidence">evidence</dt>
+  <dd>Something concrete a reader can examine and check, such as data, a quotation, a documented case, or the findings of a study. <span class="gl-where"><a href="week-06.html">Week 6</a></span></dd>
+  <dt id="g-explainability">explainability</dt>
+  <dd>How well people can understand why a system produced a particular output. <span class="gl-where"><a href="week-08.html">Week 8</a></span></dd>
+  <dt id="g-extra-labor">extra labor</dt>
+  <dd>Optional work that raises your grade above the base B: +0.1 for each extra reflection and +0.3 for a larger project, up to a 4.0. <span class="gl-where"><a href="extra-labor.html">Extra Labor</a></span></dd>
+</dl>
+
+<h2 id="letter-f">F</h2>
+<dl class="gl-list">
+  <dt id="g-facial-recognition">facial recognition</dt>
+  <dd>Software that identifies or verifies a person by comparing an image of their face against stored images. <span class="gl-where"><a href="week-03.html">Week 3</a></span></dd>
+  <dt id="g-facilitator">facilitator</dt>
+  <dd>The group member who hosts a week&#39;s meeting by opening it, watching the time, and inviting quieter people in. The role rotates each week. <span class="gl-where"><a href="meeting-instructions.html">Meeting Instructions</a></span></dd>
+  <dt id="g-fair-use">fair use</dt>
+  <dd>A US legal exception that allows some uses of copyrighted work without permission. Courts weigh the purpose of the use, the kind of work, how much was used, and the effect on the market for the original. <span class="gl-where"><a href="week-04.html">Week 4</a></span></dd>
+  <dt id="g-fairness">fairness</dt>
+  <dd>Treating people justly, so that nobody is disadvantaged for reasons that should not matter. Computer scientists have written several precise definitions of fairness, and some of them conflict, so a system usually cannot meet all of them at once. <span class="gl-where"><a href="week-03.html">Week 3</a></span></dd>
+  <dt id="g-feedback-loop">feedback loop</dt>
+  <dd>A cycle in which a system&#39;s outputs feed back into the system as new inputs. A biased decision can produce data that makes the next decision more biased (bias amplification). <span class="gl-where"><a href="week-03.html">Week 3</a></span></dd>
+  <dt id="g-filler-language">filler language</dt>
+  <dd>Words and phrases that add length without adding meaning, such as &quot;it is important to note that&quot; or &quot;in today&#39;s society&quot;. <span class="gl-where"><a href="week-09.html">Week 9</a></span></dd>
+</dl>
+
+<h2 id="letter-g">G</h2>
+<dl class="gl-list">
+  <dt id="g-gdpr">GDPR</dt>
+  <dd>The General Data Protection Regulation, the European Union&#39;s main data protection law (applied since 2018). It covers organizations in the EU, and organizations elsewhere that offer goods or services to people in the EU or track their behavior. <span class="gl-where"><a href="week-02.html">Week 2</a></span></dd>
+  <dt id="g-generative-ai">generative AI</dt>
+  <dd>AI systems that produce new content (text, images, audio, video, or code) in response to a prompt. ChatGPT, Claude, and Stable Diffusion are examples. <span class="gl-where"><a href="week-01.html">Week 1</a></span></dd>
+  <dt id="g-gibbs-reflective-cycle">Gibbs reflective cycle</dt>
+  <dd>A six-step structure for reflective writing: description, feelings, evaluation, analysis, conclusion, and action plan. <span class="gl-where"><a href="extra-labor.html">Extra Labor</a></span></dd>
+  <dt id="g-gut-check">gut check</dt>
+  <dd>The first step of a reflection. You write your honest, immediate reaction to something specific in a source. <span class="gl-where"><a href="reflection-instructions.html">Reflection Instructions</a></span></dd>
+</dl>
+
+<h2 id="letter-h">H</h2>
+<dl class="gl-list">
+  <dt id="g-harm">harm</dt>
+  <dd>A setback to someone&#39;s interests, such as lost money, a lost opportunity, an injury, distress, or damage to their reputation. Harm can be direct or indirect, and intended or accidental. <span class="gl-where"><a href="week-01.html">Week 1</a></span></dd>
+  <dt id="g-hedge">hedge</dt>
+  <dd>A word such as &quot;may&quot;, &quot;likely&quot;, or &quot;often&quot; that tells your reader how strongly your evidence supports a claim. In this course a hedge should match the strength of that evidence. <span class="gl-where"><a href="week-09.html">Week 9</a></span></dd>
+</dl>
+
+<h2 id="letter-i">I</h2>
+<dl class="gl-list">
+  <dt id="g-informed-consent">informed consent</dt>
+  <dd>Consent given after the person has been told, in terms they can understand, what will happen, what the risks are, and what other options they have. The idea comes from medical research ethics. <span class="gl-where"><a href="week-07.html">Week 7</a></span></dd>
+  <dt id="g-integrity">integrity</dt>
+  <dd>Acting consistently with your values, and being willing to explain and stand behind your decisions to the people they affect. <span class="gl-where"><a href="week-01.html">Week 1</a></span></dd>
+  <dt id="g-intellectual-property">intellectual property</dt>
+  <dd>Creations of the mind that the law treats as property, such as inventions (patents), brand names (trademarks), and creative works (copyright). <span class="gl-where"><a href="week-04.html">Week 4</a></span></dd>
+</dl>
+
+<h2 id="letter-j">J</h2>
+<dl class="gl-list">
+  <dt id="g-journalism">journalism</dt>
+  <dd>Reporting on current events, usually by news organizations, where editors (and at some outlets fact-checkers) check stories before quick publication. Journalism is usually not peer-reviewed. <span class="gl-where"><a href="week-06.html">Week 6</a></span></dd>
+</dl>
+
+<h2 id="letter-l">L</h2>
+<dl class="gl-list">
+  <dt id="g-labor-displacement">labor displacement</dt>
+  <dd>Workers losing their jobs or tasks because machines or software now do that work. <span class="gl-where"><a href="week-05.html">Week 5</a></span></dd>
+  <dt id="g-labor-based-grading">labor-based grading</dt>
+  <dd>A grading system based on how much of the assigned work you complete with a genuine attempt. In this course completing all required work (with up to 8 late) earns a B (3.1), and extra labor raises it. <span class="gl-where"><a href="syllabus.html">Syllabus</a></span></dd>
+  <dt id="g-large-language-model">large language model (LLM)</dt>
+  <dd>A neural network trained on very large amounts of text to predict the next word, and usually trained further to follow instructions and hold a conversation. ChatGPT, Claude, and Gemini are built on large language models. <span class="gl-where"><a href="week-03.html">Week 3</a></span></dd>
+  <dt id="g-liability">liability</dt>
+  <dd>Legal responsibility for a harm, which can require paying damages or facing other penalties. <span class="gl-where"><a href="week-09.html">Week 9</a></span></dd>
+  <dt id="g-liars-dividend">liar&#39;s dividend</dt>
+  <dd>The benefit a liar gets once deepfakes are common. A real recording can be dismissed as probably fake. <span class="gl-where"><a href="week-06.html">Week 6</a></span></dd>
+  <dt id="g-licensing">licensing</dt>
+  <dd>Permission from a rights holder to use a work under agreed terms, often for payment. <span class="gl-where"><a href="week-04.html">Week 4</a></span></dd>
+  <dt id="g-living-essay">living essay</dt>
+  <dd>The single Google Doc you revise every week, which grows into your final paper by Week 10. <span class="gl-where"><a href="essay.html">Essay Instructions</a></span></dd>
+</dl>
+
+<h2 id="letter-m">M</h2>
+<dl class="gl-list">
+  <dt id="g-manipulation">manipulation</dt>
+  <dd>Influencing someone&#39;s beliefs or choices by going around their reasoning, for instance by exploiting their emotions, habits, or blind spots. <span class="gl-where"><a href="week-07.html">Week 7</a></span></dd>
+  <dt id="g-many-hands-problem">many-hands problem</dt>
+  <dd>The difficulty of holding anyone responsible when many people each made a small contribution to a harmful outcome. <span class="gl-where"><a href="week-09.html">Week 9</a></span></dd>
+  <dt id="g-meaningful-consent">meaningful consent</dt>
+  <dd>Consent given by someone who understands what they are agreeing to, has a real option to say no, and can withdraw it later. <span class="gl-where"><a href="week-02.html">Week 2</a></span></dd>
+  <dt id="g-misinformation">misinformation</dt>
+  <dd>False or misleading information shared without an intent to deceive. <span class="gl-where"><a href="week-06.html">Week 6</a></span></dd>
+  <dt id="g-moral-outsourcing">moral outsourcing</dt>
+  <dd>Rumman Chowdhury&#39;s name for handing the blame for a decision to a system or to someone else in the chain, as in &quot;the algorithm decided&quot;. <span class="gl-where"><a href="week-09.html">Week 9</a></span></dd>
+  <dt id="g-moral-responsibility">moral responsibility</dt>
+  <dd>Being the right person to praise or blame for an outcome, because of what you did, decided, or failed to do. <span class="gl-where"><a href="week-09.html">Week 9</a></span></dd>
+  <dt id="g-motivated-reasoning">motivated reasoning</dt>
+  <dd>Weighing evidence in a way that favors the conclusion you already want. <span class="gl-where"><a href="week-06.html">Week 6</a></span></dd>
+</dl>
+
+<h2 id="letter-n">N</h2>
+<dl class="gl-list">
+  <dt id="g-negligence">negligence</dt>
+  <dd>In law, failing to take the care a reasonable person would take, so that someone is harmed. <span class="gl-where"><a href="week-09.html">Week 9</a></span></dd>
+  <dt id="g-nudging">nudging</dt>
+  <dd>Arranging how choices are presented (the default option, the order, the wording) so that people tend toward one choice while every option stays open to them. <span class="gl-where"><a href="week-07.html">Week 7</a></span></dd>
+</dl>
+
+<h2 id="letter-o">O</h2>
+<dl class="gl-list">
+  <dt id="g-obligation">obligation</dt>
+  <dd>Something you owe to others (or to yourself) because of a duty, a promise, a role, or a principle. An obligation can hold even when meeting it costs you something. <span class="gl-where"><a href="week-01.html">Week 1</a></span></dd>
+  <dt id="g-opacity">opacity</dt>
+  <dd>The quality of a system whose workings the affected people cannot see or follow. <span class="gl-where"><a href="week-08.html">Week 8</a></span></dd>
+  <dt id="g-open-access">open access</dt>
+  <dd>Making research and other knowledge free for anyone to read, with no paywall or subscription. <span class="gl-where"><a href="week-04.html">Week 4</a></span></dd>
+</dl>
+
+<h2 id="letter-p">P</h2>
+<dl class="gl-list">
+  <dt id="g-passive-voice">passive voice</dt>
+  <dd>A sentence form in which the subject receives the action, as in &quot;the model was shipped&quot;. The sentence can leave the actor out entirely. <span class="gl-where"><a href="week-09.html">Week 9</a></span></dd>
+  <dt id="g-peer-review">peer review</dt>
+  <dd>The checking of a research paper by other experts in the field before a journal or conference publishes it. In computing, many of the most important papers appear at peer-reviewed conferences. <span class="gl-where"><a href="week-06.html">Week 6</a></span></dd>
+  <dt id="g-personal-data">personal data</dt>
+  <dd>Any information that identifies a person or could be linked back to them, such as a name, a face, a location, a voice, or a browsing history. <span class="gl-where"><a href="week-02.html">Week 2</a></span></dd>
+  <dt id="g-persuasion">persuasion</dt>
+  <dd>Influencing someone&#39;s beliefs or choices through communication, such as arguments, evidence, or emotional appeals. <span class="gl-where"><a href="week-07.html">Week 7</a></span></dd>
+  <dt id="g-policy-proposal">policy proposal</dt>
+  <dd>A specific recommendation that names what should change, who carries it out, who pays, and what tradeoffs it creates. It is Section 3 of the course essay. <span class="gl-where"><a href="essay.html">Essay Instructions</a></span></dd>
+  <dt id="g-position-paper">position paper</dt>
+  <dd>An essay that takes a position on a problem, argues for it with evidence, and proposes what should be done. The course essay is a 2000-word position paper. <span class="gl-where"><a href="essay.html">Essay Instructions</a></span></dd>
+  <dt id="g-precision">precision</dt>
+  <dd>Saying exactly what you mean, with specific nouns and claims in place of vague ones. <span class="gl-where"><a href="week-09.html">Week 9</a></span></dd>
+  <dt id="g-preprint">preprint</dt>
+  <dd>A research paper shared publicly before peer review, often on a site such as arXiv. <span class="gl-where"><a href="week-06.html">Week 6</a></span></dd>
+  <dt id="g-primary-source">primary source</dt>
+  <dd>Original evidence, such as the study, dataset, court ruling, interview, or recording itself. <span class="gl-where"><a href="week-06.html">Week 6</a></span></dd>
+  <dt id="g-privacy">privacy</dt>
+  <dd>A person&#39;s ability to keep information about themselves, and parts of their life, from others. This includes control over who collects and uses that information. <span class="gl-where"><a href="week-02.html">Week 2</a></span></dd>
+  <dt id="g-protected-class">protected class</dt>
+  <dd>A group that anti-discrimination law protects, defined by a characteristic such as race, sex, religion, national origin, age, or disability. <span class="gl-where"><a href="week-03.html">Week 3</a></span></dd>
+  <dt id="g-proxy-variable">proxy variable</dt>
+  <dd>A piece of data that stands in for something a system is not given directly. For instance, a zip code can act as a proxy for race, so a model can learn racial patterns from it. <span class="gl-where"><a href="week-03.html">Week 3</a></span></dd>
+  <dt id="g-pseudo-intimacy">pseudo-intimacy</dt>
+  <dd>A sense of a close personal relationship with an AI companion, built up by features such as remembering details about the user and expressing affection. <span class="gl-where"><a href="week-07.html">Week 7</a></span></dd>
+</dl>
+
+<h2 id="letter-r">R</h2>
+<dl class="gl-list">
+  <dt id="g-recidivism">recidivism</dt>
+  <dd>Returning to crime after a conviction, usually measured as a new arrest or conviction within a set period (often two years). Risk assessment tools such as COMPAS try to predict it. <span class="gl-where"><a href="week-03.html">Week 3</a></span></dd>
+  <dt id="g-right-to-be-forgotten">right to be forgotten</dt>
+  <dd>A right under the EU&#39;s GDPR to have an organization delete personal data about you in certain cases (for instance when the data is no longer needed, or you withdraw your consent), with some exceptions. <span class="gl-where"><a href="week-02.html">Week 2</a></span></dd>
+  <dt id="g-right-to-explanation">right to explanation</dt>
+  <dd>The idea that a person affected by an automated decision can get a meaningful explanation of how it was made. EU law includes a version of it. <span class="gl-where"><a href="week-08.html">Week 8</a></span></dd>
+  <dt id="g-risk-assessment">risk assessment algorithm</dt>
+  <dd>A tool that scores how likely a person is to do something in the future, such as reoffend or miss a court date. Courts in many US states use these scores in bail and sentencing decisions. <span class="gl-where"><a href="week-03.html">Week 3</a></span></dd>
+</dl>
+
+<h2 id="letter-s">S</h2>
+<dl class="gl-list">
+  <dt id="g-safety-critical-system">safety-critical system</dt>
+  <dd>A system whose failure can injure or kill people, such as a medical device, an aircraft control system, or a self-driving car. <span class="gl-where"><a href="week-09.html">Week 9</a></span></dd>
+  <dt id="g-scale">scale</dt>
+  <dd>The number of people or decisions a system reaches. A system working at scale repeats the same choice many times, so the system&#39;s errors and benefits both multiply. <span class="gl-where"><a href="week-01.html">Week 1</a></span></dd>
+  <dt id="g-secondary-source">secondary source</dt>
+  <dd>A source that reports on, summarizes, or interprets primary sources, such as a news story about a study. <span class="gl-where"><a href="week-06.html">Week 6</a></span></dd>
+  <dt id="g-section-coherence">section coherence</dt>
+  <dd>Each section of a paper doing one clear job, in an order where each part sets up the next. <span class="gl-where"><a href="week-08.html">Week 8</a></span></dd>
+  <dt id="g-source-credibility">source credibility</dt>
+  <dd>How far a source has earned a reader&#39;s trust, judged by who wrote it, how it was checked, who funded it, and how clearly it shows its evidence. <span class="gl-where"><a href="week-06.html">Week 6</a></span></dd>
+  <dt id="g-stakeholder">stakeholder</dt>
+  <dd>Any person or group affected by a system or a decision. This includes the people who build it, use it, profit from it, and are judged by it. <span class="gl-where"><a href="week-01.html">Week 1</a></span></dd>
+  <dt id="g-stakeholder-analysis">stakeholder analysis</dt>
+  <dd>A closer look at the most important groups on a stakeholder map: what each stands to gain or lose, and where their interests conflict. It is the Week 4 writing goal. <span class="gl-where"><a href="week-04.html">Week 4</a></span></dd>
+  <dt id="g-stakeholder-map">stakeholder map</dt>
+  <dd>A broad list of every group affected by a system, with a few words on how each is affected. It is the Week 3 writing goal. <span class="gl-where"><a href="week-03.html">Week 3</a></span></dd>
+  <dt id="g-strawman">strawman</dt>
+  <dd>A weakened or distorted version of an opposing view, set up so it is easy to knock down. <span class="gl-where"><a href="toolkit.html">Toolkit</a></span></dd>
+  <dt id="g-surveillance">surveillance</dt>
+  <dd>Systematic watching or recording of people&#39;s behavior by a government, a company, or another person, often to predict or influence what they do. <span class="gl-where"><a href="week-02.html">Week 2</a></span></dd>
+  <dt id="g-surveillance-capitalism">surveillance capitalism</dt>
+  <dd>Shoshana Zuboff&#39;s name for a business model that collects data about people&#39;s behavior and sells predictions about that behavior, often to advertisers. <span class="gl-where"><a href="week-02.html">Week 2</a></span></dd>
+  <dt id="g-synthesis">synthesis</dt>
+  <dd>In a dialectic, the fuller view a group reaches by examining two or more starting positions together. It can keep a disagreement while making clearer what is at stake. <span class="gl-where"><a href="meeting-instructions.html">Meeting Instructions</a></span></dd>
+  <dt id="g-synthetic-media">synthetic media</dt>
+  <dd>Images, audio, video, or text generated or altered by AI, often made to look or sound real. <span class="gl-where"><a href="week-02.html">Week 2</a></span></dd>
+</dl>
+
+<h2 id="letter-t">T</h2>
+<dl class="gl-list">
+  <dt id="g-technological-unemployment">technological unemployment</dt>
+  <dd>Unemployment that results when technology replaces workers faster than new jobs appear for them. <span class="gl-where"><a href="week-05.html">Week 5</a></span></dd>
+  <dt id="g-theme-statement">theme statement</dt>
+  <dd>The central claim of a Labor Journal Essay, stated in one sentence: what changed or developed for you over the course. <span class="gl-where"><a href="extra-labor.html">Extra Labor</a></span></dd>
+  <dt id="g-thesis">thesis</dt>
+  <dd>The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward. <span class="gl-where"><a href="week-02.html">Week 2</a></span></dd>
+  <dt id="g-think-tank">think tank</dt>
+  <dd>An organization that researches policy questions and publishes reports and recommendations. Many are funded by groups with a stake in the issues they study, or hold a political viewpoint, so it is a good idea to check who backs one. <span class="gl-where"><a href="week-06.html">Week 6</a></span></dd>
+  <dt id="g-topic-sentence">topic sentence</dt>
+  <dd>A sentence, usually the first in a paragraph, that states the paragraph&#39;s claim. <span class="gl-where"><a href="week-08.html">Week 8</a></span></dd>
+  <dt id="g-trace-it">trace it</dt>
+  <dd>The second step of a reflection. You work out where your reaction comes from in your values, your experience, or the communities you belong to. <span class="gl-where"><a href="reflection-instructions.html">Reflection Instructions</a></span></dd>
+  <dt id="g-training-data">training data</dt>
+  <dd>The collection of examples (text, images, code, and so on) a model learns its patterns from. A model&#39;s outputs reflect what is in the training data and what is missing from the training data. <span class="gl-where"><a href="week-02.html">Week 2</a></span></dd>
+  <dt id="g-transformative-use">transformative use</dt>
+  <dd>A use of a work for a purpose or character different from the original&#39;s, such as parody, commentary, or a search index. The more a use differs in purpose, the more it counts toward fair use. <span class="gl-where"><a href="week-04.html">Week 4</a></span></dd>
+  <dt id="g-transparency">transparency</dt>
+  <dd>Openness about how systems work, what data they use, and how they are used, so that outsiders can understand and question them. <span class="gl-where"><a href="week-08.html">Week 8</a></span></dd>
+</dl>
+
+<h2 id="letter-u">U</h2>
+<dl class="gl-list">
+  <dt id="g-underrepresented-data">underrepresented data</dt>
+  <dd>Training data with few examples of some groups. A model trained on it tends to be less accurate for those groups. <span class="gl-where"><a href="week-03.html">Week 3</a></span></dd>
+</dl>
+
+<h2 id="letter-v">V</h2>
+<dl class="gl-list">
+  <dt id="g-virtue-ethics">virtue ethics</dt>
+  <dd>A family of ethical theories that focus on character, asking what a good person would do and what kind of person an action makes you. The toolkit question &quot;What would a person of integrity do?&quot; draws on it. <span class="gl-where"><a href="toolkit.html">Toolkit</a></span></dd>
+</dl>
+
+<h2 id="letter-w">W</h2>
+<dl class="gl-list">
+  <dt id="g-weapons-of-math-destruction">weapons of math destruction</dt>
+  <dd>Cathy O&#39;Neil&#39;s name for algorithms that are important (they shape many people&#39;s lives), secret (people cannot see how they work), and harmful to the people they score. <span class="gl-where"><a href="week-08.html">Week 8</a></span></dd>
+  <dt id="g-web-scraping">web scraping</dt>
+  <dd>Collecting large amounts of content from websites automatically with a program. Much of the training data for generative AI was gathered this way. <span class="gl-where"><a href="week-02.html">Week 2</a></span></dd>
+  <dt id="g-whistleblower">whistleblower</dt>
+  <dd>A person inside an organization who reports wrongdoing they have seen there, to people inside the organization who can act on it, or to regulators, lawmakers, or the public. <span class="gl-where"><a href="week-10.html">Week 10</a></span></dd>
+</dl>
+
+<h2 id="letter-x">X</h2>
+<dl class="gl-list">
+  <dt id="g-xai">XAI (explainable AI)</dt>
+  <dd>Methods for making a model&#39;s outputs understandable to people, for instance by showing which inputs mattered most to a decision. <span class="gl-where"><a href="week-08.html">Week 8</a></span></dd>
+</dl>
+
+
+<h2 id="toolkit-skills">Toolkit Skills</h2>
+
+<p>Each skill is explained in full, with an example, in the <a href="toolkit.html">Writing Toolkit</a>.</p>
+
+<dl class="gl-list">
+  <dt><a href="toolkit.html#section-1-the-three-toolkit-questions">The three toolkit questions</a></dt>
+  <dd>Who is harmed? What are our obligations? What would a person of integrity do? Each question draws on a different family of ethical theory.</dd>
+  <dt><a href="toolkit.html#who-is-harmed">Who is harmed?</a></dt>
+  <dd>This toolkit question asks who is affected by a system or decision and what specific harms they could face.</dd>
+  <dt><a href="toolkit.html#what-are-our-obligations">What are our obligations?</a></dt>
+  <dd>This toolkit question asks what duties, rules, or principles should guide a decision, whatever its consequences.</dd>
+  <dt><a href="toolkit.html#what-would-a-person-of-integrity-do">What would a person of integrity do?</a></dt>
+  <dd>This toolkit question asks what the situation asks of you as a person with values, and whether you could explain your decision to the people it affects.</dd>
+  <dt><a href="toolkit.html#free-ideation">Free Ideation</a></dt>
+  <dd>Free ideation means writing down everything that comes to mind in a set time, without judging it, to build a large pile of raw ideas.</dd>
+  <dt><a href="toolkit.html#so-what">So What</a></dt>
+  <dd>The so what skill means asking &quot;so what?&quot; of an observation, again and again, until you reach a claim with real stakes.</dd>
+  <dt><a href="toolkit.html#steelmanning">Steelmanning</a></dt>
+  <dd>Steelmanning means stating the strongest version of the case against your own position before you respond to it.</dd>
+  <dt><a href="toolkit.html#role-reversal">Role Reversal</a></dt>
+  <dd>Role reversal means imagining a system from one stakeholder&#39;s position to see what they need and what the system costs them.</dd>
+  <dt><a href="toolkit.html#finding-and-evaluating-sources">Finding and Evaluating Sources</a></dt>
+  <dd>This skill means telling credible evidence apart from assertion, and choosing the right kind of source (journal, think tank, journalism, blog) for each claim.</dd>
+  <dt><a href="toolkit.html#citing-sources">Citing Sources</a></dt>
+  <dd>Citing sources means giving every source in one consistent citation style, so a reader can find and check it.</dd>
+  <dt><a href="toolkit.html#paragraph-as-unit-of-argument">Paragraph as Unit of Argument</a></dt>
+  <dd>This skill means building each paragraph as one unit of argument, with a topic sentence, evidence, analysis, and a transition.</dd>
+  <dt><a href="toolkit.html#structural-editing">Structural Editing</a></dt>
+  <dd>Structural editing means revising a whole paper at the level of sections and paragraphs by cutting, reordering, combining, and splitting them.</dd>
+  <dt><a href="toolkit.html#sentence-level-editing">Sentence-Level Editing</a></dt>
+  <dd>Sentence-level editing means revising each sentence for clarity, precision, and efficiency, with hedges that match your evidence.</dd>
+  <dt><a href="toolkit.html#final-framing">Final Framing</a></dt>
+  <dd>Final framing means writing the conclusion, introduction, abstract, and title last, once you know what your paper argues.</dd>
+</dl>
+
+  </main>
+
+  <footer class="site-footer">
+    <span>Computer Ethics · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-27">October 27, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Computer Ethics');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  <script>
+    /* Hover text near the right edge opens leftward so it stays on screen. */
+    (() => {
+      const flip = e => {
+        const a = e.target.closest && e.target.closest('main a.gl, main a.tk');
+        if (!a) return;
+        const tipWidth = Math.min(352, window.innerWidth - 32);
+        a.classList.toggle('tip-left', a.getBoundingClientRect().left + tipWidth > window.innerWidth - 16);
+      };
+      addEventListener('mouseover', flip);
+      addEventListener('focusin', flip);
+    })();
+  </script>
+
+  
+  <script src="https://uwt-tutor-backend.onrender.com/widget.js"
+    data-key="wk_3e7a91c5d84b2f60a1c93d7e58b04af2"
+    data-page-context="on"></script>
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>
