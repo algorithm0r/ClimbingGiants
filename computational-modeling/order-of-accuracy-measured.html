@@ -980,7 +980,7 @@ release speed and so overshoots. Heun averages the speed at the start with an es
 end, and RK4 adds two estimates at the midpoint. In code each is the Euler stepper from page 25
 with its update line replaced by the lines that take the slopes:</p>
 
-<pre data-lang="python">def heun(f, s0, t0, dt, n):
+<div class="codetabs"><pre data-lang="python" data-notes="1|The same shape as the Euler stepper: a starting state, a step dt and a number of steps n ([Functions](py-functions.html)).;8|The slope at the end of the step, estimated by taking a full Euler step with the first slope.;9|Heun's update: the average of the slope at the start and the estimate at the end.;13|The same again, with four slopes in place of two.;20|Two estimates at the midpoint of the step, each built from the one before it.;22|An estimate at the end of the step.;23|The weighted average of the four slopes, with the two midpoint slopes counted twice.">def heun(f, s0, t0, dt, n):
     s = np.array(s0, dtype=float)
     out = np.empty((n + 1, s.size))
     out[0] = s
@@ -1005,6 +1005,8 @@ def rk4(f, s0, t0, dt, n):
         s = s + dt/6 * (k1 + 2*k2 + 2*k3 + k4)
         out[k + 1] = s
     return out</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
+</div>
 
 <h2 id="three-methods-on-one-problem">Three Methods on One Problem</h2>
 

@@ -1111,7 +1111,7 @@ within 1&nbsp;m of the hoop. <code>fit_free</code> fits $a + bt + ct^2$ to $z$, 
 it, both by least squares. <code>rms</code> evaluates the parabola at the given times and returns
 the RMS of its difference from the heights, in centimetres.</p>
 
-<pre data-lang="python">out_free = []
+<div class="codetabs"><pre data-lang="python" data-notes="1|Two empty lists, one for each model, that gain one error per shot.;3|One pass per shot ([Loops](py-loops.html)).;4|Shot 325 has a stretch the tracker filled in with a straight line, so it is left out. continue skips straight to the next pass of the loop ([Loops](py-loops.html)). Leaving it out is a choice.;6|free_flight hands back two arrays, the times and the heights of the free flight, and each gets its own name ([Functions](py-functions.html)).;7|The midpoint of the flight. // divides and drops the remainder, so half is a whole number. Splitting at the middle is a choice.;8|t[:half] is the first half, the frames the model is fitted to ([Lists](py-lists.html)).;10|t[half:] is the second half, which the fit never saw, so this is an error and not a residual.">out_free = []
 out_held = []
 for s in train['shots']:
     if s['id'] == 325:
@@ -1122,6 +1122,8 @@ for s in train['shots']:
     c_held = fit_held(t[:half], z[:half])
     out_free.append(rms(c_free, t[half:], z[half:]))
     out_held.append(rms(c_held, t[half:], z[half:]))</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
+</div>
 
 <div class="check">
   <span class="label">Check</span>

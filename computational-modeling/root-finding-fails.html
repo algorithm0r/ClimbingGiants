@@ -1162,7 +1162,7 @@ checks above, in the order above.</p>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="1|domain is the interval the problem is physically defined on, e.g. (0.0, 6.0) for a 6 m beam.;6|The residual test the routine already applied. Repeat it yourself: the routine may have used a different f.;9|The check no solver can do for you. It compares against the physical setup, not the mathematics.;11|A sign change either side means the root is crossed, not touched. Without one, expect the error to be much larger than the residual.">def verify(f, x, domain, tol=1e-8, h=1e-4):
+  <pre data-lang="python" data-notes="1|domain is the interval the problem is physically defined on, e.g. (0.0, 6.0) for a 6 m beam. tol and h are choices, with defaults.;4|An empty dictionary that collects the four checks under their names ([Dictionaries](py-dicts.html)).;6|The residual test the routine already applied. Repeat it yourself, since the routine may have used a different f.;9|This compares x against the physical setup, which a solver does not know about.;11|A sign change either side means the root is crossed. No sign change suggests a touching root, or no root within h, and then the error is likely much larger than the residual.">def verify(f, x, domain, tol=1e-8, h=1e-4):
     lo = domain[0]
     hi = domain[1]
     report = {}
@@ -1175,7 +1175,7 @@ checks above, in the order above.</p>
     report['crosses'] = f(x - h) * f(x + h) &lt; 0
 
     return report</pre>
-  <pre data-lang="matlab" hidden data-notes="1|domain is a two-element vector, e.g. [0 6] for a 6 m beam.;2|nargin is the number of inputs the call passed, so a call that leaves tol out gets 1e-8.;9|Repeat the residual test on the f you care about.;11|The check no solver can do for you.;12|No sign change either side means a touching root: the error will be far larger than the residual.">function r = verify(f, x, domain, tol, h)
+  <pre data-lang="matlab" hidden data-notes="1|domain is a two-element vector, e.g. [0 6] for a 6 m beam.;2|nargin is the number of inputs the call passed, so a call that leaves tol out gets 1e-8.;9|Repeat the residual test on the f you care about.;11|This compares x against the physical setup, which a solver does not know about.;12|No sign change either side suggests a touching root, or no root within h. Then the error is likely much larger than the residual.">function r = verify(f, x, domain, tol, h)
     if nargin &lt; 4
         tol = 1e-8;
     end
@@ -1188,7 +1188,7 @@ checks above, in the order above.</p>
     r.in_domain = x &gt;= domain(1) &amp;&amp; x &lt;= domain(2);
     r.crosses   = f(x - h) * f(x + h) &lt; 0;
 end</pre>
-  <pre data-lang="js" hidden data-notes="1|domain is [lo, hi], the interval the problem is physically defined on.;4|Repeat the residual test yourself.;8|The check no solver can do for you.;9|No sign change either side means a touching root.">function verify(f, x, domain, tol = 1e-8, h = 1e-4) {
+  <pre data-lang="js" hidden data-notes="1|domain is [lo, hi], the interval the problem is physically defined on.;4|Repeat the residual test yourself.;8|This compares x against the physical setup, which a solver does not know about.;9|No sign change either side suggests a touching root, or no root within h.">function verify(f, x, domain, tol = 1e-8, h = 1e-4) {
   const lo = domain[0];
   const hi = domain[1];
   const residual = Math.abs(f(x));

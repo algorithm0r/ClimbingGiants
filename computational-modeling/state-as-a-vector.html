@@ -1049,7 +1049,7 @@ advances any system it is given.</p>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="3|The whole physics: unpack the state, return its rate, in the same order.;5|The first component's rate is the second component. That line is the rewrite.;7|The whole method. It never mentions x, v, mass or springs.;8|Works on a state of any length, because + and * are elementwise on an array.;12|Swap oscillator for projectile and step() is untouched.">import numpy as np
+  <pre data-lang="python" data-notes="3|The whole physics: unpack the state, return its rate, in the same order. m, c and k have defaults, the oscillator's mass, damping and stiffness ([Functions](py-functions.html)).;4|Unpacks the two components of the state into their own names.;5|The first component's rate is the second component. This is the second-order equation rewritten as two first-order ones.;7|The whole method. It never mentions x, v, mass or springs.;8|Works on a state of any length, because + and * are elementwise on an array.;10|The starting state: 5 cm out, at rest.;11|200 steps of size h, which is set earlier on the page. The step size is the choice ([Loops](py-loops.html)).;12|Swap oscillator for projectile and step() is untouched.">import numpy as np
 
 def oscillator(t, s, m=1.0, c=0.30, k=40.0):
     x, v = s
@@ -1061,7 +1061,10 @@ def step(f, t, s, h):
 s = np.array([0.05, 0.0])
 for i in range(200):
     s = step(oscillator, i*h, s, h)</pre>
-  <pre data-lang="matlab" hidden data-notes="5|Unpack, return the rate, same order.;10|The method, independent of the system.;15|ode45 takes exactly this shape of function.">function ds = oscillator(t, s)
+  <pre data-lang="matlab" hidden data-notes="2|ode45 takes exactly this shape of function.;8|Unpack, return the rate, same order.;13|The method, independent of the system.">% the library solver takes the same function:
+[T, S] = ode45(@oscillator, [0 5], [0.05; 0.0]);
+
+function ds = oscillator(t, s)
     m = 1.0;
     c = 0.30;
     k = 40.0;
@@ -1072,10 +1075,7 @@ end
 
 function s = step(f, t, s, h)
     s = s + h * f(t, s);
-end
-
-% and the same function goes straight into the library solver:
-[T, S] = ode45(@oscillator, [0 5], [0.05; 0.0]);</pre>
+end</pre>
   <pre data-lang="js" hidden data-notes="2|Unpack, return the rate, same order.;7|The method, component by component, so it works on a state of any length.">function oscillator(t, s, m = 1.0, c = 0.30, k = 40.0) {
   const x = s[0];
   const v = s[1];

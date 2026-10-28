@@ -1085,7 +1085,7 @@ exceeds the limit, which is what keeps the candidate set to the diagonal band.</
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="5|The prefix sum, built once. Every window's integral comes from this array.;11|Every admissible start.;14|Stop extending this window the moment it exceeds the limit: this is the constraint.;16|The integral over the window: one subtraction, whatever the window's length.;17|The quantity inside the maximum, for this one window.;23|best holds the score and the window's two ends, as a tuple.">import numpy as np
+  <pre data-lang="python" data-notes="3|wmax is the longest window allowed, and mode says whether to look for the largest or smallest score ([Functions](py-functions.html)).;4|np.diff(t) is the spacing between each pair of neighbouring times ([numpy arrays](py-numpy.html)).;5|The prefix sum, built once. Every window's integral comes from this array.;7|Start below any real score, so the first window always beats it. best holds the score and the two ends of its window.;11|Every admissible start ([Loops](py-loops.html)).;12|Every end after that start.;14|Stop extending this window once it exceeds the limit, which is the constraint. break leaves the inner loop only.;16|The mean over the window. Its integral is one subtraction, S[j] - S[i], whatever the window's length, and dividing by T gives the mean.;17|The quantity inside the maximum, for this one window.;23|best holds the score and the window's two ends, as a tuple.">import numpy as np
 
 def windowed_optimum(t, a, wmax, mode="max"):
     panels = (a[1:] + a[:-1]) * 0.5 * np.diff(t)
@@ -1110,7 +1110,7 @@ def windowed_optimum(t, a, wmax, mode="max"):
                 best = (score, t[i], t[j])
 
     return best</pre>
-  <pre data-lang="matlab" hidden data-notes="3|The prefix sum, built once.;15|Stop extending this window the moment it exceeds the limit.;18|The integral over the window: one subtraction.">function [score, t0, t1] = windowedOptimum(t, a, wmax, mode)
+  <pre data-lang="matlab" hidden data-notes="3|The prefix sum, built once.;15|Stop extending this window the moment it exceeds the limit.;18|The score for this window. Its integral is one subtraction, S(j) - S(i), whatever the window's length.">function [score, t0, t1] = windowedOptimum(t, a, wmax, mode)
     panels = (a(2:end) + a(1:end-1)) * 0.5 .* diff(t);
     S = [0; cumsum(panels)];
     if strcmp(mode, 'max')
@@ -1142,7 +1142,7 @@ def windowed_optimum(t, a, wmax, mode="max"):
     end
     score = best;
 end</pre>
-  <pre data-lang="js" hidden data-notes="2|The prefix sum, built once.;20|Stop extending this window the moment it exceeds the limit.;23|The integral over the window: one subtraction.">function windowedOptimum(t, a, wmax, mode = "max") {
+  <pre data-lang="js" hidden data-notes="2|The prefix sum, built once.;20|Stop extending this window the moment it exceeds the limit.;23|The score for this window. Its integral is one subtraction, S[j] - S[i], whatever the window's length.">function windowedOptimum(t, a, wmax, mode = "max") {
   const S = [0];
   for (let i = 1; i &lt; a.length; i++) {
     const panel = (a[i] + a[i - 1]) * 0.5 * (t[i] - t[i - 1]);
@@ -1193,11 +1193,13 @@ comparison reversed, and several criteria in other fields are defined that way.<
 <code>time.perf_counter()</code> reads a clock whose resolution is typically finer than a
 microsecond, so the difference between the two readings is the time the call took:</p>
 
-<pre data-lang="python">import time
+<div class="codetabs"><pre data-lang="python" data-notes="3|perf_counter reads a clock with very fine resolution. The time taken is the difference between two readings.;4|The function hands back three values, and each gets a name. The limit is 15 ms plus a nanosecond, for the reason in the next paragraph.">import time
 
 start = time.perf_counter()
 score, t1, t2 = windowed_optimum(t, a, 0.015 + 1e-9)
 elapsed = time.perf_counter() - start</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
+</div>
 
 <p>The limit is written as 0.015&nbsp;s plus a nanosecond because the window lengths are computed
 as differences of floating-point times. On the record below, the window from 60.85 to 75.85&nbsp;ms

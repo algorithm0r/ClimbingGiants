@@ -1180,7 +1180,7 @@ afterwards.</p>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="2|2.0775 converts the class number into the filter's design frequency. It is a constant of the standard, not something to tune.;3|The pre-warp. This is the step that fails below the minimum rate: tan passes through infinity and the coefficients change sign.;11|one_pass is defined inside cfc, so it can use the five coefficients above directly ([Functions](py-functions.html)).;14|Each output needs the two outputs before it. That is what makes this recursive, and why the samples must be produced in order.;18|The first pass runs forward in time.;19|The second pass runs over the first one's result reversed, so it runs backward in time. The two passes delay by the same amount in opposite directions.;20|Reversing again puts the samples back in time order.">def cfc(y, dt, cls):
+  <pre data-lang="python" data-notes="1|cls is the filter class, such as 60 or 180. SAE J211 sets which class applies to which measurement, and choosing it is the main decision in this function ([Functions](py-functions.html)).;2|2.0775 converts the class number into the filter's design frequency. It is a constant of the standard, not something to tune.;3|The pre-warp. This is the step that fails below the minimum rate: tan passes through infinity and the coefficients change sign.;5|a0, a1 and a2 weight the inputs, and b1 and b2 weight the outputs already produced.;11|one_pass is defined inside cfc, so it can use the five coefficients above directly.;12|The first two outputs stay at zero, so the filter starts from rest. That is a choice, and starting from the first sample instead changes the first few milliseconds.;13|Starts at 2 because each output needs the two samples before it ([Loops](py-loops.html)).;14|Each output reuses the two outputs before it, which is what makes this a recursive filter (the function does not call itself), and why the samples must be produced in order.;18|The first pass runs forward in time.;19|The second pass runs over the first one's result reversed, so it runs backward in time. forward[::-1] is a slice with a step of -1 ([Lists](py-lists.html)). The two passes delay by the same amount in opposite directions.;20|Reversing again puts the samples back in time order.">def cfc(y, dt, cls):
     wd = 2 * np.pi * cls * 2.0775
     wa = np.tan(wd * dt / 2)
     d  = 1 + np.sqrt(2) * wa + wa**2
@@ -1200,7 +1200,7 @@ afterwards.</p>
     forward = one_pass(y)
     backward = one_pass(forward[::-1])
     return backward[::-1]</pre>
-  <pre data-lang="matlab" hidden data-notes="10|All five coefficients in one vector, so one pass can be written once and called twice.;13|flip reverses the forward result, so the second pass runs backward in time.;14|Flip again to put the samples back in time order.">function out = cfc(y, dt, cls)
+  <pre data-lang="matlab" hidden data-notes="1|cls is the filter class, such as 60 or 180. SAE J211 sets which class applies to which measurement.;10|All five coefficients in one vector, so one pass can be written once and called twice.;13|flip reverses the forward result, so the second pass runs backward in time.;14|Flip again to put the samples back in time order.;18|The first two outputs stay at zero, so the filter starts from rest. That is a choice.">function out = cfc(y, dt, cls)
     wd = 2*pi*cls*2.0775;
     wa = tan(wd*dt/2);
     d  = 1 + sqrt(2)*wa + wa^2;
@@ -1223,7 +1223,7 @@ function out = one_pass(x, c)
                + c(4)*out(i-1) + c(5)*out(i-2);
     end
 end</pre>
-  <pre data-lang="js" hidden data-notes="11|onePass is defined inside cfc, so the coefficients above are in reach.;21|slice() copies the array before reverse() reverses it in place, so the second pass runs over a reversed copy.;22|Reverse again to put the samples back in time order.">function cfc(y, dt, cls) {
+  <pre data-lang="js" hidden data-notes="1|cls is the filter class, such as 60 or 180. SAE J211 sets which class applies to which measurement.;11|onePass is defined inside cfc, so the coefficients above are in reach.;12|The first two outputs stay at zero, so the filter starts from rest. That is a choice.;21|slice() copies the array before reverse() reverses it in place, so the second pass runs over a reversed copy.;22|Reverse again to put the samples back in time order.">function cfc(y, dt, cls) {
   const wd = 2 * Math.PI * cls * 2.0775;
   const wa = Math.tan(wd * dt / 2);
   const d = 1 + Math.SQRT2 * wa + wa * wa;

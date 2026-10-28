@@ -1049,14 +1049,14 @@ the crash data</a> lists what it applies to.</p></div>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="2|One panel per adjacent pair: the average of the two heights, times the width.;3|cumsum keeps every running total instead of only the last.;4|The leading zero: nothing has accumulated before the first panel. It also makes the output the same length as the input.;7|The definite integral is the last value of the cumulative one.">def cumulative(y, dt):
+  <pre data-lang="python" data-notes="2|One panel per adjacent pair: the average of the two heights, times the width. y[1:] + y[:-1] adds each sample to the one before it, all at once ([numpy arrays](py-numpy.html)).;3|cumsum keeps every running total instead of only the last.;4|The leading zero: nothing has accumulated before the first panel. It also makes the output the same length as the input, so it lines up with the times.;7|The definite integral is the last value of the cumulative one. [-1] is the last entry.">def cumulative(y, dt):
     panels = (y[1:] + y[:-1]) * 0.5 * dt
     running = np.cumsum(panels)
     return np.concatenate([[0.0], running])
 
 def definite(y, dt):
     return cumulative(y, dt)[-1]</pre>
-  <pre data-lang="matlab" hidden data-notes="2|One panel per adjacent pair.;3|cumsum keeps every running total.;3|The leading zero keeps the output the same length as the input.">function s = cumulative(y, dt)
+  <pre data-lang="matlab" hidden data-notes="2|One panel per adjacent pair.;3|cumsum keeps every running total, and the leading zero keeps the output the same length as the input.">function s = cumulative(y, dt)
     panels = (y(2:end) + y(1:end-1)) * 0.5 * dt;
     s = [0; cumsum(panels)];
 end</pre>

@@ -1079,7 +1079,7 @@ correct.</p>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
   <div class="panes">
-  <pre data-lang="python" data-notes="8|The loop looks at each channel in turn and keeps the one whose code matches under the name ch ([Loops](py-loops.html), [Conditions](py-conditions.html)). Selecting by code finds the driver head channel in any test in the set, while a channel picked by its position finds whatever happens to be first.;12|The three header fields, turned into the times the samples were taken at ([numpy arrays](py-numpy.html)). The times are computed here because the file does not store them.;17|The axis text comes out of the header. Typing the text by hand produces a figure that is correct for one file and wrong for the next.">import json
+  <pre data-lang="python" data-notes="1|import brings in a library: json reads the data file, numpy works on whole arrays and matplotlib draws ([Files and libraries](py-files.html)).;5|Opens the file, and the next line reads all of it into one dictionary called test ([Files and libraries](py-files.html), [Dictionaries](py-dicts.html)). The path is looked up from the working folder, which an editor may set to something other than the program's own folder.;8|The loop looks at each channel in turn and keeps the one whose code matches under the name ch ([Loops](py-loops.html), [Conditions](py-conditions.html)). Selecting by code finds the driver head channel in any test in the set, while a channel picked by its position finds whatever happens to be first.;12|The three header fields, turned into the times the samples were taken at ([numpy arrays](py-numpy.html)). The times are computed here because the file does not store them.;13|The samples as a numpy array, so arithmetic works on all of them at once.;15|One line of y against t. The three lines after it label the figure ([Figures](py-plots.html)).;17|The axis text comes out of the header, through an f-string ([Numbers and text](py-values.html)). Text typed by hand may be right for this file and wrong for the next one.">import json
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -1098,7 +1098,7 @@ plt.xlabel('time (s)')
 plt.ylabel(f"{ch['dimension']} [{ch['unit']}]")
 plt.title(f"{ch['comment']}  ({ch['code']})")
 plt.show()</pre>
-  <pre data-lang="matlab" hidden data-notes="1|jsondecode turns the object into a struct, so the channels arrive as named fields and not as a list.;4|The loop looks at each channel in turn and keeps the one whose code matches under the name ch.;11|The same arithmetic. (0:ch.n-1) is the sample index.">test  = jsondecode(fileread('crash/10642.json'));
+  <pre data-lang="matlab" hidden data-notes="1|jsondecode turns the object into a struct, so the channels arrive as named fields and not as a list.;2|fieldnames lists the channel names, so the loop below can visit each one.;4|The loop looks at each channel in turn and keeps the one whose code matches under the name ch.;5|names{k} is the k-th name, and .( ) uses that text as the field name.;11|The same arithmetic. (0:ch.n-1) is the sample index.;15|sprintf fills each %s from the header, as the f-string does in Python, so the figure labels itself.">test  = jsondecode(fileread('crash/10642.json'));
 names = fieldnames(test.channels);
 
 for k = 1:numel(names)
@@ -1114,7 +1114,7 @@ plot(t, ch.y);
 xlabel('time (s)');
 ylabel(sprintf('%s [%s]', ch.dimension, ch.unit));
 title(sprintf('%s  (%s)', ch.comment, ch.code));</pre>
-  <pre data-lang="js" hidden data-notes="2|The file arrives as text and .json() turns it into an object.;5|Object.values because the channels are an object keyed by name, not an array. The loop keeps the channel whose code matches.;12|One time per sample, built from the three header fields.">const response = await fetch('crash/10642.json');
+  <pre data-lang="js" hidden data-notes="1|fetch asks for the file, and await waits until it arrives.;2|The file arrives as text and .json() turns it into an object.;5|Object.values because the channels are an object keyed by name, not an array. The loop keeps the channel whose code matches.;12|One time per sample, built from the three header fields.">const response = await fetch('crash/10642.json');
 const test = await response.json();
 
 let ch;

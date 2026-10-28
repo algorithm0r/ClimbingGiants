@@ -1173,17 +1173,17 @@ you keep missing.</p></div></details></li>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="2|Keep one sample in every factor. What comes back is what an instrument running that much slower would have recorded of the same event.;2|The interval has to travel with the values. A record whose spacing is not known is not a record of anything.;4|Nothing has been averaged or removed. The samples that survive are untouched, and the ones between them are simply gone.">def at_lower_rate(y, dt, factor):
+  <pre data-lang="python" data-notes="1|Takes a record, its sampling interval and a factor, and hands back two things: the slower record and its interval ([Functions](py-functions.html)).;2|y[::factor] keeps one sample in every factor, starting with the first ([Lists](py-lists.html)). What comes back is what an instrument sampling that much slower might have recorded, if it had no filter of its own. The interval is returned with the values, since the slower record cannot be used without its spacing.;4|Nothing has been averaged or smoothed. The samples that survive are unchanged, and the rest are dropped. The factor, 10, is the choice here.">def at_lower_rate(y, dt, factor):
     return y[::factor], dt * factor
 
 slow, slow_dt = at_lower_rate(y, dt, 10)</pre>
-  <pre data-lang="matlab" hidden data-notes="2|1:factor:end is the same selection.">function [s, s_dt] = at_lower_rate(y, dt, factor)
+  <pre data-lang="matlab" hidden data-notes="2|1:factor:end is the same selection. MATLAB counts from 1, so it starts at y(1).;6|The factor, 10, is the choice here.">function [s, s_dt] = at_lower_rate(y, dt, factor)
     s = y(1:factor:end);
     s_dt = dt * factor;
 end
 
 [slow, slow_dt] = at_lower_rate(y, dt, 10);</pre>
-  <pre data-lang="js" hidden data-notes="3|The loop makes the discarding explicit.">function atLowerRate(y, dt, factor) {
+  <pre data-lang="js" hidden data-notes="3|The loop makes the discarding explicit. i jumps by factor each pass.">function atLowerRate(y, dt, factor) {
   const s = [];
   for (let i = 0; i &lt; y.length; i = i + factor) {
     s.push(y[i]);

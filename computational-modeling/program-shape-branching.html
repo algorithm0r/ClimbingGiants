@@ -1026,7 +1026,7 @@ produce identical numbers, so nothing about the arithmetic is at stake here.</p>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="1|tol is not an input. It is reached for from wherever it happens to be defined.;3|The signature says this depends on residual alone. It does not.;8|tol is now an input with a stated default, and the signature is the whole truth.">tol = 1e-6                       # somewhere near the top of the file
+  <pre data-lang="python" data-notes="1|tol is not an input. It is reached for from wherever it happens to be defined.;3|The signature says this depends on residual alone, though the body also uses tol ([Functions](py-functions.html)).;4|abs is the size of a number without its sign, and &lt; gives True or False ([Conditions](py-conditions.html)).;8|tol is now an input with a stated default, so the signature lists everything the result depends on.">tol = 1e-6                       # somewhere near the top of the file
 
 def converged(residual):         # signature says: depends on residual
     return abs(residual) &lt; tol   # body says: also depends on tol
@@ -1035,7 +1035,7 @@ def converged(residual):         # signature says: depends on residual
 # the boundary closed
 def converged(residual, tol=1e-6):
     return abs(residual) &lt; tol</pre>
-  <pre data-lang="matlab" hidden data-notes="1|A global that the function reaches for.;9|Now an argument with a default, so the signature is the whole truth.">global tol;
+  <pre data-lang="matlab" hidden data-notes="1|A global that the function reaches for.;9|tol is now an input. MATLAB cannot put a default in the signature, so the lines below supply 1e-6 when the call leaves tol out (nargin counts the inputs the call passed).">global tol;
 tol = 1e-6;
 
 function ok = converged(residual)   % signature is a lie
@@ -1049,7 +1049,7 @@ function ok = converged(residual, tol)   % boundary closed
     end
     ok = abs(residual) &lt; tol;
 end</pre>
-  <pre data-lang="js" hidden data-notes="1|Captured from the enclosing scope and not passed in.;3|The signature says one input; the body uses two.;7|Now a parameter with a default.">const tol = 1e-6;
+  <pre data-lang="js" hidden data-notes="1|Captured from the enclosing scope and not passed in.;3|The signature says one input. The body uses two.;7|Now a parameter with a default.">const tol = 1e-6;
 
 function converged(residual) {          // signature says one input
   return Math.abs(residual) &lt; tol;      // body uses two

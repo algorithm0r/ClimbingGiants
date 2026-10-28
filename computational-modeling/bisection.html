@@ -1024,7 +1024,7 @@ number of roots, and that includes two. The whole-flight bracket on page 22 fail
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="5|Refuse, and do not guess. A routine that quietly proceeds without a bracket has no guarantee left to offer.;10|One evaluation per step, and it is the only one.;12|Keep whichever half still has opposite signs at its ends.;19|Return the width too: it is the uncertainty, and it is exact.">def bisect(f, a, b, tol=1e-10, max_evals=200):
+  <pre data-lang="python" data-notes="1|tol and max_evals have defaults, so a call can leave them out ([Functions](py-functions.html)). Both are choices: how narrow the bracket has to get, and how many evaluations to spend at most.;4|The two ends have the same sign, so the interval is not a bracket. There may be no root inside, or an even number of them.;5|Stop with an error, since without a sign change there is no bracket to halve and no guarantee of a root. raise stops the program with an error message ([Reading an error](py-errors.html)), and {a:g} writes a in its shortest form ([Numbers and text](py-values.html)).;8|Halve until the bracket is narrower than tol, or the evaluations run out ([Loops](py-loops.html)).;10|One evaluation per step, and it is the only one.;12|Keep whichever half still has opposite signs at its ends ([Conditions](py-conditions.html)).;19|Return the half-width too. The root is within this distance of the midpoint, so it is a guaranteed bound on the error.">def bisect(f, a, b, tol=1e-10, max_evals=200):
     fa = f(a)
     fb = f(b)
     if fa * fb &gt; 0:
@@ -1043,7 +1043,7 @@ number of roots, and that includes two. The whole-flight bracket on page 22 fail
             fa = fm
 
     return 0.5 * (a + b), (b - a) / 2, evals</pre>
-  <pre data-lang="matlab" hidden data-notes="5|Refuse, and do not guess.;11|One evaluation per step.;13|Keep the half that still brackets.">function [x, halfwidth, evals] = bisect(f, a, b, tol)
+  <pre data-lang="matlab" hidden data-notes="5|Stop with an error, since without a sign change there is no bracket to halve.;9|This version has no cap on evaluations, so a tol below what floating point can resolve would never be reached. The Python and JavaScript tabs stop after max_evals.;11|One evaluation per step.;13|Keep the half that still brackets.">function [x, halfwidth, evals] = bisect(f, a, b, tol)
     fa = f(a);
     fb = f(b);
     if fa*fb &gt; 0
@@ -1066,7 +1066,7 @@ number of roots, and that includes two. The whole-flight bracket on page 22 fail
     x = 0.5*(a + b);
     halfwidth = (b - a)/2;
 end</pre>
-  <pre data-lang="js" hidden data-notes="5|Refuse, and do not guess.;11|One evaluation per step.;13|Keep the half that still brackets.;21|The half-width is the uncertainty, and it is exact.">function bisect(f, a, b, tol = 1e-10, maxEvals = 200) {
+  <pre data-lang="js" hidden data-notes="5|Stop with an error, since without a sign change there is no bracket to halve.;11|One evaluation per step.;13|Keep the half that still brackets.;21|The half-width is the uncertainty, and it is exact.">function bisect(f, a, b, tol = 1e-10, maxEvals = 200) {
   let fa = f(a);
   let fb = f(b);
   if (fa * fb &gt; 0) {

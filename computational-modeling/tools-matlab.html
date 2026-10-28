@@ -923,7 +923,7 @@ name of the one file in the <code>crash</code> folder of your pack. If MATLAB sa
 the file the name in the program does not match it. The example reads test 10642, which no student
 receives.</p>
 
-<div class="codetabs"><pre data-lang="matlab" data-notes="1|Put your own test number here.;4|This loop prints every channel in the file, with its code and its description. It is a good idea to read this list before you plot anything.;9|The channel is chosen by its code. Any code from the list printed above can go here. The loop keeps the channel whose code matches under the name ch.;16|The file stores no times. Three header fields give them, as the Anatomy page explains.;20|The axis text comes from the header, so the figure names its own channel and units.">test  = jsondecode(fileread('crash/10642.json'));
+<div class="codetabs"><pre data-lang="matlab" data-notes="1|Put your own test number here. jsondecode turns the file into a struct.;6|This loop prints every channel in the file, with its code and its description. It is a good idea to read this list before you plot anything.;11|The channel is chosen by its code. Any code from the list printed above can go here. The loop keeps the channel whose code matches under the name ch.;16|The file stores no times. Three header fields give them, as the Anatomy page explains.;20|The axis text comes from the header, so the figure names its own channel and units.;22|Saves the figure as an image for your report, at 200 dots per inch.">test  = jsondecode(fileread('crash/10642.json'));
 names = fieldnames(test.channels);
 
 for k = 1:numel(names)

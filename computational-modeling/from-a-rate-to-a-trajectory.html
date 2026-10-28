@@ -1047,7 +1047,7 @@ that is often a stronger statement than an error estimate.</p></div></details></
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="1|f is the system and euler is the method. Neither mentions the other's details, which is what lets one stepper run any problem.;6|The whole method is this line. Everything else is bookkeeping.;6|f is handed the time as well as the state, because a rate can depend on a recorded signal as well as on where it is.">def euler(f, s0, t0, dt, n):
+  <pre data-lang="python" data-notes="1|f is the system and euler is the method. Neither mentions the other's details, which is what lets either be swapped.;2|The starting state as an array of floats, whatever form it was passed in ([numpy arrays](py-numpy.html)).;3|One row per time, filled in as the loop goes. dt and n, the step and the number of steps, are the choices.;6|The whole method is this line, and the other lines store the results. f is handed the time as well as the state, because a rate can depend on a recorded signal and not only on the state.">def euler(f, s0, t0, dt, n):
     s = np.array(s0, dtype=float)
     out = np.empty((n + 1, s.size))
     out[0] = s
@@ -1055,7 +1055,7 @@ that is often a stronger statement than an error estimate.</p></div></details></
         s = s + dt * f(t0 + k*dt, s)
         out[k + 1] = s
     return out</pre>
-  <pre data-lang="matlab" hidden data-notes="2|s0(:).' forces a row vector, so a scalar problem and a two-component one behave the same.">function out = euler(f, s0, t0, dt, n)
+  <pre data-lang="matlab" hidden data-notes="2|s0(:).' forces a row vector, so a scalar problem and a two-component one behave the same.;6|The whole method is this line.">function out = euler(f, s0, t0, dt, n)
     s = s0(:).';
     out = zeros(n+1, numel(s));
     out(1,:) = s;
@@ -1064,7 +1064,7 @@ that is often a stronger statement than an error estimate.</p></div></details></
         out(k+2,:) = s;
     end
 end</pre>
-  <pre data-lang="js" hidden data-notes="8|Each component advances by its own rate, so the same code advances a state of any length.">function euler(f, s0, t0, dt, n) {
+  <pre data-lang="js" hidden data-notes="5|The rate of every component at this time and state.;8|Each component advances by its own rate, so the same code advances a state of any length.">function euler(f, s0, t0, dt, n) {
   let s = s0.slice();
   const out = [s.slice()];
   for (let k = 0; k &lt; n; k++) {

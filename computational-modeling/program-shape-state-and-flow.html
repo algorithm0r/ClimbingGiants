@@ -1058,7 +1058,7 @@ straight&#8209;line flow: six statements, each run once, top to bottom.</p>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="1|Given. Assigned once and never changed, so it can be read as a constant.;2|Given.;3|A constant of the problem. Its value is fixed by physics and not chosen here.;5|The discriminant. It exists only from this line onwards.;6|Depends on disc, so it cannot be written above it.;7|The result. Every name above it had to exist first.">y0 = 2.00
+  <pre data-lang="python" data-notes="1|Given. Assigned once and never changed, so it can be read as a constant ([Names and assignment](py-names.html)).;2|Given.;3|A constant of the problem. Its value is fixed by physics and not chosen here.;5|The discriminant. It exists only from this line onwards.;6|Depends on disc, so it cannot be written above it. sqrt is the square root, which a full Python program brings in first with from math import sqrt ([Files and libraries](py-files.html)).;7|The result. Every name above it had to exist first.">y0 = 2.00
 v0 = 5.00
 g  = 9.81
 
@@ -1102,7 +1102,7 @@ the integral from week&nbsp;3, written out longhand.</p>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="1|a is the whole record under one name. It exists before the loop and never changes.;2|The sampling interval, read from the channel header and not assumed.;4|total starts at zero before the loop, so it exists to be added to on the first pass.;6|i is scratch. It is fresh every pass and gone afterwards.;7|The accumulator. This is the only line that carries anything between passes.;9|Read after the loop. total holds the sum from every pass. i does not survive it.">a  = load_channel(10642, '093')
+  <pre data-lang="python" data-notes="1|a is the whole record under one name. It exists before the loop and never changes. load_channel stands for the lines that read a channel from the file ([Dictionaries](py-dicts.html)).;2|The sampling interval. It is the dt value in the channel header, typed in here for the example. 8.0e-5 is 8 times 10 to the power -5 ([Numbers and text](py-values.html)).;4|total starts at zero before the loop, so it exists to be added to on the first pass.;6|i is scratch. It takes a new value every pass, and nothing after the loop uses it. range(len(a)) counts 0, 1, 2 and so on to the last index ([Loops](py-loops.html)).;7|The accumulator. This is the only line that carries anything between passes. a[i] is the sample at position i ([Lists](py-lists.html)).;9|Read after the loop. total holds the sum from every pass.">a  = load_channel(10642, '093')
 dt = 8.0e-5
 
 total = 0.0
@@ -1111,7 +1111,7 @@ for i in range(len(a)):
     total = total + a[i]
 
 dv = total * dt</pre>
-  <pre data-lang="matlab" hidden data-notes="1|a is the whole record under one name.;2|The sampling interval, read from the header.;4|The accumulator, initialised before the loop.;6|i is scratch, fresh every pass.;7|The only line that carries state between passes.">a  = loadChannel(10642, '093');
+  <pre data-lang="matlab" hidden data-notes="1|a is the whole record under one name.;2|The sampling interval, the dt value from the channel header, typed in for the example.;4|The accumulator, initialised before the loop.;6|i is scratch. It takes a new value every pass, and nothing after the loop uses it.;7|The only line that carries state between passes.">a  = loadChannel(10642, '093');
 dt = 8.0e-5;
 
 total = 0.0;
@@ -1121,7 +1121,7 @@ for i = 1:numel(a)
 end
 
 dv = total * dt;</pre>
-  <pre data-lang="js" hidden data-notes="1|a is the whole record under one name.;2|The sampling interval, read from the header.;4|The accumulator, declared before the loop with let because it is reassigned.;6|i is scratch, and let scopes it to the loop.;7|The only line that carries state between passes.">const a  = await loadChannel(10642, '093');
+  <pre data-lang="js" hidden data-notes="1|a is the whole record under one name.;2|The sampling interval, the dt value from the channel header, typed in for the example.;4|The accumulator, declared before the loop with let because it is reassigned.;6|i is scratch, and let scopes it to the loop.;7|The only line that carries state between passes.">const a  = await loadChannel(10642, '093');
 const dt = 8.0e-5;
 
 let total = 0.0;
