@@ -6,8 +6,8 @@
 <title>Lecture 18 — Residual and error</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261028082814">
-<link rel="stylesheet" href="css/demos.css?v=20261028082814">
+<link rel="stylesheet" href="css/blocks.css?v=20261102083412">
+<link rel="stylesheet" href="css/demos.css?v=20261102083412">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -230,7 +230,7 @@ body:not(.inclass) .deck-slide .pcard.gold .tag{background:#f1e4c4; color:#8A650
 /* worked arithmetic, set by KaTeX. The aligned environment does the spacing,
    so there is no hand padding and no monospace face to fake a column. */
 .deck-slide .work{margin:0 auto; font-size:var(--stage-text)}
-.deck-slide .work .katex-display{margin:0}
+.deck-slide .work .katex-display{margin:0; overflow:visible}
 /* two display equations under one claim need air between them, or the
    second one's numerator lands on the first one's denominator */
 .deck-slide .work .katex-display + .katex-display{margin-top:.8em}
@@ -694,14 +694,14 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>All right, welcome. So in the last video we saw a curve with a residual of zero land further from the truth than one that didn't go through a single point. In this video I want to pull those two gaps apart properly, because they get mixed up all the time. So let's take a look.</p><p>The residual is the gap between the model and the data it was fitted to. We always have it, and the fit made it as small as it could.</p><p>The error is the gap between the model and the truth. We only have it when we know the truth, which is almost never, and the fit did nothing to it at all.</p>">
+<section class="deck-slide full" data-notes="<p>All right, welcome. In this video I want to pull apart two gaps, the residual and the error, because they get mixed up all the time. So let's take a look.</p><p>The residual is the gap between the model and the data it was fitted to. We always have it, and the fit made it as small as it could.</p><p>The error is the gap between the model and the truth. We only have it when we know the truth, which is almost never, and the fit did nothing to it at all.</p>">
   <div class="head">
     <p class="say">The <span class="term">residual</span> is measured against the data, and the <span class="term">error</span> <span class="def">against the truth</span>.</p>
   </div>
   <div class="stage">
     <div class="pcards c2">
       <div class="pcard"><span class="tag">residual</span><b>Model against its own data</b>
-        <span>It is always available, and the fit minimized it. We report it as an RMS, as in lecture 13.</span></div>
+        <span>It is always available, and the fit minimized it. We report it as an RMS.</span></div>
       <div class="pcard gold"><span class="tag">error</span><b>Model against the truth</b>
         <span>It is usually unknown, and the fit did nothing to it.</span></div>
     </div>
@@ -735,29 +735,13 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Now let's see what happens when we change how many frames we fit, from 6 up to 20, and take the median over all 140 shots.</p><p>The median residual goes up, from 1.27 centimeters at 6 frames to 2.21 at 20. And the median error goes down, from 113 centimeters at 6 frames to 13 at 14, and about 3 at 20.</p><p>Why? With only a few frames, the parabola can bend to follow the noise, so it fits those frames very closely and predicts badly. With more frames it can't follow the noise anymore, so the residual grows, and the prediction gets much better. So the residual got worse while the prediction got better, and on real data we'd only ever see the residual.</p><p>Now one honest caveat. The answer here is itself a fit to the whole flight, so as the short fit uses more of the same frames it's bound to get closer to it. Some of that fall is built in, and the page gets into it.</p>">
+<section class="deck-slide full" data-notes="<p>Now let's see what happens when we change how many frames we fit. On the left is the typical shot from before, fitted with its first 6, 10 and 20 frames, and each parabola is carried on down to the rim. The three fits all follow the frames they were given, and they reach the rim at different times. On the right, the number of frames runs from 6 up to 20, and each point is the median over all 140 shots.</p><p>The median residual goes up, from 1.27 centimeters at 6 frames to 2.21 at 20. And the median error goes down, from 113 centimeters at 6 frames to 13 at 14, and about 3 at 20.</p><p>Why? With only a few frames, the parabola can bend to follow the noise, so it fits those frames very closely and predicts badly. With more frames it can't follow the noise anymore, so the residual grows, and the prediction gets much better. So the residual got worse while the prediction got better, and on real data we'd only ever see the residual.</p><p>Now one honest caveat. The answer here is itself a fit to the whole flight, so as the short fit uses more of the same frames it's bound to get closer to it. Some of that fall is built in, and the page gets into it.</p>">
   <div class="head">
     <p class="say">With more frames, the residual <span class="def">rises</span> while the error <span class="def">falls</span>.</p>
-    <p class="sub">Each point is the median over 140 shots. With more frames the parabola can no longer bend to follow the noise.</p>
+    <p class="sub">Left, the typical shot fitted with 6, 10 and 20 frames and carried to the rim. Right, medians over 140 shots against the number of frames fitted.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="lec18-trend"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>So where does the gap come from? Three things, and they stack up.</p><p>First, the fit is judged where the data are. Least squares makes the residual small at those ten frames and says nothing at all about the rim, which is well past all of them.</p><p>Second, small changes in a parameter become large far away. The curvature is uncertain by a little bit, and it gets multiplied by the time squared. We've seen 0.36 seconds of flight, and the rim's at about 1.1 seconds, about three times further. Three squared is 9, so a small error in the curvature grows about nine times by the rim. That's week nine.</p><p>And third, the residual has been made small on purpose. Adding parameters drives it toward zero whether the model's right or not. We saw that in lecture 13, a residual of 0.00005 at degree 9, with the error 25 times worse than at degree 2.</p>">
-  <div class="head">
-    <p class="say">Three mechanisms open the gap, and <span class="def">they compound</span>.</p>
-  </div>
-  <div class="stage">
-    <div class="pcards c3">
-      <div class="pcard"><span class="tag">where</span><b>Judged at the data</b>
-        <span>Nothing in the fit looks at the rim.</span></div>
-      <div class="pcard"><span class="tag">how far</span><b>Amplified by distance</b>
-        <span>A small error in the fitted <i>g</i> grows with time squared.</span></div>
-      <div class="pcard"><span class="tag">by design</span><b>Made small on purpose</b>
-        <span>More parameters never make it larger.</span></div>
-    </div>
+    <figure class="figure wide legible" data-fig="lec18-trend"><div class="fig-body"></div></figure>
   </div>
 </section>
 
@@ -768,10 +752,10 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So to estimate the error, we need something the fitted data can't give us. And the most direct thing is to hold some data back.</p><p>Here's how that works for the two models from this week, the parabola with g fitted, and the one with g held at 9.81. Take each shot's free flight and split it in half. Fit both models to the first half only. Then score each one by the RMS error of its predictions on the second half, which neither of them has seen.</p><p>This is on the example pack, 23 shots, one left out because its tracking runs in straight steps, and it's in nobody's data.</p>">
+<section class="deck-slide full" data-notes="<p>So to estimate the error, we need something the fitted data can't give us. And the most direct thing is to hold some data back.</p><p>Here's how that works for two models, the parabola with g fitted, and the one with g held at 9.81. Take each shot's free flight and split it in half. Fit both models to the first half only. Then score each one by the RMS error of its predictions on the second half, which neither of them has seen.</p><p>This is on 23 shots. A 24th was left out because its tracking runs in straight steps.</p>">
   <div class="head">
     <p class="say">Hold data back by <span class="def">fitting the first half and scoring the second</span>.</p>
-    <p class="sub">This uses the course&rsquo;s example shots (23, in no student&rsquo;s data), and both models are fitted to the same first halves.</p>
+    <p class="sub">There are 23 shots, and both models are fitted to the same first halves.</p>
   </div>
   <div class="stage">
     <div class="pcards c3">
@@ -785,7 +769,7 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So first, on the halves they were fitted to. The fitted-g model matches the first half at least as well on all 23 shots, a median of 1.99 centimeters against 2.12. And it has to, because the held model is the same parabola with one coefficient fixed. That's the free fit always winning on its own data, from lecture 15.</p><p>And now on the second halves, which neither fit has seen. Each dot is a shot. Across is the error with g held, up is the error with g fitted. Above the dashed line means holding g predicted better.</p><p>Holding g did better on 14 of the 23. That's a majority, but not a large one. The medians are 4.2 centimeters held against 5.8 fitted. And the clearer difference is in the bad shots. The worst with g fitted is 35.7 centimeters, and the worst with g held is 11.8, so about three times worse with g fitted. Probably because a fitted g can soak up the noise in half a flight and then carry the wrong curvature forward.</p>">
+<section class="deck-slide full" data-notes="<p>So first, on the halves they were fitted to. The fitted-g model matches the first half at least as well on all 23 shots, a median of 1.99 centimeters against 2.12. And it has to, because the held model is the same parabola with one coefficient fixed. That's the free fit always winning on its own data.</p><p>And now on the second halves, which neither fit has seen. Each dot is a shot. Across is the error with g held, up is the error with g fitted. Above the dashed line means holding g predicted better.</p><p>Holding g did better on 14 of the 23. That's a majority, but not a large one. The medians are 4.2 centimeters held against 5.8 fitted. And the clearer difference is in the bad shots. The worst with g fitted is 35.7 centimeters, and the worst with g held is 11.8, so about three times worse with g fitted. Probably because a fitted g can soak up the noise in half a flight and then carry the wrong curvature forward.</p>">
   <div class="head">
     <p class="say">On unseen frames, <span class="def">holding <i>g</i> did better on 14 of 23 shots</span>.</p>
     <p class="sub">On the fitted halves, fitting <i>g</i> matched better on all 23. 14 of 23 is a majority, though not a large one.</p>
@@ -795,17 +779,13 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So here's what to do with all of that. To say how good a model is, confront it with something it wasn't fitted to.</p><p>Held-out data, like we just did, is the most direct. Resampling, perturbing the inputs within their noise and refitting, is week nine. And running the whole thing on cases where the answer is known, and counting how often the interval you report actually contains it, is also week nine, and that's probably the one that checks the other two.</p><p>So hopefully that gives you an idea of why the residual isn't the error, and how to get at the error anyway. That's the end of week six. Next week we start finding roots and searching. Thanks a lot for watching and we'll see you in the next video.</p>">
+<section class="deck-slide full" data-notes="<p>So far each shot was split in half. Now let's hold back whole shots, the way we'd test a model before using it.</p><p>We kept 23 shots and fitted each one's whole flight, and g came out between about 8.9 and 10.4. The median is 9.63. That's our model, a parabola with g held at 9.63, and everything in it came from the kept shots.</p><p>Then there are 12 more shots we held back. Nothing about them went into that 9.63. For each one we have the first few frames of flight, about eight. We fit only the release height and the vertical speed to those frames, with g held at 9.63, carry the parabola on, and compare it with the next eight frames, which the fit never saw.</p><p>On the right, each dot is a held-back shot. Across is our model's error on those unseen frames, and up is the error if we fit g to the shot's own few frames instead. Our model's median error is 4.1 centimeters, and its worst is 8.8. Fitting g to each shot matched its own frames a little better, but on the unseen frames its median is 5.9 and its worst is 50 centimeters. Our model did better on 7 of the 12, and the bigger difference is in the bad shots.</p><p>So that's how to judge a model. Fit it on what you kept, and judge it on what you held back.</p><p>So hopefully that gives you an idea of why the residual isn't the error, and how to get at the error anyway. In the next video we'll start finding roots. Thanks a lot for watching and we'll see you in the next video.</p>">
   <div class="head">
-    <p class="say">Judge a model on <span class="def">data it was not fitted to</span>.</p>
+    <p class="say">Judge the model on <span class="def">shots it was not fitted to</span>.</p>
+    <p class="sub">g&nbsp;=&nbsp;9.63 is the median of the 23 kept shots. Each of 12 held-back shots fits only its release height and speed, and is scored on its next 8 frames.</p>
   </div>
   <div class="stage">
-    <div class="pcards c2">
-      <div class="pcard gold"><span class="tag">now</span><b>Held-out data</b>
-        <span>Fit part of the data and predict the rest.</span></div>
-      <div class="pcard"><span class="tag">week 9</span><b>Two more checks</b>
-        <span>Week 9 adds two more ways to test a model on data it was not fitted to.</span></div>
-    </div>
+    <figure class="figure wide legible" data-fig="lec18-kept"><div class="fig-body"></div></figure>
   </div>
 </section>
 
@@ -816,6 +796,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <div class="deck-notes"></div>
 
 
-<script type="module" src="js/bundle/lecture-18.js?v=20261028082814"></script>
+<script type="module" src="js/bundle/lecture-18.js?v=20261102083412"></script>
 </body>
 </html>

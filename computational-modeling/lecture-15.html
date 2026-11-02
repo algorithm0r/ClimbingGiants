@@ -6,8 +6,8 @@
 <title>Lecture 15 — Linearity in the parameters</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261028082814">
-<link rel="stylesheet" href="css/demos.css?v=20261028082814">
+<link rel="stylesheet" href="css/blocks.css?v=20261102083412">
+<link rel="stylesheet" href="css/demos.css?v=20261102083412">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -230,7 +230,7 @@ body:not(.inclass) .deck-slide .pcard.gold .tag{background:#f1e4c4; color:#8A650
 /* worked arithmetic, set by KaTeX. The aligned environment does the spacing,
    so there is no hand padding and no monospace face to fake a column. */
 .deck-slide .work{margin:0 auto; font-size:var(--stage-text)}
-.deck-slide .work .katex-display{margin:0}
+.deck-slide .work .katex-display{margin:0; overflow:visible}
 /* two display equations under one claim need air between them, or the
    second one's numerator lands on the first one's denominator */
 .deck-slide .work .katex-display + .katex-display{margin-top:.8em}
@@ -687,17 +687,17 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <body>
 
 
-<section class="deck-slide part">
+<section class="deck-slide part" data-notes="<p>All right, welcome. In the last video we looked at what best means in best fit, and least squares came out as the standard, mostly because it&#x27;s easy to compute. In this video I want to look at which models least squares handles that easily, the ones that are linear in their parameters. Then we&#x27;ll use one to fit a parabola to the height of Curry&#x27;s basketball shot from lecture 13. So let&#x27;s take a look.</p>">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
-    <p class="say">Models that least squares solves in one step</p>
+    <p class="say">Models that are linear in their parameters</p>
   </div>
 </section>
 
-<section class="deck-slide full">
+<section class="deck-slide full" data-notes="<p>Let&#x27;s start with the straight line from lecture 13, y equals a plus b t. I can write it a little differently, as a times 1 plus b times t.</p><p>Now each parameter multiplies a function of t. a multiplies the function that&#x27;s always 1, and b multiplies the function t itself. Neither function has an unknown in it, since we know t at every frame. And then the terms are added.</p><p>A sum of unknowns, each times something known, is what we call a linear combination. So the line is a linear combination of the functions 1 and t, with a and b as the weights.</p>">
   <div class="head">
-    <p class="say">In <i>y</i> = <i>a</i> + <i>bt</i>, each parameter <span class="def">only multiplies something we know</span>.</p>
-    <p class="sub"><i>a</i> multiplies 1 and <i>b</i> multiplies <i>t</i>, and both 1 and <i>t</i> come from the data.</p>
+    <p class="say">In <i>y</i> = <i>a</i> + <i>bt</i>, the parameters appear in <span class="def">a linear combination</span>.</p>
+    <p class="sub">Each parameter multiplies a known function of <i>t</i>, <i>a</i> the function 1 and <i>b</i> the function <i>t</i>, and the terms are added.</p>
   </div>
   <div class="stage">
     <div class="work">
@@ -706,10 +706,10 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>All right, welcome. So in the last video we looked at what best means in a line of best fit, and least squares came out as the default. In this video I want to look at which models least squares can solve in one step, with no searching. And maybe more of them than you'd expect. So let's take a look.</p><p>What we call linear in the parameters means the model can be written as a sum, where each parameter, each theta, multiplies a function of x, and those functions, the g's, have no unknowns in them.</p><p>And the g's can be anything. x, x squared, sine of x. Really the only thing we're checking is that every unknown is out front, multiplying.</p>">
+<section class="deck-slide full" data-notes="<p>So here&#x27;s the general version. I&#x27;ll write x for the input in general, and for the shot it&#x27;s t. What we call linear in the parameters means the model is a linear combination like that. Each parameter, each theta, multiplies a function of x, one of the g&#x27;s, and the g&#x27;s have no unknowns in them. Theta is just the Greek letter people usually use for a parameter, and there are p of them. For the line, the g&#x27;s are 1 and x, and the thetas are a and b.</p><p>The g&#x27;s can be anything we can compute from x, like the ones on the next slide. The thing we&#x27;re checking is that each term is one unknown, to the first power, times a known function.</p>">
   <div class="head">
-    <p class="say">A model is <span class="term">linear in its parameters</span> when <span class="def">each parameter only multiplies</span>.</p>
-    <p class="sub">Each <i>g<sub>k</sub></i> is any function of <i>x</i> with no unknowns in it. The &theta;s are <i>a</i>, <i>b</i>, &hellip; renamed, and on the last slide <i>g</i><sub>1</sub> = 1 and <i>g</i><sub>2</sub> = <i>t</i>.</p>
+    <p class="say">A model is <span class="term">linear in its parameters</span> when it is <span class="def">a linear combination of known functions of <i>x</i></span>.</p>
+    <p class="sub">Each <i>g<sub>k</sub></i> is a function of <i>x</i> with no unknowns in it, and &theta;<sub><i>k</i></sub> (theta) is the parameter that multiplies it. For the line, the functions are 1 and <i>x</i>, and the parameters are <i>a</i> and <i>b</i>.</p>
   </div>
   <div class="stage">
     <div class="work">
@@ -718,30 +718,30 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So let's try some. A parabola, a plus b x plus c x squared. Is that linear in its parameters? Well, a multiplies 1, b multiplies x, c multiplies x squared. So yes. The curve is curved, and the model is still linear in a, b and c.</p><p>a sine x plus b cosine 3 x. Same thing, a and b are out front. Yes.</p><p>And a e to the minus 2 x. There's one unknown, a, and it multiplies. So yes.</p><p>So linear in this sense means how the unknowns enter, and a parabola is curved and still passes.</p>">
+<section class="deck-slide full" data-notes="<p>So let&#x27;s try some. A parabola, a plus b x plus c x squared. a multiplies 1, b multiplies x, and c multiplies x squared, so yes, it&#x27;s linear in its parameters, even though its graph is a curve.</p><p>a sine x plus b cosine 3 x. a and b each multiply a known function, so yes. And a e to the minus 2 x. There&#x27;s one unknown, a, and it multiplies the known function e to the minus 2 x, so yes.</p><p>So linear here is about how the unknowns enter the model, and the graph can be as curved as we like.</p>">
   <div class="head">
     <p class="say">A curved model can still be <span class="def">linear in its parameters</span>.</p>
   </div>
   <div class="stage">
     <div class="pcards c3">
       <div class="pcard"><span class="tag">linear</span><b><i>a</i> + <i>bx</i> + <i>cx</i>&sup2;</b>
-        <span>This is a parabola, and <i>c</i> multiplies <i>x</i>&sup2;.</span></div>
+        <span>This is a parabola, and <i>c</i> multiplies the function <i>x</i>&sup2;.</span></div>
       <div class="pcard"><span class="tag">linear</span><b><i>a</i> sin <i>x</i> + <i>b</i> cos 3<i>x</i></b>
-        <span>The functions can be anything with no unknowns.</span></div>
+        <span>The functions can be anything with no unknowns in them.</span></div>
       <div class="pcard"><span class="tag">linear</span><b><i>a</i> e<sup>&minus;2<i>x</i></sup></b>
-        <span>It has one unknown, <i>a</i>, and <i>a</i> multiplies.</span></div>
+        <span>It has one unknown, <i>a</i>, and <i>a</i> multiplies the function e<sup>&minus;2<i>x</i></sup>.</span></div>
     </div>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Now let's try three that aren't. a e to the minus k x, with k unknown. That's the same shape of curve as the last one. The only thing that changed is that now we're fitting k, and k is stuck inside the exponential. So that one fails.</p><p>a over b plus x fails too, b is stuck in the denominator. And log of a plus b x, both a and b are inside the log, so that fails as well.</p>">
+<section class="deck-slide full" data-notes="<p>Now three that aren&#x27;t. a e to the minus k x, with k unknown. It&#x27;s the same family of curves as the last one, but now we&#x27;re fitting k, and k is inside the exponential, so it doesn&#x27;t multiply a known function. That one fails.</p><p>a over the quantity b plus x fails too, since b is in the denominator. And the log of the whole thing, a plus b x, has both a and b inside the log, so that fails as well.</p>">
   <div class="head">
     <p class="say">A parameter inside a function makes the model <span class="def">nonlinear in its parameters</span>.</p>
   </div>
   <div class="stage">
     <div class="pcards c3">
       <div class="pcard"><span class="tag">not linear</span><b><i>a</i> e<sup>&minus;<i>kx</i></sup></b>
-        <span>This is the same curve as before, now with <i>k</i> fitted.</span></div>
+        <span>This is the same family of curves as before, now with <i>k</i> fitted.</span></div>
       <div class="pcard"><span class="tag">not linear</span><b><i>a</i> / (<i>b</i> + <i>x</i>)</b>
         <span><i>b</i> is in a denominator.</span></div>
       <div class="pcard"><span class="tag">not linear</span><b>ln(<i>a</i> + <i>bx</i>)</b>
@@ -750,180 +750,92 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So why do we care? Well, it decides what least squares has to do.</p><p>If the model is linear in its parameters, minimizing the sum of squares turns into a set of linear equations. We call them the normal equations, and they have a closed-form answer. No starting guess, no iterating, and the answer we get is the global minimum. That's the next video.</p><p>If it isn't, the fit becomes a search. We need a starting guess, it might not converge, and it can hand us a local minimum as if it were the answer. We'll see a lot more about searches in week seven.</p>">
+<section class="deck-slide full" data-notes="<p>With norm 2, least squares, whether a model is linear in its parameters decides how the computer finds the best fit. If it is, making the sum of squared residuals as small as possible turns into a set of linear equations, one per parameter. They&#x27;re called the normal equations, and the next video is about them.</p><p>Solving linear equations is still work. Inside the library it&#x27;s a standard recipe from linear algebra, a matrix factorization, and the arithmetic grows with the size of the problem. But it&#x27;s a fixed recipe. There&#x27;s no starting guess, it always finishes, and the answer is the lowest point of the sum of squared residuals, as long as the known functions are really different from each other. From our side it&#x27;s one library call. Because the answer comes from solving equations by a fixed recipe, with no guessing, we call it a closed form.</p><p>If the model isn&#x27;t linear in its parameters, the fit becomes a search. The computer guesses, improves the guess, and repeats. It needs a starting guess, it might never settle on an answer, and it can stop in a dip that isn&#x27;t the lowest one and hand that back as the answer.</p>">
   <div class="head">
-    <p class="say">Linear in its parameters means the fit can be <span class="def">solved in one step</span>.</p>
-    <p class="sub">There are two ways a computer can find the best parameters. Lecture 16 shows the one-step way.</p>
+    <p class="say">With norm 2, a model linear in its parameters has its best fit <span class="def">at the solution of linear equations</span>.</p>
+    <p class="sub">A library solves those equations in one call, with a fixed amount of arithmetic and no starting guess.</p>
   </div>
   <div class="stage">
     <div class="pcards c2">
-      <div class="pcard gold"><span class="tag">linear</span><b>Solve once</b>
-        <span>The best values come from equations, the way 2<i>x</i> + 3 = 7 gives <i>x</i> = 2. This is called a <span class="term">closed form</span>.</span></div>
+      <div class="pcard gold"><span class="tag">linear</span><b>Solve the equations</b>
+        <span>The best values come from linear equations, the way 2<i>x</i> + 3 = 7 gives <i>x</i> = 2. This is called a <span class="term">closed form</span>.</span></div>
       <div class="pcard"><span class="tag">not linear</span><b>Search</b>
         <span>The computer guesses, improves the guess and repeats. It may stop in a dip of the sum of squares that is not the lowest one.</span></div>
     </div>
   </div>
 </section>
 
-<section class="deck-slide part">
+<section class="deck-slide part" data-notes="<p>All right. In lecture 13 we fit a straight line to the height of Curry&#x27;s shot, got a bad fit, and asked what form would follow the arc. The physics says a parabola, and a parabola is linear in its parameters. So in this section we fit it.</p>">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
-    <p class="say">Holding a known parameter fixed in a fit</p>
+    <p class="say">Fitting a parabola to the height of the shot</p>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Okay, now back to the ball. The height of a ball in flight is a parabola, c-nought plus c-1 t plus c-2 t squared. And that's linear in c-nought, c-1 and c-2, so least squares solves it in one step.</p><p>Fit all three to the shot from lecture 13 and we get c-2 of minus 4.806.</p><p>Why is c-2 minus g over 2? Well, take the second derivative of c-2 t squared and we get 2 c-2. That's the acceleration, and the acceleration is minus g. So g is twice 4.806, that's 9.61. Back in lecture 13 we got 9.60 from the velocities, so the two routes agree to about a hundredth.</p><p>But we already know g. It's 9.81, to more figures than 31 frames of tracking could ever give us. So what if we don't fit it?</p>">
+<section class="deck-slide full" data-notes="<p>I&#x27;ll call the height z, measured upward. Under gravity alone, the height of the ball follows a parabola, z equals c-nought plus c-1 t plus c-2 t squared. c-nought is the height at t equals zero, c-1 is the vertical velocity then, and c-2 is minus g over 2.</p><p>Why minus g over 2? Well, differentiate z twice. The first two terms vanish, and c-2 t squared gives 2 c-2. That&#x27;s the acceleration, and since gravity pulls down, the acceleration is minus g.</p><p>And it&#x27;s linear in all three. c-nought multiplies 1, c-1 multiplies t, and c-2 multiplies t squared. So it&#x27;s the line from lecture 13 with one more known function added, t squared.</p>">
   <div class="head">
     <p class="say">The height of a ball in flight is <span class="def">linear in all three parameters</span>.</p>
-    <p class="sub"><i>c</i><sub>0</sub> is the height and <i>c</i><sub>1</sub> the upward speed at <i>t</i> = 0, and <i>c</i><sub>2</sub> = &minus;&frac12;<i>g</i>. On the shot from lecture 13, <i>c</i><sub>2</sub> = &minus;4.806, so <i>g</i> = 9.61&nbsp;m/s&sup2;.</p>
+    <p class="sub"><i>c</i><sub>0</sub> is the height and <i>c</i><sub>1</sub> the vertical velocity at <i>t</i> = 0, and <i>c</i><sub>2</sub> = &minus;&frac12;<i>g</i>.</p>
   </div>
   <div class="stage">
     <div class="work">
-      $$z(t) \;=\; c_0 + c_1 t + c_2 t^2 \qquad c_2 = -\tfrac{1}{2}g$$
+      $$z(t) \;=\; \textcolor{#8A6508}{c_0} \cdot 1 \;+\; \textcolor{#8A6508}{c_1} \cdot t \;+\; \textcolor{#8A6508}{c_2} \cdot t^2 \qquad z^{\prime\prime} = 2c_2 = -g$$
     </div>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So here's the move. If c-2 is known, it isn't a parameter anymore. So I'm going to take that term and move it to the other side, by adding a half g t squared to both sides.</p><p>Now the left side is the height plus a half g t squared, and every piece of that comes from the data, or is a number we know. And the right side is c-nought plus c-1 t. That's a straight line, still linear in its parameters, just with two of them instead of three.</p>">
+<section class="deck-slide full" data-notes="<p>To fit it, the computer needs the model written out at every frame, with that frame&#x27;s measured height on the left. At the first frame t is 0, so only c-nought is left. At the second, t is 0.04 and t squared is tiny. And so on, down to frame 31.</p><p>That&#x27;s 31 equations and only three unknowns. With measured heights, no parabola goes exactly through all 31 points, which is why each line says approximately equal. Least squares finds the c&#x27;s that make the sum of squared residuals as small as it can be.</p>">
   <div class="head">
-    <p class="say">A known term moves <span class="def">out of the model and into the data</span>.</p>
+    <p class="say">Writing the model at every frame gives <span class="def">one equation per frame</span>.</p>
+    <p class="sub">With measured heights, no parabola satisfies all 31 equations. Least squares finds the values that come closest.</p>
   </div>
   <div class="stage">
     <div class="work">
       $$\begin{aligned}
-      z &= c_0 + c_1 t - \tfrac{1}{2} g t^2 && \text{the model, with } g \text{ known} \\[8pt]
-      z + \tfrac{1}{2} g t^2 &= c_0 + c_1 t && \text{add } \tfrac{1}{2} g t^2 \text{ to both sides} \\[8pt]
-      \underbrace{z + 4.905\, t^2}_{\text{data}} &= \textcolor{#8A6508}{c_0 + c_1 t} && \text{two parameters left}
+        3.27 &\approx \textcolor{#8A6508}{c_0} \cdot 1 + \textcolor{#8A6508}{c_1} \cdot 0 + \textcolor{#8A6508}{c_2} \cdot 0 && \text{frame 1, } t = 0 \\[4pt]
+        3.50 &\approx \textcolor{#8A6508}{c_0} \cdot 1 + \textcolor{#8A6508}{c_1} \cdot 0.04 + \textcolor{#8A6508}{c_2} \cdot 0.0016 && \text{frame 2, } t = 0.04 \\[4pt]
+        3.74 &\approx \textcolor{#8A6508}{c_0} \cdot 1 + \textcolor{#8A6508}{c_1} \cdot 0.08 + \textcolor{#8A6508}{c_2} \cdot 0.0064 && \text{frame 3, } t = 0.08 \\[2pt]
+        &\;\;\vdots \\[2pt]
+        3.43 &\approx \textcolor{#8A6508}{c_0} \cdot 1 + \textcolor{#8A6508}{c_1} \cdot 1.2 + \textcolor{#8A6508}{c_2} \cdot 1.44 && \text{frame 31, } t = 1.2
       \end{aligned}$$
     </div>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>And here's what that looks like. On the left, the heights, an arc. On the right, the same heights with 4.905 t squared added to each one. That's 9.81 over 2, times the time squared.</p><p>And the arc turns into a straight line. So now we're fitting a line, c-nought of 3.28 meters, the starting height, and c-1 of 5.93 meters per second, the starting vertical speed.</p><p>The RMS residual goes from 3.02 centimeters with all three free to 3.23 with g held. So it went up a little bit, about 0.2 of a centimeter, maybe 7 percent. It can't go down, because the fit has one less thing it can adjust, and with noise it basically always goes up.</p>">
+<section class="deck-slide full" data-notes="<p>Those 31 equations all have the same shape, so we can pull the known numbers out into a table. That&#x27;s the matrix A. Each row is one frame, one equation from the last slide. Each column is one of the known functions, 1, t and t squared, evaluated at that frame&#x27;s time.</p><p>Now multiply A by c, the column of three unknowns. Each row times the c&#x27;s, entry by entry, added up, is that frame&#x27;s equation, so you get the right-hand sides of all 31, and those should come out close to z, the column of measured heights. So the whole fit is A times c, approximately equal to z. The computer needs exactly two things, the table A and the heights z.</p>">
   <div class="head">
-    <p class="say">Adding &frac12;<i>gt</i>&sup2; to the heights <span class="def">turns the arc into a line</span>.</p>
-    <p class="sub">The line gives the height and upward speed at <i>t</i> = 0. The RMS residual, the typical gap from lecture 13, is 3.02&nbsp;cm with <i>g</i> fitted and 3.23&nbsp;cm with <i>g</i> held.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="lec15-shot"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">The matrix <i>A</i> has <span class="def">one row per frame and one column per function</span>.</p>
-    <p class="sub">For the height, the columns are 1, <i>t</i> and <i>t</i>&sup2;, evaluated at each frame&rsquo;s time.</p>
+    <p class="say">The known numbers form a table, <span class="def">the matrix <i>A</i></span>.</p>
+    <p class="sub">Each row is one frame&rsquo;s equation, and each column is one function, 1, <i>t</i> or <i>t</i>&sup2;, at each frame&rsquo;s time. <i>z</i> is the column of heights.</p>
   </div>
   <div class="stage">
     <div class="work">
-      $$A \;=\; \begin{bmatrix} 1 & 0 & 0 \\ 1 & 0.04 & 0.0016 \\ 1 & 0.08 & 0.0064 \\ \vdots & \vdots & \vdots \\ 1 & 1.20 & 1.44 \end{bmatrix}
-      \qquad \begin{matrix} \leftarrow \text{frame 1} \\ \leftarrow \text{frame 2} \\ \leftarrow \text{frame 3} \\ \\ \leftarrow \text{frame 31} \end{matrix}$$
+      $$\underbrace{\begin{bmatrix} 1 & 0 & 0 \\ 1 & 0.04 & 0.0016 \\ 1 & 0.08 & 0.0064 \\ \vdots & \vdots & \vdots \\ 1 & 1.20 & 1.44 \end{bmatrix}}_{A} \underbrace{\begin{bmatrix} \textcolor{#8A6508}{c_0} \\ \textcolor{#8A6508}{c_1} \\ \textcolor{#8A6508}{c_2} \end{bmatrix}}_{c} \;\approx\; \underbrace{\begin{bmatrix} 3.27 \\ 3.50 \\ 3.74 \\ \vdots \\ 3.43 \end{bmatrix}}_{z}$$
     </div>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>And in code there are two small changes. G here is gravity, 9.81. All three free, we build three columns, a column of ones, t, and t squared, and solve.</p><p>With g known, the t squared column goes away, because we're not solving for its coefficient. And we add the known term to the measurements before we solve. Nothing about the solver changes. It's still lstsq, the least-squares routine, on a smaller problem.</p>">
+<section class="deck-slide full" data-notes="<p>So here&#x27;s what the fit actually picks, all on the same axis in meters. The first column, the function 1, times c-nought, about 3.3, is a flat line at 3.3 meters. The t column times c-1, about 5.8, is a line rising steadily. The t squared column times c-2, about minus 4.8, is the red curve, falling faster and faster. And the solid curve is their sum, the parabola, with the 31 heights on it. So the fitted model is z equals 3.3 plus 5.82 t minus 4.81 t squared.</p><p>By the last frame, the rising line and the falling curve are each about 7 meters and nearly cancel, and what&#x27;s left is the arc. A fit that&#x27;s linear in its parameters chooses one weight for each known function, so the weighted sum comes as close to the data as it can. In numpy that&#x27;s one call, lstsq, short for least squares, and you hand it A and z.</p>">
   <div class="head">
-    <p class="say">In code the known term is <span class="def">added to the data before the solve</span>.</p>
-    <p class="sub">Each column of <i>A</i> is one function a parameter multiplies, and <code>lstsq</code> does the least-squares fit.</p>
+    <p class="say">The fit chooses <span class="def">how much of each column</span> to add up.</p>
+    <p class="sub">In numpy, <code>np.linalg.lstsq(A, z)</code> returns the weight on each column of <i>A</i>.</p>
   </div>
   <div class="stage">
-    <div class="panels">
-      <div class="code"><span class="dim"># all three free</span></div><div class="note"></div>
-      <div class="code">A = np.column_stack([np.ones_like(t), t, t**2])</div><div class="note">three columns, three parameters</div>
-      <div class="code">c = np.linalg.lstsq(A, z, rcond=None)[0]</div><div class="note">[0] keeps the coefficients</div>
-      <div class="code"><span class="dim"># g known: it moves into the data</span></div><div class="note"></div>
-      <div class="code">A = np.column_stack([np.ones_like(t), t])</div><div class="note">the t&sup2; column is gone</div>
-      <div class="code">c = np.linalg.lstsq(A, <span class="k">z + 0.5*G*t**2</span>, rcond=None)[0]</div><div class="note">the known term joins the data</div>
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>Now there are two consequences of holding a parameter, and they pull in different directions.</p><p>The fit has fewer parameters, so its residual can't get smaller. The free fit could always pick 9.81 if that were best, so its residual is always smaller or equal.</p><p>And the held fit can't move g to follow the data. If what it's following is a bad frame, that's probably a good thing, and if it's real drag, maybe it isn't. Which of those you want is kind of the question assignment five asks, and the residual alone probably can't settle it. The page on residual and error is where we'll get the tools for it.</p>">
-  <div class="head">
-    <p class="say">Holding a parameter <span class="def">never lowers the residual</span>.</p>
-    <p class="sub">That alone does not make the held fit worse.</p>
-  </div>
-  <div class="stage">
-    <div class="pcards c2">
-      <div class="pcard"><span class="tag">fewer parameters</span><b>A residual no smaller</b>
-        <span>The free fit could always choose 9.81 itself.</span></div>
-      <div class="pcard"><span class="tag">a fixed coefficient</span><b>A fixed <i>g</i></b>
-        <span>It cannot bend to follow noise, so a slightly larger residual buys a value we trust.</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide part">
-  <div class="head">
-    <p class="course">Computational Physical Modeling</p>
-    <p class="say">Log transforms and the weighting of a fit</p>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>All right, one more trick, and it's one people use all the time. a e to the minus k x isn't linear in a and k. But take the log of both sides, and we get log y equals log a minus k x. That's a straight line in x. Intercept log a, slope minus k. So it's linear, and we can solve it in closed form.</p><p>And the algebra is exact. Nothing wrong there. Now, what is the fit minimizing? Well, a difference of logs, and a difference of logs is a relative error. So the fit is minimizing relative error now, and that changes which points count.</p>">
-  <div class="head">
-    <p class="say">Taking logs makes an exponential <span class="def">linear in its parameters</span>.</p>
-    <p class="sub">This is the decay shape from lecture 13. After the fit, <i>a</i> is <i>e</i> raised to the intercept.</p>
-  </div>
-  <div class="stage">
+    <figure class="figure wide" data-fig="lec15-sum"><div class="fig-body"></div></figure>
     <div class="work">
-      $$\begin{aligned}
-      y &= a\, e^{-kx} && \text{not linear in } k \\[8pt]
-      \ln y &= \textcolor{#8A6508}{\ln a} - \textcolor{#8A6508}{k}\, x && \text{a straight line in } x
-      \end{aligned}$$
+      $$z(t) \;=\; \textcolor{#8A6508}{3.30} \cdot 1 \;+\; \textcolor{#8A6508}{5.82} \cdot t \;-\; \textcolor{#8A6508}{4.81} \cdot t^2$$
     </div>
   </div>
 </section>
 
-<section class="deck-slide full">
+<section class="deck-slide full" data-notes="<p>And here&#x27;s the fitted parabola on the heights. The RMS residual is about 3 centimeters, about as precisely as the cameras can place the ball. So this form fits.</p><p>Now g. c-2 is minus g over 2, so g is minus 2 times c-2, which comes out to 9.61. In lecture 13, fitting a line to the velocities, we got 9.60. So the two routes agree to within 0.01 meters per second squared, and both are about 2 percent below the standard 9.81. Both use the same tracked heights, though, so their agreement checks the two methods, and it can&#x27;t tell us where the 2 percent comes from.</p><p>So hopefully that gives you an idea of what linear in the parameters means, and how a curved model can still be fitted with one library call. In the next video we&#x27;ll build the equations behind that call, the normal equations, and solve them by hand. Thanks a lot for watching and we&#x27;ll see you in the next video.</p>">
   <div class="head">
-    <p class="say">On <i>y</i> itself, the &plusmn;0.05 noise is <span class="def">the same size everywhere</span>.</p>
-    <p class="sub">Eight points from <i>y</i> = 5<i>e</i><sup>&minus;0.4<i>x</i></sup>, so the true <i>k</i> is 0.400.</p>
+    <p class="say">The fitted parabola gives <span class="def"><i>g</i> = 9.61&nbsp;m/s&sup2;</span>.</p>
+    <p class="sub">The velocity line in lecture 13 gave 9.60. The standard value is 9.81, about 2% higher.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="lec15-yband"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>Here are eight points from 5 e to the minus 0.4 x, with noise of a fixed size, plus or minus 0.05, plotted as log y.</p><p>The shaded band is that same plus or minus 0.05, drawn on the log scale. At x equals 0, y is 5, so 0.05 is 1 percent, and the band is thin, 0.02 wide. At x equals 7 the curve is down to 0.304, so the same 0.05 is 0.05 out of 0.304, about 16 percent, and the band is 0.33 wide.</p><p>And least squares on log y treats every point the same. So the points at the end, which on the log scale are the noisy ones, pull the slope around. The fit on log y gives k of 0.4110, 2.8 percent off. A direct fit on the original y, which needs a search, gives 0.4029, 0.7 percent off.</p>">
-  <div class="head">
-    <p class="say">On ln <i>y</i>, the same &plusmn;0.05 noise grows from <span class="def">0.02 wide to 0.33</span>.</p>
-    <p class="sub">ln <i>y</i> moves by about 0.05/<i>y</i>, so the band widens where <i>y</i> is small. The fit on ln <i>y</i> still counts those points fully.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="lec15-band"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>So how do we choose? Fit in the space where the errors are the same size.</p><p>If the noise is a fixed size, like an instrument with a stated resolution, fit the original, and pay for the search. If the noise is proportional to the reading, say accurate to 2 percent of reading, then the log fit is probably the right one.</p><p>And the usual practical answer is both. Use the log fit to get a starting guess, which is close enough for the search to converge from, and then fit the original.</p>">
-  <div class="head">
-    <p class="say">Fit on the scale where <span class="def">the noise is the same size everywhere</span>.</p>
-  </div>
-  <div class="stage">
-    <div class="pcards c3">
-      <div class="pcard"><span class="tag">fixed-size noise</span><b>Fit the original</b>
-        <span>This needs a search and a starting guess.</span></div>
-      <div class="pcard"><span class="tag">noise in proportion</span><b>Fit on ln <i>y</i></b>
-        <span>The log weighting is then likely the right one.</span></div>
-      <div class="pcard gold"><span class="tag">in practice</span><b>Both, in order</b>
-        <span>The log fit gives the starting guess for the search.</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>So here's what to do with all of that. Check how the unknowns enter, not what the graph looks like. If a parameter is already known, move its term into the data. And if you transform to make the fit easy, remember the transform also changed which points count most.</p><p>So hopefully that gives you an idea of what linear in the parameters buys us. In the next video we'll look at how that one-step solve actually works, the normal equations, and where it can lose digits. Thanks a lot for watching and we'll see you in the next video.</p>">
-  <div class="head">
-    <p class="say">Linearity depends on <span class="def">how the unknowns enter the model</span>.</p>
-  </div>
-  <div class="stage">
-    <div class="pcards c3">
-      <div class="pcard gold"><span class="tag">the test</span><b>Each parameter multiplies</b>
-        <span>Then least squares solves it in one step.</span></div>
-      <div class="pcard"><span class="tag">a known value</span><b>Move it to the data</b>
-        <span>This leaves one fewer parameter and the same solver.</span></div>
-      <div class="pcard"><span class="tag">a transform</span><b>Check the weighting</b>
-        <span>It changes which points count most.</span></div>
+    <figure class="figure wide" data-fig="lec15-par"><div class="fig-body"></div></figure>
+    <div class="work">
+      $$g \;=\; -2\,\textcolor{#8A6508}{c_2} \;=\; -2 \times (-4.806) \;=\; 9.61\ \text{m/s}^2$$
     </div>
   </div>
 </section>
@@ -935,6 +847,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <div class="deck-notes"></div>
 
 
-<script type="module" src="js/bundle/lecture-15.js?v=20261028082814"></script>
+<script type="module" src="js/bundle/lecture-15.js?v=20261102083412"></script>
 </body>
 </html>

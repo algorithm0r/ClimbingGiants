@@ -6,8 +6,8 @@
 <title>Lecture 13 — Model form and free parameters</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261028082814">
-<link rel="stylesheet" href="css/demos.css?v=20261028082814">
+<link rel="stylesheet" href="css/blocks.css?v=20261102083412">
+<link rel="stylesheet" href="css/demos.css?v=20261102083412">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -230,7 +230,7 @@ body:not(.inclass) .deck-slide .pcard.gold .tag{background:#f1e4c4; color:#8A650
 /* worked arithmetic, set by KaTeX. The aligned environment does the spacing,
    so there is no hand padding and no monospace face to fake a column. */
 .deck-slide .work{margin:0 auto; font-size:var(--stage-text)}
-.deck-slide .work .katex-display{margin:0}
+.deck-slide .work .katex-display{margin:0; overflow:visible}
 /* two display equations under one claim need air between them, or the
    second one's numerator lands on the first one's denominator */
 .deck-slide .work .katex-display + .katex-display{margin-top:.8em}
@@ -687,59 +687,57 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <body>
 
 
-<section class="deck-slide part">
+<section class="deck-slide part" data-notes="<p>All right, welcome. In the last video we looked at how the filter class is part of a measurement. In this video I want to start fitting models to data. We&#x27;ll fit straight lines to one basketball shot, and we&#x27;ll see that the shape we choose for a model, before any fitting happens, decides a lot about whether the fitted numbers mean anything. So let&#x27;s take a look.</p>">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
     <p class="say">Fitting a line to measured points</p>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So here's some data to fit. This is one three-point attempt by Stephen Curry, Golden State at the Clippers, November 2015, and it missed. The arena's cameras tracked the ball 25 times a second.</p><p>These are 31 frames of free flight, from just after it leaves his hand until it gets to the rim, so about 1.2 seconds. On the left is how far the ball is from the hoop, measured along the floor, and it goes from 7.91 meters down to 0.42. On the right is its height, which goes up from 3.27 to 5.07 and comes back down to 3.43.</p>">
+<section class="deck-slide full" data-notes="<p>Here&#x27;s the data we&#x27;ll fit. It&#x27;s one three-point attempt by Stephen Curry. He was playing for Golden State against the Clippers in November 2015, and he missed. Cameras in the arena tracked the ball 25 times a second.</p><p>These are 31 frames, about 1.2 seconds, that I chose as its free flight, from just after the ball leaves his hand up to the rim. On the left is how far the ball is from the hoop, measured along the floor. It goes from about 8 meters down to under half a meter. On the right is its height, which goes up from about 3.3 meters to about 5 and comes back down. Choosing those frames with a rule comes up later in this video.</p>">
   <div class="head">
     <p class="say">One shot was tracked <span class="def">25 times a second</span> for 1.2&nbsp;s.</p>
-    <p class="sub">It is a missed three by Stephen Curry from November 2015, shown as its distance from the hoop and its height. These frames are its free flight only, picked by a rule shown later.</p>
+    <p class="sub">It is a missed three by Stephen Curry from November 2015, shown as its distance from the hoop and its height. These 31 frames were chosen as its free flight, up to the rim.</p>
   </div>
   <div class="stage">
     <figure class="figure wide" data-fig="lec13-shot"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full">
+<section class="deck-slide full" data-notes="<p>Let&#x27;s start with the simplest model, a straight line, y equals a plus b t. t is time in seconds, and on the shot it counts from the first frame we kept. a is where the line crosses t equals zero, so on this one it&#x27;s 2. And b is the slope, how much the line goes up for each second across. On this one it goes up 1.5.</p><p>You&#x27;ve probably seen this written y equals m x plus b. It&#x27;s the same line. Here the intercept comes first and gets the name a. Why? Well, later we&#x27;ll add terms on the end, like c t squared, and the letters just keep going.</p><p>Now some names. What we call a model is an equation we expect the data to follow. Its shape, a straight line here, is what we call its form. And a and b are its parameters. We choose the form, and the fit finds the parameters.</p>">
   <div class="head">
-    <p class="say">Fitting a line means finding <span class="def">the line that comes closest to the points</span>.</p>
-    <p class="sub">Three lines through the same distances, with each point&rsquo;s gap to the line drawn in red.</p>
+    <p class="say">A straight line, <i>y</i> = <i>a</i> + <i>bt</i>, is set by <span class="def">two numbers, <i>a</i> and <i>b</i></span>.</p>
+    <p class="sub">A <span class="term">model</span> is an equation the data should follow. Its shape is its <span class="term">form</span>, and <i>a</i> and <i>b</i> are its <span class="term">parameters</span>.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="lec13-cands"><div class="fig-body"></div></figure>
+    <figure class="figure wide" data-fig="lec13-ab"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>All right, welcome. So the last video was the end of week four, where we filtered records. In this video I want to start fitting models to data, and I want to start with the part of fitting that the computer doesn't do for us. So let's take a look.</p><p>You've probably drawn a line of best fit before, in a physics lab, or with the trendline button in a spreadsheet. The line is y equals a plus b t, and drawing it means picking the two numbers a and b that put the line closest to the points. And that's what we call the fit, picking those two numbers.</p><p>But before any of that happened, somebody decided it was going to be a straight line. That's what we call the form of the model, and the fit never touches it. So that part's on us, okay?</p>">
+<section class="deck-slide full" data-notes="<p>Here are the distances from the shot, with a line I can move. The top slider sets a, and the bottom one sets b. Each red stick runs from a point to the line, and that gap is what we call the residual. Technically it&#x27;s the measured value minus the line&#x27;s value at that time, so a point above the line has a positive residual and a point below it has a negative one.</p><p>Right now the line is too steep, and the sticks are long at both ends. If I bring b up a little bit, the sticks shrink. If I move a, the whole line slides up or down.</p><p>Underneath is one number for all 31 sticks together, the RMS of the residuals. I&#x27;ll build it properly in two slides. For now it&#x27;s the typical length of a stick, and smaller means closer.</p><p>Fitting means finding the a and b that make that number as small as it can go. If I press best fit, the line jumps there, and the RMS is about 3 centimeters. No other a and b get lower than that.</p>">
   <div class="head">
-    <p class="say">We choose the shape, <span class="def"><i>y</i> = <i>a</i> + <i>bt</i></span>, and the computer finds the <i>a</i> and <i>b</i> that come closest.</p>
-    <p class="sub">A <span class="term">model</span> is an equation we expect the data to follow. Its shape is the <span class="term">form</span>, <i>a</i> and <i>b</i> are its <span class="term">parameters</span>, and finding them is the <span class="term">fit</span>.</p>
+    <p class="say">Fitting the line means finding the <i>a</i> and <i>b</i> that <span class="def">bring it closest to the points</span>.</p>
+    <p class="sub">Each red stick is a <span class="term">residual</span>, the data minus the line at that time.</p>
   </div>
   <div class="stage">
-    <div class="work">
-      $$y \;=\; \textcolor{#8A6508}{a} + \textcolor{#8A6508}{b}\,t$$
-    </div>
+    <figure class="figure wide" data-fig="lec13-demo"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Let's fit a straight line to the distance first. Why would we expect a line? Well, once the ball leaves his hand, the only big force on it is gravity, and gravity pulls straight down. So nothing much is speeding it up or slowing it down horizontally, and it closes on the hoop at a pretty steady rate.</p><p>And it does, pretty much. On the left, the points sit right on the line, so close we can't see any gaps at all at this scale. So on the right I've blown the gaps up. Each red stick is how far one point is from the line, in centimeters this time, not meters.</p><p>The biggest one is 6.7 centimeters, at the very first frame, and the RMS residual, the typical size of the gaps, is 2.9 centimeters. The dashed lines are plus and minus 2.8 centimeters, about how well the cameras can place the ball, and 21 of the 31 gaps are inside them. So the line is about as close as the cameras can tell. Okay.</p><p>Now it isn't perfect. If you look at the sticks, they go up at both ends and down through the middle. That's air resistance slowing the ball a little bit, which a straight line leaves out. But it's a few centimeters over seven and a half meters of travel, so it's pretty small.</p>">
+<section class="deck-slide full" data-notes="<p>Now why a line for the distance at all? We chose it. Before any fitting, we picked the form from what we know about the physics. Once the ball leaves his hand, gravity pulls straight down. Nothing much pushes the ball sideways, so it should close on the hoop at a steady rate, and a steady rate is a straight line.</p><p>At this scale every point sits on the line, so on the right I&#x27;ve blown up the residuals, in centimeters. The biggest is about 7 centimeters, at the first frame. The dashed lines are plus and minus 2.8 centimeters, about how precisely the cameras can place the ball, and most of the residuals sit inside them.</p><p>Now the residuals aren&#x27;t random. They&#x27;re positive at both ends and negative through the middle, which means the points follow a slight curve the line can&#x27;t bend to. That&#x27;s probably air resistance slowing the ball a little. So a straight line is probably not the best possible form for this data. But we chose to leave out air resistance, and without it the physics gives a line. The residuals are a few centimeters over about seven and a half meters of travel, so the line is the form we chose and the form we&#x27;ll keep.</p>">
   <div class="head">
     <p class="say">The distance sits on a straight line, <span class="def">within 7&nbsp;cm</span>.</p>
-    <p class="sub">The right panel shows each point&rsquo;s gap from the line, its <span class="term">residual</span>, in centimeters.</p>
+    <p class="sub">We chose a line because gravity pulls straight down, which leaves the horizontal motion steady. The right panel shows each residual in centimeters.</p>
   </div>
   <div class="stage">
     <figure class="figure wide" data-fig="lec13-dist"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full">
+<section class="deck-slide full" data-notes="<p>Here&#x27;s how that one number is built, from the 31 residuals of the distance fit. Why not just average them? Well, the positive and negative ones cancel. For a least-squares line the plain average always comes out to exactly zero, which tells us nothing about how big the gaps are.</p><p>So first we square each residual. That makes every one positive, and it makes the big ones count for more. On the left are the squares. The biggest by far is the first frame, about 6.7 squared, so about 45. Then we take the mean of the squares, about 8.3 square centimeters, the dashed line. And then the square root, to get back to centimeters, about 2.9. On the right that&#x27;s drawn back on the residuals as plus and minus 2.9, and it looks like a typical size for them. Okay.</p><p>So that&#x27;s the RMS, root mean square, which is the recipe read backwards: square, then mean, then root. The fit that makes this RMS as small as possible is called least squares. Making the RMS smallest and making the sum of the squares smallest pick out the same line, so you&#x27;ll see it described both ways.</p>">
   <div class="head">
-    <p class="say">The RMS gives one typical size for all 31 gaps, <span class="def">2.9&nbsp;cm</span>.</p>
-    <p class="sub">RMS stands for root mean square. The plain mean of the gaps is 0 because the positive and negative ones cancel, so each gap is squared first.</p>
+    <p class="say">The RMS gives one typical size for all 31 residuals, <span class="def">2.9&nbsp;cm</span>.</p>
+    <p class="sub">RMS stands for root mean square. The plain mean of the residuals is 0, so each one is squared first. <span class="term">Least squares</span> is the fit that makes the RMS as small as possible.</p>
   </div>
   <div class="stage">
     <figure class="figure wide" data-fig="lec13-rms"><div class="fig-body"></div></figure>
@@ -749,66 +747,73 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Now the fit gave us two numbers, a and b. What do they mean? Well, in y equals a plus b t, a is the line's value at t equals zero, so it should be where the ball was at the first frame. And b is how much the line changes per second, so it should be how fast the ball closed on the hoop. Let's check both against the ball itself.</p><p>a is 7.84 meters. The first tracked frame has the ball at 7.91 meters, so 7 centimeters apart, which is that biggest stick on the last slide. Okay.</p><p>b is minus 6.22 meters per second. The ball went from 7.91 meters to 0.42, so 7.91 minus 0.42, that's 7.49 meters, in 1.2 seconds. 7.49 over 1.2 is about 6.24 meters per second. So that matches too, and the minus sign just means the distance was shrinking.</p><p>So both numbers describe the ball. Keep that check in mind, because we're about to do it again on the height.</p>">
+<section class="deck-slide full" data-notes="<p>The fit gave us two numbers, and since the form came from the physics, each one should mean something about the ball. So let&#x27;s check them.</p><p>a is the line at t equals zero, so it should be about where the ball was at the first frame. The line says 7.84 meters, and the first frame has the ball at 7.91, so they&#x27;re 7 centimeters apart, which is that biggest residual from before.</p><p>b is the slope, so it should be how fast the ball closed on the hoop. The ball went about 7.5 meters in 1.2 seconds, the step drawn on the plot, which works out at the bottom to about minus 6.2 meters per second, and the fit says the same. The minus sign means the distance was shrinking. So both numbers describe the ball.</p>">
   <div class="head">
     <p class="say">Both fitted numbers <span class="def">check out against the ball</span>.</p>
-    <p class="sub">In <i>y</i> = <i>a</i> + <i>bt</i>, <i>a</i> is the value at <i>t</i> = 0 and <i>b</i> is the change per second.</p>
+    <p class="sub"><i>a</i> is the line at <i>t</i> = 0, and <i>b</i> is its change per second.</p>
   </div>
   <div class="stage">
-    <div class="pcards c2">
-      <div class="pcard"><span class="tag">intercept</span><b><i>a</i> = 7.84&nbsp;m</b>
-        <span>The ball was 7.91&nbsp;m from the hoop at the first frame.</span></div>
-      <div class="pcard"><span class="tag">slope</span><b><i>b</i> = &minus;6.22&nbsp;m/s</b>
-        <span>It closed 7.49&nbsp;m in 1.2&nbsp;s, about 6.24&nbsp;m/s.</span></div>
+    <figure class="figure wide" data-fig="lec13-dcheck"><div class="fig-body"></div></figure>
+    <div class="work">
+      $$\textcolor{#8A6508}{b} = -6.22\ \text{m/s} \qquad \text{the ball: } \frac{0.42 - 7.91}{1.2} \;=\; -6.24\ \text{m/s}$$
     </div>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Now let's do exactly the same thing to the height. We're going to use the same code and the same straight line.</p><p>And it gives us an answer. a is 4.41 meters and b is 0.05 meters per second, and this really is the best straight line through these points. Nothing went wrong in the fitting.</p><p>But look at the red sticks, those are the gaps between each point and the line. The points are below the line at both ends and above it through the middle, and the biggest gap is 1.14 meters. So the line goes through the points, but it's not really following them, okay?</p>">
+<section class="deck-slide full" data-notes="<p>Now I&#x27;ll fit the same form, a straight line, to the height, where we can already see that a line is the wrong form. I&#x27;m choosing the wrong form on purpose, to see how the choice of form changes what we conclude. The fitting is identical. The one thing that changes is that the form doesn&#x27;t match the physics.</p><p>And the fit works. It hands back the best straight line through these points, nearly flat. On the left the residuals are drawn as red sticks. The points sit below the line at both ends and above it in the middle.</p><p>On the right I&#x27;ve put the residuals from both fits on one axis, in centimeters. The pattern is the one we saw on the distance, turned upside down. The distance residuals were up at the ends and down in the middle, and these are down at the ends and up in the middle. But the size is completely different. The distance residuals had an RMS of about 3 centimeters. These have an RMS of about 55, and the biggest is over a meter. On this axis the distance residuals barely leave zero.</p><p>And that difference in size is what makes us accept the first fit and doubt this one. It&#x27;s the same kind of pattern, but a few centimeters we can put down to air resistance, and a meter we can&#x27;t put down to anything except the form.</p>">
   <div class="head">
-    <p class="say">The same fit on the height gives <span class="def">the best line through a curve</span>.</p>
-    <p class="sub">Red sticks join each point to the line. The largest is 1.14&nbsp;m.</p>
+    <p class="say">Now we choose <span class="def">a form we know is wrong</span>, a straight line for the height.</p>
+    <p class="sub">The red sticks are the residuals. On the right, the height&rsquo;s residuals show the distance&rsquo;s pattern turned over, about 20 times larger.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="lec13-height"><div class="fig-body"></div></figure>
+    <figure class="figure wide" data-fig="lec13-hres"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Now let's check these two against the ball, like we did for the distance.</p><p>The line says the ball was at 4.41 meters at the first frame. It was at 3.27. So 4.41 minus 3.27, that's 1.14, more than a meter off, and that's the same 1.14 as the biggest red stick on the last slide.</p><p>The slope says 0.05 meters per second, which is basically level. All that really tells us is the ball finished at about the height it started, 3.43 against 3.27. The ball itself was going up at almost 6 meters per second at the start, and coming down at almost 6 at the end.</p><p>So they have units, and they look like measurements, but neither one is actually true of the ball, okay.</p>">
+<section class="deck-slide full" data-notes="<p>Let&#x27;s do the same check we did on the distance. a should be where the ball was at the first frame. The line says about 4.4 meters, and the ball was at about 3.3. So a is more than a meter off, which is the biggest residual again.</p><p>b should be how fast the height changes. The line says 0.05 meters per second, basically level. The ball itself was going up at about 6 meters per second at the start, the short red segment on the left, and coming down at about 6 at the end. About all the slope tells us is that the ball finished at about the height it started.</p><p>So both numbers have units and look like measurements, but neither one is true of the ball.</p>">
   <div class="head">
     <p class="say">On the height, <span class="def">neither number describes the ball</span>.</p>
+    <p class="sub">The line is at 4.41&nbsp;m at <i>t</i> = 0, more than a meter above the first frame, and its slope is nearly level.</p>
   </div>
   <div class="stage">
-    <div class="pcards c2">
-      <div class="pcard"><span class="tag">intercept</span><b><i>a</i> = 4.41&nbsp;m</b>
-        <span>The ball was at 3.27&nbsp;m at the first frame.</span></div>
-      <div class="pcard"><span class="tag">slope</span><b><i>b</i> = 0.05&nbsp;m/s</b>
-        <span>Its vertical velocity, shown a few slides on, went from almost 6&nbsp;m/s up to almost 6&nbsp;m/s down.</span></div>
-    </div>
+    <figure class="figure wide" data-fig="lec13-hcheck"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So here they are side by side. The fitting was identical on both panels. The only thing that changed was whether the form, a straight line, actually matched what the ball was doing.</p><p>On the left it did, because the physics says the horizontal motion is steady. On the right it didn't, because the height follows a curve. So I think it's mostly the form we picked that decides whether these numbers mean anything.</p>">
+<section class="deck-slide full" data-notes="<p>So here they are side by side, with the RMS residual on each. About 3 centimeters on the left and about 55 on the right. The only difference is whether the form matched what the ball was doing.</p><p>So I think the form we pick decides, more than anything else here, whether the fitted numbers mean anything. Which leaves a question for the height. What form would actually follow this arc? Think about the physics of a thrown ball for a moment before the next section.</p>">
   <div class="head">
     <p class="say">The fitting was the same in both panels, and <span class="def">the straight line suited only the distance</span>.</p>
-    <p class="sub">The form we choose largely decides whether the fitted numbers mean anything.</p>
+    <p class="sub">The RMS residual is 2.9&nbsp;cm for the distance and 55&nbsp;cm for the height. What form would follow the arc?</p>
   </div>
   <div class="stage">
-    <figure class="figure wide legible" id="fig-line"><div class="fig-body"></div></figure>
+    <figure class="figure wide legible" data-fig="lec13-pair"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide part">
+<section class="deck-slide part" data-notes="<p>All right. The height isn&#x27;t a line, but something about it might be. Gravity changes the ball&#x27;s vertical velocity at a steady rate, so in this section we turn the heights into velocities and fit a line to those.</p>">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
     <p class="say">A straight line for the vertical velocity</p>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Okay, so what does the height follow? Well, let's go one step back to the physics. Gravity gives the ball a nearly constant downward acceleration, so its vertical velocity goes down steadily during the flight. v equals v-nought minus g t.</p><p>And that is a straight line. The intercept is v-nought, the vertical velocity at time zero, and the slope is minus g.</p><p>And we already know how to get the velocities. We take central differences of the heights, one frame either side, like we did in week four. That gives one velocity for every frame that has a neighbor on both sides, so 31 minus the two ends, 29 of them. Okay.</p>">
+<section class="deck-slide full" data-notes="<p>So what form follows the arc? From the physics, I&#x27;d choose a parabola. We could fit a parabola to the heights directly, and that&#x27;s probably the better way to do it. It takes a fit with three parameters, and we&#x27;ll do exactly that in the video on linearity in the parameters. In this video I want to stay with straight lines, so we&#x27;ll change the data into something a line should fit.</p><p>That something is the vertical velocity, how fast the height is changing. We get it the way we did in the finite differences video, with a central difference. Here z is the height and i counts the frames. For each frame, take the height one frame later, minus the height one frame earlier, and divide by the time between them, 0.08 seconds. On the left that&#x27;s drawn for frame 4. The height goes up about a third of a meter between frames 3 and 5, and that&#x27;s about 4 meters per second.</p><p>Do that at every frame that has a neighbor on both sides, and we get 29 velocities, on the right. They&#x27;re noisy. In the video on how differentiation amplifies noise, we saw that differencing makes the noise in the data bigger, and these show it.</p>">
+  <div class="head">
+    <p class="say">Differencing the heights turns the arc into <span class="def">vertical velocities</span>.</p>
+    <p class="sub">Each velocity is the change in height between the frames either side, divided by the 0.08&nbsp;s between them.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec13-diff"><div class="fig-body"></div></figure>
+    <div class="work">
+      $$v_i \;=\; \frac{z_{i+1} - z_{i-1}}{t_{i+1} - t_{i-1}}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>A line should fit the velocities because, near the ground, gravity gives the ball a nearly constant downward acceleration, which we call g. A constant acceleration means the velocity changes by the same amount every second, and that&#x27;s a straight line. So the form is v equals v-nought minus g t. v-nought is the vertical velocity at t equals zero, and the slope is minus g.</p><p>So again we&#x27;re choosing the form from the physics. And this time the slope is a number we care about, because it&#x27;s the acceleration due to gravity.</p>">
   <div class="head">
     <p class="say">Gravity makes the vertical velocity <span class="def">a straight line</span>.</p>
-    <p class="sub">The height curved, so we look at its rate of change. The 29 velocities come from central differences of the heights.</p>
+    <p class="sub">Gravity changes the vertical velocity by the same amount every second, so the form is again a line, chosen from the physics.</p>
   </div>
   <div class="stage">
     <div class="work">
@@ -817,48 +822,57 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So let's fit it, with both numbers free. And we get v-nought of 5.85 meters per second, and g of 9.60 meters per second squared. 9.81 minus 9.60 is 0.21, and 0.21 out of 9.81 is about 2 percent. Not bad.</p><p>Now the velocities scatter a lot about their line. The RMS residual is about half a meter per second, and some of them are off by 1.2. We saw why in week four, differencing blows up the tracking noise. But the fit uses all 29 of them, and the slope still comes out close to minus g.</p><p>Now why is this one nice? Well, the slope has units of acceleration. So before we look at any residual at all, we can hold it up against a number we already know, 9.81. If this had come out at 340, we'd know something was wrong straight away.</p>">
+<section class="deck-slide full" data-notes="<p>So let&#x27;s fit it with both parameters free, meaning the fit finds both of them. The fit gives a v-nought of about 5.85 meters per second and a slope of minus 9.60. The slope is minus g, so this fit has measured g as 9.60 meters per second squared, from 29 noisy velocities of one basketball shot.</p><p>The velocities scatter around the line by about half a meter per second, the RMS residual up in the corner. That&#x27;s the noise from differencing again. But the fit uses all 29 of them, and the line runs through the middle of the scatter.</p>">
   <div class="head">
-    <p class="say">The fitted slope gives <span class="def"><i>g</i>&nbsp;=&nbsp;9.60&nbsp;m/s&sup2;</span>.</p>
-    <p class="sub">This is within 2.1% of 9.81. The velocities&rsquo; typical gap from the line, their RMS residual, is 0.513&nbsp;m/s.</p>
+    <p class="say">The fitted slope is our measurement, <span class="def"><i>g</i>&nbsp;=&nbsp;9.60&nbsp;m/s&sup2;</span>.</p>
+    <p class="sub">Both <i>v</i><sub>0</sub> and <i>g</i> are fitted. The velocities&rsquo; RMS residual is 0.513&nbsp;m/s.</p>
   </div>
   <div class="stage">
     <figure class="figure wide" data-fig="lec13-vel" data-mode="free"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full">
+<section class="deck-slide full" data-notes="<p>Now we can check the answer against a value known independently, which most fits don&#x27;t have. We already know g. Near the earth&#x27;s surface it&#x27;s 9.81 meters per second squared, and that&#x27;s been measured far more carefully than anything we can do with one shot.</p><p>Our 9.60 is 0.21 below 9.81. As a fraction of the known value, 0.21 out of 9.81, that&#x27;s about 2 percent, so our measurement is about 2 percent low.</p><p>For 29 velocities that scatter by half a meter per second, I think that&#x27;s not bad. And the check only works because the slope means something physical, which it does because we chose the form from the physics.</p>">
   <div class="head">
-    <p class="say">A number we already know <span class="def">does not have to be fitted</span>.</p>
-    <p class="sub">The fit found <i>g</i> from the data, though we already knew it. Holding <i>g</i> leaves every frame for <i>v</i><sub>0</sub> alone.</p>
+    <p class="say">Our measurement is <span class="def">2.1% below</span> the known 9.81&nbsp;m/s&sup2;.</p>
+    <p class="sub">Physics gives <i>g</i> = 9.81&nbsp;m/s&sup2; near the earth&rsquo;s surface, so we can check how far off our measurement is.</p>
   </div>
   <div class="stage">
-    <div class="pcards c2">
-      <div class="pcard"><span class="tag">from the data</span><b>29 velocities</b>
-        <span>They scatter by about half a meter per second, and gave <i>g</i> = 9.60.</span></div>
-      <div class="pcard gold"><span class="tag">already known</span><b><i>g</i> = 9.81&nbsp;m/s&sup2;</b>
-        <span>It is known to more digits than these frames could give.</span></div>
+    <div class="work">
+      $$\frac{9.81 - 9.60}{9.81} \;=\; \frac{0.21}{9.81} \;\approx\; 0.021 \;=\; 2.1\%$$
     </div>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Now there's a second way to fit the same line. We can also hold g at 9.81, and only fit v-nought.</p><p>So I'm going to start with the model, and I'm going to add g t to both sides. Now the left side is all data, the velocity and the time, plus a number we know, and the right side is just v-nought, one parameter.</p><p>I'll call that moving a term to the data side. The page on linearity in the parameters, page 15, works it through properly, so I'll just show you what it does here.</p>">
+<section class="deck-slide full" data-notes="<p>So here&#x27;s a different choice we can make. If we already know g, we don&#x27;t have to ask the data for it. We can write 9.81 into the form and fit only v-nought.</p><p>On top is the form we just fit, with two parameters. Underneath is the same form with g held at 9.81. Now there&#x27;s only one parameter, and all 29 velocities go into finding v-nought.</p><p>9.81 is known to more digits than these frames could ever give us, so fitting g spends the data on a number we already have.</p>">
   <div class="head">
-    <p class="say">Holding <i>g</i> at 9.81 moves <span class="def">&minus;<i>gt</i> to the data side</span>.</p>
+    <p class="say">A number we already know <span class="def">does not have to be fitted</span>.</p>
+    <p class="sub">Holding <i>g</i> at 9.81 leaves one parameter, <i>v</i><sub>0</sub>, for the data to find.</p>
+  </div>
+  <div class="stage">
+    <div class="work">
+      $$\begin{aligned} v &= \textcolor{#8A6508}{v_0} - \textcolor{#8A6508}{g}\,t && \text{two parameters, } g \text{ fitted} \\[8pt] v &= \textcolor{#8A6508}{v_0} - 9.81\,t && \text{one parameter, } g \text{ held} \end{aligned}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So how do we fit only v-nought? Start with the model, and add g t to both sides. Now the left side is the velocity plus 9.81 times the time, which is all data plus a number we know. The right side is just v-nought.</p><p>So at every frame, v plus 9.81 t should come out to the same number, v-nought. It won&#x27;t quite, because of the noise, and the least-squares v-nought turns out to be their average. I call that moving a term to the data side.</p>">
+  <div class="head">
+    <p class="say">Holding <i>g</i> at 9.81 <span class="def">moves &minus;<i>gt</i> to the data side</span>.</p>
     <p class="sub"><i>v</i> + 9.81<i>t</i> should be the same number at every frame, and the fit takes its average as <i>v</i><sub>0</sub>.</p>
   </div>
   <div class="stage">
     <div class="work">
       $$\begin{aligned}
-      v &= v_0 - g\,t && \text{the model} \\[8pt]
-      v + g\,t &= v_0 && \text{add } g\,t \text{ to both sides} \\[8pt]
-      \underbrace{v + 9.81\,t}_{\text{data}} &= \textcolor{#8A6508}{v_0} && \text{one parameter left to fit}
+        v &= v_0 - g\,t && \text{the model} \\[8pt]
+        v + g\,t &= v_0 && \text{add } g\,t \text{ to both sides} \\[8pt]
+        \underbrace{v + 9.81\,t}_{\text{data}} &= \textcolor{#8A6508}{v_0} && \text{one parameter left to fit}
       \end{aligned}$$
     </div>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So here it is with g held at 9.81. v-nought comes out at 5.98 instead of 5.85, and the RMS residual goes from 0.513 to 0.517 meters per second. So it went up a little bit, by four thousandths.</p><p>And that's what we'd expect. A fit with fewer free numbers can't get any closer to the points than one with more. The dashed line is the other fit, and on this plot the two are hard to tell apart.</p><p>So which one should we believe? I'm going to leave that for now, because it's the question assignment five asks. The short answer is that the residual alone probably can't tell us.</p>">
+<section class="deck-slide full" data-notes="<p>So here it is with g held at 9.81. v-nought moves up a little, to about 6 meters per second. The RMS residual goes up by a few thousandths. The dashed line is the fit with g free, and the two are hard to tell apart.</p><p>That increase is guaranteed. A fit with fewer free parameters can never get closer to the points than one with more, because the free fit could always pick 9.81 for itself if that were closer.</p><p>So which one should we believe? If we trust 9.81, and we do, then the held fit. Its residual is a little bigger, but its slope is right by construction, and the free fit&#x27;s extra closeness probably comes from tilting its slope toward the noise in these 29 points. The residual can&#x27;t settle the question, since it always favors the fit with more parameters. In the video on residual and error we&#x27;ll test both fits on frames they were not fitted to.</p>">
   <div class="head">
     <p class="say">With <i>g</i> held, the RMS residual moves <span class="def">from 0.513 to 0.517&nbsp;m/s</span>.</p>
     <p class="sub">The dashed line is the fit with <i>g</i> free. Holding <i>g</i> costs 0.004&nbsp;m/s of residual for a <i>g</i> we trust.</p>
@@ -868,169 +882,136 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide part">
+<section class="deck-slide part" data-notes="<p>All right. Everything so far used 31 frames of free flight, and I said I&#x27;d come back to how those frames were picked. That&#x27;s this section.</p>">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
     <p class="say">Finding the free flight in a tracked shot</p>
   </div>
 </section>
 
-<section class="deck-slide full">
+<section class="deck-slide full" data-notes="<p>For Curry&#x27;s shot I chose the 31 frames for this example, running right up to the rim. With many shots we want a rule that picks the window the same way every time, and to show one I need a shot with the whole record. This is another shot from the same tracking data, number 1092, with every tracked frame. The ball rises in the shooter&#x27;s hands, flies in an arc, meets the rim and bounces off. The shaded part is the window we&#x27;ll treat as free flight.</p><p>The data doesn&#x27;t mark where free flight starts or ends. There&#x27;s no column that says release. So we have to decide, and there are a lot of signals we could use. For instance, for the start we could use the frame where the vertical velocity stops growing, or where the acceleration settles near minus g, or a fixed number of frames before the top. For the end we could use the distance to the hoop, or the height dropping to the rim, or the first jump in the velocity when the ball hits something.</p><p>Any of those can be defended, and none of them is the true release. They&#x27;re guesses with reasons. I&#x27;m going to pick one rule for each. The pick is somewhat arbitrary, and someone else could reasonably pick differently. On Curry&#x27;s shot, for instance, the rules I&#x27;m about to show keep 29 frames, a slightly different window from the 31 I chose.</p>">
   <div class="head">
-    <p class="say">A straight velocity line holds <span class="def">only while the ball is in free flight</span>.</p>
-    <p class="sub">This is shot 1092, a different shot. The next slides give the rules for its window.</p>
+    <p class="say">Where free flight starts and ends is <span class="def">a choice we make</span>.</p>
+    <p class="sub">Nothing in the tracking marks the release or the arrival, so we pick a rule for each.</p>
   </div>
   <div class="stage">
     <figure class="figure wide" data-fig="lec13-whole"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>All right. So all of that only works while the ball is in free flight. From the frame his hand lets go, to the frame the ball gets to the rim. And neither of those frames is marked anywhere in the data, so we have to find them with a rule.</p><p>Here's the start, on a different example shot, 1092. Each dot is the vertical velocity at one frame, up is positive. Before the release, the hand is pushing the ball up, so the velocity grows from frame to frame. Here it climbs from 2.58 at frame 6 up to 5.81 at frame 11.</p><p>After the release only gravity and a little air resistance act on it, so the velocity falls by about g times delta t each frame. At 25 frames a second that's 9.81 times 0.04, 0.39 meters per second a frame. And that's the dashed line. So the release is the frame where the velocity stops growing, frame 11.</p>">
+<section class="deck-slide full" data-notes="<p>For the start, I&#x27;m going to use the vertical velocity, the same idea as before. We difference the heights to get how fast the ball is rising. One change, though. These differences are not between neighboring frames. Each one uses the frames two before and two after, so it&#x27;s spread over four frames, 0.16 seconds. Why wider? Well, the wider difference calms the noise a little, and we need that, because the rule is going to compare each frame&#x27;s velocity with the ones before it.</p><p>While the ball is in the shooter&#x27;s hands, he&#x27;s pushing it up, so the vertical velocity grows from frame to frame. Once he lets go, only gravity and a little air resistance act on it, so the velocity should only go down. The frames are 0.04 seconds apart, so it should drop by g times 0.04 each frame, about 0.39 meters per second, the dashed line. So I&#x27;ll take the release as the frame where the velocity stops growing, frame 11 here.</p><p>Now with real data it doesn&#x27;t only go down. After the release the noise makes it tick up for a frame here and there, so the rule has to cope with that.</p>">
   <div class="head">
-    <p class="say">Free flight starts where <span class="def">the vertical velocity stops growing</span>.</p>
-    <p class="sub">After the release it falls 0.39&nbsp;m/s a frame, and 0.39 &times; 25 frames a second is 9.75&nbsp;m/s&sup2;, close to <i>g</i>.</p>
+    <p class="say">We take the release as the frame where <span class="def">the vertical velocity stops growing</span>.</p>
+    <p class="sub">Each velocity is the change in height from two frames before to two frames after, over 0.16&nbsp;s. After the release, gravity should make it fall about 0.39&nbsp;m/s a frame.</p>
   </div>
   <div class="stage">
     <figure class="figure wide legible" id="fig-release"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>And here's that rule as code. The first two lines get the vertical velocity at every frame. This is a wider central difference than before, two frames either side, so four frames apart, which calms the noise a little bit. Frames without a neighbor two away just get nan, not a number.</p><p>Then we start at the highest point of the flight. Why there? Well, at the top the ball is definitely in the air, so it's a safe place to start. And we step back one frame at a time, for as long as the vertical velocity one frame earlier or two frames earlier was higher.</p><p>Why look two frames back? Because one noisy value would stop it early otherwise. On shot 1092, coming down from the top, the first place that happens is frame 23. One frame earlier the velocity is lower, 1.38 against 1.50. So a one-frame rule would stop there, and call frame 23 the release, which is way too late. Two frames back it's 2.21, so the rule keeps going, and it ends up at frame 11.</p><p>And the i greater than 3 is just a floor, so the rule can't step back off the start of the record.</p>">
+<section class="deck-slide full" data-notes="<p>Here&#x27;s the rule as a procedure. Start at the top of the flight, frame 27, where the ball is certainly in the air. Then step back one frame at a time, as long as the velocity one frame earlier or two frames earlier was higher.</p><p>Why two frames back? Look at frame 23. The velocity one frame earlier, at 22, is lower, because of the noise. A rule that only looked one frame back would stop there and call frame 23 the release, about half a second after the velocity peak. Looking two back, frame 21 is higher, so the rule keeps going. It ends at frame 11, where both earlier frames are lower.</p><p>The rule also has a limit, so it can&#x27;t step back past the start of the record.</p>">
   <div class="head">
-    <p class="say">The rule steps back from the top <span class="def">while an earlier velocity was higher</span>.</p>
+    <p class="say">Step back from the top of the flight while <span class="def">an earlier velocity is higher</span>.</p>
+    <p class="sub">Looking two frames back keeps one noisy frame from stopping the search. On shot 1092 it stops at frame 11.</p>
   </div>
   <div class="stage">
-    <div class="panels">
-      <div class="code"><span class="dim">def</span> release(t, z):</div><div class="note">t is time and z is height</div>
-      <div class="code">&nbsp;&nbsp;&nbsp;&nbsp;vz = np.full(len(t), np.nan)</div><div class="note">nan where there is no velocity</div>
-      <div class="code">&nbsp;&nbsp;&nbsp;&nbsp;vz[2:-2] = (z[4:] - z[:-4]) / (t[4:] - t[:-4])</div><div class="note">two frames each side, to calm the noise</div>
-      <div class="code">&nbsp;&nbsp;&nbsp;&nbsp;i = int(np.argmax(z))</div><div class="note">start at the top of the flight</div>
-      <div class="code">&nbsp;&nbsp;&nbsp;&nbsp;<span class="dim">while</span> <span class="k">i &gt; 3 and (vz[i - 1] &gt; vz[i] or vz[i - 2] &gt; vz[i])</span>:</div><div class="note">two back, so one noisy frame cannot stop it</div>
-      <div class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i -= 1</div><div class="note">step back a frame</div>
-      <div class="code">&nbsp;&nbsp;&nbsp;&nbsp;<span class="dim">return</span> i</div><div class="note">the release</div>
-    </div>
+    <figure class="figure wide legible" data-fig="lec13-rule"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>And the end. The example pack's programs stop at the first frame where the ball is within 1 meter of the hoop's center, measured along the floor, ignoring height. That comes before the ball can hit the rim or the backboard. On shot 1092 that's frame 37, so the free flight is frames 11 to 36. 36 minus 11 is 25, plus one because we keep both ends, so 26 frames.</p><p>Across the 24 example shots, the release lands anywhere from frame 3 to frame 19, and the window is 23 to 31 frames long. That frame 3 is the floor, by the way. On one shot the velocity is already falling when the record starts, so the rule runs back to the start and stops.</p><p>So you're going to want both rules in the report. Why? Well, somebody else using a different rule will probably get a slightly different window, and a slightly different g, and they need to be able to see why.</p>">
+<section class="deck-slide full" data-notes="<p>And the end. I stop at the first frame where the ball is within 1 meter of the hoop&#x27;s center, measured along the floor and ignoring height. That comes before the ball can hit the rim or the backboard. On shot 1092 that&#x27;s frame 37, so the free flight is frames 11 to 36, 26 frames.</p><p>So that&#x27;s three choices: how the velocity is computed, where the start is, and where the end is. Each one changes which frames go into the fit, and so each one changes the g that comes out. Someone else could make different choices and get a slightly different window and a slightly different g. Stating the choices along with the result shows where that difference came from.</p>">
   <div class="head">
-    <p class="say">Two rules set the window, and <span class="def">both go in your assignment report</span>.</p>
+    <p class="say">The window rests on <span class="def">three choices</span>, so each is stated with the result.</p>
+    <p class="sub">On shot 1092 they give frames 11 to 36, which is 26 frames. Different choices would give a different window and a slightly different <i>g</i>.</p>
   </div>
   <div class="stage">
     <div class="pcards c3">
-      <div class="pcard"><span class="tag">start</span><b>The release</b>
-        <span>It is the frame where the vertical velocity stops growing.</span></div>
-      <div class="pcard"><span class="tag">end</span><b>Within 1&nbsp;m of the hoop</b>
-        <span>It is measured along the floor and comes before the rim or backboard.</span></div>
-      <div class="pcard gold"><span class="tag">shot 1092</span><b>Frames 11 to 36</b>
-        <span>That is 26 frames. Across the course&rsquo;s 24 example shots the window keeps 23 to 31.</span></div>
+      <div class="pcard"><span class="tag">the velocity</span><b>Two frames either side</b>
+        <span>Each difference spans four frames, 0.16&nbsp;s.</span></div>
+      <div class="pcard"><span class="tag">the start</span><b>Where the velocity stops growing</b>
+        <span>Step back from the top while either of the two earlier velocities is higher.</span></div>
+      <div class="pcard"><span class="tag">the end</span><b>Within 1&nbsp;m of the hoop</b>
+        <span>It is measured along the floor, and it comes before the rim or backboard.</span></div>
     </div>
   </div>
 </section>
 
-<section class="deck-slide part">
+<section class="deck-slide part" data-notes="<p>All right. We&#x27;ve chosen a form several times now, the line for the distance, the wrong line for the height, and the line for the velocity, once with g fitted and once with g held. In this section I want to look at where forms come from in general.</p>">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
-    <p class="say">Where a model&rsquo;s form comes from</p>
+    <p class="say">Choosing the form of a model</p>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So let's say this in general. A model is a function of the independent variable, x, and some constants. The constants are theta-1 up to theta-p, and theta is just the Greek letter we usually use for them.</p><p>The form is f, whether it's a straight line, or a parabola, or a decaying exponential. And the parameters are the thetas, and those are what the fit finds.</p><p>So the computer only really does the thetas, and f is up to us. Give it a straight line and data on a curve, and it'll hand back the straight line that fits the curve least badly, like it did for the height.</p>">
+<section class="deck-slide full" data-notes="<p>Here are some forms side by side, with the parameters in gold. The straight line has two, a and b. The velocity with g held has one, v-nought, and the 9.81 is part of the form. The height as a parabola has three, a starting height, a starting vertical velocity, and g. That parabola is what you get from the velocity line, since the height is the integral of v-nought minus g t, and the integral is where the one half comes from. And a decay, something dying away toward zero, has two, a starting value a and a rate k. I&#x27;ve written the decay in x, since a decay doesn&#x27;t have to be in time.</p><p>In each one, everything that isn&#x27;t gold, the powers, the e, the 9.81, is decided before the fit. The fit only ever finds the gold numbers. So whether a fit means anything depends on whether we got the rest of the form right.</p>">
   <div class="head">
-    <p class="say">We choose <span class="def">the form</span>, and the fit then finds its <span class="term">parameters</span>.</p>
-    <p class="sub"><i>x</i> is the input, and &theta; (theta) marks a parameter, <i>p</i> of them in all. <i>f</i> is the form.</p>
+    <p class="say">Each form has its own <span class="def">parameters</span>, and the fit finds those.</p>
+    <p class="sub">The parameters are in gold. Everything else in each form is fixed before the fit.</p>
   </div>
   <div class="stage">
     <div class="work">
-      $$y \;=\; f(x;\; \textcolor{#8A6508}{\theta_1, \theta_2, \dots, \theta_p})$$
+      $$\begin{aligned}
+        y &= \textcolor{#8A6508}{a} + \textcolor{#8A6508}{b}\,t && \text{a straight line} \\[6pt]
+        v &= \textcolor{#8A6508}{v_0} - 9.81\,t && \text{the velocity, with } g \text{ held} \\[6pt]
+        z &= \textcolor{#8A6508}{z_0} + \textcolor{#8A6508}{v_0}\,t - \tfrac{1}{2}\,\textcolor{#8A6508}{g}\,t^2 && \text{the height, a parabola} \\[6pt]
+        y &= \textcolor{#8A6508}{a}\,e^{-\textcolor{#8A6508}{k}\,x} && \text{a decay}
+      \end{aligned}$$
     </div>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So where does f come from? There are three sources, and I've put them in order of how much the fitted numbers end up meaning.</p><p>Usually the best one is the physics. A projectile under gravity gives y equals y-nought plus v-nought t minus a half g t squared. That's a parabola with three parameters, and they're a height, a speed and an acceleration. So the fit measures physical things, with units.</p><p>Next is a known limiting behavior. Say something decays to zero, that suggests a e to the minus k x. Something that levels off suggests a x over b plus x. The numbers mean a little less, but the form is still backed by an argument.</p><p>And last is convenience, a polynomial of whatever degree fits. The coefficients don't mean anything on their own, and I probably wouldn't trust it very far outside the data. Sometimes that's the best we can do, and that's okay, we just say so.</p>">
+<section class="deck-slide full" data-notes="<p>To get the rest of the form right, we ask what we already know about the data, and usually that knowledge comes from one of three places. I&#x27;ve put them in order of how much the fitted numbers end up meaning.</p><p>The best is the physics. A projectile under gravity gives the parabola, and its three parameters are a height, a vertical velocity and an acceleration. So the fit measures physical things, with units, that we can check.</p><p>Next is knowing what the data does for large x. Let&#x27;s say something decays to zero. That suggests a e to the minus k x. Something that levels off suggests a x over b plus x. The numbers mean a little less, but there&#x27;s still an argument behind the form.</p><p>And last is convenience, a polynomial of whatever degree fits, where the degree is the highest power. A polynomial&#x27;s parameters are called its coefficients, and they don&#x27;t mean much one at a time, and I probably wouldn&#x27;t trust it far outside the data. Sometimes that&#x27;s the best we have, and that&#x27;s okay as long as we say so.</p>">
   <div class="head">
-    <p class="say">A form usually comes from one of <span class="def">three sources</span>.</p>
-    <p class="sub">They are listed in order of how much the fitted numbers mean.</p>
+    <p class="say">We choose the form by <span class="def">asking what we already know about the data</span>.</p>
+    <p class="sub">Three kinds of knowledge supply most forms. They are listed by how much the fitted numbers mean.</p>
   </div>
   <div class="stage">
     <figure class="figure wide" data-fig="lec13-shapes"><div class="fig-body"></div></figure>
     <div class="pcards c3">
       <div class="pcard gold"><span class="tag">first</span><b>The physics</b>
-        <span>A projectile&rsquo;s parabola has a height, a speed and an acceleration as its parameters.</span></div>
-      <div class="pcard"><span class="tag">second</span><b>What <i>y</i> does far out</b>
+        <span>A projectile&rsquo;s parabola has a height, a vertical velocity and an acceleration as its parameters.</span></div>
+      <div class="pcard"><span class="tag">second</span><b>What <i>y</i> does for large <i>x</i></b>
         <span>Decay to zero suggests <i>ae</i><sup>&minus;<i>kx</i></sup>, and leveling off suggests <i>ax</i>/(<i>b</i>&nbsp;+&nbsp;<i>x</i>).</span></div>
       <div class="pcard"><span class="tag">third</span><b>Convenience</b>
-        <span>A polynomial fits, though its coefficients mean nothing one at a time.</span></div>
+        <span>A polynomial fits, though its coefficients mean little one at a time.</span></div>
     </div>
   </div>
 </section>
 
-<section class="deck-slide part">
+<section class="deck-slide part" data-notes="<p>All right. A polynomial makes it easy to add parameters, one more for each degree. In this last section I want to see what adding them does.</p>">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
     <p class="say">Adding parameters to a fit</p>
   </div>
 </section>
 
-<section class="deck-slide full">
+<section class="deck-slide full" data-notes="<p>For this part I want data where we know the answer, so these ten points are made up. They come from a parabola I picked, plus noise taken from a real sensor. So the true form is degree 2.</p><p>Degree 1 is a straight line, two parameters, and it can&#x27;t bend, so the residuals are big, an RMS of about 0.37. Degree 2 has three parameters, the right form, and the RMS drops to about 0.07. Degree 3 adds one more, and the RMS drops again, but only a little.</p><p>That last drop happens even though the true form is degree 2. A fit with more parameters can always do at least as well on the points, because it could set the extra one to zero.</p>">
   <div class="head">
-    <p class="say">Each extra degree adds <span class="def">one more number for the fit to adjust</span>.</p>
-    <p class="sub">Ten points made from a known parabola plus noise, fitted with polynomials of degree 1, 2 and 3.</p>
+    <p class="say">Each extra degree adds <span class="def">one more parameter for the fit to adjust</span>.</p>
+    <p class="sub">Ten points from a known parabola plus noise, fitted at degree 1, 2 and 3, with 2, 3 and 4 parameters. Each title gives the RMS of the residuals.</p>
   </div>
   <div class="stage">
     <figure class="figure wide" data-fig="lec13-degrees"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Now one thing that's very easy to do is add parameters. And more parameters always fit better.</p><p>Here's a test where we know the answer. Ten points from a parabola, the dashed curve, with real accelerometer noise added. So the true form is degree 2.</p><p>On the left, a degree 2 fit, three parameters, sits right on the dashed curve. On the right is degree 9, ten parameters for ten points. And it goes through every single point. But in between the points it swings away from the curve the points came from, and near the ends it goes right off the plot.</p>">
+<section class="deck-slide full" data-notes="<p>So let&#x27;s keep going, all the way to degree 9. On the left is degree 2 again, sitting right on the dashed curve the points came from. On the right is degree 9, ten parameters for ten points.</p><p>Ten parameters and ten points means the curve can go through every point exactly, whatever the points are. So the residuals are all zero, the best fit possible.</p><p>But look between the points. It swings away from the dashed curve, and near the ends it goes right off the plot. As an answer to what curve the points came from, it&#x27;s much worse than degree 2. So adding parameters never makes the fit to the points worse, and it can make the answer worse at the same time.</p>">
   <div class="head">
-    <p class="say">Degree 9 passes through every point and <span class="def">misses the curve between them</span>.</p>
-    <p class="sub">The ten points come from a parabola (dashed) with noise taken from a real sensor.</p>
+    <p class="say">More parameters never fit the points worse, and <span class="def">they can still give a worse answer</span>.</p>
+    <p class="sub">Degree 9 has ten parameters for ten points, so it passes through every one. The dashed curve is the parabola the points came from.</p>
   </div>
   <div class="stage">
     <figure class="figure wide" data-fig="lec13-deg"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So let's run every degree from 0 to 9 and watch two numbers.</p><p>The green line is the residual, the gap to the points. It falls the whole way, from about a half at degree 0 down to 0.00005 at degree 9, which is basically zero.</p><p>The red line is the error, the gap to the true curve. It falls too, to 0.0175 at degree 2, the right degree. And then it climbs back, to 0.442 at degree 9. 0.442 over 0.0175 is about 25, so twenty-five times worse than degree 2. Okay.</p><p>And on real data we only get the green line. We don't know the true curve, that's the whole reason we're fitting. So a residual that keeps falling as we add parameters doesn't tell us the model is getting better.</p>">
+<section class="deck-slide full" data-notes="<p>Here&#x27;s every degree from 0 to 9, where degree 0 is a constant, with two numbers. The green line is the residual, the RMS gap to the points. It falls the whole way, to basically zero at degree 9.</p><p>The red line is what we call the error, the RMS gap to the true curve. It falls too, to its lowest at degree 2, the right degree. Then it climbs back, to about 0.44 at degree 9 against about 0.02 at degree 2.</p><p>Now the red line only exists because we made the data. On real data there&#x27;s no true curve to compare to, which is the reason we&#x27;re fitting in the first place. So on real data we only ever see the green line, and the green line keeps saying more parameters are better. Making up data with a known answer is how we get to watch the red line at all.</p><p>So hopefully that gives you an idea of how the form we choose, before any fitting, shapes what a fit can tell us. In the next video we&#x27;ll look at what best means in best fit, and why least squares is only one choice. Thanks a lot for watching and we&#x27;ll see you in the next video.</p>">
   <div class="head">
     <p class="say">The residual falls to zero while <span class="def">the error climbs back</span>.</p>
-    <p class="sub">The <span class="term">error</span> is the RMS gap to the true curve along its whole length, known only because we built the data. Degree 0 is a constant.</p>
+    <p class="sub">The <span class="term">error</span> is the RMS gap to the true curve. On real data the true curve is unknown, so we built these points to watch the error change.</p>
   </div>
   <div class="stage">
     <figure class="figure wide" data-fig="lec13-curve"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>And here's why that has to happen. A degree 9 polynomial has ten coefficients. Ten points with different x values pin those ten coefficients down exactly, so the curve goes through every point, whatever the points are. Measurements, noise, numbers off a lottery ticket, it doesn't matter.</p><p>So the residual was going to be zero before anybody looked at the data, which means it being zero tells us nothing. Ten knobs, ten points, so the points don't really get to test anything, okay?</p><p>So parameters beyond what the physics calls for are probably mostly fitting the noise, and next time the noise is going to be different. In week ten we'll get a sharper test, holding some points back and predicting them.</p>">
-  <div class="head">
-    <p class="say">Ten parameters on ten points give zero residual, up to rounding, <span class="def">whatever the data are</span>.</p>
-  </div>
-  <div class="stage">
-    <div class="pcards c3">
-      <div class="pcard"><span class="tag">degree 9</span><b>Ten coefficients</b>
-        <span>Ten points pin down all ten exactly.</span></div>
-      <div class="pcard"><span class="tag">residual</span><b>Zero, in advance</b>
-        <span>It is zero for any ten points, by construction.</span></div>
-      <div class="pcard gold"><span class="tag">this week</span><b>Hold points back</b>
-        <span>Fit some points, then predict the rest.</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>So here's what to do with all of that in the assignment.</p><p>Pick the form before the fit, and take it from the physics if you can, because then the numbers have units and you can check them against something you know. Write down the rules you used for the window, because the fit only ever sees the frames you gave it. And if you're raising the degree of a polynomial past what the physics calls for, be a little bit suspicious of it, because a smaller residual is going to come with it no matter what.</p><p>So hopefully that gives you an idea of how we pick a form before we fit anything. In the next video we'll look at what best means in best fit, and why least squares is only one choice. Thanks a lot for watching and we'll see you in the next video.</p>">
-  <div class="head">
-    <p class="say">Choose the form first, and <span class="def">say where it came from</span>.</p>
-  </div>
-  <div class="stage">
-    <div class="pcards c3">
-      <div class="pcard gold"><span class="tag">form</span><b>Physics first</b>
-        <span>Its parameters have units we can check.</span></div>
-      <div class="pcard"><span class="tag">window</span><b>Name the rule</b>
-        <span>The fit uses only the frames we give it.</span></div>
-      <div class="pcard"><span class="tag">degree</span><b>No higher than the physics needs</b>
-        <span>A higher degree always fits the points as well or better.</span></div>
-    </div>
   </div>
 </section>
 
@@ -1041,6 +1022,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <div class="deck-notes"></div>
 
 
-<script type="module" src="js/bundle/lecture-13.js?v=20261028082814"></script>
+<script type="module" src="js/bundle/lecture-13.js?v=20261102083412"></script>
 </body>
 </html>

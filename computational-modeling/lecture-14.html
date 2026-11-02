@@ -6,8 +6,8 @@
 <title>Lecture 14 — Least squares and the choice of norm</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261028082814">
-<link rel="stylesheet" href="css/demos.css?v=20261028082814">
+<link rel="stylesheet" href="css/blocks.css?v=20261102083412">
+<link rel="stylesheet" href="css/demos.css?v=20261102083412">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -230,7 +230,7 @@ body:not(.inclass) .deck-slide .pcard.gold .tag{background:#f1e4c4; color:#8A650
 /* worked arithmetic, set by KaTeX. The aligned environment does the spacing,
    so there is no hand padding and no monospace face to fake a column. */
 .deck-slide .work{margin:0 auto; font-size:var(--stage-text)}
-.deck-slide .work .katex-display{margin:0}
+.deck-slide .work .katex-display{margin:0; overflow:visible}
 /* two display equations under one claim need air between them, or the
    second one's numerator lands on the first one's denominator */
 .deck-slide .work .katex-display + .katex-display{margin-top:.8em}
@@ -687,14 +687,14 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <body>
 
 
-<section class="deck-slide part">
+<section class="deck-slide part" data-notes="<p>All right, welcome. In the last video we chose the form of a model, a straight line, and let the fit find its parameters by least squares. In this video I want to look at what best means in best fit. Least squares is one way of scoring a line, there are others, and the choice changes the line we get. So let&#x27;s take a look.</p>">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
     <p class="say">What &ldquo;best&rdquo; means in a line of best fit</p>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>All right, welcome. So in the last video we picked the form of a model, a straight line for the distance, and we let the fit find the numbers. In this video I want to look at what the fit is actually doing when it finds them, because there's a choice inside best fit that we usually don't see. So let's take a look.</p><p>Here's a straight line through some points, the solid one. The dashed one is where the points really came from, and we'll come back to it. At every point there's a gap between the measurement and the solid line. We call that gap the residual, and these red sticks are the residuals.</p><p>With ten points we get ten residuals. And no straight line goes through all ten points, so no line makes all ten residuals zero. If we move the line to shorten some sticks, others get longer.</p>">
+<section class="deck-slide full" data-notes="<p>Here are ten points and a line through them. At every point there&#x27;s a gap between the measurement and the line, and as in the last video we call that gap the residual. The red sticks are the residuals.</p><p>No straight line goes through all ten of these points, so no line makes all ten residuals zero. If we move the line to shorten some sticks, others get longer.</p>">
   <div class="head">
     <p class="say">A line through the points leaves a <span class="term">residual</span> <span class="def">at every point</span>.</p>
     <p class="sub">A residual is the gap between the measurement and the model, drawn here as red sticks.</p>
@@ -704,7 +704,7 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full">
+<section class="deck-slide full" data-notes="<p>Here are two lines through the same points. The one on the left is closer to the points on the left, and the one on the right is closer to the points on the right.</p><p>And there are as many lines as we like, any intercept with any slope. To choose among them, each line needs a score, one number made from all ten of its residuals, where smaller means a better fit. Then the fit picks the line with the smallest score.</p>">
   <div class="head">
     <p class="say">Two lines can each be closer at some points <span class="def">and farther at others</span>.</p>
     <p class="sub">To say which line is better, we need one score for all ten residuals.</p>
@@ -714,59 +714,54 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>And the three differ in one thing, how much a big residual counts against a line compared with a small one.</p><p>One small thing first. For norm 2 we usually drop the square root and just minimize the sum of squares, because the root doesn't change which line wins.</p><p>Norm 1 adds up the sizes. A residual twice as big counts twice as much. That's what we call least absolute deviations.</p><p>Norm 2 adds up the squares. A residual twice as big counts four times as much, because 2 squared is 4. That's least squares, the one most libraries and spreadsheets probably give you by default.</p><p>And norm infinity only looks at the biggest residual. Only the largest one counts, and we could change any of the others and get the same number. That's sometimes called minimax, because it minimizes the maximum.</p>">
+<section class="deck-slide full" data-notes="<p>Here are the three scores people use most. These scores are what we call norms, and the numbers in their names will make sense in a couple of slides. They differ in how much a big residual counts against a line compared with a small one.</p><p>Norm 1 adds up the sizes, so a residual twice as big counts twice as much. That&#x27;s what we call least absolute deviations. Norm 2 adds up the squares and takes the square root, so a residual twice as big counts four times as much. The root doesn&#x27;t change which line wins, so least squares just makes the sum of squares as small as it can. And norm infinity only looks at the biggest residual. That one is sometimes called minimax, because it minimizes the maximum.</p><p>Norm 2 is the one you&#x27;ll see almost everywhere, and the reason is that it&#x27;s easy to compute. On a given problem another norm may well fit better. Every score has to deal with negative residuals, since a point below the line is just as far off as one above it. Norm 1 does that with the absolute value, and norm 2 does it by squaring. Squaring gives a score that&#x27;s a parabola in the intercept and the slope, so the best line comes from solving two linear equations, in one step, which is the next two videos. Norm 1 and norm infinity have no single formula like that. They need an iterative method, which library routines do have, but it&#x27;s slower and more work, especially when a fit has to run on the fly, as new data arrive. So least squares has become the standard.</p>">
   <div class="head">
     <p class="say">Three common scores turn the residuals into <span class="def">one number</span>.</p>
-    <p class="sub">These scores are called <span class="term">norms</span>. Here <i>r</i> is one residual, and a fit picks the line with the smallest score.</p>
+    <p class="sub">These scores are called <span class="term">norms</span>, and $r_i$ is the residual at point $i$. Norm 2 is the standard because squaring lets the best line come from two linear equations.</p>
   </div>
   <div class="stage">
     <div class="pcards c3">
-      <div class="pcard"><span class="tag">add the sizes</span><b>Norm 1, &sum;|<i>r</i>|</b>
+      <div class="pcard"><span class="tag">add the sizes</span><b>Norm 1&ensp;$\|r\|_1 = \sum_i |r_i|$</b>
         <span>A residual twice as big counts twice as much.</span></div>
-      <div class="pcard"><span class="tag">add the squares</span><b>Norm 2, &sum;<i>r</i>&sup2;, least squares</b>
-        <span>A residual twice as big counts four times as much.</span></div>
-      <div class="pcard"><span class="tag">take the largest</span><b>Norm &infin;, max |<i>r</i>|</b>
+      <div class="pcard gold"><span class="tag">add the squares</span><b>Norm 2&ensp;$\|r\|_2 = \sqrt{\textstyle\sum_i r_i^2}$</b>
+        <span>A residual twice as big counts four times as much. Least squares minimizes $\sum_i r_i^2$.</span></div>
+      <div class="pcard"><span class="tag">take the largest</span><b>Norm &infin;&ensp;$\|r\|_\infty = \max_i |r_i|$</b>
         <span>Only the largest residual counts.</span></div>
     </div>
   </div>
 </section>
 
-<section class="deck-slide full">
+<section class="deck-slide full" data-notes="<p>Here&#x27;s what that weighting does on the smallest example I could think of, two residuals, a 3 and a 1. What I want to see is how much of each score comes from the 3.</p><p>Norm 1 adds them, 3 plus 1 is 4, and the 3 makes up three quarters of the score. Norm 2 adds the squares, 9 plus 1 is 10, and now the 3 makes up 90 percent. Norm infinity just takes the largest, 3, and the 1 doesn&#x27;t count at all.</p><p>So going from norm 1 to norm 2 to norm infinity, the score is more and more about the biggest residual. So when one point is far off the line, it can make up most of the score.</p>">
   <div class="head">
-    <p class="say">On residuals of 3 and 1, the three scores <span class="def">weigh the 3 differently</span>.</p>
+    <p class="say">On residuals of 3 and 1, the 3 makes up <span class="def">75%, 90% and 100%</span> of the scores.</p>
+    <p class="sub">Each panel shows what the 3 and the 1 add to one score.</p>
   </div>
   <div class="stage">
-    <div class="pcards c3">
-      <div class="pcard"><span class="tag">add the sizes</span><b>3 + 1 = 4</b>
-        <span>The 3 counts three times as much as the 1.</span></div>
-      <div class="pcard"><span class="tag">add the squares</span><b>9 + 1 = 10</b>
-        <span>The 3 counts nine times as much as the 1.</span></div>
-      <div class="pcard"><span class="tag">take the largest</span><b>3</b>
-        <span>The 1 does not count at all.</span></div>
-    </div>
+    <figure class="figure wide" data-fig="lec14-share"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So how do we say one line is better than another? Ten residuals is ten numbers, and we need one number, so that less means something.</p><p>The family of ways to do that is what we call the p-norm. Take the size of each residual, raise it to the power p, add them up, and take the p-th root. r-i is the residual at point i, and m is the number of points, ten here.</p><p>And there are three values of p people actually use. p equals 1, p equals 2, and p equals infinity, which is the limit, where only the biggest residual is left.</p>">
+<section class="deck-slide full" data-notes="<p>These three are members of one family, what we call the p-norm. Take the size of each residual, raise it to the power p, add them up, and take the p-th root. r i is the residual at point i, and m is the number of points.</p><p>p equals 1 is norm 1. p equals 2 is the sum of squares with a square root on the end, which is norm 2. As p grows, the biggest residual takes over, and in the limit it&#x27;s the only one left, which is norm infinity. The plot is our 3 and 1 again. The score starts at 4 for p equals 1 and falls toward 3, the largest residual.</p><p>So any p from 1 up is a possible choice, and there are other families of scores in use too. By convention, as a community, we&#x27;ve settled on this family, and mostly on p equals 2, as the tools of choice.</p>">
   <div class="head">
     <p class="say">All three scores belong to <span class="def">one family</span>.</p>
-    <p class="sub">This is the <span class="term">p-norm</span>. With <i>p</i> = 1 it adds the sizes, with <i>p</i> = 2 the squares (then takes a root), and as <i>p</i> grows only the largest is left (on residuals of 3 and 1 it gives 4, 3.16, 3.01 and 3.00 for <i>p</i> = 1, 2, 4 and 10). <i>r<sub>i</sub></i> is the residual at point <i>i</i>, and there are <i>m</i> points.</p>
+    <p class="sub">This is the <span class="term">p-norm</span>. <i>r<sub>i</sub></i> is the residual at point <i>i</i>, and there are <i>m</i> points.</p>
   </div>
   <div class="stage">
     <div class="work">
       $$\|r\|_p \;=\; \left( \sum_{i=1}^{m} |r_i|^{\textcolor{#8A6508}{p}} \right)^{1/\textcolor{#8A6508}{p}}$$
     </div>
+    <figure class="figure wide" data-fig="lec14-pfam"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide part">
+<section class="deck-slide part" data-notes="<p>All right. Now let&#x27;s fit one set of data with all three norms. The data are ten points near a line we know, with one point that&#x27;s far off the line.</p>">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
     <p class="say">Three norms fitted to data with one bad point</p>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So let's see what that does on some data. Here are ten points on a straight line, y equals 2 plus 1.5 x, with a little scatter. And one of them, at x equals 6, I've moved up by 6. That's the kind of thing a bad frame, or a dropped marker, or a typo in a spreadsheet does.</p><p>Why make the data up? Well, because then we know the true line, the dashed one, so we can check each fit against the truth as well as against its own rule.</p>">
+<section class="deck-slide full" data-notes="<p>Here are ten points near the line y equals 2 plus 1.5 x, the dashed line, with a little scatter. One of them, at x equals 6, I&#x27;ve moved up by 6. That&#x27;s the kind of thing a bad frame, a dropped marker, or a typo in a spreadsheet does.</p><p>I made the data up so that we know the true line and can check each fit against it. And we&#x27;re assuming real data with one bad point in it would behave the same way.</p>">
   <div class="head">
     <p class="say">Ten points lie near <i>y</i> = 2 + 1.5<i>x</i>, with <span class="def">one moved up by 6</span>.</p>
     <p class="sub">The data are constructed, so the true line is known.</p>
@@ -776,17 +771,17 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>First, least squares. The slope comes out at 1.614, against a true 1.500. 1.614 minus 1.5 is 0.114, and 0.114 over 1.5 is about 7.6 percent off the truth, from one bad point out of ten.</p><p>And look at the red sticks. Nine of them are short, but all nine are on the same side. The line sits above every one of the good points, because it's been pulled up toward the bad one.</p>">
+<section class="deck-slide full" data-notes="<p>Here are the three fits, one per panel, each against the dashed true line. On the left, norm 1 lands almost on the true line, with a slope of almost exactly 1.5. On a norm 1 line, a point far off the line pulls no harder than one close to it, so the nine good points outvote the bad one.</p><p>In the middle, least squares tilts toward the bad point, to a slope of about 1.6. On the right, norm infinity keeps a good slope but lifts the whole line, to an intercept of about 4.8 against a true 2. It only cares about the worst point, and the worst point is the bad one.</p><p>So on this data least squares isn&#x27;t the best of the three. Norm 1 is the closest to the true line.</p>">
   <div class="head">
-    <p class="say">Least squares tilts toward the bad point, to <span class="def">a slope of 1.614</span>.</p>
-    <p class="sub">The true slope is 1.500.</p>
+    <p class="say">On the same ten points, the three norms give <span class="def">three different lines</span>.</p>
+    <p class="sub">The dashed line is the true line, <i>y</i> = 2 + 1.5<i>x</i>. Least squares tilts toward the bad point, and norm &infin; lifts the whole line.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="lec14-fit" data-norm="n2"><div class="fig-body"></div></figure>
+    <figure class="figure wide" data-fig="lec14-three"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So why does it tilt? Well, let's look at what least squares is adding up. These bars are each point's squared residual for that line.</p><p>The bad point's residual is 5.24, so its square is 5.24 squared, about 27.5. The other nine together come to about 4.5. So the total is 32.0, and 27.5 of it is the one bad point. 27.5 out of 32, so about 86 percent. And that's even after the line has already tilted toward it.</p><p>So the cheapest way to make the total smaller is to move the line toward that one point, even though it makes nine other residuals a little bit worse. Okay.</p>">
+<section class="deck-slide full" data-notes="<p>Here&#x27;s why least squares tilts. These bars are each point&#x27;s squared residual for the least-squares line, which is what least squares adds up, and what I want is the bad point&#x27;s share of that total.</p><p>The bad point&#x27;s bar is about 27, and the other nine together come to about 4.5. So the bad point is 86 percent of the total, even after the line has tilted toward it. The cheapest way to make that total smaller is to move the line toward the one bad point, even though that makes most of the other residuals a little worse. Okay.</p>">
   <div class="head">
     <p class="say">After squaring, the bad point makes up <span class="def">86% of the sum</span> least squares minimizes.</p>
   </div>
@@ -795,108 +790,59 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Now norm 1, on the same ten points. The slope is 1.502, so almost exactly the true 1.500.</p><p>Why doesn't it tilt? Well, under norm 1 every point pulls on the line equally hard, however far away it is. So nine good points outvote one bad one. The line goes exactly through two of the points, at x equals 0 and x equals 9, and within about 0.43 of every other good point. And the bad point just sits there with one long stick.</p>">
+<section class="deck-slide full" data-notes="<p>So which line is best? Each of the three is the best line under its own rule. No line has a smaller sum of sizes than the norm 1 line, no line has a smaller sum of squares than the least-squares line, and no line has a smaller worst residual than the norm infinity line.</p><p>But for this data there is an answer, and it&#x27;s norm 1. The data have one bad point, and least squares and norm infinity both give that point more control over the line than it should have.</p><p>We can test that. Take the bad point out, refit with each norm, and see how far each line moves. The refit is the dashed line in each panel. Here the norm 1 line doesn&#x27;t move at all. The least-squares line moves by up to about 1.1, and the norm infinity line by up to about 2.8. So the bad point was steering those two lines, and it wasn&#x27;t steering the norm 1 line.</p>">
   <div class="head">
-    <p class="say">Norm 1 leaves the bad point alone and finds <span class="def">a slope of 1.502</span>.</p>
-    <p class="sub">Moving the line toward the bad point would shrink one residual and grow nine.</p>
+    <p class="say">For these data norm 1 is best, since <span class="def">the bad point does not move its line</span>.</p>
+    <p class="sub">Each panel refits its norm without the point at <i>x</i> = 6 (dashed). The title gives how far the line moved, at most, over the data.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="lec14-fit" data-norm="n1"><div class="fig-body"></div></figure>
+    <figure class="figure wide" data-fig="lec14-moved"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>And norm infinity. The slope is 1.510, pretty close. But look at the intercept, 4.835, against a true 2.000.</p><p>What happened? Well, norm infinity only cares about the worst point. So it lifts the whole line up toward the bad point, until the bad point and the two worst good points are all the same distance away, about 3.16. Every good point is now about 3 below the line. So the worst gap went from 5.24 down to 3.16, and every good point moved about 3 away to get there.</p>">
-  <div class="head">
-    <p class="say">Norm &infin; lifts the whole line, to <span class="def">an intercept of 4.835</span>.</p>
-    <p class="sub">The true intercept is 2.000. The line rises until the bad point and the worst good points are all 3.16 away.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="lec14-fit" data-norm="ninf"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>So which one is right? Well, it depends what we asked. Each of these three lines is the best there is, under its own rule.</p><p>No line has a smaller sum of sizes than the norm 1 line, 7.72. No line has a smaller sum of squares than the least squares line, 31.99. And no line has a smaller worst residual than the norm infinity line, 3.16.</p><p>So nothing went wrong in any of them. Each one answered the question we gave it, okay?</p>">
-  <div class="head">
-    <p class="say">Each line is <span class="def">the best under its own rule</span>.</p>
-    <p class="sub">Each card scores one line on the same ten points.</p>
-  </div>
-  <div class="stage">
-    <div class="pcards c3">
-      <div class="pcard"><span class="tag">norm 1 line</span><b>&sum;|<i>r</i>| = 7.72</b>
-        <span>This is the smallest of the three, and least squares gives 10.49.</span></div>
-      <div class="pcard"><span class="tag">least-squares line</span><b>&sum;<i>r</i>&sup2; = 31.99</b>
-        <span>This is the smallest of the three, and norm 1 gives 35.56.</span></div>
-      <div class="pcard"><span class="tag">norm &infin; line</span><b>max |<i>r</i>| = 3.16</b>
-        <span>This is the smallest of the three, and least squares gives 5.24.</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide part">
+<section class="deck-slide part" data-notes="<p>All right. This section is about when each norm works best, and what people actually do.</p>">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
     <p class="say">Choosing a norm for a fit</p>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So how do we pick? From what the residuals mean.</p><p>If the scatter is ordinary measurement noise, roughly symmetric, with no bad points, least squares is usually the right call. If the noise is Gaussian it's the most likely line, and for a model that's linear in its parameters it has a closed-form answer, no iterating. That's the next video.</p><p>If bad points are expected, and we don't want one of them to steer the whole fit, norm 1. It costs us the closed form, so it needs a search, and sometimes there's more than one best line.</p><p>And if the requirement is about the worst case, a tolerance that has to hold at every point, then norm infinity, because that's the only one that's actually stating that requirement.</p>">
+<section class="deck-slide full" data-notes="<p>Each norm works best for a particular kind of residual. Norm 2 works best when the scatter is what we call normal, symmetric and bell-shaped, with no bad points. Under that kind of scatter, the least-squares line is the one that makes the data we got most likely. Norm 1 works best when bad points are expected and we don&#x27;t want one of them steering the fit. And norm infinity is for a requirement on the worst case, a tolerance that has to hold at every point, since it&#x27;s the only one of the three that states that requirement.</p><p>Now in practice, norm 2 is the default, because it&#x27;s easy to compute. And to use it, we usually assume the scatter is normal, everywhere, often without checking. It&#x27;s easy to call that ordinary noise, and ordinary there means assumed, often without anyone checking. The usual argument is that many small errors adding up make a bell shape. That&#x27;s only true when the errors are independent, and offsets and drift are exactly the errors that aren&#x27;t. They&#x27;re correlated, some fast and some slow. So I think the normal distribution comes mostly out of our uncertainty, out of describing the errors as small and independent, and much less out of the errors themselves.</p><p>So that&#x27;s when each norm works best. And the practice is to use norm 2 unless something forces you to use another one.</p>">
   <div class="head">
-    <p class="say">Choose the norm from <span class="def">what the residuals mean</span>.</p>
+    <p class="say">Each norm works best for <span class="def">one kind of residual</span>.</p>
+    <p class="sub">In practice norm 2 is the default, and the scatter is usually assumed normal to match it.</p>
   </div>
   <div class="stage">
     <div class="pcards c3">
-      <div class="pcard gold"><span class="tag">ordinary noise</span><b>Norm 2</b>
-        <span>It suits symmetric scatter with no bad points, and it is the usual default.</span></div>
+      <div class="pcard gold"><span class="tag">normal scatter</span><b>Norm 2</b>
+        <span>It works best when the scatter is symmetric and bell-shaped, with no bad points.</span></div>
       <div class="pcard"><span class="tag">bad points expected</span><b>Norm 1</b>
         <span>A bad point counts in proportion to its size.</span></div>
       <div class="pcard"><span class="tag">a tolerance everywhere</span><b>Norm &infin;</b>
-        <span>It fits the worst point, as a tolerance like &ldquo;every part within 0.02&nbsp;mm&rdquo; requires.</span></div>
+        <span>It states a tolerance like &ldquo;every point within 0.02&rdquo; directly.</span></div>
     </div>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Now here's a test you can run on any fit, even without knowing the truth. Fit the same data with norm 1 and with least squares, and compare.</p><p>On well-behaved data they usually agree pretty closely. When a few points are far out, they split, because least squares chases those points and norm 1 doesn't. Here the slopes are 1.614 and 1.502. 1.614 minus 1.502 is 0.112, so they're about 7 percent apart.</p><p>So when they disagree, sort the points by the size of their residual and look at the top few. If it's a typo or a failed sensor, take it out and refit. If it's a real measurement, it might be the most interesting point you've got, and then it's maybe the model form that needs to change.</p>">
-  <div class="head">
-    <p class="say">When norm 1 and norm 2 disagree, <span class="def">look at the largest residuals</span>.</p>
-    <p class="sub">Here the slopes are 1.502 and 1.614, about 7% apart.</p>
-  </div>
-  <div class="stage">
-    <div class="pcards c3">
-      <div class="pcard"><span class="tag">they agree</span><b>No point is steering</b>
-        <span>The residuals are likely ordinary scatter.</span></div>
-      <div class="pcard"><span class="tag">they split</span><b>A few points steer</b>
-        <span>Sort by |<i>r</i>| and look at the top few.</span></div>
-      <div class="pcard gold"><span class="tag">then decide</span><b>Error or real</b>
-        <span>Remove an error and refit, or change the model.</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>And one more check, for a requirement on the worst point. Say a calibration curve has to be within 0.02 of every measured point. Least squares will happily trade, because it minimizes a sum. Say one point goes from 0.02 off to 0.05, and twenty others go from 0.02 to 0.01. 0.05 squared minus 0.02 squared adds 0.0021, and the twenty take off 0.0003 each, so 0.006. So least squares takes that trade, and our calibration now fails at that one point.</p><p>So if you fit with least squares anyway, and you probably will, because it's what most libraries give you, check the biggest residual afterwards. It's one line of code, the one on the screen. The RMS can look fine and still hide one point that's over 0.02.</p>">
+<section class="deck-slide full" data-notes="<p>Here&#x27;s a check for that last case, a requirement on the worst point. Let&#x27;s say a calibration line has to be within 0.02 of every measured point. These are the residuals of a least-squares fit to 21 calibration points, made up for this example, with the tolerance drawn as the dashed band.</p><p>The RMS is about 0.01, well inside the band. But one point is outside it, at almost 0.04. Least squares minimizes a sum, so it will trade one point a little further out for many points a little closer, and it never looks at the tolerance.</p><p>So if you fit with least squares, and you probably will, check the largest residual against the tolerance afterwards.</p>">
   <div class="head">
     <p class="say">A tolerance on every point is checked with <span class="def">the largest residual</span>.</p>
     <p class="sub">For a requirement like &ldquo;within 0.02 of every point&rdquo;, check the largest residual whatever norm the fit used.</p>
   </div>
   <div class="stage">
-    <div class="panels">
-      <div class="code">r = y - model(x)</div><div class="note">every residual</div>
-      <div class="code">ok = <span class="k">np.max(np.abs(r)) &lt;= 0.02</span></div><div class="note">the worst point, against the tolerance</div>
-    </div>
+    <figure class="figure wide" data-fig="lec14-tol"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So here's what to do with all of that. The norm changes the answer, 1.614 or 1.502 from the same ten points, so it goes in the report with the answer, the same way the filter class did in week four.</p><p>Choose it from what the residuals mean. And if we don't pick one, the library has probably picked least squares for us, so it's worth knowing what that does to a bad point.</p><p>So hopefully that gives you an idea of what best means in best fit. In the next video we'll look at the models least squares solves in one step, the ones that are linear in their parameters. Thanks a lot for watching and we'll see you in the next video.</p>">
+<section class="deck-slide full" data-notes="<p>So here&#x27;s what a report of these fits might look like. It names the norm and gives the fitted values. It says what least squares gives, since that&#x27;s what a reader will probably assume. It says where the difference comes from, the point at x equals 6, and what happens without that point. And it says which fit we&#x27;re reporting, and why.</p><p>Someone else might make a different choice, remove the point and report least squares, and the report would still tell a reader exactly what was done.</p><p>So hopefully that gives you an idea of what best means in best fit, and why least squares is one choice among several. In the next video we&#x27;ll look at the models least squares can solve in one step, the ones that are linear in their parameters. Thanks a lot for watching and we&#x27;ll see you in the next video.</p>">
   <div class="head">
-    <p class="say">Report the norm <span class="def">together with the fit</span>.</p>
+    <p class="say">A report names the norm, <span class="def">gives the fit, and says why</span>.</p>
+    <p class="sub">This is one way to report the fits from this video.</p>
   </div>
   <div class="stage">
-    <div class="pcards c3">
-      <div class="pcard gold"><span class="tag">always</span><b>Name the norm</b>
-        <span>1.614 and 1.502 both fit these ten points.</span></div>
-      <div class="pcard"><span class="tag">choosing</span><b>From the residuals</b>
-        <span>The choice depends on noise, bad points, or a tolerance.</span></div>
-      <div class="pcard"><span class="tag">the default</span><b>Least squares</b>
-        <span>It is what a library usually uses when nobody chooses.</span></div>
+    <div class="pcards" style="grid-template-columns:minmax(0,1fr)">
+      <div class="pcard gold"><span class="tag">ten points, <i>y</i> = <i>a</i> + <i>bx</i></span><b>Slope 1.502 and intercept 2.120, fitted by norm 1</b>
+        <span>Least squares gives a slope of 1.614. The difference comes from the point at <i>x</i> = 6, whose squared residual, 5.24&sup2;, is 86% of the least-squares sum of squares. Without that point, least squares gives a slope of 1.505 and the norm 1 fit does not change. We report the norm 1 fit and flag the point at <i>x</i> = 6 as a likely error.</span></div>
     </div>
   </div>
 </section>
@@ -908,6 +854,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <div class="deck-notes"></div>
 
 
-<script type="module" src="js/bundle/lecture-14.js?v=20261028082814"></script>
+<script type="module" src="js/bundle/lecture-14.js?v=20261102083412"></script>
 </body>
 </html>

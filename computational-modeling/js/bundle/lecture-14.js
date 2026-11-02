@@ -1271,6 +1271,8 @@ setTimeout(() => {
      norm 2   a 2.121  b 1.614  sum|r| 10.49  sum r^2 31.99  max|r| 5.24
      norm inf a 4.835  b 1.510  sum|r| 28.77  sum r^2 83.33  max|r| 3.16
    Under least squares the bad point's r^2 is 27.51 of 31.99, 86% of the sum.
+   Without the bad point: norm 1 does not move, least squares moves up to 1.09
+   (slope 1.505), norm inf up to 2.84.
    Hosts are found by data-fig; data-norm picks the fit (n1, n2, ninf). */
 (() => {
   const XR = [-0.6, 9.6], YR = [-0.5, 19];
@@ -1348,6 +1350,99 @@ setTimeout(() => {
               {x: OUTLIER, y: sq[OUTLIER], anchor: 'middle', dy: -6, cls: 'hi',
                text: sq[OUTLIER].toFixed(1) + ' of ' + tot.toFixed(1) + ', ' + Math.round(100 * sq[OUTLIER] / tot) + '%'},
               {x: 1.5, y: 6, anchor: 'middle', text: 'the other nine: ' + (tot - sq[OUTLIER]).toFixed(1)}]
+    });
+  });
+
+  /* residuals of 3 and 1 under each norm: what each residual adds to the
+     score, and the share that comes from the 3 (75%, 90%, 100%) */
+  document.querySelectorAll('[data-fig="lec14-share"] .fig-body').forEach(host => {
+    const cells = diagramRow(host, 3), bw = 0.3;
+    [['norm 1: 3 + 1 = 4', [3, 1], '75%'], ['norm 2: 9 + 1 = 10', [9, 1], '90%'],
+     ['norm ∞: the largest, 3', [3, 0], '100%']].forEach(([title, h, share], k) =>
+      diagram(cells[k], {
+        w: 200, h: 230, xRange: [-0.7, 1.7], yRange: [-1.6, 11], axes: false,
+        title,
+        alt: 'Two bars, what the residual of 3 and the residual of 1 add to the score: ' + h[0] + ' and ' + h[1] + '.',
+        areas: h.map((v, i) => ({cls: i === 0 ? 'neg' : 'fill',
+          pts: [{x: i - bw, y: 0}, {x: i + bw, y: 0}, {x: i + bw, y: v}, {x: i - bw, y: v}]})),
+        leads: [{from: [-0.7, 0], to: [1.7, 0], cls: 'level'}],
+        notes: [{x: 0, y: -1.6, dy: -2, anchor: 'middle', text: 'from the 3'},
+                {x: 1, y: -1.6, dy: -2, anchor: 'middle', text: 'from the 1'},
+                {x: 0, y: h[0], dy: -6, anchor: 'middle', cls: 'hi', text: share}]
+      }));
+  });
+
+  /* the p-norm of residuals 3 and 1 as p grows: 4 at p = 1, 3.16 at p = 2,
+     falling toward 3, the largest residual */
+  document.querySelectorAll('[data-fig="lec14-pfam"] .fig-body').forEach(host => {
+    const P = linspace(1, 12, 120), pn = p => (3 ** p + 1) ** (1 / p);
+    diagram(host, {
+      w: 440, h: 170, xRange: [0.4, 12.6], yRange: [2.8, 4.15],
+      title: 'the p-norm of residuals 3 and 1, as p grows',
+      alt: 'A curve falling from 4 at p = 1 to 3.16 at p = 2 and leveling off toward 3.',
+      curves: [{x: P, y: [...P].map(pn)}],
+      leads: [{from: [0.4, 3], to: [12.6, 3], cls: 'level'}],
+      points: [1, 2, 4, 10].map(p => ({x: p, y: pn(p), r: 3.6})),
+      notes: [{x: 1, y: 4, anchor: 'start', dx: 8, text: 'p = 1: 4'},
+              {x: 2, y: pn(2), anchor: 'start', dx: 8, text: 'p = 2: 3.16'},
+              {x: 12.4, y: 3, anchor: 'end', dy: -6, cls: 'hi', text: 'toward 3, the largest, as p → ∞'}]
+    });
+  });
+
+  /* the three fits side by side, each against the dashed true line */
+  const pane = (host, f, title, extra = {}) => diagram(host, Object.assign({
+    w: 200, h: 180, xRange: XR, yRange: YR,
+    title,
+    alt: 'The ten points with the dashed true line and a fitted line.',
+    curves: [truth, {x: XR, y: XR.map(v => f.a + f.b * v)}],
+    points: [...[...X].map((v, i) => ({x: v, y: Y[i], r: 2.6})),
+             {x: X[OUTLIER], y: Y[OUTLIER], cls: 'miss', r: 5.5}]
+  }, extra));
+  document.querySelectorAll('[data-fig="lec14-three"] .fig-body').forEach(host => {
+    const cells = diagramRow(host, 3);
+    pane(cells[0], FITS.n1, 'norm 1: slope ' + FITS.n1.b.toFixed(3));
+    pane(cells[1], FITS.n2, 'norm 2: slope ' + FITS.n2.b.toFixed(3));
+    pane(cells[2], FITS.ninf, 'norm ∞: intercept ' + FITS.ninf.a.toFixed(2));
+  });
+
+  /* each norm refitted without the bad point (dashed): the norm 1 line does
+     not move, least squares moves up to 1.09, norm inf up to 2.84 */
+  const CLEAN = {};
+  for (const k in NORMS) CLEAN[k] = fit(r => NORMS[k](r.filter((_, i) => i !== OUTLIER)));
+  document.querySelectorAll('[data-fig="lec14-moved"] .fig-body').forEach(host => {
+    const cells = diagramRow(host, 3);
+    [['n1', 'norm 1'], ['n2', 'norm 2'], ['ninf', 'norm ∞']].forEach(([k, name], j) => {
+      const f = FITS[k], c = CLEAN[k];
+      const moved = Math.max(...[0, 9].map(x => Math.abs(f.a + f.b * x - c.a - c.b * x)));
+      pane(cells[j], f, name + ', moved ' + moved.toFixed(2), {
+        alt: 'The ' + name + ' line fitted with the bad point (solid) and without it (dashed).',
+        curves: [{x: XR, y: XR.map(v => c.a + c.b * v), cls: 'ghost'}, {x: XR, y: XR.map(v => f.a + f.b * v)}]
+      });
+    });
+  });
+
+  /* a tolerance check: residuals of a least-squares fit to 21 constructed
+     calibration points, against a band of +-0.02. RMS 0.010, one point out
+     at 0.036 (x = 13). */
+  document.querySelectorAll('[data-fig="lec14-tol"] .fig-body').forEach(host => {
+    const N = 21, xs = [...Array(N).keys()], e = realNoise(N, 0.007);
+    const ys = xs.map((x, i) => 1 + 0.05 * x + e[i] + (i === 13 ? 0.03 : 0));
+    let sx = 0, sy = 0, sxx = 0, sxy = 0;
+    for (let i = 0; i < N; i++) { sx += xs[i]; sy += ys[i]; sxx += xs[i] ** 2; sxy += xs[i] * ys[i]; }
+    const b = (N * sxy - sx * sy) / (N * sxx - sx * sx), a = (sy - b * sx) / N;
+    const r = ys.map((y, i) => y - a - b * xs[i]);
+    const rms = Math.sqrt(r.reduce((s, v) => s + v * v, 0) / N);
+    const big = r.map(Math.abs).indexOf(Math.max(...r.map(Math.abs)));
+    diagram(host, {
+      w: 440, h: 200, xRange: [-1, 21], yRange: [-0.045, 0.05], zero: true,
+      title: 'residuals of a least-squares fit to 21 calibration points',
+      alt: 'Twenty-one residuals, all inside a dashed band of plus and minus 0.02 except one at 0.036.',
+      leads: [{from: [-1, 0.02], to: [21, 0.02], cls: 'level'}, {from: [-1, -0.02], to: [21, -0.02], cls: 'level'},
+              ...r.map((v, i) => ({from: [i, 0], to: [i, v], cls: 'alt'}))],
+      points: r.map((v, i) => ({x: i, y: v, r: i === big ? 5.5 : 2.8, cls: i === big ? 'miss' : 'dot'})),
+      notes: [{x: 20.5, y: 0.02, anchor: 'end', dy: -5, text: 'tolerance ±0.02'},
+              {x: big, y: r[big], anchor: 'start', dx: 10, cls: 'hi', text: 'largest ' + Math.abs(r[big]).toFixed(3) + ', outside'},
+              {x: 0, y: -0.04, anchor: 'start', text: 'RMS ' + rms.toFixed(3) + ', well inside'}]
     });
   });
 })();

@@ -1425,6 +1425,10 @@ setTimeout(() => {
      distance  a = 7.84 m, b = -6.22 m/s, RMS 2.9 cm, max 6.7 cm
                mean gap 0, sum of squares 257.6 cm2, mean square 8.31 cm2
      height    a = 4.41 m, b = 0.05 m/s, max miss 1.14 m, first frame 3.27 m
+               RMS 55 cm (about 19 times the distance's 2.9 cm)
+     velocity  g free: v0 5.85, g 9.60, RMS 0.513; g held: v0 5.98, RMS 0.517
+     release   shot 1092: top of flight frame 27, a one-frame look stops at
+               23, the two-frame rule at 11
      degree    RMS residual 0.50175 (0), 0.07368 (2), 0.00005 (9)
                RMS error    0.45785 (0), 0.01748 (2), 0.44195 (9)
    Hosts are found by data-fig so a figure can sit under more than one claim. */
@@ -1443,36 +1447,18 @@ setTimeout(() => {
   const ends = f => ({x: [-0.03, 1.23], y: [f.a - 0.03 * f.b, f.a + 1.23 * f.b]});
   const dots = y => y.map((v, i) => ({x: T[i], y: v, r: 3}));
 
-  /* what fitting a line means, before any formula: three candidate lines
-     through the distances, each with its gaps drawn. The close one is the
-     least-squares line; the others are it tilted too steeply and shifted up. */
-  each('lec13-cands', host => {
-    const tm = T.reduce((s, v) => s + v, 0) / T.length;
-    const steep = {b: fd.b * 1.5, a: fd.a + (fd.b - fd.b * 1.5) * tm};
-    const high = {a: fd.a + 2.2, b: fd.b};
-    const cells = diagramRow(host, 3);
-    [[fd, 'close to every point'], [steep, 'too steep'], [high, 'too high']].forEach(([f, name], k) => {
-      const at = t => f.a + f.b * t;
-      diagram(cells[k], {
-        w: 200, h: 170, xRange: [-0.05, 1.25], yRange: [-2.5, 11],
-        title: name,
-        alt: 'The distance points with a line drawn ' + name + ', and red sticks from each point to the line.',
-        leads: D.map((v, i) => ({from: [T[i], v], to: [T[i], at(T[i])], cls: 'alt'})),
-        curves: [ends(f)],
-        points: D.map((v, i) => ({x: T[i], y: v, r: 2.2}))
-      });
-    });
-  });
-
-  /* each extra degree is one more number for the fit to adjust */
+  /* each extra degree is one more number for the fit to adjust; the red
+     sticks are the residuals, and each title gives their RMS */
   each('lec13-degrees', host => {
     const cells = diagramRow(host, 3);
     [1, 2, 3].forEach((deg, k) => {
       const c = polyfit(XD, YD, deg);
+      const rms = Math.sqrt([...XD].reduce((s, x, i) => s + (YD[i] - polyval(c, x)) ** 2, 0) / NPTS);
       diagram(cells[k], {
         w: 200, h: 170, xRange: [-0.05, 1.05], yRange: [0.6, 3.2],
-        title: 'degree ' + deg + ', ' + (deg + 1) + ' numbers to adjust',
-        alt: 'Ten points with a fitted polynomial of degree ' + deg + '.',
+        title: 'degree ' + deg + ', RMS ' + rms.toFixed(3),
+        alt: 'Ten points with a fitted polynomial of degree ' + deg + ' and red sticks from each point to the curve.',
+        leads: [...XD].map((x, i) => ({from: [x, YD[i]], to: [x, polyval(c, x)], cls: 'alt'})),
         curves: [{x: XF, y: [...XF].map(v => polyval(c, v))}],
         points: [...XD].map((x, i) => ({x, y: YD[i], r: 2.6}))
       });
@@ -1610,23 +1596,175 @@ setTimeout(() => {
     });
   });
 
-  /* the same line through the heights, with each point's miss drawn in */
-  each('lec13-height', host => {
-    const sticks = Z.map((v, i) => ({from: [T[i], v], to: [T[i], fz.a + fz.b * T[i]], cls: 'alt'}));
+  /* a straight line and its two numbers, before any data: a where it crosses
+     t = 0, and b the rise over one second, drawn as a step */
+  each('lec13-ab', host => {
+    const A = 2, B = 1.5, X = [-0.2, 3.2];
     diagram(host, {
-      w: 440, h: 230, xRange: [-0.05, 1.25], yRange: [2.95, 5.45],
-      title: 'height above the floor (m), against time (s)',
-      alt: 'The thirty-one heights with a nearly flat line through them. Red sticks join each '
-         + 'point to the line: below it at both ends, above it through the middle.',
-      leads: sticks,
+      w: 440, h: 230, xRange: [-0.4, 3.4], yRange: [-0.6, 7.4],
+      title: 'y = a + bt, drawn with a = 2 and b = 1.5',
+      alt: 'A straight line rising to the right. It crosses t = 0 at y = 2, and a step one second '
+         + 'across and 1.5 up shows its slope.',
+      leads: [{from: [1, A + B], to: [2, A + B], cls: 'level'},
+              {from: [2, A + B], to: [2, A + 2 * B], cls: 'alt'}],
+      curves: [{x: X, y: X.map(t => A + B * t)}],
+      points: [{x: 0, y: A, r: 4.5}],
+      notes: [{x: 0, y: A, anchor: 'start', dx: 10, dy: 16, cls: 'hi', text: 'a = 2, where the line crosses t = 0'},
+              {x: 1.5, y: A + B, anchor: 'middle', dy: 16, text: '1 s across'},
+              {x: 2, y: A + 1.5 * B, anchor: 'start', dx: 8, cls: 'hi', text: 'b = 1.5 up, the slope'},
+              {x: 3.3, y: -0.6, anchor: 'end', dy: -4, text: 't (s)'}]
+    });
+  });
+
+  /* the fit by hand: two sliders move a line over the 31 distances, the red
+     sticks are the residuals, and the RMS of the residuals is read out below.
+     "best fit" sets the least-squares a and b (7.84, -6.22, RMS 2.9 cm). */
+  each('lec13-demo', host => {
+    host.innerHTML =
+      '<style>.deck-slide .stage .l13-demo .cgd-controls label,.deck-slide .stage .l13-demo .cgd-val,' +
+      '.deck-slide .stage .l13-demo .cgd-seg button{font-size:calc(var(--stage-code) * .8)}</style>' +
+      '<div class="cgd l13-demo"><div class="cgd-plots"></div><div class="cgd-controls">' +
+      '<label>a, the line at t = 0 <input type="range" data-k="a" min="5" max="11" step="0.01" value="9.6">' +
+      '<span class="cgd-val" data-v="a"></span></label>' +
+      '<label>b, the slope <input type="range" data-k="b" min="-10" max="-3" step="0.01" value="-8.6">' +
+      '<span class="cgd-val" data-v="b"></span></label>' +
+      '<span class="cgd-seg"><button type="button" data-best>best fit</button></span>' +
+      '<label>RMS of the residuals <span class="cgd-val" data-r="rms"></span></label></div></div>';
+    const plots = host.querySelector('.cgd-plots');
+    const inp = k => host.querySelector('[data-k="' + k + '"]');
+    const draw = () => {
+      const a = +inp('a').value, b = +inp('b').value, at = t => a + b * t;
+      const rms = Math.sqrt(D.reduce((s, v, i) => s + (v - at(T[i])) ** 2, 0) / D.length);
+      plots.innerHTML = '';
+      diagram(plots, {
+        w: 520, h: 150, xRange: [-0.05, 1.25], yRange: [-2.5, 11],
+        title: 'distance from the hoop (m), against time (s)',
+        alt: 'The 31 distances with the line set by the sliders, and red sticks from each point to the line.',
+        leads: D.map((v, i) => ({from: [T[i], v], to: [T[i], at(T[i])], cls: 'alt'})),
+        curves: [ends({a, b})],
+        points: D.map((v, i) => ({x: T[i], y: v, r: 2.6}))
+      });
+      host.querySelector('[data-v="a"]').textContent = a.toFixed(2) + ' m';
+      host.querySelector('[data-v="b"]').textContent = b.toFixed(2) + ' m/s';
+      host.querySelector('[data-r="rms"]').textContent = (rms * 100).toFixed(1) + ' cm';
+    };
+    host.querySelectorAll('input').forEach(el => el.addEventListener('input', draw));
+    host.querySelector('[data-best]').addEventListener('click', () => {
+      inp('a').value = fd.a.toFixed(2); inp('b').value = fd.b.toFixed(2); draw();
+    });
+    draw();
+  });
+
+  /* the fitted a and b held up against the ball: the first frame against a,
+     and the whole drop over 1.2 s against b */
+  each('lec13-dcheck', host => {
+    diagram(host, {
+      w: 440, h: 200, xRange: [-0.1, 1.3], yRange: [-0.6, 9.2],
+      title: 'distance from the hoop (m), against time (s)',
+      alt: 'The distances and the fitted line. At t = 0 the line is at 7.84 m and the first point '
+         + 'at 7.91 m. A step from the first point to the last is 1.2 s across and 7.49 m down.',
+      leads: [{from: [0, D[0]], to: [1.2, D[0]], cls: 'level'},
+              {from: [1.2, D[0]], to: [1.2, D[30]], cls: 'level'},
+              {from: [0.04, 3.7], to: [0.004, 7.5], cls: 'alt'}],
+      curves: [ends(fd)],
+      points: D.map((v, i) => ({x: T[i], y: v, r: 2.4})),
+      notes: [{x: 0, y: D[0], anchor: 'start', dx: 8, dy: -8, text: 'first frame 7.91 m'},
+              {x: 0.02, y: 3.2, anchor: 'start', cls: 'hi', text: 'a = 7.84 m, the line at t = 0'},
+              {x: 0.6, y: D[0], anchor: 'middle', dy: -8, text: '1.2 s across'},
+              {x: 1.2, y: 4.2, anchor: 'end', dx: -8, text: '7.49 m down'},
+              {x: 0.62, y: 6.4, anchor: 'middle', cls: 'hi', text: 'b = −6.22 m/s'}]
+    });
+  });
+
+  /* the wrong form on purpose: the same straight line on the height (left),
+     and the residuals of both fits in cm on one axis (right). The pattern is
+     the distance's turned over, and about 20 times larger. */
+  each('lec13-hres', host => {
+    const [l, r] = diagramRow(host, 2);
+    diagram(l, {
+      w: 300, h: 210, xRange: [-0.05, 1.25], yRange: [2.95, 5.45],
+      title: 'height (m), with the best straight line',
+      alt: 'The heights rise and fall in an arc. A nearly flat line runs through them, with red '
+         + 'sticks from each point to the line.',
+      leads: Z.map((v, i) => ({from: [T[i], v], to: [T[i], fz.a + fz.b * T[i]], cls: 'alt'})),
       curves: [ends(fz)],
       points: dots(Z),
-      notes: [{x: 0.02, y: fz.a + 0.02 * fz.b, anchor: 'start', dx: 6, dy: -14,
-               text: 'a = ' + fz.a.toFixed(2) + ' m'},
-              {x: 0.05, y: 3.12, anchor: 'start', dx: 4, cls: 'hi',
-               text: 'misses by ' + (fz.a - Z[0]).toFixed(2) + ' m'},
-              {x: 0.62, y: 4.25, anchor: 'middle', text: 'b = ' + fz.b.toFixed(2) + ' m/s'},
-              {x: 1.2, y: 3.08, anchor: 'end', text: '1.2 s'}]
+      notes: [{x: 0.05, y: 3.1, anchor: 'start', dx: 4, cls: 'hi', text: 'misses by 1.14 m'}]
+    });
+    const cm = (y, f) => y.map((v, i) => (v - f.a - f.b * T[i]) * 100);
+    const hd = cm(D, fd), hz = cm(Z, fz);
+    diagram(r, {
+      w: 300, h: 210, xRange: [-0.05, 1.25], yRange: [-125, 80], zero: true,
+      title: 'residuals of both fits (cm)',
+      alt: 'The height residuals run from minus 114 cm at both ends up to 63 cm in the middle. '
+         + 'The distance residuals, on the same axis, stay within 7 cm of zero.',
+      points: [...hz.map((v, i) => ({x: T[i], y: v, r: 2.6, cls: 'miss'})),
+               ...hd.map((v, i) => ({x: T[i], y: v, r: 2.4}))],
+      notes: [{x: 0.62, y: -85, anchor: 'middle', cls: 'hi', text: 'height, RMS 55 cm'},
+              {x: 0.62, y: -6, anchor: 'middle', dy: 16, text: 'distance, RMS 2.9 cm'}]
+    });
+  });
+
+  /* the line's a and b on the height held up against the ball: a against the
+     first frame, and the nearly level slope against the ball rising at about
+     6 m/s at the start and falling at about 6 m/s at the end */
+  each('lec13-hcheck', host => {
+    const v0 = 5.85, v1 = 5.85 - 9.60 * 1.2;
+    diagram(host, {
+      w: 440, h: 210, xRange: [-0.12, 1.3], yRange: [2.95, 5.45],
+      title: 'height above the floor (m), against time (s)',
+      alt: 'The heights and the nearly flat fitted line. At t = 0 the line is at 4.41 m while the '
+         + 'first point is at 3.27 m. Short red segments show the ball rising steeply at the start '
+         + 'and falling steeply at the end.',
+      curves: [ends(fz),
+               {x: [0, 0.14], y: [Z[0], Z[0] + v0 * 0.14], cls: 'alt'},
+               {x: [1.06, 1.2], y: [Z[30] - v1 * 0.14, Z[30]], cls: 'alt'}],
+      points: dots(Z),
+      notes: [{x: 0.02, y: fz.a, anchor: 'start', dy: -10, cls: 'hi', text: 'a = 4.41 m'},
+              {x: 0, y: Z[0], anchor: 'start', dx: 10, dy: 5, text: 'first frame 3.27 m'},
+              {x: -0.08, y: 5.3, anchor: 'start', cls: 'hi', text: 'red: rising about 6 m/s'},
+              {x: 1.28, y: 5.3, anchor: 'end', cls: 'hi', text: 'red: falling about 6 m/s'},
+              {x: 0.62, y: fz.a + fz.b * 0.62, anchor: 'middle', dy: 18, cls: 'hi', text: 'b = 0.05 m/s, nearly level'}]
+    });
+  });
+
+  /* both straight-line fits side by side, each titled with its RMS residual */
+  each('lec13-pair', host => {
+    const [l, r] = diagramRow(host, 2);
+    diagram(l, {
+      w: 300, h: 200, xRange: [-0.05, 1.25], yRange: [-0.6, 8.6],
+      title: 'distance (m), RMS residual 2.9 cm',
+      alt: 'The distances with their fitted line, every point on it.',
+      curves: [ends(fd)], points: dots(D)
+    });
+    diagram(r, {
+      w: 300, h: 200, xRange: [-0.05, 1.25], yRange: [2.95, 5.45],
+      title: 'height (m), RMS residual 55 cm',
+      alt: 'The heights in an arc with a nearly flat line through them.',
+      curves: [ends(fz)], points: dots(Z)
+    });
+  });
+
+  /* from heights to velocities: one central difference drawn on the arc
+     (frames 3 and 5 for frame 4), and the 29 velocities it gives */
+  each('lec13-diff', host => {
+    const [l, r] = diagramRow(host, 2), k = 4;
+    const vk = (Z[k + 1] - Z[k - 1]) / (2 * 0.04);
+    diagram(l, {
+      w: 300, h: 210, xRange: [-0.05, 1.25], yRange: [2.95, 5.45],
+      title: 'height (m), one difference drawn',
+      alt: 'The heights in an arc. A red segment joins frames 3 and 5, either side of frame 4.',
+      curves: [{x: [T[k - 1], T[k + 1]], y: [Z[k - 1], Z[k + 1]], cls: 'alt'}],
+      points: [...dots(Z), {x: T[k - 1], y: Z[k - 1], r: 5, cls: 'miss'}, {x: T[k + 1], y: Z[k + 1], r: 5, cls: 'miss'}],
+      notes: [{x: T[k + 1], y: Z[k + 1], anchor: 'start', dx: 10, dy: 10, cls: 'hi',
+               text: 'up ' + (Z[k + 1] - Z[k - 1]).toFixed(2) + ' m in 0.08 s'}]
+    });
+    diagram(r, {
+      w: 300, h: 210, xRange: [-0.05, 1.25], yRange: [-7, 7], zero: true,
+      title: 'vertical velocity (m/s), 29 frames',
+      alt: 'Twenty-nine velocities falling from about 6 m/s to about minus 6 m/s, scattered.',
+      points: [...VEL_T.map((t, i) => ({x: t, y: VEL_V[i], r: 2.6})), {x: T[k], y: vk, r: 5, cls: 'miss'}],
+      notes: [{x: T[k], y: vk, anchor: 'start', dx: 10, cls: 'hi', text: 'frame 4, ' + vk.toFixed(1) + ' m/s'}]
     });
   });
 
@@ -1685,7 +1823,7 @@ setTimeout(() => {
    36, the ball meets the rim near frame 41 and bounces. */
 (async () => {
   const hosts = document.querySelectorAll('[data-fig="lec13-whole"] .fig-body');
-  if (!hosts.length) return;
+  if (!hosts.length && !document.querySelector('[data-fig="lec13-rule"]')) return;
   let d;
   try { d = await (await fetch('data/example/train.json')).json(); }
   catch (e) { return; }
@@ -1712,6 +1850,34 @@ setTimeout(() => {
             {x: 56, y: 4.3, anchor: 'middle', text: 'off the rim'},
             {x: 41, y: 1.4, anchor: 'middle', text: 'the ball meets the rim'}]
   }));
+
+  /* the release rule, drawn: start at the top of the flight (frame 27) and
+     step back while either of the two earlier velocities is higher. At frame
+     23 the one before is lower (1.38 against 1.50), which would stop a rule
+     that looked one frame back; two back is 2.21, so this rule goes on to 11. */
+  document.querySelectorAll('[data-fig="lec13-rule"] .fig-body').forEach(host => {
+    let top = 0;
+    for (let i = 1; i < n; i++) if (z[i] > z[top]) top = i;
+    const idx = [];
+    for (let i = 2; i <= top + 1; i++) idx.push(i);
+    diagram(host, {
+      w: 660, h: 250, xRange: [1, top + 2], yRange: [-1.2, 7.4], zero: true,
+      title: 'vertical velocity (m/s) by frame, shot 1092, up to the top of the flight',
+      alt: 'Vertical velocity by frame. From the top of the flight at frame ' + top + ' it rises, going back, '
+         + 'to a peak of 5.81 m/s at frame ' + r + '. Frames 22 and 23 are ringed where the velocity '
+         + 'ticks up by one frame.',
+      leads: [{from: [r, -1.2], to: [r, 7.4], cls: 'level'},
+              {from: [top, -1.2], to: [top, 7.4], cls: 'level'},
+              {from: [23.2, 3.5], to: [22.8, 1.9], cls: 'alt'}],
+      points: [...idx.map(i => ({x: i, y: vz[i], r: 3})),
+               {x: 22, y: vz[22], r: 6, cls: 'miss'}, {x: 23, y: vz[23], r: 6, cls: 'miss'}],
+      notes: [{x: top, y: 6.9, anchor: 'end', dx: -6, text: 'start here, the top, frame ' + top},
+              {x: r, y: 6.9, anchor: 'start', dx: 6, cls: 'hi', text: 'stops here, frame ' + r},
+              {x: 25, y: 4.6, anchor: 'middle', cls: 'hi', text: 'frame 22 lower than 23'},
+              {x: 25, y: 3.9, anchor: 'middle', text: 'frame 21 higher, so keep going'},
+              {x: 6, y: 1.8, anchor: 'middle', text: 'in the hand'}]
+    });
+  });
 })();
 
 /* Slide runtime. Every slide is in the DOM from the start, so the figure code

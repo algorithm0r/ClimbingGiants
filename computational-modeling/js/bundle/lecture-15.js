@@ -1254,95 +1254,64 @@ setTimeout(() => {
   });
 }, 0);
 
-/* Lecture 15's own figures.
-   lec15-shot: the shot from lecture 13 (example pack, shot 700, frames 8-38,
-   25 Hz), its heights z and the same heights with the known gravity term moved
-   to the data side, z + g t^2 / 2, which is a straight line. Checked:
-     all three free   c0 3.298  c1 5.815  c2 -4.806 (g 9.61)  RMS 3.02 cm
-     g held at 9.81   c0 3.275  c1 5.934                      RMS 3.23 cm
-   lec15-band: the page's eight points from y = 5 e^(-0.4x) with fixed noise of
-   +-0.05, on ln y. The same +-0.05 is a band 0.020 wide at x = 0 and 0.332
-   wide at x = 7. Fits (from the page's demo): direct k 0.4029, on ln y 0.4110.
+/* Lecture 15's own figures, on the shot from lecture 13 (example pack, shot
+   700, frames 8-38, 25 Hz): its heights z and the parabola
+   z = c0 + c1 t + c2 t^2 fitted by least squares. Checked:
+     c0 3.298 m  c1 5.815 m/s  c2 -4.806 m/s^2  g = -2 c2 = 9.61  RMS 3.02 cm
+   lec15-sum draws the three columns of A, each scaled by its fitted
+   parameter, on one scale, and their sum through the heights.
    Hosts are found by data-fig. */
 (() => {
   const Z = [3.2687, 3.5030, 3.7425, 3.9280, 4.1173, 4.2554, 4.4051, 4.5764, 4.6591, 4.7882,
              4.9001, 4.9535, 4.9812, 5.0164, 5.0502, 5.0666, 5.0734, 5.0374, 4.9993, 4.9507,
              4.8083, 4.7967, 4.6564, 4.5164, 4.4659, 4.2496, 4.1735, 4.0146, 3.7636, 3.5551,
              3.4273];
-  const T = Z.map((_, i) => i * 0.04), G = 9.81;
-  const W = Z.map((z, i) => z + 0.5 * G * T[i] * T[i]);
-  const line = (t, y) => {
-    const n = t.length;
-    let st = 0, sy = 0, stt = 0, sty = 0;
-    for (let i = 0; i < n; i++) { st += t[i]; sy += y[i]; stt += t[i] * t[i]; sty += t[i] * y[i]; }
-    const b = (n * sty - st * sy) / (n * stt - st * st);
-    return {a: (sy - b * st) / n, b};
-  };
+  const T = Z.map((_, i) => i * 0.04), n = Z.length;
+  /* least squares for c0 + c1 t + c2 t^2, by the 3 x 3 normal equations */
+  const S = k => T.reduce((s, t) => s + t ** k, 0), Sz = k => T.reduce((s, t, i) => s + t ** k * Z[i], 0);
+  const M = [[S(0), S(1), S(2), Sz(0)], [S(1), S(2), S(3), Sz(1)], [S(2), S(3), S(4), Sz(2)]];
+  for (let k = 0; k < 3; k++) for (let i = 0; i < 3; i++) if (i !== k) {
+    const f = M[i][k] / M[k][k];
+    for (let j = k; j < 4; j++) M[i][j] -= f * M[k][j];
+  }
+  const [c0, c1, c2] = M.map((r, i) => r[3] / r[i]);
+  const TT = linspace(-0.02, 1.22, 80), par = t => c0 + c1 * t + c2 * t * t;
+  const dots = Z.map((z, i) => ({x: T[i], y: z, r: 2.6}));
+  const XR = [-0.05, 1.25];
 
-  document.querySelectorAll('[data-fig="lec15-shot"] .fig-body').forEach(host => {
-    const [l, r] = diagramRow(host, 2), h = line(T, W), XR = [-0.05, 1.25];
-    diagram(l, {
-      w: 300, h: 210, xRange: XR, yRange: [2.9, 5.4],
-      title: 'z, the height (m)',
-      alt: 'The heights of the shot, rising and falling in an arc.',
-      points: Z.map((z, i) => ({x: T[i], y: z, r: 2.8})),
-      notes: [{x: 0.62, y: 3.15, anchor: 'middle', text: 'an arc'}]
-    });
-    diagram(r, {
-      w: 300, h: 210, xRange: XR, yRange: [2.6, 11.2],
-      title: 'z + ½gt² (m), with g = 9.81',
-      alt: 'The same heights with half g t squared added: the points now rise along a straight line.',
-      curves: [{x: XR, y: XR.map(t => h.a + h.b * t)}],
-      points: W.map((w, i) => ({x: T[i], y: w, r: 2.8})),
-      notes: [{x: 0.02, y: 10.4, anchor: 'start', dx: 4, text: 'c₀ = ' + h.a.toFixed(2) + ' m'},
-              {x: 0.02, y: 9.4, anchor: 'start', dx: 4, cls: 'hi', text: 'c₁ = ' + h.b.toFixed(2) + ' m/s'},
-              {x: 1.2, y: 3.0, anchor: 'end', text: 'a straight line'}]
-    });
-  });
-
-  /* the same +-0.05 noise, drawn as a band on ln y: thin at the start, wide at the end */
-  document.querySelectorAll('[data-fig="lec15-band"] .fig-body').forEach(host => {
-    const XS = linspace(0, 7, 120), tru = x => A_TRUE * Math.exp(-K_TRUE * x);
-    const up = [...XS].map(x => ({x, y: Math.log(tru(x) + 0.05)}));
-    const dn = [...XS].reverse().map(x => ({x, y: Math.log(tru(x) - 0.05)}));
+  /* the three columns, each times its parameter, on one scale, and their sum
+     (solid) through the heights */
+  document.querySelectorAll('[data-fig="lec15-sum"] .fig-body').forEach(host => {
+    const y = f => [...TT].map(f);
     diagram(host, {
-      w: 440, h: 230, xRange: [-0.3, 7.6], yRange: [-1.65, 1.9],
-      title: 'ln y against x, with the ±0.05 noise drawn as a band',
-      alt: 'On ln y the true curve is a straight line. The band for noise of plus or minus 0.05 '
-         + 'is a thin strip at x = 0 and widens to about 0.33 at x = 7.',
-      areas: [{pts: [...up, ...dn], cls: 'fill'}],
-      curves: [{x: XS, y: XS.map(x => Math.log(tru(x))), cls: 'ghost'},
-               {x: XS, y: XS.map(x => Math.log(LF.a) - LF.k * x), cls: 'alt'},
-               {x: XS, y: XS.map(x => Math.log(DF.a) - DF.k * x)}],
-      points: [...XD].map((x, i) => ({x, y: Math.log(YD[i]), r: 3.4})),
-      notes: [{x: 0, y: Math.log(5), anchor: 'start', dx: 10, dy: -10, text: 'band 0.02 wide'},
-              {x: 7, y: Math.log(tru(7) - 0.05), anchor: 'end', dx: -8, dy: 14, text: 'band 0.33 wide'},
-              {x: 3.6, y: 1.55, anchor: 'start', cls: 'hi', text: 'fit on ln y: k = ' + LF.k.toFixed(4)},
-              {x: 3.6, y: 1.2, anchor: 'start', text: 'direct fit: k = ' + DF.k.toFixed(4)}]
+      w: 440, h: 185, xRange: [-0.05, 1.6], yRange: [-7.6, 8.2], zero: true,
+      title: 'each column times its parameter (m), against time (s)',
+      alt: 'A flat line at 3.3, a rising line to about 7, a falling curve to about minus 7, and '
+         + 'their sum, a gentle arc between 3.3 and 5.1 through the 31 heights.',
+      curves: [{x: TT, y: y(() => c0), cls: 'ghost'}, {x: TT, y: y(t => c1 * t), cls: 'ghost'},
+               {x: TT, y: y(t => c2 * t * t), cls: 'alt'}, {x: TT, y: y(par)}],
+      points: dots,
+      notes: [{x: 1.24, y: c0, anchor: 'start', dx: 4, dy: 12, text: c0.toFixed(2) + ' × 1'},
+              {x: 1.24, y: c1 * 1.22, anchor: 'start', dx: 4, text: c1.toFixed(2) + ' × t'},
+              {x: 1.24, y: c2 * 1.22 * 1.22, anchor: 'start', dx: 4, cls: 'hi', text: '−' + Math.abs(c2).toFixed(2) + ' × t²'},
+              {x: 1.24, y: par(1.22), anchor: 'start', dx: 4, dy: -8, text: 'the sum'}]
     });
   });
-})();
 
-/* the same eight points on y itself, where the +-0.05 noise is a band of
-   constant width around the true curve. Shown before the ln y version, where
-   the band widens toward the small values. */
-(() => {
-  const hosts = document.querySelectorAll('[data-fig="lec15-yband"] .fig-body');
-  if (!hosts.length) return;
-  const XS = linspace(0, 7, 120), tru = x => A_TRUE * Math.exp(-K_TRUE * x);
-  const up = [...XS].map(x => ({x, y: tru(x) + 0.05})), dn = [...XS].reverse().map(x => ({x, y: tru(x) - 0.05}));
-  hosts.forEach(host => diagram(host, {
-    w: 440, h: 230, xRange: [-0.3, 7.6], yRange: [-0.3, 5.5],
-    title: 'y against x, with the ±0.05 noise drawn as a band',
-    alt: 'Eight points falling along a decaying curve from 5 to about 0.3, inside a thin band of '
-       + 'constant width 0.1.',
-    areas: [{pts: [...up, ...dn], cls: 'fill'}],
-    curves: [{x: XS, y: [...XS].map(tru), cls: 'ghost'}],
-    points: [...XD].map((x, i) => ({x, y: YD[i], r: 3.4})),
-    notes: [{x: 2.4, y: 4.4, anchor: 'start', text: 'true curve y = 5e^(−0.4x), dashed'},
-            {x: 7, y: tru(7), anchor: 'end', dx: -8, dy: -12, text: 'y ≈ 0.3 here'},
-            {x: 0, y: 0, anchor: 'start', dx: 4, dy: -4, text: '0'}]
-  }));
+  /* the fitted parabola through the heights */
+  document.querySelectorAll('[data-fig="lec15-par"] .fig-body').forEach(host => {
+    const r = Z.map((z, i) => z - par(T[i]));
+    const rms = Math.sqrt(r.reduce((s, v) => s + v * v, 0) / n);
+    diagram(host, {
+      w: 440, h: 210, xRange: XR, yRange: [2.95, 5.45],
+      title: 'height (m) against time (s), with the fitted parabola',
+      alt: 'The 31 heights in an arc with a parabola fitted through them, every point on it.',
+      curves: [{x: TT, y: [...TT].map(par)}],
+      points: dots,
+      notes: [{x: 0.62, y: 3.2, anchor: 'middle', text: 'RMS residual ' + (100 * rms).toFixed(2) + ' cm'},
+              {x: 0.05, y: 5.25, anchor: 'start', cls: 'hi', text: 'c₂ = ' + c2.toFixed(3) + ' m/s², so g = ' + (-2 * c2).toFixed(2) + ' m/s²'}]
+    });
+  });
 })();
 
 /* Slide runtime. Every slide is in the DOM from the start, so the figure code

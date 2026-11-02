@@ -1409,7 +1409,7 @@ setTimeout(() => {
       const Y = v => L(Math.max(v, 0.3));
       diagram(host, {
         w: 440, h: 240, xRange: [0, 5.4], yRange: [L(0.3), L(900)],
-        title: 'error at the hoop (cm, log scale) against RMS residual of the fit (cm)',
+        title: 'one dot per shot, ten frames fitted',
         alt: '140 dots, one per shot, scattered with no trend: residuals from 0.5 to 4.9 cm, '
            + 'errors from under 1 cm to over 2.5 m.',
         points: [...rs.map(r => ({x: r.rms, y: Y(r.err), r: 2.6})),
@@ -1421,7 +1421,11 @@ setTimeout(() => {
                 {x: loose.rms, y: Y(loose.err), anchor: 'end', dx: -10, dy: 14, cls: 'hi',
                  text: 'loosest: ' + loose.rms.toFixed(2) + ' cm, ' + loose.err.toFixed(0) + ' cm out'},
                 {x: 0.1, y: L(1), anchor: 'start', text: '1 cm'},
-                {x: 0.1, y: L(100), anchor: 'start', text: '1 m'}]
+                {x: 0.1, y: L(10), anchor: 'start', text: '10 cm'},
+                {x: 0.1, y: L(100), anchor: 'start', text: '1 m'},
+                ...[1, 2, 3, 4, 5].map(k => ({x: k, y: L(0.3), dy: 13, anchor: 'middle', text: String(k)})),
+                {x: 5.35, y: L(0.45), anchor: 'end', text: 'RMS residual (cm) →'},
+                {x: 0.1, y: L(900), anchor: 'start', dy: 14, text: '↑ error at the rim (cm, log scale)'}]
       });
     });
 
@@ -1430,12 +1434,32 @@ setTimeout(() => {
       const ms = [6, 8, 10, 12, 14, 16, 18, 20];
       const rows = ms.map(m => { const rs = set.map(a => one(a, m)).filter(Boolean);
         return {m, res: med(rs.map(r => r.rms)), err: med(rs.map(r => r.err))}; });
-      const [l, r] = diagramRow(host, 2);
+      const [f, l, r] = diagramRow(host, 3);
+      /* the typical shot from the first figure, fitted with 6, 10 and 20 frames,
+         each parabola carried on down to the rim */
+      const rs = set.map(a => ({a, r: one(a, 10)})).filter(o => o.r).sort((p, q) => p.r.err - q.r.err);
+      const a = rs[rs.length >> 1].a, t0 = a.t[0];
+      const fit = m => { const [c, b, q] = polyfit(a.t.slice(0, m), a.z.slice(0, m), 2);
+        const disc = b * b - 4 * q * (c - RIM);
+        const tc = Math.max((-b + Math.sqrt(disc)) / (2 * q), (-b - Math.sqrt(disc)) / (2 * q));
+        const ts = linspace(t0, tc, 80); return {tc, x: ts, y: [...ts].map(t => c + b * t + q * t * t)}; };
+      const F = [[6, 'alt'], [10, 'ghost'], [20, 'trace']].map(([m, cls]) => ({m, cls, ...fit(m)}));
+      const tEnd = Math.max(...F.map(o => o.tc), a.t[a.t.length - 1]) + 0.04;
+      diagram(f, {
+        w: 300, h: 200, xRange: [t0 - 0.03, tEnd], yRange: [1.6, 6.4],
+        title: 'one shot, height (m) against time (s)',
+        alt: 'One shot fitted with its first 6, 10 and 20 frames, each parabola carried down to the rim.',
+        leads: [{from: [t0 - 0.03, RIM], to: [tEnd, RIM], cls: 'level'}],
+        curves: F.map(o => ({x: o.x, y: o.y, cls: o.cls})),
+        points: a.t.map((t, i) => ({x: t, y: a.z[i], r: 1.8})),
+        notes: F.map((o, i) => ({x: o.tc, y: RIM, anchor: 'middle', dy: 13 + 11 * (i % 2),
+                                 cls: o.m === 6 ? 'hi' : '', text: o.m + ''}))
+      });
       const lab = (k, f) => rows.filter((_, i) => i % 2 === 0 || i === rows.length - 1)
         .map(o => ({x: o.m, y: o[k], anchor: 'middle', dy: -8, text: f(o[k])}));
       diagram(l, {
         w: 300, h: 200, xRange: [5, 21], yRange: [0, 2.8],
-        title: 'median residual (cm), by frames fitted',
+        title: 'median residual (cm)',
         alt: 'The median residual rises from 1.27 cm at 6 frames as more frames are fitted.',
         curves: [{x: ms, y: rows.map(o => o.res)}],
         points: rows.map(o => ({x: o.m, y: o.res, r: 3})),
@@ -1444,12 +1468,87 @@ setTimeout(() => {
       });
       diagram(r, {
         w: 300, h: 200, xRange: [5, 21], yRange: [0, 135],
-        title: 'median error at the rim (cm), by frames fitted',
+        title: 'median error at the rim (cm)',
         alt: 'The median error falls from 113 cm at 6 frames as more frames are fitted.',
         curves: [{x: ms, y: rows.map(o => o.err), cls: 'alt'}],
         points: rows.map(o => ({x: o.m, y: o.err, r: 3, cls: 'miss'})),
         notes: [...lab('err', v => v.toFixed(0)),
                 ...ms.map(m => ({x: m, y: 0, dy: 13, anchor: 'middle', text: String(m)}))]
+      });
+    });
+  });
+})();
+
+/* Kept shots and held-back shots, on the example pack. The 23 kept shots
+   (train.json, shot 325 left out, its tracking runs in straight steps) each
+   fit g to the whole free flight; the model is a parabola with g held at their
+   median. The 12 held-back shots (test_short.json) fit only release height and
+   speed to their frames of flight, and are scored on the next 8 frames, which
+   test_long.json holds. Checked against numpy: g 9.633; unseen median 4.1 cm
+   with g held, 5.9 fitting g; held better on 7 of 12; worst 8.8 against 50.4. */
+(() => {
+  if (!document.querySelector('[data-fig="lec18-kept"]')) return;
+  const get = f => fetch('data/example/' + f + '.json').then(r => r.json());
+  Promise.all(['train', 'test_short', 'test_long'].map(get)).then(([tr, ts, tl]) => {
+    const med = arr => { const v = [...arr].sort((p, q) => p - q), k = v.length >> 1;
+      return v.length % 2 ? v[k] : (v[k - 1] + v[k]) / 2; };
+    const release = (t, z) => {
+      const n = t.length, vz = new Array(n).fill(NaN);
+      for (let i = 2; i < n - 2; i++) vz[i] = (z[i + 2] - z[i - 2]) / (t[i + 2] - t[i - 2]);
+      let i = 0;
+      for (let k = 1; k < n; k++) if (z[k] > z[i]) i = k;
+      i = Math.min(i, n - 3);
+      while (i > 3 && (vz[i - 1] > vz[i] || vz[i - 2] > vz[i])) i--;
+      return i;
+    };
+    const free = (t, z) => polyfit(t, z, 2);
+    const held = (t, z, g) => { const c = polyfit(t, z.map((v, i) => v + g / 2 * t[i] * t[i]), 1);
+      return [c[0], c[1], -g / 2]; };
+    const rms = (c, t, z) => 100 * Math.sqrt(t.reduce((s, v, i) =>
+      s + (c[0] + c[1] * v + c[2] * v * v - z[i]) ** 2, 0) / t.length);
+
+    const gs = [];
+    for (const s of tr.shots) {
+      if (s.id === 325) continue;
+      let end = 0;
+      while (Math.hypot(s.x[end] - s.hoop_x, s.y[end] - s.hoop_y) >= 1.0) end++;
+      const r = release(s.t, s.z);
+      gs.push(-2 * free(s.t.slice(r, end), s.z.slice(r, end))[2]);
+    }
+    const G = med(gs);
+    const long = Object.fromEntries(tl.shots.map(s => [s.id, s]));
+    const pts = ts.shots.map(s => {
+      const r = release(s.t, s.z), n = s.t.length, l = long[s.id];
+      const tf = l.t.slice(r, n), zf = l.z.slice(r, n), tp = l.t.slice(n), zp = l.z.slice(n);
+      return {held: rms(held(tf, zf, G), tp, zp), free: rms(free(tf, zf), tp, zp)};
+    });
+
+    document.querySelectorAll('[data-fig="lec18-kept"] .fig-body').forEach(host => {
+      host.dataset.g = G.toFixed(3);
+      const [l, r] = diagramRow(host, 2);
+      const sorted = [...gs].sort((p, q) => p - q);
+      diagram(l, {
+        w: 300, h: 220, xRange: [8.7, 10.7], yRange: [-1.5, 24],
+        title: 'kept: g fitted to each of 23 shots (m/s²)',
+        alt: 'Twenty-three fitted values of g, sorted, from 8.9 to 10.4, with their median 9.63 marked.',
+        leads: [{from: [G, -1.5], to: [G, 24], cls: 'level'}],
+        points: sorted.map((g, i) => ({x: g, y: i, r: 3})),
+        notes: [{x: G, y: 22.5, anchor: 'end', dx: -6, cls: 'hi', text: 'median ' + G.toFixed(2)},
+                ...[9, 9.5, 10, 10.5].map(k => ({x: k, y: -1.5, dy: 13, anchor: 'middle', text: String(k)}))]
+      });
+      const Lg = v => Math.log10(v);
+      diagram(r, {
+        w: 300, h: 220, xRange: [Lg(0.8), Lg(250)], yRange: [Lg(0.8), Lg(250)],
+        title: 'held back: error on unseen frames (cm)',
+        alt: 'Twelve held-back shots, error with g held at the kept median across, error fitting g up. '
+           + 'Most sit above the equal-error line.',
+        leads: [{from: [Lg(0.8), Lg(0.8)], to: [Lg(250), Lg(250)], cls: 'ghost'}],
+        points: pts.map(p => ({x: Lg(p.held), y: Lg(p.free), r: 3.4})),
+        notes: [{x: Lg(1), y: Lg(1), anchor: 'start', dy: -8, text: '1 cm'},
+                {x: Lg(10), y: Lg(10), anchor: 'start', dx: 6, text: '10 cm'},
+                {x: Lg(0.85), y: Lg(250), anchor: 'start', dy: 14, text: '↑ g fitted to the shot'},
+                {x: Lg(0.85), y: Lg(250), anchor: 'start', dy: 32, cls: 'hi', text: 'above the line, ' + G.toFixed(2) + ' did better'},
+                {x: Lg(240), y: Lg(0.9), anchor: 'end', text: 'g held at ' + G.toFixed(2) + ' →'}]
       });
     });
   });

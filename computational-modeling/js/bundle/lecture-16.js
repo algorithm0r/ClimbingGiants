@@ -1342,87 +1342,14 @@ setTimeout(() => {
   });
 }, 0);
 
-/* Lecture 16's own figures, computed from the notes page's demo module
-   (normalFit, which builds and solves the normal equations and reports their
-   condition number; XS/YS, the 21 calibration points; XU, x scaled to -1..1).
-   Checked against numpy (cond of A^T A) and against the browser's own demo:
-     21 points on [0,1], digits lost log10(kappa): deg 1 1.2, 2 2.6, 3 4.1,
-       5 7.0, 6 8.5, 7 10.0, 9 13.1
-     degree 5, x as 0-100 / 0-1 / -1..1: 20.3 / 7.0 / 3.2
-     raw vs scaled solve, largest gap between the curves: deg 9 1.5e-7 V,
-       deg 12 7.4 mV, deg 14 22.6 mV, deg 20 6.98 V
-   Hosts are found by data-fig; lec16-curves takes data-deg. */
+/* Lecture 16's own figures, on the shot's distance from the hoop (lecture 13;
+   example pack, shot 700, frames 8-38, 0.04 s apart). The normal equations
+   for the line give c0 = 7.84 m and c1 = -6.22 m/s; residuals sum to zero,
+   RMS 2.9 cm.
+   lec16-bowl: S against each parameter with the other held at its best value.
+   lec16-line: the fitted line through the distances, with c0 and c1 marked.
+   Hosts are found by data-fig. */
 (() => {
-  const U01 = Array.from({length: 21}, (_, i) => i / 20);
-  const bar = (i, v, cls, bw = 0.32) => ({cls,
-    pts: [{x: i - bw, y: 0}, {x: i + bw, y: 0}, {x: i + bw, y: v}, {x: i - bw, y: v}]});
-
-  /* digits lost against degree, 21 points on [0, 1] */
-  document.querySelectorAll('[data-fig="lec16-digits"] .fig-body').forEach(host => {
-    const degs = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    const lost = degs.map(d => Math.log10(normalFit(U01, U01, d).kappa));
-    diagram(host, {
-      w: 440, h: 230, xRange: [0.3, 9.7], yRange: [-1.6, 17.5],
-      title: 'digits lost, log₁₀ of the condition number, by polynomial degree',
-      alt: 'Bars rising with degree: 1.2 digits lost at degree 1, 7.0 at degree 5, 13.1 at degree 9, '
-         + 'against a line at the 16 digits a double carries.',
-      leads: [{from: [0.3, 16], to: [9.7, 16], cls: 'level'}],
-      areas: lost.map((v, i) => bar(degs[i], v, degs[i] >= 7 ? 'neg' : 'fill')),
-      notes: [...degs.map((d, i) => ({x: d, y: lost[i], anchor: 'middle', dy: -5, text: lost[i].toFixed(1)})),
-              ...degs.map(d => ({x: d, y: -1.6, anchor: 'middle', dy: -2, text: String(d)})),
-              {x: 0.5, y: 16, anchor: 'start', dy: -5, text: 'all 16 digits of a double'}]
-    });
-  });
-
-  /* the same degree-5 fit with x written three ways */
-  document.querySelectorAll('[data-fig="lec16-units"] .fig-body').forEach(host => {
-    const ways = [['0 to 100', U01.map(u => 100 * u)], ['0 to 1', U01], ['−1 to 1', U01.map(u => 2 * u - 1)]];
-    const lost = ways.map(([, xs]) => Math.log10(normalFit(xs, xs, 5).kappa));
-    diagram(host, {
-      w: 440, h: 220, xRange: [-0.6, 2.6], yRange: [-2.2, 23],
-      title: 'digits lost, degree 5, 21 points, by how x is written',
-      alt: 'Three bars: 20.3 digits lost with x from 0 to 100, 7.0 with x from 0 to 1, '
-         + '3.2 with x from -1 to 1. A line marks the 16 digits a double carries.',
-      leads: [{from: [-0.6, 16], to: [2.6, 16], cls: 'level'}],
-      areas: lost.map((v, i) => bar(i, v, i === 0 ? 'neg' : 'fill', 0.28)),
-      notes: [...lost.map((v, i) => ({x: i, y: v, anchor: 'middle', dy: -5,
-                text: v > 16 ? v.toFixed(1) + ', more than all 16' : v.toFixed(1)})),
-              ...ways.map(([nm], i) => ({x: i, y: -2.2, anchor: 'middle', dy: -2, text: 'x from ' + nm})),
-              {x: 2.55, y: 16, anchor: 'end', dy: -5, text: '16 digits'}]
-    });
-  });
-
-  /* the calibration points with the raw-x and scaled-x solves at one degree */
-  const evalP = (c, u) => { let v = 0; for (let k = c.length - 1; k >= 0; k--) v = v * u + c[k]; return v; };
-  document.querySelectorAll('[data-fig="lec16-curves"]').forEach(fig => {
-    const deg = +fig.dataset.deg, host = fig.querySelector('.fig-body');
-    const raw = normalFit(XS, YS, deg), uni = normalFit(XU, YS, deg);
-    const TP = linspace(XLO, XHI, 400), LO = 1.0, HI = 3.4;
-    const rawY = [...TP].map(x => evalP(raw.c, x)), uniY = [...TP].map(x => evalP(uni.c, (x - MID) / HALF));
-    let gap = 0;
-    for (let i = 0; i < TP.length; i++) gap = Math.max(gap, Math.abs(rawY[i] - uniY[i]));
-    const clip = y => Math.max(LO, Math.min(HI, y));
-    const fmt = g => g >= 1 ? g.toFixed(2) + ' V' : g >= 1e-3 ? (1000 * g).toFixed(1) + ' mV'
-                   : (1e6 * g).toFixed(2) + ' µV';
-    diagram(host, {
-      w: 440, h: 230, xRange: [-3, 103], yRange: [LO, HI],
-      title: 'degree ' + deg + ': raw x (red) and scaled x (green), largest gap ' + fmt(gap),
-      alt: 'The 21 calibration points with two fitted curves of degree ' + deg + ', one solved on the '
-         + 'raw temperatures and one on scaled temperatures. The largest gap between them is ' + fmt(gap) + '.',
-      curves: [{x: TP, y: rawY.map(clip), cls: 'alt'}, {x: TP, y: uniY.map(clip)}],
-      points: XS.map((x, i) => ({x, y: YS[i], r: 3})),
-      notes: [{x: 100, y: 1.1, anchor: 'end', text: 'temperature 0 to 100 °C'}]
-    });
-  });
-})();
-
-/* S, the sum of squared residuals for the shot's distance line, against each
-   parameter with the other held at its best value: two U-shapes whose lowest
-   points are the fitted c0 = 7.84 and c1 = -6.22. The distances are the shot
-   from lecture 13 (example pack, shot 700, frames 8-38, 0.04 s apart). */
-(() => {
-  const hosts = document.querySelectorAll('[data-fig="lec16-bowl"] .fig-body');
-  if (!hosts.length) return;
   const D = [7.9054, 7.6249, 7.3730, 7.1166, 6.8507, 6.5963, 6.3330, 6.1048, 5.8236, 5.5750,
              5.3412, 5.0792, 4.8344, 4.5811, 4.3325, 4.0536, 3.8338, 3.5966, 3.3265, 3.0730,
              2.8377, 2.5786, 2.3472, 2.0915, 1.8832, 1.6246, 1.3825, 1.1429, 0.9050, 0.6659,
@@ -1432,7 +1359,8 @@ setTimeout(() => {
   for (let i = 0; i < n; i++) { st += T[i]; sy += D[i]; stt += T[i] * T[i]; sty += T[i] * D[i]; }
   const c1 = (n * sty - st * sy) / (n * stt - st * st), c0 = (sy - c1 * st) / n;
   const S = (a, b) => D.reduce((s, v, i) => s + (v - a - b * T[i]) ** 2, 0);
-  hosts.forEach(host => {
+
+  document.querySelectorAll('[data-fig="lec16-bowl"] .fig-body').forEach(host => {
     const [l, r] = diagramRow(host, 2);
     const A = linspace(c0 - 1, c0 + 1, 120), B = linspace(c1 - 1.6, c1 + 1.6, 120);
     const SA = [...A].map(a => S(a, c1)), SB = [...B].map(b => S(c0, b));
@@ -1451,6 +1379,31 @@ setTimeout(() => {
       leads: [{from: [c1 - 0.55, S(c0, c1)], to: [c1 + 0.55, S(c0, c1)], cls: 'alt', over: true}],
       points: [{x: c1, y: S(c0, c1), r: 3.6}],
       notes: [{x: c1, y: top * 0.3, anchor: 'middle', cls: 'hi', text: 'lowest at c₁ = ' + c1.toFixed(2)}]});
+  });
+
+  /* the distances alone, as a reminder before the line is solved for */
+  document.querySelectorAll('[data-fig="lec16-data"] .fig-body').forEach(host => {
+    diagram(host, {
+      w: 440, h: 220, xRange: [-0.05, 1.3], yRange: [-0.3, 8.8],
+      title: 'distance from the hoop (m) against time (s)',
+      alt: 'The 31 distances falling steadily from 7.9 to 0.4 m over 1.2 s.',
+      points: D.map((d, i) => ({x: T[i], y: d, r: 2.6}))
+    });
+  });
+
+  /* the solved line through the distances */
+  document.querySelectorAll('[data-fig="lec16-line"] .fig-body').forEach(host => {
+    const TT = linspace(-0.02, 1.24, 2);
+    diagram(host, {
+      w: 440, h: 220, xRange: [-0.05, 1.3], yRange: [-0.3, 8.8],
+      title: 'distance from the hoop (m) against time (s), with the solved line',
+      alt: 'The 31 distances falling steadily from 7.9 to 0.4 m, with the line 7.84 − 6.22 t through them.',
+      curves: [{x: TT, y: [...TT].map(t => c0 + c1 * t)}],
+      points: D.map((d, i) => ({x: T[i], y: d, r: 2.6})),
+      notes: [{x: 0.03, y: 4.3, anchor: 'start', cls: 'hi', text: 'c₀ = ' + c0.toFixed(2) + ' m at t = 0'},
+              {x: 0.62, y: c0 + c1 * 0.62, anchor: 'start', dx: 12, dy: -6, cls: 'hi',
+               text: 'slope c₁ = ' + c1.toFixed(2) + ' m/s'}]
+    });
   });
 })();
 
