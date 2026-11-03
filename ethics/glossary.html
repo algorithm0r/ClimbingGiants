@@ -441,6 +441,23 @@
     /* On a touch screen a tap follows the link to the full entry. */
     @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
 
+    /* ── Optional sources on the week pages, closed until opened ── */
+    details.extra-content {
+      margin: 1.75rem 0 1rem;
+      border: 1px solid #e0dcd4;
+      border-radius: 4px;
+      padding: 0 1rem;
+    }
+    details.extra-content > summary {
+      cursor: pointer;
+      padding: 0.6rem 0;
+      list-style-position: outside;
+      margin-left: 1rem;
+    }
+    details.extra-content > summary h3 { display: inline; margin: 0; font-size: 1.1rem; }
+    details.extra-content .extra-count { font-size: 0.88rem; color: #5A5550; margin-left: 0.4rem; }
+    details.extra-content[open] > summary { border-bottom: 1px solid #e0dcd4; margin-bottom: 0.5rem; }
+
     .gl-letters { font-size: 0.95rem; line-height: 1.9; }
     dl.gl-list { margin: 0.75rem 0 0; }
     dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
@@ -1285,6 +1302,10 @@
   </script>
 
   <script>
+    /* A printed week page carries its optional sources too. */
+    addEventListener('beforeprint', () =>
+      document.querySelectorAll('details.extra-content').forEach(d => { d.open = true; }));
+
     /* Hover text near the right edge opens leftward so it stays on screen. */
     (() => {
       const flip = e => {

@@ -441,6 +441,23 @@
     /* On a touch screen a tap follows the link to the full entry. */
     @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
 
+    /* ── Optional sources on the week pages, closed until opened ── */
+    details.extra-content {
+      margin: 1.75rem 0 1rem;
+      border: 1px solid #e0dcd4;
+      border-radius: 4px;
+      padding: 0 1rem;
+    }
+    details.extra-content > summary {
+      cursor: pointer;
+      padding: 0.6rem 0;
+      list-style-position: outside;
+      margin-left: 1rem;
+    }
+    details.extra-content > summary h3 { display: inline; margin: 0; font-size: 1.1rem; }
+    details.extra-content .extra-count { font-size: 0.88rem; color: #5A5550; margin-left: 0.4rem; }
+    details.extra-content[open] > summary { border-bottom: 1px solid #e0dcd4; margin-bottom: 0.5rem; }
+
     .gl-letters { font-size: 0.95rem; line-height: 1.9; }
     dl.gl-list { margin: 0.75rem 0 0; }
     dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
@@ -811,50 +828,52 @@
 <p>Joy Buolamwini, a computer scientist, discovered that <a class="gl" href="glossary.html#g-facial-recognition" data-tip="Software that identifies or verifies a person by comparing an image of their face against stored images.">facial recognition</a> systems failed on darker skin tones, particularly women with darker skin. This is likely still one of the most accessible short introductions to <a class="gl" href="glossary.html#g-algorithmic-bias" data-tip="Bias in the outputs of an algorithm. It usually comes from the training data, from proxy variables, or from choices about what the system is built to optimize.">algorithmic bias</a> in AI. While the talk predates <a class="gl" href="glossary.html#g-large-language-model" data-tip="A neural network trained on very large amounts of text to predict the next word, and usually trained further to follow instructions and hold a conversation. ChatGPT, Claude, and Gemini are built on large language models.">large language models</a>, the concepts carry over, since systems trained on <a class="gl" href="glossary.html#g-underrepresented-data" data-tip="Training data with few examples of some groups. A model trained on it tends to be less accurate for those groups.">unrepresentative data</a> tend to fail the people they should serve.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
-<li>Buolamwini describes borrowing her white roommate's face to get a robot to recognize her during an undergraduate project, and then assuming &quot;somebody else will solve this problem.&quot; Have you ever noticed a gap or limitation in a technology and moved on? What would it take for that to become your problem to fix?</li>
-<li>She calls the problem the &quot;<a class="gl" href="glossary.html#g-coded-gaze" data-tip="Joy Buolamwini's name for the assumptions and blind spots of a system's builders that become built into the system.">coded gaze</a>,&quot; the idea that whoever builds a system embeds their assumptions into it. If 117 million Americans have their faces in police facial recognition networks with no public accuracy <a class="gl" href="glossary.html#g-algorithmic-audit" data-tip="A review, often by an outside party, that tests an algorithm's outputs (and where possible the data and code behind them) for errors, bias, and harm.">audits</a>, who bears the risk when those systems are wrong? Who is not in the room when those decisions get made?</li>
-<li>Buolamwini's fix, the &quot;Incoding&quot; movement, involves diversifying who codes, how we code, and why we code. Does that feel like a sufficient response to a system that misidentifies suspects in criminal investigations? What would a more structural response look like?</li>
+<li>Buolamwini describes borrowing her white roommate's face to get a robot to recognize her during an undergraduate project, and then assuming &quot;somebody else will solve this problem.&quot; Think of a time you noticed a gap or limitation in a technology and moved on. What would it have taken for that to become your problem to fix?</li>
+<li>She calls the problem the &quot;<a class="gl" href="glossary.html#g-coded-gaze" data-tip="Joy Buolamwini's name for the assumptions and blind spots of a system's builders that become built into the system.">coded gaze</a>,&quot; the idea that whoever builds a system embeds their assumptions into it. Police facial recognition networks hold the faces of 117 million Americans, with no public accuracy <a class="gl" href="glossary.html#g-algorithmic-audit" data-tip="A review, often by an outside party, that tests an algorithm's outputs (and where possible the data and code behind them) for errors, bias, and harm.">audits</a>. Who is not in the room when decisions about those systems get made?</li>
+<li>Buolamwini's fix, the &quot;Incoding&quot; movement, involves diversifying who codes, how we code, and why we code. Does that feel like a sufficient response to a system that misidentifies suspects in criminal investigations?</li>
 </ul>
 <p><strong><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10909834/">&quot;Bias of AI-Generated Content: An Examination of News Produced by Large Language Models&quot;</a></strong> — Nature/PMC · 2024 · ~25 min read · 🟢 Free access · [<a class="gl" href="glossary.html#g-peer-review" data-tip="The checking of a research paper by other experts in the field before a journal or conference publishes it. In computing, many of the most important papers appear at peer-reviewed conferences.">Peer-reviewed</a>]</p>
-<p>A recent study showing that LLMs trained on the internet reproduce and amplify the <a class="gl" href="glossary.html#g-bias" data-tip="A consistent tilt in a person's or a system's judgments that favors some people or outcomes over others. In AI it usually means outputs that are less accurate or less favorable for a particular group.">biases</a> in their <a class="gl" href="glossary.html#g-training-data" data-tip="The collection of examples (text, images, code, and so on) a model learns its patterns from. A model's outputs reflect what is in the training data and what is missing from the training data.">training data</a>, including gender bias and racial bias. This is contemporary, peer-reviewed research on the exact systems you will be working with. Read the introduction and results. The methods section is optional.</p>
+<p>A recent peer-reviewed study of news written by large language models, the systems you will be working with. Read the introduction and results. The methods section is optional.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
-<li>The study examines how LLMs trained on internet data reproduce the gender, racial, and political biases embedded in that data. When you use a large language model for a task, how much do you think about where its training data came from? Does the source of a model's knowledge change how you trust it?</li>
-<li>This is recent, peer-reviewed research on systems in daily use. What would it mean for your field if the tools becoming standard in software development carry systematic bias? Who would be responsible for checking?</li>
+<li>The study examines how LLMs trained on internet data reproduce the gender, racial, and political <a class="gl" href="glossary.html#g-bias" data-tip="A consistent tilt in a person's or a system's judgments that favors some people or outcomes over others. In AI it usually means outputs that are less accurate or less favorable for a particular group.">biases</a> embedded in that data. When you use a large language model for a task, how much do you think about where its <a class="gl" href="glossary.html#g-training-data" data-tip="The collection of examples (text, images, code, and so on) a model learns its patterns from. A model's outputs reflect what is in the training data and what is missing from the training data.">training data</a> came from?</li>
+<li>This is recent, peer-reviewed research on systems in daily use. If the tools becoming standard in software development carry systematic bias, who should be responsible for checking?</li>
 <li>News shapes what people believe is real, so bias in AI news generation may have particular stakes. If an LLM writes a news summary and that summary is systematically skewed by training data, who is <a class="gl" href="glossary.html#g-accountability" data-tip="Being answerable for a decision or outcome. That means having to explain it, and facing consequences if it caused harm.">accountable</a>: the company that trained the model, the outlet that deployed it, or the reader who consumed it?</li>
 </ul>
 <p><strong><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11874501/">&quot;Explicitly Unbiased Large Language Models Still Form Biased Associations&quot;</a></strong> — PNAS · 2025 · ~25 min read · 🟢 Free access · [Peer-reviewed]</p>
-<p>A 2025 study on why trying to make models &quot;unbiased&quot; through technical intervention alone may not work. The authors found that even when a model is explicitly tuned to remove bias, it still forms biased associations. This suggests the problem may not have a simple engineering fix.</p>
+<p>A 2025 study of language models tuned to be unbiased, and of the biased associations those models still form. It suggests the problem may not have a simple engineering fix.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
-<li>The paper's central finding is that bias in LLMs is part of how the models represent language, so explicitly removing it still leaves it in place. Does that change how you would approach the problem as an engineer? Is &quot;we tried to remove bias&quot; a sufficient answer when the <a class="gl" href="glossary.html#g-harm" data-tip="A setback to someone's interests, such as lost money, a lost opportunity, an injury, distress, or damage to their reputation. Harm can be direct or indirect, and intended or accidental.">harm</a> persists?</li>
+<li>The paper's central finding is that bias in LLMs is part of how the models represent language, so explicitly removing it still leaves it in place. Does that change how you would approach the problem as an engineer?</li>
 <li>The researchers tested models that had been specifically trained to be unbiased and found the biased associations remained. What does it mean for accountability when a company can say they took steps to fix a problem, but the fix does not actually work?</li>
-<li>If the bias is structural, embedded in how language models represent meaning, who is responsible for it? Is it the researchers who built the architecture, the companies that trained on biased data, or the field that published the methods?</li>
+<li>If the bias is structural, embedded in how language models represent meaning, who is responsible for it: the researchers who built the architecture, the companies that trained on biased data, or the field that published the methods?</li>
 </ul>
-<h3 id="additional-content">Additional Content</h3>
+<details class="extra-content">
+<summary><h3 id="additional-content">Additional Content</h3> <span class="extra-count">3 optional sources for extra reflections</span></summary>
 <p>➕ <strong><a href="https://www.netflix.com/title/81328723">Coded Bias</a></strong> — Netflix · 2020 · ~85 min watch · 🔴 Paywalled · [Media]</p>
 <p>A feature documentary following researchers and activists fighting algorithmic bias. It is more immersive than a single article, and you will see real people affected by biased systems and the work it takes to challenge them.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
-<li>The documentary follows real people harmed by algorithmic systems, including facial recognition used in public housing and policing. When harm is caused by an <a class="gl" href="glossary.html#g-algorithm" data-tip="A set of step-by-step instructions a computer follows to turn inputs into an output, such as a score, a ranking, or a decision.">algorithm</a>, who do you hold responsible? Does <a class="gl" href="glossary.html#g-diffuse-accountability" data-tip="Accountability spread so thinly across people and organizations that each one can point to another.">diffusing accountability</a> across a system make it easier to ignore?</li>
+<li>The documentary follows real people <a class="gl" href="glossary.html#g-harm" data-tip="A setback to someone's interests, such as lost money, a lost opportunity, an injury, distress, or damage to their reputation. Harm can be direct or indirect, and intended or accidental.">harmed</a> by algorithmic systems, including facial recognition used in public housing and policing. When harm is caused by an <a class="gl" href="glossary.html#g-algorithm" data-tip="A set of step-by-step instructions a computer follows to turn inputs into an output, such as a score, a ranking, or a decision.">algorithm</a>, who do you hold responsible?</li>
 <li>Researchers and activists in the film spend significant time and energy challenging systems that institutions have already adopted. What does it tell you that the burden of proving a system is biased often falls on the people harmed by it?</li>
 </ul>
 <p>➕ <strong><a href="https://www.propublica.org/article/machine-bias-risk-assessments-in-criminal-sentencing">&quot;Machine Bias&quot;</a></strong> — Julia Angwin et al., ProPublica · 2016 · ~15 min read · 🟢 Free access · [Media]</p>
-<p>An investigative report on COMPAS, a <a class="gl" href="glossary.html#g-risk-assessment" data-tip="A tool that scores how likely a person is to do something in the future, such as reoffend or miss a court date. Courts in many US states use these scores in bail and sentencing decisions.">risk-assessment algorithm</a> used in criminal sentencing. ProPublica found the algorithm was significantly more likely to flag Black defendants as high-risk than white defendants who committed similar crimes. This is one of the canonical cases of algorithmic bias in high-stakes decision-making.</p>
+<p>An investigative report on COMPAS, a <a class="gl" href="glossary.html#g-risk-assessment" data-tip="A tool that scores how likely a person is to do something in the future, such as reoffend or miss a court date. Courts in many US states use these scores in bail and sentencing decisions.">risk-assessment algorithm</a> used in criminal sentencing. It is one of the canonical cases of algorithmic bias in high-stakes decision-making.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
-<li>ProPublica found that the COMPAS algorithm predicted violent <a class="gl" href="glossary.html#g-recidivism" data-tip="Returning to crime after a conviction, usually measured as a new arrest or conviction within a set period (often two years). Risk assessment tools such as COMPAS try to predict it.">recidivism</a> at only 20% accuracy overall yet it was used in sentencing decisions across multiple states. Black defendants were falsely flagged as high-risk at almost twice the rate of white defendants. When you learn that a system used in real courtrooms is this inaccurate, what is your gut reaction? Does knowing it came from an algorithm change how you think about the harm?</li>
+<li>ProPublica found that only 20% of the people COMPAS predicted would commit violent crimes went on to do so, yet the tool was used in sentencing decisions across multiple states. Black defendants were falsely flagged as high-risk at almost twice the rate of white defendants. When you learn that a system used in real courtrooms is this inaccurate, does knowing the error came from an algorithm change how you think about the harm?</li>
 <li>The article introduces Brisha Borden, 18, Black, arrested for riding a child's bike, scored an 8 out of 10 for risk. Vernon Prater, white, with prior armed robbery convictions, scored a 3. Neither outcome matched the algorithm's prediction. What does it mean for justice when the tool shaping someone's sentence is kept proprietary, so neither the defendant nor their lawyer can challenge how it works?</li>
-<li>Tim Brennan, COMPAS's creator, acknowledged that excluding race-correlated factors like poverty and joblessness would reduce accuracy, but including them produces <a class="gl" href="glossary.html#g-disparate-impact" data-tip="A pattern where a rule or system applied to everyone produces noticeably worse outcomes for a group defined by a protected characteristic such as race or sex. In US employment and housing law it can count as discrimination without any intent, unless the organization shows the rule serves a legitimate need.">disparate impact</a>. Does that tension feel like a technical problem or a social one? Can engineering solve it?</li>
+<li>Tim Brennan, COMPAS's creator, acknowledged that excluding race-correlated factors like poverty and joblessness would reduce accuracy, but including them produces <a class="gl" href="glossary.html#g-disparate-impact" data-tip="A pattern where a rule or system applied to everyone produces noticeably worse outcomes for a group defined by a protected characteristic such as race or sex. In US employment and housing law it can count as discrimination without any intent, unless the organization shows the rule serves a legitimate need.">disparate impact</a>. Does that tension feel like a technical problem or a social one?</li>
 </ul>
 <p>➕ <strong><a href="https://www.allaboutai.com/resources/ai-statistics/ai-bias/">&quot;AI Bias Statistics 2026: Why LLMs Are More Discriminatory Than Ever&quot;</a></strong> — AllAboutAI · 2026 · ~12 min read · 🟢 Free access · [Blog]</p>
 <p>A current overview of what the research is showing in 2026 about bias in the systems entering the market.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
-<li>The page reports that in resume screening tests, AI preferred white names 85% of the time and selected Black male names 0% of the time. GPT-2 assigned &quot;programmer&quot; a male pronoun 83% of the time and &quot;nurse&quot; a female pronoun 91% of the time. When you see numbers like these, does it change how you think about using AI tools in hiring, admissions, or evaluation? Who should be required to know these statistics before deploying a system?</li>
-<li>A 2025 PNAS study finding (cited on the page) suggests that even models explicitly tuned to remove bias still form biased associations. That is, adjusting a model's settings may not remove the bias. If you were asked to build a hiring tool and learned this, what would you do? Is &quot;good enough&quot; an acceptable standard when the stakes are someone's livelihood?</li>
-<li>The page introduces a 2026 finding called &quot;AI-AI bias.&quot; LLMs prefer AI-generated academic content 78% of the time over human-written work. As AI-generated content becomes more prevalent in training data, what happens to the <a class="gl" href="glossary.html#g-feedback-loop" data-tip="A cycle in which a system's outputs feed back into the system as new inputs. A biased decision can produce data that makes the next decision more biased (bias amplification).">feedback loop</a>? Who loses when the systems start optimizing for content that looks like themselves?</li>
+<li>The page reports that in resume screening tests, AI preferred white names 85% of the time and selected Black male names 0% of the time. GPT-2 assigned &quot;programmer&quot; a male pronoun 83% of the time and &quot;nurse&quot; a female pronoun 91% of the time. When you see numbers like these, does it change how you think about using AI tools in hiring, admissions, or evaluation?</li>
+<li>A 2025 PNAS study finding (cited on the page) suggests that even models explicitly tuned to remove bias still form biased associations. That is, adjusting a model's settings may not remove the bias. If you were asked to build a hiring tool knowing this, what would you do?</li>
+<li>The page introduces a 2026 finding called &quot;AI-AI bias.&quot; LLMs prefer AI-generated academic content 78% of the time over human-written work. As AI-generated content becomes more prevalent in training data, who loses when the systems start optimizing for content that looks like themselves?</li>
 </ul>
+</details>
 <hr>
 <h2 id="assignment">Assignment</h2>
 <p><strong>Writing goal this week:</strong> <a class="gl" href="glossary.html#g-stakeholder-map" data-tip="A broad list of every group affected by a system, with a few words on how each is affected. It is the Week 3 writing goal.">Stakeholder mapping</a>. Identify who the actors are.</p>
@@ -905,7 +924,7 @@
   </main>
 
   <footer class="site-footer">
-    <span>Computer Ethics · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-21">October 21, 2026</time>.</span>
+    <span>Computer Ethics · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
 
@@ -1000,6 +1019,10 @@
   </script>
 
   <script>
+    /* A printed week page carries its optional sources too. */
+    addEventListener('beforeprint', () =>
+      document.querySelectorAll('details.extra-content').forEach(d => { d.open = true; }));
+
     /* Hover text near the right edge opens leftward so it stays on screen. */
     (() => {
       const flip = e => {

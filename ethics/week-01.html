@@ -441,6 +441,23 @@
     /* On a touch screen a tap follows the link to the full entry. */
     @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
 
+    /* ── Optional sources on the week pages, closed until opened ── */
+    details.extra-content {
+      margin: 1.75rem 0 1rem;
+      border: 1px solid #e0dcd4;
+      border-radius: 4px;
+      padding: 0 1rem;
+    }
+    details.extra-content > summary {
+      cursor: pointer;
+      padding: 0.6rem 0;
+      list-style-position: outside;
+      margin-left: 1rem;
+    }
+    details.extra-content > summary h3 { display: inline; margin: 0; font-size: 1.1rem; }
+    details.extra-content .extra-count { font-size: 0.88rem; color: #5A5550; margin-left: 0.4rem; }
+    details.extra-content[open] > summary { border-bottom: 1px solid #e0dcd4; margin-bottom: 0.5rem; }
+
     .gl-letters { font-size: 0.95rem; line-height: 1.9; }
     dl.gl-list { margin: 0.75rem 0 0; }
     dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
@@ -811,27 +828,28 @@
 <p>In this foundational talk, computer scientist Toby Walsh explains why AI systems need <a class="gl" href="glossary.html#g-ethical-reasoning" data-tip="Working through a question of right and wrong step by step, with reasons that someone else can follow, check, and challenge.">ethical reasoning</a> and what happens when they lack it. He covers real cases where AI made decisions that seemed reasonable in code but caused <a class="gl" href="glossary.html#g-harm" data-tip="A setback to someone's interests, such as lost money, a lost opportunity, an injury, distress, or damage to their reputation. Harm can be direct or indirect, and intended or accidental.">harm</a> in the world. It is a strong introduction to why ethical questions come up in ordinary CS work.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
-<li>Walsh's central claim is that AI creates no new ethical problems, and that it gives us new and more powerful ways to commit old ones. Faking an identity, deceiving people, and <a class="gl" href="glossary.html#g-manipulation" data-tip="Influencing someone's beliefs or choices by going around their reasoning, for instance by exploiting their emotions, habits, or blind spots.">manipulating</a> outcomes have always been wrong. Does that framing land for you, or does AI seem different in kind as well as in <a class="gl" href="glossary.html#g-scale" data-tip="The number of people or decisions a system reaches. A system working at scale repeats the same choice many times, so the system's errors and benefits both multiply.">scale</a>? Where does your instinct come from?</li>
-<li>Think of a specific AI capability that concerns you, such as <a class="gl" href="glossary.html#g-deepfake" data-tip="Synthetic media that shows a real person saying or doing something they never said or did.">deepfakes</a>, impersonation bots, or automated scams. If Walsh is right that the underlying wrong is the same as it has always been, does that make the ethical question simpler or more complicated? What does applying existing ethics to a new tool actually require of the person doing the applying?</li>
-<li>AI operates at a scale and with a level of <a class="gl" href="glossary.html#g-autonomy" data-tip="A person's ability to make their own choices, based on their own reasoning and values.">autonomy</a> that human actors never could. A con artist can deceive dozens of people, while an AI system can deceive millions at once without any single person making each choice. What does that change about how we apply ethics? Do scale and autonomy require new thinking, or more careful application of what we already have?</li>
+<li>Walsh's central claim is that AI creates no new ethical problems, and that it gives us new and more powerful ways to commit old ones. Faking an identity, deceiving people, and <a class="gl" href="glossary.html#g-manipulation" data-tip="Influencing someone's beliefs or choices by going around their reasoning, for instance by exploiting their emotions, habits, or blind spots.">manipulating</a> outcomes have always been wrong. Does that framing land for you, or does AI seem different in kind as well as in <a class="gl" href="glossary.html#g-scale" data-tip="The number of people or decisions a system reaches. A system working at scale repeats the same choice many times, so the system's errors and benefits both multiply.">scale</a>?</li>
+<li>Think of a specific AI capability that concerns you, such as <a class="gl" href="glossary.html#g-deepfake" data-tip="Synthetic media that shows a real person saying or doing something they never said or did.">deepfakes</a>, impersonation bots, or automated scams. If Walsh is right that the underlying wrong is the same as it has always been, does that make the ethical question simpler or more complicated?</li>
+<li>AI operates at a scale and with a level of <a class="gl" href="glossary.html#g-autonomy" data-tip="A person's ability to make their own choices, based on their own reasoning and values.">autonomy</a> that human actors never could. A con artist can deceive dozens of people, while an AI system can deceive millions at once without any single person making each choice. Do scale and autonomy require new thinking, or more careful application of what we already have?</li>
 </ul>
 <hr>
 <p><strong><a href="https://www.pbs.org/video/the-future-of-ai-1683317973/">&quot;'Godfather of AI' Geoffrey Hinton on the dangers AI poses to society&quot;</a></strong> — PBS NewsHour · 2023 · ~10 min watch · 🟢 Free access · [Media]</p>
 <p>Hinton, one of the pioneers of modern AI, discusses the real risks AI systems pose and why the people building them need to think carefully about <a class="gl" href="glossary.html#g-consequence" data-tip="A result that follows from an action or decision, including results nobody intended.">consequences</a>. Note: this talk focuses on safety risk (ethical reasoning in general gets less attention). If you watch it, pair it with at least one of the readings to ground the <a class="tk" href="toolkit.html#section-1-the-three-toolkit-questions" data-tip="Who is harmed? What are our obligations? What would a person of integrity do? Each question draws on a different family of ethical theory. (A click opens it in the toolkit.)">three toolkit questions</a>.</p>
 <p><strong>Reflection prompts:</strong></p>
 <ul>
-<li>Hinton compares the relationship between humans and a superintelligent AI to the relationship between an adult and a two-year-old, where the adult can easily manipulate the child into choices that serve the adult's interests. When you heard that analogy, what was your gut reaction? Does it feel alarmist, or does it clarify something real?</li>
-<li>Hinton argues that an advanced AI pursuing any goal will develop &quot;get more control, get more power&quot; as a useful subgoal. On his account control helps it achieve any other goal, so no evil intent is needed. Does that logic hold for you? What does it mean for how we think about the systems we build?</li>
+<li>Hinton compares the relationship between humans and a superintelligent AI to the relationship between an adult and a two-year-old, where the adult can easily manipulate the child into choices that serve the adult's interests. When you heard that analogy, what was your gut reaction?</li>
+<li>Hinton argues that an advanced AI pursuing any goal will develop &quot;get more control, get more power&quot; as a useful subgoal. On his account control helps it achieve any other goal, so no evil intent is needed. Does that logic hold for you?</li>
 <li>Hinton spent decades building the foundations of modern AI and now says he regrets it. He is warning about fake news, political polarization, and job losses and growing inequality, harms that are likely already happening. What is your honest reaction to hearing this from someone who helped create the technology?</li>
 </ul>
 <hr>
-<h3 id="additional-content">Additional Content</h3>
+<details class="extra-content">
+<summary><h3 id="additional-content">Additional Content</h3> <span class="extra-count">2 optional sources for extra reflections</span></summary>
 <p>➕ <strong><a href="https://aihub.org/2026/03/04/top-ai-ethics-and-policy-issues-of-2025-and-what-to-expect-in-2026/">&quot;Top AI ethics and policy issues of 2025 and what to expect in 2026&quot;</a></strong> — AIhub · 2026 · ~10 min read · 🟢 Free access · [Blog]</p>
 <p>This is a current overview of the ethical landscape in AI. It covers where the tensions are, what is being debated, and what decisions are being made.</p>
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
-<li>The article describes a $5.3 billion AI impersonation scam targeting fans of a celebrity, with fake concert tickets and fake VIP experiences run through AI-generated personas. At what point does a technology become a tool for harm? Who bears responsibility there?</li>
-<li>The article notes that the US rolled back Biden-era AI safety rules while the EU moved toward enforcement. The rules governing AI development may now differ a great deal depending on where you are. Does it concern you that the company building your tools might operate in a regulatory environment with fewer protections than you would want? Why or why not?</li>
+<li>The article describes a $5.3 billion AI impersonation scam targeting fans of a celebrity, with fake concert tickets and fake VIP experiences run through AI-generated personas. Who bears responsibility when a technology becomes a tool for harm like this?</li>
+<li>The article notes that the US rolled back Biden-era AI safety rules while the EU moved toward enforcement. The rules governing AI development may now differ a great deal depending on where you are. Does it concern you that the company building your tools might operate in a regulatory environment with fewer protections than you would want?</li>
 <li>The article points out that a single Google Gemini prompt emits 0.03g CO₂ and consumes water, and this scales to trillions of queries. This was likely not on most people's ethical radar a few years ago. What other hidden costs of the tools you use might you not be thinking about?</li>
 </ul>
 <hr>
@@ -840,9 +858,10 @@
 <p><strong>Extra reflection prompts:</strong></p>
 <ul>
 <li>Amazon's recruiting tool was trained on resumes submitted over a decade, and those resumes reflected a male-dominated field. The tool learned to penalize resumes that included the word &quot;women's&quot;, as in &quot;women's chess club&quot;. Nobody programmed that rule in. What does it mean to be responsible for an outcome your system produced without your explicit instruction?</li>
-<li>Amazon eventually scrapped the tool, but it had already been in use. If you were an engineer on that team and learned what it was doing, what would you do? What would make that easy or hard?</li>
+<li>Amazon eventually scrapped the tool, but it had already been in use. If you were an engineer on that team and learned what it was doing, what would you do?</li>
 <li>The system was encoding historical discrimination. That is, it learned to repeat past hiring decisions. What does that tell us about the limits of using data to make decisions about people?</li>
 </ul>
+</details>
 <hr>
 <h2 id="assignment">Assignment</h2>
 <p><strong>Writing goal this week:</strong> <a class="gl" href="glossary.html#g-brainstorming" data-tip="Writing down as many ideas as you can in a set time, without judging them, so you have raw material to choose from later. It is the Week 1 writing goal.">Brainstorming</a>. Get everything down.</p>
@@ -893,7 +912,7 @@
   </main>
 
   <footer class="site-footer">
-    <span>Computer Ethics · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-21">October 21, 2026</time>.</span>
+    <span>Computer Ethics · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
 
@@ -988,6 +1007,10 @@
   </script>
 
   <script>
+    /* A printed week page carries its optional sources too. */
+    addEventListener('beforeprint', () =>
+      document.querySelectorAll('details.extra-content').forEach(d => { d.open = true; }));
+
     /* Hover text near the right edge opens leftward so it stays on screen. */
     (() => {
       const flip = e => {

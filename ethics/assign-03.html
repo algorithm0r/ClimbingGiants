@@ -441,6 +441,23 @@
     /* On a touch screen a tap follows the link to the full entry. */
     @media (hover: none) { main a.gl::after, main a.tk::after { display: none; } }
 
+    /* ── Optional sources on the week pages, closed until opened ── */
+    details.extra-content {
+      margin: 1.75rem 0 1rem;
+      border: 1px solid #e0dcd4;
+      border-radius: 4px;
+      padding: 0 1rem;
+    }
+    details.extra-content > summary {
+      cursor: pointer;
+      padding: 0.6rem 0;
+      list-style-position: outside;
+      margin-left: 1rem;
+    }
+    details.extra-content > summary h3 { display: inline; margin: 0; font-size: 1.1rem; }
+    details.extra-content .extra-count { font-size: 0.88rem; color: #5A5550; margin-left: 0.4rem; }
+    details.extra-content[open] > summary { border-bottom: 1px solid #e0dcd4; margin-bottom: 0.5rem; }
+
     .gl-letters { font-size: 0.95rem; line-height: 1.9; }
     dl.gl-list { margin: 0.75rem 0 0; }
     dl.gl-list dt { font-weight: 600; color: var(--course-accent-dark); margin-top: 0.9rem; scroll-margin-top: 1rem; }
@@ -799,7 +816,7 @@
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
     <h1>Week 3 Assignment · Stakeholder Mapping</h1>
 <p><em>Skill: Role Reversal · <a href="toolkit.html#role-reversal">See toolkit</a></em></p>
-<p>You have a <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a>, and this week you map the human terrain around it by asking who is affected by the system or practice you are arguing about. The work is broad and rough, since the purpose of this week is to see all the actors before you zoom in on any of them (deeper analysis comes next week). Students who skip this step tend to write essays that argue convincingly for one group while accidentally ignoring everyone else.</p>
+<p>You have a <a class="gl" href="glossary.html#g-thesis" data-tip="The central claim a piece of writing argues for, specific enough that a reasonable person could disagree with it. In a dialectic, the thesis is the first position put forward.">thesis</a>, and this week you map who is affected by the system or practice you are arguing about. The work is broad and rough, since the purpose is to see all the actors before you zoom in on any of them (deeper analysis comes next week). Students who skip this step tend to write essays that argue convincingly for one group while ignoring everyone else.</p>
 <hr>
 <h2 id="steps">Steps</h2>
 <ol>
@@ -817,7 +834,7 @@
 <p>Aim for at least 8 distinct <a class="gl" href="glossary.html#g-stakeholder" data-tip="Any person or group affected by a system or a decision. This includes the people who build it, use it, profit from it, and are judged by it.">stakeholder</a> groups. A few words describing their relationship to the system is enough for now.</p>
 </li>
 <li>
-<p>Pick one stakeholder who is very different from you, ideally someone harmed by or left out of the system. Write a short paragraph (4 to 6 sentences) from their perspective using <strong><a class="tk" href="toolkit.html#role-reversal" data-tip="Role reversal means imagining a system from one stakeholder's position to see what they need and what the system costs them. (A click opens it in the toolkit.)">role reversal</a></strong>: what do they see when they look at your topic? What do they need that the current system does not provide? What would they ask for if anyone listened?</p>
+<p>Pick one stakeholder who is very different from you, ideally someone harmed by or left out of the system. Write a paragraph (4 to 6 sentences) from their perspective using <strong><a class="tk" href="toolkit.html#role-reversal" data-tip="Role reversal means imagining a system from one stakeholder's position to see what they need and what the system costs them. (A click opens it in the toolkit.)">role reversal</a></strong>: what do they see when they look at your topic? What do they need that the current system does not provide? What would they ask for if anyone listened?</p>
 </li>
 <li>
 <p>After your role reversal paragraph, write 2 to 3 sentences noting what this perspective revealed that you had not considered from your own viewpoint.</p>
@@ -833,7 +850,7 @@
   </main>
 
   <footer class="site-footer">
-    <span>Computer Ethics · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-21">October 21, 2026</time>.</span>
+    <span>Computer Ethics · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
 
@@ -928,6 +945,10 @@
   </script>
 
   <script>
+    /* A printed week page carries its optional sources too. */
+    addEventListener('beforeprint', () =>
+      document.querySelectorAll('details.extra-content').forEach(d => { d.open = true; }));
+
     /* Hover text near the right edge opens leftward so it stays on screen. */
     (() => {
       const flip = e => {
