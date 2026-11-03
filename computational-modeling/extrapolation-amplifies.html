@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Extrapolation and uncertainty — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102083412">
-  <link rel="stylesheet" href="css/demos.css?v=20261102083412">
+  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
+  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -978,6 +978,30 @@ the distance, so the resampled distribution is pushed away from zero and is not 
 estimate. An interval written as a symmetric
 &plusmn; hides both.</p>
 
+<h2 id="three-record-lengths">Three Record Lengths on One Shot</h2>
+
+<p>The tracker's short, medium and long records hold the same shots cut off at three lengths. In
+the example pack they are 26, 30 and 34 frames long, and the flight in them runs to about 7, 11 and
+15 frames after release. The demo can be set to those three counts. The table gives the 90%
+interval at each on the well-behaved shot, with gravity fitted (as in the demo) and with gravity
+held at 9.81&nbsp;m/s&sup2; (measured separately, with the same 240 resamples).</p>
+
+<table class="data">
+  <tr><th class="num">frames of flight</th><th class="num">flight seen</th>
+      <th class="num">90% interval, gravity fitted</th><th class="num">90% interval, gravity held</th></tr>
+  <tr><td class="num">7</td><td class="num">0.24 s</td><td class="num">[24, 1366] cm</td><td class="num">[8, 56] cm</td></tr>
+  <tr><td class="num">11</td><td class="num">0.40 s</td><td class="num">[24, 113] cm</td><td class="num">[21, 42] cm</td></tr>
+  <tr><td class="num">15</td><td class="num">0.56 s</td><td class="num">[28, 66] cm</td><td class="num">[27, 37] cm</td></tr>
+</table>
+
+<p>With gravity fitted the width of the interval falls by a factor of 15 over the first four extra frames and
+by 2.4 over the next four, which is about a factor of 2.0 a frame and then 1.2 a frame. With
+gravity held it falls by 2.3 and then 2.0, about 1.2 a frame both times. As a result a single
+factor per frame describes the gravity-held fit on this shot reasonably well, and it does not
+describe the gravity-fitted one, where the first few extra frames buy most of the narrowing. This is
+one shot, and the factors on another shot will likely differ (the demo's harder shot is one to
+try).</p>
+
 <h2 id="fixing-the-curvature-the-physics-knows">Practice for Extrapolation</h2>
 
 <ol class="plain">
@@ -1003,7 +1027,8 @@ estimate. An interval written as a symmetric
 $-g/2$, and $g$ is known to far better than the fit can measure it from ten frames.</p>
   <p>Imposing that removes the $\delta c\,t^2$ term, which is the one that grows fastest.
 Fitting only the release height and speed, with the curvature fixed, gives a much tighter
-extrapolation from the same ten frames, because the model has been told something the data did
+extrapolation from the same ten frames (on the well-behaved shot, a 90% interval of 15 to
+43&nbsp;cm against 25 to 221&nbsp;cm), because the model has been told something the data did
 not have to supply. That is generally the best available move, and it is only available when the
 form came from physics and not from convenience.</p>
 </div>
@@ -1058,7 +1083,7 @@ crossing point in some direction on the floor, and almost <em>any</em> direction
 from a point it was already near. As a result almost every draw comes out larger than the unperturbed
 value, and the 5th percentile of the draws can sit above it. The distribution is not centered on
 the estimate, and it is not a matter of having taken too few draws. Taking more sharpens the
-same displaced shape. So a value &plusmn; a half-width is <strong>the wrong form for this
+same displaced shape. For this reason a value &plusmn; a half-width is <strong>the wrong form for this
 quantity</strong>. It asserts a centering that does not hold and a symmetry that does not hold,
 and at short windows it produces intervals that do not contain their own point estimate, which
 can look like an arithmetic mistake, though it is not one.</p>
@@ -1094,11 +1119,11 @@ interval comes from when no formula gives one.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/extrapolation-amplifies.js?v=20261102083412"></script>
+  <script type="module" src="js/bundle/extrapolation-amplifies.js?v=20261102180601"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

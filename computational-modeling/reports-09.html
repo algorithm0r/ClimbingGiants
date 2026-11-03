@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Example reports · Assignment 8 — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102083412">
-  <link rel="stylesheet" href="css/demos.css?v=20261102083412">
+  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
+  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -885,100 +885,139 @@
 <h1>Example reports &middot; Assignment 8</h1>
 
 <p>These are three reports for <a href="assign-09.html">Assignment 8, Uncertainty Intervals</a>,
-written in three different styles. All three describe the same example pack (crash test 9793,
-which no phrase assigns), so nothing here answers anybody's assignment. Each student reruns the
-driver's head injury calculation many times with noise added, and each chooses the noise and the
-level differently. Please see the <a href="reports.html">Example reports</a> page for what every
-report needs and who it is written for.</p>
+written in three different styles. All three use the short records and training arcs in the example
+pack (test 9793, which no phrase assigns). Nothing here answers anybody's assignment. The three
+students put their intervals on different quantities (a distance from the hoop center, a position
+along and across the line of the shot, and a position in the court's own coordinates), drew the
+noise in different ways (at the header's level, or from the residuals of fitted flights) and checked
+their intervals against different answers, and each one says why. Please see the <a href="reports.html">Example reports</a> page for what every report needs and
+who it is written for.</p>
 
-<p>The three students agree on the value and on what the record shows. Their intervals differ
-in width by a factor of about six (0.15 against roughly 1), and each says which choice moved it.
-Each report is followed by a short note on what it does well. The purpose of the notes is to show
-that three styles can meet the same standard (plots identified at a glance, errors flagged,
-assumptions noted).</p>
+<p>Each report is followed by a short note on what it does well. The purpose of the notes is to
+show that different methods can meet the same standard. That is, plots are identified at a glance,
+errors are flagged and assumptions are noted. Their counts differ because their checks differ (one
+arc is about 14 points of a count out of 7 arcs, and about 4 out of 23), and every number in them comes from
+the program that is attached.</p>
 
-<div class="aside"><span class="label">Things to watch for</span>
-<p>Test 9793 starts 50&nbsp;ms before impact, which gives 1000 quiet samples for measuring the noise.
-Many tests start 30 or 20&nbsp;ms before impact, and at 10&nbsp;kHz a 20&nbsp;ms stretch holds only
-200 samples. For this reason your noise estimate will probably be less certain, and a method that cuts
-pieces from that stretch (as the technical report does) has little to choose from. Set the piece
-length in samples from your own sample rate (the technical report's 200 samples is 10&nbsp;ms only
-at 20&nbsp;kHz).</p>
-</div>
-
-<p>The technical report's program is read one section at a time, beside a MATLAB version that
-prints the same results, on <a href="walk-09.html">Reading the assignment 8 program</a>.</p>
+<p>The technical report's program is read one section at a time, beside a MATLAB version, on
+<a href="walk-09.html">Reading the assignment 8 program</a>.</p>
 
 <h2 id="a-memo">A Memo</h2>
 
 <div class="aside report"><span class="label">Example 1 &middot; Memo</span>
 <div class="memo-head">
-<p><strong>To:</strong> Alice</p>
-<p><strong>Re:</strong> How well we know the driver's head injury number</p>
+<p><strong>To:</strong> Bob</p>
+<p><strong>Re:</strong> How far from the center of the hoop the short records come down</p>
 <p><strong>Data phrase:</strong> example pack (test 9793)</p>
 </div>
 
-<p>HIC15 for the driver is 150.4, with a 90% interval of 150.3 to 150.5. I would put my name
-beside both, as long as one sentence goes with them: the interval covers the noise in the head
-instruments and nothing else. (HIC15 is the head injury criterion searched over windows no
-longer than 15&nbsp;ms. The regulation's limit for it is 700.)</p>
+<p>The table gives a 90% interval on how far from the center of the hoop each short record comes
+down through rim height. Apart from record 685, they start between 0.04 and 0.15&nbsp;m from the center and end between 0.32 and 0.76&nbsp;m. I checked the
+same method on the 7 training arcs where the ball came down through rim height without touching
+anything first, and it came down inside its interval on 6 of them. That is close to 90%, though 7
+shots are too few to say 90% and mean it. One more miss would make it 5 of 7 (71%).</p>
 
-<p><strong>What I varied.</strong> Before impact the car is towed at a steady speed, so the
-50&nbsp;ms of record before impact (1000 samples) shows what the head instruments read when
-nothing is happening. Their spread (standard deviation, sigma) is 0.811, 1.061 and
-0.929&nbsp;m/s&sup2; in the X, Y and Z directions, or 0.08 to 0.11&nbsp;<em>g</em> (one
-<em>g</em> is 9.80665&nbsp;m/s&sup2;). I added fresh random noise of that size to each channel
-and ran the whole calculation again. That includes the CFC&nbsp;1000 smoothing filter the
-standard sets for head acceleration, the resultant (the three directions combined into one size)
-and the window search. I did this 1000 times. The interval runs from the 5th to the 95th percentile
-of the 1000 answers (the 5th percentile is the answer that 5% of the reruns fall below), so nine
-reruns in ten land inside it.</p>
+<table class="data">
+  <tr><th class="num">Short record</th><th class="num">Frames fitted</th><th class="num">Median (m)</th><th class="num">90% interval (m)</th></tr>
+  <tr><td class="num">685</td><td class="num">6</td><td class="num">1.00</td><td class="num">0.50 to 1.51</td></tr>
+  <tr><td class="num">332</td><td class="num">10</td><td class="num">0.15</td><td class="num">0.04 to 0.32</td></tr>
+  <tr><td class="num">872</td><td class="num">7</td><td class="num">0.28</td><td class="num">0.07 to 0.60</td></tr>
+  <tr><td class="num">158</td><td class="num">8</td><td class="num">0.33</td><td class="num">0.15 to 0.54</td></tr>
+  <tr><td class="num">1299</td><td class="num">7</td><td class="num">0.42</td><td class="num">0.15 to 0.75</td></tr>
+  <tr><td class="num">734</td><td class="num">7</td><td class="num">0.44</td><td class="num">0.15 to 0.76</td></tr>
+  <tr><td class="num">503</td><td class="num">8</td><td class="num">0.21</td><td class="num">0.05 to 0.46</td></tr>
+  <tr><td class="num">502</td><td class="num">7</td><td class="num">0.36</td><td class="num">0.09 to 0.71</td></tr>
+  <tr><td class="num">1317</td><td class="num">7</td><td class="num">0.44</td><td class="num">0.15 to 0.76</td></tr>
+  <tr><td class="num">1326</td><td class="num">7</td><td class="num">0.19</td><td class="num">0.05 to 0.43</td></tr>
+  <tr><td class="num">490</td><td class="num">8</td><td class="num">0.38</td><td class="num">0.14 to 0.68</td></tr>
+  <tr><td class="num">838</td><td class="num">7</td><td class="num">0.41</td><td class="num">0.15 to 0.74</td></tr>
+</table>
 
 <figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r09-memo-interval.svg?v=20261102083412"
-    alt="Left, the three driver head acceleration channels over the 50 ms before impact, each
-    labeled with its sigma in m/s squared. Right, a histogram of HIC15 over 1000 reruns, running
-    from about 150.25 to 150.51, with the 90 per cent interval from 150.31 to 150.46 shaded and
-    the value on the record, 150.39, marked."></div>
-  <figcaption>Left, the noise I measured before impact. Right, what that noise does to HIC15 over
-  1000 reruns, drawn by <code>a8_hic_interval.py</code>.</figcaption>
+  <div class="fig-body"><img src="data/example/figures/r09-memo-intervals.svg?v=20261102180601"
+    alt="A horizontal bar for each of the 12 short records, distance from the hoop center in meters
+    on the horizontal axis, with a dot at the median. Eleven bars start between about 0.05 and 0.15
+    m and end between about 0.3 and 0.8 m. The bar for record 685 runs from 0.5 to 1.5 m. A dashed
+    orange line at 0.23 m marks the inside edge of the rim."></div>
+  <figcaption>Figure 1. The median and 90% interval for each short record. The dashed line is the
+  inside edge of the rim, 0.23&nbsp;m from the center (from the header).</figcaption>
 </figure>
 
-<p><strong>What I held fixed.</strong></p>
+<p><strong>How I built the intervals.</strong> A short record starts with the ball still in the
+hand, so I found the last frame where the ball's vertical acceleration is upward (from a parabola
+through the 9 frames around each frame) and fitted everything after it. That leaves 6 to 10 frames,
+7 on most records. The fit is a parabola in height with gravity held at 9.81&nbsp;m/s&sup2; and a
+straight line in each floor direction, and the crossing is the later of the two times the parabola
+is at rim height (the ball coming down). <strong>What I varied</strong> is the tracker's noise. The
+header gives it as 3.07&nbsp;cm in height and 2.84&nbsp;cm across the floor, so I added random
+noise of that size to every fitted frame, fitted again and found the crossing again, 1000 times
+per record. The interval runs from the 5th to the 95th percentile of the 1000 distances, and the
+value is their median. <strong>What I held fixed</strong> is gravity, the model (no drag), the frame
+the fit starts on and the position of the hoop.</p>
+
+<p><strong>How I counted.</strong> I cut every training arc 7 frames after its last push, the median
+for the short records, so it holds what a short record would. Then I built its interval the same way
+and compared it with where the ball really came down, found from the frames on either side of rim
+height. That comparison only makes sense if the ball got to rim height in free flight. For this reason I counted
+an arc only if every acceleration estimate from the top of the arc to 4 frames before the crossing
+stayed within 5&nbsp;m/s&sup2; of &minus;9.81. A bounce off the rim or the board breaks that. 7 of
+the 24 arcs pass. The other 17 fail the test, and on most of them the ball has hit the rim or the
+board before it comes down through rim height (arc 325 also has a stretch of height the tracker
+filled in). One estimate outside the band is enough to fail an arc, so a few of the 17 may have
+come down in free flight and been left out anyway.</p>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r09-memo-check.svg?v=20261102180601"
+    alt="A horizontal bar for each of 7 training arcs, distance from the hoop center in meters, with
+    a marker where the ball came down. Six blue dots sit inside their bars, all between 0.08 and 0.37
+    m. For arc 1144 a red cross at 0.06 m sits to the left of its bar, which runs from 0.33 to 1.01
+    m."></div>
+  <figcaption>Figure 2. The 7 training arcs checked, cut to the length of a short record. Each bar
+  is the arc's 90% interval and each marker is where the ball came down through rim height.</figcaption>
+</figure>
+
+<p><strong>What the count means.</strong> 6 of 7 is 86%, which is as close to 90% as 7 shots can
+get without being 7 of 7. Each shot is worth 14 points, though, so the count cannot separate 90%
+from a rate one or two shots lower. I would not quote the interval to the coaches as 90% on this check alone. The one
+miss is arc 1144. Its interval ran from 0.33 to 1.01&nbsp;m, and the ball came down 0.06&nbsp;m from
+the center. A distance cannot be less than zero, so every low end sits above zero (the lowest is
+0.04&nbsp;m, on record 332), and a ball that comes down near the middle of the hoop is the case this
+kind of interval is most likely to miss. That floor does not explain arc 1144, though. Its low end
+is 0.33&nbsp;m, well clear of zero, so the fit to its 7 frames of flight put the crossing too far from
+the center by more than the tracker's noise allows. The cause may be something the reruns hold
+fixed (the model has no drag, for instance), and I have not tested that.</p>
+
+<p>Three things need your attention.</p>
 <ul>
-  <li>The filter class (CFC&nbsp;1000) and the 15&nbsp;ms window limit. The standards set both
-  (SAE J211-1 and FMVSS 208).</li>
-  <li>The value of <em>g</em> (9.80665&nbsp;m/s&sup2;).</li>
-  <li>No offset removed. The pre-impact means are small (&minus;0.205 to 0.097&nbsp;m/s&sup2;),
-  and subtracting them moves HIC15 by +0.02.</li>
-  <li>The test itself. A second crash of the same car would probably give a different number, and
-  the interval says nothing about that.</li>
+  <li><strong>Record 685 has the fewest frames.</strong> It has 6 frames after the last push, and its
+  interval (0.50 to 1.51&nbsp;m) is about twice as wide as most of the others. The prediction may be
+  less trustworthy than the interval says.</li>
+  <li><strong>Most arcs could not be checked.</strong> 17 of the 24 fail the free-flight test, most
+  of them because the ball hit the rim or the board first. The count rests on the 7 that pass, and
+  these may not be typical of the others.</li>
+  <li><strong>The noise may be correlated.</strong> The header notes that the noise is mildly
+  correlated frame to frame. My draws are independent. If neighboring frames tend to be off in the
+  same direction, the fit could be pulled further than my reruns allow, and the intervals would be
+  too narrow.</li>
 </ul>
 
-<p><strong>Two things need your attention before the meeting.</strong></p>
-<ul>
-  <li><strong>The interval is very narrow.</strong> It is 0.15 wide, about a tenth of a percent of
-  the value. It says how much the instruments' noise moves the calculation, and the customer's
-  engineers could easily read it as how well we know this car's HIC.</li>
-  <li><strong>I assumed the noise is independent from one sample to the next.</strong> I have not
-  checked this. If neighboring samples tend to move together, the noise would cancel less inside a
-  15&nbsp;ms window, and the interval is probably too narrow.</li>
-</ul>
+<p><strong>Assumptions.</strong> Coordinates are in meters. Gravity is 9.81&nbsp;m/s&sup2;, with no
+air drag or spin. The tracker's noise is normal, at the header's level and independent from frame to
+frame. The flight starts on the frame after the last upward push. The random numbers are seeded, so
+the program prints the same thing every time.</p>
 
-<p><strong>Assumptions.</strong> Time zero in the file is the moment of impact, and the
-50&nbsp;ms before it is noise alone. The noise during the crash is the same size as before it. The
-three head channels (all in m/s&sup2;, status <code>ok</code>) are calibrated correctly, since a
-scale error would move every rerun the same way and would not show in the interval.</p>
-
-<p><strong>Program.</strong> <a href="data/example/code/a8_hic_interval.py" download><code>a8_hic_interval.py</code></a>
-(attached) measures the noise, computes HIC15, runs the 1000 reruns and draws the figure.</p>
+<p><strong>Program.</strong> <a href="data/example/code/a8_ninety_percent.py" download><code>a8_ninety_percent.py</code></a>
+(attached) builds every interval, runs the check and draws both figures.</p>
 </div>
 
 <div class="aside notice"><span class="label">What to notice</span>
-<p>The first paragraph gives Alice the value, the interval, the level and the sentence she can say
-in the room. The figure puts the measured noise beside what it does to the answer. A reader sees
-what was varied and what came of it. The memo also names the one assumption it did not check (that
-the noise is independent), and that line is probably the most useful one in it.</p>
+<p>The first paragraph gives Bob the intervals, the count and what the count can and cannot
+support. The memo puts its interval on the distance from the hoop center, since that is likely what
+Bob will use to decide whether a shot goes in. It checks the interval only against crossings it could see, says why the
+other 17 arcs were left out, and looks at the one miss. The floor at zero that a distance has is the
+first reason to suspect, and the memo checks it against the interval's low end (0.33&nbsp;m) before
+setting it aside. The miss is left as a prediction that came down too far from the center, with
+its cause untested.</p>
 </div>
 
 <h2 id="a-technical-report">A Technical Report</h2>
@@ -987,653 +1026,789 @@ the noise is independent), and that line is probably the most useful one in it.<
 <p><strong>Data phrase:</strong> example pack (test 9793)</p>
 
 <h4>Summary</h4>
-<p>HIC15 for the driver of test 9793 is 150.4, with a 95% interval of 150.0 to 151.0. The interval
-comes from rerunning the whole calculation 1000 times with noise cut from the record's own
-pre-impact stretch, so it covers instrument noise and nothing else. The filter class and the window
-limit were held fixed by rule, and the value of <em>g</em> and the baseline by choice. Changing
-either choice leaves the answer inside the interval. I would put my name beside the value and
-the interval, provided the words "instrument noise only" go with them.</p>
+
+<p>Each short record's rim crossing is given here as two numbers with a 90% interval on each:
+how far past the hoop center it lands along the line of the shot (long or short) and how far to
+the right of that line. The median interval is 0.67&nbsp;m wide long/short and 0.45&nbsp;m wide
+left/right. On 23 training arcs cut to the length of a short record, the answer from the whole
+arc fell inside its interval on 18 (78%) long/short and on 22 (96%) left/right. Four of the five
+long/short misses are on the short side. This means the left/right interval does about what it claims,
+while the long/short interval covers less than 90% (likely nearer 80%) and may lean long, which
+would point to something the noise alone does not account for. On the 8 arcs where the crossing can be seen in the frames, 7
+were inside both ways.</p>
 
 <h4>Data</h4>
-<p>The three driver head channels of test 9793 (codes <code>11HEADCG0000ACXP</code>,
-<code>ACYP</code> and <code>ACZP</code>) are accelerations at the head's center of gravity in
-m/s&sup2;. Each holds 7001 samples 0.05&nbsp;ms apart (a sample rate of 20,000 per second), from
-&minus;50 to +300&nbsp;ms. Each header also gives a prefilter of 4000&nbsp;Hz, which means the
-instrument smoothed the signal before it was recorded. The 1000 samples before impact are the noise
-record. Table 1 gives their mean and spread, and how much each sample resembles the samples after
-it (the autocorrelation at a given lag, which is 0 for noise that is independent from sample to
-sample and 1 for a copy).</p>
 
-<table class="data">
-  <tr><th>Channel</th><th class="num">Mean (m/s&sup2;)</th><th class="num">Sigma (m/s&sup2;)</th><th class="num">Sigma (<em>g</em>)</th><th class="num">r at 0.05&nbsp;ms</th><th class="num">r at 1&nbsp;ms</th><th class="num">r at 5&nbsp;ms</th><th class="num">r at 10&nbsp;ms</th></tr>
-  <tr><td>Head X</td><td class="num">0.054</td><td class="num">0.811</td><td class="num">0.0827</td><td class="num">0.79</td><td class="num">0.36</td><td class="num">0.13</td><td class="num">0.02</td></tr>
-  <tr><td>Head Y</td><td class="num">&minus;0.205</td><td class="num">1.061</td><td class="num">0.1082</td><td class="num">0.89</td><td class="num">0.64</td><td class="num">0.46</td><td class="num">0.17</td></tr>
-  <tr><td>Head Z</td><td class="num">0.097</td><td class="num">0.929</td><td class="num">0.0948</td><td class="num">0.83</td><td class="num">0.47</td><td class="num">0.37</td><td class="num">0.21</td></tr>
-</table>
-<p class="plain">Table 1. The 50&nbsp;ms before impact. One <em>g</em> is 9.80665&nbsp;m/s&sup2;. The
-last four columns are autocorrelations (r) at the lag shown.</p>
-
-<figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r09-rep-noise.svg?v=20261102083412"
-    alt="Three stacked plots of driver head acceleration in m/s squared over the 50 ms before
-    impact, one per channel, each titled with its header description and code. The Y channel
-    drifts from about -2 up to about +1 and back down across the 50 ms."></div>
-  <figcaption>Figure 1. The three driver head channels before impact, titled from their headers.</figcaption>
-</figure>
+<p>The header says the short records begin partway into the flight, though each one holds an upward
+push, so each starts with the ball still in the hand. After the last upward push they have 6 to 10
+frames of flight (median 7), at 25 frames a second. The training file
+holds 24 whole arcs. The header gives the tracker's noise as 3.07&nbsp;cm vertical and 2.84&nbsp;cm
+horizontal, with the note that it was measured across the set and is mildly correlated frame to
+frame. The hoop's inner radius (0.2286&nbsp;m) is used only to draw the rim in Figure&nbsp;1.</p>
 
 <h4>Method</h4>
-<p>A Python program, <a href="data/example/code/a8_noise_intervals.py" download><code>a8_noise_intervals.py</code></a>
-(listed in the appendix and submitted with this report), does every step below and draws every
-figure.</p>
-<ol>
-  <li><strong>The value.</strong> Each head channel is filtered at CFC&nbsp;1000 (the four-pole
-  Butterworth that SAE J211-1 assigns to head acceleration, run forward and then backward). The
-  resultant is formed from the three filtered channels and divided by 9.80665 to put it in
-  <em>g</em>. HIC is then searched over every window no longer than 15&nbsp;ms (FMVSS 208), using a
-  running total so that each window's integral is one subtraction.</li>
-  <li><strong>The noise model.</strong> Table 1 and Figure 2 show that the noise is far from
-  independent, so I did not use independent Gaussian noise. For each rerun and each channel, I cut
-  10&nbsp;ms pieces (200 samples) at random from the pre-impact record, with its mean removed, and
-  joined them end to end to the length of the record. A piece keeps the noise's own wander inside
-  it. I chose 10&nbsp;ms because the X channel's autocorrelation has fallen to 0.02 there and the
-  other two to about 0.2. Longer pieces would keep more of the wander, but the 50&nbsp;ms record
-  would then offer fewer different pieces to choose from.</li>
-  <li><strong>The reruns.</strong> Noise is added to all three raw channels and the whole of step 1
-  is run again, 1000 times. For comparison, the same is done with independent Gaussian noise of
-  each channel's sigma (the "independent" model).</li>
-  <li><strong>The interval.</strong> The 95% interval runs from the 2.5th to the 97.5th
-  percentile of the 1000 answers. I used percentiles because they make no assumption about the
-  shape of the spread, and Figure 3 shows the spread is not centered on the value. I chose 95%,
-  which the Reporting an Interval notes give as the common scientific default, because the number
-  is going to a customer's engineers who will test it.</li>
-  <li><strong>The fixed choices.</strong> The two fixed choices that are judgment calls (the value
-  of <em>g</em> and the baseline) are each changed on their own and HIC15 recomputed, to compare how
-  far they move the answer with the interval's width.</li>
-</ol>
 
-<figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r09-rep-autocorr.svg?v=20261102083412"
-    alt="Autocorrelation of the pre-impact noise against lag from 0 to 25 ms for the three head
-    channels. All three start near 0.8 to 0.9. X falls to about zero by 10 ms, Z stays near 0.2,
-    and Y falls steadily to about -0.45 at 25 ms. A dashed line marks the 10 ms block length."></div>
-  <figcaption>Figure 2. Autocorrelation of the pre-impact noise. Independent noise would sit
-  on the zero line at every lag.</figcaption>
-</figure>
+<p><strong>The prediction.</strong> The fit starts on the frame after the last upward push, found as
+in assignment 5 from a parabola through the 9 frames around each frame. The height is fitted with
+<em>z</em> = <em>c</em><sub>0</sub> + <em>c</em><sub>1</sub><em>t</em> &minus; &frac12;<em>g</em><em>t</em>&sup2;
+(<em>g</em> = 9.81&nbsp;m/s&sup2;), and each floor coordinate with a straight line. The crossing is
+the later root of <em>z</em>(<em>t</em>) = 3.048&nbsp;m, which is the ball coming down. The crossing
+point is then measured from the hoop center along the line from the first fitted frame to the hoop
+(positive is long) and across it (positive is to the right, as the shooter sees it). Both numbers
+can take either sign, so neither has the floor at zero that a distance from the hoop center has
+(<a href="coverage.html">Coverage</a> shows what that floor does to an interval).</p>
+
+<p><strong>The interval.</strong> Noise is added to every fitted frame, drawn from a normal
+distribution with the header's standard deviations, and the fit and the solve are run again. This
+is repeated 1000 times per record. The 1000 answers are sorted, the 50 lowest and 50 highest are
+left out, and the remaining 900 span the 90% interval. The value reported is the crossing from the
+frames as measured.</p>
+
+<table class="data">
+  <tr><th>Varied in every rerun</th><th>Held fixed</th></tr>
+  <tr><td>the height of every fitted frame (3.07&nbsp;cm)</td><td>gravity, 9.81&nbsp;m/s&sup2;</td></tr>
+  <tr><td>both floor coordinates of every fitted frame (2.84&nbsp;cm)</td><td>the model: a parabola in height and straight lines on the floor, with no drag</td></tr>
+  <tr><td></td><td>the first fitted frame, and so the number of frames</td></tr>
+  <tr><td></td><td>the direction from the first fitted frame to the hoop</td></tr>
+</table>
+
+<p>The first fitted frame was chosen, and the reruns never move it. As a check, every fit was
+started one frame later. The value moved by a median of 0.06&nbsp;m long/short and
+0.05&nbsp;m left/right, about a tenth of the interval widths.</p>
+
+<p><strong>The check.</strong> Each training arc is cut 7 frames after its last push (the median
+for the short records) and given an interval in exactly the same way. Its answer comes from the
+whole arc: the free flight found by the assignment&nbsp;5 rules, fitted with gravity free, and
+carried down to rim height. Most training arcs hit the rim or the board before the ball's center
+reaches rim height, so this answer is itself a fit, and the check is a fit against a fit. Where the flight does run down to rim height (to within the 4 frames an acceleration estimate
+looks ahead), the crossing is also read off the frames by interpolating between the frame just
+above rim height and the one just below.</p>
+
+<p>A Python program, <a href="data/example/code/a8_crossing_intervals.py" download><code>a8_crossing_intervals.py</code></a>
+(listed in the appendix and submitted with this report), does all of the above and draws every
+figure.</p>
 
 <h4>Results</h4>
-<p>HIC15 on the record is 150.39. Table 2 gives the intervals from both noise models at both
-levels.</p>
 
 <table class="data">
-  <tr><th>Noise model</th><th class="num">Median</th><th class="num">90% interval</th><th class="num">Width</th><th class="num">95% interval</th><th class="num">Width</th></tr>
-  <tr><td>Independent Gaussian</td><td class="num">150.39</td><td class="num">150.31 to 150.46</td><td class="num">0.15</td><td class="num">150.31 to 150.48</td><td class="num">0.17</td></tr>
-  <tr><td>Blocks (10&nbsp;ms pieces of the record), used</td><td class="num">150.53</td><td class="num">150.07 to 150.94</td><td class="num">0.87</td><td class="num">150.01 to 151.01</td><td class="num">1.00</td></tr>
+  <tr><th class="num">Short record</th><th class="num">Frames fitted</th><th class="num">Long (m)</th><th class="num">90% interval (m)</th><th class="num">Right (m)</th><th class="num">90% interval (m)</th></tr>
+  <tr><td class="num">685</td><td class="num">6</td><td class="num">+0.99</td><td class="num">+0.52 to +1.49</td><td class="num">&minus;0.09</td><td class="num">&minus;0.43 to +0.25</td></tr>
+  <tr><td class="num">332</td><td class="num">10</td><td class="num">+0.08</td><td class="num">&minus;0.11 to +0.28</td><td class="num">&minus;0.07</td><td class="num">&minus;0.20 to +0.06</td></tr>
+  <tr><td class="num">872</td><td class="num">7</td><td class="num">+0.21</td><td class="num">&minus;0.15 to +0.58</td><td class="num">&minus;0.07</td><td class="num">&minus;0.34 to +0.15</td></tr>
+  <tr><td class="num">158</td><td class="num">8</td><td class="num">&minus;0.22</td><td class="num">&minus;0.47 to +0.04</td><td class="num">&minus;0.21</td><td class="num">&minus;0.37 to &minus;0.05</td></tr>
+  <tr><td class="num">1299</td><td class="num">7</td><td class="num">+0.34</td><td class="num">&minus;0.01 to +0.67</td><td class="num">+0.20</td><td class="num">&minus;0.05 to +0.44</td></tr>
+  <tr><td class="num">734</td><td class="num">7</td><td class="num">+0.38</td><td class="num">+0.07 to +0.73</td><td class="num">&minus;0.15</td><td class="num">&minus;0.36 to +0.07</td></tr>
+  <tr><td class="num">503</td><td class="num">8</td><td class="num">&minus;0.15</td><td class="num">&minus;0.43 to +0.13</td><td class="num">&minus;0.05</td><td class="num">&minus;0.22 to +0.12</td></tr>
+  <tr><td class="num">502</td><td class="num">7</td><td class="num">+0.30</td><td class="num">&minus;0.09 to +0.68</td><td class="num">+0.12</td><td class="num">&minus;0.12 to +0.35</td></tr>
+  <tr><td class="num">1317</td><td class="num">7</td><td class="num">+0.40</td><td class="num">+0.07 to +0.75</td><td class="num">+0.10</td><td class="num">&minus;0.18 to +0.36</td></tr>
+  <tr><td class="num">1326</td><td class="num">7</td><td class="num">+0.01</td><td class="num">&minus;0.32 to +0.35</td><td class="num">&minus;0.01</td><td class="num">&minus;0.21 to +0.18</td></tr>
+  <tr><td class="num">490</td><td class="num">8</td><td class="num">+0.36</td><td class="num">+0.09 to +0.62</td><td class="num">&minus;0.07</td><td class="num">&minus;0.27 to +0.12</td></tr>
+  <tr><td class="num">838</td><td class="num">7</td><td class="num">&minus;0.31</td><td class="num">&minus;0.65 to +0.04</td><td class="num">+0.23</td><td class="num">&minus;0.04 to +0.46</td></tr>
 </table>
-<p class="plain">Table 2. HIC15 over 1000 reruns for each noise model.</p>
+
+<p>Long is past the hoop center along the line of the shot, and right is to the right of that line
+as the shooter sees it. Figure&nbsp;1 shows what one interval is made of. The 1000 rerun crossings
+for record 1299 form a cloud longer along the line of the shot than across it, which is true of every
+record (Figure&nbsp;2). The long/short intervals are the wider ones, likely because the crossing time
+depends on the fitted vertical speed, and a small change in that speed moves the crossing a long way
+along the line of flight.</p>
 
 <figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r09-rep-draws.svg?v=20261102083412"
-    alt="Two overlaid histograms of HIC15 over 1000 reruns. The independent-noise model is a narrow
-    spike around 150.4 with its 95 per cent interval from 150.31 to 150.48. The blocks model is
-    broad and runs from about 149.8 to 151.2, with its 95 per cent interval from 150.01 to 151.01.
-    A black line marks the value on the record, 150.39."></div>
-  <figcaption>Figure 3. HIC15 over 1000 reruns for each noise model, with each model's 95% interval
-  dashed.</figcaption>
+  <div class="fig-body"><img src="data/example/figures/r09-rep-cloud.svg?v=20261102180601"
+    alt="A scatter of 1000 small points, right of the line to the hoop in meters across, past the
+    hoop center in meters up. The cloud is centered near 0.2 m right and 0.35 m past, about 0.6 m
+    across and 1.2 m tall, with a black cross at its middle. A circle of radius 0.23 m at the origin
+    marks the inside of the rim and overlaps the lower left of the cloud."></div>
+  <figcaption>Figure 1. Short record 1299. Each point is where one rerun crosses rim height, seen
+  from behind the shooter. The cross is the fit to the record as measured, and the circle is the
+  inside of the rim.</figcaption>
 </figure>
 
-<p>With the noise cut from the record, the 95% interval is about six times wider than with
-independent noise (1.00 against 0.17). The independent noise mostly cancels inside a 15&nbsp;ms window, and
-the record's own noise, which wanders over several milliseconds, does not. The block interval is
-also lopsided about the value, reaching 0.38 below it and 0.62 above, and its median (150.53) sits
-above the value. A likely reason is that the search keeps whichever window has the largest
-average, so noise that raises some window's average shows up in HIC15 more readily than noise that
-lowers it. I have not checked this.</p>
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r09-rep-short.svg?v=20261102180601"
+    alt="Two panels, one row per short record. Left, long or short in meters, bars mostly between
+    about minus 0.5 and plus 0.75, with record 685 from 0.5 to 1.5. Right, right or left in meters,
+    shorter bars between about minus 0.45 and plus 0.45. A gray line marks zero in each."></div>
+  <figcaption>Figure 2. The value (dot) and 90% interval (bar) for each short record, long/short on
+  the left and left/right on the right.</figcaption>
+</figure>
 
-<h4>Checks on What Was Held Fixed</h4>
 <table class="data">
-  <tr><th>Held fixed, changed to</th><th class="num">HIC15</th><th class="num">Shift</th><th class="num">Shift / 95% width</th></tr>
-  <tr><td><em>g</em> = 9.81 instead of 9.80665</td><td class="num">150.26</td><td class="num">&minus;0.13</td><td class="num">0.13</td></tr>
-  <tr><td>Pre-impact mean subtracted from each channel</td><td class="num">150.41</td><td class="num">+0.02</td><td class="num">0.02</td></tr>
+  <tr><th>Checked against</th><th class="num">Arcs</th><th class="num">Inside, long/short</th><th class="num">Inside, left/right</th></tr>
+  <tr><td>the whole-flight answer</td><td class="num">23</td><td class="num">18 (78%)</td><td class="num">22 (96%)</td></tr>
+  <tr><td>the crossing seen in the frames</td><td class="num">8</td><td class="num">7</td><td class="num">7</td></tr>
 </table>
-<p class="plain">Table 3. Each fixed choice changed on its own, against HIC15 = 150.39.</p>
 
-<p>Neither change moves HIC15 outside the block interval. Rounding <em>g</em> to 9.81 would,
-however, move the answer outside the independent-noise interval. The window limit and the filter
-class are set by the standards, so they are fixed by rule and not varied here.</p>
+<p>Of the five long/short misses against the whole-flight answer, four came down shorter than the
+interval allowed and one longer (Figure&nbsp;3). The one left/right miss, arc 83, came down further
+left. Against the crossings seen in the frames, the long/short miss is arc 1144, whose interval ran
+from +0.25 to +0.95&nbsp;m while the ball came down at +0.05&nbsp;m. Its left/right miss is on the
+edge of the interval (&minus;0.03&nbsp;m against an upper end of &minus;0.03&nbsp;m at two
+decimals).</p>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r09-rep-coverage.svg?v=20261102180601"
+    alt="A vertical bar for each of 23 training arcs, the long/short interval minus the whole-flight
+    answer in meters, with a black line at zero. Eighteen blue bars cross zero. Four red bars sit
+    wholly above it, the highest from about 0.4 to 1.25 m, and one red bar sits wholly below it,
+    from about minus 0.7 to minus 0.08 m."></div>
+  <figcaption>Figure 3. Each training arc's long/short interval with its whole-flight answer
+  subtracted. A bar that crosses zero (blue) contains the answer. A red bar above zero is an arc
+  where the ball came down shorter than its interval allowed.</figcaption>
+</figure>
+
+<p><strong>What the count means.</strong> Left/right, 22 of 23 is close enough to 90% that the
+count gives no reason to doubt the label. Long/short, 18 of 23 is short of 90% by about three arcs,
+and the misses fall mostly on one side. A miss that is only a matter of width should fall on either
+side about equally. Four of five on the short side may mean that the predictions run long, though
+the count alone is weak evidence of it. If each miss were as likely to fall on one side as the
+other, a split of 4 to 1 or more lopsided would still come up about 37% of the time. The stronger
+reason is the drag finding on <a href="coverage.html">Coverage</a>, where fitting gravity freely
+gives less than 9.81&nbsp;m/s&sup2;, most likely because of drag. The model here has no drag, and a
+ball slowed by the air would likely come down shorter than a drag-free fit to its first frames
+predicts. I have not tested that here. Until it is tested, the long/short interval is better quoted
+as below 90%, likely nearer 80%, than as 90%.</p>
 
 <h4>Errors and Anomalies</h4>
-<p><strong>The pre-impact noise is not independent from sample to sample.</strong> Neighboring
-samples have autocorrelations of 0.79 to 0.89 (Table 1). The 4000&nbsp;Hz prefilter probably
-accounts for that much, since smoothing makes neighbors alike. It would not explain the Y and Z
-channels still being correlated at 5&nbsp;ms (0.46 and 0.37), so something slower is in the record
-too.</p>
-<p><strong>The Y channel drifts.</strong> Across the 50&nbsp;ms before impact it rises by a few
-m/s&sup2; and falls back (Figure 1), which is probably where its negative correlation at long lags
-comes from. It could be the dummy's head moving while the car is towed, or a slow drift in
-the instrument. I cannot tell which from the record. The block model treats it as noise, which
-probably makes the interval wider than the instrument noise alone would.</p>
+
+<p><strong>Most arcs hit something before rim height.</strong> Only 8 of the 23 arcs run in free
+flight down to rim height. On the rest, the first downward pass through rim height comes after a
+bounce. As a result the main check is against a fitted answer, and
+<a href="coverage.html">Coverage</a> notes that such a check is if anything gentler than reality.
+The fitted answer agreed with the seen crossing to within 0.12&nbsp;m on the 8 arcs that have
+both.</p>
+
+<p><strong>Arc 325 is filled in.</strong> A stretch of its height runs in straight lines, as found in
+assignment 5, and it was left out, which leaves 23 arcs.</p>
+
+<p><strong>Record 685 is the shortest.</strong> It has 6 frames after the last push, and its
+long/short interval (+0.52 to +1.49&nbsp;m) is the widest of the 12 and reaches furthest past the
+hoop. It may be less trustworthy than its interval suggests, since the fewer the frames, the further
+the fit has to reach.</p>
 
 <h4>Assumptions</h4>
+
 <ul>
-  <li>Time zero is the moment of impact, and the 50&nbsp;ms before it holds no crash signal. The
-  car is towed at constant speed, so the true acceleration there should be zero.</li>
-  <li>The noise during the crash has the same size and character as the noise before it. I have
-  not checked this, and an instrument under the crash load may well behave differently.</li>
-  <li>The three channels' noise is independent of each other, so each gets its own draw. I have not
-  checked this either.</li>
-  <li>The instruments are calibrated correctly. A scale error would move every rerun the same way,
-  and no resampling can show it.</li>
-  <li>Each rerun adds fresh noise to a record that already carries its own, so the reruns probably
-  hold about twice the noise of the record, and the interval is likely somewhat wider than the
-  noise alone would give. I have left it that way, since it errs on the side of a wider
-  interval.</li>
+  <li>The coordinates are in meters, as the rim height is.</li>
+  <li>The tracker's noise is normal, at the header's level and independent from frame to frame. The
+  header says it is mildly correlated. Correlated noise would likely move the fit further than
+  independent draws do.</li>
+  <li>The flight starts on the frame after the last upward push. Starting a frame later moves the
+  answers by about a tenth of the interval width.</li>
+  <li>Gravity is 9.81&nbsp;m/s&sup2;, and the ball follows a parabola with no drag or spin.</li>
+  <li>A training arc cut 7 frames after its last push stands for a short record.</li>
+  <li>The whole-flight fit, with gravity free, is close enough to where the ball would have come
+  down to serve as the answer.</li>
 </ul>
 
 <h4>Appendix. Program</h4>
-<pre class="nb-in">"""Assignment 8: an uncertainty interval on the driver's HIC15.
 
-Run this from the unzipped pack folder. It
-  1. measures the noise on the three driver head channels over the 50 ms
-     before impact, including how much each sample resembles its neighbors,
-  2. reruns the whole HIC15 calculation (CFC 1000 filter, resultant, 15 ms
-     window search) 1000 times with noise added, for two noise models:
-       independent: Gaussian noise drawn fresh for each sample, same sigma
-       blocks:      10 ms pieces cut at random from the pre-impact record itself
-  3. gives the 90% and 95% intervals for both,
-  4. changes each judgment call that was held fixed (g and the baseline), one
-     at a time, to see how far it moves HIC15.
-Saves noise_before_impact.svg, noise_autocorrelation.svg and hic_draws.svg.
+<pre class="nb-in">"""Assignment 8: 90% intervals on where each short record comes down through rim height.
+
+Run this from the unzipped pack folder. For each short record it fits the frames
+after the last upward push (a parabola in height with gravity held at 9.81, and
+straight lines across the floor), solves for the point where the falling ball
+reaches rim height, and splits that point into long/short (along the line
+from the first fitted frame to the hoop) and left/right (across that line). It
+then adds noise at the tracker's stated level to the fitted frames and fits and
+solves again, 1000 times. The 50 lowest and 50 highest answers are left out, and the other 900
+span the 90% interval.
+
+The training arcs are cut to the length of a short record and given the same
+intervals, which are checked against where each whole arc says the ball came
+down. It prints a line per record and per arc and the counts, and saves
+cloud.svg, short_intervals.svg and coverage.svg.
 """
-import glob
 import json
-import math
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-G = 9.80665        # standard gravity, m/s^2 in one g
-DRAWS = 1000       # reruns per noise model
-BLOCK_MS = 10      # length of a block for the 'blocks' model
-CODES = ['11HEADCG0000ACXP', '11HEADCG0000ACYP', '11HEADCG0000ACZP']
+G = 9.81               # m/s^2, held fixed
+RIM = 3.048            # m, rim height (from the header)
+WINDOW = 9             # frames in each acceleration estimate (0.32 s)
+TOL = 5.0              # m/s^2, how close to -g counts as free flight
+RUN = 4                # frames in a row, for the end of a whole flight
+DRAWS = 1000           # reruns per record
+LEAVE = DRAWS // 20    # 50 answers left out at each end, which leaves 90%
+SEED = 8               # the same random numbers on every run
+SHOW = 1299            # the short record drawn in cloud.svg
 
 
-def cfc(y, dt, cls):
-    """SAE J211-1 four-pole Butterworth (Smoothing notes), forward then backward."""
-    wd = 2 * math.pi * cls * 2.0775
-    wa = math.tan(wd * dt / 2)
-    d = 1 + math.sqrt(2) * wa + wa ** 2
-    a0 = wa ** 2 / d
-    b1 = -2 * (wa ** 2 - 1) / d
-    b2 = (-1 + math.sqrt(2) * wa - wa ** 2) / d
-
-    def one_pass(x):
-        out = np.zeros(len(x))
-        for i in range(2, len(x)):
-            out[i] = (a0 * x[i] + 2 * a0 * x[i - 1] + a0 * x[i - 2]
-                      + b1 * out[i - 1] + b2 * out[i - 2])
-        return out
-
-    forward = one_pass(y)
-    backward = one_pass(forward[::-1])
-    return backward[::-1]
+def load(name):
+    with open(f'shots/{name}.json') as f:
+        return json.load(f)
 
 
-def hic(a, dt, limit_ms):
-    """Largest HIC over every window up to limit_ms, a = resultant in g.
-    Prefix sum of the trapezoid integral, one numpy pass per window length."""
-    panels = (a[1:] + a[:-1]) / 2 * dt
-    S = np.concatenate([[0.0], np.cumsum(panels)])
-    kmax = round(limit_ms / 1000 / dt)          # the limit in samples
-    best = 0.0
-    for k in range(1, kmax + 1):
-        T = k * dt
-        mean = np.clip((S[k:] - S[:-k]) / T, 0, None)   # every window of length k at once
-        best = max(best, np.max(T * mean ** 2.5))
-    return best
+def accel(t, z):
+    """Vertical acceleration at every frame, from a parabola through the 9 frames
+    centered on it. NaN where the window runs off either end."""
+    h = WINDOW // 2
+    a = np.full(len(t), np.nan)
+    for i in range(h, len(t) - h):
+        c = np.polyfit(t[i - h:i + h + 1] - t[i], z[i - h:i + h + 1], 2)
+        a[i] = 2 * c[0]
+    return a
 
 
-def pipeline(chs, dt, cls=1000, limit_ms=15, g=G):
-    """The whole analysis: filter each component, resultant in g, HIC search.
-    cls=None skips the filter."""
-    if cls is not None:
-        filtered = []
-        for c in chs:
-            filtered.append(cfc(c, dt, cls))
-        chs = filtered
-    total = 0
-    for c in chs:
-        total = total + c ** 2
-    return hic(np.sqrt(total) / g, dt, limit_ms)
+def last_push(t, z):
+    """The last frame before the top where the acceleration is upward (the hand
+    is still on the ball). With no such frame, the first frame that has an
+    acceleration estimate."""
+    a = accel(t, z)
+    top = int(np.argmax(z))
+    last = WINDOW // 2
+    for i in range(top):
+        if a[i] &gt; 0:
+            last = i
+    return last
 
 
-def autocorr(r, lag):
-    """Correlation between the noise and itself shifted by lag samples."""
-    return np.corrcoef(r[:-lag], r[lag:])[0, 1]
+def release(t, z):
+    """Assignment 5's release on a whole arc: the first frame after the last push
+    where the acceleration is within TOL of -g for RUN frames in a row."""
+    a = accel(t, z)
+    for i in range(last_push(t, z) + 1, len(t) - RUN + 1):
+        if np.all(np.abs(a[i:i + RUN] + G) &lt; TOL):
+            return i
 
 
-def independent_noise(pre, n, rng):
-    return rng.normal(0, np.std(pre), n)
+def flight_end(t, z):
+    """Assignment 5's end of a whole flight: the frame before the acceleration
+    leaves the band for RUN frames (the ball hit something), or before the ball
+    drops below rim height, whichever comes first."""
+    a = accel(t, z)
+    for i in range(int(np.argmax(z)), len(t) - RUN + 1):
+        if np.all(np.abs(a[i:i + RUN] + G) &gt;= TOL) or z[i] &lt; RIM:
+            return i - 1
+    return len(t) - 1
 
 
-def block_noise(pre, n, rng):
-    """Join random 10 ms pieces of the (mean-removed) pre-impact record."""
-    r = pre - np.mean(pre)
-    pieces = []
-    for k in range(n // BLOCK + 1):
-        s = rng.integers(0, len(r) - BLOCK + 1)     # a random start
-        pieces.append(r[s:s + BLOCK])
-    return np.concatenate(pieces)[:n]
+def filled_in(z):
+    """True if the height runs in a straight line for 6 steps or more, which
+    3 cm of tracking noise cannot do (the tracker filled a gap)."""
+    flat = np.abs(np.diff(z, 2)) &lt; 0.001
+    for i in range(len(flat) - 4):
+        if np.all(flat[i:i + 5]):
+            return True
+    return False
 
 
-name = glob.glob('crash/*.json')[0]     # the crash folder holds one test file
-with open(name) as f:
-    test = json.load(f)
-chans = []
-for c in test['channels'].values():
-    if c['code'] in CODES:
-        chans.append(c)
-dt = chans[0]['dt']
-n = chans[0]['n']
-t0 = chans[0]['t0']
-t_ms = 1000 * (t0 + dt * np.arange(n))
-before = t_ms &lt; 0
-raw = []                                # each channel's samples
-pre = []                                # the part of each before impact
-for c in chans:
-    y = np.array(c['y'])
-    raw.append(y)
-    pre.append(y[before])
-# a block is 10 ms of samples, and never more than half the stretch before impact,
-# so the blocks can start in more than one place
-BLOCK = min(round(BLOCK_MS / 1000 / dt), len(pre[0]) // 2)
+def line(t, v):
+    """Least-squares straight line v = c0 + c1 t."""
+    A = np.column_stack([np.ones_like(t), t])
+    return np.linalg.lstsq(A, v, rcond=None)[0]
 
-# 1. the noise
-print(f"{len(chans)} head channels, {n} samples every {dt * 1000:g} ms, "
-      f"{t_ms[0]:.2f} to {t_ms[-1]:.2f} ms")
-print(f"pre-impact stretch: {np.sum(before)} samples, "
-      f"{t_ms[0]:.2f} to {t_ms[before][-1]:.2f} ms")
-LAGS = []
-for lag in [1, 20, 100, 200]:             # in samples, kept only if the stretch is long enough
-    if lag &lt; len(pre[0]) // 2:
-        LAGS.append(lag)
-columns = []
-for lag in LAGS:
-    columns.append(f'r({lag * dt * 1000:g} ms)')
-print(f"{'code':18} {'prefilter':&gt;9} {'mean':&gt;7} {'sigma':&gt;6} {'sigma':&gt;7}   "
-      + '  '.join(columns))
-for m in range(len(chans)):
-    c = chans[m]
-    p = pre[m]
-    r = p - np.mean(p)
-    columns = []
-    for lag in LAGS:
-        columns.append(f'{autocorr(r, lag):9.2f}')
-    print(f"{c['code']:18} {c['prefilter_hz']:&gt;6} Hz {np.mean(p):7.3f} {np.std(p):6.3f} "
-          f"{np.std(p) / G:6.4f}g   "
-          + '  '.join(columns))
 
-# 2. the value, then the reruns
-value = pipeline(raw, dt)
-print(f"\nHIC15 on the record: {value:.2f}")
-rng = np.random.default_rng(310)
-models = {'independent': independent_noise, 'blocks': block_noise}
-draws = {}
-for name, noise in models.items():      # noise is a function: one of the two above
-    runs = []
+def crossing(t, x, y, z, fit_gravity=False):
+    """Fit the frames given and solve for the falling crossing of rim height.
+    Returns the time from the first frame given, and x and y there."""
+    t = t - t[0]
+    if fit_gravity:
+        A = np.column_stack([np.ones_like(t), t, t ** 2])
+        c0, c1, c2 = np.linalg.lstsq(A, z, rcond=None)[0]
+    else:   # the known term moves to the left-hand side
+        c0, c1 = line(t, z + 0.5 * G * t ** 2)
+        c2 = -G / 2
+    # c2 t^2 + c1 t + (c0 - RIM) = 0; with c2 &lt; 0 the later root has the minus sign
+    tc = (-c1 - np.sqrt(c1 ** 2 - 4 * c2 * (c0 - RIM))) / (2 * c2)
+    bx = line(t, x)
+    by = line(t, y)
+    return tc, bx[0] + bx[1] * tc, by[0] + by[1] * tc
+
+
+def observed(x, y, z):
+    """The frame just before the ball comes down through rim height, and where it
+    crossed, by straight-line interpolation between that frame and the next."""
+    for k in range(int(np.argmax(z)), len(z) - 1):
+        if z[k] &gt;= RIM and z[k + 1] &lt; RIM:
+            f = (z[k] - RIM) / (z[k] - z[k + 1])
+            return k, x[k] + f * (x[k + 1] - x[k]), y[k] + f * (y[k + 1] - y[k])
+
+
+def split(x, y, s, x0, y0):
+    """A crossing point as (long, right): meters past the hoop center along the
+    line from (x0, y0), the first fitted frame, to the hoop, and meters to the
+    right of that line as the shooter sees it."""
+    ux = s['hoop_x'] - x0
+    uy = s['hoop_y'] - y0
+    n = np.hypot(ux, uy)
+    ux = ux / n
+    uy = uy / n
+    dx = x - s['hoop_x']
+    dy = y - s['hoop_y']
+    return dx * ux + dy * uy, uy * dx - ux * dy
+
+
+def interval(t, x, y, z, first, s, rng):
+    """The crossing from the frames, and its 90% interval from DRAWS reruns with
+    the tracker's noise added to the fitted frames. Returns the value, the low
+    and high ends (each as long, right) and every rerun's answer."""
+    t = t[first:]
+    x = x[first:]
+    y = y[first:]
+    z = z[first:]
+    x0 = x[0]
+    y0 = y[0]
+    tc, xc, yc = crossing(t, x, y, z)
+    value = split(xc, yc, s, x0, y0)
+    runs = np.zeros((DRAWS, 2))
     for k in range(DRAWS):
-        noisy = []
-        for m in range(len(raw)):
-            noisy.append(raw[m] + noise(pre[m], n, rng))
-        runs.append(pipeline(noisy, dt))
-    draws[name] = np.array(runs)
+        zk = z + SIG_Z * rng.standard_normal(len(z))
+        xk = x + SIG_XY * rng.standard_normal(len(x))
+        yk = y + SIG_XY * rng.standard_normal(len(y))
+        tc, xc, yc = crossing(t, xk, yk, zk)
+        runs[k] = split(xc, yc, s, x0, y0)
+    ends = np.sort(runs, axis=0)
+    return np.array(value), ends[LEAVE], ends[DRAWS - 1 - LEAVE], runs
 
-# 3. the intervals
-print(f"\n{'noise model':12} {'median':&gt;7} {'90% interval':&gt;17} {'width':&gt;6} "
-      f"{'95% interval':&gt;17} {'width':&gt;6}")
-for name, d in draws.items():
-    l90, h90, l95, h95 = np.percentile(d, [5, 95, 2.5, 97.5])
-    print(f"{name:12} {np.median(d):7.2f} {l90:8.2f} to {h90:6.2f} {h90 - l90:6.2f} "
-          f"{l95:8.2f} to {h95:6.2f} {h95 - l95:6.2f}")
 
-# 4. what was held fixed, changed one at a time
-l95, h95 = np.percentile(draws['blocks'], [2.5, 97.5])
-print(f"\n{'held fixed, changed to':34} {'HIC15':&gt;7} {'shift':&gt;7} "
-      f"{'x 95% width':&gt;11}")
-changes = {}
-changes['g = 9.81'] = pipeline(raw, dt, g=9.81)
-corrected = []
-for m in range(len(raw)):
-    corrected.append(raw[m] - np.mean(pre[m]))
-changes['pre-impact mean subtracted'] = pipeline(corrected, dt)
-for name, v in changes.items():
-    ratio = abs(v - value) / (h95 - l95)
-    print(f"{name:34} {v:7.2f} {v - value:+7.2f} {ratio:11.2f}")
+rng = np.random.default_rng(SEED)
+train = load('train')
+short = load('test_short')
+noise = train['header']['tracking_noise']
+SIG_Z = noise['vertical_m']
+SIG_XY = noise['horizontal_m']
+print(f'tracker noise from the header: vertical {100 * SIG_Z:.2f} cm, '
+      f'horizontal {100 * SIG_XY:.2f} cm')
 
-# Figure 1: the pre-impact stretch of each channel
-fig, axs = plt.subplots(3, 1, figsize=(8, 6), sharex=True)
-for m in range(len(chans)):
-    ax = axs[m]
-    c = chans[m]
-    ax.plot(t_ms[before], pre[m], linewidth=0.7)
-    ax.set_title(f"{c['comment']}  [{c['code']}]", fontsize=9)
-    ax.set_ylabel('acceleration (m/s$^2$)', fontsize=8)
-axs[-1].set_xlabel('time from impact (ms)')
-fig.suptitle(f"Driver head acceleration in the {-t_ms[0]:.0f} ms before impact, test {test['testNo']}",
-             fontsize=10)
-fig.tight_layout()
-fig.savefig('noise_before_impact.svg')
-plt.close(fig)
+# how many frames does a short record have after the last push?
+after = []
+for s in short['shots']:
+    t = np.array(s['t'])
+    after.append(len(t) - 1 - last_push(t, np.array(s['z'])))
+N_AFTER = int(np.median(after))
+print(f'frames after the last upward push in the short records: '
+      f'median {N_AFTER}, range {min(after)} to {max(after)}')
 
-# Figure 2: how alike neighboring samples are
-lags = np.arange(1, min(501, len(pre[0]) // 2 + 1))   # up to half the stretch
-plt.figure(figsize=(8, 3.6))
-for m in range(len(chans)):
-    r = pre[m] - np.mean(pre[m])
-    corr = []
-    for lag in lags:
-        corr.append(autocorr(r, lag))
-    plt.plot(lags * dt * 1000, corr, label=chans[m]['code'])
-plt.axhline(0, color='gray', linewidth=0.8)
-plt.axvline(BLOCK * dt * 1000, color='gray', linestyle='--', linewidth=0.8,
-            label=f'block length, {BLOCK * dt * 1000:g} ms')
-plt.title('Autocorrelation of the pre-impact noise (independent noise would sit at 0)')
-plt.xlabel('lag (ms)')
-plt.ylabel('autocorrelation (no units)')
+# the 12 short records
+print()
+print('short records, 90% intervals (m): past the hoop center, and right of the line to it')
+print(f"{'id':&gt;5} {'fitted':&gt;6} {'long':&gt;6} {'90% interval':&gt;16} {'right':&gt;6} {'90% interval':&gt;16}")
+rows = []
+for s in short['shots']:
+    t, x, y, z = [np.array(s[k]) for k in 'txyz']
+    first = last_push(t, z) + 1
+    v, lo, hi, runs = interval(t, x, y, z, first, s, rng)
+    rows.append((s['id'], v, lo, hi))
+    if s['id'] == SHOW:
+        show_runs = runs
+        show_v = v
+    print(f"{s['id']:&gt;5} {len(t) - first:&gt;6} {v[0]:+6.2f} [{lo[0]:+6.2f}, {hi[0]:+6.2f}] "
+          f"{v[1]:+6.2f} [{lo[1]:+6.2f}, {hi[1]:+6.2f}]")
+widths = np.array([hi - lo for sid, v, lo, hi in rows])
+print(f'median width: long/short {np.median(widths[:, 0]):.2f} m, '
+      f'left/right {np.median(widths[:, 1]):.2f} m')
+
+# held fixed: the first fitted frame. Start one frame later and see how far it moves
+moved = []
+for s, (sid, v, lo, hi) in zip(short['shots'], rows):
+    t, x, y, z = [np.array(s[k]) for k in 'txyz']
+    first = last_push(t, z) + 2
+    tc, xc, yc = crossing(t[first:], x[first:], y[first:], z[first:])
+    moved.append(np.abs(np.array(split(xc, yc, s, x[first], y[first])) - v))
+moved = np.array(moved)
+print(f'starting one frame later moves the value by a median of '
+      f'{np.median(moved[:, 0]):.2f} m long/short and {np.median(moved[:, 1]):.2f} m left/right')
+
+# the training arcs, cut to the same number of frames after the last push
+print()
+print(f'training arcs cut {N_AFTER} frames after the last push; '
+      'answer = whole flight fitted, gravity free')
+print(f"{'id':&gt;5} {'long':&gt;16} {'answer':&gt;6} {'seen':&gt;6} {'right':&gt;16} {'answer':&gt;6} {'seen':&gt;6}")
+cover = []
+checked = []
+arc_rows = []
+for s in train['shots']:
+    t, x, y, z = [np.array(s[k]) for k in 'txyz']
+    if filled_in(z):
+        print(f"{s['id']:&gt;5}  left out: a stretch of the height is filled in")
+        continue
+    # the answer: the whole free flight, fitted with gravity free, solved for rim height
+    r = release(t, z)
+    e = flight_end(t, z)
+    tc, xc, yc = crossing(t[r:e + 1], x[r:e + 1], y[r:e + 1], z[r:e + 1], fit_gravity=True)
+    # the record as a short record would have been, and its interval
+    end = last_push(t, z) + N_AFTER + 1
+    tk, xk, yk, zk = t[:end], x[:end], y[:end], z[:end]
+    first = last_push(tk, zk) + 1
+    v, lo, hi, runs = interval(tk, xk, yk, zk, first, s, rng)
+    answer = np.array(split(xc, yc, s, xk[first], yk[first]))
+    cover.append([lo[0] &lt;= answer[0] &lt;= hi[0], lo[1] &lt;= answer[1] &lt;= hi[1],
+                  answer[0] &lt; lo[0], answer[0] &gt; hi[0], answer[1] &lt; lo[1], answer[1] &gt; hi[1]])
+    arc_rows.append((lo[0] - answer[0], hi[0] - answer[0]))
+    # if the ball came down through rim height before touching anything (the
+    # flight runs to within half a window of it), the frames show the crossing too
+    k, xo, yo = observed(x, y, z)
+    if e &gt;= k - WINDOW // 2:
+        obs = np.array(split(xo, yo, s, xk[first], yk[first]))
+        checked.append([lo[0] &lt;= obs[0] &lt;= hi[0], lo[1] &lt;= obs[1] &lt;= hi[1]])
+        seen = [f'{obs[0]:+6.2f}', f'{obs[1]:+6.2f}']
+    else:
+        seen = ['-', '-']
+    print(f"{s['id']:&gt;5} [{lo[0]:+6.2f}, {hi[0]:+6.2f}] {answer[0]:+6.2f} {seen[0]:&gt;6} "
+          f"[{lo[1]:+6.2f}, {hi[1]:+6.2f}] {answer[1]:+6.2f} {seen[1]:&gt;6}")
+cover = np.array(cover)
+checked = np.array(checked)
+n = len(cover)
+print()
+print(f'answer inside the 90% interval, {n} arcs: long/short {np.sum(cover[:, 0])}, '
+      f'left/right {np.sum(cover[:, 1])}')
+print(f'  long/short outside: {np.sum(cover[:, 2])} shorter, {np.sum(cover[:, 3])} longer')
+print(f'  left/right outside: {np.sum(cover[:, 4])} further left, {np.sum(cover[:, 5])} further right')
+print(f'crossing seen in the frames, {len(checked)} arcs: inside long/short {np.sum(checked[:, 0])}, '
+      f'left/right {np.sum(checked[:, 1])}')
+
+# Figure 1: the reruns for one short record, as points where the ball crosses
+plt.figure(figsize=(5.5, 5.5))
+plt.plot(show_runs[:, 1], show_runs[:, 0], '.', markersize=2, alpha=0.4,
+         label=f'{DRAWS} reruns')
+plt.plot(show_v[1], show_v[0], 'kx', markersize=10, label='fitted to the record')
+angle = np.linspace(0, 2 * np.pi, 200)
+hoop_r = train['header']['hoop_inner_radius_m']
+plt.plot(hoop_r * np.cos(angle), hoop_r * np.sin(angle), 'k-', linewidth=1,
+         label='inside of the rim')
+plt.axis('equal')
+plt.xlabel('right of the line to the hoop (m)')
+plt.ylabel('past the hoop center (m)')
+plt.title(f'Short record {SHOW}: where the reruns cross rim height')
 plt.legend(fontsize=8)
 plt.tight_layout()
-plt.savefig('noise_autocorrelation.svg')
+plt.savefig('cloud.svg')
 plt.close()
 
-# Figure 3: the reruns under both noise models, 95% intervals marked
-plt.figure(figsize=(8, 3.8))
-lowest = min(np.min(draws['independent']), np.min(draws['blocks']))
-highest = max(np.max(draws['independent']), np.max(draws['blocks']))
-bins = np.linspace(lowest, highest, 50)
-colors = {'independent': 'tab:blue', 'blocks': 'tab:orange'}
-for name, d in draws.items():
-    col = colors[name]
-    lo, hi = np.percentile(d, [2.5, 97.5])
-    plt.hist(d, bins=bins, alpha=0.6, color=col,
-             label=f'{name}: 95% interval {lo:.2f} to {hi:.2f}')
-    for v in (lo, hi):
-        plt.axvline(v, color=col, linestyle='--', linewidth=1)
-plt.axvline(value, color='black', linewidth=1.2,
-            label=f'value on the record, {value:.2f}')
-plt.title(f'HIC15 over {DRAWS} reruns for each noise model')
-plt.xlabel('HIC15 (a in g, t in s)')
-plt.ylabel('number of reruns')
+# Figure 2: the intervals on the 12 short records
+fig, axes = plt.subplots(1, 2, figsize=(9, 4.2), sharey=True)
+pos = np.arange(len(rows))
+for col, ax, label in [(0, axes[0], 'past the hoop center (m)'),
+                       (1, axes[1], 'right of the line to the hoop (m)')]:
+    for p, (sid, v, lo, hi) in zip(pos, rows):
+        ax.plot([lo[col], hi[col]], [p, p], 'k-')
+        ax.plot(v[col], p, 'ko')
+    ax.axvline(0, color='gray', linewidth=0.8)
+    ax.set_xlabel(label)
+axes[0].set_yticks(pos)
+axes[0].set_yticklabels([str(sid) for sid, v, lo, hi in rows])
+axes[0].set_ylabel('short record (shot id)')
+axes[0].set_title('Long (+) or short (-)')
+axes[1].set_title('Right (+) or left (-)')
+fig.suptitle('90% intervals on the rim crossing, 12 short records')
+fig.tight_layout()
+fig.savefig('short_intervals.svg')
+plt.close(fig)
+
+# Figure 3: the long/short check on the training arcs, each interval drawn
+# relative to its answer, so an interval that misses the zero line missed
+plt.figure(figsize=(7, 4.2))
+for p, (lo, hi) in enumerate(arc_rows):
+    if lo &lt;= 0 &lt;= hi:
+        color = 'tab:blue'
+    else:
+        color = 'tab:red'
+    plt.plot([p, p], [lo, hi], '-', color=color, linewidth=3)
+plt.axhline(0, color='k', linewidth=0.8)
+plt.xlabel('training arc, cut to a short record (in file order)')
+plt.ylabel('interval minus the answer (m)')
+plt.title(f'Long/short 90% intervals against the whole-flight answer, {n} arcs')
+plt.plot([], [], '-', color='tab:blue', linewidth=3, label='contains the answer')
+plt.plot([], [], '-', color='tab:red', linewidth=3, label='misses it')
 plt.legend(fontsize=8)
 plt.tight_layout()
-plt.savefig('hic_draws.svg')</pre>
+plt.savefig('coverage.svg')
+plt.close()</pre>
 </div>
 
 <div class="aside notice"><span class="label">What to notice</span>
-<p>The summary answers all four of Alice's questions before any heading. Table 1 and Figure 2 are
-the evidence for the main decision (the noise is not independent). The choice of noise model is
-therefore argued from the data. Tables 2 and 3 put the noise models and the fixed choices in the
-same units, so a reader can see that neither judgment call moves the answer beyond the interval.</p>
+<p>The summary gives both intervals, both counts and what the counts mean, in that order. The
+report splits the crossing into two signed numbers so that each interval can fall on either side of
+zero (a distance cannot), and it gives a reason for doing so. The table of what was varied and what was held fixed
+answers one of Bob's questions directly, and the report tests one of the held-fixed choices (the
+first fitted frame) against the width of the interval.
+The check is made two ways, and the report says which of the two is a fit and what that may cost.
+When the count comes out short, the report looks at which side the misses fall on before saying
+what the count means, since misses that fall mostly on one side may point to a cause the noise
+does not include (see <a href="coverage.html">Coverage</a>).</p>
 </div>
 
 <h2 id="a-notebook">A Notebook</h2>
 
 <div class="aside report"><span class="label">Example 3 &middot; Notebook, exported to PDF</span>
-<p><strong>Assignment 8, an interval on the driver's HIC15.</strong> Data phrase: example pack (test 9793)</p>
+<p><strong>Assignment 8, intervals on the rim crossing.</strong> Data phrase: example pack (test 9793)</p>
 
-<p><strong>Answer for Alice.</strong> HIC15 = 150.4, 90% interval 149.9 to 150.9, from 500
-reruns with the recorded pre-impact noise added to the head channels. What I varied, what I held
-fixed and whether I would sign it are at the end.</p>
-
-<p>I did this in Google Colab. The plan from the Resampling notes is to add noise to the three
-head channels, rerun the whole HIC calculation from assignment 6 many times, and look at the spread
-of the answers. The 50&nbsp;ms before impact is the noise on its own, so I start there.</p>
+<p>I did this in Google Colab. My plan is to predict where each short record crosses rim height in
+the court's own coordinates (<em>x</em> along the court and <em>y</em> across it, measured from the
+hoop center), then rerun the prediction with noise added to the frames. For the noise I am going to
+use the residuals left over when I fit the training arcs' whole flights, so the noise is drawn from
+what the data show. First, what is in the files.</p>
 
 <pre class="nb-in">import json
 import numpy as np
+import matplotlib.pyplot as plt
 
-with open('crash/09793.json') as f:
-    test = json.load(f)
+with open('shots/train.json') as f:
+    train = json.load(f)
+with open('shots/test_short.json') as f:
+    short = json.load(f)
 
-head = [test['channels']['head_x'], test['channels']['head_y'], test['channels']['head_z']]
-dt = head[0]['dt']
-n = head[0]['n']
-t0 = head[0]['t0']
-t_ms = 1000 * (t0 + dt * np.arange(n))
-x = np.array(head[0]['y'])
-y = np.array(head[1]['y'])
-z = np.array(head[2]['y'])
-quiet = t_ms &lt; 0          # the 50 ms before impact
+print(len(train['shots']), 'training arcs,', len(short['shots']), 'short records')
+for key, value in train['header']['tracking_noise'].items():
+    print(key, ':', value)</pre>
+<pre class="nb-out">24 training arcs, 12 short records
+vertical_m : 0.0307
+horizontal_m : 0.0284
+note : measured across the set, not quoted by the vendor; mildly correlated frame to frame</pre>
 
-print(np.sum(quiet), 'samples before impact')
-for c in head:
-    a = np.array(c['y'])
-    print(c['code'], c['comment'],
-          f' mean {np.mean(a[quiet]):.3f}  sigma {np.std(a[quiet]):.3f} m/s^2')</pre>
-<pre class="nb-out">1000 samples before impact
-11HEADCG0000ACXP V1P1 HEAD CG X ACCELERATION  mean 0.054  sigma 0.811 m/s^2
-11HEADCG0000ACYP V1P1 HEAD CG Y ACCELERATION  mean -0.205  sigma 1.061 m/s^2
-11HEADCG0000ACZP V1P1 HEAD CG Z ACCELERATION  mean 0.097  sigma 0.929 m/s^2</pre>
+<p>The header puts the noise at about 3&nbsp;cm and says it is mildly correlated from frame to
+frame, which I will come back to. Next, the prediction itself. I take the flight as starting on the
+frame after the last upward push, and fit a parabola with gravity held at 9.81 to the height and a
+straight line to each floor coordinate.</p>
 
-<p>Each channel has 1000 quiet samples, and the spread (sigma, the standard deviation) is about
-1&nbsp;m/s&sup2;, or about 0.1&nbsp;<em>g</em>. The means are not quite zero. The biggest is
-&minus;0.205&nbsp;m/s&sup2; on Y, about 0.02&nbsp;<em>g</em>, so I left it in. Next the calculation
-from assignment 6, written as functions so I can rerun it. The HIC search loops over window lengths
-and does every start time at once, because the double loop I used in assignment 6 is too slow to
-run hundreds of times.</p>
+<pre class="nb-in">G = 9.81
+RIM = 3.048
 
-<pre class="nb-in">import math
-G = 9.80665
+def last_push(t, z):
+    # the last frame before the top where a parabola through the 9 frames
+    # around it curves upward, so the hand is still pushing
+    top = int(np.argmax(z))
+    last = 4
+    for i in range(4, min(top, len(t) - 4)):
+        c = np.polyfit(t[i-4:i+5] - t[i], z[i-4:i+5], 2)
+        if c[0] &gt; 0:
+            last = i
+    return last
 
-def cfc(y, dt, cls):
-    # SAE J211-1 filter, copied from the Smoothing notes
-    wd = 2 * math.pi * cls * 2.0775
-    wa = math.tan(wd * dt / 2)
-    d = 1 + math.sqrt(2) * wa + wa ** 2
-    a0 = wa ** 2 / d
-    b1 = -2 * (wa ** 2 - 1) / d
-    b2 = (-1 + math.sqrt(2) * wa - wa ** 2) / d
-    def one_pass(x):
-        out = np.zeros(len(x))
-        for i in range(2, len(x)):
-            out[i] = (a0 * x[i] + 2 * a0 * x[i - 1] + a0 * x[i - 2]
-                      + b1 * out[i - 1] + b2 * out[i - 2])
-        return out
-    forward = one_pass(y)
-    backward = one_pass(forward[::-1])
-    return backward[::-1]
+def fit_cross(t, x, y, z, free_g=False):
+    # fit the frames, then find where the falling ball reaches rim height
+    t = t - t[0]
+    if free_g:
+        cz = np.polyfit(t, z, 2)
+    else:                            # gravity held: fit z + (g/2) t^2 with a line
+        b = np.polyfit(t, z + 0.5*G*t**2, 1)
+        cz = np.array([-G/2, b[0], b[1]])
+    roots = np.roots([cz[0], cz[1], cz[2] - RIM])
+    tc = max(roots.real)             # the later root: the ball coming down
+    cx = np.polyfit(t, x, 1)
+    cy = np.polyfit(t, y, 1)
+    return np.polyval(cx, tc), np.polyval(cy, tc)
 
-def hic(a, dt, limit_ms=15):
-    # prefix sum, then every window length up to the limit, all starts at once
-    panels = (a[1:] + a[:-1]) / 2 * dt
-    S = np.concatenate([[0.0], np.cumsum(panels)])
-    kmax = round(limit_ms / 1000 / dt)
-    best = 0.0
-    for k in range(1, kmax + 1):
-        mean = np.clip((S[k:] - S[:-k]) / (k * dt), 0, None)
-        best = max(best, np.max(k * dt * mean ** 2.5))
-    return best
+after = []
+for s in short['shots']:
+    t, x, y, z = [np.array(s[k]) for k in 'txyz']
+    first = last_push(t, z) + 1
+    after.append(len(t) - first)
+    xc, yc = fit_cross(t[first:], x[first:], y[first:], z[first:])
+    print(f"{s['id']:5}  frames {len(t) - first:2}  hoop at x {s['hoop_x']:6.2f}  "
+          f"crossing x {xc - s['hoop_x']:+.2f}  y {yc - s['hoop_y']:+.2f} m")
+print('median frames after the last push:', np.median(after))</pre>
+<pre class="nb-out">  685  frames  6  hoop at x   1.60  crossing x -0.99  y +0.04 m
+  332  frames 10  hoop at x  27.05  crossing x -0.02  y +0.11 m
+  872  frames  7  hoop at x  27.05  crossing x +0.19  y -0.12 m
+  158  frames  8  hoop at x  27.05  crossing x -0.27  y +0.15 m
+ 1299  frames  7  hoop at x   1.60  crossing x -0.39  y +0.04 m
+  734  frames  7  hoop at x  27.05  crossing x +0.28  y +0.30 m
+  503  frames  8  hoop at x   1.60  crossing x +0.10  y -0.13 m
+  502  frames  7  hoop at x   1.60  crossing x -0.26  y +0.20 m
+ 1317  frames  7  hoop at x   1.60  crossing x -0.16  y +0.38 m
+ 1326  frames  7  hoop at x  27.05  crossing x -0.01  y +0.01 m
+  490  frames  8  hoop at x   1.60  crossing x -0.23  y -0.28 m
+  838  frames  7  hoop at x  27.05  crossing x -0.36  y +0.12 m
+median frames after the last push: 7.0</pre>
 
-def head_hic(x, y, z, g=G, limit_ms=15):
-    fx = cfc(x, dt, 1000)
-    fy = cfc(y, dt, 1000)
-    fz = cfc(z, dt, 1000)
-    return hic(np.sqrt(fx ** 2 + fy ** 2 + fz ** 2) / g, dt, limit_ms)
+<p>Most records have 7 frames to fit. Record 685 has only 6, and its crossing is 0.99&nbsp;m from
+the hoop along the court, much further out than any other. The hoops are at <em>x</em> = 1.60 and
+<em>x</em> = 27.05, so for a shot at the 1.60 hoop a negative <em>x</em> is past the hoop, and for
+a shot at the 27.05 hoop a positive <em>x</em> is. Next, the residuals from whole flights. I end each
+flight at the last frame more than 1&nbsp;m from the hoop, before the ball can touch the rim, and
+leave out arc 325 because its drop was filled in by the tracker (found in assignment&nbsp;5).</p>
 
-value = head_hic(x, y, z)
-print(f'HIC15 = {value:.2f}')</pre>
-<pre class="nb-out">HIC15 = 150.39</pre>
+<pre class="nb-in">def whole_flight(s):
+    # from the frame after the last push to the last frame more than 1 m from
+    # the hoop (measured across the floor), before anything can touch the ball
+    t, x, y, z = [np.array(s[k]) for k in 'txyz']
+    first = last_push(t, z) + 1
+    d = np.hypot(x - s['hoop_x'], y - s['hoop_y'])
+    end = int(np.argmax(d &lt; 1.0))
+    return t[first:end], x[first:end], y[first:end], z[first:end]
 
-<p>That matches assignment 6. Now the first try, the way the Resampling notes do it: independent
-Gaussian noise of each channel's sigma added to the raw channels, 200 runs, and the 5th and 95th
-percentiles as a 90% interval.</p>
+res_z = []
+res_xy = []
+for s in train['shots']:
+    if s['id'] == 325:               # filled-in drop (assignment 5)
+        continue
+    t, x, y, z = whole_flight(s)
+    t = t - t[0]
+    res_z += list(z - np.polyval(np.polyfit(t, z, 2), t))
+    res_xy += list(x - np.polyval(np.polyfit(t, x, 1), t))
+    res_xy += list(y - np.polyval(np.polyfit(t, y, 1), t))
+res_z = np.array(res_z)
+res_xy = np.array(res_xy)
+print(len(res_z), 'height residuals, sd', round(100*np.std(res_z, ddof=1), 2), 'cm')
+print(len(res_xy), 'ground residuals, sd', round(100*np.std(res_xy, ddof=1), 2), 'cm')
 
-<pre class="nb-in">rng = np.random.default_rng(2026)
-sig = [np.std(x[quiet]), np.std(y[quiet]), np.std(z[quiet])]
-
-indep = []
-for k in range(200):
-    indep.append(head_hic(x + rng.normal(0, sig[0], n),
-                          y + rng.normal(0, sig[1], n),
-                          z + rng.normal(0, sig[2], n)))
-lo, hi = np.percentile(indep, [5, 95])
-print(f'independent noise, 200 runs: 90% interval {lo:.2f} to {hi:.2f}, width {hi - lo:.2f}')</pre>
-<pre class="nb-out">independent noise, 200 runs: 90% interval 150.31 to 150.46, width 0.16</pre>
-
-<p>That is tiny, about a tenth of a percent of the value. The noise is filtered at CFC&nbsp;1000 (the
-smoothing filter the standard sets for head acceleration) and then averaged over a 15&nbsp;ms window, so most of it cancels (the Bias and Noise notes say random
-error cancels as it is added up). That only works if each sample's noise is independent of the next
-one's, so I plotted the recorded noise next to independent noise of the same sigma.</p>
-
-<pre class="nb-in">import matplotlib.pyplot as plt
-
-plt.figure(figsize=(8, 3.5))
-plt.plot(t_ms[quiet], y[quiet], label='recorded (head Y)')
-plt.plot(t_ms[quiet], np.mean(y[quiet]) + rng.normal(0, sig[1], np.sum(quiet)),
-         alpha=0.6, label='independent noise, same sigma')
-plt.xlabel('time from impact (ms)')
-plt.ylabel('head Y acceleration (m/s$^2$)')
-plt.title('Driver head Y before impact, against independent noise of the same size')
+plt.hist(100*res_z, bins=30, alpha=0.6, label='height')
+plt.hist(100*res_xy, bins=30, alpha=0.6, label='along and across the court')
+plt.xlabel('residual from a whole-flight fit (cm)')
+plt.ylabel('number of frames')
+plt.title('Residuals of 23 whole flights, pooled')
 plt.legend()
 plt.show()</pre>
+<pre class="nb-out">579 height residuals, sd 2.33 cm
+1158 ground residuals, sd 2.5 cm</pre>
 
 <figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r09-nb-1.svg?v=20261102083412"
-    alt="Driver head Y acceleration over the 50 ms before impact, plotted over independent noise of the
-    same sigma. The independent noise jumps from sample to sample around zero. The recorded noise
-    wanders slowly, starting near -2.5 m/s squared, rising to about +1 and falling back."></div>
-  <figcaption>The notebook's plot of the recorded head Y noise against independent noise.</figcaption>
+  <div class="fig-body"><img src="data/example/figures/r09-nb-1.svg?v=20261102180601"
+    alt="Two overlapping histograms of residuals in centimeters, height in blue and along and across
+    the court in orange, both centered on zero and running from about minus 7 to plus 7, with a few
+    out to 10."></div>
+  <figcaption>The notebook's first plot, in matplotlib's default style.</figcaption>
 </figure>
 
-<p>They do not look alike. The independent noise jumps around from sample to sample. The recorded noise
-wanders up and down over several milliseconds, and across the whole 50&nbsp;ms it climbs by a few
-m/s&sup2; and comes back. Slow wander like that will not cancel inside a 15&nbsp;ms window,
-so <strong>I am flagging the independent-noise interval as probably too narrow</strong>. In place of a
-formula for the noise, I used the recorded noise itself. For each channel, I take the pre-impact
-stretch with its mean removed, repeat it end to end and start it at a random point. Every run then
-gets the real noise in its real order, wander and all. I am keeping 90%, since the Reporting an
-Interval notes give it as the usual level for engineering reports.</p>
+<p>Both pools are centered on zero and roughly bell-shaped. Their spread is 2.33&nbsp;cm in height
+and 2.5&nbsp;cm on the floor, a bit under the header's 3.07 and 2.84. A whole-flight fit has
+three numbers to bend to the noise, so the residuals may come out a little small. I am using them
+anyway, since they are what the data show. Next, the interval. I add residuals drawn at random (with
+replacement) from the pools to the fitted frames, refit, and take the mean of 1000 answers
+&plusmn;&nbsp;1.645 standard deviations, which is the 90% convention on
+<a href="reporting-an-interval.html">Reporting an interval</a>.</p>
 
-<pre class="nb-in">def real_noise(a):
-    # the recorded noise before impact, mean removed, repeated end to end
-    # and started at a random point
-    r = a[quiet] - np.mean(a[quiet])
-    s = rng.integers(len(r))
-    return np.tile(r, n // len(r) + 2)[s:s + n]
+<pre class="nb-in">rng = np.random.default_rng(2026)
+DRAWS = 1000
 
-real = []
-for k in range(500):
-    real.append(head_hic(x + real_noise(x), y + real_noise(y), z + real_noise(z)))
-real = np.array(real)
-lo, hi = np.percentile(real, [5, 95])
-print(f'recorded noise, 500 runs: 90% interval {lo:.2f} to {hi:.2f}, width {hi - lo:.2f}')
-print(f'median {np.median(real):.2f}')
+def interval(t, x, y, z, hoop):
+    # refit DRAWS times, each time adding residuals drawn (with replacement)
+    # from the pools; return mean and 1.645 sd for x and y, from the hoop
+    xs = []
+    ys = []
+    n = len(t)
+    for k in range(DRAWS):
+        xc, yc = fit_cross(t, x + rng.choice(res_xy, n),
+                           y + rng.choice(res_xy, n), z + rng.choice(res_z, n))
+        xs.append(xc - hoop[0])
+        ys.append(yc - hoop[1])
+    return (np.mean(xs), 1.645*np.std(xs, ddof=1),
+            np.mean(ys), 1.645*np.std(ys, ddof=1))
 
-lowest = min(np.min(real), min(indep))
-highest = max(np.max(real), max(indep))
-bins = np.linspace(lowest, highest, 60)
-plt.figure(figsize=(8, 3.5))
-plt.hist(indep, bins=bins, alpha=0.7, label='independent noise (200 runs)')
-plt.hist(real, bins=bins, alpha=0.7, label='recorded noise (500 runs)')
-plt.axvline(value, color='black', label='value on the record')
-plt.axvspan(lo, hi, color='tab:orange', alpha=0.15,
-            label='90% interval, recorded noise')
-plt.xlabel('HIC15 (a in g, t in s)')
-plt.ylabel('number of runs')
-plt.title('Driver HIC15 rerun with noise added, two noise models')
-plt.legend(fontsize=8)
+for s in short['shots']:
+    t, x, y, z = [np.array(s[k]) for k in 'txyz']
+    first = last_push(t, z) + 1
+    mx, hx, my, hy = interval(t[first:], x[first:], y[first:], z[first:],
+                              (s['hoop_x'], s['hoop_y']))
+    print(f"{s['id']:5}  x {mx:+.2f} ± {hx:.2f} m   y {my:+.2f} ± {hy:.2f} m")</pre>
+<pre class="nb-out">  685  x -0.99 ± 0.41 m   y +0.05 ± 0.30 m
+  332  x -0.02 ± 0.13 m   y +0.11 ± 0.16 m
+  872  x +0.19 ± 0.25 m   y -0.11 ± 0.27 m
+  158  x -0.27 ± 0.20 m   y +0.15 ± 0.14 m
+ 1299  x -0.38 ± 0.27 m   y +0.05 ± 0.21 m
+  734  x +0.27 ± 0.25 m   y +0.30 ± 0.21 m
+  503  x +0.09 ± 0.22 m   y -0.13 ± 0.17 m
+  502  x -0.26 ± 0.29 m   y +0.20 ± 0.22 m
+ 1317  x -0.16 ± 0.25 m   y +0.38 ± 0.25 m
+ 1326  x +0.00 ± 0.19 m   y +0.01 ± 0.25 m
+  490  x -0.24 ± 0.21 m   y -0.28 ± 0.20 m
+  838  x -0.36 ± 0.25 m   y +0.13 ± 0.28 m</pre>
+
+<p>The half-widths run from 0.13 to 0.41&nbsp;m along the court and 0.14 to 0.30&nbsp;m across it.
+Record 685 has the widest along the court, as expected with the fewest frames. Last, the check. I
+cut each training arc 7 frames after its last push, give it an interval the same way, and compare
+it with the answer from its whole flight fitted with gravity free. Most arcs hit the rim or the board
+before their center gets down to rim height, so the whole-flight fit is the nearest thing to an
+answer I have on every arc.</p>
+
+<pre class="nb-in">rows = []
+for s in train['shots']:
+    if s['id'] == 325:
+        continue
+    hoop = (s['hoop_x'], s['hoop_y'])
+    # the answer: the whole flight, gravity free, carried down to rim height
+    ax, ay = fit_cross(*whole_flight(s), free_g=True)
+    # the same arc cut 7 frames after the last push, like a short record
+    t, x, y, z = [np.array(s[k]) for k in 'txyz']
+    end = last_push(t, z) + 8
+    first = last_push(t[:end], z[:end]) + 1
+    mx, hx, my, hy = interval(t[first:end], x[first:end], y[first:end],
+                              z[first:end], hoop)
+    # how far the answer is from the middle, in half-widths (inside if under 1)
+    rows.append([s['id'], hoop[0], (ax - hoop[0] - mx) / hx, (ay - hoop[1] - my) / hy])
+rows = np.array(rows)
+
+for name, col in [('x', 2), ('y', 3)]:
+    inside = np.sum(np.abs(rows[:, col]) &lt;= 1)
+    print(f'{name}: inside {inside} of {len(rows)}, '
+          f'outside below {np.sum(rows[:, col] &lt; -1)}, above {np.sum(rows[:, col] &gt; 1)}')
+print('outside in x:')
+for r in rows[np.abs(rows[:, 2]) &gt; 1]:
+    print(f'  arc {r[0]:4.0f}  hoop at x {r[1]:5.2f}  {r[2]:+.2f} half-widths')
+
+plt.plot(rows[:, 2], 'o', label='x, along the court')
+plt.plot(rows[:, 3], 's', label='y, across the court')
+plt.axhline(1, color='k', linestyle='--')
+plt.axhline(-1, color='k', linestyle='--')
+plt.xlabel('training arc (file order, 325 left out)')
+plt.ylabel('(answer - mean) / half-width')
+plt.title('Whole-flight answer against the 90% interval, 23 cut arcs')
+plt.legend()
 plt.show()</pre>
-<pre class="nb-out">recorded noise, 500 runs: 90% interval 149.88 to 150.86, width 0.98
-median 150.45</pre>
+<pre class="nb-out">x: inside 16 of 23, outside below 0, above 7
+y: inside 20 of 23, outside below 2, above 1
+outside in x:
+  arc 1144  hoop at x  1.60  +1.05 half-widths
+  arc   83  hoop at x  1.60  +2.74 half-widths
+  arc  707  hoop at x  1.60  +1.57 half-widths
+  arc  677  hoop at x 27.05  +1.50 half-widths
+  arc  739  hoop at x  1.60  +1.64 half-widths
+  arc  749  hoop at x  1.60  +1.08 half-widths
+  arc  372  hoop at x  1.60  +1.05 half-widths</pre>
 
 <figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r09-nb-2.svg?v=20261102083412"
-    alt="Histograms of HIC15 for the two noise models on the same bins. The independent noise runs make
-    a narrow spike at about 150.4. The recorded noise runs spread from about 149.6 to 151.0 in two
-    humps, one near 150.1 and one near 150.6, with the 90 per cent interval from 149.88 to
-    150.86 shaded."></div>
-  <figcaption>The notebook's histogram of both sets of runs.</figcaption>
+  <div class="fig-body"><img src="data/example/figures/r09-nb-2.svg?v=20261102180601"
+    alt="Points for 23 training arcs, the answer minus the mean in half-widths, with dashed lines at
+    plus and minus 1. Most points sit between the lines. Seven blue x points sit above plus 1, the
+    highest at about 2.7. Three orange y points sit outside, one above plus 2 and two near minus
+    1.2."></div>
+  <figcaption>The notebook's second plot. A point between the dashed lines is an answer inside its
+  interval.</figcaption>
 </figure>
 
-<p>The interval is now 149.88 to 150.86, six times wider than before. The recorded-noise runs
-fall in two humps, one either side of the value. My guess is that this is the slow wander in the Y
-channel. Depending on where the copy starts, the HIC window gets either the high part of it or the
-low part. I have not checked that. Two humps are also a reason to use percentiles and not the mean
-plus or minus some number of sigmas, since a symmetric interval would describe a shape this is
-not. Next, whether 500 runs is enough.</p>
+<p>Across the court the answer is inside 20 of 23 intervals (87%), which is near 90%. Along the
+court it is inside only 16 of 23 (70%), and all 7 misses are on the same side. Six of them are
+shots at the 1.60 hoop, where a larger <em>x</em> is short of the prediction, and one is at the 27.05
+hoop, where a larger <em>x</em> is long. That is, 6 of the 7 balls came down shorter than the interval
+allowed. <strong>My intervals are 90% intervals in name only along the court.</strong> They covered
+about 70%, and the misses look like a prediction that runs long. An interval that was only too
+narrow would likely miss on both sides. Two things I did may make them narrower than they should be. The residuals are
+smaller than the header's noise, and I drew them independently when the header says the noise is
+correlated. Neither would explain misses that all fall on one side, though, and that side is what
+leaving drag out of the model would likely produce. I have not tested that.</p>
 
-<pre class="nb-in">m = np.arange(20, 501, 10)
-plt.figure(figsize=(8, 3.5))
-low_end = []         # the interval's ends using only the first k runs
-high_end = []
-for k in m:
-    low_end.append(np.percentile(real[:k], 5))
-    high_end.append(np.percentile(real[:k], 95))
-plt.plot(m, low_end, label='5th percentile')
-plt.plot(m, high_end, label='95th percentile')
-plt.axhline(value, color='black', linewidth=0.8, label='value on the record')
-plt.xlabel('number of runs used')
-plt.ylabel('HIC15 (a in g, t in s)')
-plt.title('Ends of the 90% interval as the runs add up (recorded noise)')
-plt.legend(fontsize=8, loc='lower right', bbox_to_anchor=(1, 0.15))
-plt.show()
-
-for k in (100, 200, 300, 400, 500):
-    ends = np.percentile(real[:k], [5, 95])
-    print(k, f'runs: {ends[0]:.2f} to {ends[1]:.2f}')</pre>
-
-<figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r09-nb-3.svg?v=20261102083412"
-    alt="The 5th and 95th percentiles of the recorded-noise runs against the number of runs used,
-    from 20 to 500. Both settle by about 200 runs, near 149.88 and 150.86, with the value on the
-    record drawn between them."></div>
-  <figcaption>The notebook's plot of the interval's ends as runs are added.</figcaption>
-</figure>
-<pre class="nb-out">100 runs: 149.81 to 150.84
-200 runs: 149.88 to 150.86
-300 runs: 149.88 to 150.86
-400 runs: 149.84 to 150.85
-500 runs: 149.88 to 150.86</pre>
-
-<p>At 200, 300, 400 and 500 runs the ends agree to within 0.04, so 500 is plenty. Last, one of the things I
-held fixed, to see how it compares with the interval.</p>
-
-<pre class="nb-in">print(f'g = 9.81 instead of 9.80665: {head_hic(x, y, z, g=9.81):.2f}')</pre>
-<pre class="nb-out">g = 9.81 instead of 9.80665: 150.26</pre>
-
-<p>Rounding <em>g</em> to 9.81 moves HIC15 by 0.13. That would put it outside the independent-noise
-interval, although it stays inside the recorded-noise one. Both the window (15&nbsp;ms, FMVSS 208) and the filter class
-(CFC&nbsp;1000, SAE J211-1) are set by the standards, so I held them fixed.</p>
-
-<p><strong>For Alice.</strong> The value is 150.4, the 90% interval is 149.9 to 150.9, and it comes
-from 500 reruns. <strong>Varied:</strong> the noise on the three head channels, taken from the
-record itself. <strong>Held fixed:</strong> the filter class, the 15&nbsp;ms window, <em>g</em> =
-9.80665&nbsp;m/s&sup2;, no offset removed, and this one test of this one car. <strong>My
-name:</strong> I would sign the value and the interval as long as the interval is described as
-instrument noise only, because a second crash of the same car could give a different number,
-and nothing here measures how different.</p>
-
-<p><strong>Flags.</strong> The recorded noise is not independent from sample to sample, so the
-independent-noise interval is probably too narrow. The Y channel climbs and falls by a few m/s&sup2; before
-impact, and I do not know whether that is the head moving or the instrument drifting.
-<strong>Assumptions.</strong> Time zero is the impact. The 50&nbsp;ms before it is noise only, and
-the noise is the same during the crash. The three channels get independent draws. The instruments
-are calibrated correctly.</p>
+<p><strong>Flags.</strong> Record 685 has 6 frames and the widest interval. Arc 325 was left out.
+The along-court misses are one-sided. The residual pools are smaller than the header's noise.
+<strong>Assumptions.</strong> Coordinates are in meters. Gravity is 9.81&nbsp;m/s&sup2; in the
+prediction, with no drag. The flight starts on the frame after the last push. The noise in any frame
+is like a residual from a whole-flight fit and independent of its neighbors. The whole-flight fit
+(gravity free, to 1&nbsp;m from the hoop) stands in for where the ball came down. The random draws
+are seeded.</p>
 </div>
 
 <div class="aside notice"><span class="label">What to notice</span>
-<p>The notebook shows its first interval and then the check that overturned it, in the order the
-work was done. The plot of recorded against independent noise shows why a second noise model was needed.
-It is a good idea to put the answer at the top, as this one does, and to gather the flags and
-assumptions again at the end.</p>
+<p>The notebook takes its noise from the data, says how that compares with the header's figure, and
+reports both (2.33 against 3.07&nbsp;cm in height). Its interval is the &plusmn;1.645&nbsp;&sigma;
+convention, which is simple to read and gives 90% when the spread is near-normal. That is
+likely a fair assumption on these records, since the technical report's percentile ends sit about evenly
+either side of its values (on no short record do the two sides differ by more than 0.05&nbsp;m),
+though neither report checks the shape of the spread directly. When the count comes out at 70% the notebook says so in bold and works
+out which way the misses fell, which takes some care in court coordinates where long and short
+depend on the hoop. It also names the two choices that may have narrowed its intervals, and says
+why neither explains misses on one side.</p>
 </div>
 
   </main>
 
   
 
-  <script src="js/page.js?v=20261102083412"></script>
+  <script src="js/page.js?v=20261102180601"></script>
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

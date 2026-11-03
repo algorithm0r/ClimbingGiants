@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Example reports · Assignment 6 — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102083412">
-  <link rel="stylesheet" href="css/demos.css?v=20261102083412">
+  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
+  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -884,17 +884,21 @@
     <div class="eyebrow"><a href="reports.html">Example reports</a></div>
 <h1>Example reports &middot; Assignment 6</h1>
 
-<p>These are three reports for <a href="assign-07.html">Assignment 6, The Head Injury
-Criterion</a>, written in three different styles. All three use the same example pack (crash
-test 9793, which no phrase assigns), so nothing here answers anybody's assignment. They agree on
-the number and on the facts. They differ in how much of the record they search and how they
-write the search. Please see the <a href="reports.html">Example reports</a>
-page for what every report needs and who it is written for.</p>
+<p>These are three reports for <a href="assign-07.html">Assignment 6, The Rim Crossing</a>, written
+in three different styles. All three use the 12 short records and the training arcs in the example
+pack (test 9793, which no phrase assigns). Nothing here answers anybody's assignment. The three
+students made different choices about which frames to fit, how to find the root and how to decide
+that a shot is too close to call, and each one says why. Please see the
+<a href="reports.html">Example reports</a> page for what every report needs and who it is written
+for.</p>
 
 <p>Each report is followed by a short note on what it does well. The purpose of the notes is to
-show that three different styles can meet the same standard (the answer first, plots identified
-at a glance, errors flagged, assumptions noted). The search times in all three come from one run
-on one computer (they will likely differ on yours).</p>
+show that different methods can meet the same standard. That is, plots are identified at a glance,
+errors are flagged and assumptions are noted. The three reports do not call every shot the same
+way, because their frames and their tests differ (and on these records a frame more or less often
+moves a prediction a long way). Every one of their results and figures comes from the program that is
+attached, and the few other numbers come from the pack's header or the writer's own assignment&nbsp;5
+report.</p>
 
 <p>The technical report's program is read one section at a time, beside a MATLAB version that
 prints the same results, on <a href="walk-07.html">Reading the assignment 6 program</a>.</p>
@@ -903,77 +907,114 @@ prints the same results, on <a href="walk-07.html">Reading the assignment 6 prog
 
 <div class="aside report"><span class="label">Example 1 &middot; Memo</span>
 <div class="memo-head">
-<p><strong>To:</strong> Alice</p>
-<p><strong>Re:</strong> Head injury criterion for test 9793, and what 200 more would cost</p>
+<p><strong>To:</strong> Bob</p>
+<p><strong>Re:</strong> Calling the short records before the ball reaches the hoop</p>
 <p><strong>Data phrase:</strong> example pack (test 9793)</p>
 </div>
 
-<p>The driver's head injury criterion for test 9793 is <strong>HIC15&nbsp;=&nbsp;150.4</strong>,
-well under the limit of 700. The limit we used is a window of 15&nbsp;ms, and both the 15&nbsp;ms
-and the 700 come from FMVSS&nbsp;208, section S6.2 (49&nbsp;CFR&nbsp;571.208). To get the number I
-examined 2,055,150 windows. With no limit on the window length the same search would have
-examined 24,503,500, which is 11.9 times as many. The whole program took 0.33&nbsp;s for this
-test on my laptop, so 200 tests would take about 1.1 minutes of computing with the limit and
-about 11.8 minutes without it.</p>
+<p>From the frames in the short records, six of the twelve shots can be called. Shots 332 and 1326
+should go in, and 158, 1299, 1317 and 838 should miss. The other six come down within reach of the
+rim, so they are too close to call. The table gives the time of each crossing, measured from the
+first frame of its record, and how far ahead of the record's last frame it comes (0.73 to
+1.08&nbsp;s). The distance is from the center of the hoop to the center of the ball as it comes
+down through rim height, 3.048&nbsp;m.</p>
 
-<p>HIC is worked out from the head acceleration in <em>g</em> (multiples of standard gravity,
-9.80665&nbsp;m/s&sup2;). For any stretch of the record, called a window, take the average
-acceleration over it, raise that to the power 2.5 and multiply by the window's length in
-seconds. HIC15 is the largest result over every window no longer than 15&nbsp;ms. The record has
-7001 samples, one every 0.05&nbsp;ms (20,000 a second), so a 15&nbsp;ms window is 300 sample steps
-long. I filtered the three driver head channels (<code>11HEADCG0000ACXP</code>, <code>ACYP</code>
-and <code>ACZP</code>) at CFC&nbsp;1000, the standard low-pass filter class that SAE&nbsp;J211-1
-gives for head acceleration, and combined them sample by sample into the resultant. A running
-total of the integral, built once, turns each window's integral into one subtraction. The program
-then tries every start in the record and every end up to 300 steps after it. The figure shows
-the window it found.</p>
+<table class="data">
+  <tr><th class="num">Shot</th><th class="num">Comes down at (s)</th><th class="num">After the last frame (s)</th><th class="num">From the hoop center (m)</th><th>Call</th></tr>
+  <tr><td class="num">332</td><td class="num">1.874</td><td class="num">0.87</td><td class="num">0.097</td><td>in</td></tr>
+  <tr><td class="num">1326</td><td class="num">1.781</td><td class="num">0.78</td><td class="num">0.059</td><td>in</td></tr>
+  <tr><td class="num">158</td><td class="num">1.731</td><td class="num">0.73</td><td class="num">0.425</td><td>out</td></tr>
+  <tr><td class="num">1299</td><td class="num">1.922</td><td class="num">0.92</td><td class="num">0.414</td><td>out</td></tr>
+  <tr><td class="num">1317</td><td class="num">2.048</td><td class="num">1.05</td><td class="num">0.389</td><td>out</td></tr>
+  <tr><td class="num">838</td><td class="num">2.086</td><td class="num">1.08</td><td class="num">0.464</td><td>out</td></tr>
+  <tr><td class="num">685</td><td class="num">2.009</td><td class="num">1.02</td><td class="num">0.280</td><td>too close</td></tr>
+  <tr><td class="num">872</td><td class="num">1.950</td><td class="num">0.95</td><td class="num">0.208</td><td>too close</td></tr>
+  <tr><td class="num">734</td><td class="num">1.859</td><td class="num">0.85</td><td class="num">0.310</td><td>too close</td></tr>
+  <tr><td class="num">503</td><td class="num">1.852</td><td class="num">0.84</td><td class="num">0.251</td><td>too close</td></tr>
+  <tr><td class="num">502</td><td class="num">1.985</td><td class="num">0.98</td><td class="num">0.293</td><td>too close</td></tr>
+  <tr><td class="num">490</td><td class="num">1.968</td><td class="num">0.97</td><td class="num">0.297</td><td>too close</td></tr>
+</table>
+
+<p>Before trusting the calls I made the same calls on the 23 usable training arcs, cut to the same
+number of frames, and compared them with the play-by-play. All 3 arcs I called in were made. Of the
+9 I called out, 6 missed and 3 were made, so an out call was wrong one time in three. Of the 11 that
+came down within reach of the rim, 6 were made, which is roughly what a coin toss would give. With
+23 arcs these counts are small, so they give a rough idea of how often a call holds up and no more.
+I have not checked the times against the training arcs.</p>
 
 <figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r07-memo-window.svg?v=20261102083412"
-    alt="Resultant driver head acceleration in g against time from impact in ms, from -50 to 300
-    ms, filtered at CFC 1000. The HIC15 window from 60.85 to 75.85 ms is shaded and the peak of
-    45.3 g at 66.50 ms is marked. The title gives HIC15 = 150.4."></div>
-  <figcaption>The driver's resultant head acceleration (CFC&nbsp;1000) for test 9793, with the
-  15&nbsp;ms window that gives HIC15 shaded, drawn by <code>a6_hic15.py</code>.</figcaption>
+  <div class="fig-body"><img src="data/example/figures/r07-memo-record.svg?v=20261102180601"
+    alt="Ball height in meters against time for record 158. Gray circles start near 0.9 m and climb
+    to the rim line at 3.048 m by about 0.66 s. Seven black frames between about 0.76 and 1.0 s are
+    fitted by a parabola that peaks near 4.45 m and comes back down. An orange square marks where
+    the parabola rises through rim height at 0.66 s, and a red cross where it falls through at
+    1.73 s."></div>
+  <figcaption>Figure 1. Record 158. The fitted parabola is at rim height twice, at 0.66&nbsp;s on the
+  way up (where the record's own frames also reach the rim) and at 1.73&nbsp;s on the way
+  down.</figcaption>
 </figure>
 
-<p>A few things need your attention before you commit to the month.</p>
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r07-memo-calls.svg?v=20261102180601"
+    alt="Top view centered on the hoop, in meters, with a small green circle of radius 0.109 m and a
+    red circle of radius 0.348 m. Two labeled points, 332 and 1326, sit inside the green circle. Six
+    sit between the circles. Four, 158, 1299, 1317 and 838, sit just outside the red circle."></div>
+  <figcaption>Figure 2. Where each ball is predicted to come down through rim height, seen from
+  above. Inside the green circle the ball clears the rim, and outside the red one it cannot reach
+  it.</figcaption>
+</figure>
+
+<p><strong>How I decided.</strong> The record does not say when the ball leaves the hand, so I
+used my rule from assignment 5. The vertical acceleration comes from a parabola through the 9
+frames around each frame, and the last frame where it is upward is the last push of the hand. In
+assignment 5 I started the flight 5 frames after that push. On these records that would leave
+only 2 to 6 frames, so I started 2 frames after it, which leaves 5 to 9. I held gravity at
+9.81&nbsp;m/s&sup2;, as I recommended in assignment 5. Fitting it to these few frames instead gives
+values from 4.6 to 21.9&nbsp;m/s&sup2;, which suggests those fits mostly follow the
+noise. Across the floor I
+fitted a straight line to each coordinate. The quadratic formula then gives both times the fitted
+ball is at rim height, and the call comes from where it is at the later one.</p>
+
+<p><strong>How I know it is the right crossing.</strong> The earlier of the two roots falls between
+0.66 and 0.75&nbsp;s on every record, and each record's own frames first reach rim height within
+0.04&nbsp;s of it (Figure 1 shows one). That is within a few frames of the last push, while the
+ball is still leaving the shooter's hands, so the earlier root is the ball going up. The later root
+comes after the top of the fitted flight, with the ball falling, and it is the one in the
+table.</p>
+
+<p>Three things need your attention.</p>
 
 <ul>
-  <li><strong>The window is exactly as long as the limit allows.</strong> It runs from 60.85 to
-  75.85&nbsp;ms, which is 15.00&nbsp;ms, and it starts before the peak (45.3&nbsp;<em>g</em> at
-  66.50&nbsp;ms). With no limit the best window on this record is 53.45 to 105.40&nbsp;ms and gives
-  334.0. The number depends on the limit that much, so it should always travel with it, as the
-  customer asked.</li>
-  <li><strong>The times are from one run.</strong> They will change from run to run and from
-  machine to machine. The window count will not, as long as the other tests are recorded the same
-  way (7001 samples at 20,000 a second). I have not checked that they are.</li>
-  <li><strong>The estimate covers computing only.</strong> It does not include checking each test's
-  channels before trusting them, as Assignment 1 had to.</li>
-  <li><strong>The end of the filtered trace drops to zero.</strong> In the last fraction of a
-  millisecond (the right edge of the figure) the filtered resultant falls straight down. I believe
-  this is the filter starting from rest at the end of the record, since a head does not stop that
-  suddenly. It is far from the window and does not touch the number.</li>
-  <li><strong>Only the driver can be done from this file.</strong> The passenger's head has an X
-  channel only, so there is no resultant to compute for the passenger.</li>
+  <li><strong>The records start earlier than the header says.</strong> The header says the short
+  records begin "partway into the flight". They begin with the ball about 1&nbsp;m above the floor
+  in the shooter's hands (Figure 1), and the last upward push comes at frame 15 to 19. Only the
+  last few frames are flight, and every number above rests on them.</li>
+  <li><strong>Three calls sit close to a line.</strong> Shot 332 is 12&nbsp;mm inside the in radius,
+  1317 is about 4&nbsp;cm outside the out radius and 1326 is about 5&nbsp;cm inside the in radius. A frame more or less in the fit
+  could likely move any of them across.</li>
+  <li><strong>The lines assume the ball comes straight down.</strong> The in radius is the hoop's
+  radius less the ball's, and the out radius is the two added, both from the header. A real shot
+  arrives at an angle, so the lines sort shots only roughly. That may be part of why 3 of the
+  training arcs I called out were made, though I have not checked it.</li>
 </ul>
 
-<p><strong>Assumptions.</strong> The occupant you mean is the driver, since only the driver has
-all three head channels. The 700 is the limit for a 50th percentile male dummy, and I have assumed
-the driver dummy is that size because the file does not say. A window may be exactly 15&nbsp;ms
-long, and lengths are counted in whole sample steps. The integral uses the trapezoid rule, and
-time zero is the impact the file declares.</p>
+<p><strong>Assumptions.</strong> The coordinates are in meters (the header gives the rim and both
+radii in meters and the coordinates no unit). Gravity is 9.81&nbsp;m/s&sup2;. In flight the
+ball's height is a parabola and each floor coordinate a straight line, so I ignored air drag and
+spin. The training arcs were cut 7 frames after the last push, which is about what the short
+records hold. The times are as recorded.</p>
 
-<p><strong>Program.</strong> <a href="data/example/code/a6_hic15.py" download><code>a6_hic15.py</code></a>
-(attached) filters the channels, runs the search with and without the limit, times both and draws
-the figure.</p>
+<p><strong>Program.</strong> <a href="data/example/code/a6_rim_call.py" download><code>a6_rim_call.py</code></a>
+(attached) finds each flight, fits it, finds both roots, makes the calls on the short records and
+the training arcs, and draws both figures.</p>
 </div>
 
 <div class="aside notice"><span class="label">What to notice</span>
-<p>The first paragraph answers all four of Alice's questions in the order she asked them. The
-memo glosses HIC once in plain terms, so a reader who has never met it can follow the rest. The
-list tells Alice what the cost estimate rests on (one run and one record length). That is
-probably what she needs most for costing a month.</p>
+<p>Bob asked three things, and the first paragraph and the table answer two of them. The third,
+how the student knows it is the falling crossing, gets a paragraph of its own, checked against the
+record's own frames. The memo tests its calls on training arcs cut to the same length and reports
+the counts against the play-by-play, including the out calls that were wrong. That count is probably
+what Bob needs most for his decision. It also says what it did not check (the times).</p>
 </div>
 
 <h2 id="a-technical-report">A Technical Report</h2>
@@ -982,647 +1023,763 @@ probably what she needs most for costing a month.</p>
 <p><strong>Data phrase:</strong> example pack (test 9793)</p>
 
 <h4>Summary</h4>
-<p>The head injury criterion for the driver in NHTSA test 9793 is HIC15&nbsp;=&nbsp;150.4, over
-the window from 60.85 to 75.85&nbsp;ms. The 15&nbsp;ms window limit and the pass limit of 700 both
-come from FMVSS&nbsp;208, section S6.2. The search examined 2,055,150 windows, against 24,503,500
-with no limit (11.9 times as many). It took 0.042&nbsp;s, or 0.09&nbsp;s per test including reading
-and filtering, so 200 tests would take about 19&nbsp;s of computing.</p>
+<p>On this pack, the time of the crossing can be predicted from the short records, and the place
+cannot be predicted well enough to call a shot. The 12 crossings come 0.74 to 1.06&nbsp;s after the last
+frame of their records. On 23 training arcs cut to the same 7 frames of flight, the predicted time
+was within 0.020&nbsp;s of the time the whole flight gives on the median arc, and 0.082&nbsp;s off
+at worst. The predicted place was 0.232&nbsp;m from the whole flight's on the median arc and
+0.806&nbsp;m at worst. That median is twice the in radius (0.109&nbsp;m) and about the width of the
+rim band (0.239&nbsp;m). Narrowing the in and out bands by it leaves 11 of the 12 records too close
+to call and calls 685 out. On the training arcs the same rule called 3 arcs out, and all 3 were
+made, so the call for 685 is probably not one to act on.</p>
 
 <h4>Data</h4>
-<p>Test 9793 is a New Car Assessment test of a 2017 Hyundai Elantra driven into a rigid barrier
-at 56.15&nbsp;km/h. HIC is computed from the driver's three head acceleration channels, which are
-measured at the head's center of gravity (CG). Each has 7001 samples at a spacing of 0.05&nbsp;ms
-(a sample rate of 20,000 per second), from &minus;50 to 300&nbsp;ms, in m/(s*s) with a status of
-<code>ok</code>. Table 1 gives each channel's largest value in <em>g</em> (one <em>g</em> is
-9.80665&nbsp;m/s&sup2;) before and after filtering.</p>
+<p>The short-record file holds 12 shots tracked at 25 frames a second. Its header says the records
+begin "partway into the flight" and end before the ball reaches the hoop. They begin earlier than
+that. Each starts with the ball 0.58 to 1.43&nbsp;m above the floor, and the last frame with an upward
+acceleration is frame 15 to 19 (Figure 1), so most of each record appears to be the ball in the
+shooter's hands. Only the
+6 to 10 frames after the last upward push are free flight (7 on the median record).</p>
 
-<table class="data">
-  <tr><th>Channel</th><th>Direction</th><th class="num">Largest, unfiltered</th><th class="num">Largest, CFC 1000</th></tr>
-  <tr><td><code>11HEADCG0000ACXP</code></td><td>X, longitudinal</td><td class="num">43.3&nbsp;<em>g</em></td><td class="num">42.8&nbsp;<em>g</em></td></tr>
-  <tr><td><code>11HEADCG0000ACYP</code></td><td>Y, lateral</td><td class="num">7.3&nbsp;<em>g</em></td><td class="num">4.8&nbsp;<em>g</em></td></tr>
-  <tr><td><code>11HEADCG0000ACZP</code></td><td>Z, vertical</td><td class="num">22.3&nbsp;<em>g</em></td><td class="num">20.2&nbsp;<em>g</em></td></tr>
-</table>
-<p>Table 1. Largest magnitude in each driver head channel.</p>
-
-<figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r07-rep-components.svg?v=20261102083412"
-    alt="The three driver head acceleration components in g against time from impact in ms,
-    filtered at CFC 1000. X falls to about -43 g near 67 ms, Z rises to about 20 g, and Y stays
-    within about 5 g. A second, smaller event appears after 230 ms."></div>
-  <figcaption>Figure 1. The three driver head components of test 9793 after filtering at
-  CFC&nbsp;1000, in <em>g</em>.</figcaption>
-</figure>
+<p>The header gives the hoop's inner radius (0.2286&nbsp;m) and the ball's radius
+(0.1195&nbsp;m). Treating the ball as coming straight down, a crossing under 0.1091&nbsp;m from the
+hoop center clears the rim, one over 0.3481&nbsp;m cannot touch it, and one between touches the
+rim. The training file holds 24 whole arcs with the play-by-play result. Arc 325 has a filled-in
+stretch (found in assignment 5) and is left out, which leaves 23.</p>
 
 <h4>Method</h4>
-<p>A Python program, <a href="data/example/code/a6_hic_search.py" download><code>a6_hic_search.py</code></a>
-(listed in the appendix and submitted with this report), does every step below and draws every
+<p><strong>The flight.</strong> The release rule from assignment 5 looks for four acceleration
+estimates in a row near &minus;9.81&nbsp;m/s&sup2;. Each estimate needs 4 frames on either side, so
+on a short record they stop a few frames after the last push and the rule has almost nothing to
+test. I kept its first step instead. The last frame before the top with an upward acceleration is
+the last push, and the flight is every frame after it.</p>
+
+<p><strong>The model.</strong> The height is <em>z</em> = <em>c</em><sub>0</sub> + <em>c</em><sub>1</sub><em>t</em> &minus; &frac12;<em>g</em><em>t</em>&sup2;
+with <em>g</em> held at 9.81&nbsp;m/s&sup2;, fitted by least squares as in assignment 5. Each floor
+coordinate, measured from the hoop center, is a straight line in <em>t</em>.</p>
+
+<p><strong>The root.</strong> The crossing is a root of <em>f</em>(<em>t</em>) = <em>z</em>(<em>t</em>) &minus; 3.048.
+Bisection stays inside its bracket, and a bracket that starts at the top of the fitted parabola
+can hold only the falling root, so I used bisection on <em>f</em>, from the top
+(<em>t</em> = &minus;<em>c</em><sub>1</sub>/2<em>c</em><sub>2</sub>) to 2&nbsp;s after it, until
+the bracket was 10<sup>&minus;6</sup>&nbsp;s wide. That takes 23 evaluations of <em>f</em> on
+every record. At the top <em>f</em> is positive and 2&nbsp;s later it is negative, and a
+downward parabola falls the whole time after its top, so the one root in the bracket is the falling
+crossing. The parabola's other root comes before the top, while the ball is rising. As a check, the
+program also solves the quadratic with numpy's <code>roots</code> and stops if its later root
+differs from the bisection's by more than the tolerance. None did.</p>
+
+<p><strong>The training check.</strong> Each training arc was cut to 7 frames after its last push
+(the median for the short records), and the method above was run on it. The prediction was
+compared with the same model fitted to the whole flight, from the frame after the push to the last
+frame at least 1&nbsp;m from the hoop across the floor. I did not use the crossing read off
+the frames as the reference. On 10 of the 24 training arcs the height rises again between the last
+frame 1&nbsp;m out and the first frame under the rim, so the ball likely hit the rim or the
+backboard first, and the crossing in the frames comes after the bounce, somewhere else. A fit that
+stops 1&nbsp;m out ends before the ball can reach the rim (the out radius is 0.348&nbsp;m). It is
+itself a fit, though it reaches only the last meter or so past its frames, so the difference likely
+measures what is lost by having 7 frames. The time error is the difference between the two crossing times, and the place
+error is the distance between the two crossing points. The same cut arcs were also fitted with
+gravity free. The calls on the cut arcs were compared with the play-by-play twice, once with the in
+and out bands as the header gives them and once with each band narrowed by the median place error
+(a margin of 0.232&nbsp;m).</p>
+
+<p>A Python program, <a href="data/example/code/a6_rim_crossing.py" download><code>a6_rim_crossing.py</code></a>
+(listed in the appendix and submitted with this report), does all of the above and draws every
 figure.</p>
-<ol>
-  <li>Filter each component at CFC&nbsp;1000. This is the low-pass filter class SAE&nbsp;J211-1
-  assigns to head acceleration, run forward and then backward as in the Smoothing notes.</li>
-  <li>Combine the three into the resultant, the square root of the sum of their squares, and
-  divide by 9.80665 to put it in <em>g</em>.</li>
-  <li>Build the running total (prefix sum) of the trapezoid integral once, so each window's
-  integral is one subtraction.</li>
-  <li>For each window length from 1 to 300 sample steps (0.05 to 15&nbsp;ms), compute the HIC
-  value of every window of that length at once with numpy, and keep the largest.</li>
-</ol>
-<p>HIC for a window from <em>t</em><sub>1</sub> to <em>t</em><sub>2</sub> is
-(<em>t</em><sub>2</sub>&nbsp;&minus;&nbsp;<em>t</em><sub>1</sub>) times the average
-acceleration over the window raised to the power 2.5, with time in seconds and acceleration in
-<em>g</em>. HIC15 is its largest value over every window no longer than 15&nbsp;ms. Every start in
-the record was searched, including the 50&nbsp;ms before impact. Those windows cannot win, but
-searching them costs little and means no judgment is needed about where the event begins. The
-same code was run with no limit, to show how much the limit decides.</p>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r07-rep-record.svg?v=20261102180601"
+    alt="Two panels for short record 158 against time. Top, ball height in meters. Gray circles in
+    the hand climb from about 0.9 m to 3.1 m by 0.68 s, then eight black frames are fitted by a
+    parabola that peaks near 4.45 m and falls back through the red rim line at 1.74 s. Bottom,
+    vertical acceleration. It swings from plus 38 to minus 20, rises to about plus 15 between 0.5
+    and 0.6 s while the hand pushes, crosses zero at the dashed line marking the last push at frame
+    17, and settles near the dotted line at minus 9.81."></div>
+  <figcaption>Figure 1. Short record 158. The acceleration is upward until frame 17, and only the
+  frames after it are fitted.</figcaption>
+</figure>
 
 <h4>Results</h4>
 <table class="data">
-  <tr><th>Window limit</th><th class="num">HIC</th><th class="num">Window (ms)</th><th class="num">Length</th><th class="num">Mean</th><th class="num">Windows</th><th class="num">Search time</th></tr>
-  <tr><td>15&nbsp;ms (FMVSS 208)</td><td class="num"><strong>150.4</strong></td><td class="num">60.85&ndash;75.85</td><td class="num">15.00&nbsp;ms</td><td class="num">39.9&nbsp;<em>g</em></td><td class="num">2,055,150</td><td class="num">0.042&nbsp;s</td></tr>
-  <tr><td>none</td><td class="num">334.0</td><td class="num">53.45&ndash;105.40</td><td class="num">51.95&nbsp;ms</td><td class="num">33.4&nbsp;<em>g</em></td><td class="num">24,503,500</td><td class="num">0.416&nbsp;s</td></tr>
+  <tr><th class="num">Shot</th><th class="num">Frames fitted</th><th class="num">Crossing (s)</th><th class="num">After the last frame (s)</th><th class="num"><em>x</em> (m)</th><th class="num"><em>y</em> (m)</th><th class="num">From the hoop center (m)</th><th>Call, margin 0.232&nbsp;m</th></tr>
+  <tr><td class="num">685</td><td class="num">6</td><td class="num">2.053</td><td class="num">1.063</td><td class="num">&minus;0.993</td><td class="num">0.037</td><td class="num">0.993</td><td>out</td></tr>
+  <tr><td class="num">332</td><td class="num">10</td><td class="num">1.873</td><td class="num">0.873</td><td class="num">&minus;0.023</td><td class="num">0.106</td><td class="num">0.108</td><td>too close</td></tr>
+  <tr><td class="num">872</td><td class="num">7</td><td class="num">1.969</td><td class="num">0.969</td><td class="num">0.195</td><td class="num">&minus;0.115</td><td class="num">0.226</td><td>too close</td></tr>
+  <tr><td class="num">158</td><td class="num">8</td><td class="num">1.737</td><td class="num">0.737</td><td class="num">&minus;0.266</td><td class="num">0.150</td><td class="num">0.305</td><td>too close</td></tr>
+  <tr><td class="num">1299</td><td class="num">7</td><td class="num">1.916</td><td class="num">0.916</td><td class="num">&minus;0.392</td><td class="num">0.044</td><td class="num">0.395</td><td>too close</td></tr>
+  <tr><td class="num">734</td><td class="num">7</td><td class="num">1.881</td><td class="num">0.871</td><td class="num">0.276</td><td class="num">0.302</td><td class="num">0.409</td><td>too close</td></tr>
+  <tr><td class="num">503</td><td class="num">8</td><td class="num">1.854</td><td class="num">0.844</td><td class="num">0.097</td><td class="num">&minus;0.126</td><td class="num">0.159</td><td>too close</td></tr>
+  <tr><td class="num">502</td><td class="num">7</td><td class="num">1.973</td><td class="num">0.973</td><td class="num">&minus;0.257</td><td class="num">0.200</td><td class="num">0.325</td><td>too close</td></tr>
+  <tr><td class="num">1317</td><td class="num">7</td><td class="num">2.045</td><td class="num">1.045</td><td class="num">&minus;0.164</td><td class="num">0.381</td><td class="num">0.415</td><td>too close</td></tr>
+  <tr><td class="num">1326</td><td class="num">7</td><td class="num">1.787</td><td class="num">0.787</td><td class="num">&minus;0.009</td><td class="num">0.011</td><td class="num">0.014</td><td>too close</td></tr>
+  <tr><td class="num">490</td><td class="num">8</td><td class="num">1.967</td><td class="num">0.967</td><td class="num">&minus;0.235</td><td class="num">&minus;0.276</td><td class="num">0.362</td><td>too close</td></tr>
+  <tr><td class="num">838</td><td class="num">7</td><td class="num">2.036</td><td class="num">1.026</td><td class="num">&minus;0.361</td><td class="num">0.122</td><td class="num">0.382</td><td>too close</td></tr>
 </table>
-<p>Table 2. HIC with the 15&nbsp;ms limit and with none. The mean is the average resultant over the window.</p>
+<p>The crossing time is measured from the first frame of each record, and <em>x</em> and
+<em>y</em> are the ball's center from the hoop center, along and across the court. Figure 3 shows
+the same points from above.</p>
 
-<p>HIC15 is 150.4, which passes the FMVSS&nbsp;208 limit of 700. The resultant peaks at
-45.33&nbsp;<em>g</em> at 66.50&nbsp;ms, and the window opens before it (Figure 2). The best
-window is exactly as long as the limit allows. Figure 3 shows why. HIC keeps rising as the
-limit is relaxed, up to 51.95&nbsp;ms, where the record itself sets the optimum. The value
-therefore depends strongly on the limit, and a HIC value cannot be read without it.</p>
-
-<figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r07-rep-windows.svg?v=20261102083412"
-    alt="Resultant driver head acceleration in g against time from impact, 0 to 160 ms, filtered
-    at CFC 1000. The HIC15 window from 60.85 to 75.85 ms is shaded orange."></div>
-  <figcaption>Figure 2. Driver head resultant (CFC&nbsp;1000) with the best 15&nbsp;ms window
-  shaded.</figcaption>
-</figure>
-
-<figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r07-rep-limit.svg?v=20261102083412"
-    alt="HIC against the longest window allowed, 0 to 80 ms. The curve rises from zero through
-    150.4 at 15 ms, then levels off at 334.0, reached at 51.95 ms and marked
-    with a red dot."></div>
-  <figcaption>Figure 3. Driver HIC for test 9793 as the window length limit is relaxed. The dashed
-  line marks 15&nbsp;ms. HIC is computed with acceleration in <em>g</em> and time in
-  seconds.</figcaption>
-</figure>
-
-<p><strong>Search cost.</strong> The number of windows depends only on the record length and the
-limit, so it is the same for every test recorded the same way. With the prefix sum each window
-costs one subtraction, 2,055,150 in all. Integrating each window directly from its own samples
-would take 307,050,100 additions, 149 times as many. On this run one test took 0.09&nbsp;s
-(0.05&nbsp;s to read and filter and 0.042&nbsp;s to search), so 200 tests would take about
-19&nbsp;s. The same search written as two plain Python loops took 0.58&nbsp;s, so even the
-plain-loop version would finish 200 tests in a few minutes.</p>
-
-<h4>Checks</h4>
 <table class="data">
-  <tr><th>Check</th><th class="num">HIC15</th></tr>
-  <tr><td>as reported</td><td class="num">150.4</td></tr>
-  <tr><td>same search written as two plain loops</td><td class="num">150.4</td></tr>
-  <tr><td>no filter</td><td class="num">150.6</td></tr>
-  <tr><td>each component's mean before impact subtracted</td><td class="num">150.4</td></tr>
+  <tr><th>23 cut training arcs</th><th class="num">Time error, median (s)</th><th class="num">Time error, worst (s)</th><th class="num">Place error, median (m)</th><th class="num">Place error, worst (m)</th></tr>
+  <tr><td>gravity held at 9.81</td><td class="num">0.020</td><td class="num">0.082</td><td class="num">0.232</td><td class="num">0.806</td></tr>
+  <tr><td>gravity fitted</td><td class="num">0.244</td><td class="num">0.941</td><td class="num">1.417</td><td class="num">6.890</td></tr>
 </table>
-<p>Table 3. The plain loops confirm the numpy version. Filtering lowers the largest lateral value
-from 7.3 to 4.8&nbsp;<em>g</em> (Table 1) but barely moves HIC15, probably because the window
-averages over the fast spikes the filter removes.</p>
+<p>Fitting gravity to the same 7 frames made the median time error twelve times larger and the
+median place error six times larger, so the rest of the report holds gravity, as I recommended in
+assignment 5. Figure 2 shows the errors for gravity held, arc by arc.</p>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r07-rep-check.svg?v=20261102180601"
+    alt="Two histograms over 23 training arcs. Left, crossing time error in milliseconds, cut minus
+    whole, spread from about minus 80 to plus 45 with most between minus 50 and plus 20. Right,
+    distance between the two crossing points in centimeters, from about 7 to 80, most under 40,
+    with a dashed line at the median of 23 cm and one arc near 80."></div>
+  <figcaption>Figure 2. The training check. Left, how much earlier or later the 7-frame prediction
+  puts the crossing than the whole flight does. Right, how far apart the two crossing points are.</figcaption>
+</figure>
+
+<table class="data">
+  <tr><th>Margin</th><th class="num">Called in (made)</th><th class="num">Called out (made)</th><th class="num">Too close (made)</th></tr>
+  <tr><td>none</td><td class="num">2 (2)</td><td class="num">9 (3)</td><td class="num">12 (7)</td></tr>
+  <tr><td>0.232&nbsp;m</td><td class="num">0 (0)</td><td class="num">3 (3)</td><td class="num">20 (9)</td></tr>
+</table>
+<p>The calls on the 23 cut arcs against the play-by-play. With the bands as the header gives them,
+11 arcs were called and 8 of those calls were right (both in calls, and 6 of the 9 out calls).
+With the margin, the 3 arcs called out were all made. Two of them, 83 and 1144, had the largest
+place errors in the set (0.806 and 0.525&nbsp;m). On these arcs a prediction far from the hoop was
+more likely a poor fit than a clear miss.</p>
+
+<p>The time holds up and the place does not. With gravity held, the time of the crossing depends on
+the height and upward speed the frames give, and the time errors suggest 7 frames fix both well
+enough. The place depends
+on the floor speed from a straight line through 7 frames, each with about 3&nbsp;cm of tracking
+noise according to the header, carried about a second ahead. A small error in that speed likely becomes a few tenths of a
+meter at the hoop, which is the size of the place errors found.</p>
+
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r07-rep-points.svg?v=20261102180601"
+    alt="Top view centered on the hoop, in meters, with a green circle of radius 0.109 m, a red
+    circle of radius 0.348 m and a dotted red circle of radius 0.58 m. Eleven labeled points sit
+    inside the dotted circle, two of them, 332 and 1326, at or inside the green circle. Point 685
+    sits alone about 1 m to the left."></div>
+  <figcaption>Figure 3. Predicted crossing points for the 12 short records, seen from above. Only a
+  point outside the dotted circle is called out, and no point can be called in, because the margin
+  is larger than the in radius.</figcaption>
+</figure>
 
 <h4>Errors and Anomalies</h4>
-<p><strong>Filter edge at the end of the record.</strong> The course's filter starts each pass from
-zero. The backward pass therefore starts at 300&nbsp;ms from rest, while the head is still at about
-3.6&nbsp;<em>g</em>. The filtered resultant reads 3.59&nbsp;<em>g</em> at 299.50&nbsp;ms, 2.99 at
-299.80, 1.02 at 299.90 and 0.00 at 300.00, against 3.49 to 3.62&nbsp;<em>g</em> unfiltered. From
-299.80&nbsp;ms on, the filtered values are wrong. They are far from the window and do not affect
-HIC.</p>
-<p><strong>Resultant before impact.</strong> The resultant averages 0.127&nbsp;<em>g</em> before
-impact, where the head is not moving. A resultant is never negative, so the sensor noise cannot
-average out. Removing each component's mean leaves HIC15 at 150.4 (Table 3).</p>
-<p><strong>Passenger head.</strong> The passenger (<code>13HEADCG0000ACXP</code>) has an X channel
-only, so no HIC can be computed for the passenger from this file.</p>
-<p><strong>Second event.</strong> All three components rise again after about 230&nbsp;ms
-(Figure 1). It is well below the main pulse.</p>
+<p><strong>The records start in the hand.</strong> The header says the short records begin partway
+into the flight. Each begins with the ball 0.58 to 1.43&nbsp;m up, the hand is still pushing it at frame 15
+to 19, and its heights pass rim height on the way up at frame 17 to 19, close to the last push.
+A program that took the header at its word and fitted every frame would fit the throw.</p>
+
+<p><strong>Uneven steps in two records.</strong> Record 685 has one step between fitted frames that
+is not 40&nbsp;ms, and 503 has two. The times were used as recorded. Record 685 is also the one
+call the margin rule makes, at 0.993&nbsp;m, with only 6 frames fitted. The uneven step may
+have moved it, though I have not checked.</p>
+
+<p><strong>The training records end differently from their header.</strong> The header says each
+training record ends 15 frames past the rim crossing. Counting from the first frame under the rim
+after the top, arcs 325, 1095 and 1307 end after 8, 6 and 11 frames. In addition, the ball rises
+again before it reaches rim height on 10 arcs (1092, 1223, 1111, 1095, 700, 1039, 739, 1151, 749
+and 372), so on those the first frame under the rim is not where free flight crossed it. The
+training check uses no frame within 1&nbsp;m of the hoop, and the play-by-play result does not
+depend on the frames, so neither problem reaches the numbers above.</p>
+
+<p><strong>Arc 739 has no push.</strong> No frame before the top of this training arc has an upward
+acceleration, so its flight was started at frame 4, the first frame with an estimate.</p>
 
 <h4>Assumptions</h4>
 <ul>
-  <li>HIC is for the driver (position 1), the only occupant with all three head channels.</li>
-  <li>The 700 limit is for a 50th percentile male dummy. The file does not give the dummy's size,
-  and I have assumed that is what sat in the driver's seat.</li>
-  <li>"No longer than 15&nbsp;ms" includes 15&nbsp;ms. Window lengths are whole numbers of
-  0.05&nbsp;ms steps, so the longest window is 300 steps.</li>
-  <li>The integral uses the trapezoid rule, and the resultant is formed after filtering each
-  component, since the standard gives a class for each channel.</li>
-  <li>Impact is at time zero, as the file declares.</li>
-  <li>Timings are from one run on one laptop and will vary. The window counts will not.</li>
+  <li>The coordinates are in meters. The header gives no unit for them, but it gives the rim height
+  and both radii in meters.</li>
+  <li>Gravity is 9.81&nbsp;m/s&sup2;. In flight the height is a parabola and each floor coordinate a
+  straight line (no drag, no spin).</li>
+  <li>The flight starts at the frame after the last upward push. The training arcs were cut 7
+  frames after it, and the short records hold 6 to 10.</li>
+  <li>The whole flight's crossing, from a fit that stops 1&nbsp;m from the hoop, stands in for the
+  true one in the training check. It is a
+  prediction too, so the check measures the cost of having few frames, not the model's own
+  error.</li>
+  <li>The in and out radii treat the ball as coming straight down.</li>
 </ul>
 
 <h4>Appendix. Program</h4>
-<pre class="nb-in">"""Assignment 6: HIC for the driver's head, and what the search costs.
+<pre class="nb-in">"""Assignment 6: when and where each short-record shot comes down through the rim.
 
-Run this from the unzipped pack folder. It:
-  1. reads the three driver head channels by code and filters each at CFC 1000,
-  2. forms the resultant in g,
-  3. finds the best window for every window length with a prefix sum,
-     one numpy pass per length, which gives HIC15 and the limit-free value,
-  4. counts and times the windows, and counts what direct integration would cost,
-  5. runs three checks (a plain double loop, no filter, baseline removed).
-Figures saved: head_components.svg, hic_windows.svg, hic_vs_limit.svg
+Run this from the unzipped pack folder. For each of the 12 short test records it
+finds the frames of free flight, fits the height with gravity held at 9.81 m/s^2
+and the two floor coordinates with straight lines, and finds the falling crossing
+of rim height by bisection. Before that it tries the same method on the training
+arcs, cut to the same number of flight frames, and compares each prediction with
+the one the whole flight gives and with the play-by-play. It prints what it finds
+and saves short_record.svg, training_check.svg and predictions.svg.
 """
-import glob
 import json
-import time
 
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 
-G = 9.80665            # standard gravity (m/s^2)
-CODES = ['11HEADCG0000ACXP', '11HEADCG0000ACYP', '11HEADCG0000ACZP']
-LIMITS_MS = [15]       # FMVSS 208
-
-
-def cfc(y, dt, cls):
-    """SAE J211-1 Butterworth (Smoothing notes), run forward then backward."""
-    wd = 2 * np.pi * cls * 2.0775
-    wa = np.tan(wd * dt / 2)
-    d = 1 + np.sqrt(2) * wa + wa**2
-    a0 = wa**2 / d
-    a1 = 2 * a0
-    a2 = a0
-    b1 = -2 * (wa**2 - 1) / d
-    b2 = (-1 + np.sqrt(2) * wa - wa**2) / d
-
-    def one_pass(x):
-        out = np.zeros_like(x)
-        for i in range(2, len(x)):
-            out[i] = (a0 * x[i] + a1 * x[i - 1] + a2 * x[i - 2]
-                      + b1 * out[i - 1] + b2 * out[i - 2])
-        return out
-
-    forward = one_pass(y)
-    backward = one_pass(forward[::-1])
-    return backward[::-1]
+G = 9.81               # m/s^2, held (assignment 5)
+WINDOW = 9             # frames in each acceleration estimate, as in assignment 5
+NEAR_HOOP = 1.0        # m, a whole flight ends at the last frame this far from the hoop
+TOL_T = 1e-6           # s, bisection stops when the bracket is this narrow
+SKIP = [325]           # training arc with a filled-in gap (found in assignment 5)
+SHOW = 158             # the short record drawn in short_record.svg
 
 
-def resultant_g(comps):
-    total = 0
-    for c in comps:
-        total = total + c**2
-    return np.sqrt(total) / G
+def load(name):
+    with open(f'shots/{name}.json') as f:
+        return json.load(f)
 
 
-def best_by_length(a, dt, kmax):
-    """For each window length k = 1..kmax samples, the best HIC over every
-    start. The prefix sum S makes each window's integral one subtraction."""
-    panels = (a[1:] + a[:-1]) / 2 * dt
-    S = np.concatenate([[0.0], np.cumsum(panels)])
-    best = np.zeros(kmax + 1)
-    start = np.zeros(kmax + 1, dtype=int)
-    windows = 0
-    for k in range(1, kmax + 1):
-        T = k * dt
-        mean = (S[k:] - S[:-k]) / T          # every window of length k at once
-        h = T * np.clip(mean, 0, None)**2.5
-        start[k] = np.argmax(h)
-        best[k] = h[start[k]]
-        windows = windows + len(h)
-    return best, start, windows
+def accel(t, z):
+    """Vertical acceleration at every frame, from a parabola through the 9 frames
+    centered on it. NaN where the window runs off either end."""
+    h = WINDOW // 2
+    a = np.full(len(t), np.nan)
+    for i in range(h, len(t) - h):
+        c = np.polyfit(t[i - h:i + h + 1] - t[i], z[i - h:i + h + 1], 2)
+        a[i] = 2 * c[0]
+    return a
 
 
-def hic(a, dt, kmax):
-    """HIC with windows up to kmax samples: (value, start, end, windows)."""
-    best, start, windows = best_by_length(a, dt, kmax)
-    k = int(np.argmax(best))
-    return best[k], start[k], start[k] + k, windows
+def last_push(t, z):
+    """The last frame before the top where the acceleration is upward, meaning
+    the hand is still on the ball."""
+    a = accel(t, z)
+    top = int(np.argmax(z))
+    last = None
+    for i in range(top):
+        if a[i] &gt; 0:
+            last = i
+    return last
 
 
-def hic_loops(a, dt, kmax):
-    """The same search as two plain loops, as a check on the numpy version."""
-    a = list(a)
-    S = [0.0]
-    for i in range(1, len(a)):
-        S.append(S[-1] + (a[i] + a[i - 1]) / 2 * dt)
-    best = 0.0
-    for i in range(len(a) - 1):
-        last = min(i + kmax, len(a) - 1)
-        for j in range(i + 1, last + 1):
-            mean = (S[j] - S[i]) / ((j - i) * dt)
-            if mean &gt; 0:
-                best = max(best, (j - i) * dt * mean**2.5)
-    return best
+def fit_height(t, z, held):
+    """Parabola z = c0 + c1 t + c2 t^2, with c2 = -g/2 when gravity is held."""
+    if held:
+        A = np.column_stack([np.ones_like(t), t])
+        c = np.linalg.lstsq(A, z + 0.5 * G * t ** 2, rcond=None)[0]
+        return np.array([c[0], c[1], -G / 2])
+    A = np.column_stack([np.ones_like(t), t, t ** 2])
+    return np.linalg.lstsq(A, z, rcond=None)[0]
 
 
-# ---- read and filter
-t_start = time.perf_counter()
-name = glob.glob('crash/*.json')[0]     # the crash folder holds one test file
-with open(name) as f:
-    test = json.load(f)
-by_code = {}                            # each channel under its ISO code
-for c in test['channels'].values():
-    by_code[c['code']] = c
-chans = []
-for code in CODES:
-    chans.append(by_code[code])
-dt = chans[0]['dt']
-n = chans[0]['n']
-t = (chans[0]['t0'] + dt * np.arange(n)) * 1000          # ms
-raw = []
-filt = []
-for c in chans:
-    y = np.array(c['y'])
-    raw.append(y)
-    filt.append(cfc(y, dt, 1000))
-res = resultant_g(filt)
-t_read = time.perf_counter() - t_start
-print(f"test {test['testNo']}, {n} samples at dt = {dt * 1000:.2f} ms "
-      f"({1 / dt:.0f} per second), {t[0]:.0f} to {t[-1]:.0f} ms")
-for m in range(len(chans)):
-    c = chans[m]
-    print(f"  {c['code']}  {c['unit']}  {c['status']}  "
-          f"raw peak {np.max(np.abs(raw[m])) / G:5.1f} g  "
-          f"CFC 1000 peak {np.max(np.abs(filt[m])) / G:5.1f} g")
-p = int(np.argmax(res))
-print(f"resultant: peak {res[p]:.2f} g at {t[p]:.2f} ms, "
-      f"mean before impact {np.mean(res[t &lt; 0]):.3f} g")
-# the filter starts each pass from zero, so look at the ends of the record
-raw_res = resultant_g(raw)
-for i in [-11, -5, -3, -1]:
-    print(f"  at {t[i]:.2f} ms: unfiltered {raw_res[i]:.2f} g, "
-          f"CFC 1000 {res[i]:.2f} g")
-print(f"read and filter: {t_read:.3f} s")
+def fit_line(t, v):
+    """Straight line v = b0 + b1 t (no drag, so the floor speed is constant)."""
+    A = np.column_stack([np.ones_like(t), t])
+    return np.linalg.lstsq(A, v, rcond=None)[0]
 
-# ---- HIC for each limit, and with no limit
-print(f"{'limit':&gt;8} {'HIC':&gt;7} {'from (ms)':&gt;10} {'to (ms)':&gt;8} {'length':&gt;7} "
-      f"{'mean g':&gt;7} {'windows':&gt;11} {'time (s)':&gt;9}")
-found = {}
-for lim in LIMITS_MS + [None]:
-    if lim is None:
-        kmax = n - 1
-    else:
-        kmax = round(lim / 1000 / dt)
-    t0 = time.perf_counter()
-    h, i, j, w = hic(res, dt, kmax)
-    secs = time.perf_counter() - t0
-    found[lim] = (h, i, j, w, secs)
-    mean = (h / ((j - i) * dt))**(1 / 2.5)
-    if lim is None:
-        label = 'none'
-    else:
-        label = f'{lim} ms'
-    print(f"{label:&gt;8} {h:7.1f} {t[i]:10.2f} {t[j]:8.2f} "
-          f"{(j - i) * dt * 1000:7.2f} {mean:7.1f} {w:11,} {secs:9.3f}")
 
-# ---- what the search costs
-kmax = round(15 / 1000 / dt)
-# integrating directly: one addition per sample, for every window
-direct = 0
-for k in range(1, kmax + 1):
-    direct = direct + k * (n - k)
-h15, i15, j15, w15, s15 = found[15]
-print(f"HIC15 windows: {w15:,} subtractions with the prefix sum, "
-      f"{direct:,} additions integrating each window directly "
-      f"({direct / w15:.0f} times as many)")
-w_all = found[None][3]
-print(f"no limit: {w_all:,} windows, {w_all / w15:.1f} times as many")
-per_test = t_read + s15
-print(f"one test: {per_test:.2f} s (read and filter {t_read:.2f} s, "
-      f"search {s15:.3f} s), 200 tests: {200 * per_test:.0f} s")
+def above_rim(c, t, rim):
+    """f(t): how far the fitted ball is above rim height at time t."""
+    return c[0] + c[1] * t + c[2] * t ** 2 - rim
 
-# ---- checks
-t0 = time.perf_counter()
-print(f"check, plain double loop: HIC15 = {hic_loops(res, dt, kmax):.1f} "
-      f"in {time.perf_counter() - t0:.2f} s")
-print(f"check, no filter: HIC15 = {hic(resultant_g(raw), dt, kmax)[0]:.1f}")
-before = t &lt; 0
-debiased = []
-for y in filt:
-    debiased.append(y - np.mean(y[before]))
-print(f"check, each component's mean before impact removed: "
-      f"HIC15 = {hic(resultant_g(debiased), dt, kmax)[0]:.1f}")
 
-# ---- figure 1: the three filtered components
-plt.figure(figsize=(8, 4))
-for m in range(len(chans)):
-    c = chans[m]
-    plt.plot(t, filt[m] / G, linewidth=0.8,
-             label=f"{c['code'][-2]}, {c['direction'].lower()}")
-plt.xlabel('time from impact (ms)')
-plt.ylabel('head acceleration, CFC 1000 (g)')
-plt.title(f"Test {test['testNo']}, driver head CG, components at CFC 1000")
-plt.legend()
+def falling_crossing(c, rim):
+    """Bisection on f between the top of the parabola and 2 s after it. The
+    parabola is above the rim at its top and only falls after it, so the one
+    root in that bracket is the falling crossing. Returns the root and the
+    number of evaluations of f."""
+    a = -c[1] / (2 * c[2])          # time of the top
+    b = a + 2.0
+    fa = above_rim(c, a, rim)
+    fb = above_rim(c, b, rim)
+    if fa &lt;= 0 or fb &gt;= 0:
+        return None, 2              # the fitted ball never gets above the rim
+    evals = 2
+    while b - a &gt; TOL_T:
+        m = (a + b) / 2
+        fm = above_rim(c, m, rim)
+        evals = evals + 1
+        if fm &gt; 0:
+            a = m                   # still above the rim, so the root is later
+        else:
+            b = m
+    return (a + b) / 2, evals
+
+
+def predict(s, first, last, rim, held=True):
+    """Fit frames first..last of shot s and return the crossing time, where the
+    ball is then (x and y from the hoop center, m) and the evaluations used."""
+    t = np.array(s['t'][first:last + 1])
+    c = fit_height(t, np.array(s['z'][first:last + 1]), held)
+    tc, evals = falling_crossing(c, rim)
+    if tc is None:
+        return None
+    bx = fit_line(t, np.array(s['x'][first:last + 1]) - s['hoop_x'])
+    by = fit_line(t, np.array(s['y'][first:last + 1]) - s['hoop_y'])
+    return tc, bx[0] + bx[1] * tc, by[0] + by[1] * tc, evals
+
+
+def call(d, in_r, out_r, margin):
+    """In, out or too close, with the bands narrowed by the margin."""
+    if d + margin &lt; in_r:
+        return 'in'
+    if d - margin &gt; out_r:
+        return 'out'
+    return 'too close'
+
+
+def near_hoop_end(s):
+    """Last frame at least NEAR_HOOP from the hoop, measured across the floor."""
+    dx = np.array(s['x']) - s['hoop_x']
+    dy = np.array(s['y']) - s['hoop_y']
+    return int(np.argmax(np.hypot(dx, dy) &lt; NEAR_HOOP)) - 1
+
+
+short = load('test_short')
+h = short['header']
+rim = h['rim_height_m']
+in_r = h['hoop_inner_radius_m'] - h['ball_radius_m']    # clears the rim on every side
+out_r = h['hoop_inner_radius_m'] + h['ball_radius_m']   # cannot touch the rim
+print('short records, header says they begin:', h['record_begins'])
+print(f'rim {rim} m, in radius {in_r:.4f} m, out radius {out_r:.4f} m')
+
+# where does each short record start, and how much flight does it hold?
+print()
+print(f"{'shot':&gt;5} {'height at frame 0':&gt;17} {'last push':&gt;9} {'frames after':&gt;12} {'up through rim':&gt;14}")
+n_after = []
+for s in short['shots']:
+    t = np.array(s['t'])
+    z = np.array(s['z'])
+    p = last_push(t, z)
+    up = int(np.argmax(z &gt;= rim))          # first frame at or above the rim
+    n_after.append(len(t) - 1 - p)
+    print(f"{s['id']:&gt;5} {z[0]:&gt;15.2f} m {p:&gt;9} {len(t) - 1 - p:&gt;12} {up:&gt;14}")
+n_cut = int(np.median(n_after))
+print(f'frames after the last push: median {n_cut}, range {min(n_after)} to {max(n_after)}')
+
+# the training arcs: do they run 15 frames past the crossing, as the header says,
+# and does the ball bounce before the crossing the frames record?
+train = load('train')['shots']
+print()
+bounced = []
+for s in train:
+    z = np.array(s['z'])
+    top = int(np.argmax(z))
+    below = top + int(np.argmax(z[top:] &lt; rim))    # first frame under the rim after the top
+    if len(z) - below != 15:
+        print(f"arc {s['id']}: {len(z) - below} frames from the crossing to the end, not 15")
+    if np.any(np.diff(z[near_hoop_end(s):below]) &gt; 0):
+        bounced.append(s['id'])         # the height rises again before it reaches the rim
+text = ''
+for shot_id in bounced:
+    text = text + f' {shot_id}'
+print(f'{len(bounced)} of {len(train)} arcs rise again between 1 m out and the crossing:{text}')
+
+# the method on the training arcs, cut to n_cut frames after the last push
+print()
+print(f'training arcs cut to {n_cut} frames after the last push, against the whole flight')
+print(f"{'arc':&gt;5} {'made':&gt;5} {'t whole':&gt;7} {'t cut':&gt;6} {'d whole':&gt;7} {'d cut':&gt;6} {'place err':&gt;9}")
+t_err = []
+p_err = []
+t_err_free = []
+p_err_free = []
+d_cut = []
+made = []
+for s in train:
+    if s['id'] in SKIP:
+        continue
+    t = np.array(s['t'])
+    z = np.array(s['z'])
+    p = last_push(t, z)
+    if p is None:
+        p = WINDOW // 2 - 1      # no push found: start where the first estimate is
+    whole = predict(s, p + 1, near_hoop_end(s), rim)
+    cut = predict(s, p + 1, p + n_cut, rim)
+    free = predict(s, p + 1, p + n_cut, rim, held=False)
+    err = np.hypot(cut[1] - whole[1], cut[2] - whole[2])
+    t_err.append(cut[0] - whole[0])
+    p_err.append(err)
+    if free is not None:
+        t_err_free.append(free[0] - whole[0])
+        p_err_free.append(np.hypot(free[1] - whole[1], free[2] - whole[2]))
+    d_cut.append(np.hypot(cut[1], cut[2]))
+    made.append(s['pbp_made'])
+    print(f"{s['id']:&gt;5} {str(s['pbp_made']):&gt;5} {whole[0]:7.3f} {cut[0]:6.3f} "
+          f"{np.hypot(whole[1], whole[2]):7.3f} {d_cut[-1]:6.3f} {err:9.3f}")
+t_err = np.array(t_err)
+p_err = np.array(p_err)
+d_cut = np.array(d_cut)
+made = np.array(made)
+margin = np.median(p_err)
+print(f'held:   time error median {np.median(np.abs(t_err)):.3f} s, worst {np.max(np.abs(t_err)):.3f} s; '
+      f'place error median {margin:.3f} m, worst {np.max(p_err):.3f} m')
+print(f'fitted: time error median {np.median(np.abs(t_err_free)):.3f} s, worst {np.max(np.abs(t_err_free)):.3f} s; '
+      f'place error median {np.median(p_err_free):.3f} m, worst {np.max(p_err_free):.3f} m '
+      f'({len(p_err_free)} arcs with a crossing)')
+
+# how the calls compare with the play-by-play, with and without the margin
+for m in [0.0, margin]:
+    print(f'margin {m:.3f} m:', end='')
+    for word in ['in', 'out', 'too close']:
+        hits = [k for k in range(len(d_cut)) if call(d_cut[k], in_r, out_r, m) == word]
+        n_made = int(np.sum(made[hits])) if hits else 0
+        print(f'  {word} {len(hits)} ({n_made} made)', end='')
+    print()
+
+# the twelve short records
+print()
+print(f'short records, frames from the last push + 1 to the end, margin {margin:.3f} m')
+print(f"{'shot':&gt;5} {'frames':&gt;6} {'steps not 40 ms':&gt;15} {'t cross':&gt;7} {'after last':&gt;10} "
+      f"{'x':&gt;7} {'y':&gt;7} {'d':&gt;6} {'evals':&gt;5}  call")
+rows = []
+for s in short['shots']:
+    t = np.array(s['t'])
+    z = np.array(s['z'])
+    p = last_push(t, z)
+    tc, x, y, evals = predict(s, p + 1, len(t) - 1, rim)
+    c = fit_height(t[p + 1:], z[p + 1:], True)
+    roots = np.roots([c[2], c[1], c[0] - rim])      # the quadratic formula, as a check
+    assert abs(max(roots) - tc) &lt; TOL_T
+    d = np.hypot(x, y)
+    word = call(d, in_r, out_r, margin)
+    steps = 1000 * np.diff(t[p + 1:])            # ms between the fitted frames
+    odd = int(np.sum(np.abs(steps - 40) &gt; 5))
+    rows.append((s['id'], x, y, d, word))
+    print(f"{s['id']:&gt;5} {len(t) - 1 - p:&gt;6} {odd:&gt;15} {tc:7.3f} {tc - t[-1]:8.3f} s "
+          f"{x:7.3f} {y:7.3f} {d:6.3f} {evals:&gt;5}  {word}")
+
+# Figure 1: one short record, what is in it, and the crossing it predicts
+for s in short['shots']:
+    if s['id'] == SHOW:
+        break                    # s is now the record with the id SHOW
+t = np.array(s['t'])
+z = np.array(s['z'])
+p = last_push(t, z)
+c = fit_height(t[p + 1:], z[p + 1:], True)
+tc = predict(s, p + 1, len(t) - 1, rim)[0]
+tt = np.linspace(t[p + 1], tc + 0.1, 200)
+fig, axes = plt.subplots(2, 1, figsize=(7, 5.5), sharex=True)
+ax1 = axes[0]
+ax2 = axes[1]
+ax1.plot(t[:p + 1], z[:p + 1], 'o', mfc='none', color='gray', label='in the hand')
+ax1.plot(t[p + 1:], z[p + 1:], 'o', color='black', label='frames fitted')
+ax1.plot(tt, c[0] + c[1] * tt + c[2] * tt ** 2, '-', label='parabola, g held at 9.81')
+ax1.axhline(rim, color='tab:red', linestyle='--', linewidth=0.8, label='rim height')
+ax1.plot(tc, rim, 'x', color='tab:red', markersize=9, label=f'falling crossing, {tc:.2f} s')
+ax1.set_ylabel('ball height (m)')
+ax1.set_title(f'Short record {SHOW}: the frames, and the parabola fitted to its flight')
+ax1.legend(fontsize=8, loc='upper left')
+ax2.plot(t, accel(t, z), '.-')
+ax2.axhline(0, color='gray', linewidth=0.8)
+ax2.axhline(-G, color='tab:green', linestyle=':', label='-9.81')
+ax2.axvline(t[p], color='gray', linestyle='--', linewidth=0.8, label=f'last upward push (frame {p})')
+ax2.set_ylabel('vertical acceleration (m/s²)')
+ax2.set_xlabel('time from first frame (s)')
+ax2.set_title('Vertical acceleration, 9-frame parabola at each frame')
+ax2.legend(fontsize=8, loc='lower left')
+fig.tight_layout()
+fig.savefig('short_record.svg')
+plt.close(fig)
+
+# Figure 2: the training check, time and place errors per arc
+fig, axes = plt.subplots(1, 2, figsize=(9, 3.8))
+ax1 = axes[0]
+ax2 = axes[1]
+ax1.hist(1000 * t_err, bins=10)
+ax1.set_xlabel('time error, cut minus whole (ms)')
+ax1.set_ylabel('number of arcs')
+ax1.set_title('Crossing time')
+ax2.hist(100 * p_err, bins=10)
+ax2.axvline(100 * margin, color='k', linestyle='--', label=f'median, {100 * margin:.0f} cm')
+ax2.set_xlabel('distance between the two crossing points (cm)')
+ax2.set_title('Crossing place')
+ax2.legend(fontsize=8)
+fig.suptitle(f'{len(p_err)} training arcs: {n_cut} frames of flight against the whole flight')
+fig.tight_layout()
+fig.savefig('training_check.svg')
+plt.close(fig)
+
+# Figure 3: where the twelve are predicted to come down, seen from above
+fig = plt.figure(figsize=(6, 6))
+ang = np.linspace(0, 2 * np.pi, 200)
+plt.plot(in_r * np.cos(ang), in_r * np.sin(ang), color='tab:green', label='in radius')
+plt.plot(out_r * np.cos(ang), out_r * np.sin(ang), color='tab:red', label='out radius')
+plt.plot((out_r + margin) * np.cos(ang), (out_r + margin) * np.sin(ang), ':', color='tab:red',
+         label=f'out radius + margin ({margin:.2f} m)')
+for shot_id, x, y, d, word in rows:
+    plt.plot(x, y, 'o', color='black')
+    plt.annotate(str(shot_id), (x, y), textcoords='offset points', xytext=(4, 4), fontsize=7)
+plt.gca().set_aspect('equal')
+plt.xlabel('along the court from the hoop center (m)')
+plt.ylabel('across the court from the hoop center (m)')
+plt.title('Predicted crossing points, 12 short records')
+plt.legend(fontsize=8, loc='lower right')
 plt.tight_layout()
-plt.savefig('head_components.svg')
-plt.close()
-
-# ---- figure 2: the resultant with the HIC15 window
-plt.figure(figsize=(8, 4))
-plt.plot(t, res, linewidth=0.8, color='k', label='resultant, CFC 1000', zorder=3)
-plt.axvspan(t[i15], t[j15], color='tab:orange', alpha=0.4,
-            label=f'HIC15 = {h15:.1f}, {t[i15]:.2f} to {t[j15]:.2f} ms')
-plt.xlim(0, 160)
-plt.ylim(0, max(62, 1.35 * np.max(res)))    # room for the legend above the trace
-plt.xlabel('time from impact (ms)')
-plt.ylabel('resultant head acceleration (g)')
-plt.title(f"Test {test['testNo']}, driver head resultant and the best window")
-plt.legend(loc='upper left', fontsize=8)
-plt.tight_layout()
-plt.savefig('hic_windows.svg')
-plt.close()
-
-# ---- figure 3: HIC against the window length limit
-best, start, windows = best_by_length(res, dt, round(80 / 1000 / dt))
-limit_ms = np.arange(1, len(best)) * dt * 1000
-plt.figure(figsize=(8, 4))
-plt.plot(limit_ms, np.maximum.accumulate(best[1:]), color='k')
-for lim in LIMITS_MS:
-    plt.axvline(lim, color='gray', linestyle='--', linewidth=0.8)
-    plt.annotate(f'HIC{lim} = {found[lim][0]:.1f}', (lim, found[lim][0]),
-                 xytext=(5, -15), textcoords='offset points')
-hn = found[None][0]
-inn = found[None][1]
-jn = found[None][2]
-plt.plot((jn - inn) * dt * 1000, hn, 'o', color='tab:red',
-         label=f'no limit: {hn:.1f} over {(jn - inn) * dt * 1000:.2f} ms')
-plt.xlabel('longest window allowed (ms)')
-plt.ylabel('HIC (a in g, t in s)')
-plt.title(f"Test {test['testNo']}, driver HIC against the window length limit")
-plt.legend(loc='lower right')
-plt.tight_layout()
-plt.savefig('hic_vs_limit.svg')</pre>
+plt.savefig('predictions.svg')
+plt.close()</pre>
 </div>
 
 <div class="aside notice"><span class="label">What to notice</span>
-<p>The summary answers all four questions, and the sections behind it let a reader check each
-one. Table 2 puts the answer beside two alternatives, so the effect of the limit is visible
-without any argument. The search cost is given as a count and as a time. The count holds on any
-computer and the time likely does not.</p>
+<p>The summary answers Bob in two parts, the time and the call, with the numbers behind each. The
+report tests its own calling rule on the training arcs and reports a check that went against it
+(the three out calls were made shots). Its bracket explains why the root it returns is the falling
+one, and the quadratic formula checks it. The anomalies include the header that does not match its
+records, which Bob would likely want to know first, before he trusts any number in the report.</p>
 </div>
 
 <h2 id="a-notebook">A Notebook</h2>
 
 <div class="aside report"><span class="label">Example 3 &middot; Notebook, exported to PDF</span>
-<p><strong>Assignment 6, HIC for Alice.</strong> Data phrase: example pack (test 9793)</p>
+<p><strong>Assignment 6, the rim crossing.</strong> Data phrase: example pack (test 9793)</p>
 
-<p>The answer first. HIC15 for the driver is 150.4, over the window 60.85 to 75.85&nbsp;ms. The
-15&nbsp;ms limit is from FMVSS&nbsp;208 section S6.2, which also sets the pass line at 700. I
-searched from the moment of impact on and examined 1,755,150 windows, where 18,003,000 would be
-needed with no limit. That took about 0.26&nbsp;s for one test, or about a minute for 200
-tests. The rest of this notebook is how I got there.</p>
-
-<p>I did this in Google Colab. First, which head channels are in the file.</p>
+<p>I did this in Google Colab. Bob wants to know, for each of the 12 short records, when the ball
+comes down through rim height, where it is then and whether it goes in. My plan is to find the
+flight in each record, fit it with gravity held, find the falling root with Newton's method, and
+then see how far each prediction moves when its last frame is left out. First, what is in the
+short-record file.</p>
 
 <pre class="nb-in">import json
+import numpy as np
 
-with open('crash/09793.json') as f:
-    test = json.load(f)
+with open('shots/test_short.json') as f:
+    short = json.load(f)
 
-for key, ch in test['channels'].items():
-    if ch['location'] == 'Head':
-        print(f"{key:12} {ch['code']}  {ch['comment']:28} "
-              f"{ch['unit']}  {ch['status']}")
+h = short['header']
+print(len(short['shots']), 'records')
+keys = ['sample_rate_hz', 'record_begins', 'record_ends', 'rim_height_m',
+        'hoop_inner_radius_m', 'ball_radius_m']
+for key in keys:
+    print(key, ':', h[key])
+in_r = h['hoop_inner_radius_m'] - h['ball_radius_m']
+out_r = h['hoop_inner_radius_m'] + h['ball_radius_m']
+print(f'in if under {in_r:.4f} m, out if over {out_r:.4f} m')</pre>
+<pre class="nb-out">12 records
+sample_rate_hz : 25
+record_begins : partway into the flight
+record_ends : before the ball reaches the hoop
+rim_height_m : 3.048
+hoop_inner_radius_m : 0.2286
+ball_radius_m : 0.1195
+in if under 0.1091 m, out if over 0.3481 m</pre>
 
-head = [test['channels']['head_x'], test['channels']['head_y'], test['channels']['head_z']]
-dt = head[0]['dt']
-n = head[0]['n']
-t0 = head[0]['t0']
-print(dt, n, t0)</pre>
-<pre class="nb-out">head_x       11HEADCG0000ACXP  V1P1 HEAD CG X ACCELERATION  m/(s*s)  ok
-head_y       11HEADCG0000ACYP  V1P1 HEAD CG Y ACCELERATION  m/(s*s)  ok
-head_z       11HEADCG0000ACZP  V1P1 HEAD CG Z ACCELERATION  m/(s*s)  ok
-pass_head_x  13HEADCG0000ACXP  V1P2 HEAD CG X ACCELERATION  m/(s*s)  ok
-5e-05 7001 -0.05</pre>
+<p>A ball that clears the rim on every side has its center under 0.1091&nbsp;m from the hoop
+center (the hoop's radius less the ball's), and one that cannot touch the rim is over
+0.3481&nbsp;m away. The header says the records begin partway into the flight. Next, the heights.</p>
 
-<p>The driver has all three directions and the passenger only has X, so the driver is the only
-one with a resultant. Every channel is in m/(s*s) and every one says <code>ok</code>. The samples
-are 0.00005&nbsp;s apart (20,000 a second), 7001 of them, starting 0.05&nbsp;s before impact. Next
-I made the resultant, the square root of the sum of the squares at each sample, and divided by
-9.80665 to get it in <em>g</em>.</p>
+<pre class="nb-in">import matplotlib.pyplot as plt
 
-<pre class="nb-in">import math
-import matplotlib.pyplot as plt
-
-G = 9.80665   # standard gravity, m/s^2 in one g
-t_ms = []
-for i in range(n):
-    t_ms.append(1000 * (t0 + i * dt))
-
-def resultant(x, y, z):
-    out = []
-    for i in range(len(x)):
-        out.append(math.sqrt(x[i]*x[i] + y[i]*y[i] + z[i]*z[i]) / G)
-    return out
-
-raw = resultant(head[0]['y'], head[1]['y'], head[2]['y'])
-k = 0                                   # the index of the peak
-for i in range(n):
-    if raw[i] &gt; raw[k]:
-        k = i
-before = raw[:round(-t0 / dt)]          # the samples before impact
-print(f"peak {raw[k]:.2f} g at {t_ms[k]:.2f} ms")
-print(f"mean before impact {sum(before) / len(before):.3f} g")
-print(f"last sample {raw[-1]:.2f} g")
-
-plt.plot(t_ms, raw)
-plt.xlabel('time from impact (ms)')
-plt.ylabel('resultant head acceleration (g)')
-plt.title('Driver head resultant, test 9793, unfiltered')
-plt.show()</pre>
-<pre class="nb-out">peak 46.82 g at 65.95 ms
-mean before impact 0.153 g
-last sample 3.62 g</pre>
-
-<figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r07-nb-1.svg?v=20261102083412"
-    alt="Unfiltered resultant driver head acceleration in g against time from impact, -50 to 300
-    ms. It rises after about 15 ms to a noisy peak near 47 g at about 66 ms, falls by 120 ms,
-    and has a second, smaller rise to about 20 g between 230 and 280 ms."></div>
-  <figcaption>The notebook's plot of the unfiltered resultant.</figcaption>
-</figure>
-
-<p>The peak is 46.82&nbsp;<em>g</em> at 65.95&nbsp;ms. Two things look odd. Before impact the
-resultant averages 0.153&nbsp;<em>g</em> when nothing is happening, which I think is sensor noise,
-because squaring makes the noise positive so it cannot cancel. Also, the record stops at
-300&nbsp;ms with the head still at 3.62&nbsp;<em>g</em>, so it ends before the head has settled.
-Neither should matter for HIC because the big pulse is in the middle. The trace is also spiky, and
-the Why a standard exists notes say the standard (SAE&nbsp;J211-1) wants head acceleration filtered at
-CFC&nbsp;1000,
-so I filtered each direction with the filter from the Smoothing notes before making the
-resultant.</p>
-
-<pre class="nb-in">import numpy as np
-import time
-
-# the CFC filter from the Smoothing notes
-def cfc(y, dt, cls):
-    wd = 2 * np.pi * cls * 2.0775
-    wa = np.tan(wd * dt / 2)
-    d  = 1 + np.sqrt(2) * wa + wa**2
-    a0 = wa**2 / d
-    a1 = 2 * a0
-    a2 = a0
-    b1 = -2 * (wa**2 - 1) / d
-    b2 = (-1 + np.sqrt(2) * wa - wa**2) / d
-
-    def one_pass(x):
-        out = np.zeros_like(x)
-        for i in range(2, len(x)):
-            out[i] = (a0*x[i] + a1*x[i-1] + a2*x[i-2]
-                      + b1*out[i-1] + b2*out[i-2])
-        return out
-
-    forward = one_pass(y)
-    backward = one_pass(forward[::-1])
-    return backward[::-1]
-
-start = time.perf_counter()
-fx = cfc(np.array(head[0]['y']), dt, 1000)
-fy = cfc(np.array(head[1]['y']), dt, 1000)
-fz = cfc(np.array(head[2]['y']), dt, 1000)
-filt = resultant(fx, fy, fz)
-filter_time = time.perf_counter() - start
-k = 0
-for i in range(n):
-    if filt[i] &gt; filt[k]:
-        k = i
-print(f"filtered peak {filt[k]:.2f} g at {t_ms[k]:.2f} ms")
-print(f"{filter_time:.2f} s to filter")
-
-plt.plot(t_ms, raw, label='unfiltered')
-plt.plot(t_ms, filt, label='CFC 1000')
-plt.xlim(40, 110)
-plt.xlabel('time from impact (ms)')
-plt.ylabel('resultant head acceleration (g)')
-plt.title('Driver head resultant around the peak, test 9793')
+RIM = h['rim_height_m']
+for s in short['shots']:
+    plt.plot(s['t'], s['z'], '.-', linewidth=0.6)
+plt.axhline(RIM, color='k', linestyle='--', label='rim height')
+plt.xlabel('time from first frame (s)')
+plt.ylabel('ball height (m)')
+plt.title('Height in all 12 short records')
 plt.legend()
 plt.show()</pre>
-<pre class="nb-out">filtered peak 45.33 g at 66.50 ms
-0.02 s to filter</pre>
 
 <figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r07-nb-2.svg?v=20261102083412"
-    alt="Resultant driver head acceleration in g from 40 to 110 ms, unfiltered in blue and
-    filtered at CFC 1000 in orange. The filtered line follows the unfiltered one and removes its
-    narrow spikes."></div>
-  <figcaption>The notebook's plot of the resultant around the peak, unfiltered and at
-  CFC&nbsp;1000.</figcaption>
+  <div class="fig-body"><img src="data/example/figures/r07-nb-1.svg?v=20261102180601"
+    alt="Ball height in meters against time for all 12 short records, one colored line each. Every
+    record starts between about 0.6 and 1.4 m, stays flat or dips for the first few frames, then
+    climbs steadily, passes the dashed rim line at 3.048 m at about 0.7 s and ends between about
+    4.2 and 4.6 m at 1.0 s."></div>
+  <figcaption>The notebook's first plot, in matplotlib's default style.</figcaption>
 </figure>
 
-<p>Filtering takes the peak down to 45.33&nbsp;<em>g</em> at 66.50&nbsp;ms and keeps the shape.
-Now the search. I wrote it like the code in the Windowed Optimum notes, with a running total of
-the integral so each window's integral is one subtraction, and a break as soon as a window gets
-longer than 15&nbsp;ms (300 steps). The choice I made is to start the windows at impact and not at
-the start of the record. Before impact the head is only reading noise, so a window that starts
-there cannot be the best one, and Alice asked how many windows I had to look at.</p>
+<p>The plot does not match the header. Every record begins with the ball about 1&nbsp;m up, flat or
+dipping for a few frames, and then it climbs steadily for most of a second. That appears to be the
+shooter gathering the ball and pushing it up, so <strong>most of each record is the ball in the
+hands</strong>, even though the header says the records begin partway into the flight. Every record
+also passes rim height on the way up, at about 0.7&nbsp;s. The release rule from assignment 5
+should find where the hand lets go. These records stop while the ball is still rising, so I start
+its walk back at the last frame that has a speed.</p>
 
-<pre class="nb-in">def hic_search(a, dt, first, kmax):
-    # running total of the trapezoid integral, built once
-    S = [0.0]
-    for i in range(1, len(a)):
-        S.append(S[-1] + (a[i] + a[i-1]) / 2 * dt)
-    best = 0.0
-    window = None
-    count = 0
-    for i in range(first, len(a) - 1):
-        for j in range(i + 1, len(a)):
-            if j - i &gt; kmax:          # longer than the limit
-                break
-            count = count + 1
-            T = (j - i) * dt
-            score = T * ((S[j] - S[i]) / T) ** 2.5
-            if score &gt; best:
-                best = score
-                window = (i, j)    # the window's start and end, as a pair
-    return best, window, count
+<pre class="nb-in">def release(t, z):
+    # assignment 5's rule: walk back while the upward speed keeps growing.
+    # These records stop while the ball is still rising, so the walk starts
+    # at the last frame that has a speed, not at the top.
+    vz = np.full(len(t), np.nan)
+    vz[2:-2] = (z[4:] - z[:-4]) / (t[4:] - t[:-4])
+    i = len(t) - 3
+    while i &gt; 3 and (vz[i - 1] &gt; vz[i] or vz[i - 2] &gt; vz[i]):
+        i = i - 1
+    return i
 
-impact = round(-t0 / dt)       # index of t = 0
-kmax = round(0.015 / dt)       # 15 ms in samples
-start = time.perf_counter()
-hic15, window, count = hic_search(filt, dt, impact, kmax)
-i = window[0]
-j = window[1]
-search_time = time.perf_counter() - start
-print(f"kmax = {kmax}, starts from index {impact}")
-print(f"HIC15 = {hic15:.2f}, window {t_ms[i]:.2f} to {t_ms[j]:.2f} ms")
-print(f"{count:,} windows in {search_time:.2f} s")</pre>
-<pre class="nb-out">kmax = 300, starts from index 1000
-HIC15 = 150.39, window 60.85 to 75.85 ms
-1,755,150 windows in 0.23 s</pre>
+for s in short['shots']:
+    t = np.array(s['t'])
+    z = np.array(s['z'])
+    r = release(t, z)
+    c = np.polyfit(t[r:], z[r:], 2)      # gravity fitted, to see what it gives
+    print(f"{s['id']:5}  release {r}  height there {z[r]:.2f} m  "
+          f"flight frames {len(t) - r}  g fitted {-2*c[0]:6.2f}")</pre>
+<pre class="nb-out">  685  release 19  height there 3.05 m  flight frames 7  g fitted  11.89
+  332  release 16  height there 2.95 m  flight frames 10  g fitted   7.91
+  872  release 18  height there 3.06 m  flight frames 8  g fitted   7.09
+  158  release 17  height there 3.11 m  flight frames 9  g fitted   9.63
+ 1299  release 17  height there 3.05 m  flight frames 9  g fitted  10.40
+  734  release 18  height there 3.13 m  flight frames 8  g fitted  13.52
+  503  release 17  height there 2.84 m  flight frames 9  g fitted   7.11
+  502  release 18  height there 3.01 m  flight frames 8  g fitted   9.14
+ 1317  release 20  height there 3.74 m  flight frames 6  g fitted  10.37
+ 1326  release 18  height there 3.19 m  flight frames 8  g fitted   7.10
+  490  release 17  height there 3.09 m  flight frames 9  g fitted  10.23
+  838  release 19  height there 3.32 m  flight frames 7  g fitted   0.41</pre>
 
-<p>HIC15 is 150.39. The window is exactly 15&nbsp;ms long and starts before the peak, which
-surprised me. Next, some checks. I wanted to know whether starting at impact changed
-anything, what the filter did to the answer, and what the search would cost with no limit.</p>
+<p>The rule puts the release at frame 16 to 20, where the ball is already at 2.84 to 3.74&nbsp;m,
+from 0.2&nbsp;m below rim height to 0.7&nbsp;m above it. That leaves 6 to 10 frames of flight per record. Fitting gravity to so few frames
+gives values from 0.41 to 13.52&nbsp;m/s&sup2;. A ball in free flight falls at about 9.8, so these
+fits are probably following the noise, and I am holding gravity at 9.81, as I recommended to Bob in assignment 5.
+With gravity held, the height above the rim is
+<em>f</em>(<em>t</em>) = <em>c</em><sub>0</sub> + <em>c</em><sub>1</sub><em>t</em> &minus; 4.905<em>t</em>&sup2; &minus; 3.048,
+and its derivative is <em>f</em>&prime;(<em>t</em>) = <em>c</em><sub>1</sub> &minus; 9.81<em>t</em>,
+which Newton's method needs. The parabola crosses rim height twice, so I start Newton half a second
+after the top of the fitted flight and check which way <em>f</em> is going at the root. First I try
+both sides on record 158.</p>
 
-<pre class="nb-in">full = hic_search(filt, dt, 0, kmax)
-print(f"starting before impact too: {full[0]:.2f}, {full[2]:,} windows")
-unf = hic_search(raw, dt, impact, kmax)
-a, b = unf[1]
-print(f"unfiltered: {unf[0]:.2f}, window {t_ms[a]:.2f} to {t_ms[b]:.2f} ms")
-start = time.perf_counter()
-nolim = hic_search(filt, dt, impact, n)
-nolim_time = time.perf_counter() - start
-a, b = nolim[1]
-print(f"no limit: {nolim[0]:.2f}, window {t_ms[a]:.2f} to {t_ms[b]:.2f} ms")
-print(f"{nolim[2]:,} windows in {nolim_time:.2f} s")</pre>
-<pre class="nb-out">starting before impact too: 150.39, 2,055,150 windows
-unfiltered: 150.62, window 60.90 to 75.90 ms
-no limit: 334.02, window 53.45 to 105.40 ms
-18,003,000 windows in 2.50 s</pre>
+<pre class="nb-in">G = 9.81
 
-<p>Searching the whole record gives the same 150.39 from 2,055,150 windows, so leaving out the
-windows that start before impact cost nothing. The unfiltered value is 150.62, so the filter
-moves HIC by much less than it moves the peak. With no limit HIC goes up to 334.02 over a window
-from 53.45 to 105.40&nbsp;ms. That means the limit is what decides the number, and it has to be reported
-with it. Here is the window on the filtered trace.</p>
+def fit_held(t, z):
+    # z + (g/2) t^2 = c0 + c1 t, a straight line
+    A = np.column_stack([np.ones_like(t), t])
+    return np.linalg.lstsq(A, z + 0.5*G*t**2, rcond=None)[0]
 
-<pre class="nb-in">plt.plot(t_ms, filt)
-plt.axvspan(t_ms[i], t_ms[j], color='orange', alpha=0.3)
-plt.xlim(0, 160)
-plt.xlabel('time from impact (ms)')
-plt.ylabel('resultant head acceleration, CFC 1000 (g)')
-plt.title(f'HIC15 = {hic15:.1f}, window {t_ms[i]:.2f} to {t_ms[j]:.2f} ms (shaded)')
+def f(c, t):
+    # how far the fitted ball is above the rim at time t
+    return c[0] + c[1]*t - 0.5*G*t**2 - RIM
+
+def newton(c, t):
+    for k in range(1, 51):
+        t = t - f(c, t) / (c[1] - G*t)     # f'(t) = c1 - g t
+        if abs(f(c, t)) &lt; 1e-10:
+            return t, k
+    return None, k
+
+def predict(s, first, last):
+    t = np.array(s['t'][first:last])
+    c = fit_held(t, np.array(s['z'][first:last]))
+    top = c[1] / G                     # f'(t) = 0 at the top
+    tc, steps = newton(c, top + 0.5)   # start on the falling side
+    # which way is f going at the root?
+    if f(c, tc - 1e-4) &gt; 0 and f(c, tc + 1e-4) &lt; 0:
+        way = 'falling'
+    else:
+        way = 'not falling'
+    A = np.column_stack([np.ones_like(t), t])
+    bx = np.linalg.lstsq(A, np.array(s['x'][first:last]) - s['hoop_x'], rcond=None)[0]
+    by = np.linalg.lstsq(A, np.array(s['y'][first:last]) - s['hoop_y'], rcond=None)[0]
+    return tc, bx[0] + bx[1]*tc, by[0] + by[1]*tc, steps, way
+
+s = short['shots'][3]                  # record 158
+t = np.array(s['t'])
+z = np.array(s['z'])
+r = release(t, z)
+c = fit_held(t[r:], z[r:])
+top = c[1] / G
+print(f'top of the fitted flight at {top:.3f} s')
+for start in [top - 0.5, top + 0.5]:
+    root, steps = newton(c, start)
+    print(f'Newton from {start:.3f} s: root {root:.4f} s after {steps} steps')
+print('first frame at or above the rim:', t[np.argmax(z &gt;= RIM)], 's')</pre>
+<pre class="nb-out">top of the fitted flight at 1.204 s
+Newton from 0.704 s: root 0.6662 s after 3 steps
+Newton from 1.704 s: root 1.7417 s after 3 steps
+first frame at or above the rim: 0.68 s</pre>
+
+<p>Started before the top, Newton finds a root at 0.666&nbsp;s, and the record's own heights first
+reach the rim at 0.68&nbsp;s. That root is the ball rising through rim height as it leaves the
+hand. Started after the top, it finds 1.742&nbsp;s, which is the one Bob means. Both took 3 steps.
+Next, all twelve, each fitted twice, once with all of its flight frames and once with the last
+frame left out. The distance the predicted point moves between the two is my measure of how settled
+each prediction is, and I only call a shot when the call holds up under a move that size.</p>
+
+<pre class="nb-in">rows = []
+for s in short['shots']:
+    t = np.array(s['t'])
+    r = release(t, np.array(s['z']))
+    tc, x, y, steps, way = predict(s, r, len(t))
+    tc1, x1, y1, steps1, way1 = predict(s, r, len(t) - 1)   # one frame fewer
+    d = np.hypot(x, y)
+    move = np.hypot(x - x1, y - y1)
+    if d + move &lt; in_r:
+        word = 'in'
+    elif d - move &gt; out_r:
+        word = 'out'
+    else:
+        word = 'too close'
+    rows.append((s['id'], x, y, x1, y1, word))
+    print(f"{s['id']:5}  t {tc:.3f} s ({tc - t[-1]:.2f} after the last frame)  "
+          f"x {x:6.3f}  y {y:6.3f}  d {d:.3f}  moved {move:.3f}  "
+          f"{steps} steps, {way}  {word}")</pre>
+<pre class="nb-out">  685  t 2.034 s (1.04 after the last frame)  x -0.685  y  0.008  d 0.685  moved 0.417  4 steps, falling  too close
+  332  t 1.873 s (0.87 after the last frame)  x -0.023  y  0.106  d 0.108  moved 0.149  4 steps, falling  too close
+  872  t 1.931 s (0.93 after the last frame)  x -0.089  y -0.040  d 0.097  moved 0.035  4 steps, falling  too close
+  158  t 1.742 s (0.74 after the last frame)  x -0.236  y  0.113  d 0.261  moved 0.020  3 steps, falling  too close
+ 1299  t 1.923 s (0.92 after the last frame)  x -0.481  y  0.035  d 0.482  moved 0.114  4 steps, falling  out
+  734  t 1.899 s (0.89 after the last frame)  x  0.368  y  0.334  d 0.497  moved 0.076  4 steps, falling  out
+  503  t 1.843 s (0.83 after the last frame)  x  0.201  y -0.181  d 0.270  moved 0.078  4 steps, falling  too close
+  502  t 1.980 s (0.98 after the last frame)  x -0.284  y  0.061  d 0.290  moved 0.048  4 steps, falling  too close
+ 1317  t 2.048 s (1.05 after the last frame)  x -0.213  y  0.325  d 0.389  moved 0.191  4 steps, falling  too close
+ 1326  t 1.773 s (0.77 after the last frame)  x -0.003  y -0.007  d 0.008  moved 0.065  3 steps, falling  in
+  490  t 1.970 s (0.97 after the last frame)  x -0.214  y -0.272  d 0.346  moved 0.067  4 steps, falling  too close
+  838  t 2.036 s (1.03 after the last frame)  x -0.361  y  0.122  d 0.382  moved 0.158  4 steps, falling  too close</pre>
+
+<p>Every root was found on the falling side, in 3 or 4 steps. The crossings come 0.74 to
+1.05&nbsp;s after each record's last frame. Leaving out one frame moved the predicted point by
+0.020 to 0.417&nbsp;m. On the worst record (685) that is more than the width of the whole rim band,
+0.239&nbsp;m. Three shots keep their call under their own move.</p>
+
+<pre class="nb-in">ang = np.linspace(0, 2*np.pi, 200)
+plt.figure(figsize=(6, 6))
+plt.plot(in_r*np.cos(ang), in_r*np.sin(ang), color='tab:green', label='in radius')
+plt.plot(out_r*np.cos(ang), out_r*np.sin(ang), color='tab:red', label='out radius')
+for shot_id, x, y, x1, y1, word in rows:
+    plt.plot([x1, x], [y1, y], '-', color='gray')
+    plt.plot(x, y, 'o', color='black')
+    plt.annotate(str(shot_id), (x, y), textcoords='offset points',
+                 xytext=(4, 4), fontsize=8)
+plt.gca().set_aspect('equal')
+plt.xlabel('along the court from the hoop center (m)')
+plt.ylabel('across the court from the hoop center (m)')
+plt.title('Predicted crossings, gray to the prediction from one frame fewer')
+plt.legend(loc='lower left')
 plt.show()</pre>
 
 <figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r07-nb-3.svg?v=20261102083412"
-    alt="Resultant driver head acceleration filtered at CFC 1000, in g, from 0 to 160 ms, with
-    the window from 60.85 to 75.85 ms shaded. The title gives HIC15 = 150.4."></div>
-  <figcaption>The notebook's plot of the HIC15 window.</figcaption>
+  <div class="fig-body"><img src="data/example/figures/r07-nb-2.svg?v=20261102180601"
+    alt="Top view centered on the hoop, in meters, with a green circle of radius 0.109 m and a red
+    circle of radius 0.348 m. Twelve labeled black points, each with a gray line to where the
+    prediction from one frame fewer put it. 1326 sits inside the green circle with a short line.
+    1299 and 734 sit outside the red circle. 685 sits about 0.7 m left of the hoop with a long line
+    running further left."></div>
+  <figcaption>The notebook's second plot. Each gray line runs from the prediction with one frame
+  fewer to the prediction with all of them.</figcaption>
 </figure>
 
-<p>Last, what 200 of these would cost, using the filter and search times from above.</p>
+<p>My answer for Bob is that 1326 goes in, 1299 and 734 miss, and the other nine are too close to
+call from these frames. The crossing times are in the output above, 1.742 to 2.048&nbsp;s from the
+first frame of each record. The move from one dropped frame is a rough measure, though. It is one
+comparison per record, and it does not say how far the prediction is from where the ball really
+comes down. I have not tried this rule on the training arcs, which would be the next step.</p>
 
-<pre class="nb-in">per_test = filter_time + search_time
-print(f"one test: {per_test:.2f} s, 200 tests: {200 * per_test / 60:.1f} min")
-print(f"without the limit: {200 * (filter_time + nolim_time) / 60:.1f} min")</pre>
-<pre class="nb-out">one test: 0.26 s, 200 tests: 0.9 min
-without the limit: 8.4 min</pre>
-
-<p>About a minute of computing for 200 tests with the limit, and about eight without it. These
-times are from one run and probably change a bit every time. The window count only depends on how
-long the record is, so it should be the same for every test sampled the same way, although I have
-not checked the other 200.</p>
-
-<p><strong>Flags.</strong> The resultant is not zero before impact (sensor noise made positive by
-squaring). The record ends at 300&nbsp;ms with the head still at 3.62&nbsp;<em>g</em>. The passenger
-has only an X head channel, so there is no passenger HIC. <strong>Assumptions.</strong> Alice means
-the driver. Windows start at impact, which I checked against the full search. A window of exactly
-15&nbsp;ms counts. The 700 is for a 50th percentile male dummy, and I assumed the driver dummy is
-one. Time zero is the impact.</p>
+<p><strong>Flags.</strong> The header says the records begin partway into the flight, and they
+begin with the ball in the hands. Record 685 moved 0.417&nbsp;m when one frame was dropped, the
+most of any. Record 1317 has only 6 frames of flight. <strong>Assumptions.</strong> Coordinates are
+in meters. Gravity is 9.81&nbsp;m/s&sup2;. The flight is a parabola in height and a straight line in
+each floor coordinate, from the release found above to the end of the record. The in and out radii
+assume the ball comes straight down. Times are used as recorded.</p>
 </div>
 
 <div class="aside notice"><span class="label">What to notice</span>
-<p>The answer comes in the first paragraph, so Alice can use it without reading any code. The
-student starts the windows at impact, which changes the window count (1,755,150 in place of
-2,055,150). The full search in the next cell then shows that HIC is unchanged. Each oddity is
-noted where it was found and gathered again at the end.</p>
+<p>The notebook finds the mismatch with the header in its first plot and says so where it finds it.
+It shows why the root it keeps is the falling one by running Newton from both sides of the top. Its
+measure of how settled a prediction is comes from each record itself (one frame left out), and the
+last paragraph says what that measure does not show and names the test it has not run.</p>
 </div>
 
   </main>
 
   
 
-  <script src="js/page.js?v=20261102083412"></script>
+  <script src="js/page.js?v=20261102180601"></script>
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

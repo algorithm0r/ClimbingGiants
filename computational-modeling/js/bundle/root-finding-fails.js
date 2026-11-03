@@ -967,14 +967,26 @@ function realNoiseRaw(n, sd = 1) {
   return scaleTo(out, sd);
 }
 
-/* ---------- the four cases ---------- */
+/* Root-finding failures. Four cases on real data and three on constructed
+   functions.
+
+   The shot is arc 79 from data/arcs.json, the arc the other week 7 pages use:
+   a least-squares parabola in z over its free-flight frames, time measured from
+   release. All 24 frames give z = 3.4520 + 4.7428 t - 4.9153 t^2 and fitted
+   gravity 9.831 m/s^2. The first six give z = 3.4675 + 4.3250 t - 3.1473 t^2
+   and 6.295 m/s^2.
+
+   The slope is data/slope-example-runs.json, the Slope Stability Lab's example
+   class. Bisection is walked through the runs the class actually made, and it
+   stops where the next midpoint has no run.
+
+   The constructed cases are the overhanging beam (pole), the 6 m beam's
+   deflection (a root off the structure) and a shot that only just reaches the
+   rim (a touching root). */
+
+const RIM = 3.048;
 const G = 9.81;
 const VY_B = Math.sqrt(2 * G * (3.05 - 2.00));             // 4.5388 m/s
-/* least-squares parabola over the free-flight frames of shot 79, the arc the
-   other pages use. Fitted gravity comes back as 9.831 m/s^2, and the arc passes
-   the free-flight screen: residual scatter, second-difference scatter, gravity
-   and residual structure all inside the population's 5th-95th percentile. */
-const Z_C = 3.4520, Z_B = 4.7428, Z_A = -4.9153;
 const W_C = 10, RA_C = 15, MSTAR = 8;                      // kN/m, kN, kN.m
 const W_D = 10e3, L_D = 6.0, EI_D = 200e9 * 8.5e-5;        // N/m, m, N.m^2
 
@@ -983,79 +995,58 @@ const dM_C = x => RA_C - W_C * x;
 const DFL  = x => W_D * x * (L_D ** 3 - 2 * L_D * x * x + x ** 3) / (24 * EI_D);
 const dDFL = x => W_D * (L_D ** 3 - 6 * L_D * x * x + 4 * x ** 3) / (24 * EI_D);
 
-const CASES = [
-  {
-    key: 'two-roots', caption: "Rings mark both roots of the fitted parabola. Amber numbered dots are Newton’s successive estimates, joined in order. Start left of the apex at 0.482 s and it converges on a time before the ball was released — the shaded strip, where the parabola is an extrapolation backwards and the ball was not yet in free flight.",
-    tab: '1. A root outside the problem',
-    setting: 'A real tracked three-pointer, as a parabola least-squares fitted to its free-flight ' +
-             'frames: y(t) = 3.4520 + 4.7428 t − 4.9153 t², released at 3.45 m. The hoop plane ' +
-             'is 3.048 m. f(t) = y(t) − 3.048.',
-    f:  t => Z_C + Z_B * t + Z_A * t * t - 3.048,
-    df: t => Z_B + 2 * Z_A * t,
-    x: [-0.4, 1.5], xLabel: 'time since release', xUnit: 's', xScale: 1,
-    yLabel: 'f = height − hoop height', yUnit: 'm',
-    rings: [{x: -0.07871, text: '−0.0787 s'}, {x: 1.04372, text: '1.0437 s'}],
-    bracket: [-0.4, 1.5], bracketNote: 'a bracket reaching back past release',
-    start: 0.20, domain: [0, 1.5],
-    domainNote: 'the ball is only a projectile after t = 0'
-  },
-  {
-    key: 'pole', caption: "The trace breaks where g passes through its pole at x = 3 m. Green rings mark the two true roots of the condition; the red square is what bisection returned.",
-    tab: '2. Bracket, no root',
-    setting: 'Overhanging beam, 10 kN/m over 6 m, supports at 0 and 4 m. Condition M(x) = 8 kN·m ' +
-             'written as a ratio: g(x) = 8/M(x) − 1.',
-    f:  x => MSTAR / M_C(x) - 1,
-    df: x => -MSTAR * dM_C(x) / (M_C(x) * M_C(x)),
-    x: [0.3, 3.9], xLabel: 'position along the beam', xUnit: 'm', xScale: 1,
-    yLabel: 'g = 8/M − 1', yUnit: '', yClamp: [-6, 6],
-    rings: [{x: 0.69377, text: '0.694 m'}, {x: 2.30623, text: '2.306 m'}],
-    bracket: [2.4, 3.7], bracketNote: 'spans the point of contraflexure',
-    start: 2.60, domain: [0.3, 3.9], domainNote: null,
-    poleAt: 3.0
-  },
-  {
-    key: 'off-beam', caption: "The shaded band is the beam, 0 to 6 m. Green rings mark the two positions where the deflection is 8 mm. Move Newton’s start toward midspan at 3 m and watch the iterates leave the beam.",
-    tab: '3. Off the beam',
-    setting: 'Simply supported beam, 6 m, 10 kN/m, EI = 1.7×10⁷ N·m². ' +
-             'Where does the deflection reach 8 mm? f(x) = δ(x) − 0.008 m.',
-    f:  x => DFL(x) - 0.008,
-    df: x => dDFL(x),
-    x: [-6, 6], xLabel: 'position', xUnit: 'm', xScale: 1,
-    yLabel: 'f = δ − 0.008', yUnit: 'm', yClamp: [-0.05, 0.05],
-    rings: [{x: 1.77650, text: '1.777 m'}, {x: 4.22350, text: '4.224 m'}],
-    bracket: [0.5, 3.0], bracketNote: 'left half of the beam',
-    start: 2.90, domain: [0, 6], domainNote: 'the beam'
-  },
-  {
-    key: 'double', caption: "The curve touches zero at 0.4627 s without crossing it, so bisection has no bracket to work with anywhere. Change the tolerance and watch the returned value move.",
-    tab: '4. No sign change',
-    setting: 'The same shot thrown to only just reach the rim: 5.84 m/s at 51°. ' +
-             'f(t) = height − 3.05 m touches zero without crossing.',
-    f:  t => 2.00 + VY_B * t - G * t * t / 2 - 3.05,
-    df: t => VY_B - G * t,
-    x: [0, 0.95], xLabel: 'time', xUnit: 's', xScale: 1,
-    yLabel: 'f = height − rim height', yUnit: 'm',
-    rings: [{x: 0.46267, text: '0.4627 s'}],
-    bracket: [0, 0.93], bracketNote: 'the whole flight',
-    start: 0.00, domain: [0, 0.95], domainNote: null
+function polyfit(xs, ys, deg) {
+  const n = deg + 1;
+  const A = Array.from({length: n}, (_, i) => {
+    const row = new Float64Array(n + 1);
+    for (let j = 0; j < n; j++) { let q = 0; for (let k = 0; k < xs.length; k++) q += Math.pow(xs[k], i + j); row[j] = q; }
+    let q = 0; for (let k = 0; k < xs.length; k++) q += ys[k] * Math.pow(xs[k], i);
+    row[n] = q; return row;
+  });
+  for (let k = 0; k < n; k++) {
+    let p = k;
+    for (let i = k + 1; i < n; i++) if (Math.abs(A[i][k]) > Math.abs(A[p][k])) p = i;
+    [A[k], A[p]] = [A[p], A[k]];
+    if (Math.abs(A[k][k]) < 1e-300) return null;
+    for (let i = 0; i < n; i++) {
+      if (i === k) continue;
+      const f = A[i][k] / A[k][k];
+      for (let c = k; c <= n; c++) A[i][c] -= f * A[k][c];
+    }
   }
-];
+  return Array.from({length: n}, (_, i) => A[i][n] / A[i][i]);
+}
+
+/* arc 79, time from release, and a fit to its first n free-flight frames */
+async function loadShot() {
+  const d = await (await fetch('data/arcs.json')).json();
+  const a = d.arcs.find(x => x.id === 79);
+  const k = a.rel, t0 = a.t[k];
+  const T = a.t.map(v => v - t0);
+  const fitN = n => {
+    const ts = T.slice(k, k + n);
+    const [c, b, q] = polyfit(ts, a.z.slice(k, k + n), 2);
+    const [x0, x1] = polyfit(ts, a.x.slice(k, k + n), 1);
+    const [y0, y1] = polyfit(ts, a.y.slice(k, k + n), 1);
+    /* the falling crossing: the larger root, since q < 0 */
+    const disc = b * b - 4 * q * (c - RIM);
+    const tc = disc >= 0 ? (-b - Math.sqrt(disc)) / (2 * q) : NaN;
+    const miss = Math.hypot(x0 + x1 * tc - a.hoop_x, y0 + y1 * tc - a.hoop_y);
+    return {c, b, q, g: -2 * q, tc, miss, last: ts[ts.length - 1]};
+  };
+  return {arc: a, T, rel: k, nf: a.key.nf, fitN, inR: d.in_radius_m, outR: d.out_radius_m};
+}
 
 function bisect(f, a, b, tol) {
   let ev = 0;
   const F = x => { ev++; const v = f(x); return isFinite(v) ? v : NaN; };
   let fa = F(a), fb = F(b);
-  if (!(fa * fb <= 0)) return {status: 'refused', ev,
-    why: 'f has the same sign at both ends of the bracket'};
-  let x = (a + b) / 2;
-  for (let k = 0; k < 200 && (b - a) > 1e-10; k++) {
-    x = (a + b) / 2;
-    const fm = F(x);
-    if (Math.abs(fm) < tol) return {status: 'stopped', x, ev, why: 'residual below tolerance'};
+  if (!(fa * fb <= 0)) return {status: 'refused', ev};
+  for (let k = 0; k < 200 && (b - a) > tol; k++) {
+    const x = (a + b) / 2, fm = F(x);
     if (fa * fm <= 0) { b = x; fb = fm; } else { a = x; fa = fm; }
   }
-  x = (a + b) / 2;
-  return {status: 'stopped', x, ev, why: 'bracket narrower than 10⁻¹⁰'};
+  return {status: 'stopped', x: (a + b) / 2, ev};
 }
 
 function newton(f, df, x0, tol, maxIt = 30) {
@@ -1063,120 +1054,237 @@ function newton(f, df, x0, tol, maxIt = 30) {
   const iter = [x];
   let fx = f(x); ev++;
   for (let k = 0; k < maxIt; k++) {
-    if (Math.abs(fx) < tol)
-      return {status: 'stopped', x, ev, iter, why: 'residual below tolerance'};
+    if (Math.abs(fx) < tol) return {status: 'stopped', x, ev, iter};
     const d = df(x); ev++;
-    if (d === 0 || !isFinite(d))
-      return {status: 'stalled', x, ev, iter, why: 'the derivative is zero there'};
+    if (d === 0 || !isFinite(d)) return {status: 'stalled', x, ev, iter};
     x = x - fx / d;
     iter.push(x);
-    if (!isFinite(x)) return {status: 'diverged', x, ev, iter, why: 'the step was unbounded'};
+    if (!isFinite(x)) return {status: 'diverged', x, ev, iter};
     fx = f(x); ev++;
   }
-  return {status: 'budget', x, ev, iter, why: 'ran out of steps'};
+  return {status: 'budget', x, ev, iter};
 }
 
-class CgDemo extends HTMLElement {
-  connectedCallback() {
-    if (this._done) return; this._done = true;
-    const root = document.createElement('div'); root.className = 'cgd';
-    root.innerHTML = `<div class="cgd-setting"></div>
-      <div class="cgd-plots"></div>
-      <div class="cgd-controls">
-        <label>Newton starts at
-          <input type="range" step="any">
-          <span class="cgd-val"></span></label>
-        <label>Tolerance
-          <span class="cgd-seg" data-role="tol">
-            <button type="button" data-tol="1e-4">10⁻⁴</button>
-            <button type="button" data-tol="1e-6" aria-pressed="true">10⁻⁶</button>
-            <button type="button" data-tol="1e-8">10⁻⁸</button>
-          </span></label>
-      </div>
-      <div class="cgd-table"><table><thead><tr>
-        <th>Method</th><th>Given</th><th class="num">Evaluations</th><th class="num">Returned</th>
-        <th class="num">|f| there</th><th>Outcome</th>
-      </tr></thead><tbody></tbody></table></div>
-      <div class="cgd-caption"></div>
-      <div class="source mixed"><span class="tag">Mixed</span><span>Two settings. The first is a real three-pointer from SportVU optical tracking, 2015&ndash;16 NBA season, reduced to the least-squares parabola through its free-flight frames &mdash; so the coefficients are measured, and the roots are still available in closed form. The rest is an overhanging beam under a uniform load, constructed with ordinary numbers. Both have exact answers, so every failure here is measured against one.</span></div>`;
-    this.appendChild(root);
+/* the verdict on a returned value: is it in the domain, is it a root, and
+   which way does f cross there */
+function judge(c, x, tol) {
+  if (!isFinite(x)) return 'no value returned';
+  if (c.domain && (x < c.domain[0] || x > c.domain[1])) return 'outside ' + c.domainNote;
+  const fx = Math.abs(c.f(x));
+  if (!(fx < tol)) return 'not a root, |f| is ' + MINUS(fx.toPrecision(3));
+  const h = 1e-4, before = c.f(x - h), after = c.f(x + h);
+  if (before * after >= 0) return 'a root, with no sign change either side';
+  return 'a root, f ' + (after > before ? 'rising' : 'falling') + ' through zero';
+}
 
-    const key = this.getAttribute('case');
-    const ci = CASES.findIndex(c => c.key === key);
-    if (ci < 0) { root.textContent = 'unknown case: ' + key; return; }
-    $('.cgd-caption', root).textContent = this.getAttribute('caption') || CASES[ci].caption || '';
-
-    const plots = $('.cgd-plots', root);
-    const slider = $('input[type=range]', root), val = $('.cgd-val', root);
-    const tbody = $('.cgd-table tbody', root);
-    const setting = $('.cgd-setting', root);
-    let tol = 1e-6, p = null, N = 1400, xs = null, ys = null;
-
-    const buildCase = () => {
-      const c = CASES[ci];
-      plots.textContent = '';
-      p = panel(plots, {label: c.yLabel, unit: c.yUnit, height: 240, xAxis: true,
-        xLabel: c.xLabel, xUnit: c.xUnit, xScale: c.xScale, yClamp: c.yClamp || null});
-      xs = new Float64Array(N); ys = new Float64Array(N);
-      for (let i = 0; i < N; i++) {
-        xs[i] = c.x[0] + (c.x[1] - c.x[0]) * i / (N - 1);
-        ys[i] = c.f(xs[i]);
-      }
-      setting.textContent = c.setting;
-      slider.min = c.x[0]; slider.max = c.x[1]; slider.value = c.start;
-    };
-
-    const render = () => {
-      const c = CASES[ci], x0 = parseFloat(slider.value);
-      const bi = bisect(c.f, c.bracket[0], c.bracket[1], tol);
-      const nw = newton(c.f, c.df, x0, tol);
-
-      const rings = c.rings.map(r => ({x: r.x, y: 0, text: r.text}));
-      const bands = c.domainNote ? [{x0: c.domain[0], x1: c.domain[1]}] : [];
+/* Newton and bisection on one function: the start is a slider, the tolerance
+   and (where there is a choice) the bracket are segments */
+function explorer(c) {
+  const segs = [{key: 'tol', label: 'tolerance', value: '1e-6', options: [
+    {value: '1e-4', label: '10⁻⁴'}, {value: '1e-6', label: '10⁻⁶'}, {value: '1e-8', label: '10⁻⁸'}]}];
+  if (c.brackets.length > 1)
+    segs.unshift({key: 'br', label: 'bisection bracket', value: '0', options:
+      c.brackets.map((b, i) => ({value: String(i), label: '[' + MINUS(String(b[0])) + ', ' + b[1] + ']'}))});
+  return {
+    async data() {
+      const extra = c.load ? await c.load() : {};
+      const XS = linspace(c.x[0], c.x[1], 1400);
+      return {...extra, XS, YS: Float64Array.from(XS, c.f)};
+    },
+    setting: c.setting, caption: c.caption, source: c.source,
+    controls: [{key: 'x0', label: 'Newton starts at', min: c.x[0], max: c.x[1], step: 'any',
+                value: c.start, unit: c.xUnit, dp: 3}],
+    segments: segs,
+    panels: [{label: c.yLabel, unit: c.yUnit, height: 240, xAxis: true,
+              xLabel: c.xLabel, xUnit: c.xUnit, xScale: 1, yClamp: c.yClamp || null}],
+    readouts: [
+      {key: 'bi', label: 'bisection returns'}, {key: 'biv', label: 'bisection, checked'},
+      {key: 'nw', label: 'Newton returns'}, {key: 'nwv', label: 'Newton, checked'}],
+    compute(s) {
+      const tol = +s.tol, br = c.brackets[+(s.br || 0)];
+      const bi = bisect(c.f, br[0], br[1], tol);
+      const nw = newton(c.f, c.df, s.x0, tol);
       const marks = [];
       if (bi.status !== 'refused' && bi.x >= c.x[0] && bi.x <= c.x[1])
-        marks.push({t: bi.x, y: 0, square: true, cast: 'x',
-          text: 'bisection ' + bi.x.toFixed(4), dx: 8, dy: 36});
-      const iterates = nw.iter.slice(0, 8).map(x => ({x, y: c.f(x)}));
-
-      p(xs, ys, null, c.x, {rings, bands, marks, iterates});
-
-      val.textContent = x0.toFixed(3) + ' ' + c.xUnit;
-
-      const dom = c.domain;
-      const row = (method, given, r) => {
-        if (r.status === 'refused')
-          return `<tr><td>${method}</td><td>${given}</td><td class="num">${r.ev}</td>
-            <td class="num">—</td><td class="num">—</td>
-            <td class="ok">refused to start — ${r.why}</td></tr>`;
-        const fx = Math.abs(c.f(r.x));
-        const inDom = r.x >= dom[0] && r.x <= dom[1];
-        let verdict, cls;
-        if (!inDom) { verdict = 'outside ' + (c.domainNote || 'the plotted range'); cls = 'bad'; }
-        else if (!(fx < tol)) { verdict = 'not a root — |f| is ' + fx.toPrecision(3); cls = 'bad'; }
-        else { verdict = 'a root of f'; cls = 'ok'; }
-        return `<tr><td>${method}</td><td>${given}</td><td class="num">${r.ev}</td>
-          <td class="num">${MINUS(r.x.toPrecision(6))}</td>
-          <td class="num">${fx.toExponential(1)}</td>
-          <td class="${cls}">${verdict}</td></tr>`;
+        marks.push({t: bi.x, y: 0, square: true, text: 'bisection', dx: 8, dy: 30});
+      const val = x => MINUS(x.toPrecision(6)) + ' ' + c.xUnit;
+      const opts = {rings: c.rings, marks, bands: [{x0: br[0], x1: br[1]}],
+        iterates: nw.iter.slice(0, 8).map(x => ({x, y: c.f(x)}))};
+      if (c.frames) opts.scatter = [c.frames(this)];
+      return {
+        panels: [{x: this.XS, y: this.YS, range: c.x, opts}],
+        readouts: {
+          bi: bi.status === 'refused' ? 'nothing, after ' + bi.ev + ' evaluations'
+                                      : val(bi.x) + ' after ' + bi.ev + ' evaluations',
+          biv: bi.status === 'refused' ? 'refused, f has the same sign at both ends' : judge(c, bi.x, tol),
+          nw: val(nw.x) + ' after ' + nw.ev + ' evaluations',
+          nwv: nw.status === 'stopped' ? judge(c, nw.x, tol)
+             : nw.status === 'stalled' ? 'stopped, the derivative is zero there'
+             : 'stopped without converging'
+        }
       };
-      tbody.innerHTML =
-        row('bisection', `[${c.bracket[0]}, ${c.bracket[1]}] — ${c.bracketNote}`, bi) +
-        row("Newton", `start ${x0.toFixed(3)} ${c.xUnit}`, nw);
-    };
-
-    $('[data-role="tol"]', root).addEventListener('click', e => {
-      const b = e.target.closest('button'); if (!b) return;
-      tol = parseFloat(b.dataset.tol);
-      [...e.currentTarget.children].forEach(x => x.setAttribute('aria-pressed', x === b));
-      render();
-    });
-    slider.addEventListener('input', render);
-
-    buildCase(); render();
-  }
+    }
+  };
 }
-customElements.define('cg-demo', CgDemo);
+
+const SHOT_SOURCE = {kind: 'measured', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz, one three-pointer (arc 79). The height is a least-squares parabola through its free-flight frames, so its roots are also available from the quadratic formula.'};
+const SLOPE_SOURCE = {kind: 'simulated', text: 'The Slope Stability Lab&rsquo;s public example class, fetched 2026-11-02. Each run is one GPU simulation of a rock slope shaken by a recorded earthquake scaled to a peak ground acceleration (PGA), a minute or two of machine time. The threshold is one choice, since the lab leaves the definition of damage to you.'};
+const MADE = {kind: 'constructed', text: 'Constructed with ordinary numbers. Neither the tracked shots nor the slope runs show this failure, so it is shown on a function with a known answer.'};
+
+const ZF = [3.4520, 4.7428, -4.9153];                      // arc 79, all 24 frames
+
+const SLOPE_SETUPS = [
+  {strength: 2.6, bracket: [1, 2]},
+  {strength: 5.8, bracket: [2, 4]},
+  {strength: 5.8, bracket: [2.7, 2.9]}
+];
+
+mountDemo({
+  'two-roots': explorer({
+    setting: 'When does the shot fall through the rim? <em>f</em>(<em>t</em>)&nbsp;=&nbsp;<em>z</em>(<em>t</em>)&nbsp;&minus;&nbsp;3.048&nbsp;m, with <em>z</em>(<em>t</em>)&nbsp;=&nbsp;3.4520&nbsp;+&nbsp;4.7428<em>t</em>&nbsp;&minus;&nbsp;4.9153<em>t</em>&sup2; fitted to the shot&rsquo;s 24 free-flight frames.',
+    caption: 'Dots are the tracked frames, as height minus 3.048&nbsp;m, and the curve is the fitted parabola. Rings mark both of its roots. Amber numbered dots are Newton&rsquo;s estimates in order, the red square is what bisection returned, and the shaded band is the bracket bisection was given. Drag Newton&rsquo;s start across the apex at 0.482&nbsp;s.',
+    source: SHOT_SOURCE,
+    load: loadShot,
+    frames: s => ({x: s.T, y: s.arc.z.map(v => v - RIM), cls: 'scatter', r: 2.6}),
+    f:  t => ZF[0] + ZF[1] * t + ZF[2] * t * t - RIM,
+    df: t => ZF[1] + 2 * ZF[2] * t,
+    x: [-0.4, 1.5], xLabel: 'time since release', xUnit: 's',
+    yLabel: 'f = z − 3.048', yUnit: 'm', yClamp: [-4, 1.9],
+    rings: [{x: -0.07875, y: 0, text: '−0.0787 s'}, {x: 1.04366, y: 0, text: '1.0437 s'}],
+    brackets: [[-0.4, 1.5], [0, 1.5], [-0.3, 0.4]],
+    start: 0.20
+  }),
+
+  'few-frames': {
+    async data() { return loadShot(); },
+    setting: 'The same shot, predicted from its first frames only. Each fit is a parabola in height and a line in each of <em>x</em> and <em>y</em>, and the crossing is the falling root of <em>f</em>(<em>t</em>)&nbsp;=&nbsp;<em>z</em>(<em>t</em>)&nbsp;&minus;&nbsp;3.048&nbsp;m.',
+    caption: 'Red dots are the frames the fit used and green dots are the rest of the record. The solid curve is the fit to the frames used, the dashed curve is the fit to all 24 free-flight frames, and the dashed line is the rim. The ring is the predicted crossing.',
+    source: SHOT_SOURCE,
+    controls: [{key: 'n', label: 'frames used', min: 5, max: 24, step: 1, value: 6, dp: 0}],
+    panels: [{label: 'height', unit: 'm', height: 250, xAxis: true,
+              xLabel: 'time since release', xUnit: 's', xScale: 1, yClamp: [1.5, 5]}],
+    readouts: [
+      {key: 'used', label: 'frames used'}, {key: 'g', label: 'fitted gravity'},
+      {key: 'tc', label: 'predicted crossing'}, {key: 'miss', label: 'distance from hoop center'},
+      {key: 'all', label: 'from all 24 frames'}],
+    compute(s) {
+      const n = Math.round(s.n), F = this.fitN(n), A = this.fitN(this.nf), k = this.rel;
+      const XS = linspace(-0.3, 1.7, 400);
+      const z = (P, t) => P.c + P.b * t + P.q * t * t;
+      const used = {x: this.T.slice(k, k + n), y: this.arc.z.slice(k, k + n), cls: 'scatter-hi', r: 3.4};
+      const rest = {x: [...this.T.slice(0, k), ...this.T.slice(k + n)],
+                    y: [...this.arc.z.slice(0, k), ...this.arc.z.slice(k + n)], cls: 'scatter', r: 2.6};
+      const verdict = m => m < this.inR ? 'in' : m > this.outR ? 'out' : 'on the rim';
+      return {
+        panels: [{x: XS, y: Float64Array.from(XS, t => z(F, t)), ghost: Float64Array.from(XS, t => z(A, t)),
+          range: [-0.3, 1.7],
+          opts: {scatter: [rest, used], hlines: [{y: RIM, text: 'rim, 3.048 m'}],
+                 rings: isFinite(F.tc) ? [{x: F.tc, y: RIM, text: F.tc.toFixed(3) + ' s'}] : []}}],
+        readouts: {
+          used: n + ', up to ' + F.last.toFixed(2) + ' s after release',
+          g: F.g.toFixed(2) + ' m/s²',
+          tc: isFinite(F.tc) ? F.tc.toFixed(3) + ' s' : 'never reaches the rim',
+          miss: isFinite(F.tc) ? F.miss.toFixed(3) + ' m, ' + verdict(F.miss) : '—',
+          all: A.tc.toFixed(3) + ' s, ' + A.miss.toFixed(3) + ' m, gravity ' + A.g.toFixed(2) + ' m/s²'
+        }
+      };
+    }
+  },
+
+  'slope-bracket': {
+    async data() {
+      const d = await (await fetch('data/slope-example-runs.json')).json();
+      return {runs: d.runs};
+    },
+    setting: 'The largest shaking a slope survives, with damage taken as moving more than a threshold <em>d</em>*, so <em>f</em>(PGA)&nbsp;=&nbsp;slope moved&nbsp;&minus;&nbsp;<em>d</em>*. Bisection is walked through the runs the example class made, and it stops where its next midpoint has no run.',
+    caption: 'Green dots are every run the class made on this slope. Amber numbered dots are the runs bisection uses, in its order, starting with the two ends. The dashed line is the threshold and the shaded band is the bracket bisection is left with.',
+    source: SLOPE_SOURCE,
+    segments: [
+      {key: 'setup', label: 'slope and bracket', value: '0', options: SLOPE_SETUPS.map((q, i) =>
+        ({value: String(i), label: q.strength + ' MPa, [' + q.bracket[0] + ', ' + q.bracket[1] + '] g'}))},
+      {key: 'dstar', label: 'threshold', value: '5', options: [
+        {value: '5', label: '5 cm'}, {value: '15', label: '15 cm'}]}],
+    panels: [{label: 'slope moved', unit: 'cm', height: 250, xAxis: true,
+              xLabel: 'peak ground acceleration', xUnit: 'g', xScale: 1, yLog: true}],
+    readouts: [
+      {key: 'path', label: 'runs bisection uses'}, {key: 'brack', label: 'bracket left'},
+      {key: 'next', label: 'next run needed'}, {key: 'below', label: 'over the threshold below the bracket'}],
+    compute(s) {
+      const q = SLOPE_SETUPS[+s.setup], dstar = +s.dstar;
+      const runs = this.runs.filter(r => r.strength_mpa === q.strength);
+      const at = x => runs.filter(r => Math.abs(r.pga_g - x) < 1e-6).sort((p, v) => p.run_id - v.run_id);
+      const F = r => r.slope_moved_cm - dstar;
+      let [a, b] = q.bracket;
+      const used = [at(a)[0], at(b)[0]];
+      const fa0 = F(used[0]), fb0 = F(used[1]);
+      const refused = fa0 * fb0 > 0;
+      let next = null, fa = fa0;
+      if (!refused) {
+        for (;;) {
+          const m = (a + b) / 2, hit = at(m);
+          if (!hit.length) { next = m; break; }
+          used.push(hit[0]);
+          if (fa * F(hit[0]) <= 0) b = m; else { a = m; fa = F(hit[0]); }
+        }
+      }
+      const g = v => String(+v.toFixed(5));
+      const lo = Math.min(...runs.map(r => r.pga_g)), hi = Math.max(...runs.map(r => r.pga_g));
+      const over = runs.filter(r => r.pga_g < a && r.slope_moved_cm > dstar).map(r => r.pga_g);
+      return {
+        panels: [{x: runs.map(r => r.pga_g), y: runs.map(r => r.slope_moved_cm),
+          range: [Math.max(0, lo - 0.1), hi + 0.1],
+          opts: {dots: true, yRange: [0.1, 1000],
+                 hlines: [{y: dstar, text: dstar + ' cm'}],
+                 bands: refused ? [] : [{x0: a, x1: b}],
+                 iterates: used.map(r => ({x: r.pga_g, y: r.slope_moved_cm}))}}],
+        readouts: {
+          path: used.map(r => g(r.pga_g) + ' g (' + +r.slope_moved_cm.toPrecision(3) + ' cm)').join(', '),
+          brack: refused ? 'none, both ends ' + (fa0 < 0 ? 'under' : 'over') + ' the threshold, so bisection refuses'
+                         : '[' + g(a) + ', ' + g(b) + '] g',
+          next: refused ? '—' : g(next) + ' g, which the class has not run',
+          below: refused ? '—' : over.length ? [...new Set(over)].sort((p, v) => p - v).map(g).join(', ') + ' g' : 'none'
+        }
+      };
+    }
+  },
+
+  'pole': explorer({
+    setting: 'Overhanging beam, 10&nbsp;kN/m over 6&nbsp;m, supports at 0 and 4&nbsp;m. The condition <em>M</em>(<em>x</em>)&nbsp;=&nbsp;8&nbsp;kN&middot;m written as a ratio, <em>g</em>(<em>x</em>)&nbsp;=&nbsp;8/<em>M</em>(<em>x</em>)&nbsp;&minus;&nbsp;1.',
+    caption: 'The trace breaks where <em>g</em> passes through its pole at <em>x</em>&nbsp;=&nbsp;3&nbsp;m. Rings mark the two true roots of the condition, and the red square is what bisection returned.',
+    source: MADE,
+    f:  x => MSTAR / M_C(x) - 1,
+    df: x => -MSTAR * dM_C(x) / (M_C(x) * M_C(x)),
+    x: [0.3, 3.9], xLabel: 'position along the beam', xUnit: 'm',
+    yLabel: 'g = 8/M − 1', yUnit: '', yClamp: [-6, 6],
+    rings: [{x: 0.69377, y: 0, text: '0.694 m'}, {x: 2.30623, y: 0, text: '2.306 m'}],
+    brackets: [[2.4, 3.7]], start: 2.60
+  }),
+
+  'off-beam': explorer({
+    setting: 'Simply supported beam, 6&nbsp;m, 10&nbsp;kN/m, <em>EI</em>&nbsp;=&nbsp;1.7&times;10&#8311;&nbsp;N&middot;m&sup2;. Where does the deflection reach 8&nbsp;mm? <em>f</em>(<em>x</em>)&nbsp;=&nbsp;&delta;(<em>x</em>)&nbsp;&minus;&nbsp;0.008&nbsp;m.',
+    caption: 'The shaded band is bisection&rsquo;s bracket, on the left half of a beam that runs from 0 to 6&nbsp;m. Rings mark the two positions on the beam where the deflection is 8&nbsp;mm. Move Newton&rsquo;s start toward midspan at 3&nbsp;m and watch the estimates leave the beam.',
+    source: MADE,
+    f:  x => DFL(x) - 0.008,
+    df: x => dDFL(x),
+    x: [-6, 6], xLabel: 'position', xUnit: 'm',
+    yLabel: 'f = δ − 0.008', yUnit: 'm', yClamp: [-0.05, 0.05],
+    rings: [{x: 1.77650, y: 0, text: '1.777 m'}, {x: 4.22350, y: 0, text: '4.224 m'}],
+    brackets: [[0.5, 3.0]], start: 2.90,
+    domain: [0, 6], domainNote: 'the beam'
+  }),
+
+  'double': explorer({
+    setting: 'A shot thrown to only just reach the rim: released at 2.00&nbsp;m with 4.5388&nbsp;m/s upward, so the apex is exactly 3.05&nbsp;m. <em>f</em>(<em>t</em>)&nbsp;=&nbsp;height&nbsp;&minus;&nbsp;3.05&nbsp;m touches zero without crossing.',
+    caption: 'The curve touches zero at 0.4627&nbsp;s without crossing it, so bisection has no bracket to work with anywhere. Change the tolerance and watch Newton&rsquo;s returned value move.',
+    source: MADE,
+    f:  t => 2.00 + VY_B * t - G * t * t / 2 - 3.05,
+    df: t => VY_B - G * t,
+    x: [0, 0.95], xLabel: 'time', xUnit: 's',
+    yLabel: 'f = height − 3.05', yUnit: 'm',
+    rings: [{x: 0.46267, y: 0, text: '0.4627 s'}],
+    brackets: [[0, 0.93]], start: 0.00
+  })
+});
 
 /* ---- code: highlighting + per-line notes ---- */
 const RULES={

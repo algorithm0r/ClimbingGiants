@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Coverage — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102083412">
-  <link rel="stylesheet" href="css/demos.css?v=20261102083412">
+  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
+  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -925,7 +925,7 @@
 <p>Reporting <em>d</em> = 82 ± 114 cm at 90% confidence is three separate statements, being a
 value, a half-width, and a rate. The rate is the part that can be checked. It cannot be checked
 on one case. A single interval either contains the truth or does not, and either outcome is
-consistent with any confidence level, because the claim is about a population of cases. So the
+consistent with any confidence level, because the claim is about a population of cases. For this reason the
 check needs a population of cases. Run the same procedure many times on situations where the
 answer is known, and count.</p>
 
@@ -944,7 +944,10 @@ crossing is about a second later, so every case is an <dfn
 data-g="extrapolation">extrapolation</dfn> to roughly three times the observed span. The answer
 each interval is checked against is the same shot fitted over its whole free-flight window. That
 is not a ground-truth trajectory, because there is none, so this is a fit-to-fit comparison and
-the check is if anything gentler than reality would be.</p>
+the check is if anything gentler than reality would be. The test is whole arcs cut off early and
+then scored against themselves, which gives cases whose answers are known. Ten
+frames is one choice of where to cut. A short record holds about seven frames of flight, and the
+demo below has a slider for the number of frames.</p>
 
 <h2 id="resampling-within-the-residual-scatter">Resampling Within the Residual Scatter</h2>
 
@@ -955,13 +958,16 @@ Perturb the frames by <dfn data-g="gaussian-noise">Gaussian</dfn> draws at the r
 refit, re-solve, and take the 5th and 95th percentiles of the resulting predictions. That the
 draws are Gaussian is itself an assumption, and one more thing the interval will not know it has
 made. Every step of that is defensible, and it is close to what a careful student usually produces
-unprompted. It
-gives a median 90% interval 88&nbsp;cm wide.</p>
+unprompted. On these 140 shots at ten frames it gives a median 90% interval 93&nbsp;cm wide when
+the squared residuals are averaged over the ten frames, and 109&nbsp;cm when their sum is divided by
+seven, the frames left over after three parameters are fitted.</p>
 
 <h2 id="how-often-the-interval-contains-the-answer">Measured Coverage</h2>
 
 <p>The demo runs the whole pipeline on all 140 shots and counts how often each interval contains
-the answer. The diagonal is what the stated level promises.</p>
+the answer. It resamples at the tracker's noise as the data header gives it (3.07&nbsp;cm vertical
+and 2.84&nbsp;cm horizontal), which is larger than the residual scatter. At ten frames its
+median 90% interval is 137&nbsp;cm wide. The diagonal is what the stated level promises.</p>
 
 <cg-demo case="coverage"></cg-demo>
 <div class="source measured"><span class="tag">Measured</span><span>The first 21 frames from release of 140 three-point shots, drawn from the same curated set. SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz, via <a href="https://github.com/linouk23/NBA-Player-Movements" target="_blank" rel="noopener">linouk23/NBA-Player-Movements</a>, with play-by-play joined from <a href="https://github.com/shufinskiy/nba_data" target="_blank" rel="noopener">shufinskiy/nba_data</a>. The selection, windowing and unit conversion are this course&rsquo;s own.</span></div>
@@ -970,18 +976,28 @@ the answer. The diagonal is what the stated level promises.</p>
 they cover <strong>6%</strong>. Every level is short, and the shortfall is worst where the claim
 is weakest, which is the opposite of what a merely noisy estimate would typically do.</p>
 
+<p>Cutting closer to release makes it worse. At seven frames a claimed 90% covers 18% of the 140
+shots, with a median interval about 7.5&nbsp;m wide. What is held fixed changes the count as well.
+Holding gravity at 9.81&nbsp;m/s&sup2; (which the demo does not do) raises the coverage of a claimed
+90% at seven frames to 69%, with a median interval 45&nbsp;cm wide (measured separately over the
+same 140 shots, 60 resamples each). That is much closer to the claim and still short of it, and 43
+of its 44 failures still fall below the interval.</p>
+
 <h2 id="the-two-obvious-repairs">Two Repairs</h2>
 
-<p><strong>Use a better noise estimate.</strong> The residual scatter of a ten-frame fit is
-1.64&nbsp;cm, while the tracker's measured per-frame noise is 3.07&nbsp;cm. The fit appears to have
-absorbed about half the noise into its three free parameters, so the residual understates it by a
-factor of nearly two. Substituting the measured value nearly doubles the median interval width, from
-88&nbsp;cm to 159&nbsp;cm. Coverage barely moves: 52% to 56%, measured separately over the same
-140 shots.</p>
+<p><strong>Use a better noise estimate.</strong> The residual scatter of a ten-frame height fit
+has a median of 1.7&nbsp;cm across the 140 shots (2.1&nbsp;cm when the sum of squares is divided by
+seven), while the header gives the tracker's vertical noise as 3.07&nbsp;cm. Three free parameters
+fitted to ten frames with independent noise shrink the residual scatter to about &radic;0.7, or
+0.84, of the noise. That would be about 2.6&nbsp;cm here, so the fit alone likely accounts for only
+part of the gap. Replacing the residual scatter with the header's values widens the median interval from
+93&nbsp;cm (109&nbsp;cm with the divisor of seven) to 137&nbsp;cm. Coverage stays near half, going
+from 49% (54%) to 51% (the residual-scatter runs measured separately over the same 140 shots, with
+the demo's 60 resamples each).</p>
 
 <p><strong>Widen the interval.</strong> Raise the assumed noise further and coverage falls,
 and at four times the measured noise a claimed 90% interval covers
-<strong>11%</strong>.</p>
+<strong>12%</strong>.</p>
 
 <table class="data">
   <tr><th class="num">noise assumed</th><th class="num">coverage of a claimed 90%</th></tr>
@@ -1000,7 +1016,7 @@ too narrow, though the one-sided failures say it is in the wrong place.</p>
 
 <p>The quantity reported is a <em>distance</em> from the center of the hoop, and a distance cannot
 be negative. Perturbing the frames moves the predicted crossing point in some direction, and most
-directions increase its distance from a point it was already near. So the resampled distribution
+directions increase its distance from a point it was already near. As a result the resampled distribution
 is pushed away from zero, and its 5th percentile, the lower bound, rises with the noise. The
 median lower bound is 15&nbsp;cm at the measured noise and rises with it, while the median
 answer stays at 16&nbsp;cm. Widening the assumed noise walks the interval off the answer.</p>
@@ -1107,13 +1123,13 @@ honest label, and it is more useful than the nominal one because it was checked.
 is reach for a multiplier. Widening the interval until the count comes out right treats the
 symptom, and the measurement on this page shows why that can fail. If the failures are all on one
 side, the interval is misplaced and not merely too narrow, and inflating it can make coverage
-worse. So report both numbers, then look at <em>where</em> the 104 failures fell. All on one
+worse. Report both numbers, then look at <em>where</em> the 104 failures fell. All on one
 side is a bias and points at something unmodeled. Split evenly is a width problem, and then the
 shortfall is telling you how much of your uncertainty the procedure never saw.</p></div></details></li>
     <li>A colleague argues their interval must be right because their residuals are very small.
-    Using the table above, say in one sentence what is wrong with that argument.
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Small residuals say the model reproduces the data it was fitted to, and the table shows
-intervals built from such residuals covering about half of what they claim, so the
+    Using the measurements on this page, say in one sentence what is wrong with that argument.
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Small residuals say the model reproduces the data it was fitted to, and this page shows
+intervals built from the residual scatter covering about half of what they claim, so the
 argument uses a measure of fit as though it were a measure of error. The residual is measured
 against data you have, and the error against a truth you do not. In fact a model with enough
 parameters absorbs the noise, so its residuals shrink <em>and</em> the
@@ -1166,11 +1182,11 @@ interval comes from when no formula gives one.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/coverage.js?v=20261102083412"></script>
+  <script type="module" src="js/bundle/coverage.js?v=20261102180601"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

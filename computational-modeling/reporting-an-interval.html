@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reporting an interval — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102083412">
-  <link rel="stylesheet" href="css/demos.css?v=20261102083412">
+  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
+  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -923,7 +923,8 @@
 
 <table class="data">
   <tr><th>Part</th><th>Answers</th><th>Source</th></tr>
-  <tr><td>the value</td><td>what is the answer</td><td>the analysis, run once on the data</td></tr>
+  <tr><td>the value</td><td>what is the answer</td><td>the analysis, run once on the data (or the
+      median of the resampled answers, where the two differ)</td></tr>
   <tr><td>the interval</td><td>how far out could it be</td><td>the spread from resampling, or held-out
       testing</td></tr>
   <tr><td>the level</td><td>how often is that claim right</td><td>a choice, which you then have to
@@ -950,10 +951,13 @@ which part of that distribution to quote. There are two conventions:</p>
   by 1.645 for 90%, 1.96 for 95%. Compact and symmetric, though the symmetry is assumed and not measured.</li>
 </ul>
 
-<p>On this course's crossing-time problem the two disagree, because the distribution has a long
-right tail: a fitted parabola slightly too flat crosses the rim much later, while one slightly
-too steep crosses only a little earlier. As a result the percentile interval is lopsided about
-the value and the ±kσ interval is not.</p>
+<p>On the rim crossing the two disagree, because the distributions are skewed. A fitted parabola
+slightly too flat crosses rim height much later and farther on, while one slightly too steep
+crosses only a little earlier. On the seven-frame shot of <a href="propagating-by-resampling.html"
+title="Propagating uncertainty by resampling">page 29</a>, with gravity fitted, the crossing-time
+interval reaches 0.38&nbsp;s before the value and 2.1&nbsp;s after it. The distance from the hoop
+center, which the demo below reads, has a long right tail as well, and it cannot go below zero. As
+a result the percentile interval is lopsided about the value and the ±kσ interval is not.</p>
 
 <cg-demo case="interval"></cg-demo>
 <div class="source measured"><span class="tag">Measured</span><span>Eight three-point arcs, drawn from a curated, outcome-balanced set of 1,016 shots from 508 games. SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz, via <a href="https://github.com/linouk23/NBA-Player-Movements" target="_blank" rel="noopener">linouk23/NBA-Player-Movements</a>, with play-by-play joined from <a href="https://github.com/shufinskiy/nba_data" target="_blank" rel="noopener">shufinskiy/nba_data</a>. The selection, windowing and unit conversion are this course&rsquo;s own.</span></div>
@@ -973,9 +977,20 @@ they say:</p>
 </ul>
 
 <p>The first states the asymmetry and how the interval was obtained, so a reader may disagree with
-the method. The second is compact and discards the asymmetry, where the percentile interval runs
+the method (its value is the median of the draws, 59.3&nbsp;cm, rounded for the reason in the aside
+below). The second is compact and discards the asymmetry, where the percentile interval runs
 163&nbsp;cm above the value and 38&nbsp;cm below it. The third is not a result, because it implies
 a precision of about a centimeter on a quantity whose 90% interval is about 200&nbsp;cm wide.</p>
+
+<p>Where the ball comes down is a point, so the same forms apply to each of its two offsets from
+the hoop center or to the distance, with the choices in the parenthesis. For instance, the
+seven-frame shot of <a href="propagating-by-resampling.html" title="Propagating uncertainty by resampling">page 29</a> with gravity held, written in the first form, is <em>d</em> =
+30&nbsp;cm, 90% interval [9, 55]&nbsp;cm <em>(percentile, 1000 resamples at the tracker's noise,
+seven frames, g held at 9.81&nbsp;m/s&sup2;)</em>. Here 30&nbsp;cm is the median of the draws
+(30.1&nbsp;cm), as in the first form above, and the 25&nbsp;cm in the table on <a href="propagating-by-resampling.html" title="Propagating uncertainty by resampling">page 29</a> is the value
+from the frames as recorded (24.5&nbsp;cm). Every item in that parenthesis changes the interval, and
+the same page shows that holding or fitting <em>g</em> alone moves it between [9, 55]&nbsp;cm and
+[24&nbsp;cm, 13&nbsp;m].</p>
 
 <div class="aside">
   <span class="label">Significant figures</span>
@@ -1010,16 +1025,25 @@ that choice.</p>
 <div class="check">
   <span class="label">Check</span>
   <ol>
-    <li>A report gives "HIC = 412 ± 30". What is missing, and why can you not use the number as it
-    stands?
+    <li>A report says the ball comes down "31 &plusmn; 9&nbsp;cm from the hoop center". What is
+    missing, and why can you not use the number as it stands?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>The confidence level is missing</strong>, and so is the convention that produced the
 &plusmn;.</p>
-     <p>Without a level, &plusmn;30 is not a claim. HIC = 412 &plusmn; 30 at 50% confidence says the
-truth is as likely outside 382&ndash;442 as inside. At 99% it says the truth is almost certainly
-in there. Those are different statements about the same numbers. Without the convention, you cannot tell whether 30 is a percentile half-width, a
-standard deviation, a <em>k</em>&sigma; interval, or a manufacturer's tolerance, and on a skewed
-distribution, as <a href="extrapolation-amplifies.html" title="Extrapolation and uncertainty">page 32</a> shows, these differ enough to change a decision. You also cannot
-compare it with anyone else's HIC, because the filter class and baseline window are unstated.</p></div></details></li>
+     <p>Without a level, &plusmn;9 is not a claim. 31 &plusmn; 9&nbsp;cm at 50% confidence says the
+truth is as likely outside 22&ndash;40&nbsp;cm as inside. At 99% it says the truth is almost certainly
+in there. Those are different statements about the same numbers. Under either level the interval
+straddles the 34.8&nbsp;cm at which a crossing is out, so neither settles rim or out, and the level
+changes what else is possible. At 99% the ball almost certainly does not go in, and at 50% even a
+make is not ruled out. Without the convention, you
+cannot tell whether 9 is a percentile half-width, a standard deviation, a <em>k</em>&sigma;
+interval, or a figure from the tracker's specification, and on a skewed distribution, as
+<a href="extrapolation-amplifies.html" title="Extrapolation and uncertainty">page 32</a> shows,
+these differ enough to change a decision. You also cannot compare it with anyone else's, because
+the number of frames fitted and whether gravity was fitted or held are unstated.
+<a href="propagating-by-resampling.html" title="Propagating uncertainty by resampling">Page 29</a>
+shows gravity fitted or held changing the interval by more than a factor of twenty, and
+<a href="extrapolation-amplifies.html" title="Extrapolation and uncertainty">page 32</a> shows the
+number of frames changing it by more than that.</p></div></details></li>
     <li>Your 1000 resamples have 5th and 95th percentiles at 0.819 and 1.361 around a value of
     1.021. Write the result two ways and say what the second one loses.
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>As percentiles:</strong> <em>t</em> = 1.021&nbsp;s, 90% interval [0.819, 1.361]&nbsp;s
@@ -1084,11 +1108,11 @@ interval comes from when no formula gives one.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/reporting-an-interval.js?v=20261102083412"></script>
+  <script type="module" src="js/bundle/reporting-an-interval.js?v=20261102180601"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

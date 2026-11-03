@@ -967,10 +967,13 @@ function realNoiseRaw(n, sd = 1) {
   return scaleTo(out, sd);
 }
 
-/* Slide the target c and watch the constructed f = y - c move down through the
-   axis. The trajectory is a parabola fitted to a real tracked shot, so the roots
-   are still available in closed form and can be checked, while the coefficients
-   come from measurement rather than from a choice. */
+/* Two demos for the two problems on this page.
+   predict: fit the first n free-flight frames of a real tracked shot (a parabola
+   in height, lines in x and y), evaluate the fitted formula where the rim is, and
+   call the shot in, rim or out, beside what the frames say after the fact.
+   slope: the runs of the Slope Stability Lab's example class on one slope, with a
+   damage threshold d* the reader sets. There is no formula, so the panel shows
+   only the runs, and f = moved - d* is known only where a run was made. */
 
 const RIM = 3.048;
 
@@ -996,84 +999,136 @@ function polyfit(xs, ys, deg) {
   return Array.from({length: n}, (_, i) => A[i][n] / A[i][i]);
 }
 
+/* in, rim or out, from the distance between the ball's center and the hoop's */
+const call = (d, a) => d <= a.inR ? 'in' : d >= a.outR ? 'out, clear of the rim' : 'touches the rim, so the tracking cannot decide';
+
 mountDemo({
-  convert: {
+  predict: {
     async data() {
       const d = await (await fetch('data/arcs.json')).json();
       const a = d.arcs.find(x => x.role === 'clean');
       const k = a.rel, nf = a.key.nf;
-      const T = [], Z = [];
-      for (let i = k; i < k + nf; i++) { T.push(a.t[i] - a.t[k]); Z.push(a.z[i]); }
-      const [c0, b0, a0] = polyfit(T, Z, 2);
-      return {arc: a, c0, b0, a0,
-              tFrames: T, zFrames: Z,
-              apexT: -b0 / (2 * a0), apex: c0 - b0 * b0 / (4 * a0)};
+      const T = a.t.map(v => v - a.t[k]);
+      /* after the fact: the frames either side of the rim on the way down */
+      let after = null;
+      for (let i = k + 1; i < a.z.length; i++) {
+        if (a.z[i - 1] >= RIM && a.z[i] < RIM) {
+          const s = (RIM - a.z[i - 1]) / (a.z[i] - a.z[i - 1]);
+          const x = a.x[i - 1] + s * (a.x[i] - a.x[i - 1]), y = a.y[i - 1] + s * (a.y[i] - a.y[i - 1]);
+          after = {t: T[i - 1] + s * (T[i] - T[i - 1]), d: Math.hypot(x - a.hoop_x, y - a.hoop_y)};
+          break;
+        }
+      }
+      return {a, k, nf, T, after, inR: d.in_radius_m, outR: d.out_radius_m};
     },
-    setting: 'The height of a real tracked three-pointer, as a parabola fitted to its free-flight ' +
-             'frames. The condition is <em>y</em>(<em>t</em>)&nbsp;=&nbsp;<em>c</em>; the root ' +
-             'problem is <em>f</em>&nbsp;=&nbsp;<em>y</em>&nbsp;&minus;&nbsp;<em>c</em>.',
-    source: {kind: 'measured', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz. The trajectory is a least-squares parabola through the free-flight frames of one shot, so its roots are available in closed form and every value on this page can be checked by hand.'},
-    caption: 'The ghost is the height itself; the solid curve is f = y &minus; c, the same curve ' +
-             'shifted down by c. Rings mark its roots wherever they are, including before the ball ' +
-             'was released. Raise c past the apex and both vanish &mdash; not because the routine ' +
-             'failed, but because the condition has no solution.',
-    controls: [{key: 'c', label: 'target height c', min: 1.0, max: 5.2, step: 'any',
-                value: 3.048, dp: 3, unit: 'm'}],
-    segments: [{key: 'show', label: 'show', value: 'f', options: [
-      {value: 'f', label: 'f = y − c'},
-      {value: 'g', label: 'y and the target'}]}],
-    panels: [{label: 'f', unit: 'm', height: 250, xAxis: true,
+    setting: 'The height of a real tracked three-pointer. The parabola is fitted to the first ' +
+             '<em>n</em> frames after release, as it could be while the ball is still in the air, ' +
+             'and evaluated where the frames have not reached yet.',
+    source: {kind: 'measured', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz. Hoop radii: the ball drops through clean within 0.109&nbsp;m of the hoop&rsquo;s center and clears the rim beyond 0.348&nbsp;m.'},
+    caption: 'Filled dots are the frames the fit uses. The dashed line is every tracked frame, ' +
+             'including the ones the fit has not seen and the ball bouncing back after it reaches ' +
+             'the rim. Rings mark where the fitted formula crosses 3.048&nbsp;m, both times.',
+    controls: [{key: 'n', label: 'frames fitted', min: 10, max: 24, step: 1, value: 10, dp: 0, unit: ''}],
+    panels: [{label: 'height', unit: 'm', height: 260, xAxis: true,
               xLabel: 'time since release', xUnit: 's', xScale: 1}],
     readouts: [
-      {key: 'c',     label: 'target c'},
-      {key: 'n',     label: 'roots of f'},
-      {key: 'r1',    label: 'first root'},
-      {key: 'r2',    label: 'second root'},
-      {key: 'apex',  label: 'apex height'},
-      {key: 'note',  label: ''}
+      {key: 'upto',  label: 'last frame fitted'},
+      {key: 'tc',    label: 'predicted crossing'},
+      {key: 'dist',  label: 'from the hoop center'},
+      {key: 'call',  label: 'the formula says'},
+      {key: 'after', label: 'the frames say, after the fact'}
     ],
     compute(s) {
-      const c = s.c, A = this.a0, B = this.b0, C = this.c0 - c;
-      const disc = B * B - 4 * A * C;
-      let roots = [];
-      if (disc >= 0) {
-        roots = [(-B + Math.sqrt(disc)) / (2 * A), (-B - Math.sqrt(disc)) / (2 * A)]
-                .sort((p, q) => p - q);
-      }
-      const yAt = t => this.c0 + this.b0 * t + this.a0 * t * t;
-      const TS = linspace(-0.35, 1.45, 400);
-      const GS = Float64Array.from(TS, yAt);
-      const showF = s.show === 'f';
-      const y = showF ? Float64Array.from(TS, t => yAt(t) - c) : GS;
-
-      /* a root before t = 0 is a root of the parabola but not of the problem */
-      const before = roots.filter(r => r < 0).length;
-
+      const {a, k, T} = this, n = Math.round(s.n);
+      const ft = [], fz = [], fx = [], fy = [];
+      for (let i = k; i < k + n; i++) { ft.push(T[i]); fz.push(a.z[i]); fx.push(a.x[i]); fy.push(a.y[i]); }
+      const [c0, c1, c2] = polyfit(ft, fz, 2);
+      const [x0, x1] = polyfit(ft, fx, 1), [y0, y1] = polyfit(ft, fy, 1);
+      const disc = c1 * c1 - 4 * c2 * (c0 - RIM);
+      const roots = disc < 0 ? [] : [(-c1 + Math.sqrt(disc)) / (2 * c2), (-c1 - Math.sqrt(disc)) / (2 * c2)].sort((p, q) => p - q);
+      const tc = roots.length ? roots[roots.length - 1] : NaN;
+      const d = Math.hypot(x0 + x1 * tc - a.hoop_x, y0 + y1 * tc - a.hoop_y);
+      const TS = linspace(-0.4, 1.6, 400);
+      const tr = T.filter(t => t >= -0.4 && t <= 1.6), zr = a.z.filter((_, i) => T[i] >= -0.4 && T[i] <= 1.6);
       return {
-        panels: [{x: TS, y, ghost: showF ? GS : null, range: [-0.35, 1.45],
+        panels: [{x: TS, y: Float64Array.from(TS, t => c0 + c1 * t + c2 * t * t), range: [-0.4, 1.6],
           opts: {
-            label: showF ? 'f = y − c' : 'height y, with the target as the dotted line',
-            pred: showF ? null : () => c,
-            bands: [{x0: -0.35, x1: 0}],
-            rings: roots.map(r => ({x: r, y: showF ? 0 : c, text: r.toFixed(4) + ' s'})),
-            marks: [{t: this.apexT, y: showF ? this.apex - c : this.apex, square: true,
-                     text: 'apex ' + this.apex.toFixed(3) + ' m', dx: 6, dy: -10}]
+            label: 'height, the fitted parabola and every tracked frame',
+            yRange: [0, 5.4],
+            pred: () => RIM,
+            bands: [{x0: -0.4, x1: 0}],
+            curves: [{x: tr, y: zr, cls: 'ghost'}],
+            rings: roots.map(r => ({x: r, y: RIM, text: r.toFixed(3) + ' s'})),
+            marks: ft.map((t, i) => ({t, y: fz[i]}))
           }}],
         readouts: {
-          c: c.toFixed(3) + ' m',
-          n: String(roots.length),
-          r1: roots.length ? roots[0].toFixed(4) + ' s' : 'none',
-          r2: roots.length > 1 ? roots[1].toFixed(4) + ' s' : 'none',
-          apex: this.apex.toFixed(3) + ' m at ' + this.apexT.toFixed(3) + ' s',
-          note: roots.length === 0
-            ? 'No solution: the ball never reaches ' + c.toFixed(2) + ' m, so there is nothing ' +
-              'for a root finder to find. A routine that returns a number here is wrong.'
-            : before
-              ? 'The shaded strip is before the ball left the hand. This shot is released at ' +
-                this.c0.toFixed(2) + ' m — above the rim — so the earlier root is a root of the ' +
-                'parabola and not of the problem. Only the descending crossing at ' +
-                roots[roots.length - 1].toFixed(3) + ' s is the shot.'
-              : ''
+          upto: ft[ft.length - 1].toFixed(2) + ' s (' + n + ' frames)',
+          tc: isFinite(tc) ? tc.toFixed(3) + ' s' : 'none',
+          dist: isFinite(tc) ? d.toFixed(3) + ' m' : '',
+          call: isFinite(tc) ? call(d, this) : '',
+          after: this.after.t.toFixed(3) + ' s, ' + this.after.d.toFixed(3) + ' m, touches the rim (missed)'
+        }
+      };
+    }
+  },
+
+  slope: {
+    async data() {
+      const d = await (await fetch('data/slope-example-runs.json')).json();
+      return {runs: d.runs};
+    },
+    setting: 'A rock slope in the Slope Stability Lab&rsquo;s example class, shaken by one ' +
+             'recorded earthquake scaled to a peak ground acceleration (PGA). Each dot is one run of ' +
+             'the simulation, a minute or two on a GPU. The condition is moved(PGA)&nbsp;=&nbsp;' +
+             '<em>d</em>*, and the root problem is <em>f</em>&nbsp;=&nbsp;moved&nbsp;&minus;&nbsp;<em>d</em>*.',
+    source: {kind: 'measured', text: 'Slope Stability Lab example class (the test round), 78 runs on five slopes, fetched 2026-11-02. The lab leaves the definition of damage to each student. <em>d</em>* here is a slider because it is a choice.'},
+    caption: 'There is no curve, because there is no formula to draw one from. Between two dots ' +
+             'nothing is known until another run is made. The sign of <em>f</em> at each run is ' +
+             'whether its dot sits above or below the threshold line.',
+    controls: [{key: 'd', label: 'damage threshold d*', min: 1, max: 50, step: 'any', value: 5, dp: 1, unit: 'cm'}],
+    segments: [
+      {key: 'mpa', label: 'bond strength', value: '7.4', options: [
+        {value: '1', label: '1.0'}, {value: '2.6', label: '2.6'}, {value: '4.2', label: '4.2'},
+        {value: '5.8', label: '5.8'}, {value: '7.4', label: '7.4 MPa'}]},
+      {key: 'view', label: 'view', value: 'all', options: [
+        {value: 'all', label: 'every run'}, {value: 'close', label: 'around the first sign change'}]}],
+    panels: [{label: 'slope moved', unit: 'cm', height: 260, xAxis: true, yLog: true,
+              xLabel: 'PGA', xUnit: 'g', xScale: 1}],
+    readouts: [
+      {key: 'runs',  label: 'runs on this slope'},
+      {key: 'cross', label: 'f changes sign between'},
+      {key: 'count', label: 'sign changes'}
+    ],
+    compute(s) {
+      const runs = this.runs.filter(r => r.strength_mpa === +s.mpa).sort((p, q) => p.pga_g - q.pga_g);
+      const x = runs.map(r => r.pga_g), y = runs.map(r => r.slope_moved_cm);
+      /* sign changes between neighboring settings, repeats averaged first */
+      const at = new Map();
+      for (const r of runs) { if (!at.has(r.pga_g)) at.set(r.pga_g, []); at.get(r.pga_g).push(r.slope_moved_cm); }
+      const pts = [...at].map(([g, v]) => [g, v.reduce((p, q) => p + q, 0) / v.length]);
+      const flips = [];
+      for (let i = 1; i < pts.length; i++)
+        if ((pts[i - 1][1] - s.d) * (pts[i][1] - s.d) < 0) flips.push([pts[i - 1], pts[i]]);
+      const lo = 0, hi = 4.2;
+      let range = [lo, hi];
+      if (s.view === 'close' && flips.length) {
+        const [p, q] = flips[0], w = Math.max(0.06, (q[0] - p[0]) * 3);
+        range = [p[0] - w, q[0] + w];
+      }
+      const g = v => String(+v.toFixed(5)) + ' g';
+      return {
+        panels: [{x, y, range, opts: {
+          label: 'slope moved, one dot a run', dots: true, dotR: 4, yRange: [0.1, 1000],
+          pred: () => s.d,
+          marks: flips.length ? [
+            {t: flips[0][0][0], y: flips[0][0][1], ring: true},
+            {t: flips[0][1][0], y: flips[0][1][1], ring: true}] : []
+        }}],
+        readouts: {
+          runs: String(runs.length),
+          cross: flips.length ? g(flips[0][0][0]) + ' (' + flips[0][0][1].toFixed(2) + ' cm) and ' +
+                 g(flips[0][1][0]) + ' (' + flips[0][1][1].toFixed(1) + ' cm)' : 'none among these runs',
+          count: String(flips.length)
         }
       };
     }

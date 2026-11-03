@@ -967,41 +967,54 @@ function realNoiseRaw(n, sd = 1) {
   return scaleTo(out, sd);
 }
 
-/* Three methods under a shared evaluation budget. The x axis is evaluations
-   spent, not iterations, so the curves are directly comparable. */
+/* Two demos. The first runs three methods on the shot's fitted height under a
+   shared evaluation budget, with evaluations on the x axis so the curves are
+   comparable. The second is the example class's 7.4 MPa slope, where each
+   evaluation is a run of the lab, plotted as the bracket width each run left. */
 
-const W = 10e3, L = 6.0, EI = 200e9 * 8.5e-5, TARGET = 0.008;
-const F  = x => W * x * (L ** 3 - 2 * L * x * x + x ** 3) / (24 * EI) - TARGET;
-const DF = x => W * (L ** 3 - 6 * L * x * x + 4 * x ** 3) / (24 * EI);
-const ROOT = (() => {
-  let a = 0.5, b = 3.0, fa = F(a);
-  for (let k = 0; k < 200 && (b - a) > 1e-16; k++) {
-    const m = 0.5 * (a + b), fm = F(m);
-    if (fa * fm <= 0) b = m; else { a = m; fa = fm; }
+const RIM = 3.048, DSTAR = 5;
+function polyfit(xs, ys, deg) {
+  const n = deg + 1;
+  const A = Array.from({length: n}, (_, i) => {
+    const row = new Float64Array(n + 1);
+    for (let j = 0; j < n; j++) { let q = 0; for (let k = 0; k < xs.length; k++) q += Math.pow(xs[k], i + j); row[j] = q; }
+    let q = 0; for (let k = 0; k < xs.length; k++) q += ys[k] * Math.pow(xs[k], i);
+    row[n] = q; return row;
+  });
+  for (let k = 0; k < n; k++) {
+    let p = k;
+    for (let i = k + 1; i < n; i++) if (Math.abs(A[i][k]) > Math.abs(A[p][k])) p = i;
+    [A[k], A[p]] = [A[p], A[k]];
+    if (Math.abs(A[k][k]) < 1e-300) return null;
+    for (let i = 0; i < n; i++) {
+      if (i === k) continue;
+      const f = A[i][k] / A[k][k];
+      for (let c = k; c <= n; c++) A[i][c] -= f * A[k][c];
+    }
   }
-  return 0.5 * (a + b);
-})();
-const FLOOR = 1e-16;
-const err = x => Math.max(FLOOR, Math.abs(x - ROOT));
+  return Array.from({length: n}, (_, i) => A[i][n] / A[i][i]);
+}
 
-/* each returns [{evals, err}] — error against evaluations spent */
-function runBisection(budget) {
-  let a = 0.5, b = 3.0, fa = F(a), evals = 2;
-  const out = [{evals, err: err(0.5 * (a + b))}];
+const FLOOR = 1e-16;
+
+/* each returns [{evals, err}]: an estimate's error against the evaluations used
+   to compute it, the count page 21 uses. Bisection reports its bracket width,
+   the bound it guarantees, as pages 20 and 21 do. */
+function runBisection(F, err, budget) {
+  let a = 0.5, b = 1.5, fa = F(a), evals = 2;
+  const out = [{evals, err: b - a}];
   while (evals < budget) {
     const m = 0.5 * (a + b), fm = F(m); evals++;
     if (fa * fm <= 0) b = m; else { a = m; fa = fm; }
-    out.push({evals, err: err(0.5 * (a + b))});
+    out.push({evals, err: b - a});
   }
   return out;
 }
-function runNewton(budget, x0) {
+function runNewton(F, DF, err, budget, x0) {
   let x = x0, evals = 0;
   const out = [{evals, err: err(x)}];
-  while (evals < budget) {
-    const d = DF(x); evals++;
-    if (evals >= budget) break;
-    const fx = F(x); evals++;
+  while (evals + 2 <= budget) {
+    const d = DF(x), fx = F(x); evals += 2;
     if (d === 0 || !isFinite(d)) break;
     x = x - fx / d;
     if (!isFinite(x)) break;
@@ -1009,15 +1022,16 @@ function runNewton(budget, x0) {
   }
   return out;
 }
-function runSecant(budget, x0) {
-  let a = x0, b = x0 + 0.35, fa = F(a), fb = F(b), evals = 2;
-  const out = [{evals, err: err(b)}];
+function runSecant(F, err, budget, x0, x1) {
+  let a = x0, b = x1, fa = F(a), evals = 1;
+  const out = [{evals: 0, err: err(b)}];
   while (evals < budget) {
+    const fb = F(b); evals++;
     if (fb === fa) break;
     const x = b - fb * (b - a) / (fb - fa);
     if (!isFinite(x)) break;
-    a = b; fa = fb; b = x; fb = F(x); evals++;
-    out.push({evals, err: err(b)});
+    out.push({evals, err: err(x)});
+    a = b; fa = fb; b = x;
   }
   return out;
 }
@@ -1035,57 +1049,122 @@ function onAxis(run, budget) {
 
 mountDemo({
   budget: {
-    setting: 'The beam-deflection root, from a start of 1.20&nbsp;m and a bracket of ' +
-             '[0.5,&nbsp;3.0]. The horizontal axis is evaluations of <em>f</em> spent — the ' +
-             'quantity that costs something — not iterations.',
-    source: {kind: 'constructed', text: 'The beam-deflection root from the previous pages. The reference root is computed to full double precision, so the error axis measures the methods and not the reference.'},
-    caption: 'Bisection is the straight line: one bit per evaluation, whatever the function does. ' +
-             'The curves that bend downwards are the ones using the values they paid for, not just ' +
-             'the signs. The floor at 10⁻¹⁶ is double precision, not the method.',
-    controls: [{key: 'budget', label: 'evaluation budget', min: 6, max: 48, step: 1, value: 24, dp: 0}],
-    panels: [{label: 'error in the estimate', unit: 'm', height: 250, xAxis: true,
+    /* the same fit as pages 19 and 20: arc 79's free-flight frames, time from release */
+    async data() {
+      const d = await (await fetch('data/arcs.json')).json();
+      const a = d.arcs.find(x => x.role === 'clean');
+      const k = a.rel, nf = a.key.nf;
+      const T = [], Z = [];
+      for (let i = k; i < k + nf; i++) { T.push(a.t[i] - a.t[k]); Z.push(a.z[i]); }
+      const [c0, c1, c2] = polyfit(T, Z, 2);
+      const F = t => c0 + c1 * t + c2 * t * t - RIM;
+      const DF = t => c1 + 2 * c2 * t;
+      /* the falling root in closed form, so the error axis measures the methods */
+      const C = c0 - RIM, root = (-c1 - Math.sqrt(c1 * c1 - 4 * c2 * C)) / (2 * c2);
+      return {F, DF, err: t => Math.max(FLOOR, Math.abs(t - root))};
+    },
+    setting: 'When does the shot fall through the rim? The root of <em>f</em>(<em>t</em>)&nbsp;=&nbsp;<em>z</em>(<em>t</em>)&nbsp;&minus;&nbsp;3.048&nbsp;m answers it, ' +
+             'with <em>z</em>(<em>t</em>) the parabola fitted to the shot. Bisection starts from the bracket [0.5,&nbsp;1.5]&nbsp;s, Newton from ' +
+             'the last frame fitted, 0.92&nbsp;s, and the secant method from the last two, 0.88 and 0.92&nbsp;s. The horizontal axis is ' +
+             'the evaluations used to compute each estimate.',
+    source: {kind: 'measured', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz. The height is a least-squares parabola through the 24 free-flight frames of one shot (arc 79). Its falling root is also available from the quadratic formula, so the error is the actual error.'},
+    caption: 'Bisection is the dashed straight line, the width of its bracket, which halves with each evaluation whatever the function does. ' +
+             'The width is the bound bisection guarantees. The other two keep no bracket, so they are shown by their actual error. ' +
+             'The secant curve and the Newton dots bend down because they use the values of <em>f</em> as well as their signs. ' +
+             'Errors below 10⁻¹⁶&nbsp;s are drawn at 10⁻¹⁶&nbsp;s, about the spacing of double-precision numbers near 1&nbsp;s. ' +
+             'The last readout gives the machine time if each evaluation were a run of the Slope Stability Lab.',
+    controls: [{key: 'budget', label: 'evaluation budget', min: 6, max: 44, step: 1, value: 24, dp: 0}],
+    panels: [{label: 'error in the crossing time', unit: 's', height: 250, xAxis: true,
               xLabel: 'evaluations of f spent', xUnit: '', xScale: 1, yLog: true}],
     readouts: [
       {key: 'b',  label: 'budget'},
-      {key: 'eb', label: 'bisection reaches'},
+      {key: 'eb', label: 'bisection bracket'},
       {key: 'en', label: 'Newton reaches'},
       {key: 'es', label: 'secant reaches'},
-      {key: 'win', label: 'best at this budget'}
+      {key: 'run', label: 'as slope runs'}
     ],
     compute(s) {
-      const B = Math.round(s.budget);
+      const {F, DF, err} = this, B = Math.round(s.budget);
       const runs = {
-        bisection: runBisection(B),
-        newton: runNewton(B, 1.20),
-        secant: runSecant(B, 1.20)
+        bisection: runBisection(F, err, B),
+        newton: runNewton(F, DF, err, B, 0.92),
+        secant: runSecant(F, err, B, 0.88, 0.92)
       };
       const X = linspace(0, B, B + 1);
       const yb = onAxis(runs.bisection, B);
-      const yn = onAxis(runs.newton, B);
       const ys = onAxis(runs.secant, B);
       const final = k => runs[k][runs[k].length - 1].err;
-      /* Once two methods are both at machine precision, ranking them by the last
-         bit is not a comparison of methods. Say so rather than declaring a
-         winner on rounding noise. */
-      const AT_FLOOR = 1e-14;
-      const sorted = ['bisection', 'newton', 'secant'].sort((p, q) => final(p) - final(q));
-      const best = (final(sorted[0]) < AT_FLOOR && final(sorted[1]) < AT_FLOOR)
-        ? sorted.filter(k => final(k) < AT_FLOOR).join(' and ') + ': both at machine precision'
-        : sorted[0];
+      const show = v => v <= FLOOR ? 'below 10⁻¹⁶ s' : v.toExponential(1) + ' s';
       return {
         panels: [{x: X, y: ys, ghost: yb, range: [0, B],
           opts: {
-            label: 'error — secant solid, bisection dashed, Newton dotted',
+            label: 'error (secant solid, Newton dots) and bracket width (bisection dashed)',
             pred: null,
-            marks: [...Array(B + 1).keys()].filter(e => e % Math.max(1, Math.round(B / 12)) === 0)
-              .map(e => ({t: e, y: yn[e]}))
+            marks: runs.newton.map(p => ({t: p.evals, y: p.err}))
           }}],
         readouts: {
           b: B + ' evaluations',
-          eb: final('bisection').toExponential(1),
-          en: final('newton').toExponential(1),
-          es: final('secant').toExponential(1),
-          win: best
+          eb: show(final('bisection')),
+          en: show(final('newton')),
+          es: show(final('secant')),
+          run: B + ' to ' + 2 * B + ' minutes, ' + (B <= 40 ? 'within' : 'over') + ' the 40-run budget'
+        }
+      };
+    }
+  },
+
+  /* Second demo: what each run bought on the example class's 7.4 MPa slope.
+     The bracket is the strongest shaking still under the threshold and the
+     weakest over it, among the runs made so far. */
+  cost: {
+    async data() {
+      const d = await (await fetch('data/slope-example-runs.json')).json();
+      const runs = d.runs.filter(r => r.strength_mpa === 7.4).sort((p, q) => p.run_id - q.run_id);
+      const width = [];
+      for (let n = 1; n <= runs.length; n++) {
+        const made = runs.slice(0, n);
+        const under = made.filter(r => r.slope_moved_cm < DSTAR).map(r => r.pga_g);
+        const over = made.filter(r => r.slope_moved_cm >= DSTAR).map(r => r.pga_g);
+        width.push(under.length && over.length ? Math.min(...over) - Math.max(...under) : NaN);
+      }
+      const repeat = runs.map((r, i) => runs.slice(0, i).some(q => q.pga_g === r.pga_g));
+      return {runs, width, repeat};
+    },
+    setting: 'The 7.4&nbsp;MPa slope, with damage taken as more than 5&nbsp;cm of movement. ' +
+             'Each point is one run of the lab, and its height is the width of the bracket left by the runs so far.',
+    source: {kind: 'simulated', text: 'The Slope Stability Lab&rsquo;s public example class, fetched 2026-11-02. Each run is one GPU simulation of the slope, a minute or two of machine time. The 5&nbsp;cm threshold is one choice, since the lab leaves the definition of damage to you.'},
+    caption: 'The first two runs leave no bracket, and the third leaves one 2&nbsp;g wide. Each halving after that lowers the width by a factor of 2, ' +
+             'and a factor of 10 (one more digit of PGA) takes about 3.3 halvings. Rings mark repeats of a setting already run. ' +
+             'Each repeat is a new run that costs one from the budget and leaves the width where it was.',
+    controls: [{key: 'n', label: 'runs made', min: 3, max: 17, step: 1, value: 17, dp: 0}],
+    panels: [{label: 'bracket width', unit: 'g', height: 250, xAxis: true,
+              xLabel: 'runs on this slope', xUnit: '', xScale: 1, yLog: true}],
+    readouts: [
+      {key: 'n',     label: 'runs made'},
+      {key: 'rep',   label: 'of them repeats'},
+      {key: 'width', label: 'bracket width'},
+      {key: 'dig',   label: 'digits since the first bracket'},
+      {key: 'time',  label: 'machine time'}
+    ],
+    compute(s) {
+      const n = Math.round(s.n), {width, repeat} = this;
+      const X = [], Y = [], R = [];
+      for (let i = 0; i < n; i++) {
+        if (!isFinite(width[i])) continue;
+        X.push(i + 1); Y.push(width[i]);
+        if (repeat[i]) R.push({x: i + 1, y: width[i]});
+      }
+      const reps = repeat.slice(0, n).filter(Boolean).length;
+      const w = width[n - 1], w0 = width.find(isFinite);
+      return {
+        panels: [{x: X, y: Y, range: [0, 18],
+          opts: {dots: true, dotR: 3.6, yRange: [0.001, 3], rings: R}}],
+        readouts: {
+          n: String(n),
+          rep: String(reps),
+          width: +w.toPrecision(3) + ' g',
+          dig: Math.log10(w0 / w).toFixed(1),
+          time: n + ' to ' + 2 * n + ' minutes'
         }
       };
     }

@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Propagating uncertainty by resampling — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102083412">
-  <link rel="stylesheet" href="css/demos.css?v=20261102083412">
+  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
+  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -932,16 +932,19 @@ working almost immediately:</p>
   <li>The relationship is strongly non-linear over the range the inputs actually vary.</li>
 </ul>
 
-<p>The crash and trajectory pipelines in this course typically have all three properties. Week 7's HIC is a
-constrained search over a filtered, integrated record, and there is no derivative to take.</p>
+<p>The rim crossing from week 7 has all three properties. It fits a parabola in height and lines in
+the two ground coordinates to a few frames, solves for the two times the parabola passes 3.048&nbsp;m,
+keeps the later one, and turns the point it reaches there into a distance from the hoop center.
+Keeping the later root is a branch, and a fit that curves the wrong way never comes back down to the
+rim at all, so there is no tidy derivative to take through it.</p>
 
 <h2 id="perturb-the-inputs-and-re-run-the-whole-analysis">The Resampling Procedure</h2>
 
 <ol class="plain">
-  <li><strong>Characterize the input scatter.</strong> The instrument's stated resolution, or the
-  residual scatter of a fit, or the pre-impact window of week 3. This is the one step that
-  requires
-  judgment, and it is where a resampled interval can go wrong.</li>
+  <li><strong>Characterize the input scatter.</strong> The instrument's stated noise (the header of
+  the shots file gives the tracker's, 3.07&nbsp;cm vertical and 2.84&nbsp;cm horizontal per frame),
+  or the residual scatter of a fit to the whole flight. This is the one step that
+  requires judgment, and it is where a resampled interval can go wrong.</li>
   <li><strong>Draw a perturbed set of inputs</strong> from that scatter.</li>
   <li><strong>Run the entire analysis</strong> on them, unchanged. That is, the actual pipeline,
   filters and searches and all, with no linearized version.</li>
@@ -953,6 +956,51 @@ constrained search over a filtered, integrated record, and there is no derivativ
 
 <cg-demo case="resample"></cg-demo>
 <div class="source measured"><span class="tag">Measured</span><span>Eight three-point arcs, drawn from a curated, outcome-balanced set of 1,016 shots from 508 games. SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz, via <a href="https://github.com/linouk23/NBA-Player-Movements" target="_blank" rel="noopener">linouk23/NBA-Player-Movements</a>, with play-by-play joined from <a href="https://github.com/shufinskiy/nba_data" target="_blank" rel="noopener">shufinskiy/nba_data</a>. The selection, windowing and unit conversion are this course&rsquo;s own.</span></div>
+
+<h2 id="resampling-a-short-record">Resampling a Short Record</h2>
+
+<p>The demo fits ten frames, and a short record holds fewer. It stops a few frames after the ball
+leaves the hand (in the example pack six to ten frames after the last upward push, and seven is
+typical). Consider the same shot cut to its first seven frames after release, which is 0.24&nbsp;s
+of flight (arc 79 in <code>data/arcs.json</code>, release at the frame stored with the arc). Each of
+1000 draws adds Gaussian noise at the header's values to <em>x</em>, <em>y</em> and <em>z</em> in
+all seven frames, refits, solves for the falling crossing of 3.048&nbsp;m, and keeps the time and
+the point. The point is given as its offset from the hoop center along the court and across it.
+The procedure runs twice on the same draws, once with gravity fitted and once with gravity held at
+9.81&nbsp;m/s&sup2;.</p>
+
+<table class="data">
+  <tr><th>Predicted at the Rim Crossing</th><th class="num">Gravity Fitted, Seven Frames</th>
+      <th class="num">Gravity Held, Seven Frames</th><th class="num">Whole Flight, 24 Frames</th></tr>
+  <tr><td>time from release</td><td class="num">1.13&nbsp;s [0.75, 3.2]</td>
+      <td class="num">1.03&nbsp;s [0.99, 1.07]</td><td class="num">1.04&nbsp;s</td></tr>
+  <tr><td>offset along the court</td><td class="num">&minus;44&nbsp;cm [&minus;990, 130]</td>
+      <td class="num">4&nbsp;cm [&minus;25, 33]</td><td class="num">&minus;15&nbsp;cm</td></tr>
+  <tr><td>offset across the court</td><td class="num">18&nbsp;cm [&minus;130, 870]</td>
+      <td class="num">&minus;24&nbsp;cm [&minus;49, 1]</td><td class="num">&minus;32&nbsp;cm</td></tr>
+  <tr><td>distance from the hoop center</td><td class="num">47&nbsp;cm [24, 1300]</td>
+      <td class="num">25&nbsp;cm [9, 55]</td><td class="num">36&nbsp;cm</td></tr>
+</table>
+
+<p>Each cell gives the value from the frames as recorded and then the 90% percentile interval of
+the draws. The two seven-frame columns share the frames, the noise and the draws, and they differ
+only in what was held fixed. With gravity fitted, seven frames do not pin down the curvature, and the
+distance interval runs from 24&nbsp;cm to 13&nbsp;m (17 of the 1000 draws never came back down to
+the rim at all, so that column is read off the other 983). Holding gravity at 9.81 removes that
+parameter, and the interval shrinks to 9 to 55&nbsp;cm. Neither interval is wrong, since each
+reflects what was held fixed. An interval describes the scatter you varied with everything else held
+where you put it, so a report needs both lists. Here the fixed list is the release frame, the seven
+frames, the rim height, the hoop position, the model form and (in the gravity-held column) the value of
+<em>g</em>. The whole flight lands inside both intervals in every row, though one shot says nothing
+yet about how often that happens (<a href="coverage.html" title="Coverage">page 31</a> counts it).</p>
+
+<p>The interval also answers <a href="conditions-become-roots.html" title="Conditions as roots">week 7's</a> in, out or rim question more carefully than one prediction
+can. A crossing closer than 10.9&nbsp;cm to the hoop center goes in, one farther than 34.8&nbsp;cm
+is out, and anything between them hits the rim (both radii are stored in <code>data/arcs.json</code>).
+The prediction as recorded, 25&nbsp;cm, says rim. The gravity-held interval of 9 to 55&nbsp;cm
+reaches into all three, and of its 1000 draws 75 land in, 541 on the rim and 384 out. Seven
+frames cannot separate rim from out on this shot. The whole flight puts it at 36&nbsp;cm, just outside, and the
+shot missed.</p>
 
 <h2 id="resampling-propagates-only-input-noise">Limits of Resampling</h2>
 
@@ -974,6 +1022,13 @@ and the spread cannot show it. This is why week 9 ends with a page on coverage. 
 an interval, and counting it against known cases is how to establish whether that interval is any
 good.</p>
 
+<p>Characterizing the scatter also includes its shape over time. The demo and the table above draw
+each frame's noise independently of its neighbors, while the shots header says the tracker's noise
+is mildly correlated frame to frame. Correlated errors move neighboring frames together, and a fit
+cannot average them away as well as it averages independent ones, so independent draws likely
+understate the spread somewhat. A coverage count includes this effect along with every other
+unmodeled source.</p>
+
 <div class="aside">
   <span class="label">Parametric resampling and the bootstrap</span>
   <p>What this page does is <strong>parametric</strong>, meaning it perturbs the fitted values by
@@ -989,8 +1044,12 @@ coarse.</p>
 <h2 id="the-number-of-runs">The Number of Runs</h2>
 
 <p>The spread is itself estimated from a finite sample, so it has its own uncertainty falling as 1/√B
-for B runs. A few hundred typically settles the width to a few per cent, while percentiles far
-out in the tails need more, because few draws land there. Cost is B times the cost of one
+for B runs. A few hundred draws typically settle the middle of the distribution, while percentiles
+far out in the tails need more, because few draws land there. On the demo's shot the 90% interval is
+17 to 223&nbsp;cm after 100 draws, 22 to 225&nbsp;cm after 500 and 22 to 223&nbsp;cm after 1000.
+From 200 draws on, the lower end stays between 20 and 23&nbsp;cm. The upper end sits in the long
+right tail, and it still jumps between counts, to 185&nbsp;cm at 300 draws and to
+216&nbsp;cm at 780, before settling back near 223&nbsp;cm. Cost is B times the cost of one
 analysis, which for an arithmetic pipeline is negligible. For one containing a finite-element run it can be the whole budget, and week 7's argument about evaluations applies unchanged.</p>
 
 <div class="check">
@@ -1019,7 +1078,7 @@ tail from occasional draws where the fit turns badly and the prediction lands fa
 mean feels every one of them while the median does not.</p>
      <p><strong>The quantity is a magnitude</strong>, a distance from the hoop center, which cannot be
 negative. Perturbing the frames moves the predicted crossing point in some direction, and most
-directions increase its distance from a point it was already close to. So the cloud of
+directions increase its distance from a point it was already close to. As a result the cloud of
 draws sits mostly above the unperturbed 41&nbsp;cm and not around it.</p>
      <p>Report the <strong>median with its interval</strong>. The mean is inflated by a tail whose shape
 you do not trust. The unperturbed value is one draw with no uncertainty attached, and it is
@@ -1032,7 +1091,10 @@ propagation needs to <strong>differentiate</strong> it.</p>
 set of windows. Perturb the input a little and the answer usually moves a little, but at the
 point where the winner changes it <strong>jumps</strong>. The output is a step function of the
 input there, and the derivative is either zero or undefined, and neither describes how
-the answer moves. Root finds with branching, <code>if</code> statements on a tolerance,
+the answer moves. On the rim crossing, a draw whose parabola opens upward, or peaks below
+3.048&nbsp;m, has no falling crossing at all, so the output does not exist there and
+the pipeline has to decide what to do with that draw (on the seven-frame shot above, 17 draws in
+1000). Root finds with branching, <code>if</code> statements on a tolerance,
 anything that picks an index. All of these are places where a first-order propagation formula
 quietly returns something meaningless. Resampling only needs the pipeline to be
 callable. That is why it costs hundreds of runs, and why it works on the pipelines you
@@ -1123,11 +1185,11 @@ interval comes from when no formula gives one.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/propagating-by-resampling.js?v=20261102083412"></script>
+  <script type="module" src="js/bundle/propagating-by-resampling.js?v=20261102180601"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

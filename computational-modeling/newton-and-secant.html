@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Newton and the secant method — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102083412">
-  <link rel="stylesheet" href="css/demos.css?v=20261102083412">
+  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
+  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -917,52 +917,118 @@
   <span class="label">Claim</span>
   <p class="exact"><dfn data-g="newtons-method">Newton's method</dfn> follows the tangent at the
   current estimate to where it crosses the axis and takes that crossing as the next estimate.
-  Near a
-  simple root the number of correct digits roughly doubles each step. It requires the derivative
-  and
-  maintains no <dfn data-g="bracket">bracket</dfn>, so it offers no guarantee of convergence. The
-  <dfn data-g="secant-method">secant method</dfn> replaces the
-  tangent with the line through the two most recent estimates, requiring no derivative and
-  converging almost as fast.</p>
+  Near a simple root the number of correct digits roughly doubles each step. It requires the
+  derivative, which is simplest to get when $f$ is a formula, and it maintains no <dfn data-g="bracket">bracket</dfn>,
+  so it offers no guarantee of convergence. The <dfn data-g="secant-method">secant method</dfn>
+  replaces the tangent with the line through the two most recent estimates, requiring no
+  derivative and converging almost as fast on a smooth $f$.</p>
   <p class="plain">  Follow the slope down to the axis and start again from there. It is usually much faster than
-  bisection, though it can fail.</p>
+  bisection, though it can fail, and it needs a function smooth enough for a straight line to
+  follow.</p>
 </div>
 
 <h2 id="the-tangent-step">The Tangent Step</h2>
 
-<p>At $x_k$ the tangent to $f$ has slope $f'(x_k)$, and setting the tangent to zero and solving for
-its crossing gives the whole method:</p>
+<p>The <a href="conditions-become-roots.html" title="Conditions as roots">prediction on page
+19</a> fits a parabola to the 24 free-flight frames of one tracked three-pointer, the last of them
+at 0.92&nbsp;s after release. With $t$ in seconds since release and $z$ the ball's height in
+meters, the fit is</p>
 
-$$x_{k+1} \;=\; x_k \;-\; \frac{f(x_k)}{f'(x_k)}$$
+$$z(t) = -4.9153\,t^2 + 4.7428\,t + 3.4520$$
 
-<p>The secant method uses the same formula with the derivative replaced by the slope through the
-last two points:</p>
+<p>and the ball falls back through rim height where $f(t) = z(t) - 3.048 = 0$. Because $f$ is a formula,
+its derivative is a formula too. Differentiating each term with the power rule gives</p>
 
-$$f'(x_k) \;\approx\; \frac{f(x_k) - f(x_{k-1})}{x_k - x_{k-1}}$$
+$$f'(t) = -9.8306\,t + 4.7428 \quad \text{m/s}$$
 
-<p>which is a finite difference, namely week 4's backward difference, with the step supplied by the
-iteration and not chosen.</p>
+<p>which is the ball's vertical velocity on the fitted path. (The 9.83 is the fitted gravity, twice
+the 4.915.)</p>
 
-<h2 id="correct-digits-double-each-step">Convergence Rates</h2>
+<p>At an estimate $t_k$ the tangent to $f$ is the straight line with slope $f'(t_k)$ through the
+point $(t_k, f(t_k))$. Newton's method takes the next estimate $t_{k+1}$ to be where that line
+crosses zero:</p>
 
-<details class="ans"><summary><span>Optional, open to read</span></summary><div class="body">
-<p>Near a simple root Newton's error obeys $e_{k+1} \approx C e_k^2$, so the error is roughly squared
-each step and the number of correct digits roughly doubles. From an error of 10⁻¹ that goes 10⁻², 10⁻⁴, 10⁻⁸,
-10⁻¹⁶, which is four steps from one digit to machine precision. Compare with bisection, which
-gains one bit, about a third of a digit, per evaluation. To reach 12 digits from a bracket of
-width 1, bisection needs 40 evaluations and Newton needs about 5.</p>
+$$\begin{aligned}
+y &= f(t_k) + f'(t_k)\,(t - t_k) && \text{the tangent line at } t_k \\
+0 &= f(t_k) + f'(t_k)\,(t_{k+1} - t_k) && \text{it crosses zero at } t_{k+1} \\
+t_{k+1} - t_k &= -\frac{f(t_k)}{f'(t_k)} && \text{divide both sides by } f'(t_k) \\
+t_{k+1} &= t_k - \frac{f(t_k)}{f'(t_k)} && \text{add } t_k \text{ to both sides}
+\end{aligned}$$
+
+<p>Starting from the last frame fitted, $t_0 = 0.92$&nbsp;s, where the fitted ball is 0.607&nbsp;m
+above the rim and falling at 4.30&nbsp;m/s, the first step is
+$t_1 = 0.92 - 0.60708 / (-4.30127) = 0.92 + 0.14114 = 1.06114$&nbsp;s. The error is the distance
+from the estimate to the falling root, 1.0436631&nbsp;s, which the quadratic formula gives
+exactly:</p>
 
 <table class="data">
-  <tr><th>Method</th><th>Needs</th><th>Evaluations per Step</th><th>Convergence</th>
-      <th>Guaranteed?</th></tr>
-  <tr><td>bisection</td><td>a bracket</td><td>1</td><td>linear, factor 2</td><td>yes</td></tr>
-  <tr><td>Newton</td><td>$f'$ and a start</td><td>2, being $f$ and $f'$</td><td>quadratic</td><td>no</td></tr>
-  <tr><td>secant</td><td>two starts</td><td>1, being $f$ only</td><td>order 1.618</td><td>no</td></tr>
+  <tr><th>Step $k$</th><th>$t_k$ (s)</th><th>$f(t_k)$ (m)</th><th>$f'(t_k)$ (m/s)</th><th>Error (s)</th></tr>
+  <tr><td>0</td><td class="num">0.92</td><td class="num">0.60708</td><td class="num">&minus;4.3013</td><td class="num">1.2&times;10⁻¹</td></tr>
+  <tr><td>1</td><td class="num">1.061139</td><td class="num">&minus;0.097913</td><td class="num">&minus;5.6887</td><td class="num">1.7&times;10⁻²</td></tr>
+  <tr><td>2</td><td class="num">1.043927</td><td class="num">&minus;0.0014561</td><td class="num">&minus;5.5195</td><td class="num">2.6&times;10⁻⁴</td></tr>
+  <tr><td>3</td><td class="num">1.04366319</td><td class="num">&minus;3.4&times;10⁻⁷</td><td class="num">&minus;5.5169</td><td class="num">6.2&times;10⁻⁸</td></tr>
+  <tr><td>4</td><td class="num">1.043663128</td><td class="num">&minus;1.8&times;10⁻¹⁴</td><td class="num">&minus;5.5169</td><td class="num">3.3&times;10⁻¹⁵</td></tr>
 </table>
 
-<p>The secant method's exponent is the golden ratio, and that is one reason the method survives
-alongside Newton. It converges a little more slowly per step, though each step costs half as
-much, so per evaluation it is usually the faster of the two. It is also the only one of the
+<p>Four steps take the error from 0.12&nbsp;s to 3&times;10⁻¹⁵&nbsp;s. At that crossing the fitted
+ball is 0.356&nbsp;m from the hoop's center, beyond the 0.348&nbsp;m at which the ball misses the rim
+entirely, so the formula calls the shot out.</p>
+
+<h2 id="the-secant-step">The Secant Step</h2>
+
+<p>The secant method uses the same step with the derivative replaced by the slope of the line
+through the last two estimates:</p>
+
+$$\begin{aligned}
+f'(t_k) &\approx \frac{f(t_k) - f(t_{k-1})}{t_k - t_{k-1}} && \text{the slope through the last two points} \\
+t_{k+1} &= t_k - f(t_k)\,\frac{t_k - t_{k-1}}{f(t_k) - f(t_{k-1})} && \text{put it into Newton's step}
+\end{aligned}$$
+
+<p>The slope is a finite difference, namely week 4's backward difference, with the step set by the
+last two estimates. Starting from the last two frames fitted, 0.88 and 0.92&nbsp;s, the
+slope is $(0.60708 - 0.77126)/0.04 = -4.1045$&nbsp;m/s and the first step lands at 1.06790&nbsp;s.
+Each step after that costs one new evaluation of $f$ and no derivative:</p>
+
+<table class="data">
+  <tr><th>Step $k$</th><th>$t_k$ (s)</th><th>$f(t_k)$ (m)</th><th>Error (s)</th></tr>
+  <tr><td>0</td><td class="num">0.88</td><td class="num">0.77126</td><td class="num">1.6&times;10⁻¹</td></tr>
+  <tr><td>1</td><td class="num">0.92</td><td class="num">0.60708</td><td class="num">1.2&times;10⁻¹</td></tr>
+  <tr><td>2</td><td class="num">1.067899</td><td class="num">&minus;0.13660</td><td class="num">2.4&times;10⁻²</td></tr>
+  <tr><td>3</td><td class="num">1.040733</td><td class="num">0.016121</td><td class="num">2.9&times;10⁻³</td></tr>
+  <tr><td>4</td><td class="num">1.043601</td><td class="num">3.4&times;10⁻⁴</td><td class="num">6.2&times;10⁻⁵</td></tr>
+  <tr><td>5</td><td class="num">1.04366329</td><td class="num">&minus;9.0&times;10⁻⁷</td><td class="num">1.6&times;10⁻⁷</td></tr>
+  <tr><td>6</td><td class="num">1.043663128</td><td class="num">5.0&times;10⁻¹¹</td><td class="num">9.0&times;10⁻¹²</td></tr>
+</table>
+
+<h2 id="correct-digits-double-each-step">Digits Gained Per Step</h2>
+
+<details class="ans"><summary><span>Optional, open to read</span></summary><div class="body">
+<p>Near a simple root Newton's error obeys $e_{k+1} \approx C e_k^2$, where $e_k$ is the error at
+step $k$ and $C = f''/(2f')$ at the root. (It comes from a Taylor expansion of $f$ about the root
+to second order.) The error is roughly squared each step, so the number of
+correct digits roughly doubles. On the shot $f'' = -9.8306$ and $f' = -5.5169$&nbsp;m/s at the
+root, so $C = 0.89$, and the Newton table follows the law closely: $0.89 \times
+(1.75\times10^{-2})^2 = 2.7\times10^{-4}$ against a measured $2.6\times10^{-4}$, and $0.89 \times
+(2.64\times10^{-4})^2 = 6.2\times10^{-8}$ against a measured $6.2\times10^{-8}$. The powers of ten
+in the error go &minus;1, &minus;2, &minus;4, &minus;8, &minus;15.</p>
+
+<p>Compare with bisection, which gains one bit, about a third of a digit, per evaluation. On the
+same $f$, bisection from [0.5,&nbsp;1.5]&nbsp;s needs 40 midpoint evaluations to bring the bracket's
+width under 10⁻¹²&nbsp;s. Newton reaches 3&times;10⁻¹⁵&nbsp;s in four steps, which is eight
+evaluations, since each step evaluates $f$ and $f'$. The secant method reaches
+9&times;10⁻¹²&nbsp;s in six evaluations of $f$.</p>
+
+<table class="data">
+  <tr><th>Method</th><th>Needs to Start</th><th>Evaluations per Step</th><th><dfn data-g="convergence-order">Convergence Order</dfn></th>
+      <th>Guaranteed to Converge</th></tr>
+  <tr><td>bisection</td><td>a bracket</td><td>1</td><td>linear, factor 2</td><td>yes</td></tr>
+  <tr><td>Newton</td><td>$f'$ and a start</td><td>2, being $f$ and $f'$</td><td>quadratic</td><td>no</td></tr>
+  <tr><td>secant</td><td>two starts</td><td>1, being $f$ only</td><td>1.618</td><td>no</td></tr>
+</table>
+
+<p>The secant method's order is 1.618, the golden ratio. It converges a little more slowly per
+step, though each step costs half as much when $f'$ costs about as much as $f$, so per evaluation
+it is usually the faster of the two. It is also the only one of the
 three that needs neither a derivative nor a bracket.</p>
 </div></details>
 
@@ -972,85 +1038,140 @@ three that needs neither a derivative nor a bracket.</p>
 
 <p>Bisection's bracket is what makes its guarantee possible, because the root is inside and stays
 inside. Newton and the secant method keep no such interval, so at every step the estimate may land
-anywhere. Concretely:</p>
+anywhere. On the shot:</p>
 
 <ul class="plain">
-  <li><strong>A small derivative gives a huge step.</strong> The tangent is nearly flat, so its
-  axis
-  crossing is far away. This is <a href="root-finding-fails.html" title="Root-finding failures">page 22</a>'s third failure.</li>
-  <li><strong>The step can leave the domain.</strong> Nothing in the formula knows the beam ends
-  at
-  6 m.</li>
-  <li><strong>It can cycle.</strong> Some functions send Newton back and forth between two points
-  forever, converging to neither.</li>
-  <li><strong>It can converge to a different root</strong> than the one nearest the start.</li>
+  <li><strong>A small derivative gives a huge step.</strong> At the apex, 0.482&nbsp;s, the fitted
+  ball is neither rising nor falling and $f' = 0$. From 0.50&nbsp;s, just after it, $f' =
+  -0.17$&nbsp;m/s, the tangent is nearly flat, and the first step lands at 9.47&nbsp;s. (Set the
+  demo above to start at 0.50&nbsp;s and take one step to see it.)</li>
+  <li><strong>The step can leave the domain.</strong> Nothing in the formula knows that the free
+  flight starts at release and ends at the rim. A step to 9.47&nbsp;s is long after the ball has
+  come down.</li>
+  <li><strong>It can converge to a different root</strong> than the one the question asks for. From
+  0.40&nbsp;s, before the apex, Newton converges on the rising crossing at &minus;0.079&nbsp;s,
+  before release. On a parabola Newton converges on the root on the same side of the apex as the
+  start.</li>
+  <li><strong>It can cycle.</strong> On some functions Newton moves back and forth between two
+  points forever, converging to neither. A parabola with two real roots is not one of them.</li>
 </ul>
 
-<p>These are what a method without a bracket costs, and the price is usually worth paying, which is
-why most library root finders take Newton or secant steps whenever they can.</p>
+<p>Library root finders still take steps of this kind, though they keep a bracket around them, as
+the last section shows.</p>
 
-<h2 id="combining-bisection-and-newton">Combining Bisection and Newton</h2>
+<h2 id="no-formula">A Slope With No Formula</h2>
+
+<p>The Slope Stability Lab asks for the largest earthquake shaking a simulated rock slope survives.
+Each slope is shaken by one recorded earthquake scaled to a peak ground acceleration (PGA), and the
+simulation reports how far the slope moved. The condition is $f(\text{PGA}) =
+\text{moved}(\text{PGA}) - d^*$, where $d^*$ is a damage threshold. The lab leaves the definition
+of damage to you, and this page uses $d^* = 5$&nbsp;cm as one choice. Each evaluation of $f$ is a
+run of the simulation on a GPU, a minute or two of machine time.</p>
+
+<p>There is no formula for moved(PGA), so there is no $f'$ to evaluate, and Newton's method would
+need a finite-difference one. That would cost a second run every step, and on this simulation two runs
+at one setting do not always agree (at 1.28125&nbsp;g the 2.6&nbsp;MPa slope moved 206.8&nbsp;cm
+and then 140.4&nbsp;cm), so a difference of two close runs can be mostly the spread between runs.
+The secant method needs only the runs already made, at one new run per step. Its line assumes
+that the response between two runs is close to straight, and the example class's runs show what
+happens where it is not. Repeated runs are averaged in the numbers below.</p>
+
+<ul class="plain">
+  <li><strong>Between two runs either side of the jump the step lands inside.</strong> On the
+  7.4&nbsp;MPa slope 2.875&nbsp;g moved 0.32&nbsp;cm and 2.9375&nbsp;g moved 48.8&nbsp;cm. The line
+  through them reaches 5&nbsp;cm at 2.881&nbsp;g, inside the pair and 0.008&nbsp;g below 2.88867&nbsp;g,
+  the highest run on this slope that stayed under 5&nbsp;cm. The line is still wrong about the
+  runs between, since it puts 2.88281&nbsp;g at 6.4&nbsp;cm and that run moved 0.23&nbsp;cm.</li>
+  <li><strong>Across a jump the line misses the runs between.</strong> On the 5.8&nbsp;MPa slope
+  2.72&nbsp;g moved 2.9&nbsp;cm and 2.8&nbsp;g moved 23.0&nbsp;cm (22.7 and 23.4 in two runs). The line
+  through them reaches 5&nbsp;cm at 2.728&nbsp;g and puts 2.75&nbsp;g at 10.4&nbsp;cm. The run at
+  2.75&nbsp;g moved 307&nbsp;cm.</li>
+  <li><strong>Past a jump the line points the wrong way.</strong> Through 2.75&nbsp;g (307&nbsp;cm)
+  and 2.8&nbsp;g (23.0&nbsp;cm) the line slopes down, and it reaches 5&nbsp;cm at 2.803&nbsp;g, beyond
+  a run that already moved 23&nbsp;cm.</li>
+  <li><strong>Below a jump the line is nearly flat.</strong> The class's last two settings on the
+  7.4&nbsp;MPa slope, 2.88672&nbsp;g (0.23&nbsp;cm) and 2.88867&nbsp;g (0.26&nbsp;cm), give a line rising
+  15.9&nbsp;cm per g. It reaches 5&nbsp;cm at 3.187&nbsp;g, far outside the bracket
+  [2.88867,&nbsp;2.89062]&nbsp;g that the class's bisection had reached, and past 3.0&nbsp;g, which
+  moved 31&nbsp;cm.</li>
+</ul>
+
+<cg-demo case="slope"></cg-demo>
+
+<p>Each secant step goes wherever the line through two runs reaches $d^*$, and on both slopes
+the jump in the response decides where that is. The flat case is Newton's small-derivative failure
+in another form, with the line's rise per g in place of $f'$. Keeping the bisection bracket and
+taking a secant step only when it lands inside would hold every step within
+[2.88867,&nbsp;2.89062]&nbsp;g.</p>
+
+<h2 id="secant-steps-inside-a-bracket">Secant Steps Inside a Bracket</h2>
 
 <details class="ans"><summary><span>Optional, open to read</span></summary><div class="body">
 <p>In practice the methods are usually combined, and a good library does it in three steps:</p>
 
 <ol class="plain">
   <li>Find a bracket by plotting or scanning.</li>
-  <li>Take Newton or secant steps from inside it.</li>
-  <li><strong>If a step leaves the bracket, discard it and bisect instead.</strong> The bracket is
+  <li>Take fast steps from inside it.</li>
+  <li>If a step leaves the bracket, or shrinks it too little, discard it and bisect instead. The bracket is
   maintained, so the guarantee is kept, and the fast steps are taken whenever they are safe.</li>
 </ol>
 
 <p>This is Brent's method, near enough, and it is what <code>scipy.optimize.brentq</code> and
-MATLAB's <code>fzero</code> are. Knowing that is likely worth more than being able to implement
-any of the three, because the practical decision is usually whether the problem has been set up
-so that a bracket exists.</p>
+MATLAB's <code>fzero</code> are. Brent's fast steps are secant steps and steps through a parabola
+fitted to the last three points (a parabola giving $t$ as a function of $f$, called inverse
+quadratic interpolation), so it needs no derivative and takes no Newton steps. On the
+7.4&nbsp;MPa slope it would discard the secant step to 3.187&nbsp;g, which leaves the bracket
+[2.88867,&nbsp;2.89062]&nbsp;g, and run the midpoint, 2.88965&nbsp;g, instead. In practice the first
+decision is usually whether the problem has a bracket, since <code>brentq</code> and
+<code>fzero</code> with an interval need one to start.</p>
 </div></details>
 
 <div class="check">
   <span class="label">Check</span>
   <ol>
-    <li>Newton's error is 10⁻³ at one step. Estimate it after two more, and say what assumption
-    you
-    used.
+    <li>Newton's error is 10⁻³ at one step. Estimate it after two more, and say what assumptions
+    you used.
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>About 10<sup>&minus;12</sup></strong>, via 10<sup>&minus;6</sup>. Newton converges
 quadratically, at <em>e</em><sub><em>n</em>+1</sub> &asymp;
 <em>Ce</em><sub><em>n</em></sub>&sup2;. Taking <em>C</em>&nbsp;&asymp;&nbsp;1, the errors go
 10<sup>&minus;3</sup> &rarr; 10<sup>&minus;6</sup> &rarr; 10<sup>&minus;12</sup>, so the number
 of correct digits doubles each step.</p>
-     <p>Three assumptions are hiding in that. The root is <strong>simple</strong>, since at a double
+     <p>The estimate rests on three assumptions. The root is <strong>simple</strong>, since at a double
 root Newton is only linear and the errors would go 10<sup>&minus;3</sup>, 5&times;
 10<sup>&minus;4</sup>, 2.5&times;10<sup>&minus;4</sup>. The iteration is already <strong>in the
 asymptotic regime</strong>, meaning close enough for the quadratic law to hold. The third is that <em>C</em>,
 which is <em>f</em>&Prime;/2<em>f</em>&prime; at the root, is of order 1, when it may be a good
-deal larger. The last step also brushes machine precision, because for values of order 1,
-10<sup>&minus;12</sup> is close to the floor and the step after it would not deliver
-10<sup>&minus;24</sup>.</p></div></details></li>
-    <li>Your <em>f</em> is expensive and you have no derivative. Which method, and how many
-    evaluations per step?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>The secant method, at one evaluation per step.</strong> It reuses the previous point, so
-each step costs a single new evaluation of <em>f</em> and no derivative, at an order of
-1.618 (the golden ratio).</p>
+deal larger. On the shot it is 0.89. In addition, the step after these would not deliver
+10<sup>&minus;24</sup>, because for values of order 1 double precision bottoms out near
+10<sup>&minus;16</sup>.</p></div></details></li>
+    <li>On the slope each evaluation of <em>f</em> is a run of a minute or two, and there is no
+    derivative. Which method, and how many runs per step?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>The secant method, at one run per step, inside a bracket.</strong> It reuses the previous
+run, so each step costs a single new run and no derivative, at an order of 1.618 (the golden
+ratio) where the response is smooth.</p>
      <p>The alternative is Newton with a finite-difference derivative, which costs <strong>two</strong>
-evaluations per step for an order of nearly 2. Compare them per evaluation and not per step. Secant gains a
-factor of 1.618 per evaluation, Newton &radic;2&nbsp;=&nbsp;1.414. <strong>The secant method is
-faster per evaluation</strong>, which is the currency when <em>f</em> is expensive. The
-difference-quotient derivative is also the worst of both worlds numerically, because it inherits
-the step-size dilemma from week 4, on a function you were told is expensive.</p></div></details></li>
-    <li>Why can a hybrid method keep bisection's guarantee while taking Newton steps most of the
+runs per step for an order close to 2 while the error is large next to the difference step.
+Compare them per evaluation. Secant gains a factor of 1.618 per evaluation, Newton
+&radic;2&nbsp;=&nbsp;1.414, so the secant method is faster when each evaluation is a simulation
+run. The difference quotient also brings back the step-size problem from week 4, and on this
+simulation two runs at 1.28125&nbsp;g differ by 66&nbsp;cm.</p>
+     <p>The order assumes a smooth response, and this one jumps (2.72&nbsp;g moved 2.9&nbsp;cm and
+2.75&nbsp;g moved 307&nbsp;cm on the 5.8&nbsp;MPa slope). Secant steps across a jump can land
+anywhere, so keep the bracket from bisection and take a secant step only when it lands inside
+it.</p></div></details></li>
+    <li>Why can a hybrid method keep bisection's guarantee while taking fast steps most of the
     time?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>It keeps the guarantee because it never lets go of the bracket.</p>
-     <p>The hybrid keeps an interval known to contain a root at all times. Each step it
-<em>proposes</em> a Newton or secant step and then checks it. Does the proposal land inside the
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>The hybrid keeps an interval known to contain a root at every step. Each step it
+<em>proposes</em> a fast step (Newton, secant or interpolation) and then checks it. Does the proposal land inside the
 current bracket, and does it shrink the interval by enough? If yes, take it and update the
 bracket. If no, discard it and take a bisection step instead.</p>
-     <p>The guarantee survives because it is a property of the bracket and not of the steps, and the
-bracket is maintained unconditionally. The worst case is that every proposal is
+     <p>The guarantee comes from the bracket, and the bracket is kept at every step. The worst case is that every proposal is
 rejected, and then the method <em>is</em> bisection, with its bound intact.</p>
-     <p>The speed survives because near a simple root Newton's proposals are excellent and are almost
-always accepted. The guarantee costs one comparison per step, which is small next to an evaluation
-of <em>f</em>. That is close to Brent's method, and it is why the default root finder in most
-libraries is a hybrid.</p></div></details></li>
+     <p>The speed survives because near a simple root the fast proposals land close to the root and
+are almost always accepted. The guarantee costs one comparison per step, which is small next to an
+evaluation of <em>f</em>. Brent's method is this kind of hybrid, with secant and interpolation
+steps and no Newton steps, and many libraries use it as their default root finder on a
+bracket.</p></div></details></li>
   </ol>
 </div>
 
@@ -1079,11 +1200,11 @@ bisection, secant and Newton on any signal, counting evaluations.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/newton-and-secant.js?v=20261102083412"></script>
+  <script type="module" src="js/bundle/newton-and-secant.js?v=20261102180601"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

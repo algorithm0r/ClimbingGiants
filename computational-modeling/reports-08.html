@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Example reports · Assignment 7 — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102083412">
-  <link rel="stylesheet" href="css/demos.css?v=20261102083412">
+  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
+  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -884,18 +884,20 @@
     <div class="eyebrow"><a href="reports.html">Example reports</a></div>
 <h1>Example reports &middot; Assignment 7</h1>
 
-<p>These are three reports for <a href="assign-08.html">Assignment 7, Occupant Displacement</a>,
-written in three different styles. All three model the same example pack (crash test 9793, which
-no phrase assigns), so nothing here answers anybody's assignment. The three students chose
-different methods, filters and steps, and each one says why. Their answers agree to within a
-fraction of a millimeter (110&nbsp;mm), which is probably the most useful thing the three of them
-show together. Please see the <a href="reports.html">Example reports</a> page for what every report
-needs and who it is written for.</p>
+<p>These are three reports for <a href="assign-08.html">Assignment 7, Drag</a>, written in three
+different styles. All three use the training arcs in the example pack (test 9793, which no phrase
+assigns). Nothing here answers anybody's assignment. The three students made different choices
+about the stepping method, the frames the starting state comes from, the value of the drag
+constant and what "worth it" is measured against, and each one says why. Please see the
+<a href="reports.html">Example reports</a> page for what every report needs and who it is written
+for.</p>
 
-<p>Each report is followed by a short note on what it does well. The purpose of the notes is to
-show that three different routes can meet the same standard (the answer first, evidence that it
-has settled, assumptions noted). It is a good idea to compare how each one chose its step, since
-Alice asks for that and the chosen steps range over a factor of 4 (0.05 to 0.2&nbsp;ms).</p>
+<p>Each report is followed by a short note on what it does well. The three verdicts are not quite
+the same, because the reports measure different things. The memo scores the position just before
+the hoop, the technical report scores the whole unseen flight and the rim crossing (on the arcs where
+the crossing can be trusted), and the notebook scores the height and the position across the floor separately. Drag helps on most of
+these measures. It makes the height slightly worse in the notebook, and at the rim crossing the technical report's result depends on
+the drag constant. Each report states what it measured alongside what it found. Every number comes from the program that is attached.</p>
 
 <p>The technical report's program is read one section at a time, beside a MATLAB version that
 prints the same results, on <a href="walk-08.html">Reading the assignment 7 program</a>.</p>
@@ -904,87 +906,102 @@ prints the same results, on <a href="walk-08.html">Reading the assignment 7 prog
 
 <div class="aside report"><span class="label">Example 1 &middot; Memo</span>
 <div class="memo-head">
-<p><strong>To:</strong> Alice</p>
-<p><strong>Re:</strong> How far the occupant moves relative to the car</p>
+<p><strong>To:</strong> Bob</p>
+<p><strong>Re:</strong> Whether to add drag to the flight model</p>
 <p><strong>Data phrase:</strong> example pack (test 9793)</p>
 </div>
 
-<p>The occupant moves 110&nbsp;mm forward relative to the car, furthest at 73&nbsp;ms after impact,
-and then comes back. That is your model (75&nbsp;kg, a belt of 296&nbsp;kN/m and
-2.8&nbsp;kN&middot;s/m of damping) driven by the car's motion in test 9793, a 2017 Hyundai Elantra
-run into a rigid barrier at 56.15&nbsp;km/h. The number has settled to much better than a
-millimeter, and Figure 1 shows the whole movement.</p>
+<p>Add drag. I stepped the flight of 23 of the 24 training arcs from a starting state fitted to
+the first 10 frames of free flight, once without drag and once with it, and compared each
+prediction with where the ball actually was at the last frame before the hoop. With drag the
+prediction was closer on 22 of the 23 arcs, by 4.8&nbsp;cm on the median arc. That gain is larger
+than the tracker's own noise (3.07&nbsp;cm in height and 2.84&nbsp;cm across the floor, from the
+file header), so it is unlikely to be noise. The median error fell from 12.4 to 10.8&nbsp;cm and
+the worst from 26.4 to 19.2&nbsp;cm. (The two medians come from different arcs, which is why they
+are closer together than the median gain.)</p>
 
-<p><strong>Evidence that it has settled.</strong> I stepped the model at the record's own sample
-interval of 0.05&nbsp;ms (the logger took 20,000 samples a second), and then at half and a quarter
-of that. The travel came out at 110.144, 110.081 and 110.050&nbsp;mm. Each halving moved it half as
-far as the one before (0.063&nbsp;mm, then 0.031&nbsp;mm), which is what forward Euler should do,
-since its error is proportional to the step. That puts the error at 0.05&nbsp;ms at about twice the
-first change, 0.13&nbsp;mm, and the settled travel at about 110.02&nbsp;mm. At the 110&nbsp;mm I am
-quoting, the step makes no difference.</p>
-
-<p><strong>The step.</strong> I used 0.05&nbsp;ms because at the record's own interval every value
-of the car's acceleration the method needs is a recorded sample. At the two smaller steps the
-values in between are read off a straight line joining the neighboring samples.</p>
-
-<figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r08-memo-travel.svg?v=20261102083412"
-    alt="Occupant travel relative to the car in millimeters against time from impact, for steps of
-    0.05, 0.025 and 0.0125 ms drawn on top of each other. The three curves cannot be told apart.
-    Travel rises to a marked maximum of 110 mm at 73 ms, falls below zero to about minus 43 mm near
-    128 ms and settles back toward zero."></div>
-  <figcaption>Figure 1. Occupant travel relative to the car at three steps, drawn by
-  <code>a7_belt_travel.py</code>. The three curves overlap.</figcaption>
-</figure>
-
-<p><strong>The method.</strong> The occupant is one mass on a spring and a damper (the belt). Its
-state is two numbers, the travel and the rate of travel, and forward Euler moves both ahead one step
-at a time from their rates. What drives it is the car's acceleration, filtered at CFC&nbsp;180. A
-CFC is the standard crash-data filter from SAE&nbsp;J211, and its class number sets how much fast
-wiggle it takes out. J211 gives class 180 to structure whose acceleration is going to be
-integrated, which is what the model does with it. Figure 2 shows the record before and after.</p>
+<p>The drag is quadratic. It decelerates the ball at <em>k</em> times the speed squared, against
+its velocity, with <em>k</em> = 0.016 per meter. That is the value the notes page State as a
+vector gives for a drag coefficient of 0.35, a 600&nbsp;g ball and air at 20&nbsp;&deg;C. The
+coefficient is the middle of the 0.3 to 0.4 that Zhang, Zhu, Li and Hong measured for match balls
+in a wind tunnel (<em>iScience</em> 29(8), 115873, 2026), and the notes give the whole range of
+<em>k</em> as 0.013 to 0.019. I stepped the flight with Heun's method in steps of 0.01&nbsp;s.
+Without drag, Heun gave back the fitted parabola to within a millionth of a millimeter on every
+arc, which checks the stepper. With drag, halving the step to 0.005&nbsp;s moved no prediction by
+more than 0.011&nbsp;mm. Each halving cut the change by about four (0.18, 0.041 and
+0.011&nbsp;mm), which is what a second-order method should do.</p>
 
 <figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r08-memo-drive.svg?v=20261102083412"
-    alt="The left rear seat crossmember X acceleration in g against time from impact. The recorded
-    trace is drawn in light gray and swings to about minus 196 g near 53 ms. The CFC 180 trace used
-    in the model is smoother and reaches about minus 52 g."></div>
-  <figcaption>Figure 2. The car's acceleration as recorded (gray) and filtered at CFC&nbsp;180
-  (blue). The raw record reaches &minus;195.7&nbsp;<em>g</em> at 52.8&nbsp;ms and the filtered one
-  &minus;51.9&nbsp;<em>g</em> at 53.4&nbsp;ms (one <em>g</em> is 9.81&nbsp;m/s&sup2;).</figcaption>
+  <div class="fig-body"><img src="data/example/figures/r08-memo-hoop.svg?v=20261102180601"
+    alt="Distance between the predicted and measured position in centimeters, one pair of markers
+    per arc, sorted by the error without drag. The circles without drag run from about 7 to 26 cm.
+    The squares with drag sit below them on every arc but one, arc 1151, and run from about 1.5
+    to 19 cm. A dashed line at about 3 cm marks the tracker noise."></div>
+  <figcaption>Figure 1. The distance between the predicted and the measured position at the last
+  frame 1&nbsp;m or more from the hoop, for every arc used, with and without drag. The arcs are
+  sorted by the error without drag, and the dashed line is the tracker's vertical noise.</figcaption>
 </figure>
 
-<p>Three things need your attention before this goes to the customer.</p>
+<figure class="figure">
+  <div class="fig-body"><img src="data/example/figures/r08-memo-arc.svg?v=20261102180601"
+    alt="Distance from the measured ball in centimeters against time for arc 1111, for the ten
+    frames after the fitted ones. The two predictions agree for the first three frames at about 1
+    to 3 cm. After that the prediction without drag grows to about 12 cm and the prediction with
+    drag to about 7 cm."></div>
+  <figcaption>Figure 2. Arc 1111, a typical arc. The distance between each prediction and the
+  measured ball at every frame after the 10 fitted ones. The two agree at first and separate as the
+  flight goes on.</figcaption>
+</figure>
+
+<p><strong>How I decided.</strong> The file does not say when the ball leaves the hand, so I
+estimated the vertical acceleration at each frame from a parabola through the 9 frames around it
+and started each flight 5 frames after the last upward reading. I ended it at the last frame where
+the ball was still 1&nbsp;m or more from the hoop, measured across the floor, before it can touch
+the rim. For the starting state I fitted straight lines to the first 10 positions across the floor
+and a parabola with gravity held at 9.81&nbsp;m/s&sup2; to the first 10 heights. Measured from the
+10th frame, the fits give a position and a velocity there, and the ball is stepped on from that
+frame. The error is the straight-line distance between the predicted and the measured position at
+the last frame of the flight. I counted drag as worth adding if it brought the prediction closer
+by more than the tracker's noise (about 3&nbsp;cm) on the median arc.</p>
+
+<p>Three things need your attention.</p>
 
 <ul>
-  <li><strong>The car's motion is one sensor.</strong> The channel named <code>vehicle_x</code> is
-  an accelerometer on the left rear seat crossmember, according to its header. I have treated it as
-  the motion of the whole car. A car that pitches or crumples unevenly would move the seat
-  differently from that one point.</li>
-  <li><strong>After the peak the model pushes the occupant back past where they started.</strong>
-  The travel reaches &minus;42.9&nbsp;mm at 127.8&nbsp;ms. A belt can only pull, so that part of the
-  curve is the model's spring pushing, and in the car it would be the seat back doing it. It comes
-  after the 110&nbsp;mm and does not change it.</li>
-  <li><strong>What the model leaves out.</strong> The occupant is one rigid mass, so the head, chest
-  and pelvis all travel the same distance. The belt is a straight-line spring with no slack. There is
-  no airbag or steering wheel, and the occupant moves only forward and back. Each of these would probably change the number, and I have
-  not checked by how much.</li>
+  <li><strong>Most of the error is still there.</strong> With drag the median arc is still
+  10.8&nbsp;cm off. That is about twice the 5.1&nbsp;cm that the tracker's noise alone puts
+  between a perfect prediction and the measured ball in three dimensions (worked out on the notes
+  page State as a vector). Drag accounts for part of the gap,
+  and the rest is likely in the starting state, since a velocity from 10 noisy frames is itself
+  uncertain, though I have not tested that.</li>
+  <li><strong>Arc 1151 is worse with drag</strong> (15.0&nbsp;cm against 12.1&nbsp;cm without).
+  It is the only arc where drag did not help, and I have not found why.</li>
+  <li><strong>Two arcs are odd.</strong> Arc 325 has a stretch the tracker filled in with straight
+  lines, so I left it out. My rule found no upward push at all in arc 739, so its flight starts at
+  its first frame. It has the largest error without drag (26.4&nbsp;cm).</li>
 </ul>
 
-<p><strong>Assumptions.</strong> The occupant starts at rest relative to the car with the belt just
-snug, at the start of the record (50&nbsp;ms before impact). Forward is positive. Your three values
-are used as given. Between two samples the car's acceleration is a straight line.</p>
+<p><strong>Assumptions.</strong> The coordinates are in meters, since the header gives the rim height
+in meters and the coordinates no unit. Gravity is 9.81&nbsp;m/s&sup2;. The drag constant is the
+same for every shot and every moment of flight, and the ball does not spin. A straight line through
+10 frames gives the average velocity over them, and I used it as the velocity at the 10th frame.
+With drag the ball is slowing, so this probably overstates its speed there. On the notes page State
+as a vector, where the fitted velocity is placed moved the error with drag by several centimeters
+and changed the verdict on most of its eight arcs, so this choice may matter here too, and I have
+not tested it. The times are
+as recorded in the file.</p>
 
-<p><strong>Program.</strong> <a href="data/example/code/a7_belt_travel.py" download><code>a7_belt_travel.py</code></a>
-(attached) filters the record, runs the model at the three steps, prints the travel for each and
-draws both figures.</p>
+<p><strong>Program.</strong> <a href="data/example/code/a7_drag_at_hoop.py" download><code>a7_drag_at_hoop.py</code></a>
+(attached) finds each flight, fits the starting state, steps it both ways, prints the step check and
+a line for every arc, and draws both figures.</p>
 </div>
 
 <div class="aside notice"><span class="label">What to notice</span>
-<p>The first sentence gives Alice the travel, when it happens and that it comes back. The settling
-evidence is three numbers, with the reason they shrink as they do (Euler's change should halve with
-each halving). The memo says why it picked its step in two sentences. The list keeps what needs
-action apart from what the model leaves out, and it says which flags do not move the answer.</p>
+<p>Bob asked whether drag was worth it, and the first word tells him. The deciding number is the
+median gain per arc, and the memo sets it beside the tracker's noise from the header so that Bob
+can see why 4.8&nbsp;cm counts. The step evidence takes three sentences. One shows that the stepper
+gives back the parabola, one that halving the step changes nothing he could see, and one that each
+halving cuts the change by about four, as a second-order method should. The first bullet says how
+much of the error drag leaves behind (about twice what the noise alone would give), which probably keeps Bob from reading the verdict as larger than it is.</p>
 </div>
 
 <h2 id="a-technical-report">A Technical Report</h2>
@@ -993,624 +1010,839 @@ action apart from what the model leaves out, and it says which flags do not move
 <p><strong>Data phrase:</strong> example pack (test 9793)</p>
 
 <h4>Summary</h4>
-<p>The occupant travels 110.0&nbsp;mm forward relative to the car, reaching it 73.4&nbsp;ms after
-impact, before the belt pulls them back. This is for a 75&nbsp;kg occupant on a belt of
-296&nbsp;kN/m with 2.8&nbsp;kN&middot;s/m of damping. The number has settled. At the step used
-(0.2&nbsp;ms), two successive halvings each move it by less than 0.001&nbsp;mm, and the choice of
-filter on the car's acceleration moves it by less than 0.01&nbsp;mm. The model is one mass on a
-linear belt, and what it leaves out is listed under Assumptions and Limits.</p>
+<p>Quadratic drag makes the stepped flight follow the ball more closely, and it is worth adding
+when the starting state comes from 10 or 14 frames. Started from 10 fitted frames, the median rms
+distance between the stepped and the measured ball over the rest of the free flight fell from
+12.1&nbsp;cm without drag to 6.7&nbsp;cm with <em>k</em> at the low end of its range and 7.4&nbsp;cm
+at the high end, over 23 training arcs. Drag was closer on 20 and 18 of them. Both gains are larger
+than the tracker's 3.07&nbsp;cm noise. From 6 frames the gain is about the size of the noise.
+At the rim crossing the result depends on <em>k</em> and the frames fitted. On the 8 arcs whose
+free flight reaches the crossing, drag passed the same test only with <em>k</em> at the low end and
+10 frames fitted (median 13.6 to 9.9&nbsp;cm, closer on 5 of 8). With <em>k</em> at the high end its
+median error was larger than without drag at every length. On 8 arcs this is weak evidence either
+way.</p>
 
 <h4>Data</h4>
-<p>Test 9793 is a New Car Assessment test of a 2017 Hyundai Elantra, run head on into a rigid
-barrier at 56.15&nbsp;km/h (15.60&nbsp;m/s). The car's motion comes from channel
-<code>vehicle_x</code> (code 10SEATLERE00ACXP), which its header describes as the left rear seat
-crossmember X acceleration. It holds 7001 samples every 0.05&nbsp;ms (a sample rate of
-20&nbsp;kHz), from 50&nbsp;ms before impact to 300&nbsp;ms after. Its largest value is
-&minus;195.7&nbsp;<em>g</em> at 52.75&nbsp;ms (one <em>g</em> is 9.81&nbsp;m/s&sup2;). After
-filtering at CFC&nbsp;180 (see Method) the largest value is &minus;51.9&nbsp;<em>g</em> at
-53.35&nbsp;ms. Figure 1 shows both. The driver's chest X acceleration is used for one check.</p>
-
-<figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r08-rep-drive.svg?v=20261102083412"
-    alt="Crossmember X acceleration in g from minus 10 to 150 ms after impact. The recorded trace is
-    jagged, with a narrow swing to about minus 196 g near 53 ms. The CFC 180 trace is much
-    smoother and reaches about minus 52 g near 53 ms."></div>
-  <figcaption>Figure 1. The crossmember acceleration as recorded and filtered at CFC&nbsp;180.</figcaption>
-</figure>
+<p>The training file holds 24 arcs of a basketball's position, tracked at 25 frames a second (one
+frame every 0.04&nbsp;s). The header gives the tracking noise as 3.07&nbsp;cm vertically and
+2.84&nbsp;cm horizontally, "mildly correlated frame to frame". Each training record starts before
+the ball leaves the shooter's hand and ends 15 frames after the rim crossing. Arc 325 was dropped
+(see Errors and Anomalies), which leaves 23.</p>
 
 <h4>Method</h4>
-<p>The occupant is one mass <em>m</em> held to the car by a spring of stiffness <em>k</em> and a
-damper <em>c</em>. Writing <em>u</em> for the occupant's travel relative to the car (forward
-positive), Newton's second law in the car's frame is
-<em>m</em>&thinsp;<em>u</em>&Prime; + <em>c</em>&thinsp;<em>u</em>&prime; + <em>k</em>&thinsp;<em>u</em>
-= &minus;<em>m</em>&thinsp;<em>a</em><sub>car</sub>(<em>t</em>). This is stepped as a state of two
-numbers, the travel <em>u</em> and its rate <em>w</em>, whose rates are <em>w</em> and
-(&minus;<em>c</em>&thinsp;<em>w</em> &minus; <em>k</em>&thinsp;<em>u</em>)/<em>m</em> &minus;
-<em>a</em><sub>car</sub>. The occupant starts at rest at the start of the record.</p>
+<p><strong>The model.</strong> The state is the position and velocity,
+[<em>x</em>, <em>y</em>, <em>z</em>, <em>v<sub>x</sub></em>, <em>v<sub>y</sub></em>, <em>v<sub>z</sub></em>].
+Its rate is the velocity and the acceleration
+<strong>a</strong> = &minus;<em>k</em>|<strong>v</strong>|<strong>v</strong> &minus; <em>g</em><strong>z&#770;</strong>,
+with <em>g</em> = 9.81&nbsp;m/s&sup2;. The speed |<strong>v</strong>| includes all three components,
+so the three directions are stepped together as one state. With <em>k</em> = 0 this is the
+parabola from assignment 5.</p>
 
-<p>The state is advanced with RK4, the fourth-order Runge-Kutta method. It evaluates the rates four
-times per step, and its error falls by a factor of about 16 each time the step is halved. RK4 makes
-a strict settling test cheap, which is the reason for using it. The car's acceleration between two
-samples is a straight line between them. The travel the program reports is the largest value on the
-step grid. The true peak can fall between two steps, and at a coarse step the step's own error
-can move the value either way, which the step study measures.</p>
+<p><strong>The drag constant.</strong> <em>k</em> = &rho;<em>C<sub>D</sub>A</em>/(2<em>m</em>), with
+the values on the notes page State as a vector. The air density &rho; is 1.20&nbsp;kg/m&sup3; (air at
+20&nbsp;&deg;C and sea-level pressure). The cross-section <em>A</em> = &pi;<em>r</em>&sup2; is
+0.0449&nbsp;m&sup2; for the 0.1195&nbsp;m radius in the header. The drag coefficient
+<em>C<sub>D</sub></em> is between 0.3 and 0.4 above about 6&nbsp;m/s, as measured in a wind tunnel
+by Zhang, Zhu, Li and Hong ("Experimental investigation on the aerodynamic drag of basketballs",
+<em>iScience</em> 29(8), 115873, 2026). The mass <em>m</em> is between 580 and 620&nbsp;g (FIBA,
+Official Basketball Rules 2026, Basketball Equipment, Table 1). The least drag these allow
+(<em>C<sub>D</sub></em> = 0.3 and 620&nbsp;g) is <em>k</em> = 0.0130 per meter, and the most
+(0.4 and 580&nbsp;g) is 0.0186. Both ends were run, so the result does not rest on one assumed
+value.</p>
 
-<p><strong>Filter.</strong> The crossmember is filtered with the CFC (channel frequency class)
-filter of SAE&nbsp;J211-1, run forward and then backward. The course standards page gives
-vehicle structure CFC&nbsp;180 when it is to be integrated to velocity or displacement. This model
-integrates it, so CFC&nbsp;180 is used. Check&nbsp;1 shows the choice moves the travel by less than
-0.01&nbsp;mm.</p>
+<p><strong>Finding the flight.</strong> The rules are the ones from assignment 5. The vertical
+acceleration at each frame comes from a parabola through the 9 frames centered on it. Release is
+the first frame after the last upward reading at which the acceleration is within 5&nbsp;m/s&sup2;
+of &minus;9.81 and stays there for 4 frames. The flight ends at the frame before the acceleration
+leaves that band for 4 frames in a row, or before the ball drops below rim height (3.048&nbsp;m),
+whichever comes first.</p>
 
-<p><strong>Step.</strong> The program runs the model at nine steps, halving from 6.4&nbsp;ms (128
-samples) to 0.025&nbsp;ms (half a sample), with both the filtered and the raw drive (Table&nbsp;1
-and Figure&nbsp;2). The step used is the largest one for which the next two halvings each move the
-travel by less than 0.001&nbsp;mm. One small change can be luck, which is why two are required.
-The threshold is a hundredth of the 0.1&nbsp;mm the travel is quoted to. The step this picks is
-0.2&nbsp;ms (4 samples). Its product with the belt's natural frequency in radians per second is
-0.013, far inside the 2.8 or so at which RK4 becomes unstable on an oscillator (from the stability notes).</p>
+<p><strong>The starting state.</strong> Straight lines are fitted to <em>x</em> and <em>y</em> and
+a parabola with gravity held at 9.81 to <em>z</em>, over the first 6, 10 or 14 frames of flight
+(the lengths matched to the test records in assignment 5). Time is measured from the middle of the
+fitted frames, so each fit's constant is the position there and its slope is the velocity there.
+A straight line through the frames of a slowing ball has a slope nearer the speed at the middle of
+those frames than at either end, which is why the middle was used.</p>
 
-<p>The program is <a href="data/example/code/a7_occupant_model.py" download><code>a7_occupant_model.py</code></a>,
-listed in the appendix and submitted with this report.</p>
+<p><strong>Stepping.</strong> RK4, in steps of 0.04&nbsp;s (one frame), from the middle of the
+fitted frames to each later frame of the free flight. Where frames are not exactly 40&nbsp;ms apart
+the gap is filled with equal steps of nearly 0.04&nbsp;s, so that a step always lands on a
+frame.</p>
 
-<h4>Results</h4>
+<p><strong>Scoring.</strong> Two scores are kept for each arc and each model.</p>
+<ul>
+  <li><strong>Unseen frames.</strong> The rms distance between the stepped and the measured ball
+  over the frames after the fitted ones, to the end of the free flight.</li>
+  <li><strong>Rim crossing.</strong> The measured crossing is a straight-line interpolation between
+  the last frame above 3.048&nbsp;m after the top of the arc and the frame after it. The stepped
+  crossing is found by stepping until the ball is below the rim on the way down, then bisecting on
+  the length of that last step to a microsecond. The score is the distance between the two across
+  the floor. It counts only when the free flight ends no more than 4 frames before the measured
+  crossing. Each acceleration estimate reaches 4 frames either side, so a ball that touches the rim
+  at the crossing can end its flight up to 4 frames early, and a longer gap means the ball probably
+  touched something first.</li>
+</ul>
+<p>Drag counts as worth adding where it lowers the median error by more than the tracker's vertical
+noise (3.07&nbsp;cm) and is closer on most arcs.</p>
+
+<p>A Python program, <a href="data/example/code/a7_drag_model.py" download><code>a7_drag_model.py</code></a>
+(listed in the appendix and submitted with this report), does all of the above and draws every
+figure.</p>
+
+<h4>Step Size and Its Check</h4>
+<p>With no drag the acceleration is constant, and RK4 should give back the fitted parabola exactly.
+On every arc the stepped position at the end of the flight matched the parabola to within a
+millionth of a millimeter, which checks the stepper. With drag (<em>k</em> = 0.0186, 10 frames
+fitted) the largest change in any arc's final position when the step was halved is below.</p>
 
 <table class="data">
-  <tr><th class="num">Step (ms)</th><th class="num">Travel, CFC&nbsp;180 drive (mm)</th><th class="num">Change (mm)</th><th class="num">Travel, raw drive (mm)</th><th class="num">Change (mm)</th></tr>
-  <tr><td class="num">6.4000</td><td class="num">108.3302</td><td class="num"></td><td class="num">101.3027</td><td class="num"></td></tr>
-  <tr><td class="num">3.2000</td><td class="num">109.5730</td><td class="num">+1.2428</td><td class="num">96.2077</td><td class="num">&minus;5.0950</td></tr>
-  <tr><td class="num">1.6000</td><td class="num">110.0659</td><td class="num">+0.4929</td><td class="num">90.8481</td><td class="num">&minus;5.3597</td></tr>
-  <tr><td class="num">0.8000</td><td class="num">110.0511</td><td class="num">&minus;0.0148</td><td class="num">111.5044</td><td class="num">+20.6563</td></tr>
-  <tr><td class="num">0.4000</td><td class="num">110.0149</td><td class="num">&minus;0.0362</td><td class="num">110.0311</td><td class="num">&minus;1.4733</td></tr>
-  <tr><td class="num"><strong>0.2000</strong></td><td class="num"><strong>110.0184</strong></td><td class="num"><strong>+0.0035</strong></td><td class="num"><strong>110.4451</strong></td><td class="num"><strong>+0.4139</strong></td></tr>
-  <tr><td class="num">0.1000</td><td class="num">110.0184</td><td class="num">&minus;0.0000</td><td class="num">110.0163</td><td class="num">&minus;0.4287</td></tr>
-  <tr><td class="num">0.0500</td><td class="num">110.0185</td><td class="num">+0.0001</td><td class="num">110.0184</td><td class="num">+0.0021</td></tr>
-  <tr><td class="num">0.0250</td><td class="num">110.0185</td><td class="num">+0.0000</td><td class="num">110.0184</td><td class="num">+0.0000</td></tr>
+  <tr><th class="num">Step halved (s)</th><th class="num">Largest change in an arc (mm)</th><th class="num">Ratio to the change before</th></tr>
+  <tr><td class="num">0.08 to 0.04</td><td class="num">3.18&times;10<sup>&minus;4</sup></td><td class="num"></td></tr>
+  <tr><td class="num">0.04 to 0.02</td><td class="num">1.86&times;10<sup>&minus;5</sup></td><td class="num">17.1</td></tr>
+  <tr><td class="num">0.02 to 0.01</td><td class="num">1.12&times;10<sup>&minus;6</sup></td><td class="num">16.6</td></tr>
+  <tr><td class="num">0.01 to 0.005</td><td class="num">6.69&times;10<sup>&minus;8</sup></td><td class="num">16.8</td></tr>
 </table>
-<p>Table 1. Largest travel against step. The row in bold is the step used.</p>
 
-<p>With the filtered drive the travel is within 2&nbsp;mm of its final value even at 6.4&nbsp;ms,
-and from 0.2&nbsp;ms on it changes in the fourth decimal place. The raw drive does not settle until
-the step is 0.1&nbsp;ms or smaller. Larger steps skip samples, and the raw record's narrow spikes
-make the result depend on which samples a run happens to land on (at 1.6&nbsp;ms it is 19&nbsp;mm
-low). The filter therefore matters for the step that can be used, and hardly at all for the
-answer.</p>
+<p>The ratios settle near 16, the fourth-order behavior RK4 should have, which is a second check on
+the code. At a step of 0.04&nbsp;s, halving moves no arc by more than 2&times;10<sup>&minus;5</sup>&nbsp;mm,
+about a millionth of the tracker noise (Figure 1). This means the step is not a source of error
+here, and 0.04&nbsp;s was used throughout.</p>
 
 <figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r08-rep-steps.svg?v=20261102083412"
-    alt="Largest occupant travel in millimeters against RK4 step in milliseconds on a log scale.
-    The CFC 180 line rises from 108.3 mm at 6.4 ms to 110 mm by 1.6 ms and is flat from 0.2 ms down.
-    The raw line scatters between about 91 and 112 mm at steps above 0.1 ms and joins the CFC 180
-    line below that. Vertical lines mark the
-    record's sample interval and the step used."></div>
-  <figcaption>Figure 2. The data of Table&nbsp;1. The dotted lines mark the record's sample
-  interval (0.05&nbsp;ms) and the step used (0.2&nbsp;ms).</figcaption>
+  <div class="fig-body"><img src="data/example/figures/r08-rep-step.svg?v=20261102180601"
+    alt="Log-log plot of the largest change in an arc's position in millimeters against the step
+    after halving, from 0.04 down to 0.005 s. The points fall in a straight line from about 3 times
+    10 to the minus 4 mm to about 7 times 10 to the minus 8 mm. A dashed line far above them marks
+    the tracker noise at 30.7 mm."></div>
+  <figcaption>Figure 1. The largest change in any arc's stepped position when the step is halved,
+  with <em>k</em> = 0.0186. Every change is many orders of magnitude below the tracker noise
+  (dashed).</figcaption>
 </figure>
 
-<p>At 0.2&nbsp;ms the travel is 110.02&nbsp;mm at 73.4&nbsp;ms (Figure&nbsp;3). The occupant then
-moves back, crosses zero and reaches &minus;42.7&nbsp;mm at 127.8&nbsp;ms, and is at 1.3&nbsp;mm when
-the record ends at 300&nbsp;ms. The belt and occupant together have a natural frequency of
-10.00&nbsp;Hz (a period of 100&nbsp;ms) and a damping ratio of 0.297. The time from the largest forward
-travel to the largest backward one, 54&nbsp;ms, is about half that period.</p>
+<h4>Results</h4>
+<table class="data">
+  <tr><th class="num">Frames fitted</th><th class="num">Unseen rms, no drag (cm)</th><th class="num">Unseen rms, <em>k</em> = 0.0130 (cm)</th><th class="num">Unseen rms, <em>k</em> = 0.0186 (cm)</th><th class="num">Drag closer, low and high <em>k</em></th></tr>
+  <tr><td class="num">6</td><td class="num">17.8</td><td class="num">15.3</td><td class="num">14.8</td><td class="num">15 and 14 of 23</td></tr>
+  <tr><td class="num">10</td><td class="num">12.1</td><td class="num">6.7</td><td class="num">7.4</td><td class="num">20 and 18 of 23</td></tr>
+  <tr><td class="num">14</td><td class="num">10.0</td><td class="num">6.1</td><td class="num">6.4</td><td class="num">21 and 19 of 23</td></tr>
+</table>
+
+<table class="data">
+  <tr><th class="num">Frames fitted</th><th class="num">Crossing error, no drag (cm)</th><th class="num">Crossing error, <em>k</em> = 0.0130 (cm)</th><th class="num">Crossing error, <em>k</em> = 0.0186 (cm)</th><th class="num">Drag closer, low and high <em>k</em></th></tr>
+  <tr><td class="num">6</td><td class="num">21.3</td><td class="num">24.8</td><td class="num">26.2</td><td class="num">5 and 2 of 8</td></tr>
+  <tr><td class="num">10</td><td class="num">13.6</td><td class="num">9.9</td><td class="num">17.1</td><td class="num">5 and 4 of 8</td></tr>
+  <tr><td class="num">14</td><td class="num">10.4</td><td class="num">9.9</td><td class="num">14.8</td><td class="num">4 and 4 of 8</td></tr>
+</table>
+
+<p>Every error entry is a median over the arcs. On the unseen frames, drag lowers the median by 4.7
+to 5.4&nbsp;cm at 10 frames and by 3.6 to 3.9&nbsp;cm at 14, more than the 3.07&nbsp;cm noise in
+both cases, and it is closer on most arcs. From 6 frames the gain is 2.5 to 3.0&nbsp;cm, about the
+size of the noise, and drag is closer on only 14 or 15 of 23. At that length the error without drag
+is 17.8&nbsp;cm, so the starting state itself is probably the larger problem. Figure 2 shows a
+typical arc and Figure 3 shows both scores against the frames fitted.</p>
 
 <figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r08-rep-travel.svg?v=20261102083412"
-    alt="Occupant travel relative to the car in millimeters against time from impact, RK4 at
-    0.2 ms with the CFC 180 drive. The travel rises to a marked maximum of 110.0 mm at 73.4 ms,
-    swings back to about minus 43 mm near 128 ms and returns toward zero by 300 ms."></div>
-  <figcaption>Figure 3. Occupant travel relative to the car, with the maximum marked.</figcaption>
+  <div class="fig-body"><img src="data/example/figures/r08-rep-arc.svg?v=20261102180601"
+    alt="Ball height in meters against distance from the hoop center across the floor for arc 662,
+    with the hoop at the right. The free flight is drawn as black dots with the first ten circled.
+    Three stepped curves start among the fitted frames. They agree near the top of the arc, then the
+    curve without drag stays above and beyond the measured dots while the two curves with drag
+    follow them down to the rim height line."></div>
+  <figcaption>Figure 2. Arc 662 seen from the side, stepped from 10 fitted frames with no drag and
+  with each end of the range of <em>k</em>. The dashed line is rim height.</figcaption>
 </figure>
-
-<h4>Checks</h4>
-<p><strong>1. The filter.</strong> At the record's own step (0.05&nbsp;ms) the travel is
-110.0185&nbsp;mm with the CFC&nbsp;180 drive, 110.0131&nbsp;mm with CFC&nbsp;60 and
-110.0184&nbsp;mm with the raw record. The spread is about 0.005&nbsp;mm. This is probably because
-the belt responds at 10&nbsp;Hz, and both filters leave anything that slow alone (a CFC's class
-number is roughly the frequency below which it passes a signal unchanged).</p>
-
-<p><strong>2. The drive.</strong> Integrated over the whole record, the crossmember's acceleration
-gives a change of velocity of 17.43&nbsp;m/s against an approach of 15.60&nbsp;m/s. The difference,
-1.83&nbsp;m/s, is the car rebounding off the barrier. The drive therefore has the right sign and
-about the right size.</p>
-
-<p><strong>3. The force on the occupant.</strong> No channel measures the travel itself, so the
-model's own acceleration of the occupant (the belt force divided by the mass) is compared with the
-driver's chest accelerometer, filtered at CFC&nbsp;180 as J211 gives for the thorax. The model
-peaks at &minus;48.4&nbsp;<em>g</em> at 66.4&nbsp;ms and the chest at &minus;50.4&nbsp;<em>g</em> at
-71.5&nbsp;ms (Figure&nbsp;4). The two are close in size and about 5&nbsp;ms apart. This suggests the
-model's belt force is of the right size. It does not test the travel directly. After the peak the
-two part company. Once the occupant has swung back behind their start, the model's compressed spring pushes
-them forward again, at up to +20.4&nbsp;<em>g</em> at 117.6&nbsp;ms, while the chest never goes above +4.7&nbsp;<em>g</em> anywhere in the record (at
-283.2&nbsp;ms). That push is the model's spring, which a belt does not have (see Assumptions
-and Limits).</p>
 
 <figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r08-rep-chest_check.svg?v=20261102083412"
-    alt="Acceleration in g against time from impact for the measured driver chest at CFC 180 and the
-    model occupant. Both dip to about minus 50 g between 65 and 75 ms, the model slightly earlier.
-    After that the model swings up to about plus 20 g near 118 ms while the chest stays near
-    zero."></div>
-  <figcaption>Figure 4. The model occupant's acceleration against the driver's chest accelerometer
-  (V1P1 chest X, CFC&nbsp;180).</figcaption>
+  <div class="fig-body"><img src="data/example/figures/r08-rep-errors.svg?v=20261102180601"
+    alt="Two panels against frames fitted, 6, 10 and 14. Left, median rms error on the unseen
+    frames in centimeters for 23 arcs. Without drag it falls from about 18 to 10, and with either
+    value of k from about 15 to 6. Right, median error at the rim crossing for 8 arcs. Without drag
+    it falls from about 21 to 10. With the low k it falls from about 25 to 10, and with the high k
+    it stays above the line without drag at every length. A dashed line at about 3 cm marks the
+    tracker noise in both panels."></div>
+  <figcaption>Figure 3. Left, the rms error on the unseen frames. Right, the error at the rim
+  crossing, on the arcs where the free flight reaches it. Each point is a median.</figcaption>
 </figure>
+
+<p>The two scores disagree. Along the flight, drag helps at every length tested. At the crossing it
+passes the test only with the low end of <em>k</em> from 10 frames, where the median falls by
+3.7&nbsp;cm and drag is closer on 5 of 8. From 14 frames the low end lowers the median by only
+0.5&nbsp;cm, and the high end of <em>k</em> makes the median worse at every length. The
+crossing is set by the moment the height comes down through 3.048&nbsp;m, so a model that places
+the ball better across the floor may still put the crossing in the wrong place if its height is
+off. I have not separated the two, and the crossing score rests on only 8 arcs. The low end of
+<em>k</em> did as well as the high end or better on both scores at 10 and 14 frames. Whether that
+says the drag on these balls is at the low end has not been tested, since the starting state comes
+from a fit that assumes no drag over the fitted frames.</p>
+
+<p>For predicting where the ball goes along its flight, I would build on the stepped model with
+drag at <em>k</em> = 0.0130. For the rim crossing, the result changes with <em>k</em> and the
+frames fitted and rests on 8 arcs, so these arcs are weak evidence for or against drag there.</p>
 
 <h4>Errors and Anomalies</h4>
-<p><strong>The drive channel's name.</strong> The key <code>vehicle_x</code> suggests the whole car,
-while the header describes one accelerometer on the left rear seat crossmember. This report uses it
-as the car's motion (see Assumptions) and labels it by its header.</p>
+<p><strong>Arc 325 is filled in.</strong> Its height runs in a straight line for six steps or more, which measured heights with 3&nbsp;cm of noise do not do.
+The tracker probably lost the ball, and the arc was dropped.</p>
 
-<p><strong>The spike near 53&nbsp;ms.</strong> The raw crossmember reaches &minus;195.7&nbsp;<em>g</em>
-at 52.75&nbsp;ms, nearly four times the filtered peak. It is kept. It barely moves the travel at a fine step
-(Check&nbsp;1), and it is the reason the raw drive needs a step of 0.1&nbsp;ms or smaller.</p>
+<p><strong>Most measured crossings are not in free flight.</strong> On 15 of the 23 arcs the free
+flight ends more than 4 frames before the measured crossing. On those arcs the ball has probably hit
+the rim or the board first, so the measured crossing is not where a flight model would put it, and
+they were left out of the crossing score.</p>
 
-<p><strong>Chest displacement.</strong> The pack's chest displacement channel can look like the
-answer to this question. It measures how far the chest is compressed, which is a different thing from
-the occupant's travel, and its unit label is wrong (Assignment&nbsp;1). It is not used.</p>
+<p><strong>Drag is worse on three arcs.</strong> At 10 frames, arcs 1092, 794 and 1307 have a larger
+unseen error with drag than without, at both ends of <em>k</em>. The cause has not been looked
+for.</p>
 
-<h4>Assumptions and Limits</h4>
+<p><strong>Correlated noise.</strong> The header says the tracking noise is "mildly correlated frame
+to frame". The comparison with 3.07&nbsp;cm treats the noise as one number and does not allow for
+that.</p>
+
+<h4>Assumptions</h4>
 <ul>
-  <li>The crossmember's motion is the car's motion, and the seat moves with it.</li>
-  <li>The occupant starts at rest relative to the car with the belt just snug, 50&nbsp;ms before
-  impact.</li>
-  <li>The mass, stiffness and damping are the restraint group's values, used as given.</li>
-  <li>The belt is linear and can push as well as pull. The negative travel after 100&nbsp;ms is the
-  spring pushing, which a belt cannot do. In the car the seat back would stop the occupant there.
-  This comes after the maximum and does not change it.</li>
-  <li>The occupant is one rigid mass moving only forward and back. The head, chest and pelvis
-  travel different distances in a real occupant.</li>
-  <li>There is no airbag or steering wheel, and no slack in the belt. Each would change the number, by amounts this model cannot estimate.</li>
+  <li>The coordinates are in meters. The header gives no unit for them, but it gives the rim height
+  in meters.</li>
+  <li>Gravity is 9.81&nbsp;m/s&sup2;, as in assignment 5.</li>
+  <li>The drag constant is the same for every shot and through the whole flight. The notes give the
+  drag coefficient for speeds above about 6&nbsp;m/s. Near the top of the arc the ball moves at
+  about its speed across the floor, which on many of these arcs is a little under 6&nbsp;m/s, and I
+  have assumed the same range of the coefficient holds there.</li>
+  <li>The air is at 20&nbsp;&deg;C and sea-level pressure. The header does not say where the arena
+  is.</li>
+  <li>The ball does not spin.</li>
+  <li>The starting fit assumes no drag over the fitted frames, and its slopes are the velocity at the
+  middle of them.</li>
+  <li>The flight runs from the release rule to the end rule above.</li>
 </ul>
 
 <h4>Appendix. Program</h4>
-<pre class="nb-in">"""Assignment 7: occupant travel relative to the car, with a step study.
+<pre class="nb-in">"""Assignment 7: is quadratic drag worth adding to the shot-flight model?
 
-Run from the unzipped pack folder. Model: one mass (the occupant) on a spring
-and damper (the belt), driven by the car's acceleration,
-
-    m u'' + c u' + k u = -m a_car(t)
-
-with u the travel relative to the car (forward positive). The state (u, w = u')
-is stepped with classical RK4. a_car is the crossmember channel filtered at
-CFC 180, the class J211 gives a structural acceleration that will be
-integrated, and between samples it is a straight line between neighbors.
-
-Prints a table of travel against step for the filtered and the raw drive,
-picks the step, then runs three checks. Saves travel.svg, drive.svg,
-steps.svg and chest_check.svg.
+Run this from the unzipped pack folder. For every training arc it finds the free
+flight (the release and end rules from assignment 5) and takes a starting position
+and velocity from a fit to the first 6, 10 or 14 frames of it. From there it steps
+the flight forward with RK4 three ways: with no drag, and with quadratic drag at
+each end of the range of k worked out on the notes page State as a vector. Each
+stepped flight is scored on the frames the fit did not see, and on the measured rim
+crossing where the ball reaches rim height before it touches anything. It prints
+the drag constants, the step-size check, a line per arc and a summary, and saves
+convergence.svg, one_arc.svg and errors.svg.
 """
-import glob
 import json
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-M = 75.0        # occupant mass, kg
-K = 296000.0    # belt stiffness, N/m
-C = 2800.0      # belt damping, N*s/m
-G = 9.81        # m/s^2 per g
-SETTLED = 0.001  # mm, a hundredth of the 0.1 mm I quote (RK4 makes this cheap)
+G = 9.81               # m/s^2
+WINDOW = 9             # frames in each acceleration estimate (0.32 s)
+TOL = 5.0              # m/s^2, how close to -g counts as free flight
+RUN = 4                # frames in a row it has to stay that close
+RIM = 3.048            # m, rim height (from the header)
+FIT_LENGTHS = [6, 10, 14]
+H = 0.04               # s, the step (one frame), chosen by the halving check below
+SHOW = 662             # the arc drawn in one_arc.svg
+
+# k = rho C_D A / (2 m), with the numbers given on the notes page State as a vector
+RHO = 1.20             # kg/m^3, air at 20 C and sea-level pressure
+CD_LOW = 0.30          # drag coefficient, low end of the wind-tunnel range
+CD_HIGH = 0.40         # high end
+MASS_LOW = 0.580       # kg, lightest ball the rules allow
+MASS_HIGH = 0.620      # kg, heaviest
 
 
-def cfc(y, dt, cls):
-    """SAE J211-1 Butterworth, forward then backward (assignment 4)."""
-    wd = 2 * np.pi * cls * 2.0775
-    wa = np.tan(wd * dt / 2)
-    d = 1 + np.sqrt(2) * wa + wa**2
-    a0 = wa**2 / d
-    a1 = 2 * a0
-    a2 = a0
-    b1 = -2 * (wa**2 - 1) / d
-    b2 = (-1 + np.sqrt(2) * wa - wa**2) / d
-
-    def one_pass(x):
-        out = np.zeros_like(x)
-        for i in range(2, len(x)):
-            out[i] = a0*x[i] + a1*x[i-1] + a2*x[i-2] + b1*out[i-1] + b2*out[i-2]
-        return out
-
-    forward = one_pass(y)
-    backward = one_pass(forward[::-1])
-    return backward[::-1]
+def load(name):
+    with open(f'shots/{name}.json') as f:
+        return json.load(f)
 
 
-def rk4(t, a_car, h):
-    """Step the state (u, w) from rest at t[0] to the end of the record with RK4.
-    Returns the step times, u and w."""
-    def rate(time, u, w):
-        a = np.interp(time, t, a_car)        # straight line between samples
-        return w, (-C * w - K * u) / M - a
-
-    n_steps = int(round((t[-1] - t[0]) / h))
-    times = t[0] + h * np.arange(n_steps + 1)
-    u = np.zeros(n_steps + 1)
-    w = np.zeros(n_steps + 1)
-    for n in range(n_steps):
-        tn = times[n]
-        un = u[n]
-        wn = w[n]
-        k1u, k1w = rate(tn, un, wn)
-        k2u, k2w = rate(tn + h/2, un + h/2 * k1u, wn + h/2 * k1w)
-        k3u, k3w = rate(tn + h/2, un + h/2 * k2u, wn + h/2 * k2w)
-        k4u, k4w = rate(tn + h, un + h * k3u, wn + h * k3w)
-        u[n+1] = un + h/6 * (k1u + 2*k2u + 2*k3u + k4u)
-        w[n+1] = wn + h/6 * (k1w + 2*k2w + 2*k3w + k4w)
-    return times, u, w
+def accel(t, z):
+    """Vertical acceleration at every frame, from a parabola through the 9 frames
+    centered on it. NaN where the window runs off either end."""
+    h = WINDOW // 2
+    a = np.full(len(t), np.nan)
+    for i in range(h, len(t) - h):
+        c = np.polyfit(t[i - h:i + h + 1] - t[i], z[i - h:i + h + 1], 2)
+        a[i] = 2 * c[0]
+    return a
 
 
-def travel(t, a_car, h):
-    """Largest forward travel (mm) and when it happens (ms), at step h. This is
-    the largest value on the step grid. The true peak can fall between two steps,
-    and at a coarse step the step's own error can move the value either way, which
-    the step study measures."""
-    times, u, w = rk4(t, a_car, h)
-    i = np.argmax(u)
-    return 1000 * u[i], 1000 * times[i]
+def release(t, z):
+    """The first frame after the last upward push at which the acceleration is
+    within TOL of -g and stays there for RUN frames."""
+    a = accel(t, z)
+    top = int(np.argmax(z))
+    first = WINDOW // 2
+    for i in range(top):
+        if a[i] &gt; 0:
+            first = i + 1      # the hand is still pushing at frame i
+    for i in range(first, len(t) - RUN + 1):
+        if np.all(np.abs(a[i:i + RUN] + G) &lt; TOL):
+            return i
+    return None
 
 
-name = glob.glob('crash/*.json')[0]     # the crash folder holds one test file
-with open(name) as f:
-    test = json.load(f)
-ch = test['channels']['vehicle_x']
-dt = ch['dt']
-t = ch['t0'] + dt * np.arange(ch['n'])
-raw = np.array(ch['y'])
-a180 = cfc(raw, dt, 180)
-V0 = test['test']['speed_kph'] / 3.6     # approach speed, m/s, from the test record
-print(f"drive: {ch['comment']} [{ch['code']}], "
-      f"{ch['n']} samples every {1000 * dt} ms")
-print(f"peak raw {np.min(raw) / G:.1f} g at {1000 * t[np.argmin(raw)]:.2f} ms, "
-      f"CFC 180 {np.min(a180) / G:.1f} g at {1000 * t[np.argmin(a180)]:.2f} ms")
-fn = np.sqrt(K / M) / (2 * np.pi)
-print(f"belt natural frequency {fn:.2f} Hz (period {1000 / fn:.0f} ms), "
-      f"damping ratio {C / (2 * np.sqrt(K * M)):.3f}")
+def flight_end(t, z):
+    """Last frame of the free flight: the frame before the acceleration leaves the
+    band for RUN frames in a row (the ball has hit something), or the frame
+    before the ball drops through rim height, whichever comes first."""
+    a = accel(t, z)
+    top = int(np.argmax(z))
+    for i in range(top, len(t) - RUN + 1):
+        if np.all(np.abs(a[i:i + RUN] + G) &gt;= TOL) or z[i] &lt; RIM:
+            return i - 1
+    return len(t) - 1
 
-# ---- step study: halve from 128 samples down to half a sample (6.4 to 0.025 ms at 20 kHz)
-steps = []
-for k in range(9):
-    steps.append(128 * dt / 2**k)
-results = {'CFC 180': [], 'raw': []}
-print(f"\n{'step (ms)':&gt;10} {'CFC 180 (mm)':&gt;12} {'change':&gt;9} "
-      f"{'raw (mm)':&gt;10} {'change':&gt;9}")
-drives = {'CFC 180': a180, 'raw': raw}
-for k in range(len(steps)):
-    h = steps[k]
-    row = f"{1000 * h:10.4f}"
-    for name, a in drives.items():
-        x, at = travel(t, a, h)
-        results[name].append(x)
-        if k == 0:
-            row = row + f" {x:12.4f} {'':&gt;9}"
+
+def straight_run(z, frames=6):
+    """True if the height falls on a straight line for 'frames' steps or more.
+    Measured heights carry about 3 cm of noise, so a straight line means the
+    tracker filled a gap."""
+    flat = np.abs(np.diff(z, 2)) &lt; 0.001
+    for i in range(len(flat) - frames + 2):
+        if np.all(flat[i:i + frames - 1]):
+            return True
+    return False
+
+
+def start_state(t, x, y, z, first, n):
+    """Position and velocity at the middle of n frames starting at 'first', from
+    straight lines in x and y and a parabola in z with gravity held at 9.81.
+    Time is measured from the middle of the fitted frames, so each fit's constant
+    is the position there and its slope is the velocity there."""
+    t_mid = np.mean(t[first:first + n])
+    dt = t[first:first + n] - t_mid
+    A = np.column_stack([np.ones_like(dt), dt])
+    cx = np.linalg.lstsq(A, x[first:first + n], rcond=None)[0]
+    cy = np.linalg.lstsq(A, y[first:first + n], rcond=None)[0]
+    cz = np.linalg.lstsq(A, z[first:first + n] + 0.5 * G * dt ** 2, rcond=None)[0]
+    return t_mid, np.array([cx[0], cy[0], cz[0], cx[1], cy[1], cz[1]])
+
+
+def rate(s, drag_k):
+    """The rate of the state s = [x, y, z, vx, vy, vz]. Drag acts against the
+    velocity and grows with the speed squared, so every direction needs the speed."""
+    vx = s[3]
+    vy = s[4]
+    vz = s[5]
+    speed = np.sqrt(vx ** 2 + vy ** 2 + vz ** 2)
+    return np.array([vx, vy, vz,
+                     -drag_k * speed * vx,
+                     -drag_k * speed * vy,
+                     -G - drag_k * speed * vz])
+
+
+def rk4_step(s, h, drag_k):
+    k1 = rate(s, drag_k)
+    k2 = rate(s + h / 2 * k1, drag_k)
+    k3 = rate(s + h / 2 * k2, drag_k)
+    k4 = rate(s + h * k3, drag_k)
+    return s + h / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
+
+
+def step_to(s, t_from, t_to, drag_k, h_max):
+    """Step the state from t_from to t_to in equal steps no longer than about
+    h_max, so that the last step lands exactly on t_to."""
+    n = max(1, int(np.floor((t_to - t_from) / h_max + 0.5)))
+    h = (t_to - t_from) / n
+    for i in range(n):
+        s = rk4_step(s, h, drag_k)
+    return s
+
+
+def unseen_error(t, x, y, z, first, last, t_mid, s, drag_k):
+    """rms distance (m) between the stepped ball and the measured ball over
+    frames first .. last."""
+    t_now = t_mid
+    gaps = []
+    for j in range(first, last + 1):
+        s = step_to(s, t_now, t[j], drag_k, H)
+        t_now = t[j]
+        gaps.append(np.sqrt((s[0] - x[j]) ** 2 + (s[1] - y[j]) ** 2 + (s[2] - z[j]) ** 2))
+    return np.sqrt(np.mean(np.array(gaps) ** 2))
+
+
+def stepped_crossing(t_now, s, drag_k):
+    """Time and floor position where the stepped ball comes down through rim
+    height: steps of H until it is below the rim on the way down, then bisection
+    on the length of that last step, to a microsecond."""
+    while True:
+        s_next = rk4_step(s, H, drag_k)
+        if s_next[2] &lt; RIM and s_next[5] &lt; 0:
+            break
+        s = s_next
+        t_now = t_now + H
+    lo = 0.0           # a step this long ends above the rim
+    hi = H             # and this long ends below it
+    while hi - lo &gt; 1e-6:
+        mid = (lo + hi) / 2
+        if rk4_step(s, mid, drag_k)[2] &gt; RIM:
+            lo = mid
         else:
-            row = row + f" {x:12.4f} {x - results[name][k-1]:+9.4f}"
-    print(row)
+            hi = mid
+    s = rk4_step(s, lo, drag_k)
+    return t_now + lo, s[0], s[1]
 
-# the step: the largest one where the next TWO halvings each move the CFC 180
-# travel less than SETTLED (a single small change can be luck)
-s180 = results['CFC 180']
-for k in range(len(steps) - 2):
-    first_change = abs(s180[k+1] - s180[k])
-    second_change = abs(s180[k+2] - s180[k+1])
-    if first_change &lt; SETTLED and second_change &lt; SETTLED:
-        break                      # k is the step chosen
-h = steps[k]
-print(f"\nchosen step {1000 * h:.2f} ms ({h / dt:.0f} samples), "
-      f"step x natural frequency {h * np.sqrt(K / M):.3f}")
-print(f"the next two halvings move the travel "
-      f"{s180[k+1] - s180[k]:+.4f} and {s180[k+2] - s180[k+1]:+.4f} mm")
 
-times, u, w = rk4(t, a180, h)
-i = np.argmax(u)
-top = u[i]
-when = times[i]
-j = np.argmin(u)
-print(f"TRAVEL {1000 * top:.2f} mm at {1000 * when:.1f} ms")
-print(f"most negative travel {1000 * u[j]:.1f} mm at {1000 * times[j]:.1f} ms, "
-      f"at the end of the record {1000 * u[-1]:.1f} mm")
+def find_shot(shots, wanted):
+    """The shot whose id is wanted."""
+    for s in shots:
+        if s['id'] == wanted:
+            return s
 
-# ---- checks
-print("\nchecks")
-print("1. the drive filtered three ways, all at the record's own step:")
-checks = {'CFC 180': a180, 'CFC 60': cfc(raw, dt, 60), 'raw': raw}
-for name, a in checks.items():
-    x, at = travel(t, a, dt)
-    print(f"   {name:8} {x:.4f} mm at {at:.2f} ms")
-dv = np.sum((raw[1:] + raw[:-1]) / 2) * dt
-print(f"2. velocity change in the drive {dv:.2f} m/s against an approach of "
-      f"{V0:.2f} m/s, rebound {-dv - V0:.2f} m/s")
-a_occ = -(K * u + C * w) / M                     # occupant's own acceleration, m/s^2
-has_chest = 'chest_x' in test['channels']        # a few tests have no chest channel
-if has_chest:
-    chest = cfc(np.array(test['channels']['chest_x']['y']), dt, 180)
-    io = np.argmin(a_occ)
-    ic = np.argmin(chest)
-    print(f"3. model occupant peak {a_occ[io] / G:.1f} g at {1000 * times[io]:.1f} ms, "
-          f"driver chest (CFC 180) {chest[ic] / G:.1f} g at {1000 * t[ic]:.1f} ms")
-    # after the peak the model's spring pushes back. Does the chest show that?
-    io = np.argmax(a_occ)
-    ic = np.argmax(chest)
-    print(f"   largest push back: model {a_occ[io] / G:+.1f} g at "
-          f"{1000 * times[io]:.1f} ms, "
-          f"chest {chest[ic] / G:+.1f} g at {1000 * t[ic]:.1f} ms")
-else:
-    print("3. this test has no driver chest channel, so check 3 cannot be made")
 
-# ---- figure 1, travel against time
-plt.figure(figsize=(7, 4))
-plt.plot(1000 * times, 1000 * u)
-plt.plot(1000 * when, 1000 * top, 'o', color='tab:red')
-plt.annotate(f"{1000 * top:.1f} mm at {1000 * when:.1f} ms",
-             (1000 * when, 1000 * top), xytext=(10, 0), textcoords='offset points')
-plt.ylim(-60, 130)
-plt.axhline(0, color='gray', linewidth=0.8)
-plt.xlabel('time from impact (ms)')
-plt.ylabel('occupant travel relative to the car (mm)')
-plt.title(f'Occupant travel, RK4 at {1000 * h:.1f} ms, CFC 180 drive')
+def measured_crossing(t, x, y, z):
+    """The rim crossing in the record: the last frame above rim height after the
+    top, and a straight line from it to the next frame (which is below)."""
+    i = int(np.argmax(z))
+    while z[i + 1] &gt;= RIM:
+        i = i + 1
+    f = (z[i] - RIM) / (z[i] - z[i + 1])     # how far from frame i to frame i+1
+    return i, t[i] + f * (t[i + 1] - t[i]), x[i] + f * (x[i + 1] - x[i]), y[i] + f * (y[i + 1] - y[i])
+
+
+train = load('train')
+header = train['header']
+shots = train['shots']
+noise_z = header['tracking_noise']['vertical_m']
+noise_xy = header['tracking_noise']['horizontal_m']
+print(f'tracking noise from the header: vertical {100 * noise_z:.2f} cm, '
+      f'horizontal {100 * noise_xy:.2f} cm')
+
+area = np.pi * header['ball_radius_m'] ** 2
+K_LOW = RHO * CD_LOW * area / (2 * MASS_HIGH)      # least drag: low C_D, heavy ball
+K_HIGH = RHO * CD_HIGH * area / (2 * MASS_LOW)     # most drag: high C_D, light ball
+DRAGS = [0.0, K_LOW, K_HIGH]
+print(f'ball cross-section {area:.4f} m^2, k from {K_LOW:.4f} to {K_HIGH:.4f} per m')
+
+# the free flight in every training arc
+arcs = []
+for s in shots:
+    t = np.array(s['t'])
+    x = np.array(s['x'])
+    y = np.array(s['y'])
+    z = np.array(s['z'])
+    if straight_run(z):
+        print(f"arc {s['id']} dropped: its height runs in a straight line (a filled gap)")
+        continue
+    arcs.append((s['id'], t, x, y, z, release(t, z), flight_end(t, z)))
+print(f'{len(arcs)} arcs used')
+
+# with no drag the stepped ball should follow the fitted parabola exactly
+print()
+worst = 0.0
+for arc_id, t, x, y, z, r, e in arcs:
+    t_mid, s0 = start_state(t, x, y, z, r, 10)
+    dt = t[e] - t_mid
+    parabola = np.array([s0[0] + s0[3] * dt, s0[1] + s0[4] * dt,
+                         s0[2] + s0[5] * dt - 0.5 * G * dt ** 2])
+    stepped = step_to(s0, t_mid, t[e], 0.0, H)[:3]
+    worst = max(worst, np.max(np.abs(stepped - parabola)))
+print(f'no drag, step {H} s: largest gap from the fitted parabola {1000 * worst:.6f} mm')
+
+# step size: halve it and watch the position at the end of each free flight
+print(f'with drag (k = {K_HIGH:.4f}), 10 frames fitted: largest change in any arc '
+      f'when the step is halved')
+steps = [0.08, 0.04, 0.02, 0.01, 0.005]
+ends = []
+for h in steps:
+    row = []
+    for arc_id, t, x, y, z, r, e in arcs:
+        t_mid, s0 = start_state(t, x, y, z, r, 10)
+        row.append(step_to(s0, t_mid, t[e], K_HIGH, h)[:3])
+    ends.append(np.array(row))
+changes = []
+for i in range(1, len(steps)):
+    gap = np.sqrt(np.sum((ends[i] - ends[i - 1]) ** 2, axis=1))    # one per arc
+    changes.append(np.max(gap))
+    line = f'  {steps[i - 1]:.3f} s to {steps[i]:.3f} s: {1000 * changes[-1]:.2e} mm'
+    if i &gt; 1:
+        line = line + f'   ratio {changes[-2] / changes[-1]:.1f}'
+    print(line)
+
+# every arc, every fit length, all three models
+results = {}
+crossings = {}
+for n_fit in FIT_LENGTHS:
+    rows = []
+    cross_rows = []
+    for arc_id, t, x, y, z, r, e in arcs:
+        t_mid, s0 = start_state(t, x, y, z, r, n_fit)
+        row = []
+        for drag_k in DRAGS:
+            row.append(unseen_error(t, x, y, z, r + n_fit, e, t_mid, s0, drag_k))
+        rows.append(row)
+        # the measured crossing counts only if the free flight reaches it: no more
+        # than half an acceleration window between the end of the flight and it
+        i, tc, xc, yc = measured_crossing(t, x, y, z)
+        if i - e &lt;= WINDOW // 2:
+            row = [arc_id]
+            for drag_k in DRAGS:
+                tp, xp, yp = stepped_crossing(t_mid, s0, drag_k)
+                row.append(np.sqrt((xp - xc) ** 2 + (yp - yc) ** 2))
+            cross_rows.append(row)
+    results[n_fit] = 100 * np.array(rows)                           # to cm
+    crossings[n_fit] = np.array(cross_rows) * [1, 100, 100, 100]    # id stays
+
+print()
+print('10 frames fitted: rms error on the unseen frames (cm)')
+print(f"{'arc':&gt;5} {'release':&gt;7} {'end':&gt;4} {'no drag':&gt;8} {'k low':&gt;6} {'k high':&gt;6}")
+for m in range(len(arcs)):
+    arc_id, t, x, y, z, r, e = arcs[m]
+    u = results[10][m]
+    print(f'{arc_id:&gt;5} {r:&gt;7} {e:&gt;4} {u[0]:8.1f} {u[1]:6.1f} {u[2]:6.1f}')
+print('arcs whose free flight reaches the measured crossing: '
+      + ' '.join(str(int(a)) for a in crossings[10][:, 0]))
+
+print()
+for n_fit in FIT_LENGTHS:
+    u = results[n_fit]
+    c = crossings[n_fit]
+    med = np.median(u, axis=0)
+    cmed = np.median(c[:, 1:], axis=0)
+    print(f'{n_fit} frames fitted (medians over the arcs, cm)')
+    print(f'  unseen frames, {len(u)} arcs:  no drag {med[0]:.1f}  k low {med[1]:.1f}  '
+          f'k high {med[2]:.1f}   drag closer on {np.sum(u[:, 1] &lt; u[:, 0])} and '
+          f'{np.sum(u[:, 2] &lt; u[:, 0])}')
+    print(f'  rim crossing, {len(c)} arcs:    no drag {cmed[0]:.1f}  k low {cmed[1]:.1f}  '
+          f'k high {cmed[2]:.1f}   drag closer on {np.sum(c[:, 2] &lt; c[:, 1])} and '
+          f'{np.sum(c[:, 3] &lt; c[:, 1])}')
+
+# Figure 1: the step check
+plt.figure(figsize=(6, 4))
+plt.loglog(steps[1:], 1000 * np.array(changes), 'o-', label=f'k = {K_HIGH:.4f} per m')
+plt.axhline(1000 * noise_z, color='gray', linestyle='--', label='tracker noise, 3.07 cm')
+plt.xlabel('step after halving (s)')
+plt.ylabel('largest change in an arc (mm)')
+plt.title('Change in the stepped position when the step is halved')
+plt.legend(fontsize=8)
 plt.tight_layout()
-plt.savefig('travel.svg')
+plt.savefig('convergence.svg')
 plt.close()
 
-# ---- figure 2, the drive as recorded and filtered
+# Figure 2: one arc, all three models, side view
+s = find_shot(shots, SHOW)
+t = np.array(s['t'])
+x = np.array(s['x'])
+y = np.array(s['y'])
+z = np.array(s['z'])
+r = release(t, z)
+e = flight_end(t, z)
+t_mid, s0 = start_state(t, x, y, z, r, 10)
+d = np.sqrt((x - s['hoop_x']) ** 2 + (y - s['hoop_y']) ** 2)   # distance from the hoop
 plt.figure(figsize=(7, 4))
-plt.plot(1000 * t, raw / G, linewidth=0.6, label='as recorded')
-plt.plot(1000 * t, a180 / G, label='CFC 180')
-plt.xlim(-10, 150)
-plt.xlabel('time from impact (ms)')
-plt.ylabel('acceleration (g)')
-plt.title(f"Car body X acceleration [{ch['code']}]")
-plt.legend()
+plt.plot(d, z, '.', color='lightgray', label='all frames')
+plt.plot(d[r:e + 1], z[r:e + 1], '.', color='black', label='free flight')
+plt.plot(d[r:r + 10], z[r:r + 10], 'o', mfc='none', color='black', label='the 10 frames fitted')
+names = ['no drag', f'k = {K_LOW:.4f}', f'k = {K_HIGH:.4f}']
+for m in range(3):
+    path = [s0]
+    state = s0
+    while not (state[2] &lt; RIM and state[5] &lt; 0):    # until it comes down through the rim
+        state = rk4_step(state, H, DRAGS[m])
+        path.append(state)
+    path = np.array(path)
+    plt.plot(np.sqrt((path[:, 0] - s['hoop_x']) ** 2 + (path[:, 1] - s['hoop_y']) ** 2),
+             path[:, 2], label=names[m])
+plt.axhline(RIM, color='gray', linestyle='--', linewidth=0.8)
+plt.xlim(0, d[r] + 0.5)
+plt.ylim(RIM - 0.5, np.max(z) + 0.3)
+plt.gca().invert_xaxis()
+plt.title(f'Arc {SHOW}: stepped from 10 fitted frames, three ways')
+plt.xlabel('distance from the hoop center across the floor (m)')
+plt.ylabel('ball height (m)')
+plt.legend(fontsize=8)
 plt.tight_layout()
-plt.savefig('drive.svg')
+plt.savefig('one_arc.svg')
 plt.close()
 
-# ---- figure 3, the step study
-plt.figure(figsize=(7, 4))
-steps_ms = []
-for s in steps:
-    steps_ms.append(1000 * s)
-plt.semilogx(steps_ms, results['CFC 180'], 'o-', label='CFC 180 drive')
-plt.semilogx(steps_ms, results['raw'], 's--', label='raw drive')
-plt.axvline(1000 * dt, color='gray', linestyle=':', label='record sample interval')
-plt.axvline(1000 * h, color='tab:red', linestyle=':', label='step used')
-plt.xlabel('step (ms)')
-plt.ylabel('largest travel (mm)')
-plt.title('Largest occupant travel against RK4 step')
-plt.legend()
-plt.tight_layout()
-plt.savefig('steps.svg')
-plt.close()
-
-# ---- figure 4, the model against the chest
-if has_chest:
-    plt.figure(figsize=(7, 4))
-    plt.plot(1000 * t, chest / G, label='driver chest X, measured (CFC 180)')
-    plt.plot(1000 * times, a_occ / G, label='model occupant')
-    plt.xlim(-10, 200)
-    plt.xlabel('time from impact (ms)')
-    plt.ylabel('acceleration (g)')
-    plt.title('Occupant acceleration: model against the dummy chest')
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig('chest_check.svg')
-    plt.close()</pre>
+# Figure 3: median errors against frames fitted
+fig, axes = plt.subplots(1, 2, figsize=(9, 3.8))
+marks = ['o-', 's-', '^-']
+for m in range(3):
+    unseen = []
+    cross = []
+    for n_fit in FIT_LENGTHS:
+        unseen.append(np.median(results[n_fit][:, m]))
+        cross.append(np.median(crossings[n_fit][:, m + 1]))
+    axes[0].plot(FIT_LENGTHS, unseen, marks[m], label=names[m])
+    axes[1].plot(FIT_LENGTHS, cross, marks[m], label=names[m])
+axes[0].set_title(f'rms error on the unseen frames, {len(arcs)} arcs')
+axes[1].set_title(f'Error at the rim crossing, {len(crossings[10])} arcs')
+axes[0].set_ylabel('median rms distance (cm)')
+axes[1].set_ylabel('median distance across the floor (cm)')
+for ax in axes:
+    ax.axhline(100 * noise_z, color='gray', linestyle='--', linewidth=0.8,
+               label='tracker noise')
+    ax.set_xlabel('frames fitted for the starting state')
+    ax.set_xticks(FIT_LENGTHS)
+    ax.set_ylim(bottom=0)
+    ax.legend(fontsize=8)
+fig.tight_layout()
+fig.savefig('errors.svg')
+plt.close(fig)</pre>
 </div>
 
 <div class="aside notice"><span class="label">What to notice</span>
-<p>The summary gives the travel, its time and the settling evidence before any method. The step
-comes from a rule stated in advance (two successive halvings, each under 0.001&nbsp;mm). A reader
-can apply that rule to Table&nbsp;1 and get the same step. Running the raw drive beside the filtered
-one shows what the filter is for in this problem, and Check&nbsp;3 says plainly what it does not
-test.</p>
+<p>The summary gives the verdict, the condition it holds under (10 or 14 frames) and the measure
+on which the result is mixed. The report runs both ends of the range of <em>k</em> (0.0130 and
+0.0186 per meter), so the verdict does not rest on one assumed value. The step check gives two
+pieces of evidence. The ratios near 16 show that the RK4 code behaves as fourth order, and their
+size shows that the changes are far below anything Bob could see. The crossing score comes with a
+rule for which arcs it can be trusted on, and the rule has its reason beside it. The crossing is
+held to the same test as the unseen frames, and the report says how little 8 arcs can settle. Bob
+would likely ask first why the high end of <em>k</em> makes the crossing worse, and the report says
+what it has checked and what it has not.</p>
 </div>
 
 <h2 id="a-notebook">A Notebook</h2>
 
 <div class="aside report"><span class="label">Example 3 &middot; Notebook, exported to PDF</span>
-<p><strong>Assignment 7, occupant travel.</strong> Data phrase: example pack (test 9793)</p>
+<p><strong>Assignment 7, drag in the flight model.</strong> Data phrase: example pack (test 9793)</p>
 
-<p>I did this in Google Colab. Alice wants the occupant's travel relative to the car, modeled as a
-75&nbsp;kg mass on a belt that acts like a spring and a damper. The car's motion comes from the
-crash file. First I loaded the channel that is meant to be the car and looked at it.</p>
+<p>I did this in Google Colab. The notes page State as a vector gives quadratic drag as an
+acceleration of &minus;<em>k</em>|<strong>v</strong>|<strong>v</strong>, with
+<em>k</em> = &rho;<em>C<sub>D</sub>A</em>/(2<em>m</em>), and a drag coefficient between 0.3 and
+0.4 from a wind tunnel (Zhang, Zhu, Li and Hong, <em>iScience</em> 2026). My plan is to fit a
+starting state to the first half of each training flight, step it with and without drag, and
+compare the second half with where the ball actually was. First, the header and the value of
+<em>k</em>.</p>
 
 <pre class="nb-in">import json
 import numpy as np
 
-with open('crash/09793.json') as f:
-    test = json.load(f)
+with open('shots/train.json') as f:
+    train = json.load(f)
 
-car = test['channels']['vehicle_x']
-print(car['comment'], car['code'], car['unit'], car['dt'], car['n'])
-t = car['t0'] + car['dt'] * np.arange(car['n'])
-a_car = np.array(car['y'])
-print('mean before impact', round(np.mean(a_car[t &lt; 0]), 3), 'm/s^2')
-i = np.argmin(a_car)
-print('largest', round(a_car[i] / 9.81, 1), 'g at', round(1000 * t[i], 2), 'ms')</pre>
-<pre class="nb-out">V1 LEFT REAR SEAT CROSSMEMBER AX 10SEATLERE00ACXP m/(s*s) 5e-05 7001
-mean before impact 0.041 m/s^2
-largest -195.7 g at 52.75 ms</pre>
+h = train['header']
+print(len(train['shots']), 'arcs')
+print('noise (m):', h['tracking_noise'])
+print('ball radius (m):', h['ball_radius_m'])
 
-<p>The header says this is the left rear seat crossmember, so it is one point on the car. I will
-use it as the car anyway, since it is the only vehicle channel in the file. There are 7001 samples
-every 0.00005&nbsp;s (20,000 a second). Before impact the car is being towed at a steady speed, and
-the mean there is 0.041&nbsp;m/s&sup2;, which is close enough to zero that I am not removing a
-baseline. The largest value is huge (196&nbsp;<em>g</em>, where one <em>g</em> is
-9.81&nbsp;m/s&sup2;). Next, how fast the belt system itself moves.</p>
+# k = rho C_D A / (2 m), from the notes page State as a vector
+rho = 1.20                  # kg/m^3, air at 20 C
+cd = 0.30                   # low end of the wind-tunnel range
+mass = 0.620                # kg, heaviest ball the rules allow
+area = np.pi * h['ball_radius_m']**2
+k = rho * cd * area / (2 * mass)
+print(f'A = {area:.4f} m^2, k = {k:.4f} per m')</pre>
+<pre class="nb-out">24 arcs
+noise (m): {'vertical_m': 0.0307, 'horizontal_m': 0.0284, 'note': 'measured across the set, not quoted by the vendor; mildly correlated frame to frame'}
+ball radius (m): 0.1195
+A = 0.0449 m^2, k = 0.0130 per m</pre>
 
-<pre class="nb-in">m = 75.0       # kg      (the three values are from Alice)
-k = 296e3       # N/m
-c = 2.8e3       # N*s/m
-wn = np.sqrt(k / m)
-print('natural frequency', round(wn, 1), 'rad/s =', round(wn / (2*np.pi), 2), 'Hz')
-print('damping ratio', round(c / (2 * np.sqrt(k * m)), 3))</pre>
-<pre class="nb-out">natural frequency 62.8 rad/s = 10.0 Hz
-damping ratio 0.297</pre>
+<p>I used the low end of the drag coefficient's range and the heaviest ball the rules allow
+(620&nbsp;g, from the notes). That gives <em>k</em> = 0.0130 per meter, the least drag the
+measurements support, so it is the smallest change to Bob's model. The tracker's noise is about
+3&nbsp;cm both ways, and the note says it is mildly correlated from frame to frame. Next, the free
+flight of each arc, with the same rules as in assignment 5 (the release is where the upward speed
+stops growing, and the flight stops 1&nbsp;m from the hoop).</p>
 
-<p>The occupant on the belt swings at 10&nbsp;Hz, with a period of 100&nbsp;ms. A 10&nbsp;Hz system should not
-respond much to spikes that last a fraction of a millisecond. For that reason I am using the
-record as measured, with no filter, and I will check that at the end.</p>
+<pre class="nb-in">G = 9.81
 
-<p>For the stepping I picked Heun's method. It takes an Euler step as a guess, works out the rates
-at the end of that step, and averages them with the rates at the start. Its error should drop by
-about four each time the step is halved. The state is the travel <code>u</code> and its rate
-<code>w</code>, as in the state-as-a-vector notes. For a first try I took a step of 0.4&nbsp;ms.</p>
+def release(t, z):
+    # walk back from the top while the upward speed keeps growing;
+    # the frame where it stops growing is where the hand let go
+    vz = np.full(len(t), np.nan)
+    vz[2:-2] = (z[4:] - z[:-4]) / (t[4:] - t[:-4])
+    i = int(np.argmax(z))
+    while i &gt; 3 and (vz[i - 1] &gt; vz[i] or vz[i - 2] &gt; vz[i]):
+        i = i - 1
+    return i
 
-<pre class="nb-in">def heun(h, a):
-    # travel u (m) and its rate w (m/s) relative to the car, from rest at the start
-    times = np.arange(t[0], t[-1], h)
-    u = np.zeros(len(times))
-    w = np.zeros(len(times))
-    for n in range(len(times) - 1):
-        a1 = np.interp(times[n], t, a)        # car acceleration now
-        a2 = np.interp(times[n] + h, t, a)    # and one step later
-        du1 = w[n]
-        dw1 = (-c * w[n] - k * u[n]) / m - a1
-        ug = u[n] + h * du1                   # Euler guess at the end of the step
-        wg = w[n] + h * dw1
-        du2 = wg
-        dw2 = (-c * wg - k * ug) / m - a2
-        u[n+1] = u[n] + h / 2 * (du1 + du2)   # average the two rates
-        w[n+1] = w[n] + h / 2 * (dw1 + dw2)
-    return times, u
+def flight(s):
+    # release to the last frame more than 1 m from the hoop (across the floor)
+    t = np.array(s['t'])
+    x = np.array(s['x'])
+    y = np.array(s['y'])
+    z = np.array(s['z'])
+    near = np.hypot(x - s['hoop_x'], y - s['hoop_y']) &lt; 1.0
+    end = int(np.argmax(near))
+    r = release(t, z)
+    return t[r:end], x[r:end], y[r:end], z[r:end]
 
-times, u = heun(0.0004, a_car)
-i = np.argmax(u)
-print('step 0.4 ms:', round(1000 * u[i], 3), 'mm at', round(1000 * times[i], 2), 'ms')</pre>
-<pre class="nb-out">step 0.4 ms: 106.491 mm at 76.4 ms</pre>
+arcs = []
+for s in train['shots']:
+    if s['id'] == 325:      # the filled-in gap found in assignment 5
+        continue
+    arcs.append((s['id'],) + flight(s))
+lengths = []
+for a in arcs:
+    lengths.append(len(a[1]))
+print(len(arcs), 'arcs, frames of flight from', min(lengths), 'to', max(lengths))</pre>
+<pre class="nb-out">23 arcs, frames of flight from 23 to 31</pre>
 
-<p>That is about 106&nbsp;mm. To see whether it has settled I halved the step four times.</p>
+<p>That leaves 23 flights of 23 to 31 frames. Next, a stepper. Euler's method is the simplest, and
+it is first order, so it will need a small step. Before trusting it with drag I check it without
+drag, where the answer is known. With <em>k</em> = 0 the stepped height should be the fitted
+parabola.</p>
 
-<pre class="nb-in">steps = [0.0004, 0.0002, 0.0001, 0.00005, 0.000025]
-travel = []
-for h in steps:
-    times, u = heun(h, a_car)
-    travel.append(1000 * np.max(u))
-    line = f'step {1000 * h:.3f} ms   travel {travel[-1]:.4f} mm'
-    if len(travel) &gt; 1:
-        line = line + f'   change {travel[-1] - travel[-2]:+.4f} mm'
-    print(line)</pre>
-<pre class="nb-out">step 0.400 ms   travel 106.4915 mm
-step 0.200 ms   travel 108.7885 mm   change +2.2970 mm
-step 0.100 ms   travel 110.0244 mm   change +1.2359 mm
-step 0.050 ms   travel 110.0185 mm   change -0.0060 mm
-step 0.025 ms   travel 110.0184 mm   change -0.0000 mm</pre>
+<pre class="nb-in">def rate(s, k):
+    # s = [x, y, z, vx, vy, vz]; drag is k |v| v, against the motion
+    v = s[3:]
+    speed = np.sqrt(np.sum(v**2))
+    return np.concatenate([v, -k*speed*v - np.array([0, 0, G])])
 
-<p>The first two changes are large (2.3&nbsp;mm and 1.2&nbsp;mm), and the second is only about half
-the first where Heun should give a quarter. I think the coarse steps are skipping samples. A step of
-0.4&nbsp;ms uses one sample in eight, and with a record this spiky the answer depends on which
-samples the steps land on. From 0.1&nbsp;ms down the change drops to 0.006&nbsp;mm and then to less
-than 0.0001&nbsp;mm. I am using 0.05&nbsp;ms, the record's own interval, because there every rate
-the method needs (now and one step later) falls on a recorded sample. The plot shows the same
-thing.</p>
+def euler(s, t_from, t_to, k, h):
+    # whole number of equal steps of about h, the last landing on t_to
+    n = max(1, int(np.floor((t_to - t_from)/h + 0.5)))
+    dt = (t_to - t_from) / n
+    for i in range(n):
+        s = s + dt * rate(s, k)
+    return s
+
+def start(t, x, y, z):
+    # lines in x and y, parabola in z with g held, timed from the middle
+    tm = np.mean(t)
+    A = np.column_stack([np.ones_like(t), t - tm])
+    cx = np.linalg.lstsq(A, x, rcond=None)[0]
+    cy = np.linalg.lstsq(A, y, rcond=None)[0]
+    cz = np.linalg.lstsq(A, z + 0.5*G*(t - tm)**2, rcond=None)[0]
+    return tm, np.array([cx[0], cy[0], cz[0], cx[1], cy[1], cz[1]])
+
+# one arc: fit the first half, step to its last frame
+arc_id, t, x, y, z = arcs[0]
+half = len(t) // 2
+tm, s0 = start(t[:half], x[:half], y[:half], z[:half])
+T = t[-1] - tm
+exact = s0[2] + s0[5]*T - 0.5*G*T**2       # the parabola's own height there
+print(f'arc {arc_id}, {T:.2f} s stepped')
+print('   h (s)   no drag: z minus parabola (mm)   drag: change (mm)')
+prev = None
+for step in [0.004, 0.002, 0.001, 0.0005, 0.00025]:
+    z_nodrag = euler(s0, tm, t[-1], 0, step)[2]
+    p = euler(s0, tm, t[-1], k, step)[:3]
+    line = f'{step:8.5f}   {1000*(z_nodrag - exact):30.2f}'
+    if prev is not None:      # how far the drag answer moved when h was halved
+        line = line + f'   {1000*np.sqrt(np.sum((p - prev)**2)):17.2f}'
+    print(line)
+    prev = p</pre>
+<pre class="nb-out">arc 1092, 0.76 s stepped
+   h (s)   no drag: z minus parabola (mm)   drag: change (mm)
+ 0.00400                            14.91
+ 0.00200                             7.46                7.20
+ 0.00100                             3.73                3.60
+ 0.00050                             1.86                1.80
+ 0.00025                             0.93                0.90</pre>
+
+<p>Without drag, Euler's height ends 14.9&nbsp;mm above the parabola at <em>h</em> = 0.004&nbsp;s,
+and the gap halves every time the step halves. That is what a first-order method should do, and it
+errs on the high side, as the notes say Euler does on a curve that bends down. With drag the change
+between halvings also halves (7.20, 3.60, 1.80, 0.90&nbsp;mm). For a first-order method the change
+from <em>h</em> to <em>h</em>/2 is about the error left at <em>h</em>/2, so at
+<em>h</em> = 0.0005&nbsp;s the error is about 1.8&nbsp;mm, under a tenth of the tracker's noise.
+That is the step I used. It takes 80 steps per frame, which is slow but fine for 23 arcs. I only
+checked this on one arc (1092, 0.76&nbsp;s of stepping).</p>
+
+<p>Now every arc. I split each error into height and position across the floor, because the header
+gives the noise for each, and drag might change them differently.</p>
+
+<pre class="nb-in">STEP = 0.0005
+
+def errors(arc, k):
+    # rms height error and rms floor error over the second half (cm)
+    arc_id, t, x, y, z = arc
+    half = len(t) // 2
+    tm, s = start(t[:half], x[:half], y[:half], z[:half])
+    t_now = tm
+    dz = []
+    dxy = []
+    for j in range(half, len(t)):
+        s = euler(s, t_now, t[j], k, STEP)
+        t_now = t[j]
+        dz.append(s[2] - z[j])
+        dxy.append(np.hypot(s[0] - x[j], s[1] - y[j]))
+    dz = np.array(dz)
+    dxy = np.array(dxy)
+    return 100*np.sqrt(np.mean(dz**2)), 100*np.sqrt(np.mean(dxy**2))
+
+e0 = []
+e1 = []
+for a in arcs:
+    e0.append(errors(a, 0))      # (height, floor) with no drag
+    e1.append(errors(a, k))      # and with drag
+e0 = np.array(e0)                # one row per arc: column 0 height, 1 floor
+e1 = np.array(e1)
+for col, name in [(0, 'height'), (1, 'floor ')]:
+    print(f'{name}  median rms: no drag {np.median(e0[:, col]):.1f} cm, '
+          f'drag {np.median(e1[:, col]):.1f} cm, '
+          f'drag closer on {np.sum(e1[:, col] &lt; e0[:, col])} of {len(arcs)}')
+gain = e0[:, 1] - e1[:, 1]
+print(f'floor: median gain {np.median(gain):.1f} cm, '
+      f'gain over the 2.84 cm noise on {np.sum(gain &gt; 2.84)} arcs')
+worst = int(np.argmax(e1[:, 1]))
+print(f'worst floor error with drag: arc {arcs[worst][0]}, '
+      f'{e0[worst, 1]:.1f} cm without drag, {e1[worst, 1]:.1f} cm with')</pre>
+<pre class="nb-out">height  median rms: no drag 4.3 cm, drag 4.5 cm, drag closer on 8 of 23
+floor   median rms: no drag 10.2 cm, drag 4.4 cm, drag closer on 22 of 23
+floor: median gain 5.6 cm, gain over the 2.84 cm noise on 20 arcs
+worst floor error with drag: arc 83, 21.1 cm without drag, 13.7 cm with</pre>
 
 <pre class="nb-in">import matplotlib.pyplot as plt
 
-steps_ms = []
-for h in steps:
-    steps_ms.append(1000 * h)
-plt.semilogx(steps_ms, travel, 'o-')
-plt.xlabel('step (ms)')
-plt.ylabel('largest travel relative to the car (mm)')
-plt.title('Heun, raw crossmember drive: travel against step')
+fig, axes = plt.subplots(1, 2, figsize=(9, 4))
+titles = ['Height', 'Position across the floor']
+noise = [3.07, 2.84]
+for col in range(2):
+    ax = axes[col]
+    ax.plot(e0[:, col], e1[:, col], 'o')
+    ax.plot([0, 25], [0, 25], 'k--', label='equal error')
+    ax.axhline(noise[col], color='gray', linestyle=':', label='tracker noise')
+    ax.set_xlabel('rms error, no drag (cm)')
+    ax.set_ylabel(f'rms error, drag k = {k:.4f} (cm)')
+    ax.set_title(titles[col])
+    ax.legend()
+fig.suptitle('rms error over the second half of each flight, 23 arcs')
 plt.show()</pre>
 
 <figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r08-nb-1.svg?v=20261102083412"
-    alt="Largest occupant travel in millimeters against Heun step in milliseconds on a log scale.
-    The travel rises from about 106.5 mm at 0.4 ms to about 110 mm at 0.1 ms and stays there at
-    0.05 and 0.025 ms."></div>
-  <figcaption>The notebook's plot of travel against step, in matplotlib's default style.</figcaption>
+  <div class="fig-body"><img src="data/example/figures/r08-nb-1.svg?v=20261102180601"
+    alt="Two scatter plots of rms error over the second half of each flight in centimeters, with
+    drag against without drag, one point per arc, each with a dashed equal-error line and a dotted
+    line at the tracker noise. Left, height. The points sit along the equal-error line between about
+    2 and 13 cm. Right, position across the floor. Without drag the points run from about 5 to 21 cm,
+    and with drag almost all of them sit between about 3 and 7 cm, well below the equal-error
+    line."></div>
+  <figcaption>The notebook's plot. Points below the dashed line are arcs where drag did
+  better.</figcaption>
 </figure>
 
-<p>Now the run at 0.05&nbsp;ms, with the curve over the whole record.</p>
+<p>The two halves of the plot tell different stories. <strong>Across the floor, drag helps a
+lot.</strong> The median error falls from 10.2 to 4.4&nbsp;cm, drag is closer on 22 of 23 arcs, and
+the median gain of 5.6&nbsp;cm is about twice the 2.84&nbsp;cm horizontal noise (more than the
+noise on 20 arcs). <strong>In height, drag is slightly worse on most arcs.</strong> Drag is closer on
+only 8 of 23, and the median goes from 4.3 to 4.5&nbsp;cm, a change far smaller than the noise. Without drag the height error is already only
+about 1.2&nbsp;cm above the 3.07&nbsp;cm vertical noise, so there was likely little for drag
+to fix.</p>
 
-<pre class="nb-in">times, u = heun(0.00005, a_car)
-i = np.argmax(u)
-j = np.argmin(u)
-print('travel', round(1000 * u[i], 2), 'mm at', round(1000 * times[i], 2), 'ms')
-print('most negative', round(1000 * u[j], 1), 'mm at', round(1000*times[j], 1), 'ms')
+<p>My answer for Bob is that drag is worth adding for where the ball goes across the floor, where
+it removes about twice the tracker's noise, and that it makes the height slightly worse on these
+flights, by much less than the noise on the median. I have only tried the low end of <em>k</em> and only one starting fit (the first half of
+each flight), so a different choice of either might move these numbers.</p>
 
-plt.plot(1000 * times, 1000 * u)
-plt.plot(1000 * times[i], 1000 * u[i], 'ro')
-plt.axhline(0, color='gray')
-plt.xlabel('time from impact (ms)')
-plt.ylabel('occupant travel relative to the car (mm)')
-plt.title('Occupant travel, Heun at 0.05 ms, raw drive')
-plt.show()</pre>
-<pre class="nb-out">travel 110.02 mm at 73.35 ms
-most negative -42.7 mm at 127.8 ms</pre>
-
-<figure class="figure">
-  <div class="fig-body"><img src="data/example/figures/r08-nb-2.svg?v=20261102083412"
-    alt="Occupant travel relative to the car in millimeters against time from impact, Heun at
-    0.05 ms with the raw drive. It rises to a red-marked maximum of about 110 mm near 73 ms, swings
-    to about minus 43 mm near 128 ms and returns toward zero."></div>
-  <figcaption>The notebook's plot of occupant travel at 0.05&nbsp;ms.</figcaption>
-</figure>
-
-<p>The travel is 110.02&nbsp;mm at 73.35&nbsp;ms. After that the occupant goes back past where they
-started, to &minus;42.7&nbsp;mm at 127.8&nbsp;ms. A real belt cannot push, so that part is the
-model's spring doing something a belt does not do. The seat back would probably be what stops the
-occupant there. It comes after the peak, so it does not change the answer.</p>
-
-<p>Last, the filter check. I copied the CFC filter from assignment 4 and ran the same model with the
-car filtered at CFC&nbsp;180, the class J211 gives to structure that is going to be integrated.</p>
-
-<pre class="nb-in">def cfc(y, dt, cls):       # from assignment 4
-    wd = 2 * np.pi * cls * 2.0775
-    wa = np.tan(wd * dt / 2)
-    d = 1 + np.sqrt(2) * wa + wa**2
-    a0 = wa**2 / d
-    b1 = -2 * (wa**2 - 1) / d
-    b2 = (-1 + np.sqrt(2) * wa - wa**2) / d
-
-    def one_pass(x):
-        out = np.zeros_like(x)
-        for i in range(2, len(x)):
-            out[i] = a0*x[i] + 2*a0*x[i-1] + a0*x[i-2] + b1*out[i-1] + b2*out[i-2]
-        return out
-
-    forward = one_pass(y)
-    backward = one_pass(forward[::-1])
-    return backward[::-1]
-
-a180 = cfc(a_car, car['dt'], 180)
-times, u180 = heun(0.00005, a180)
-print('CFC 180 drive:', round(1000 * np.max(u180), 4), 'mm')
-print('raw drive:', round(1000 * np.max(u), 4), 'mm')
-print('difference', round(1000 * (np.max(u180) - np.max(u)), 4), 'mm')</pre>
-<pre class="nb-out">CFC 180 drive: 110.0186 mm
-raw drive: 110.0185 mm
-difference 0.0001 mm</pre>
-
-<p>The filter moves the answer by 0.0001&nbsp;mm, so leaving the record unfiltered did not matter at
-this step. I think it would matter at the coarse steps, where the spikes were the problem, but I
-have not run that.</p>
-
-<p><strong>Answer.</strong> 110&nbsp;mm, furthest at 73&nbsp;ms, Heun at a step of 0.05&nbsp;ms.
-Halving the step moves it by less than 0.0001&nbsp;mm. <strong>Flags.</strong> The car channel is
-one sensor on the left rear seat crossmember. Its spikes make steps coarser than 0.1&nbsp;ms
-unreliable with the raw record. The model pushes the occupant back to &minus;43&nbsp;mm after the
-peak, which a belt cannot do. <strong>Assumptions.</strong> The crossmember moves like the whole
-car. The occupant starts at rest with the belt snug at &minus;50&nbsp;ms. Alice's three values are
-used as given. The car's acceleration between samples is a straight line. <strong>Left
-out.</strong> The occupant is one rigid mass moving only forward and back, the belt is a linear
-spring with no slack, and there is no airbag or steering wheel.</p>
+<p><strong>Flags.</strong> Arc 325 has a straight-line fill (from assignment 5) and was left out.
+Arc 83 has the largest floor error with drag (13.7&nbsp;cm, down from 21.1) and I have not looked at
+why. The header says the noise is correlated from frame to frame, which I have not allowed for.
+<strong>Assumptions.</strong> Coordinates are in meters (the header gives the rim in meters and the
+coordinates no unit). Gravity is 9.81&nbsp;m/s&sup2;. The drag constant is the same for every shot
+and the ball does not spin. The starting fit holds gravity at 9.81, assumes no drag over the first
+half, and gives the velocity at the middle of the fitted frames. Times are used as recorded. 23 of
+the 24 arcs were used.</p>
 </div>
 
 <div class="aside notice"><span class="label">What to notice</span>
-<p>The notebook shows a first step that turned out to be too coarse, and it keeps that run in
-view. The student notices that the change shrank by half where Heun should give a quarter, and
-offers a reason with a hedge. The choice to leave the record unfiltered is made early, defended,
-and then tested in the last cell. The answer, flags and assumptions are gathered at the end so a
-reader does not have to find them in the middle.</p>
+<p>The notebook checks its stepper on a case with a known answer before it adds drag, and it reads
+the step size off its own table using the order of the method. Splitting the error into height and
+position across the floor shows where the gain from drag comes from, and the conclusion keeps both
+halves. Its limits (one end of <em>k</em>, one starting fit, one arc for the step check) are listed
+at the end, which is probably where Bob, deciding how far to trust it, will look.</p>
 </div>
 
   </main>
 
   
 
-  <script src="js/page.js?v=20261102083412"></script>
+  <script src="js/page.js?v=20261102180601"></script>
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

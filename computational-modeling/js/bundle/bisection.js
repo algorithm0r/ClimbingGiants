@@ -967,28 +967,38 @@ function realNoiseRaw(n, sd = 1) {
   return scaleTo(out, sd);
 }
 
-/* Step bisection one evaluation at a time. The shaded band is the live bracket;
-   its width is the uncertainty, and it halves visibly. */
+/* Two demos. The first steps bisection on the shot's fitted height, a formula
+   that costs well under a microsecond to evaluate, so the bracket can be halved forty times
+   for free and its width compared with the true error. The second steps through
+   the example class's runs on the 7.4 MPa slope in the Slope Stability Lab,
+   where each evaluation is a simulation and the bracket halves once per run. */
 
-const W = 10e3, L = 6.0, EI = 200e9 * 8.5e-5, TARGET = 0.008;
-const F  = x => W * x * (L ** 3 - 2 * L * x * x + x ** 3) / (24 * EI) - TARGET;
-const XS = linspace(0, 3.0, 400);
-const YS = XS.map(F);
+const RIM = 3.048;
 
-/* Compute the reference root to full double precision rather than hard-coding a
-   rounded one: a 6-decimal constant would put a floor of about 4e-7 under the
-   "actual error" readout, and that floor would look like bisection stalling. */
-const TRUE_ROOT = (() => {
-  let a = 0.5, b = 3.0, fa = F(a);
-  for (let k = 0; k < 200 && (b - a) > 1e-16; k++) {
-    const m = 0.5 * (a + b), fm = F(m);
-    if (fa * fm <= 0) b = m; else { a = m; fa = fm; }
+function polyfit(xs, ys, deg) {
+  const n = deg + 1;
+  const A = Array.from({length: n}, (_, i) => {
+    const row = new Float64Array(n + 1);
+    for (let j = 0; j < n; j++) { let q = 0; for (let k = 0; k < xs.length; k++) q += Math.pow(xs[k], i + j); row[j] = q; }
+    let q = 0; for (let k = 0; k < xs.length; k++) q += ys[k] * Math.pow(xs[k], i);
+    row[n] = q; return row;
+  });
+  for (let k = 0; k < n; k++) {
+    let p = k;
+    for (let i = k + 1; i < n; i++) if (Math.abs(A[i][k]) > Math.abs(A[p][k])) p = i;
+    [A[k], A[p]] = [A[p], A[k]];
+    if (Math.abs(A[k][k]) < 1e-300) return null;
+    for (let i = 0; i < n; i++) {
+      if (i === k) continue;
+      const f = A[i][k] / A[k][k];
+      for (let c = k; c <= n; c++) A[i][c] -= f * A[k][c];
+    }
   }
-  return 0.5 * (a + b);
-})();
+  return Array.from({length: n}, (_, i) => A[i][n] / A[i][i]);
+}
 
 /* the whole history, computed once, so stepping is just indexing into it */
-function history(a0, b0, steps) {
+function history(F, a0, b0, steps) {
   const h = [];
   let a = a0, b = b0, fa = F(a), evals = 2;
   h.push({a, b, evals, m: null});
@@ -1000,18 +1010,33 @@ function history(a0, b0, steps) {
   }
   return h;
 }
-const HIST = history(0.5, 3.0, 40);
+
+const DSTAR = 5;   // cm, one illustrative damage threshold; the lab leaves it to the student
 
 mountDemo({
   bisect: {
-    setting: 'Where does a 6&nbsp;m simply supported beam under 10&nbsp;kN/m deflect by 8&nbsp;mm? ' +
-             'Bracket [0.5,&nbsp;3.0]&nbsp;m. The true root is 1.776456&nbsp;m.',
-    source: {kind: 'constructed', text: 'A simply supported steel beam under a uniform load, from the standard deflection formula. <em>EI</em>&nbsp;=&nbsp;1.7&times;10&#8311;&nbsp;N&middot;m&sup2;, about a W310&times;39 section.'},
+    /* the same fit as page 19: arc 79's free-flight frames, time from release */
+    async data() {
+      const d = await (await fetch('data/arcs.json')).json();
+      const a = d.arcs.find(x => x.role === 'clean');
+      const k = a.rel, nf = a.key.nf;
+      const T = [], Z = [];
+      for (let i = k; i < k + nf; i++) { T.push(a.t[i] - a.t[k]); Z.push(a.z[i]); }
+      const [c0, b0, a0] = polyfit(T, Z, 2);
+      const F = t => c0 + b0 * t + a0 * t * t - RIM;
+      /* the falling root in closed form, for the error readout */
+      const C = c0 - RIM, root = (-b0 - Math.sqrt(b0 * b0 - 4 * a0 * C)) / (2 * a0);
+      const XS = linspace(0.3, 1.6, 400);
+      return {F, root, XS, YS: Float64Array.from(XS, F), HIST: history(F, 0.5, 1.5, 40)};
+    },
+    setting: 'When does the shot fall through the rim? <em>f</em>(<em>t</em>)&nbsp;=&nbsp;<em>z</em>(<em>t</em>)&nbsp;&minus;&nbsp;3.048&nbsp;m ' +
+             'on the parabola fitted to the shot, with the bracket [0.5,&nbsp;1.5]&nbsp;s.',
+    source: {kind: 'measured', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz. The height is a least-squares parabola through the 24 free-flight frames of one shot (arc 79), so the root is also available from the quadratic formula and the actual error can be shown.'},
     caption: 'The shaded band is the current bracket and the marker is the midpoint just ' +
-             'evaluated. The band halves at every step, whatever the function does inside it.',
+             'evaluated. The band halves at every step.',
     controls: [{key: 'k', label: 'steps taken', min: 0, max: 40, step: 1, value: 0, dp: 0}],
-    panels: [{label: 'f = δ − 0.008', unit: 'm', height: 250, xAxis: true,
-              xLabel: 'position along the beam', xUnit: 'm', xScale: 1,
+    panels: [{label: 'f = z − 3.048', unit: 'm', height: 250, xAxis: true,
+              xLabel: 'time since release', xUnit: 's', xScale: 1,
               lens: true, lensZoom: 30}],
     readouts: [
       {key: 'step',  label: 'steps'},
@@ -1023,97 +1048,78 @@ mountDemo({
     ],
     compute(s) {
       const k = Math.round(s.k);
-      const h = HIST[k];
+      const h = this.HIST[k];
       const mid = 0.5 * (h.a + h.b);
       const marks = [];
-      if (h.m !== null) marks.push({t: h.m, y: F(h.m), cast: 'x',
+      if (h.m !== null) marks.push({t: h.m, y: this.F(h.m), cast: 'x',
         text: 'midpoint ' + h.m.toFixed(6), dx: 8, dy: -10});
       return {
-        panels: [{x: XS, y: Float64Array.from(YS), range: [0, 3.0],
-          opts: {bands: [{x0: h.a, x1: h.b}],
-                 rings: [{x: TRUE_ROOT, y: 0, text: 'root 1.7765 m'}],
-                 marks}}],
+        panels: [{x: this.XS, y: this.YS, range: [0.3, 1.6],
+          opts: {bands: [{x0: h.a, x1: h.b}], marks}}],
         readouts: {
           step: String(k),
           evals: String(h.evals),
-          brack: '[' + h.a.toFixed(6) + ', ' + h.b.toFixed(6) + ']',
-          width: '±' + ((h.b - h.a) / 2).toExponential(2),
-          est: mid.toFixed(6) + ' m',
-          err: Math.abs(mid - TRUE_ROOT).toExponential(2)
+          brack: '[' + h.a.toFixed(6) + ', ' + h.b.toFixed(6) + '] s',
+          width: '±' + ((h.b - h.a) / 2).toExponential(2) + ' s',
+          est: mid.toFixed(6) + ' s',
+          err: Math.abs(mid - this.root).toExponential(2) + ' s'
         }
       };
     }
   },
 
-  /* Second demo: finding the bracket, which bisection does not do and which the
-     page names as a separate problem. A scan is a sweep, so everything week 2
-     says about resolution applies — including that two roots closer together
-     than the spacing cancel each other's sign change and vanish together. */
-  scan: {
-    setting: 'An overhanging beam under 10&nbsp;kN/m, supports at 0 and 4&nbsp;m. Where is the ' +
-             'bending moment equal to <em>M</em>*? Its maximum is 11.25&nbsp;kN&middot;m at ' +
-             '<em>x</em>&nbsp;=&nbsp;1.5&nbsp;m, so as <em>M</em>* rises the two roots close in on ' +
-             'each other.',
-    source: {kind: 'constructed', text: 'Statics of an overhanging beam under a uniform load. The ' +
-             'roots are available in closed form, so what the scan found can be checked against ' +
-             'what is there.'},
-    caption: 'Amber dots are the points the scan evaluated. A green ring is a real root; a shaded ' +
-             'band is a bracket the scan detected. It opens on a scan that finds nothing while two ' +
-             'roots sit in plain view — and moving the scan-point slider one step in either ' +
-             'direction brings them back.',
-    controls: [
-      {key: 'n',     label: 'scan points', min: 3, max: 60, step: 1, value: 13, dp: 0},
-      {key: 'Mstar', label: 'target M*', min: 2, max: 11.24, step: 'any', value: 11.20,
-       dp: 2, unit: 'kN·m'}
-    ],
-    panels: [{label: 'f = M − M*', unit: 'kN·m', height: 250, xAxis: true,
-              xLabel: 'position along the beam', xUnit: 'm', xScale: 1}],
+  /* Second demo: the example class's 7.4 MPa slope, run by run. No formula
+     exists, so the panel shows only the runs made so far. */
+  trail: {
+    async data() {
+      const d = await (await fetch('data/slope-example-runs.json')).json();
+      const runs = d.runs.filter(r => r.strength_mpa === 7.4).sort((p, q) => p.run_id - q.run_id);
+      return {runs};
+    },
+    setting: 'The largest shaking the 7.4&nbsp;MPa slope survives, with damage taken as ' +
+             'more than 5&nbsp;cm of movement, so <em>f</em>(PGA)&nbsp;=&nbsp;slope moved&nbsp;&minus;&nbsp;5&nbsp;cm. ' +
+             'Each point is one run of the lab, a minute or two of machine time.',
+    source: {kind: 'simulated', text: 'The Slope Stability Lab&rsquo;s public example class, fetched 2026-11-02. Each run is one GPU simulation of the slope shaken by a recorded earthquake scaled to the peak ground acceleration (PGA). The runs are in the order the class made them. The 5&nbsp;cm threshold is one choice, since the lab leaves the definition of damage to you.'},
+    caption: 'Dots are the runs made so far, the line is the 5&nbsp;cm threshold, and the ' +
+             'shaded band is the bracket they leave. The square is the latest run. The first three ' +
+             'runs are a scan, and a repeat at a setting already run lands on the same dot.',
+    controls: [{key: 'n', label: 'runs made', min: 1, max: 17, step: 1, value: 3, dp: 0}],
+    segments: [{key: 'view', label: 'view', value: 'all', options: [
+      {value: 'all', label: '0 to 4.2 g'},
+      {value: 'near', label: '2.86 to 2.96 g'}]}],
+    panels: [{label: 'slope moved', unit: 'cm', height: 250, xAxis: true,
+              xLabel: 'peak ground acceleration', xUnit: 'g', xScale: 1, yLog: true}],
     readouts: [
-      {key: 'sp',    label: 'scan spacing'},
-      {key: 'roots', label: 'roots that exist'},
-      {key: 'sep',   label: 'separation'},
-      {key: 'found', label: 'brackets found'},
-      {key: 'evals', label: 'evaluations spent'},
-      {key: 'verdict', label: ''}
+      {key: 'n',     label: 'runs made'},
+      {key: 'last',  label: 'latest run'},
+      {key: 'brack', label: 'bracket'},
+      {key: 'width', label: 'bracket width'},
+      {key: 'time',  label: 'machine time'}
     ],
     compute(s) {
-      const RA = 15, w = 10, LO = 0, HI = 4;
-      const f = x => RA * x - w * x * x / 2 - s.Mstar;
-      const disc = RA * RA - 4 * (w / 2) * s.Mstar;
-      const roots = disc < 0 ? []
-        : [(RA - Math.sqrt(disc)) / w, (RA + Math.sqrt(disc)) / w].filter(r => r >= LO && r <= HI);
-
-      const n = Math.round(s.n), sp = (HI - LO) / (n - 1);
-      const xs = [], fs = [];
-      for (let i = 0; i < n; i++) { const x = LO + i * sp; xs.push(x); fs.push(f(x)); }
-      /* A root landing exactly on a scan point gives f = 0 there, and a strict
-         sign-change test misses it. Count it as found. */
-      const brackets = [];
-      let onPoint = 0;
-      for (let i = 0; i < n; i++) if (fs[i] === 0) onPoint++;
-      for (let i = 1; i < n; i++)
-        if (fs[i - 1] * fs[i] < 0) brackets.push({x0: xs[i - 1], x1: xs[i]});
-
-      const dense = linspace(LO, HI, 400);
-      const missed = roots.length - brackets.length;
+      const n = Math.round(s.n), made = this.runs.slice(0, n), last = made[n - 1];
+      /* the bracket: the strongest shaking still under the threshold, and the
+         weakest over it, among the runs made so far */
+      const under = made.filter(r => r.slope_moved_cm < DSTAR).map(r => r.pga_g);
+      const over = made.filter(r => r.slope_moved_cm >= DSTAR).map(r => r.pga_g);
+      const lo = under.length ? Math.max(...under) : null;
+      const hi = over.length ? Math.min(...over) : null;
+      const has = lo !== null && hi !== null && hi > lo;
+      const range = s.view === 'near' ? [2.86, 2.96] : [0, 4.2];
+      const repeat = made.slice(0, n - 1).some(r => r.pga_g === last.pga_g);
+      const g = v => +v.toFixed(5);
       return {
-        panels: [{x: dense, y: Float64Array.from(dense, f), range: [LO, HI],
-          opts: {
-            bands: brackets,
-            rings: roots.map(r => ({x: r, y: 0, text: r.toFixed(3) + ' m'})),
-            marks: xs.map((x, i) => ({t: x, y: fs[i]}))
-          }}],
+        panels: [{x: made.map(r => r.pga_g), y: made.map(r => r.slope_moved_cm), range,
+          opts: {dots: true, yRange: [0.1, 1000],
+                 hlines: [{y: DSTAR, text: '5 cm'}],
+                 bands: has ? [{x0: lo, x1: hi}] : [],
+                 marks: [{t: last.pga_g, y: last.slope_moved_cm, square: true}]}}],
         readouts: {
-          sp: sp.toFixed(3) + ' m',
-          roots: String(roots.length),
-          sep: roots.length === 2 ? (roots[1] - roots[0]).toFixed(3) + ' m' : '—',
-          found: String(brackets.length) + (onPoint ? ' (+' + onPoint + ' on a scan point)' : ''),
-          evals: String(n),
-          verdict: roots.length === 0 ? 'no roots to find'
-                 : brackets.length + onPoint >= roots.length ? 'every root accounted for'
-                 : brackets.length + onPoint === 0
-                     ? 'ALL ' + roots.length + ' missed — no sign change anywhere'
-                     : (roots.length - brackets.length - onPoint) + ' of ' + roots.length + ' missed'
+          n: String(n),
+          last: g(last.pga_g) + ' g, ' + +last.slope_moved_cm.toPrecision(3) + ' cm' + (repeat ? ' (a repeat)' : ''),
+          brack: has ? '[' + g(lo) + ', ' + g(hi) + '] g' : 'none yet',
+          width: has ? g(hi - lo) + ' g' : '—',
+          time: n + ' to ' + 2 * n + ' minutes'
         }
       };
     }

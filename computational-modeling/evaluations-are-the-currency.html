@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Evaluation cost — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102083412">
-  <link rel="stylesheet" href="css/demos.css?v=20261102083412">
+  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
+  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -918,14 +918,14 @@
   <p class="exact">Methods are compared by the number of evaluations of $f$ they consume to reach
   a
   <dfn data-g="tolerance">tolerance</dfn>, not by the number of iterations they take. An iteration costs almost nothing beyond its evaluations. An evaluation costs
-  whatever computing $f$ costs, and the methods in this week differ in how many evaluations each
-  iteration needs.</p>
-  <p class="plain">  Count evaluations, since they are where the time goes, and treat iterations as bookkeeping.</p>
+  whatever computing $f$ costs, which is nanoseconds for a fitted formula and minutes for a
+  simulation, and the methods in this week differ in how many evaluations each iteration needs.</p>
+  <p class="plain">  Count evaluations, since they are where the time goes, and find out what one evaluation costs before choosing a method.</p>
 </div>
 
-<h2 id="why-iteration-counts-mislead">Iteration Counts</h2>
+<h2 id="why-iteration-counts-mislead">Evaluations per Iteration</h2>
 
-<p>Many textbooks tabulate iteration counts, and they are the wrong unit as soon as methods need
+<p>Many textbooks tabulate iteration counts, and they mislead as soon as methods need
 different numbers of evaluations per iteration. In this week alone:</p>
 
 <table class="data">
@@ -936,72 +936,118 @@ different numbers of evaluations per iteration. In this week alone:</p>
 </table>
 
 <p>Newton in five iterations and the secant method in five iterations are not the same amount of
-work. Comparing them by iteration counts flatters Newton by a factor of two, and that factor is
-roughly the size of the difference being argued about, so the choice of unit can decide which method wins.</p>
+work. Counting iterations favors Newton by a factor of two, which is about the size of the gap between
+the methods.</p>
 
-<h2 id="the-comparison-in-evaluations">The Comparison in Evaluations</h2>
+<h2 id="the-shot-in-evaluations">The Shot, in Evaluations</h2>
 
-<p>The beam-deflection root from the previous pages, from a starting point of 1.20 m and a bracket
-of [0.5, 3.0]:</p>
+<p>The shot's falling crossing of the rim is the root of $f(t) = z(t) - 3.048$ m, where $z(t)$ is
+the parabola fitted to the 24 free-flight frames of arc 79 and $t$ is the time since release. Its
+root is 1.04366 s. Bisection starts from the bracket [0.5, 1.5] s, Newton from the last frame
+fitted, 0.92 s, and the secant method from the last two, 0.88 and 0.92 s. An estimate's cost is
+the number of evaluations used to compute it:</p>
 
 <table class="data">
-  <tr><th>Method</th><th class="num">evaluations</th><th class="num">error reached</th>
+  <tr><th>Method</th><th class="num">evaluations</th><th class="num">error reached (s)</th>
       <th class="num">measured order</th></tr>
-  <tr><td>bisection</td><td class="num">42</td><td class="num">1.0×10⁻¹²</td><td class="num">1 (factor 2)</td></tr>
-  <tr><td>Newton</td><td class="num">8</td><td class="num">5.7×10⁻¹³</td><td class="num">2.00</td></tr>
-  <tr><td>secant</td><td class="num">7</td><td class="num">2.6×10⁻¹³</td><td class="num">1.63</td></tr>
+  <tr><td>bisection</td><td class="num">42</td><td class="num">bracket 9.1×10⁻¹³ wide</td><td class="num">1 (factor 2)</td></tr>
+  <tr><td>Newton</td><td class="num">8</td><td class="num">3.3×10⁻¹⁵</td><td class="num">2.00</td></tr>
+  <tr><td>secant</td><td class="num">7</td><td class="num">below 10⁻¹⁵</td><td class="num">1.6</td></tr>
 </table>
 
-<p>The secant method reaches a comparable answer in fewer evaluations than Newton, despite
-converging more slowly per iteration. Its measured order of 1.63 is close to the golden ratio, 1.618, and the
-arithmetic that makes it competitive is that $1.618$ per evaluation beats $2$ per two
-evaluations, since $1.618 > \sqrt{2}$. The measured orders in that table are computed from
-successive errors and not quoted from theory, and they are what the demo on the previous page
-reports as you step it.</p>
+<p>Each row is the first count that gets within 10⁻¹² s. Bisection is held to its own guarantee,
+a bracket narrower than 10⁻¹² s, which takes 40 midpoints after the 2 evaluations at the ends.
+Newton and the secant method keep no bracket, so they are held to their actual error, which the
+quadratic formula gives. Newton takes four steps and the secant
+method six, so counted in steps Newton finishes first. Counted in evaluations the secant method
+finishes first, because each Newton step costs two. Its measured order of about 1.6 is close to the
+golden ratio, 1.618, and the arithmetic that makes it competitive is that $1.618$ per evaluation
+beats $2$ per two evaluations, since $1.618 > \sqrt{2}$. The measured orders are computed from
+the successive errors of each run.</p>
 
-<h2 id="an-expensive-derivative">An Expensive Derivative</h2>
+<p>On the shot the difference in time is a few microseconds. One evaluation of the fitted parabola
+is three multiplications and three additions, which Python does in about 64 nanoseconds. Bisection's
+42 evaluations take about 2.7 microseconds, and the secant method's 7 take about 0.45.</p>
+
+<cg-demo case="budget"></cg-demo>
+
+<h2 id="analytic-numerical-and-missing-derivatives">Analytic, Numerical and Missing Derivatives</h2>
 
 <details class="ans"><summary><span>Optional, open to read</span></summary><div class="body">
-<p>The table above assumes $f'$ costs about what $f$ costs. It may cost less, it may cost more, or it may not be available:</p>
+<p>The comparison above assumes $f'$ costs about what $f$ costs. It may cost less, it may cost more, or it may not be available:</p>
 
 <ul class="plain">
-  <li><strong>An analytic derivative</strong> can be cheaper than $f$, much cheaper if it shares subexpressions. Newton looks better than the table suggests.</li>
+  <li><strong>An analytic derivative</strong> costs about what $f$ costs, and much less if it shares subexpressions with $f$. On the shot, differentiating the fitted parabola $z(t) = c_0 + c_1 t + c_2 t^2$ gives $f'(t) = c_1 + 2 c_2 t$, one more line.</li>
   <li><strong>A numerical derivative</strong> costs one or two more evaluations of $f$, so Newton becomes a 2- or 3-evaluation step that converges at close to order 2. That is
   worse per evaluation than the secant method, which gets a derivative estimate for free from
   values it already has.</li>
   <li><strong>No derivative at all</strong>, where $f$ is a black box, a simulation or an experiment.
-  Then
-  Newton is unavailable and the choice is between bracketing and the secant method.</li>
+  The slope below is one. Newton is unavailable and the choice is between bracketing and the
+  secant method.</li>
 </ul>
-
-<p>The last case is the one where the currency argument bites hardest, because that is where an
-evaluation costs minutes or money and not microseconds.</p>
 </div></details>
 
-<h2 id="genuinely-expensive-f">Expensive Functions</h2>
+<h2 id="genuinely-expensive-f">The Slope, in Runs</h2>
 
-<p>Everything above treats evaluations as merely countable. When each one is a finite-element run,
-a CFD solve, or a physical test, the count shapes the design of the analysis:</p>
+<p>The Slope Stability Lab asks for the largest earthquake shaking a simulated rock slope survives
+without damage. With PGA the peak ground acceleration (in g) and $d^*$ the movement you count as
+damage, the condition is a root of</p>
+
+$$f(\text{PGA}) = \text{slope moved}(\text{PGA}) - d^*.$$
+
+<p>No formula for the slope's movement exists, and neither does a derivative. The only way to
+evaluate $f$ is to run the simulation, and each run is a minute or two of GPU time. In that time
+Python could evaluate the shot's parabola about one to two billion times. The lab's rules and the way it runs set the
+rest of the cost:</p>
+
+<ul class="plain">
+  <li><strong>40 runs each.</strong> Each student has a budget of 40 runs.</li>
+  <li><strong>Fetching is free.</strong> Fetching a run anyone in the class has already made costs nothing.</li>
+  <li><strong>Each new run costs one.</strong> A new run costs one from the budget, including a repeat of a setting already run (it joins the earlier runs at that setting).</li>
+  <li><strong>One simulation at a time.</strong> The lab runs one simulation at a time, so a run waits behind every run ahead of it.</li>
+</ul>
+
+<p>The example class searched its 7.4 MPa slope this way. With $d^*$ = 5 cm (one
+choice, since the lab leaves the definition of damage to you), its first three runs at 0.6, 2.0
+and 4.0 g left the bracket [2.0, 4.0] g. Ten more halvings brought it to [2.88867, 2.89062] g,
+0.00195 g wide. Four other runs, made along the way, repeated a setting and left the bracket where
+it was. That is 17 runs in all, or 17 to 34 minutes of machine time.</p>
+
+<p>The ten halvings shrank the bracket by $2^{10} = 1024$, which is three digits of PGA, so each
+digit took about 3.3 halvings (between 3 and 7 minutes of machine time). Counting the four repeats,
+the 14 runs after the first bracket bought three digits, or about 4.7 runs a digit. The slider below steps
+through the 17 runs.</p>
+
+<cg-demo case="cost"></cg-demo>
+
+<p>The lab's limit on PGA comes before the budget runs out. The lab accepts a PGA to six significant figures, so
+near 2.9 g the finest step is 0.00001 g. From a 2 g bracket that is a factor of $2 \times 10^5$,
+which takes $\log_2(2 \times 10^5) = 17.6$, so 18 halvings. Three runs to find the bracket and 18
+to shrink it is 21 runs, out of 40.</p>
+
+<p>The queue changes how a scan compares with bisection. A scan's points do not depend on each
+other, so on a machine that ran them side by side a scan would finish in the time of one run.
+The lab runs one at a time, so eight scan points take as much machine time as eight halvings.
+Eight halvings shrink a bracket by 256. Eight evenly spaced scan points inside the same bracket
+shrink it by 9, and in exchange they show every sign change at that spacing, which bisection
+never sees.</p>
+
+<p>When each evaluation is a run like this one, the count shapes the design of the analysis:</p>
 
 <ol class="plain">
-  <li><strong>Budget first.</strong> Decide how many evaluations are available before choosing a
+  <li><strong>Count the runs.</strong> Decide how many evaluations are available before choosing a
   method, and choose one that can produce something useful within that number.</li>
-  <li><strong>Coarse then fine.</strong> A cheap scan to locate the region, then an expensive
-  method
-  inside it. Twenty coarse evaluations plus five refined ones usually beats twenty-five spent
-  uniformly.</li>
-  <li><strong>Reuse.</strong> Every evaluation is a data point. A method that discards the values
-  it
-  computed, as bisection does with all but the sign, is wasting information it paid for. The
-  secant method's advantage is that it reuses the previous value.</li>
-  <li><strong>Report the count.</strong> An answer costing 6 evaluations and an answer costing 600
-  are different results, and the second may not be repeatable within the project.</li>
+  <li><strong>Scan, then refine.</strong> Scan a few points to find the region, then refine
+  inside it with bisection or the secant method.</li>
+  <li><strong>Keep every value.</strong> Every evaluation is a data point. Fetch the runs that
+  already exist before making new ones. Bisection keeps only the sign of each value, so it uses
+  less of what each run cost. The secant method reuses the previous value.</li>
+  <li><strong>Report the run count.</strong> An answer costing 6 runs and an answer costing 40 are
+  different results, and the second may not be repeatable within the budget.</li>
 </ol>
 
-<cg-demo case="budget"></cg-demo>
-
 <div class="aside">
-  <span class="label">Bisection and the function values</span>
+  <span class="label">Bisection Uses Only the Sign</span>
   <p>Bisection evaluates $f$ at the midpoint and uses one bit of the answer, which is the sign. The
 magnitude, which would say whether the root is near this end of the bracket or the far one, is discarded. Methods that use it, the secant method among them, typically converge faster for that reason. It is also why bisection's rate is independent
 of the function, since a method that ignores the values cannot be helped or hindered by them.</p>
@@ -1016,24 +1062,23 @@ of the function, since a method that ignores the values cannot be helped or hind
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>The secant method, by two.</strong> Newton needs <em>f</em> and <em>f</em>&prime; at
 every step, so 5 &times; 2 = <strong>10 evaluations</strong>, while the secant method reuses the
 previous point and needs one new value of <em>f</em> per step, plus one to start, so 7 + 1 =
-<strong>8</strong>. So the method that took <em>more iterations</em> did <em>less work</em>.
-Counting iterations would have reported Newton the winner by two, while counting evaluations, which tracks the time spent, reverses the ranking.</p>
+<strong>8</strong>. The method with more iterations used fewer evaluations. Counting iterations
+would have reported Newton the winner by two, while counting evaluations, which tracks the time spent, reverses the ranking.</p>
      <p>If <em>f</em>&prime; comes free, from an analytic derivative
 evaluated in the same pass or an adjoint that costs a fraction of the forward solve, then
-Newton's 5 steps cost about 5 and it wins. That is why the useful question is what an evaluation costs <em>here</em>, and not which method is faster in general.</p></div></details></li>
-    <li>Each evaluation of your <em>f</em> is a 20-minute simulation and you have one working day.
-    State your <dfn data-g="evaluation-budget">evaluation budget</dfn> and pick a strategy.
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>24 evaluations.</strong> Eight hours is 480 minutes, at 20 minutes each. If the runs
-must be serial, spend them as <strong>a coarse scan then bisection</strong>, with about 8 points
-across the plausible range to confirm a sign change and isolate it, leaving 16 halvings, which
-reduces the surviving bracket by a factor of 65&thinsp;536. A scan may look like overhead, though it shows whether the range holds one sign change, none or several, and with 24 evaluations you cannot
-afford to discover that late. Avoid Newton unless the derivative is free. At two evaluations a
-step it buys 12 steps, and it can spend all of them leaving the region.</p>
-     <p><strong>If the runs can go in parallel, the answer changes.</strong> Bisection is
-strictly serial, each step needs the previous result, so 24 serial runs is 8 hours. A 24-point
-scan is 24 independent runs and finishes in 20 minutes on 24 cores. With a wall-clock budget in
-place of an evaluation budget, the method with the worse convergence rate can be an order of
-magnitude faster.</p></div></details></li>
+Newton's 5 steps cost about 5 and it wins. For this reason it is a good idea to find out what an
+evaluation costs on your problem before choosing a method.</p></div></details></li>
+    <li>A slope's bracket is [1.5, 2.5] g after your first runs, and each run takes a minute or two.
+    How many more runs does bisection need to reach a bracket 0.01 g wide, and how much machine time
+    is that? If the first runs cost 3, how much of your 40-run
+    <dfn data-g="evaluation-budget">evaluation budget</dfn> is left?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>7 runs, 7 to 14 minutes.</strong> The bracket has to shrink by
+1 / 0.01 = 100, and $\log_2 100 = 6.6$, so 7 halvings (6 would leave it 0.016 g wide). With 3 runs
+already spent, 10 of the 40 are used and <strong>30 remain</strong>.</p>
+     <p>The queue adds to the machine time. The lab runs one simulation at a time, and each
+halving needs the result of the one before it, so each of the 7 runs waits behind whatever is
+ahead of it in the queue. In a busy week that wait can be longer than the runs themselves. It is a
+good idea to plan the runs early for this reason.</p></div></details></li>
     <li>Why is bisection's convergence rate independent of the function, when Newton's is not?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Because bisection reads only <strong>the sign</strong> of <em>f</em>, and Newton reads its
 <strong>value and slope</strong>.</p>
@@ -1075,11 +1120,11 @@ bisection, secant and Newton on any signal, counting evaluations.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/evaluations-are-the-currency.js?v=20261102083412"></script>
+  <script type="module" src="js/bundle/evaluations-are-the-currency.js?v=20261102180601"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

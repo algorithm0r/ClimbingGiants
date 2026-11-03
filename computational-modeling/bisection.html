@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bisection — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102083412">
-  <link rel="stylesheet" href="css/demos.css?v=20261102083412">
+  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
+  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -910,7 +910,8 @@
 
   <main data-pagefind-body class="wide">
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
-    <div class="eyebrow">Week 7 · Root Finding and Search</div>
+    <style>.source.simulated .tag{background:#6b5a7a}.source.simulated{border-left-color:#9a8aa8}</style>
+<div class="eyebrow">Week 7 · Root Finding and Search</div>
 <h1>Bisection</h1>
 
 <div class="claim">
@@ -942,6 +943,20 @@ this week:</p>
   interval halves every step. This is bisection's guarantee, though it also means bisection is never faster.</li>
 </ul>
 
+<p>The shot from <a href="conditions-become-roots.html" title="Conditions as roots">page 19</a>
+gives a function to try this on. A least-squares parabola through the 24 free-flight frames of
+arc 79 gives the height</p>
+
+$$z(t) = 3.45195 + 4.74284\,t - 4.91528\,t^2\ \text{m},$$
+
+<p>with $t$ in seconds from release, and the ball falls through the rim at a root of
+$f(t) = z(t) - 3.048$. The fitted apex is at 0.48 s, so the falling crossing comes after it.
+$f(0.5) = +1.547$ m and $f(1.5) = -3.541$ m, so $[0.5, 1.5]$ s is a bracket around the falling
+crossing (and only that one, since the formula's other root is at $-0.08$ s). Each evaluation of $f$
+is a few multiplications and takes well under a microsecond, so we can evaluate it as often as we like. The
+bracket bounds the root of the fitted formula. How far the formula is from the ball is a
+separate question, which the fit's own error answers.</p>
+
 <h2 id="evaluations-per-digit">Evaluations per Digit</h2>
 
 <p>Halving per evaluation means one bit of precision per evaluation. To reduce an initial bracket
@@ -949,64 +964,107 @@ of width $W$ to a tolerance $\tau$:</p>
 
 $$k \;=\; \left\lceil \log_2 \frac{W}{\tau} \right\rceil$$
 
-<p>The number is small and it is fixed in advance, which is unusual and useful:</p>
+<p>The number depends only on $W$ and $\tau$, so it is known before the first evaluation:</p>
 
 <table class="data">
-  <tr><th class="num">bracket width</th><th class="num">tolerance</th><th class="num">evaluations</th></tr>
+  <tr><th class="num">bracket width</th><th class="num">tolerance</th><th class="num">halvings</th></tr>
   <tr><td class="num">1</td><td class="num">10⁻³</td><td class="num">10</td></tr>
   <tr><td class="num">1</td><td class="num">10⁻⁶</td><td class="num">20</td></tr>
   <tr><td class="num">1</td><td class="num">10⁻¹²</td><td class="num">40</td></tr>
   <tr><td class="num">1000</td><td class="num">10⁻⁶</td><td class="num">30</td></tr>
 </table>
 
-<p>Each additional decimal place costs about 3.3 more evaluations, whatever the function, and twelve digits from a bracket of width 1 costs 40. That is a lot compared with
+<p>Each additional decimal place costs about 3.3 more evaluations, whatever the function, and twelve digits from a bracket of width 1 costs 40 halvings, or 42 evaluations counting the two ends. That is a lot compared with
 Newton's four or five, though far fewer than a method that does not converge.</p>
+
+<p>On the shot, $W = 1$ s. The ball moves sideways at 6.2 m/s, so a tolerance of $10^{-4}$ s
+places the crossing to within 0.6 mm of horizontal travel. That takes
+$\lceil \log_2 10^4 \rceil = 14$ halvings, or 16 evaluations counting the two ends, at
+well under a microsecond each.</p>
 
 <cg-demo case="bisect"></cg-demo>
 
+<h2 id="a-bisection-trail-on-a-slope">A Bisection Trail on a Slope</h2>
+
+<p>The <a href="extra-labor-slope.html">Slope Stability Lab</a> asks for the largest shaking a
+rock slope survives without damage. One evaluation is one run of the lab, a GPU simulation of
+the slope shaken by a recorded earthquake scaled to a peak ground acceleration (PGA), and each run
+takes a minute or two of machine time. There is no formula for how far the slope moves, and no
+derivative. The only way to learn $f$ at a PGA is to run it. With a damage threshold $d^*$ the
+root problem is</p>
+
+$$f(\text{PGA}) = \text{slope moved}(\text{PGA}) - d^*.$$
+
+<p>The lab leaves the definition of damage to you, so this page uses $d^* = 5$ cm as one
+illustrative choice (the lab's own catalog suggests 5 or 15 cm). On this slope the choice
+matters less than it might, because every run moved at most 0.37 cm or at least 31 cm.
+Any $d^*$ between those gives the same signs and the same trail.</p>
+
+<p>The example class's runs on the 7.4 MPa slope, in the order they were made, are a bisection
+trail. The first three, at 0.6, 2.0 and 4.0 g, are a scan. The slope moved 0.36, 0.37 and 155.8
+cm, so $[2.0, 4.0]$ g is a bracket. Every new setting after that is the midpoint of the bracket
+before it:</p>
+
+<table class="data">
+  <tr><th class="num">PGA (g)</th><th class="num">slope moved (cm)</th><th class="num">sign of f</th><th class="num">bracket after (g)</th><th class="num">width (g)</th></tr>
+  <tr><td class="num">3.0</td><td class="num">31.1</td><td class="num">+</td><td class="num">[2.0, 3.0]</td><td class="num">1</td></tr>
+  <tr><td class="num">2.5</td><td class="num">0.32</td><td class="num">&minus;</td><td class="num">[2.5, 3.0]</td><td class="num">0.5</td></tr>
+  <tr><td class="num">2.75</td><td class="num">0.29</td><td class="num">&minus;</td><td class="num">[2.75, 3.0]</td><td class="num">0.25</td></tr>
+  <tr><td class="num">2.875</td><td class="num">0.32</td><td class="num">&minus;</td><td class="num">[2.875, 3.0]</td><td class="num">0.125</td></tr>
+  <tr><td class="num">2.9375</td><td class="num">48.8</td><td class="num">+</td><td class="num">[2.875, 2.9375]</td><td class="num">0.0625</td></tr>
+  <tr><td class="num">2.90625</td><td class="num">147.3</td><td class="num">+</td><td class="num">[2.875, 2.90625]</td><td class="num">0.0313</td></tr>
+  <tr><td class="num">2.89062</td><td class="num">36.9</td><td class="num">+</td><td class="num">[2.875, 2.89062]</td><td class="num">0.0156</td></tr>
+  <tr><td class="num">2.88281</td><td class="num">0.23</td><td class="num">&minus;</td><td class="num">[2.88281, 2.89062]</td><td class="num">0.0078</td></tr>
+  <tr><td class="num">2.88672</td><td class="num">0.23</td><td class="num">&minus;</td><td class="num">[2.88672, 2.89062]</td><td class="num">0.0039</td></tr>
+  <tr><td class="num">2.88867</td><td class="num">0.26</td><td class="num">&minus;</td><td class="num">[2.88867, 2.89062]</td><td class="num">0.0020</td></tr>
+</table>
+
+<p>Ten runs halved the bracket ten times, from 2 g to 0.002 g. The class also repeated four
+settings (2.875, 2.89062, 2.88281 and 2.88867 g), and each repeat moved exactly as far as the
+first run there. The trail took 17 runs, which were 3 for the scan, 10 midpoints and 4 repeats.
+How far the slope moved is not monotone in PGA (2.90625 g moved 147.3 cm and 2.9375 g moved 48.8
+cm), though every run above the root moved far more than 5 cm, so the signs still trap one root.
+<a href="root-finding-fails.html" title="Root-finding failures">Page 22</a> looks at a slope where
+they do not.</p>
+
+<p>A run takes a minute or two whatever the slope does, so the number of runs sets the cost, and
+that number depends only on the starting and wanted widths. From the bracket $[2.0, 4.0]$ g:</p>
+
+<table class="data">
+  <tr><th class="num">bracket width wanted</th><th class="num">midpoint runs</th><th class="num">machine time</th></tr>
+  <tr><td class="num">0.1 g</td><td class="num">5</td><td class="num">5 to 10 minutes</td></tr>
+  <tr><td class="num">0.01 g</td><td class="num">8</td><td class="num">8 to 16 minutes</td></tr>
+  <tr><td class="num">0.001 g</td><td class="num">11</td><td class="num">11 to 22 minutes</td></tr>
+</table>
+
+<p>Each decimal digit of the PGA costs about 3.3 runs, which is 3 to 7 minutes of machine time.
+Each student has a budget of 40 runs. On the shot a digit costs about 3.3 evaluations, each well under
+a microsecond.
+<a href="evaluations-are-the-currency.html" title="Evaluation cost">Page 23</a> compares
+spending those runs on bisection with spending them on a scan.</p>
+
+<cg-demo case="trail"></cg-demo>
+
 <h2 id="finding-a-bracket">Finding a Bracket</h2>
 
-<p>Bisection cannot start without one, and finding one is usually a separate problem that the
+<p>Bisection cannot start without a bracket, and finding one is usually a separate problem that the
 method does not solve. Three approaches:</p>
 
 <ol class="plain">
-  <li><strong>Plot $f$.</strong> Cheap, usually reliable, and it also shows roughly how many roots there are. The
-  previous page's argument.</li>
+  <li><strong>Plot $f$.</strong> Cheap when $f$ is a formula, and it also shows roughly how many
+  roots there are. <a href="conditions-become-roots.html" title="Conditions as roots">Page 19</a> makes this argument.</li>
   <li><strong>Scan.</strong> Evaluate on a grid and look for adjacent points of opposite sign.
-  This
-  is a sweep, and everything week 2 says applies.</li>
-  <li><strong>Physics.</strong> Sometimes the bracket is known. A crossing must lie between
-  release
-  and landing. A contraflexure between the supports.</li>
+  This is a sweep, and everything week 2 says applies. The slope class's first three runs were a
+  scan, and each of its points cost a run.</li>
+  <li><strong>Physics.</strong> Sometimes the bracket is known. The falling crossing lies after
+  the apex at 0.48 s and before the fitted ball reaches the floor at 1.45 s. Rounding those to 0.5
+  and 1.5 s keeps the signs, so $[0.5, 1.5]$ is still a bracket.</li>
 </ol>
 
-<cg-demo case="scan"></cg-demo>
-
-<p>The scan costs one evaluation per point and finds every root it can see. The demo opens on a
-case where it sees nothing, with thirteen points across a 4 m beam, a target of 11.20 kN·m, and
-two ordinary roots at 1.400 m and 1.600 m that the scan does not report. Both
-roots lie inside the single interval from 1.333 to 1.667 m. $f$ is negative at both of its ends,
-so there is no sign change to find, and the scan returns what it would return for a beam that never reaches 11.20 kN·m anywhere. This is
-the even-number-of-roots property from the aside below. One root inside an interval flips the sign
-and is found, while two flip it twice and leave no sign change.</p>
-
-<p><strong>Now walk the scan-point slider up from nine.</strong> The outcome alternates:</p>
-
-<table class="data">
-  <tr><th class="num">scan points</th><th class="num">spacing</th><th>Roots Found</th></tr>
-  <tr><td class="num">9</td><td class="num">0.500 m</td><td>both</td></tr>
-  <tr><td class="num">11</td><td class="num">0.400 m</td><td>one, and only because it lands on a scan point</td></tr>
-  <tr><td class="num">12</td><td class="num">0.364 m</td><td>both</td></tr>
-  <tr><td class="num">13</td><td class="num">0.333 m</td><td><strong>neither</strong></td></tr>
-  <tr><td class="num">14</td><td class="num">0.308 m</td><td>both</td></tr>
-</table>
-
-<p>The spacing falls monotonically down that table and the outcome does not. What decides it is whether a grid point happens to fall
-<em>between</em> the two roots. The nine-point scan is the coarsest in the table and succeeds,
-because its grid includes 1.5 m, which sits between them, and the thirteen-point scan is finer
-and fails because its grid does not. So refining a scan does not monotonically improve its
-chance of finding a pair. A finer scan may miss what a coarser one caught, and no single scan
-can tell you which case you are in. The defense is the one week 2 gives, which is to refine and compare, and to read "nothing found" as a statement about the scan and not about the beam.</p>
+<p>A scan finds a root only when the sign changes between two of its points. Two roots between
+the same pair of points flip the sign twice and leave no sign change, so the scan reports
+nothing, as it would for a function with no root there at all. A scan that finds nothing has
+shown only that no two neighboring points differ in sign.</p>
 
 <div class="aside">
   <span class="label">An odd number of roots</span>
@@ -1043,7 +1101,7 @@ number of roots, and that includes two. The whole-flight bracket on <a href="roo
             fa = fm
 
     return 0.5 * (a + b), (b - a) / 2, evals</pre>
-  <pre data-lang="matlab" hidden data-notes="5|Stop with an error, since without a sign change there is no bracket to halve.;9|This version has no cap on evaluations, so a tol below what floating point can resolve would never be reached. The Python and JavaScript tabs stop after max_evals.;11|One evaluation per step.;13|Keep the half that still brackets." data-notes="1|MATLAB has no default values in a function line, so a call gives tol and max_evals, for instance 1e-10 and 200. Both are choices: how narrow the bracket has to get, and how many evaluations to spend at most.;9|Halve until the bracket is narrower than tol, or max_evals evaluations have been spent, whichever comes first.">function [x, halfwidth, evals] = bisect(f, a, b, tol, max_evals)
+  <pre data-lang="matlab" hidden data-notes="1|MATLAB has no default values in a function line, so a call gives tol and max_evals, for instance 1e-10 and 200. Both are choices: how narrow the bracket has to get, and how many evaluations to spend at most.;5|Stop with an error, since without a sign change there is no bracket to halve.;9|Halve until the bracket is narrower than tol, or max_evals evaluations have been spent, whichever comes first.;11|One evaluation per step.;13|Keep the half that still brackets.">function [x, halfwidth, evals] = bisect(f, a, b, tol, max_evals)
     fa = f(a);
     fb = f(b);
     if fa*fb &gt; 0
@@ -1091,22 +1149,22 @@ end</pre>
   <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
 </div>
 
+<p>On the shot, <code>bisect(f, 0.5, 1.5, 1e-4)</code> returns 1.04367 s, &plusmn;3.1&times;10<sup>&minus;5</sup>&nbsp;s,
+in 16 evaluations. The quadratic formula puts the root of the fitted parabola at 1.04366 s.</p>
+
 <div class="check">
   <span class="label">Check</span>
   <ol>
-    <li>A bracket of width 4 m must be reduced to 0.1 mm. How many evaluations, and how would that
-    change if the function were ten times more expensive?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>16 halvings</strong>, plus the two endpoint evaluations that establish the bracket, so
-about <strong>18 evaluations</strong>. Each step halves the interval, so you need
-4&thinsp;/&thinsp;2<sup><em>n</em></sup> &le; 10<sup>&minus;4</sup>&nbsp;m, giving
-2<sup><em>n</em></sup> &ge; 40&thinsp;000 and <em>n</em> &ge; log&#8322;40&thinsp;000 = 15.3, so
-16.</p>
-     <p>If the function were ten times more expensive, the count would be <strong>the same</strong>. Bisection consults only the <em>sign</em> of <em>f</em>, so its step count is set
-by the ratio of the starting width to the required width and by nothing else. The shape of the
-function and its cost are both irrelevant. The wall-clock time goes up tenfold and the number of
-evaluations does not move. That predictability is what you are buying, since you can promise the
-answer to 0.1&nbsp;mm in 18 evaluations before knowing anything about <em>f</em> beyond a
-bracket.</p></div></details></li>
+    <li>The slope class's bracket was $[2.0, 4.0]$ g. How many midpoint runs does it take to reach a
+    bracket 0.001 g wide, and how would that change if each run took ten times longer?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>11 runs.</strong> Each run halves the bracket, so you need
+2&thinsp;/&thinsp;2<sup><em>n</em></sup> &le; 0.001&nbsp;g, giving 2<sup><em>n</em></sup> &ge; 2000 and
+<em>n</em> &ge; log&#8322;2000 = 10.97, so 11. The two ends were already run as part of the scan,
+so they add nothing. At a minute or two a run that is 11 to 22 minutes of machine time.</p>
+     <p>If each run took ten times longer, the count would be <strong>the same</strong>. Bisection consults only the <em>sign</em> of <em>f</em>, so its step count is set
+by the ratio of the starting width to the required width and by nothing else. The machine time
+goes up tenfold and the number of runs does not move. That predictability is what you are
+buying, since you can say the answer will take 11 runs before making the first one.</p></div></details></li>
     <li>Bisection returns after 30 steps on a bracket of width 1. State the uncertainty in the
     answer, exactly.
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>2<sup>&minus;30</sup>, which is 9.31&nbsp;&times;&nbsp;10<sup>&minus;10</sup>.</strong>
@@ -1151,11 +1209,11 @@ bisection, secant and Newton on any signal, counting evaluations.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/bisection.js?v=20261102083412"></script>
+  <script type="module" src="js/bundle/bisection.js?v=20261102180601"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

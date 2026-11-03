@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Assignment 6 · The Head Injury Criterion — Computational Physical Modeling</title>
+  <title>Assignment 6 · The Rim Crossing — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102083412">
-  <link rel="stylesheet" href="css/demos.css?v=20261102083412">
+  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
+  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -910,12 +910,57 @@
 
   <main data-pagefind-body>
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
-    <h1>Assignment 6 · The Head Injury Criterion</h1>
+    <h1>Assignment 6 · The Rim Crossing</h1>
 <p>Submit your report as a PDF to the Canvas assignment by midnight on the due date, together with
 the program that produced it. <strong>Write your four-word data phrase at the top of the first page.</strong>
 Remember to cite all sources other than the text, course material, or your own notes.</p>
 <hr>
 <h2 id="problem">Problem</h2>
+<p>Bob, now that the flight model works:</p>
+<blockquote>
+<p>I want to know whether a shot is going in before it gets there. The short records stop a few
+frames after the ball leaves the hand, which is about all the warning anyone gets.</p>
+<p>Take the dozen short records. Tell me when and where each ball comes down through the height of
+the rim, and whether it goes in.</p>
+</blockquote>
+<p>The report is held to the same three standards as assignment 1: plots that can be identified at a
+glance, anything that looks wrong flagged, and every assumption you had to make written down.</p>
+<p>Bob is deciding whether a prediction this early is worth having, so he needs:</p>
+<ul>
+<li><strong>The time of each crossing, and where the ball is when it happens.</strong></li>
+<li><strong>Whether each shot goes in</strong>, misses, or is too close to call from the frames you have.</li>
+<li><strong>How you know it is the crossing he means.</strong></li>
+</ul>
+<p>Please see the <a href="reports-07.html">example reports</a> for three reports on an example pack, each in a
+different style. The <a href="reports.html">Example reports</a> page says what every report needs and who
+you are writing it for.</p>
+<details class="ans"><summary><span>If you do not know where to
+start</span></summary><div class="body">
+<ul>
+<li>It is a good idea to plot a short record before fitting it, and to compare where it begins
+with what its header says. The release rule from assignment 5 is a place to start, though on a
+record this short each frame lost costs more.</li>
+<li>Your choice in assignment 5 between gravity fitted and gravity held was made on whole flights,
+and these records hold only a few frames of flight.</li>
+<li>The records stop long before the ball reaches the hoop, so the crossing has to come from the
+fitted model.</li>
+<li>An arc passes through every height below its peak twice, once rising and once falling.
+<a href="conditions-become-roots.html">Conditions as roots</a> and
+<a href="root-finding-fails.html">Root-finding failures</a> cover which one a solver hands
+back.</li>
+<li>The header gives the radius of the hoop and the radius of the ball.
+<a href="conditions-become-roots.html">Conditions as roots</a> works out what in, out and rim
+mean from the two.</li>
+<li>Your training arcs hold whole flights and the play-by-play result, so a method can be tried on
+them first, on records cut to the same length. Many of them hit the rim or the backboard before
+they come down through rim height, so a crossing read off their frames is not always free
+flight.</li>
+<li><a href="walk-07.html">Reading the assignment&nbsp;6 program</a> goes through this assignment's example program a section at a time, with notes on its lines that link to the <a href="python.html">Reading Python</a> pages.</li>
+</ul>
+</div></details>
+<hr>
+<h2 id="extra-problem">Extra Problem</h2>
+<p>This is worth <strong>+0.1</strong> and can be submitted any time before the end of the quarter without penalty.</p>
 <p>Alice, back from Detroit:</p>
 <blockquote>
 <p>The customer wants the head injury criterion for this test, computed on the resultant of the
@@ -924,58 +969,25 @@ with the limit we used and where that limit comes from.</p>
 <p>I need the number. I also need to know how many windows you had to look at to get it, because
 there are two hundred more tests behind this one and I would like to know what I am committing to.</p>
 </blockquote>
-<p>The report is held to the same three standards as assignment 1: plots that can be identified at a
-glance, anything that looks wrong flagged, and every assumption you had to make written down.</p>
-<p>Alice is costing out a month of work, so she needs:</p>
+<p>Alice wants:</p>
 <ul>
-<li><strong>The number.</strong></li>
+<li><strong>The head injury criterion.</strong></li>
 <li><strong>The limit you used</strong>, and where it comes from.</li>
 <li><strong>How many windows you examined</strong>, against how many there would have been without the limit.</li>
 <li><strong>What the search cost</strong>, and what two hundred of them would cost.</li>
 </ul>
-<p>Please see the <a href="reports-07.html">example reports</a> for three reports on an example pack, each in a
-different style. The <a href="reports.html">Example reports</a> page says what every report needs and who
-you are writing it for.</p>
-<details class="ans"><summary><span>If you do not know where to
-start</span></summary><div class="body">
-<ul>
-<li>The resultant of three channels is the square root of the sum of their squares, sample by
-sample.</li>
-<li>Every admissible window of the record is a candidate. A running total computed once turns each window’s
-integral into one subtraction. <a href="windowed-optimum.html">Windowed optimum</a> covers
-it.</li>
-<li>For Bob: the short records stop long before the ball reaches the hoop, so the crossing has to
-come from the model and not from the samples.</li>
-<li>For Bob: a falling parabola passes through any height below its peak twice.
-<a href="conditions-become-roots.html">Conditions as roots</a> and
-<a href="root-finding-fails.html">Root-finding failures</a> cover which one a solver hands back.</li>
-<li><a href="walk-07.html">Reading the assignment&nbsp;6 program</a> goes through this assignment's example program a section at a time, with notes on its lines that link to the <a href="python.html">Reading Python</a> pages.</li>
-</ul>
-</div></details>
-<hr>
-<h2 id="extra-problem">Extra Problem</h2>
-<p>This is worth <strong>+0.1</strong> and can be submitted any time before the end of the quarter without penalty.</p>
-<p>Bob:</p>
-<blockquote>
-<p>Now the flight model works, I want to know where the ball is when it crosses the height of the
-rim. Use the short records, the ones that stop a few frames after the release. Get me the time
-and the place on a dozen of them.</p>
-<p>Tell me how you know it is the right crossing.</p>
-</blockquote>
-<p>Bob wants:</p>
-<ul>
-<li><strong>The time of each crossing, and where the ball is when it happens.</strong></li>
-<li><strong>How you know it is the crossing he means.</strong></li>
-</ul>
+<p>The resultant of three channels is the square root of the sum of their squares, sample by sample.
+<a href="windowed-optimum.html">A constrained optimum over a window</a> covers the search, and works it
+through on a test no phrase assigns.</p>
 
   </main>
 
   
 
-  <script src="js/page.js?v=20261102083412"></script>
+  <script src="js/page.js?v=20261102180601"></script>
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-27">October 27, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stability and accuracy — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102083412">
-  <link rel="stylesheet" href="css/demos.css?v=20261102083412">
+  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
+  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -1034,6 +1034,29 @@ local error, and the more accurate method may be the wrong choice.</p>
   the run" is a defensible result, while "RK4" on its own is not.</li>
 </ol>
 
+<h3 id="energy-on-the-tracked-shot">Energy on the Tracked Shot</h3>
+
+<p>The shot stepped on <a href="state-as-a-vector.html" title="State as a vector">page 26</a> has the same kind of check. Its energy per kilogram is
+$\tfrac12|\mathbf{v}|^2 + gz$, which is 64.10&nbsp;J/kg at frame 5. Without drag it should stay at
+that value for the whole flight, and with drag it can only fall. Over the 0.72&nbsp;s to the last
+frame, with one step per frame (40&nbsp;ms):</p>
+
+<table class="data">
+  <tr><th>Method and drag</th><th class="num">change in energy (J/kg)</th></tr>
+  <tr><td>Euler, no drag</td><td class="num">+1.39</td></tr>
+  <tr><td>RK4, no drag</td><td class="num">0.00</td></tr>
+  <tr><td>Euler, drag</td><td class="num">&minus;1.57</td></tr>
+  <tr><td>RK4, drag</td><td class="num">&minus;2.96</td></tr>
+</table>
+
+<p>Euler without drag adds energy the ball cannot gain, $\tfrac12 g^2 h$ per second of flight
+(2.2% over this one). With drag the same gain is still there, so the Euler run shows the ball losing
+only about half of the 2.96&nbsp;J/kg that drag takes from it in the RK4 run. The Euler trajectory
+with drag is smooth and loses energy, as it should, so the error does not show in the curve or in the sign of the change.
+It shows in the drag-free run, where the change should be zero. At a step of
+1&nbsp;ms the Euler gain is 0.03&nbsp;J/kg, and the Euler drag run loses 2.92&nbsp;J/kg, which is
+close to the RK4 value.</p>
+
 <div class="check">
   <span class="label">Check</span>
   <ol>
@@ -1100,11 +1123,11 @@ and RK4 on an equation you write, with the order measured from the run and not q
   </script>
   
 
-  <script type="module" src="js/bundle/stability-and-accuracy.js?v=20261102083412"></script>
+  <script type="module" src="js/bundle/stability-and-accuracy.js?v=20261102180601"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

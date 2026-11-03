@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Root-finding failures — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102083412">
-  <link rel="stylesheet" href="css/demos.css?v=20261102083412">
+  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
+  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -916,10 +916,10 @@
 <div class="claim">
   <span class="label">Claim</span>
   <p class="exact">A root-finding routine returns a value <em>x</em> satisfying its own stopping
-  test, which is a bound on |<em>f</em>(<em>x</em>)|. It does not test whether that value is the
-  root you wanted, whether it lies in the domain your problem is defined on, or whether it is a
-  root
-  at all. Four situations produce a returned value with no error reported.</p>
+  test, which is a bound on |<em>f</em>(<em>x</em>)| or on the width of a bracket. It does not test
+  whether that value is the root the question asks for, or whether <em>f</em> is the function you
+  meant. On a fitted formula and on a simulation, four situations produce a wrong value with no
+  error reported, or a refusal where crossings exist.</p>
   <p class="plain">  The routine answers the question you typed, and it has no way to know the question you meant.</p>
 </div>
 
@@ -936,172 +936,263 @@ is narrow:</p>
   returns the value at which its stopping test happened to be satisfied.</li>
 </ul>
 
-<p>Both stopping tests take the same form. Stop when</p>
+<p>Bisection stops when its bracket is narrower than a tolerance. Newton's method usually stops
+when</p>
 
 $$|f(x)| < \texttt{tol}$$
 
-<p>That is a statement about the <dfn data-g="residual">residual</dfn>, meaning how far the
-equation is from being satisfied at $x$, and it is not a statement about the error, which is how
-far $x$ is from the root. The two are related by the slope of $f$, so where the slope is small
+<p>That bounds the <dfn data-g="residual">residual</dfn>, meaning how far the equation is from
+being satisfied at $x$. The error, how far $x$ is from the root, is a separate number. The two are related by the slope of $f$, so where the slope is small
 they are very different numbers.</p>
 
-<h2 id="four-failures">Four Failures</h2>
+<p>Both tests read $f$ and the bracket, and nothing about the problem $f$ came from.</p>
 
-<p>Each of the four below is a real problem from statics, dynamics or mechanics of materials, with
-ordinary numbers in it, and in each of them a routine runs to completion and reports success.</p>
+<h2 id="a-fitted-shot-and-a-simulated-slope">A Fitted Shot and a Simulated Slope</h2>
+
+<p>The week's two problems give $f$ in two different forms.</p>
+
+<ul class="plain">
+  <li><strong>The shot.</strong> The question is whether a tracked three-pointer went in. The rim is 3.048&nbsp;m above
+  the floor, and the crossing is a root of $f(t) = z(t) - 3.048$, where $z(t)$ is a parabola
+  fitted to the ball's height in free flight. $f$ is a formula, so it can be evaluated anywhere,
+  as often as you like, for well under a microsecond each.</li>
+  <li><strong>The slope.</strong> The question is the largest earthquake shaking a rock slope
+  survives, in the Slope Stability Lab. Each run shakes the slope with a recorded earthquake scaled to a
+  <strong>peak ground acceleration</strong> (PGA) and reports how far the slope moved. With damage
+  taken as moving more than a threshold $d^*$, the answer is a root of
+  $f(\text{PGA}) = \text{slope moved}(\text{PGA}) - d^*$. There is no formula. Each evaluation is
+  one simulation on a GPU, a minute or two of machine time. The lab leaves the definition of
+  damage to you, and its catalog suggests 5 or 15&nbsp;cm.</li>
+</ul>
+
+<h2 id="four-failures-on-real-data">Four Failures on Real Data</h2>
+
+<p>Each failure below is on real data. In each one a routine either returns a wrong value with no
+error reported or refuses a bracket that holds crossings.</p>
 
 <ol class="plain">
-  <li><strong>More than one root.</strong> $f$ has two roots and the routine returns one. Which
-  one
-  depends on where you started.</li>
-  <li><strong>A bracket that contains no root.</strong> $f$ changes sign across a
-  <dfn data-g="pole">pole</dfn>, so a bracket exists where no root does, and bisection converges
-  on
-  the discontinuity.</li>
-  <li><strong>A root the structure does not have.</strong> Newton converges cleanly to a value
-  that
-  satisfies the formula but lies outside the object the formula describes.</li>
-  <li><strong>A root with no sign change.</strong> $f$ touches zero without crossing, so no
-  bracket
-  exists anywhere and the residual test is satisfied while the answer is still wrong.</li>
+  <li><strong>Two crossings.</strong> The fitted height crosses the rim twice, and a routine can
+  return the crossing the question did not ask for.</li>
+  <li><strong>The root of a wrong formula.</strong> A parabola fitted to too few frames has an
+  exact root, and the root is far from where the ball crossed.</li>
+  <li><strong>A bracket holding several crossings.</strong> The slope's movement jumps up and
+  down with PGA, so a bracket can hold more than one crossing of the threshold, and bisection keeps
+  whichever one its midpoints lead to.</li>
+  <li><strong>A function that answers differently twice.</strong> Two runs at the same setting can
+  move the slope by different amounts, so the sign of $f$ at a point is a sample.</li>
 </ol>
 
-<p>Each case below carries its own demo, running both methods on that case. The controls are
-Newton’s starting point and the tolerance both methods stop at, while the bracket handed to
-bisection is fixed and stated in the table.</p>
+<p>Three more failures follow on constructed functions, since neither problem shows them.</p>
 
-<h2 id="1-the-wrong-root">1. The Wrong Root</h2>
+<h2 id="two-crossings">1. Two Crossings</h2>
 
-<p>A real tracked three-pointer, with a parabola least-squares fitted to its free-flight frames:</p>
+<p>Arc&nbsp;79 is a missed three-pointer, tracked at 25 frames a second. A parabola fitted by
+<dfn data-g="least-squares">least squares</dfn> to its 24 free-flight frames, with time measured
+from release, is</p>
 
-$$y(t) = 3.4520 + 4.7428\,t - 4.9153\,t^2, \qquad
-  f(t) = y(t) - 3.048$$
+$$z(t) = 3.4520 + 4.7428\,t - 4.9153\,t^2, \qquad f(t) = z(t) - 3.048$$
 
-<p>The fitted curvature corresponds to $g = 9.831$ m/s&sup2;, which is the measurement's own answer
-and not an assumed one. The ball is released at <strong>3.452 m</strong>, above the 3.048&nbsp;m
-hoop, as 99% of the three-pointers in this set are, the median release being 3.59&nbsp;m. So
-$f(0) = +0.404$, which means the shot starts above the rim. A downward parabola still has two roots,
-and here they are:</p>
+<p>The fitted curvature corresponds to $g = 9.831$ m/s&sup2;, a value the fit takes from the frames
+(no gravity was assumed). At release the fit puts the ball at 3.452&nbsp;m (the tracked frame reads 3.475&nbsp;m), above the rim, as 99% of the three-pointers in the full set are (their median release is 3.59&nbsp;m). This gives $f(0) = +0.404$&nbsp;m. A
+downward parabola released above a height crosses it twice, and here the two roots are</p>
 
 <table class="data">
-  <tr><th>Root</th><th class="num">t</th><th>Description</th></tr>
-  <tr><td>first</td><td class="num">&minus;0.0787 s</td><td>before the ball left the hand</td></tr>
-  <tr><td>second</td><td class="num">1.0437 s</td><td>the ball descending through the hoop plane</td></tr>
+  <tr><th>Root</th><th class="num">t</th><th>Where the ball is</th></tr>
+  <tr><td>rising</td><td class="num">&minus;0.0787 s</td><td>going up through rim height, still in the hand</td></tr>
+  <tr><td>falling</td><td class="num">1.0437 s</td><td>coming down through the hoop plane</td></tr>
 </table>
 
-<p>Both satisfy $f(t) = 0$ to machine precision, and only the second one happened. The first is
-where the fitted parabola, extended backwards past the frames it was fitted to, would have
-crossed rim height if the ball had been in free flight before release, which it was not, because
-it was still in someone's hand. Three consequences follow, and the demo shows all three:</p>
+<p>The tracked frames show both crossings. They rise through 3.048&nbsp;m between &minus;0.08 and
+&minus;0.04&nbsp;s, at &minus;0.072&nbsp;s by linear interpolation, and fall through it between
+1.04 and 1.08&nbsp;s, at 1.055&nbsp;s. The rising root is the parabola extended backwards past the
+frames it was fitted to, so it lands 6&nbsp;ms from
+the tracked crossing. The question,
+did the shot go in, asks for the falling one. Both satisfy $f(t) = 0$ to machine precision, so
+nothing in the value of $f$ separates them. Three runs show what a routine does with that.</p>
 
-<p><strong>Only the domain separates the two roots, and the routine does not know it.</strong> Hand bisection the
-flight, $[0,\,1.5]$ s, where $f(0) = +0.404$ and $f(1.5) = -3.541$ have opposite signs, so it
-brackets, converges, and returns 1.0437&nbsp;s, which is the right answer. It works only because the
-lower limit was set to release.</p>
+<p><strong>Newton started before the apex returns the rising crossing.</strong> Started at
+0.20&nbsp;s, left of the apex at 0.482&nbsp;s, the tangent points backwards. The estimates go
+0.20, &minus;0.216, &minus;0.092, &minus;0.0789 and &minus;0.07875&nbsp;s. The routine reports
+success with a residual of $2\times10^{-15}$&nbsp;m, and its answer is a time before the ball left
+the hand.</p>
 
-<p><strong>Widen the bracket and it stops working.</strong> On $[-0.4,\,1.5]$ both ends are
-negative, so bisection refuses to start on a function with two roots inside the interval it was
-given. A sign change detects an <em>odd</em> number of roots, and two of them cancel.</p>
+<p><strong>A bracket around both crossings stops bisection before it starts.</strong> On
+$[-0.4,\,1.5]$ s, $f(-0.4) = -2.280$ and $f(1.5) = -3.541$ have the same sign, so bisection
+refuses a function with two roots inside the interval it was given. A sign change at the ends
+means an <em>odd</em> number of crossings inside, so two crossings leave the ends with the same
+sign.</p>
 
-<p><strong>Newton does not take a bracket, so nothing stops it.</strong> Started at 0.20&nbsp;s,
-left of the apex at 0.482&nbsp;s, the tangent points backwards and the iteration converges on
-&minus;0.0787&nbsp;s. It reports success, its residual is zero to machine precision, and its
-answer is a time before the shot was taken. Drag the starting point across the apex in the demo
-and watch the returned value change.</p>
+<p><strong>A bracket around one crossing returns that crossing.</strong> On $[0,\,1.5]$ s the
+ends are $+0.404$ and $-3.541$, and bisection returns 1.0437&nbsp;s. On $[-0.3,\,0.4]$ s it
+returns &minus;0.0787&nbsp;s. The bracket you hand it decides which crossing
+comes back.</p>
+
+<p>The two roots differ in one way a routine can check. At the falling crossing $f$ goes from
+positive to negative, and at the rising one from negative to positive. The sign of $f$ just before
+and just after the returned value tells them apart, and it is the last check in
+<a href="#in-code"><code>verify</code></a> below.</p>
 
 <cg-demo case="two-roots"></cg-demo>
 
-<h2 id="2-a-bracket-with-no-root">2. A Bracket with No Root</h2>
+<h2 id="wrong-formula">2. The Root of a Wrong Formula</h2>
 
-<p>A 6 m beam carries a <dfn data-g="udl">uniformly distributed load</dfn> of 10 kN/m. It is <dfn
-data-g="simply-supported">simply supported</dfn> at $x = 0$ and $x = 4$ m, so the last 2 m
-overhang. The reactions are 15 kN and 45 kN, and the <dfn data-g="bending-moment">bending
-moment</dfn> between the supports is</p>
+<p>To predict the crossing before the ball arrives, the parabola has to be fitted to the frames
+you have so far. Fitted to the first six frames after release, the first 0.20&nbsp;s of flight, the
+same shot gives</p>
 
-$$M(x) = 15x - 5x^2 \quad \text{kN}\cdot\text{m}$$
+$$z_6(t) = 3.4675 + 4.3250\,t - 3.1473\,t^2$$
 
-<p>Where along the beam is the moment 8 kN·m? Written as a root problem by subtraction, as on
-<a href="conditions-become-roots.html">page 19</a>:</p>
+<p>The fit is a good one by its own measure. Its root-mean-square residual is 9.3&nbsp;mm, half the
+19&nbsp;mm of the fit to all 24 frames. Newton or bisection on $f_6(t) = z_6(t) - 3.048$ returns
+the falling root,</p>
 
-$$f(x) = M(x) - 8$$
+$$t = 1.4651\ \text{s}$$
 
-<p>which has roots at $x = 0.694$ m and $x = 2.306$ m. Now consider the same condition written as a
-ratio, which is a natural enough thing to do when you are comparing a demand against a capacity:</p>
+<p>with a residual below $10^{-10}$&nbsp;m. It is a root, it falls through zero, and it lies inside
+the time the tracking covers. The full fit puts the crossing at 1.0437&nbsp;s. At that time the
+six-frame parabola still has the ball at 4.55&nbsp;m, and the tracked frame there reads
+3.14&nbsp;m. The predicted place is 2.53&nbsp;m from the hoop center, against 0.356&nbsp;m from the
+full fit.</p>
+
+<p>The routine found the root of $f_6$ exactly. $f_6$ is the wrong function, and no test a root
+finder makes can detect that. A check on the formula can. Its curvature corresponds to
+$g = 6.29$ m/s&sup2;, and a ball in free flight falls at about 9.8. As frames arrive the
+prediction moves:</p>
+
+<table class="data">
+  <tr><th class="num">frames used</th><th class="num">last frame (s)</th><th class="num">fitted g (m/s&sup2;)</th>
+      <th class="num">predicted crossing (s)</th><th class="num">from hoop center (m)</th></tr>
+  <tr><td class="num">6</td><td class="num">0.20</td><td class="num">6.29</td><td class="num">1.465</td><td class="num">2.53</td></tr>
+  <tr><td class="num">10</td><td class="num">0.36</td><td class="num">8.95</td><td class="num">1.107</td><td class="num">0.406</td></tr>
+  <tr><td class="num">14</td><td class="num">0.52</td><td class="num">9.15</td><td class="num">1.085</td><td class="num">0.358</td></tr>
+  <tr><td class="num">24</td><td class="num">0.92</td><td class="num">9.83</td><td class="num">1.044</td><td class="num">0.356</td></tr>
+</table>
+
+<p>A ball more than 0.348&nbsp;m from the hoop center at the rim plane misses, so all four rows
+call this shot a miss, which it was. Six frames get the time and the place wrong. On another shot
+in the set, arc&nbsp;48, six frames give $g = 1.77$ m/s&sup2; and a crossing at 4.03&nbsp;s,
+19.8&nbsp;m from the hoop. A fit to the first frames reaches the crossing by
+<dfn data-g="extrapolation">extrapolation</dfn>, far past the last frame it used.</p>
+
+<cg-demo case="few-frames"></cg-demo>
+
+<h2 id="several-crossings">3. A Bracket Holding Several Crossings</h2>
+
+<p>The example class in the Slope Stability Lab bisected the 2.6&nbsp;MPa slope on $[1,\,2]$&nbsp;g.
+These are their runs, in the order bisection with $d^* = 5$&nbsp;cm uses them:</p>
+
+<table class="data">
+  <tr><th class="num">PGA (g)</th><th class="num">slope moved (cm)</th>
+      <th class="num">sign of <em>f</em>, <em>d</em>* = 5 cm</th><th class="num">sign of <em>f</em>, <em>d</em>* = 15 cm</th></tr>
+  <tr><td class="num">1.0</td><td class="num">0.31</td><td class="num">&minus;</td><td class="num">&minus;</td></tr>
+  <tr><td class="num">2.0</td><td class="num">592.8</td><td class="num">+</td><td class="num">+</td></tr>
+  <tr><td class="num">1.5</td><td class="num">14.3</td><td class="num">+</td><td class="num">&minus;</td></tr>
+  <tr><td class="num">1.25</td><td class="num">2.85</td><td class="num">&minus;</td><td class="num">&minus;</td></tr>
+  <tr><td class="num">1.375</td><td class="num">28.8</td><td class="num">+</td><td class="num">+</td></tr>
+  <tr><td class="num">1.3125</td><td class="num">18.8</td><td class="num">+</td><td class="num">+</td></tr>
+  <tr><td class="num">1.28125</td><td class="num">206.8</td><td class="num">+</td><td class="num">+</td></tr>
+</table>
+
+<p>With $d^* = 5$&nbsp;cm the trail closes in on the first crossing. 1.5&nbsp;g moved 14.3&nbsp;cm, so bisection keeps the
+lower half, and four runs later the crossing lies between 1.25 and 1.28125&nbsp;g.</p>
+
+<p>With $d^* = 15$&nbsp;cm, the lab's other suggestion, the first midpoint goes the other way.
+14.3&nbsp;cm is under 15, so 1.5&nbsp;g counts as surviving and bisection keeps $[1.5,\,2]$.
+Every later run is above 1.5&nbsp;g, and the routine returns a value between 1.5 and 2&nbsp;g,
+where $f$ changes sign. The slope also moved more than 15&nbsp;cm at
+1.28125, 1.3125 and 1.375&nbsp;g, all below it. The question is the largest shaking the slope
+survives, meaning every smaller shaking too, so it asks for the first crossing.</p>
+
+<p>The movement is not monotone in PGA. On the 5.8&nbsp;MPa slope the runs read 1.85&nbsp;cm at
+2.7&nbsp;g, 307&nbsp;cm at 2.75&nbsp;g, 23&nbsp;cm at 2.8&nbsp;g, 13.5&nbsp;cm at 2.9&nbsp;g and
+32&nbsp;cm at 3.0&nbsp;g. With $d^* = 15$&nbsp;cm the bracket $[2.7,\,2.9]$&nbsp;g has the same sign
+at both ends, so bisection refuses it, though the slope failed twice inside it. The shot's
+bracket $[-0.4,\,1.5]$&nbsp;s failed the same way.</p>
+
+<p>Bisection guarantees a crossing inside the bracket, and says nothing about which one. On the
+shot a plot of $f$ costs nothing and shows every crossing. On the slope each point of that plot is
+a run, so the runs you already have, sorted by PGA, are that plot at no extra cost.
+<a href="evaluations-are-the-currency.html">Evaluation cost</a> takes up how many more to buy.</p>
+
+<cg-demo case="slope-bracket"></cg-demo>
+
+<h2 id="repeat-runs">4. A Function That Answers Differently Twice</h2>
+
+<p>A formula returns the same value every time it is evaluated. The slope simulation usually does.
+The example class repeated 13 settings, and 8 of them gave identical readings. The other 5 did
+not:</p>
+
+<table class="data">
+  <tr><th class="num">strength (MPa)</th><th class="num">PGA (g)</th><th class="num">slope moved, each run (cm)</th></tr>
+  <tr><td class="num">1.0</td><td class="num">0.4375</td><td class="num">6.33, 5.68, 6.33</td></tr>
+  <tr><td class="num">1.0</td><td class="num">0.45</td><td class="num">38.5, 38.9</td></tr>
+  <tr><td class="num">2.6</td><td class="num">1.28125</td><td class="num">206.8, 140.4</td></tr>
+  <tr><td class="num">5.8</td><td class="num">2.7</td><td class="num">1.85, 1.88, 1.88</td></tr>
+  <tr><td class="num">5.8</td><td class="num">2.8</td><td class="num">22.7, 23.4</td></tr>
+</table>
+
+<p>Bisection reads one thing from each run, the sign of $f$. At 1.28125&nbsp;g the two runs on the
+2.6&nbsp;MPa slope differ by 66&nbsp;cm and still agree in sign for any threshold under
+140&nbsp;cm. At 0.4375&nbsp;g on the 1.0&nbsp;MPa slope the three runs straddle 6&nbsp;cm. With a
+threshold anywhere between 5.68 and 6.33&nbsp;cm, the same setting fails, survives and fails. Bisection
+decides each end of the final bracket on one run, and a reading close to the threshold is the one
+a repeat can flip.</p>
+
+<p>Repeating a run costs another minute or two, so a repeat is worth its cost where its sign
+decides something, at the runs that set the final bracket. Two repeats that agree make that end of
+the bracket more trustworthy. Two that disagree mean the threshold sits inside the spread of the
+simulation, and the answer is a range of PGA however narrow the bracket gets.</p>
+
+<h2 id="a-pole-a-root-off-the-beam-and-a-double-root">A Pole, a Root off the Beam and a Double Root</h2>
+
+<p>Neither the tracked shots nor the slope runs show these three, so each is shown on a constructed
+function with a known answer.</p>
+
+<h3 id="pole">A Bracket with No Root</h3>
+
+<p>A 6&nbsp;m beam carries a <dfn data-g="udl">uniformly distributed load</dfn> of 10&nbsp;kN/m. It
+is <dfn data-g="simply-supported">simply supported</dfn> at $x = 0$ and $x = 4$&nbsp;m, so the last
+2&nbsp;m overhang. The <dfn data-g="bending-moment">bending moment</dfn> between the supports is
+$M(x) = 15x - 5x^2$&nbsp;kN·m, and $M = 8$&nbsp;kN·m at $x = 0.694$ and $2.306$&nbsp;m. Written as
+a ratio, a natural form when comparing a demand against a capacity, the condition is</p>
 
 $$g(x) = \frac{8}{M(x)} - 1$$
 
-<p>$g$ and $f$ vanish at the same places. $M$ passes through zero at $x = 3$ m, though,
-because this beam has an overhang and so has a <dfn data-g="contraflexure">point of
-contraflexure</dfn> between the supports, and at that point $g$ has a pole. Take the bracket
-$[2.4,\,3.7]$, where $g(2.4) = +0.111$ and $g(3.7) = -1.618$, which is a sign change. Bisection
-accepts it and halves 34 times, at 36 evaluations of $g$ in all, two for the ends and one per
-halving, and it returns</p>
-
-$$x = 3.00000000\ \text{m}$$
-
-<p>The bending moment there is zero. In the subtraction form the residual is $M(3) - 8 = -8$ kN·m,
-which is the full size of the target, and in the ratio form it is larger still,
-because $g$ is dividing by a moment of order $10^{-10}$, so $|g|$ at the returned point is about
-$6\times10^{10}$. Either way the value announces itself the moment anyone evaluates the function
-there. That is, the sign change came from the pole, and there is no root at the returned point. Handed the same bracket, the
-subtraction form refuses, because $f(2.4) = -0.800$ and $f(3.7) = -20.950$ have the same sign.
-The two forms state the same physical condition, and only the ratio form produces a bracket
-with no root in it.</p>
-
-<div class="aside">
-  <span class="label">Origin of the pole</span>
-  <p>Nothing in the beam is discontinuous. $M(x)$ is a smooth parabola over the whole span and the
-physical question has two ordinary answers, so the pole was introduced by the
-dividing, which was a step taken for convenience. This is the general shape of the failure. A
-rearrangement like this one keeps the roots and can still change the sign structure, and
-bracketing methods read sign structure.</p>
-</div>
+<p>$M$ passes through zero at $x = 3$&nbsp;m, a <dfn data-g="contraflexure">point of
+contraflexure</dfn>, and there $g$ has a <dfn data-g="pole">pole</dfn>. On the bracket
+$[2.4,\,3.7]$, $g(2.4) = +0.111$ and $g(3.7) = -1.618$. Bisection accepts the sign change and returns
+$x = 3.00000000$&nbsp;m, where the moment is zero. The residual in the subtraction form is
+$M(3) - 8 = -8$&nbsp;kN·m, the whole target. Handed the same bracket, the subtraction form refuses,
+because $f(2.4) = -0.800$ and $f(3.7) = -20.950$ have the same sign. Dividing by $M$ leaves the roots
+in place and adds a pole wherever $M$ is zero.</p>
 
 <cg-demo case="pole"></cg-demo>
 
-<h2 id="3-a-root-outside-the-structure">3. A Root Outside the Structure</h2>
+<h3 id="off-the-structure">A Root Outside the Structure</h3>
 
-<p>A 6 m simply supported beam carries 10 kN/m. Its <dfn data-g="deflection">deflection</dfn> is</p>
+<p>The shot cannot show this one. Its parabola has two zeros and both lie inside the record, so Newton on the shot can leave the domain and still come back. From 0.50&nbsp;s, where $f'(t) = -0.17$&nbsp;m/s, the first step lands at 9.47&nbsp;s, and the later steps return to 1.0437&nbsp;s. A root outside the domain needs a function with more zeros than the problem has, such as a quartic.</p>
+
+<p>A 6&nbsp;m simply supported beam carries 10&nbsp;kN/m with $EI = 1.7 \times 10^7$&nbsp;N·m². Its
+<dfn data-g="deflection">deflection</dfn> is</p>
 
 $$\delta(x) = \frac{w\,x\,(L^3 - 2Lx^2 + x^3)}{24EI}$$
 
-<p>With $EI = 1.7 \times 10^7$ N·m² the midspan deflection is 9.93 mm. Where does the deflection
-first reach 8 mm? Setting $f(x) = \delta(x) - 0.008$ turns that into a root problem. The answers
-are $x = 1.7765$ m and $x = 4.2235$ m, symmetric about midspan, and bisection on $[0.5,\,3.0]$
-returns 1.7762 m in 14 evaluations, on the beam and within a quarter of a millimeter. Newton
-started at $x_0 = 2.90$ m, a reasonable guess near the middle where the deflection is largest,
-and converges in three steps to</p>
-
-$$x = -4.246\ \text{m}$$
-
-<p>and reports success. It is not wrong about the arithmetic, since $\delta(-4.246) = 0.008$ m to
-four figures, because $\delta$ is a quartic in $x$, whose four zeros are $-4.246$, $1.777$, $4.224$ and $10.246$ m, so two of them lie off the beam, one past each end. The beam occupies
-$0 \le x \le 6$, so there is no beam at $x = -4.246$ m, and the formula was never claimed to
-describe anything there.</p>
-
-<p>The mechanism is the slope. At midspan the beam is at its lowest point, so
-$\mathrm{d}\delta/\mathrm{d}x = 0$ exactly. Newton divides by that slope:</p>
-
-$$x_{k+1} = x_k - \frac{f(x_k)}{f'(x_k)}$$
-
-<p>Near midspan $f'$ is small, the step is large, and one step is enough to leave the beam. From
-$x_0 = 2.99$ m the first step lands at $-69.8$ m, while from $x_0 = 2.50$ m, far enough from the
-flat point, Newton converges to 1.776 m in four steps and is correct. Nothing distinguishes the
-two runs from the inside. Both report converged and both have a residual below tolerance, and
-the difference is only visible if you ask whether the answer is on the beam.</p>
+<p>and the deflection reaches 8&nbsp;mm at $x = 1.7765$ and $4.2235$&nbsp;m. Newton on
+$f(x) = \delta(x) - 0.008$, started at $x_0 = 2.90$&nbsp;m near midspan, converges in three steps to
+$x = -4.246$&nbsp;m and reports success. $\delta$ is a quartic, with zeros of $f$ at $-4.246$,
+$1.7765$, $4.2235$ and $10.246$&nbsp;m, and two of them are off the beam. At midspan the slope of
+$\delta$ is zero, so Newton's step $f(x_k)/f'(x_k)$ is large near it. From $x_0 = 2.99$&nbsp;m the
+first step lands at $-69.8$&nbsp;m, while from $2.50$&nbsp;m Newton converges to 1.7765&nbsp;m. Both
+runs report converged, and a comparison with the beam's 0 to 6&nbsp;m is what separates them.</p>
 
 <cg-demo case="off-beam"></cg-demo>
 
-<h2 id="4-a-double-root">4. A Double Root</h2>
+<h3 id="double-root">A Double Root</h3>
 
-<p>Return to the basketball, thrown so it only just reaches the rim, at a release speed of 5.84 m/s
-at the same angle, giving $v_0\sin\theta = 4.539$ m/s. The apex is then exactly 3.05 m. $f(t) =
-y(t) - 3.05$ now touches zero at $t = 0.4627$ s and is negative everywhere else. This is a <dfn
-data-g="double-root">double root</dfn>. Bisection cannot start anywhere, because there is no
-pair of points on the whole trajectory with $f$ of opposite signs, since $f$ never becomes
-positive. A method whose guarantee rests on sign changes has nothing to work with here, and it
-correctly says so. Newton runs, and reports success. What it returns depends on the <dfn
-data-g="tolerance">tolerance</dfn>:</p>
+<p>A shot released at 2.00&nbsp;m with 4.5388&nbsp;m/s upward, a speed chosen so the apex is exactly 3.05&nbsp;m, reaches it at
+0.4627&nbsp;s. $f(t) = \text{height} - 3.05$ touches zero there and is negative everywhere else. This
+is a <dfn data-g="double-root">double root</dfn>, and no bracket exists anywhere. Newton runs and
+reports success, and what it returns depends on the <dfn data-g="tolerance">tolerance</dfn>:</p>
 
 <table class="data">
   <tr><th class="num">tol</th><th class="num">returned t</th><th class="num">|f| there</th>
@@ -1109,52 +1200,48 @@ data-g="tolerance">tolerance</dfn>:</p>
   <tr><td class="num">10⁻⁴</td><td class="num">0.45906 s</td><td class="num">6.4×10⁻⁵</td>
       <td class="num">3.6 ms</td></tr>
   <tr><td class="num">10⁻⁶</td><td class="num">0.46245 s</td><td class="num">2.5×10⁻⁷</td>
-      <td class="num">0.2 ms</td></tr>
+      <td class="num">0.23 ms</td></tr>
   <tr><td class="num">10⁻⁸</td><td class="num">0.46265 s</td><td class="num">3.9×10⁻⁹</td>
-      <td class="num">0.02 ms</td></tr>
+      <td class="num">0.028 ms</td></tr>
 </table>
 
-<p>At a tolerance of 10⁻⁴ the residual is 64 micrometers of height, an excellent-looking number,
-while the time is wrong by 3.6 milliseconds. Tightening the tolerance by a factor of 100
-improves the time by a factor of about 10, not 100. That relationship is the general one near a
-double root. Because $f'$ vanishes there, $f$ is locally quadratic, so a residual $\epsilon$
-corresponds to an error of order $\sqrt{\epsilon}$ and not order $\epsilon$. Where a root finder
-normally reports an answer far more accurate than its tolerance, here it reports one far less
-accurate.</p>
-
-<p>The cost shows up as well. Both this case and case&nbsp;1 are Newton applied to a parabola, at
-the same tolerance. Case&nbsp;1 finishes in <strong>7</strong> function evaluations. This one
-takes <strong>23</strong>. The dots in the demo bunch up as they approach the touch point and do
-not leap onto it, which is what the extra evaluations are being spent on. At a simple root
-Newton roughly doubles the number of correct digits each step, and at a double root it gains a
-fixed fraction of the remaining error instead.</p>
+<p>Tightening the tolerance by a factor of 100 improves the time by a factor of 8 to 16, close to
+the square root of 100. Because
+$f'$ vanishes at a double root, $f$ is locally quadratic, so a residual $\epsilon$ corresponds to
+an error of order $\sqrt{\epsilon}$. Newton also slows down there, gaining a fixed fraction of the
+remaining error each step, and at a tolerance of 10<sup>&minus;6</sup> it takes 23 evaluations from 0&nbsp;s where it takes 9 on the arc&nbsp;79 parabola from 0.20&nbsp;s.</p>
 
 <cg-demo case="double"></cg-demo>
 
-<h2 id="three-questions-that-catch-all-four">Three Checks</h2>
+<h2 id="three-questions-that-catch-all-four">Checks on the Value, the Function and the Domain</h2>
 
-<p>All four failures survive the routine's own test, and all four are caught by three questions,
-two asked afterwards and one before. None of them requires knowing the answer.</p>
+<p>No failure on this page shows in the routine's own test. Three checks can catch them, one on the
+returned value, one on the function, and one made before solving. None of them requires knowing
+the answer.</p>
 
 <ol class="plain">
-  <li><strong>Evaluate $f$ at the returned value and look at it.</strong> Case 2 fails here
-  immediately. The residual is 8 kN·m against a target of 8 kN·m.</li>
-  <li><strong>Ask whether the value is in the domain.</strong> Case 3 fails here, because −4.246 m is not
-  a point on a beam running from 0 to 6 m. This check is a comparison against the physical setup,
-  not against the mathematics, and no routine can make it unless you give it the domain.</li>
-  <li><strong>Plot $f$ over the whole domain before solving.</strong> Cases 1 and 4 are both
-  visible in a single plot, with two crossings in one, a curve that touches and turns back in the
-  other, and neither is visible in a returned number.</li>
+  <li><strong>Check the returned value against <em>f</em> and the problem.</strong> Evaluate
+  $f$ there, compare the value with the domain, and look at the sign of $f$ on either side. The
+  residual catches the pole, the domain catches the root off the beam, and the sign on either side
+  catches the rising crossing and the double root.</li>
+  <li><strong>Check <em>f</em> against what it stands for.</strong> A fitted formula can be
+  compared with physics you know and with data that arrive later, which is what catches the
+  six-frame parabola and its gravity of 6.29&nbsp;m/s&sup2;. A simulation can be run again at the
+  same setting, which is what shows the spread at 0.4375&nbsp;g.</li>
+  <li><strong>Look at <em>f</em> over the whole domain before solving.</strong> On the shot a
+  plot costs a few hundred evaluations, well under a microsecond each, and shows both crossings. On the slope
+  the runs you already have, sorted by PGA, show the 2.6&nbsp;MPa slope failing at 1.28125&nbsp;g
+  below a survival at 1.5&nbsp;g.</li>
 </ol>
 
-<p>The third costs the most of the three and is likely the one most often skipped. A plot costs a
-few hundred function evaluations. Case 2's bracket cost 36 evaluations to produce a wrong answer
-that looked converged to eight decimal places.</p>
+<p>The first check runs on whatever a routine returned and costs three evaluations. On the slope
+those are three more runs, and with repeat noise each one is itself a sample. The second check
+needs knowledge of where $f$ came from, which the routine never has.</p>
 
 <h2 id="in-code">In Code</h2>
 
-<p>This is the verification code, and it runs after the solver. Given whatever a routine returned, these are the three
-checks above, in the order above.</p>
+<p>This is the first check as code, and it runs after the solver. Given whatever a routine
+returned, it reports the residual, the domain and the direction of the crossing.</p>
 
 <div class="codetabs" id="code1">
   <div class="tabs" role="tablist">
@@ -1162,7 +1249,7 @@ checks above, in the order above.</p>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="1|domain is the interval the problem is physically defined on, e.g. (0.0, 6.0) for a 6 m beam. tol and h are choices, with defaults.;4|An empty dictionary that collects the four checks under their names ([Dictionaries](py-dicts.html)).;6|The residual test the routine already applied. Repeat it yourself, since the routine may have used a different f.;9|This compares x against the physical setup, which a solver does not know about.;11|A sign change either side means the root is crossed. No sign change suggests a touching root, or no root within h, and then the error is likely much larger than the residual.">def verify(f, x, domain, tol=1e-8, h=1e-4):
+  <pre data-lang="python" data-notes="1|domain is the interval the problem is defined on, for instance (-0.81, 1.64) for the seconds the shot's tracking covers. tol and h are choices, with defaults.;4|An empty dictionary that collects the checks under their names ([Dictionaries](py-dicts.html)).;6|The residual test the routine already applied. Repeat it yourself, since the routine may have used a different f.;9|This compares x against the problem, which a solver does not know about.;11|One evaluation a small step h before x and one after it.;13|f goes from negative to positive, the way the ball rises through the rim.;15|f goes from positive to negative, the way the ball falls through the rim.;18|No sign change either side suggests a touching root, or no root within h, and then the error is likely much larger than the residual.">def verify(f, x, domain, tol=1e-8, h=1e-4):
     lo = domain[0]
     hi = domain[1]
     report = {}
@@ -1172,10 +1259,17 @@ checks above, in the order above.</p>
 
     report['in_domain'] = lo &lt;= x and x &lt;= hi
 
-    report['crosses'] = f(x - h) * f(x + h) &lt; 0
+    before = f(x - h)
+    after = f(x + h)
+    if before &lt; 0 and after &gt; 0:
+        report['crossing'] = 'rising'
+    elif before &gt; 0 and after &lt; 0:
+        report['crossing'] = 'falling'
+    else:
+        report['crossing'] = 'none'
 
     return report</pre>
-  <pre data-lang="matlab" hidden data-notes="1|domain is a two-element vector, e.g. [0 6] for a 6 m beam.;2|nargin is the number of inputs the call passed, so a call that leaves tol out gets 1e-8.;9|Repeat the residual test on the f you care about.;11|This compares x against the physical setup, which a solver does not know about.;12|No sign change either side suggests a touching root, or no root within h. Then the error is likely much larger than the residual.">function r = verify(f, x, domain, tol, h)
+  <pre data-lang="matlab" hidden data-notes="1|domain is a two-element vector, for instance [-0.81 1.64] for the seconds the shot's tracking covers.;2|nargin is the number of inputs the call passed, so a call that leaves tol out gets 1e-8.;9|Repeat the residual test on the f you care about.;11|This compares x against the problem, which a solver does not know about.;12|One evaluation a small step h before x and one after it.;14|f goes from negative to positive, the way the ball rises through the rim.;16|f goes from positive to negative, the way the ball falls through the rim.;19|No sign change either side suggests a touching root, or no root within h.">function r = verify(f, x, domain, tol, h)
     if nargin &lt; 4
         tol = 1e-8;
     end
@@ -1186,62 +1280,89 @@ checks above, in the order above.</p>
     r.residual  = abs(f(x));
     r.is_root   = r.residual &lt; tol;
     r.in_domain = x &gt;= domain(1) &amp;&amp; x &lt;= domain(2);
-    r.crosses   = f(x - h) * f(x + h) &lt; 0;
+    before = f(x - h);
+    after  = f(x + h);
+    if before &lt; 0 &amp;&amp; after &gt; 0
+        r.crossing = 'rising';
+    elseif before &gt; 0 &amp;&amp; after &lt; 0
+        r.crossing = 'falling';
+    else
+        r.crossing = 'none';
+    end
 end</pre>
-  <pre data-lang="js" hidden data-notes="1|domain is [lo, hi], the interval the problem is physically defined on.;4|Repeat the residual test yourself.;8|This compares x against the physical setup, which a solver does not know about.;9|No sign change either side suggests a touching root, or no root within h.">function verify(f, x, domain, tol = 1e-8, h = 1e-4) {
+  <pre data-lang="js" hidden data-notes="1|domain is [lo, hi], the interval the problem is defined on.;4|Repeat the residual test yourself.;5|One evaluation a small step h before x and one after it.;8|f goes from negative to positive, the way the ball rises through the rim.;9|f goes from positive to negative, the way the ball falls through the rim.;7|No sign change either side, which suggests a touching root, or no root within h.">function verify(f, x, domain, tol = 1e-8, h = 1e-4) {
   const lo = domain[0];
   const hi = domain[1];
   const residual = Math.abs(f(x));
+  const before = f(x - h);
+  const after = f(x + h);
+  let crossing = 'none';
+  if (before &lt; 0 &amp;&amp; after &gt; 0) crossing = 'rising';
+  if (before &gt; 0 &amp;&amp; after &lt; 0) crossing = 'falling';
   return {
     residual: residual,
     isRoot: residual &lt; tol,
     inDomain: x &gt;= lo &amp;&amp; x &lt;= hi,
-    crosses: f(x - h) * f(x + h) &lt; 0
+    crossing: crossing
   };
 }</pre>
   <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
 </div>
 
-<p>Applied to the four cases, <code>verify</code> returns:</p>
+<p>Applied to the cases on this page, with Newton run to $|f| < 10^{-8}$ and bisection to a
+bracket narrower than 10<sup>&minus;10</sup>, <code>verify</code> returns the following. The shot
+is checked on the times its tracking covers, &minus;0.81 to 1.64&nbsp;s, and the pole on
+$f = M - 8$.</p>
 
 <table class="data">
-  <tr><th>Case</th><th>returned x</th><th>is_root</th><th>in_domain</th><th>crosses</th></tr>
-  <tr><td>1, a root outside the problem</td><td>−0.0787 s</td><td class="num">true</td>
-      <td class="num">false</td><td class="num">true</td></tr>
-  <tr><td>2, a pole</td><td>3.0000 m</td><td class="num">false</td><td class="num">true</td>
-      <td class="num">false</td></tr>
-  <tr><td>3, off the beam</td><td>−4.246 m</td><td class="num">true</td><td class="num">false</td>
-      <td class="num">true</td></tr>
-  <tr><td>4, a double root</td><td>0.4591 s</td><td class="num">true</td><td class="num">true</td>
-      <td class="num">false</td></tr>
+  <tr><th>Failure</th><th>returned x</th><th>is_root</th><th>in_domain</th><th>crossing</th></tr>
+  <tr><td>1, the rising crossing</td><td>−0.0787 s</td><td class="num">true</td>
+      <td class="num">true</td><td class="num">rising</td></tr>
+  <tr><td>1, the falling crossing</td><td>1.0437 s</td><td class="num">true</td>
+      <td class="num">true</td><td class="num">falling</td></tr>
+  <tr><td>2, six frames</td><td>1.4651 s</td><td class="num">true</td><td class="num">true</td>
+      <td class="num">falling</td></tr>
+  <tr><td>the pole</td><td>3.0000 m</td><td class="num">false</td><td class="num">true</td>
+      <td class="num">none</td></tr>
+  <tr><td>off the beam</td><td>−4.246 m</td><td class="num">true</td><td class="num">false</td>
+      <td class="num">falling</td></tr>
+  <tr><td>a double root</td><td>0.4626 s</td><td class="num">true</td><td class="num">true</td>
+      <td class="num">none</td></tr>
 </table>
 
-<p>Case 1 is caught, and only by the domain test. It <em>is</em> a root, and it does cross, so two
-of the three checks pass. What disqualifies it is that the problem has no times before release.
-That test exists only because someone wrote down what the domain was. Had the bracket started at
-<var>t</var> = 0 the routine would have returned the right answer and the check would have been
-redundant. That is the usual relationship between a safeguard and the bug it prevents.</p>
+<p>The rising crossing is caught by its direction alone. It is a root and it lies in the domain,
+and the question asks for a crossing going the other way. The six-frame root passes every line,
+exactly as the correct falling root does, because <code>verify</code> tests the value against
+$f$, and $f$ is the six-frame parabola. That case needs the second check. The slope cases are not
+in the table, since each call to $f$ inside <code>verify</code> would be another run.</p>
 
 <div class="check">
   <span class="label">Check</span>
   <ol>
-    <li>A routine returns <var>x</var> = 2.5 with a residual of 10⁻¹². You evaluate <var>f</var>
-    at
-    2.4999 and 2.5001 and find both values negative. What has the routine found, and what should
-    you
-    expect of the accuracy?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>It has most likely found <strong>a double root</strong>, meaning a point where <em>f</em> touches zero and
-turns back without crossing. Both neighbors being negative rules out a simple root, at which
-they would have opposite signs.</p>
-     <p>The accuracy is <strong>far worse than the residual suggests</strong>. Near a double root
-<em>f</em> &asymp; <em>C</em>(<em>x</em>&nbsp;&minus;&nbsp;<em>r</em>)&sup2;, so a residual of
-10<sup>&minus;12</sup> corresponds to |<em>x</em>&nbsp;&minus;&nbsp;<em>r</em>| &asymp;
-&radic;(10<sup>&minus;12</sup>/<em>C</em>), which is about
-<strong>10<sup>&minus;6</sup></strong> for <em>C</em> of order 1. <strong>Half the digits are
-gone</strong>, and the stopping test, which measures |<em>f</em>|, cannot see it.</p>
-     <p>Two consequences. Bisection cannot find this root at all, because there is no sign change to
-bracket. Newton, which does converge here, drops from quadratic to linear, so it needs many
-more steps than usual for an answer that is much less accurate than usual.</p></div></details></li>
+    <li>A parabola fitted to the first eight frames of a shot predicts the crossing at 1.31&nbsp;s,
+    and <code>verify</code> reports a root, in the domain, falling. The fit's residual is 8&nbsp;mm.
+    Name one number you could compute from what you already have that would tell you whether to
+    trust the 1.31&nbsp;s.
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>The
+fitted gravity.</strong> The <em>t</em>&sup2; coefficient of the parabola is &minus;<em>g</em>/2,
+so the fit implies a value of <em>g</em>. A ball in free flight falls at about 9.8&nbsp;m/s&sup2;,
+and a fit that implies 6 or 13 is extrapolating a shape the ball does not have. On arc&nbsp;79 six
+frames give 6.29&nbsp;m/s&sup2; and a crossing 0.42&nbsp;s late.</p>
+     <p>Neither the 8&nbsp;mm nor <code>verify</code> can say this. The fit's residual measures how
+well the parabola matches the frames it was fitted to, and <code>verify</code> measures how well
+1.31&nbsp;s satisfies the parabola. Both can be small while the parabola is wrong where the root
+is. A second number to watch is how far the prediction moves when the next frame arrives.</p></div></details></li>
+    <li>You are bisecting a slope with <em>d</em>*&nbsp;=&nbsp;10&nbsp;cm and the midpoint run moves
+    the slope 9.6&nbsp;cm. You have 12 runs left. What do you do with the next run?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Repeat
+the midpoint.</strong> 9.6&nbsp;cm is 0.4&nbsp;cm under the threshold, and in the example class
+repeats at one setting differed by 0.65&nbsp;cm at about 6&nbsp;cm of movement (5.68 against
+6.33&nbsp;cm at 0.4375&nbsp;g). A sign decided by 0.4&nbsp;cm may flip on a second run, and
+bisection discards half the bracket on that sign.</p>
+     <p>If the repeat agrees, the bracket moves as planned and the repeat cost one run. If it
+disagrees, the threshold sits inside the spread of the simulation at that PGA, and your answer is
+that PGA with a width around it, which more halving cannot narrow. Either way, look at the
+runs you already have, sorted by PGA, for a failure below the bracket.</p></div></details></li>
     <li>You are solving <var>P</var>(x) = <var>P</var><sub>allow</sub> for a column. Give the two
     formulations by subtraction and by ratio, and say which one you would hand to bisection and
     why.
@@ -1250,14 +1371,12 @@ more steps than usual for an answer that is much less accurate than usual.</p></
 <em>P</em>(<em>x</em>)/<em>P</em><sub>allow</sub> &minus; 1.</p>
      <p><strong>Hand bisection the subtraction.</strong> With <em>P</em><sub>allow</sub> a constant the
 two differ only by a positive scale factor, so they have identical roots and identical sign
-changes, and the division buys nothing. The moment the denominator is not constant, whether from
+changes, and the division changes nothing. The moment the denominator is not constant, whether from
 an allowable that depends on slenderness or from the ratio written the other way up, the
 division introduces a pole wherever it vanishes, and a sign change across a pole is not a root.
 The subtraction also keeps the units of <em>P</em>, so a tolerance on |<em>f</em>| is a
 tolerance in kN and means something physical. Divide, and the tolerance becomes dimensionless
-and its size has to be reasoned about separately.</p>
-     <p>As a general rule, avoid introducing a division you were not given, since it cannot add a root
-and it can add a pole.</p></div></details></li>
+and its size has to be reasoned about separately.</p></div></details></li>
     <li>Newton returns a value outside the domain of your problem in three steps, with a residual
     of
     10⁻¹⁰. Is the routine faulty? What would you change to get a usable answer?
@@ -1275,7 +1394,7 @@ claimed any. Three changes, in order of what they cost:</p>
      leaving it is not possible.</li>
      </ol>
      <p>The residual of 10<sup>&minus;10</sup> shows that the answer satisfies the equation, and the
-four cases above show that this alone does not make it the answer to your problem.</p></div></details></li>
+cases above show that this alone does not make it the answer to your problem.</p></div></details></li>
   </ol>
 </div>
 
@@ -1304,11 +1423,11 @@ bisection, secant and Newton on any signal, counting evaluations.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/root-finding-fails.js?v=20261102083412"></script>
+  <script type="module" src="js/bundle/root-finding-fails.js?v=20261102180601"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

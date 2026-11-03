@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Conditions as roots — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102083412">
-  <link rel="stylesheet" href="css/demos.css?v=20261102083412">
+  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
+  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -915,126 +915,232 @@
 
 <div class="claim">
   <span class="label">Claim</span>
-  <p class="exact">A root finder answers "where is $f$ zero". Engineering questions are usually of
-  the form "where does $g$ equal $c$". The two are the same question after defining
-  $f(x) = g(x) - c$, because the values of $x$ satisfying the condition are exactly the roots of $f$.
-  Which
-  of those roots is meaningful is decided by the domain of the problem, not by the algebra.</p>
-  <p class="plain">  Subtract the target from both sides, and the question the routine answers becomes the question
-  you asked.</p>
+  <p class="exact">Engineering questions usually ask where a quantity $g$ reaches a target $c$.
+  Defining $f(x) = g(x) - c$ turns that into a root problem, because the values of $x$ that satisfy
+  the condition are exactly the roots of $f$. What it costs to evaluate $f$ usually decides which
+  methods are practical. A shot's height, fitted to its tracked frames, is a formula that can be
+  evaluated anywhere in well under a microsecond. A slope's response to shaking has no formula, and each
+  evaluation is a simulation that takes a minute or two. The problem decides which of the roots
+  answers the question.</p>
+  <p class="plain">Subtract the target, and the question becomes where a function is zero.
+  Evaluating that function is usually where the time and cost go.</p>
 </div>
 
-<h2 id="rewriting-a-condition-as-a-root">Rewriting a Condition as a Root</h2>
+<h2 id="in-rim-or-out">In, Rim or Out</h2>
 
-<p>Design conditions arrive as equalities against a target:</p>
+<p>A three-pointer either goes in or it does not, and the tracking data can often decide which.
+The rim is 3.048&nbsp;m above the floor. As the ball comes down through that height, its center
+is some distance from the center of the hoop. Treating the ball as coming straight down, it drops
+through clean if that distance is under 0.109&nbsp;m (the rim's radius less the ball's), and it
+clears the rim entirely if the distance is over 0.348&nbsp;m (the two radii added). Between the
+two the ball touches the rim, and the tracking cannot say whether it rattled in. A real shot
+arrives at an angle (this one at about 40&deg;), so these two numbers sort shots only roughly.</p>
+
+<p>The question "did it go in?" then becomes two smaller ones: the time the ball came down through
+3.048&nbsp;m, and where it was at that time. The first is a condition on the tracked height,
+$z(t) = 3.048$, where $t$ is the time in seconds since release. Once it is answered, the second
+is a lookup in the two horizontal channels, $x$ and $y$.</p>
+
+<h2 id="interpolating-between-frames">Interpolating Between Frames</h2>
+
+<p>With every frame of the shot in hand, the crossing sits between two frames, the last one above
+the rim and the first one below it on the way down. For the shot on this page those are
+1.04&nbsp;s at 3.1405&nbsp;m and 1.08&nbsp;s at 2.8986&nbsp;m. Joining them with a straight line,
+the line reaches 3.048&nbsp;m a fraction $p$ of the way along, where $z_k$ is the height in the
+frame above and $z_{k+1}$ the height in the frame below:</p>
+
+$$p \;=\; \frac{3.048 - z_k}{z_{k+1} - z_k} \;=\; \frac{3.048 - 3.1405}{2.8986 - 3.1405} \;=\; 0.38$$
+
+<p>That puts the crossing at 1.055&nbsp;s. Moving the same fraction along the $x$ and $y$ channels
+puts the ball's center 0.339&nbsp;m from the hoop's center, inside the band where it touches the
+rim. The frames after it show the ball bouncing back, and the play-by-play records a miss.</p>
+
+<p>Interpolation is root finding on the straight line through two samples, and it needs no formula.
+However, it needs the frame below the rim, so it can only answer once the ball has arrived.</p>
+
+<h2 id="predicting-from-a-fitted-parabola">Predicting From a Fitted Parabola</h2>
+
+<p>To call the shot while it is still in the air, fit the free-flight frames you have so far (a
+parabola in height, a straight line in each of $x$ and $y$) and evaluate the fitted formulas past
+the last frame. Writing $z(t)$ from here on for the fitted parabola, the crossing is a root of</p>
+
+$$f(t) \;=\; z(t) - 3.048$$
+
+<p>Fitted to all 24 free-flight frames of this shot,</p>
+
+$$z(t) \;=\; 3.4520 + 4.7428\,t - 4.9153\,t^2 \qquad \text{(meters, } t \text{ in seconds after release)}$$
+
+<p>and the falling root is 1.0437&nbsp;s, with the center 0.356&nbsp;m from the hoop's. That is
+0.008&nbsp;m past the edge of the rim band, and the interpolated crossing was 0.009&nbsp;m inside
+it. Both differences are well under the tracking noise of about 0.03&nbsp;m, so neither method
+can say whether this ball touched the rim or cleared it. Fits from fewer frames sort the shot just
+as roughly. A fit to the first 10 frames, which end at 0.36&nbsp;s with the ball still rising,
+puts the crossing at 1.107&nbsp;s and the center 0.406&nbsp;m from the hoop's. Every fit from 10
+frames up puts the center between 0.29 and 0.41&nbsp;m from the hoop's, so from 0.36&nbsp;s on the
+formula rules out a clean make, about 0.7&nbsp;s before the ball got there.</p>
+
+<p>Because $f$ is a formula, it can be evaluated at any $t$, as often as you like, in
+well under a microsecond each, and its derivative is available too. The root finders on the next pages are
+easy to watch on it for that reason.</p>
+
+<cg-demo case="predict"></cg-demo>
+<div class="source measured"><span class="tag">Measured</span><span>Eight three-point arcs, drawn from a curated, outcome-balanced set of 1,016 shots from 508 games. SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz, via <a href="https://github.com/linouk23/NBA-Player-Movements" target="_blank" rel="noopener">linouk23/NBA-Player-Movements</a>, with play-by-play joined from <a href="https://github.com/shufinskiy/nba_data" target="_blank" rel="noopener">shufinskiy/nba_data</a>. The selection, windowing and unit conversion are this course&rsquo;s own.</span></div>
+
+<h2 id="which-root-actually-happened">Two Crossings, One Asked For</h2>
+
+<p>$f$ has roots wherever the algebra puts them, including outside the region the model describes.
+The parabola crosses 3.048&nbsp;m twice, and both crossings happened, but only one is the crossing
+the question asks about. This shot leaves the hand at 3.48&nbsp;m, above the rim, as all eight
+arcs here do (and 99% of three-pointers in the full set). The earlier root is at
+&minus;0.079&nbsp;s, before the ball left the hand. The tracked ball did rise through 3.048&nbsp;m
+then, at &minus;0.072&nbsp;s, in the shooter&rsquo;s hands, though the fitted parabola is an
+extrapolation backwards into a region it was never fitted to, where the ball was not yet in free
+flight. The root satisfies $f(t) = 0$ to machine precision, and a routine handed a bracket reaching
+back past $t = 0$ can return it and report success. Here the question rules it out, because it
+asks when the ball came down to the rim, and the earlier crossing was on the way up. In general,
+three questions filter the roots:</p>
+
+<ol class="plain">
+  <li><strong>Is it in the domain?</strong> A slope cannot be shaken by a negative acceleration,
+  and a beam has no points past its ends.</li>
+  <li><strong>Is it in the range the model is valid over?</strong> The parabola describes the ball
+  in free flight only, so it says nothing about the ball in the hand or after it hits the rim, and
+  it does not announce this.</li>
+  <li><strong>Is it the one the question asks about?</strong> Rising or falling, first crossing or
+  last, loading or unloading. For the shot, the question asks for the falling crossing, and that
+  is what removes the earlier root.</li>
+</ol>
+
+<p>None of the three is available to the routine, because all three are properties of the problem
+it was pointed at. The first is a property of the physical situation, the second of the model, and
+the third of the question you asked.</p>
+
+<h2 id="a-slope-with-no-formula">A Slope With No Formula</h2>
+
+<p>The <a href="extra-labor-slope.html">Slope Stability Lab</a> asks a question of the same form.
+In it Carol, a county engineer, needs the largest shaking she can be sure a rock slope survives
+without damage. The lab shakes a simulated slope with one recorded earthquake, scaled to a peak
+ground acceleration (PGA, in g), and reports how far the slope moved. If damage means the slope
+moving more than some threshold $d^*$, the condition is $\text{moved}(\text{PGA}) = d^*$, and the
+root problem is</p>
+
+$$f(\text{PGA}) \;=\; \text{moved}(\text{PGA}) - d^*$$
+
+<p>The lab leaves the definition of damage to each student, so $d^* = 5$&nbsp;cm below is one
+choice made for illustration. The examples come from the lab's public example class, a set of
+test runs on five slopes that differ in bond strength (the strength of the cement between the
+grains, in MPa). The form of $f$ is the same as the shot's, but evaluating it differs in three
+ways:</p>
 
 <ul class="plain">
-  <li>the deflection reaches the allowable limit,  $\delta(x) = \delta_{\text{allow}}$</li>
-  <li>the bending moment reaches the section capacity,  $M(x) = M_{\text{cap}}$</li>
-  <li>the ball reaches the plane of the hoop, $y(t) = 3.048$</li>
-  <li>two loadings produce equal stress,  $\sigma_1(x) = \sigma_2(x)$</li>
+  <li><strong>There is no formula.</strong> moved(PGA) is whatever the simulation does, and the only
+  way to evaluate $f$ is to run it. Each run is a simulation on a GPU that takes a minute or two,
+  and each student has 40.</li>
+  <li><strong>There is no derivative.</strong> Nothing gives the slope of $f$ between runs.</li>
+  <li><strong>The response jumps.</strong> On the 7.4&nbsp;MPa slope, shaking at
+  2.88867&nbsp;g moved it 0.26&nbsp;cm and shaking at 2.89062&nbsp;g moved it 36.9&nbsp;cm, so $f$
+  changes sign somewhere in those 0.002&nbsp;g. At 2.90625&nbsp;g it moved 147&nbsp;cm and at
+  3.0&nbsp;g only 31&nbsp;cm, so more shaking does not always mean more movement.</li>
 </ul>
 
-<p>Each becomes a root problem by moving everything to one side:</p>
+<cg-demo case="slope"></cg-demo>
 
-$$f(x) \;=\; g(x) - c \qquad\text{or}\qquad f(x) \;=\; \sigma_1(x) - \sigma_2(x)$$
+<p>In engineering practice, root finding often looks more like the slope than the shot. The
+function is a simulation or an experiment, it cannot be written down, and each evaluation has a
+cost. A crash test is the same kind of evaluation, one vehicle per value of $f$. The shot is where
+each method is easy to watch, because its formula can be evaluated as often as you like. The slope
+is where the number of evaluations a method spends starts to matter, which <a
+href="evaluations-are-the-currency.html" title="Evaluation cost">page 23</a> takes up.</p>
 
-<p>Moving everything to one side is a convention. Root finders are written to look for zero
-because zero is the one target that needs no extra argument, and every other target is reached
-by subtraction.</p>
+<h2 id="limits-on-deflection-moment-and-stress">Limits on Deflection, Moment and Stress</h2>
 
-<h2 id="subtraction-not-a-ratio">Subtraction and Ratio Forms</h2>
+<p>A design limit is reached where an equality holds, and that boundary becomes a root problem by
+the same subtraction:</p>
 
-<p>The same condition can be written as a ratio, which is tempting when comparing a demand against a capacity:</p>
+<ul class="plain">
+  <li><strong>Deflection limit.</strong> $\delta(x) = \delta_{\text{allow}}$, so $f = \delta - \delta_{\text{allow}}$.</li>
+  <li><strong>Moment capacity.</strong> $M(x) = M_{\text{cap}}$, so $f = M - M_{\text{cap}}$.</li>
+  <li><strong>Equal stress.</strong> $\sigma_1(x) = \sigma_2(x)$, so $f = \sigma_1 - \sigma_2$.</li>
+</ul>
 
-$$g_{\text{ratio}}(x) \;=\; \frac{c}{g(x)} - 1$$
+<p>Moving everything to one side is a convention, and root finders are written to look for zero
+because zero is the one target that needs no extra argument. Every other target is reached by
+subtraction.</p>
 
-<p>It vanishes wherever the subtraction form vanishes, so it has the same roots. It also has a <dfn
-data-g="pole">pole</dfn> wherever $g(x) = 0$, though, and a function may change sign across a
-pole without having a root there. That difference is what <a href="root-finding-fails.html" title="Root-finding failures">page 22</a>'s second failure is made of,
-and it is the reason to prefer the subtraction even though both forms are algebraically correct.</p>
+<p id="subtraction-not-a-ratio">The same condition can also be written as a ratio, $c/g(x) - 1$,
+which is tempting when comparing a demand against a capacity. It has the same roots. It also has a
+<dfn data-g="pole">pole</dfn> wherever $g(x) = 0$, and a function may change sign across a pole
+without having a root there. <a href="root-finding-fails.html#pole" title="Root-finding
+failures">Page 22</a> shows a bracket that closes on such a pole, and it is a good reason to
+prefer the subtraction.</p>
 
-<h2 id="plotting-first">Plotting the Function</h2>
+<h2 id="plotting-first">Plotting f</h2>
 
-<p>Once $f$ is defined it can be evaluated anywhere, and a few hundred evaluations across the
-domain cost almost nothing. Here is what the plot shows that a returned number does not:</p>
+<p>When $f$ is a formula, a few hundred evaluations across the domain cost almost nothing, and it
+is a good idea to plot $f$ before calling a root finder. Here is what the plot shows that a
+returned number does not:</p>
 
 <ul class="plain">
   <li><strong>How many roots there are.</strong> A routine returns one regardless.</li>
   <li><strong>Roughly where they are.</strong> This is what a bracket or a starting guess needs.</li>
-  <li><strong>Whether any are near a pole or a flat spot.</strong> Both are visible immediately
-  and
-  neither is visible in a result.</li>
+  <li><strong>Whether any are near a pole or a flat spot.</strong> Both show up on a plot, and a
+  returned number shows neither.</li>
 </ul>
 
-<cg-demo case="convert"></cg-demo>
-<div class="source measured"><span class="tag">Measured</span><span>Eight three-point arcs, drawn from a curated, outcome-balanced set of 1,016 shots from 508 games. SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz, via <a href="https://github.com/linouk23/NBA-Player-Movements" target="_blank" rel="noopener">linouk23/NBA-Player-Movements</a>, with play-by-play joined from <a href="https://github.com/shufinskiy/nba_data" target="_blank" rel="noopener">shufinskiy/nba_data</a>. The selection, windowing and unit conversion are this course&rsquo;s own.</span></div>
-
-<h2 id="which-root-actually-happened">The Physical Root</h2>
-
-<p>$f$ has roots wherever the algebra puts them, including outside the region the model describes.
-The parabola above crosses 3.048&nbsp;m twice, and <strong>only one of those crossings
-happened</strong>. This shot is released at 3.45&nbsp;m, above the rim, as 99% of three-pointers
-in this set are, the median release being 3.59&nbsp;m against a 3.048&nbsp;m rim. The earlier
-root is at &minus;0.079&nbsp;s, a time before the ball left the hand, where the fitted parabola
-is an extrapolation backwards into a region the model was never fitted to and the ball was not
-yet in free flight. Nothing about that root looks wrong. It satisfies $f(t) = 0$ to machine
-precision, and a routine handed a bracket reaching back past $t = 0$ can return it and report
-success without qualification. Three filters, applied in this order:</p>
-
-<ol class="plain">
-  <li><strong>Is it in the domain?</strong> A beam from 0 to 6 m has no points at $x = -4$. A
-  flight
-  has no times before release.</li>
-  <li><strong>Is it in the range the model is valid over?</strong> A small-deflection beam formula
-  stops describing a beam that has deflected a long way, and it does not announce this.</li>
-  <li><strong>Is it the one the question asks about?</strong> Ascending or descending, first
-  crossing or last, loading or unloading.</li>
-</ol>
-
-<p>None of the three is available to the routine, because all three are properties of the problem
-it was pointed at. The first two are properties of the model and the last is a property of the
-question you asked.</p>
+<p>When each evaluation is a simulation run, the plot is only the runs you have paid for, and
+nothing between them is known. Deciding where those runs go is the subject of the next four
+pages.</p>
 
 <div class="check">
   <span class="label">Check</span>
   <ol>
+    <li>Another made shot in the set comes down past the rim between a frame at 1.09&nbsp;s, with
+    $(x, y, z) = (1.7561, 7.5192, 3.1910)$&nbsp;m, and one at 1.13&nbsp;s, at $(1.6260, 7.6066,
+    3.0133)$&nbsp;m. The hoop's center is at $(1.6002, 7.6200)$&nbsp;m. Which band does
+    interpolation put it in?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>In
+the clean band. The fraction is $p = (3.048 - 3.1910)/(3.0133 - 3.1910) = 0.805$. The same
+fraction along $x$ gives $1.7561 + 0.805 \times (1.6260 - 1.7561) = 1.6514$, and along $y$ gives
+$7.5192 + 0.805 \times (7.6066 - 7.5192) = 7.5895$. The center is then
+$\sqrt{0.0512^2 + 0.0305^2} = 0.060$&nbsp;m from the hoop's, inside the 0.109&nbsp;m a clean make
+needs, and the play-by-play records it as made. A parabola fitted to this shot's free-flight
+frames puts its center 0.128&nbsp;m from the hoop's, in the rim band. The two methods differ by
+0.068&nbsp;m, more than twice the tracking noise, so for this shot they do not agree on the
+band.</p></div></details></li>
     <li>Write "the factor of safety falls to 1.5" as a root problem, in the subtraction form, and
     say what the pole would be if you wrote it as a ratio.
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Subtraction:</strong> <em>f</em>(<em>x</em>) = capacity(<em>x</em>)
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>In the subtraction form, <em>f</em>(<em>x</em>) = capacity(<em>x</em>)
 &minus;&nbsp;1.5&nbsp;&times;&nbsp;demand(<em>x</em>). Roots of <em>f</em> are the values where the
 factor of safety, capacity&thinsp;/&thinsp;demand, is exactly 1.5.</p>
-     <p><strong>As a ratio:</strong> <em>f</em>(<em>x</em>) = FS(<em>x</em>)/1.5 &minus; 1, or
+     <p>As a ratio, <em>f</em>(<em>x</em>) = FS(<em>x</em>)/1.5 &minus; 1, or
 FS(<em>x</em>) &minus; 1.5, or capacity/(1.5&nbsp;&times;&nbsp;demand) &minus; 1. All three divide by
-the demand. The pole is wherever the <strong>demand goes
-to zero</strong>, such as an unloaded station or a section where the bending moment changes
-sign. That is worth avoiding. Where the demand changes sign, FS jumps from +&infin; to &minus;&infin;,
+the demand. The pole is wherever the demand goes
+to zero, such as an unloaded station or a section where the bending moment changes
+sign. Where the demand changes sign, FS jumps from +&infin; to &minus;&infin;,
 and <em>f</em> changes sign across the pole without passing through zero, so a bracketing method sees the sign change, converges tidily
-on the pole, and reports a location where the structure is <em>safest</em> as the place it
+on the pole, and reports a location where the structure is safest as the place it
 fails.</p></div></details></li>
     <li>A plot of your <em>f</em> crosses zero three times over the domain. What do you do before
     calling a root finder?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Decide which root you want, and bracket that one alone.</strong> A root finder returns
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Decide which root you want first. A root finder returns
 one value. If it is handed an interval containing three roots, the bracket or the starting point decides
 which one it returns, so it is a good idea to make that choice yourself. Concretely, scan the domain
 on a grid, find the intervals where the sign changes, and call the routine once on each with its
 own bracket. Then apply the filters, asking which roots are in the physical domain, which are in
 the range the model is valid over, and which one the question asks about. Finally, check the count,
-because a plot only shows the crossings <em>it can resolve</em>. A pair closer together than the
+because a plot only shows the crossings it can resolve. A pair closer together than the
 plotting resolution is invisible on it, and only a scan on a grid finer than their spacing would
 find them.</p></div></details></li>
-    <li>A routine returns a root at <em>x</em> = 7.8 m on a 6 m beam. Which of the three filters
-    caught it, and could the routine have caught it itself?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>The domain filter</strong>, which asks whether the answer is in the region the model
-describes. A beam of 6&nbsp;m has no station at 7.8&nbsp;m, so the deflection formula was
-evaluated where it means nothing.</p>
-     <p>Could the routine have caught it? <strong>Yes, but only if it had been told.</strong> A
-bracketing method given [0,&nbsp;6] cannot return 7.8, because the domain is built into the
-bracket and the guarantee enforces it. Newton takes no bracket, so nothing constrains where it
-goes, and it may converge on a root of the extended formula. The general point is that
-the domain is not in the function. <em>f</em> is a piece of algebra that happily evaluates at
-7.8, and the fact that beams end is information the routine does not have unless it is passed
-in, as a bracket, or as the bound in the loop condition on <a href="program-shape-branching.html" title="Program shape II, branching and encapsulation">page 3</a>.</p></div></details></li>
+    <li>In the slope demo, set $d^*$ to 15&nbsp;cm on the 5.8&nbsp;MPa slope. How many sign changes
+    does <em>f</em> have among the runs, and what does that say about the largest shaking the slope
+    survives?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Three.</strong>
+The slope moved 2.9&nbsp;cm at 2.72&nbsp;g, 307&nbsp;cm at 2.75&nbsp;g, 23&nbsp;cm at 2.8&nbsp;g,
+13.5&nbsp;cm at 2.9&nbsp;g and 32&nbsp;cm at 3.0&nbsp;g. So <em>f</em> goes from negative to
+positive, back to negative, and positive again. With three crossings there are three candidate answers, and
+choosing among them is a judgment about what "sure" means, which the lab leaves to you. A root
+finder handed [2.0,&nbsp;4.0] would return one of the three without saying there were
+others.</p></div></details></li>
   </ol>
 </div>
 
@@ -1063,11 +1169,11 @@ bisection, secant and Newton on any signal, counting evaluations.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/conditions-become-roots.js?v=20261102083412"></script>
+  <script type="module" src="js/bundle/conditions-become-roots.js?v=20261102180601"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Assignment 7 · Occupant Displacement — Computational Physical Modeling</title>
+  <title>Assignment 7 · Quadratic Drag — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102083412">
-  <link rel="stylesheet" href="css/demos.css?v=20261102083412">
+  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
+  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -904,12 +904,57 @@
 
   <main data-pagefind-body>
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
-    <h1>Assignment 7 · Occupant Displacement</h1>
+    <h1>Assignment 7 · Quadratic Drag</h1>
 <p>Submit your report as a PDF to the Canvas assignment by midnight on the due date, together with
 the program that produced it. <strong>Write your four-word data phrase at the top of the first page.</strong>
 Remember to cite all sources other than the text, course material, or your own notes.</p>
 <hr>
 <h2 id="problem">Problem</h2>
+<p>Bob:</p>
+<blockquote>
+<p>The ball is going nine meters a second through air. The flight model has no drag in it at all,
+which cannot be right.</p>
+<p>Put it in. There is no formula for the flight once it is there, so it will have to be stepped.
+Run it on the whole arcs, where we can see where the ball actually went, and tell me whether it
+was worth doing.</p>
+</blockquote>
+<p>The report is held to the same three standards as assignment 1: plots that can be identified at a
+glance, anything that looks wrong flagged, and every assumption you had to make written down.</p>
+<p>Bob is deciding whether the stepped model is worth what it adds, so he needs:</p>
+<ul>
+<li><strong>The flight stepped both ways</strong>, with drag and without.</li>
+<li><strong>The drag you used</strong>, and where the number comes from.</li>
+<li><strong>The step you used</strong>, and evidence that the answer has stopped changing.</li>
+<li><strong>Whether drag was worth adding</strong>, and the number that says so.</li>
+</ul>
+<p>Please see the <a href="reports-08.html">example reports</a> for three reports on an example pack, each in a
+different style. The <a href="reports.html">Example reports</a> page says what every report needs and who
+you are writing it for.</p>
+<details class="ans"><summary><span>If you do not know where to
+start</span></summary><div class="body">
+<ul>
+<li>Drag acts against the velocity, so the three directions no longer move independently.
+<a href="state-as-a-vector.html">State as a vector</a> works through a ball with quadratic drag,
+including where a value for its constant comes from.</li>
+<li>Stepping needs a starting state, a position and a velocity at one moment of free flight. A fit
+like the one in assignment 5 gives both.</li>
+<li>A number has settled when halving the step changes it by less than the precision you need.
+<a href="order-of-accuracy-measured.html">Order of accuracy</a> covers how to read that, and
+<a href="stability-and-accuracy.html">Stability and accuracy</a> covers what happens when the
+step is too large.</li>
+<li>With drag set to zero, the stepped flight should reproduce the parabola (exactly for RK4, and
+for Euler to within an error that shrinks with the step), which checks the stepper.</li>
+<li>Many whole arcs hit the rim or the backboard on the way down, and the frames after that are
+not free flight, so it is a good idea to check where free flight ends before scoring a model
+against an arc.</li>
+<li>"Worth doing" needs something to measure the difference against. The tracker's noise is stated
+in the header of the shots file.</li>
+<li><a href="walk-08.html">Reading the assignment&nbsp;7 program</a> goes through this assignment's example program a section at a time, with notes on its lines that link to the <a href="python.html">Reading Python</a> pages.</li>
+</ul>
+</div></details>
+<hr>
+<h2 id="extra-problem">Extra Problem</h2>
+<p>This is worth <strong>+0.1</strong> and can be submitted any time before the end of the quarter without penalty.</p>
 <p>Alice:</p>
 <blockquote>
 <p>The customer wants to know how far the occupant moves relative to the car while the crash is
@@ -922,56 +967,24 @@ gives me 75 kg, a belt of 296 kN/m, and 2.8 kN·s/m of damping.</p>
 <p>The car's motion is the record from your own test.</p>
 <p>I need the travel. I also need to be shown that the number has stopped changing.</p>
 </blockquote>
-<p>The report is held to the same three standards as assignment 1: plots that can be identified at a
-glance, anything that looks wrong flagged, and every assumption you had to make written down.</p>
-<p>The number is going to a customer, so Alice needs:</p>
+<p>Alice wants:</p>
 <ul>
 <li><strong>The travel</strong>, in millimeters.</li>
 <li><strong>Evidence that it has settled.</strong></li>
 <li><strong>The step you used</strong>, and how you chose it.</li>
 <li><strong>What this model leaves out.</strong></li>
 </ul>
-<p>Please see the <a href="reports-08.html">example reports</a> for three reports on an example pack, each in a
-different style. The <a href="reports.html">Example reports</a> page says what every report needs and who
-you are writing it for.</p>
-<details class="ans"><summary><span>If you do not know where to
-start</span></summary><div class="body">
-<ul>
-<li>What drives the occupant is the vehicle channel from your own test.</li>
-<li>A second-order equation is stepped by carrying the velocity along as part of the state.
-<a href="state-as-a-vector.html">State as a vector</a> works through this system.</li>
-<li>The driving acceleration is a recorded array. A step that lands between two of the record’s samples needs a value between them.</li>
-<li>A number has settled when halving the step stops changing it.
-<a href="order-of-accuracy-measured.html">Order of accuracy</a> covers how to read that, and
-<a href="stability-and-accuracy.html">Stability and accuracy</a> covers what happens when the
-step is too large.</li>
-<li><a href="walk-08.html">Reading the assignment&nbsp;7 program</a> goes through this assignment's example program a section at a time, with notes on its lines that link to the <a href="python.html">Reading Python</a> pages.</li>
-</ul>
-</div></details>
-<hr>
-<h2 id="extra-problem">Extra Problem</h2>
-<p>This is worth <strong>+0.1</strong> and can be submitted any time before the end of the quarter without penalty.</p>
-<p>Bob:</p>
-<blockquote>
-<p>The ball is going nine meters a second through air. The flight model has no drag in it at all,
-which cannot be right.</p>
-<p>Put it in. There is no formula for the flight once it is there, so it will have to be stepped.
-Do that, and tell me whether it was worth doing.</p>
-</blockquote>
-<p>Bob wants:</p>
-<ul>
-<li><strong>The flight stepped both ways</strong>, with drag and without.</li>
-<li><strong>Whether it was worth doing</strong>, and the number that says so.</li>
-</ul>
+<p>A step that lands between two samples of the vehicle channel needs a value between them. <a href="state-as-a-vector.html">State as a vector</a> works
+through this system with the same constants.</p>
 
   </main>
 
   
 
-  <script src="js/page.js?v=20261102083412"></script>
+  <script src="js/page.js?v=20261102180601"></script>
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
