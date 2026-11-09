@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bisection — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
-  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
+  <link rel="stylesheet" href="css/blocks.css?v=20261109080753">
+  <link rel="stylesheet" href="css/demos.css?v=20261109080753">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -846,9 +846,6 @@
           <a href="newton-and-secant.html">Newton and secant</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="root-finding-fails.html">Root-finding failures</a>
-        
-          <span class="site-nav-sep">·</span>
           <a href="evaluations-are-the-currency.html">Evaluation cost</a>
         
           <span class="site-nav-sep">·</span>
@@ -914,6 +911,8 @@
 <div class="eyebrow">Week 7 · Root Finding and Search</div>
 <h1>Bisection</h1>
 
+<p>Video: <a href="https://www.youtube.com/watch?v=I0hgf_56mI8">Root finding by bisection</a> (0:09:18). <a href="lecture-20.html">Slides</a></p>
+
 <div class="claim">
   <span class="label">Claim</span>
   <p class="exact">If $f$ is continuous and $f(a)$ and $f(b)$ have opposite signs, a root lies
@@ -929,8 +928,9 @@
 
 <p>A <dfn data-g="bracket">bracket</dfn> is a pair $[a, b]$ with $f(a)f(b) < 0$. The intermediate
 value theorem then guarantees a root inside, provided $f$ is continuous, which is the assumption
-that <a href="root-finding-fails.html" title="Root-finding failures">page 22</a>'s pole example violates. Each step evaluates the midpoint $m$ and replaces $a$ or
-$b$ with it, whichever keeps the signs opposite, so the bracket is halved and it still contains
+that the <a href="#pole">pole example</a> below violates. Bisection works by guess and check.
+Each guess is the midpoint $m$, and its check, one evaluation of $f$, decides whether $m$ replaces
+$a$ or $b$. Either way the signs stay opposite, so the bracket is halved and it still contains
 a root. Two things follow, and they are what distinguish bisection from every other method in
 this week:</p>
 
@@ -949,7 +949,8 @@ arc 79 gives the height</p>
 
 $$z(t) = 3.45195 + 4.74284\,t - 4.91528\,t^2\ \text{m},$$
 
-<p>with $t$ in seconds from release, and the ball falls through the rim at a root of
+<p>with $t$ in seconds from frame 20, the release this data set marks. <a href="conditions-become-roots.html#finding-the-release" title="Conditions as roots">Page 19</a> finds the release
+two frames earlier, so each time on this page is 0.08&nbsp;s less than the same moment there. The ball falls through the rim at a root of
 $f(t) = z(t) - 3.048$. The fitted apex is at 0.48 s, so the falling crossing comes after it.
 $f(0.5) = +1.547$ m and $f(1.5) = -3.541$ m, so $[0.5, 1.5]$ s is a bracket around the falling
 crossing (and only that one, since the formula's other root is at $-0.08$ s). Each evaluation of $f$
@@ -1024,7 +1025,7 @@ settings (2.875, 2.89062, 2.88281 and 2.88867 g), and each repeat moved exactly 
 first run there. The trail took 17 runs, which were 3 for the scan, 10 midpoints and 4 repeats.
 How far the slope moved is not monotone in PGA (2.90625 g moved 147.3 cm and 2.9375 g moved 48.8
 cm), though every run above the root moved far more than 5 cm, so the signs still trap one root.
-<a href="root-finding-fails.html" title="Root-finding failures">Page 22</a> looks at a slope where
+<a href="#even-crossings">Two crossings and no sign change</a>, below, looks at a slope where
 they do not.</p>
 
 <p>A run takes a minute or two whatever the slope does, so the number of runs sets the cost, and
@@ -1040,7 +1041,7 @@ that number depends only on the starting and wanted widths. From the bracket $[2
 <p>Each decimal digit of the PGA costs about 3.3 runs, which is 3 to 7 minutes of machine time.
 Each student has a budget of 40 runs. On the shot a digit costs about 3.3 evaluations, each well under
 a microsecond.
-<a href="evaluations-are-the-currency.html" title="Evaluation cost">Page 23</a> compares
+<a href="evaluations-are-the-currency.html" title="Evaluation cost">Page 22</a> compares
 spending those runs on bisection with spending them on a scan.</p>
 
 <cg-demo case="trail"></cg-demo>
@@ -1071,8 +1072,115 @@ shown only that no two neighboring points differ in sign.</p>
   <p>A sign change means an <em>odd</em> number of roots in the interval, which is not the same as
 one. Bisection on an interval containing three roots converges to one of them and never mentions
 the other two. The converse is the one that bites, because no sign change means an <em>even</em>
-number of roots, and that includes two. The whole-flight bracket on <a href="root-finding-fails.html" title="Root-finding failures">page 22</a> fails for this reason, on a function with two ordinary roots inside it.</p>
+number of roots, and that includes two. The whole-flight bracket in the <a href="#even-crossings">next section</a> fails for this reason, on a function with two ordinary roots inside it.</p>
 </div>
+
+<h2 id="even-crossings">Two Crossings and No Sign Change</h2>
+
+<p>The shot's fitted parabola crosses the rim twice. The rising root is at $-0.0787$&nbsp;s, just
+after the ball leaves the hand, and the falling root is at 1.0437&nbsp;s.
+<a href="conditions-become-roots.html#which-root-actually-happened" title="Conditions as roots">Conditions as roots</a>
+explains why the question asks for the falling one. On $[-0.4,\,1.5]$&nbsp;s, an interval holding both,
+$f(-0.4) = -2.280$&nbsp;m and $f(1.5) = -3.541$&nbsp;m have the same sign. Bisection refuses the
+interval, and the code below stops with its error, though the interval holds two roots. Two
+crossings return $f$ to the sign it started with.</p>
+
+<p>A bracket around one crossing returns that crossing. On $[0,\,1.5]$&nbsp;s the ends are
+$+0.404$ and $-3.541$&nbsp;m, and bisection returns 1.0437&nbsp;s. On $[-0.3,\,0.4]$&nbsp;s it
+returns $-0.0787$&nbsp;s. The bracket you hand it decides which crossing comes back.</p>
+
+<p>The slope does the same. On the 5.8&nbsp;MPa slope the example class's runs read 1.85&nbsp;cm
+at 2.7&nbsp;g, 307&nbsp;cm at 2.75&nbsp;g, 22.7&nbsp;cm at 2.8&nbsp;g and 13.5&nbsp;cm at
+2.9&nbsp;g. With $d^* = 15$&nbsp;cm, the bracket $[2.7,\,2.9]$&nbsp;g has the same sign at both
+ends, so bisection refuses it, though the slope moved more than 15&nbsp;cm twice inside it. How far
+the slope moves is not monotone in PGA, so a pair of runs with the same sign says little about the
+runs between them.</p>
+
+<h2 id="threshold-choice">The Threshold Picks the Crossing</h2>
+
+<p>The example class bisected the 2.6&nbsp;MPa slope on $[1,\,2]$&nbsp;g. These are their runs, in
+the order bisection with $d^* = 5$&nbsp;cm uses them:</p>
+
+<table class="data">
+  <tr><th class="num">PGA (g)</th><th class="num">slope moved (cm)</th>
+      <th class="num">sign of <em>f</em>, <em>d</em>* = 5 cm</th><th class="num">sign of <em>f</em>, <em>d</em>* = 15 cm</th></tr>
+  <tr><td class="num">1.0</td><td class="num">0.31</td><td class="num">&minus;</td><td class="num">&minus;</td></tr>
+  <tr><td class="num">2.0</td><td class="num">592.8</td><td class="num">+</td><td class="num">+</td></tr>
+  <tr><td class="num">1.5</td><td class="num">14.3</td><td class="num">+</td><td class="num">&minus;</td></tr>
+  <tr><td class="num">1.25</td><td class="num">2.85</td><td class="num">&minus;</td><td class="num">&minus;</td></tr>
+  <tr><td class="num">1.375</td><td class="num">28.8</td><td class="num">+</td><td class="num">+</td></tr>
+  <tr><td class="num">1.3125</td><td class="num">18.8</td><td class="num">+</td><td class="num">+</td></tr>
+  <tr><td class="num">1.28125</td><td class="num">206.8</td><td class="num">+</td><td class="num">+</td></tr>
+</table>
+
+<p>With $d^* = 5$&nbsp;cm the trail closes in on the first crossing. 1.5&nbsp;g moved 14.3&nbsp;cm,
+so bisection keeps the lower half, and four runs later the crossing lies between 1.25 and
+1.28125&nbsp;g.</p>
+
+<p>With $d^* = 15$&nbsp;cm, the lab's other suggestion, the first midpoint goes the other way.
+14.3&nbsp;cm is under 15, so 1.5&nbsp;g counts as surviving and bisection keeps $[1.5,\,2]$&nbsp;g.
+Every later run is above 1.5&nbsp;g, and the routine returns a value between 1.5 and 2&nbsp;g, where
+$f$ does change sign. The slope also moved more than 15&nbsp;cm at 1.28125, 1.3125 and
+1.375&nbsp;g, all below that bracket. The question is the largest shaking the slope survives,
+meaning every smaller shaking too, so it asks for the first crossing.</p>
+
+<p>Bisection guarantees a crossing inside the bracket, and says nothing about which one. On the
+shot a plot of $f$ costs nothing and shows every crossing. On the slope each point of that plot is
+a run, so the runs you already have, sorted by PGA, are that plot at no extra cost.
+<a href="evaluations-are-the-currency.html" title="Evaluation cost">Evaluation cost</a> takes up
+how many more to buy.</p>
+
+<cg-demo case="slope-bracket"></cg-demo>
+
+<h2 id="repeat-runs">Repeat Runs Near the Threshold</h2>
+
+<p>A formula returns the same value every time it is evaluated, and the slope simulation usually
+does. The example class repeated 13 settings, and 8 of them gave identical readings. The other 5
+did not:</p>
+
+<table class="data">
+  <tr><th class="num">strength (MPa)</th><th class="num">PGA (g)</th><th class="num">slope moved, each run (cm)</th></tr>
+  <tr><td class="num">1.0</td><td class="num">0.4375</td><td class="num">6.33, 5.68, 6.33</td></tr>
+  <tr><td class="num">1.0</td><td class="num">0.45</td><td class="num">38.5, 38.9</td></tr>
+  <tr><td class="num">2.6</td><td class="num">1.28125</td><td class="num">206.8, 140.4</td></tr>
+  <tr><td class="num">5.8</td><td class="num">2.7</td><td class="num">1.85, 1.88, 1.88</td></tr>
+  <tr><td class="num">5.8</td><td class="num">2.8</td><td class="num">22.7, 23.4</td></tr>
+</table>
+
+<p>Bisection reads one thing from each run, the sign of $f$. At 1.28125&nbsp;g the two runs on the
+2.6&nbsp;MPa slope differ by 66&nbsp;cm and still agree in sign for any threshold under
+140&nbsp;cm. At 0.4375&nbsp;g on the 1.0&nbsp;MPa slope the three runs straddle 6&nbsp;cm. With a
+threshold anywhere between 5.68 and 6.33&nbsp;cm, the same setting fails, survives and fails.
+Bisection decides each end of the final bracket on one run, and a reading close to the threshold is
+the one a repeat can flip.</p>
+
+<p>Repeating a run costs another minute or two, so a repeat is worth its cost where its sign
+decides something, at the runs that set the final bracket. Two repeats that agree make that end of
+the bracket more trustworthy. Two that disagree mean the threshold sits inside the spread of the
+simulation, and the answer is a range of PGA however narrow the bracket gets.</p>
+
+<h2 id="pole">A Sign Change with No Root</h2>
+
+<p>Bisection needs $f$ to be continuous, and neither the shot nor the slope breaks that, so this
+case is constructed. A 6&nbsp;m beam carries a <dfn data-g="udl">uniformly distributed load</dfn>
+of 10&nbsp;kN/m. It is <dfn data-g="simply-supported">simply supported</dfn> at $x = 0$ and
+$x = 4$&nbsp;m, so the last 2&nbsp;m overhang. The <dfn data-g="bending-moment">bending
+moment</dfn> between the supports is $M(x) = 15x - 5x^2$&nbsp;kN·m, and $M = 8$&nbsp;kN·m at
+$x = 0.694$ and $2.306$&nbsp;m. Written as a ratio, a natural form when comparing a demand against
+a capacity, the condition is</p>
+
+$$g(x) = \frac{8}{M(x)} - 1$$
+
+<p>$M$ passes through zero at $x = 3$&nbsp;m, a <dfn data-g="contraflexure">point of
+contraflexure</dfn>, and there $g$ has a <dfn data-g="pole">pole</dfn>. On the bracket
+$[2.4,\,3.7]$&nbsp;m, $g(2.4) = +0.111$ and $g(3.7) = -1.618$. Bisection accepts the sign change and
+returns $x = 3.00000000$&nbsp;m, where the moment is zero. The residual in the subtraction form is
+$M(3) - 8 = -8$&nbsp;kN·m, the whole target. Handed the same bracket, the subtraction form
+$f(x) = M(x) - 8$ refuses, because $f(2.4) = -0.800$ and $f(3.7) = -20.950$ have the same sign.
+Dividing by $M$ leaves the roots in place and adds a pole wherever $M$ is zero. Evaluating the
+subtraction form at whatever bisection returns catches it.</p>
+
+<cg-demo case="pole"></cg-demo>
 
 <h2 id="in-code">In Code</h2>
 
@@ -1179,7 +1287,7 @@ a bound.</p></div></details></li>
 crossings inside one interval return the sign to where it started, so the scan sees nothing. A sign change detects an <em>odd</em> number of roots, so a pair is invisible to it.</p>
      <p>A third explanation is a root of even multiplicity, where <em>f</em> touches zero and turns back
 without crossing, and no scan of any fineness will fix it. There the sign never changes, and
-bracketing methods cannot find it in principle. This is the double-root case on <a href="root-finding-fails.html" title="Root-finding failures">page 22</a>. To separate the first two, refine the grid or offset it by half a step. To find the third,
+bracketing methods cannot find it in principle. <a href="evaluations-are-the-currency.html" title="Evaluation cost">Evaluation cost</a> works through a shot that only just reaches the rim, which has a root like this. To separate the first two, refine the grid or offset it by half a step. To find the third,
 look for minima of |<em>f</em>| instead of sign changes.</p></div></details></li>
   </ol>
 </div>
@@ -1209,11 +1317,11 @@ bisection, secant and Newton on any signal, counting evaluations.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/bisection.js?v=20261102180601"></script>
+  <script type="module" src="js/bundle/bisection.js?v=20261109080753"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-09">November 9, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

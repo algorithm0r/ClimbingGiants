@@ -6,8 +6,8 @@
 <title>Class 5 — Abstraction layers and known-answer checks</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261102180601">
-<link rel="stylesheet" href="css/demos.css?v=20261102180601">
+<link rel="stylesheet" href="css/blocks.css?v=20261109080753">
+<link rel="stylesheet" href="css/demos.css?v=20261109080753">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -720,6 +720,7 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 .deck-slide .c5steps{font-family:"SF Mono",Consolas,monospace; color:#3f3b36}
 .deck-slide .pcard > b.c5steps{font-size:.66em; color:#3f3b36; white-space:nowrap}
 .deck-slide .pcard > b.c5steps.c5big{font-size:.92em}
+.deck-slide .pcard > code.c5def{font-family:"SF Mono",Consolas,monospace; font-size:.62em; color:#3f3b36}
 .deck-slide .c5note{font-size:calc(var(--stage-code) * .78); color:var(--warm-gray);
   max-width:82%; margin:1.8vh auto 0; text-align:center; line-height:1.4}
 .deck-slide .c5note code{color:#3f3b36}
@@ -748,7 +749,21 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 .deck-slide .c5ladder span:nth-child(3n+1){justify-self:end}
 .deck-slide .c5ladder.c5bin{grid-template-columns:repeat(5, auto); font-size:calc(var(--stage-code) * 1.25)}
 .deck-slide .c5ladder.c5bin span{justify-self:start}
-.deck-slide .c5ladder.c5bin span:nth-child(5n+1){justify-self:end}
+.deck-slide .c5apis{font-size:1em}
+/* a centred slide whose stage holds cards gets a fixed stage height, so the deck's text fit
+   has room to grow the cards to the size every other slide uses */
+.deck-slide.point.c5mid .stage:has(> .pcards){height:36vh}
+.deck-slide .c5apis .pcard{text-align:left}
+.deck-slide .c5apis .pcard.c5wide{grid-column:1 / -1}
+.deck-slide .c5api.c5api2{grid-template-columns:max-content 1fr max-content 1fr}
+.deck-slide .c5api{display:grid; grid-template-columns:max-content 1fr; gap:.7vh 1.2vw; align-items:baseline; margin-top:.8vh; line-height:1.3}
+.deck-slide .c5api > code{font-family:"SF Mono",Consolas,monospace; color:var(--term); font-weight:600; font-size:.92em; white-space:nowrap}
+.deck-slide .c5api > span{color:#3f3b36}
+.deck-slide .c5api > span.c5arr{font-family:"SF Mono",Consolas,monospace; font-size:.92em; white-space:pre}
+.deck-slide .c5api > span code{font-family:"SF Mono",Consolas,monospace; font-size:.9em}
+.deck-slide .c5stored{display:flex; flex-direction:column; align-items:flex-start; width:max-content; margin:2.2vh auto 0;
+  font-family:"SF Mono",Consolas,monospace; font-size:calc(var(--stage-code) * 1.05); color:#3f3b36; gap:.5vh}
+.deck-slide .c5stored .lab{font-family:inherit; font-family:var(--font-body, sans-serif); font-size:.8em; color:#8a8178; margin:0 0 .4vh}
 .deck-slide .c5race{display:grid; grid-template-columns:repeat(4, auto); justify-content:center;
   gap:2.6vh 4vw; margin:0; font-family:"SF Mono",Consolas,monospace;
   font-size:calc(var(--stage-code) * 1.8); color:#3f3b36}
@@ -762,15 +777,51 @@ body.inclass .deck-slide.point.c5mid{justify-content:center}
 .deck-slide .c5layer.here .lay{color:#8A6508}
 .deck-slide .c5layer .here-tag{display:block; font-size:.6em; letter-spacing:.07em;
   text-transform:uppercase; color:#8A6508}
+.deck-slide .c5ok{color:var(--term); font-weight:700}
+.deck-slide .c5layer .ans.c5long{display:block; word-break:break-all}
+.deck-slide .c5note.c5rootnote{font-size:calc(var(--stage-code) * .52); margin-top:.8vh}
+.deck-slide .c5root .c5layer{padding-top:.4vh; padding-bottom:.4vh}
+.deck-slide .c5rel{align-items:start}
+.deck-slide .c5rel svg{width:100%; max-height:27vh}
+.deck-slide .c5ro{font-size:calc(var(--stage-code) * .56); line-height:1.35; color:var(--ink); min-height:2.7em;
+  margin:.2vh 0 .9vh; text-align:left}
+.deck-slide .c5relcode{font-family:"SF Mono",Consolas,monospace; font-size:calc(var(--stage-code) * .56); line-height:1.7;
+  text-align:left; background:#f7f6f2; border-radius:.3em; padding:1vh .6vw; margin:4vh 0 0; white-space:pre; color:#3f3b36}
+.deck-slide .c5relcode span{display:block; padding:0 .4em; border-left:.25em solid transparent}
+.deck-slide .c5relcode span.on{background:#e6ebd8; border-left-color:var(--course-accent)}
+.deck-slide .c5stack.c5root{font-size:calc(var(--stage-code) * .58); gap:.45vh}
+.deck-slide .c5root .c5layer{grid-template-columns:6.5em minmax(0,1.3fr) minmax(0,1.95fr) minmax(0,.9fr) 5.5em}
+.deck-slide .c5list{display:flex; flex-direction:column; align-items:flex-start; width:max-content; margin:0 auto; gap:1.2vh;
+  font-family:"SF Mono",Consolas,monospace; font-size:calc(var(--stage-code) * 1.4); color:#3f3b36}
+.deck-slide .c5newton{display:grid; grid-template-columns:repeat(4, auto); justify-content:center; gap:1.1vh 3vw;
+  font-family:"SF Mono",Consolas,monospace; font-size:calc(var(--stage-code) * 1.05); color:#3f3b36}
+.deck-slide .c5newton > span:nth-child(4n+1), .deck-slide .c5newton > span:nth-child(4n){justify-self:end}
+.deck-slide .c5newton .h{font-family:var(--font-body, sans-serif); font-size:.62em; font-weight:700; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--warm-gray); align-self:end}
+.deck-slide .c5hint{font-size:.78em; color:var(--warm-gray); max-width:90%;
+  margin:1.2vh auto 0; text-align:center; line-height:1.4}
+.deck-slide .pcol .c5hint{text-align:left; margin:.3vh 0 0; max-width:none}
+.deck-slide .c5hint code{font-family:"SF Mono",Consolas,monospace; color:var(--term); font-weight:600}
+.deck-slide .c5rootbig .katex{font-size:2.6em}
+.deck-slide .head .katex{font-size:1em}
+.deck-slide .c5nw{white-space:nowrap}
+.deck-slide .c5bob{font-size:calc(var(--stage-code) * .76)}
+.deck-slide .c5bob .c5layer{grid-template-columns:minmax(0,.9fr) minmax(0,1.4fr) minmax(0,1.3fr); padding:1vh 1.2vw}
+.deck-slide .c5choice{font-size:.8em; line-height:1.4; max-width:96%; margin:1.4vh auto 0; padding:.7vh 1.2vw;
+  text-align:left; background:#f3eff8; border-left:.3em solid var(--course-accent); border-radius:.3em; color:var(--ink)}
+.deck-slide .pcol .c5choice{max-width:none; margin:.3vh 0 0; font-size:.9em}
+.deck-slide .c5choice > b{color:var(--course-accent-dark)}
+.deck-slide .pcard.c5why{background:#f3eff8; border-color:var(--course-accent)}
+.deck-slide .pcard.c5why > b{color:var(--course-accent-dark)}
 </style>
 
 <!-- Week 5 had no class, so this arrival slide shows both week 5 (The Pantry) and
      week 6 (Connection Time), each for 30 seconds in turn. -->
 <section class="deck-slide arrive">
   <div class="c5pair">
-  <img src="data/img/f4f/f4f-05.png?v=20261102180601" width="1920" height="1080"
+  <img src="data/img/f4f/f4f-05.png?v=20261109080753" width="1920" height="1080"
          alt="The Pantry at UWT. The Pantry provides supplemental, nutritional, and culturally relevant food as well as hygiene items to all UWT students. Anyone with a Husky ID may access the Pantry. Hours and online request form can be found on The Pantry website, or visit the Pantry Instagram page for the most updated information: @uwtpantry. Beside it, a photograph of the Pantry's sign, 'Nourish the body, feed the soul', next to a refrigerator stocked with eggs and milk.">
-  <img class="c5second" src="data/img/f4f/f4f-06.png?v=20261102180601" width="1920" height="1080"
+  <img class="c5second" src="data/img/f4f/f4f-06.png?v=20261109080753" width="1920" height="1080"
        alt="Connection time. Form groups of three. Take turns sharing 3 things (people, places, activities, etc.) that you are grateful for, and describe why. Remember to practice active listening as others share. Beside it, a photograph of two students reading together on campus steps.">
   </div>
 </section>
@@ -787,7 +838,7 @@ body.inclass .deck-slide.point.c5mid{justify-content:center}
      a plain loop, sum(x) / 4 and np.mean all give -404.29999999999995 (numpy adds
      fewer than eight numbers in order), the same four added in reverse give -404.3,
      and exact decimal arithmetic gives -404.3. -->
-<section class="deck-slide point c5mid">
+<section class="deck-slide point c5mid" data-nofit>
   <div class="head">
     <p class="say">Using any tools you like, find the mean of these <span class="term">four accelerations</span> (in m/s<sup>2</sup>).</p>
   </div>
@@ -798,7 +849,7 @@ body.inclass .deck-slide.point.c5mid{justify-content:center}
   </div>
 </section>
 
-<section class="deck-slide point c5mid">
+<section class="deck-slide point c5mid" data-nofit>
   <div class="head">
     <p class="say">Who got this answer?</p>
   </div>
@@ -808,7 +859,7 @@ body.inclass .deck-slide.point.c5mid{justify-content:center}
   </div>
 </section>
 
-<section class="deck-slide point c5mid">
+<section class="deck-slide point c5mid" data-nofit>
   <div class="head">
     <p class="say">Which answer is correct?</p>
     <p class="sub">How do we know?</p>
@@ -818,7 +869,7 @@ body.inclass .deck-slide.point.c5mid{justify-content:center}
   </div>
 </section>
 
-<section class="deck-slide point c5mid">
+<section class="deck-slide point c5mid" data-nofit>
   <div class="head">
     <p class="say">Each layer is an <span class="term">abstraction</span> that hides more of the arithmetic than the layer above it.</p>
     <p class="sub">Each layer checks, and is checked by, the others.</p>
@@ -879,7 +930,7 @@ mean = total / 4</code></span>
      digits (15 to 17 significant decimal digits); 407.2 is stored as
      407.19999999999998863131622783839702606201171875, off by 1.1e-14; the loop's mean of
      the four, -404.29999999999995, is off from -404.3 by 5.7e-14. -->
-<section class="deck-slide point c5mid">
+<section class="deck-slide point c5mid" data-nofit>
   <div class="head">
     <p class="say">In decimal, <span class="term">one third</span> goes on forever, so on paper you stop writing 3s and round.</p>
     <p class="sub">Every place you stop, the answer comes up short.</p>
@@ -893,9 +944,9 @@ mean = total / 4</code></span>
   </div>
 </section>
 
-<section class="deck-slide point c5mid">
+<section class="deck-slide point c5mid" data-nofit>
   <div class="head">
-    <p class="say">The computer works in binary, where <span class="term">one tenth</span> goes on forever.</p>
+    <p class="say">A Python float works in binary, where <span class="term">one tenth</span> goes on forever.</p>
     <p class="sub">Binary uses only 0 and 1, with places worth a half, a quarter, an eighth, and so on.</p>
   </div>
   <div class="stage">
@@ -905,25 +956,179 @@ mean = total / 4</code></span>
       <span>0.000110011</span><span>=</span><span>51/512</span><span>=</span><span>0.099609375</span>
       <span>0.0001100110011</span><span>=</span><span>819/8192</span><span>=</span><span>0.0999755859375</span>
     </div>
-    <p class="c5note">Every place you stop, the answer comes up short of 0.1. The computer stores a rounded 0.1, so in Python <code>0.1&nbsp;+&nbsp;0.2</code> prints 0.30000000000000004.</p>
+    <div class="c5stored">
+      <p class="lab">What a float stores for 0.1, after 55 places with the last one rounded up</p>
+      <span>0.0001100110011001100110011001100110011001100110011001101</span>
+      <span>= 0.1000000000000000055511151231257827021181583404541015625</span>
+    </div>
+    <p class="c5note">Every place you stop, the answer comes up short of 0.1. The float rounds its last place up, so its 0.1 is a little too large, and <code>0.1&nbsp;+&nbsp;0.2</code> prints 0.30000000000000004.</p>
   </div>
 </section>
 
-<section class="deck-slide point">
+<section class="deck-slide point c5mid">
   <div class="head">
-    <p class="say">The computer keeps about <span class="term">16 digits</span> of every number, counted from the first one.</p>
-    <p class="sub">For a number in the hundreds, that leaves about 13 decimal places.</p>
+    <p class="say">A Python float keeps about <span class="term">16 digits</span> of every number, counted from the first one.</p>
+    <p class="sub">A float is a double-precision number, with 53 binary digits. For a number in the hundreds, that leaves about 13 decimal places.</p>
   </div>
   <div class="stage">
     <div class="pcards c3">
       <div class="pcard"><span class="tag">you type</span><b class="c5steps c5big">&minus;407.2</b>
         <span>One of our four accelerations.</span></div>
-      <div class="pcard"><span class="tag">the computer stores</span><b class="c5steps c5big">&minus;407.199999999999988&hellip;</b>
+      <div class="pcard"><span class="tag">the float stores</span><b class="c5steps c5big">&minus;407.199999999999988&hellip;</b>
         <span>The closest number it can make from 53 binary digits. It is off by about 0.00000000000001.</span></div>
       <div class="pcard"><span class="tag">the mean of all four</span><b class="c5steps c5big">&minus;404.29999999999995</b>
         <span>Each of the four was rounded when stored, and each addition rounds again. The answer is off by about 0.00000000000006.</span></div>
     </div>
     <p class="c5note">An accelerometer's own digits run out long before the 16th, so this rounding is far smaller than anything a crash measurement can show.</p>
+  </div>
+</section>
+
+<!-- The square root of 2, checked in Python on 2026-11-07: sqrt(2) = 1.41421356237309504880...;
+     np.sqrt(2) prints 1.4142135623730951 (the double nearest sqrt(2), 9.7e-17 above); five rounds
+     of g = (g + 2/g) / 2 from 1.0 print 1.414213562373095 (the double just below, 1.25e-16 below),
+     and a sixth round changes nothing; g * g prints 1.9999999999999996 and np.sqrt(2) ** 2 prints
+     2.0000000000000004; doubles near 1.4 are 2.2e-16 apart. Rounds 1-4 are 3/2, 17/12, 577/408,
+     665857/470832. YBC 7289 (Yale Babylonian Collection, about 1800-1600 BCE) gives 1;24,51,10 in
+     base 60 = 1.41421296. A 5-place log table: log 2 = 0.30103, half is 0.150515, nearest entry
+     0.15051 = log 1.4142. Heron of Alexandria, Metrica, about 60 CE. -->
+<section class="deck-slide point c5mid" data-nofit>
+  <div class="head">
+    <p class="say">Using any tools you like, find the <span class="term">square root of 2</span>.</p>
+  </div>
+  <div class="stage">
+    <p class="c5answer c5rootbig">$\sqrt{2}$</p>
+  </div>
+</section>
+
+<section class="deck-slide point c5mid" data-nofit>
+  <div class="head">
+    <p class="say">Which answer is correct?</p>
+    <p class="sub">How do we know?</p>
+  </div>
+  <div class="stage">
+    <div class="c5list">
+      <span>1.41</span><span>1.4142</span><span>1.414213562</span><span>1.414213562373095</span><span>1.4142135623730951</span>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point c5mid" data-nofit>
+  <div class="head">
+    <p class="say">Every tool gives an <span class="term">approximation</span> of <span class="c5nw">$\sqrt{2}$,</span> and each one stops at a different digit.</p>
+    <p class="sub">$\sqrt{2}$ = 1.41421356237309504880&hellip; and the digits never end. Green digits agree with $\sqrt{2}$.</p>
+  </div>
+  <div class="stage">
+    <div class="c5stack c5root">
+      <div class="c5layer c5cols"><span>Tool</span><span>Method</span><span>Answer</span><span>What limits it</span><span>Since</span></div>
+      <div class="c5layer"><span class="lay">Clay tablet</span>
+        <span>Written in base 60 as 1;24,51,10 on a Babylonian tablet (Yale, YBC&nbsp;7289).</span>
+        <span class="ans"><span class="c5ok">1.41421</span>296</span>
+        <span class="saves">Three base-60 places after the point</span>
+        <span class="desk">1700s BCE</span></div>
+      <div class="c5layer"><span class="lay">Paper</span>
+        <span>Start at 1 and replace the guess with the average of the guess and 2&nbsp;&divide;&nbsp;guess. Three rounds give 577/408.</span>
+        <span class="ans"><span class="c5ok">1.41421</span>57</span>
+        <span class="saves">Each round costs a long division</span>
+        <span class="desk">60 CE</span></div>
+      <div class="c5layer"><span class="lay">Log table</span>
+        <span>Halve log&nbsp;2 = 0.30103 and look up 0.15051 in the table.</span>
+        <span class="ans"><span class="c5ok">1.4142</span></span>
+        <span class="saves">The five places printed in the table</span>
+        <span class="desk">1620s</span></div>
+      <div class="c5layer"><span class="lay">Slide rule</span>
+        <span>Put the cursor on 2 on the A scale and read the D scale under it.</span>
+        <span class="ans"><span class="c5ok">1.41</span></span>
+        <span class="saves">How finely you can read the scale</span>
+        <span class="desk">1620s</span></div>
+      <div class="c5layer"><span class="lay">Calculator</span>
+        <span>Type 2 and press &radic;.</span>
+        <span class="ans"><span class="c5ok">1.414213562</span></span>
+        <span class="saves">The ten digits on the display</span>
+        <span class="desk">1970s</span></div>
+      <div class="c5layer"><span class="lay">Program</span>
+        <span><code class="c5code">g = 1.0
+for i in range(5):
+    g = (g + 2/g) / 2</code></span>
+        <span class="ans"><span class="c5ok">1.414213562373095</span></span>
+        <span class="saves">53 binary digits, rounded at every step</span>
+        <span class="desk">1980s</span></div>
+      <div class="c5layer"><span class="lay">Library</span>
+        <span><code>np.sqrt(2)</code></span>
+        <span class="ans"><span class="c5ok">1.414213562373095</span>1</span>
+        <span class="saves">53 binary digits</span>
+        <span class="desk">1990s</span></div>
+      <!-- Asked on 2026-11-08 with slide 10's prompt alone, one fresh agent per model. Haiku ran
+           no tool and gave 1.414213562373095 ("a standard mathematical constant"). Sonnet and Opus
+           each used Python's decimal module at 50 significant digits and gave
+           1.4142135623730950488016887242096980785696718753769, correct to the last digit (the
+           next digit is 4). Opus also gave math.sqrt(2) = 1.4142135623730951 and its square,
+           2.0000000000000004. -->
+      <div class="c5layer ai"><span class="lay">AI</span>
+        <span class="ask">&ldquo;Using any tools you like, find the square root of 2.&rdquo;</span>
+        <span class="ans3">
+          <span><span class="ans"><span class="c5ok">1.414213562373095</span></span> <span class="how">(Claude Haiku, from memory)</span></span>
+          <span><span class="ans c5long"><span class="c5ok">1.4142135623730950488016887242096980785696718753769</span></span> <span class="how">(Claude Sonnet and Claude Opus, each ran Python to 50 digits)</span></span>
+        </span>
+        <span class="saves">How many digits they choose to ask for</span>
+        <span class="desk">2020s</span></div>
+    </div>
+    <p class="c5note c5rootnote">Every value on this slide was also checked by an AI running Python.</p>
+  </div>
+</section>
+
+<section class="deck-slide point c5mid" data-nofit>
+  <div class="head">
+    <p class="say">Each round of averaging about <span class="term">doubles</span> the digits that agree with $\sqrt{2}$.</p>
+    <p class="sub">Heron of Alexandria wrote the method down around 60 CE. It is Newton&rsquo;s method for $x^2 - 2 = 0$, which some chips use for square roots.</p>
+  </div>
+  <div class="stage">
+    <div class="c5newton" style="gap:.6vh 3vw">
+      <span class="h">round</span><span class="h">guess</span><span class="h">Python prints</span><span class="h">digits that agree</span>
+      <span>0</span><span>1</span><span><span class="c5ok">1</span></span><span>1</span>
+      <span>1</span><span>3/2</span><span><span class="c5ok">1</span>.5</span><span>1</span>
+      <span>2</span><span>17/12</span><span><span class="c5ok">1.41</span>66666666666665</span><span>3</span>
+      <span>3</span><span>577/408</span><span><span class="c5ok">1.41421</span>56862745097</span><span>6</span>
+      <span>4</span><span>665857/470832</span><span><span class="c5ok">1.41421356237</span>46899</span><span>12</span>
+      <span>5</span><span>&hellip;</span><span><span class="c5ok">1.414213562373095</span></span><span>16</span>
+    </div>
+    <!-- Round 6, checked in Python on 2026-11-08: after round 5, g = 0x1.6a09e667f3bccp+0 and
+         2/g = 0x1.6a09e667f3bcdp+0, adjacent doubles below and above sqrt(2). Their exact sum is
+         a tie between two doubles near 2.83; round-half-to-even gives 2g, and halving gives g.
+         Exact arithmetic would have reached the double above, which np.sqrt(2) returns. -->
+    <p class="c5note">After round 5 the guess is the closest float below $\sqrt{2}$, and a sixth round prints the same number.</p>
+  </div>
+</section>
+
+<section class="deck-slide point c5mid" data-nofit>
+  <div class="head">
+    <p class="say">The two float answers sit on <span class="term">either side</span> of $\sqrt{2}$, with no float between them.</p>
+    <p class="sub">Squaring checks a root, and neither answer squares back to exactly 2.</p>
+  </div>
+  <div class="stage">
+    <div class="c5ladder">
+      <span>g * g</span><span>&rarr;</span><span>1.9999999999999996</span>
+      <span>np.sqrt(2) ** 2</span><span>&rarr;</span><span>2.0000000000000004</span>
+    </div>
+    <p class="c5note">Near 1.4 floats come in steps of about 0.0000000000000002, and $\sqrt{2}$ falls between two of them. The loop lands on the one below and <code>np.sqrt(2)</code> on the one above, which is the closer of the two.</p>
+  </div>
+</section>
+
+<!-- ============================================================ libraries -->
+
+<section class="deck-slide point c5mid">
+  <div class="head">
+    <p class="say">We import <span class="term">NumPy</span> and SciPy because they do most of the arithmetic for us.</p>
+    <p class="sub">In the second half, NumPy does each step of Assignment 5 in a line or two.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">built into Python</span><code class="c5def">x = [-407.2, -388.2, -426.9, -394.9]</code><b class="c5steps">sum(x) / len(x)</b>
+        <span>Python works on one number at a time. Anything on a whole list needs a loop or a built-in such as <code>sum</code>.</span></div>
+      <div class="pcard gold"><span class="tag">import numpy as np</span><code class="c5def">x = np.array([-407.2, -388.2, -426.9, -394.9])</code><b class="c5steps">np.mean(x)</b>
+        <span><code>np.array</code> turns the list into an array, and NumPy works on the whole array at once. One call gives a mean, the differences between frames or a least-squares fit.</span></div>
+      <div class="pcard"><span class="tag">import scipy</span><b class="c5steps">scipy.optimize</b>
+        <span>SciPy is built on NumPy and holds finished methods for fitting, root finding, filtering and integration.</span></div>
+    </div>
   </div>
 </section>
 
@@ -965,6 +1170,37 @@ mean = total / 4</code></span>
   </div>
 </section>
 
+<!-- Reading Bob's request. Gravity at the surface: about 9.78 m/s^2 at the equator to 9.83 at
+     the poles (normal gravity). Vertical tracking noise 3.07 cm is the pack header's. The use
+     (where the ball is going before it gets there) matches the example reports' reading,
+     the height at the hoop, and Assignment 6. -->
+<section class="deck-slide point c5mid" data-nofit>
+  <div class="head">
+    <p class="say">Bob never says what the model is for, so we read each phrase with what we know about <span class="term">shooting and gravity</span>.</p>
+    <p class="sub">Each phrase leaves out something Bob takes for granted.</p>
+  </div>
+  <div class="stage">
+    <div class="c5stack c5bob">
+      <div class="c5layer c5cols"><span>Bob says</span><span>What it takes to read it</span><span>So he means</span></div>
+      <div class="c5layer"><span class="lay">&ldquo;the flight model&rdquo;</span>
+        <span>A ball in the air feels gravity and little else, so its height is a parabola in time.</span>
+        <span>$z = c_0 + c_1 t + c_2 t^2$ through the frames after the hand lets go, with $g = -2c_2$.</span></div>
+      <div class="c5layer"><span class="lay">&ldquo;let the data tell me what gravity is&rdquo;</span>
+        <span>Gravity is the curvature of that parabola.</span>
+        <span>Fit $c_2$ as well, so each shot gets its own gravity.</span></div>
+      <div class="c5layer"><span class="lay">&ldquo;hold gravity at 9.81&rdquo;</span>
+        <span>Gravity at the Earth&rsquo;s surface runs from 9.78&nbsp;m/s&sup2; at the equator to 9.83 at the poles, and it is the same for every shot in a game.</span>
+        <span>Fix $c_2$ at $-9.81/2$ and fit only the release height and upward speed.</span></div>
+      <div class="c5layer"><span class="lay">&ldquo;build the rest of the season on one&rdquo;</span>
+        <span>A model of a shot is worth having when it says where the ball is going before it gets there.</span>
+        <span>The model will run on shots it was not fitted to, and predict frames it has not seen.</span></div>
+      <div class="c5layer"><span class="lay">&ldquo;how you know&rdquo;</span>
+        <span>Bob was not there when we fitted it.</span>
+        <span>Evidence he can follow, and how many shots it rests on.</span></div>
+    </div>
+  </div>
+</section>
+
 <section class="deck-slide point">
   <div class="head">
     <p class="say">Both models describe the same flights, and today we work out <span class="term">which</span> one Bob should build on.</p>
@@ -994,45 +1230,78 @@ mean = total / 4</code></span>
 
 <section class="deck-slide point compact">
   <div class="head">
-    <p class="say">Arc 662 has <span class="term">56 frames</span>, from before the throw until after the ball reaches the hoop.</p>
+    <p class="say">In flight, physics makes the path from above and the vertical speed <span class="term">straight lines</span>, and the height a parabola.</p>
     <p class="sub">Step 1 of 7 &middot; What does one arc look like?</p>
   </div>
   <div class="stage tight">
-    <div class="figside" style="grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)">
-      <img src="data/img/class05/c5-a5-arc.svg?v=20261102180601"
-           alt="Arc 662 against time. Top: the height rises from 1.25 m to 4.75 m and falls again. Bottom: the vertical speed dips, climbs to about 5 m/s near 0.44 s, then falls on a nearly straight line to about -5 m/s.">
-      <div class="pcol">
-        <div class="pcard"><span class="tag">what we found</span><b>A climb, then a straight fall</b>
-          <span>At 25 frames a second, the vertical speed climbs to 5.2&nbsp;m/s at 0.44&nbsp;s and then falls on a nearly straight line. The height tops out at 4.75&nbsp;m.</span></div>
-        <div class="pcard"><span class="tag">what we learn</span><b>Gravity is the slope</b>
-          <span>In free flight the only vertical force is gravity, so the speed falls by 9.81&nbsp;m/s each second, or 0.39&nbsp;m/s a frame. While the speed climbs, the hand is still pushing, and neither model describes that.</span></div>
-        <div class="pcard gold"><span class="tag">next</span><b>Where does the hand let go?</b>
-          <span>Neither model should see the push.</span></div>
-      </div>
+    <div class="figside" style="grid-template-columns:minmax(0,1fr); max-width:82%; margin:0 auto">
+      <img src="data/img/class05/c5-a5-arc-top.svg?v=20261109080753"
+           alt="Arc 662, with frames 16 to 33 in green and the fits to them in gold, solid over those frames and dashed across the rest of the record. Left, from above: the frames run along the straight line to the hoop. Right, against time. Top: the height rises from 1.25 m to 4.75 m and falls again, on the parabola through the middle of the flight; the early frames, while the hand is pushing, sit off it. Bottom: the vertical speed, by central difference with h = 2 frames, dips, climbs to about 5 m/s near 0.44 s, then falls along the straight line to about -5 m/s, leaving it again near the hoop.">
+    </div>
+  </div>
+</section>
+
+<!-- How many frames to difference over. Numbers from trace_a5.py ("frame to frame ...",
+     "arc 662, ..."): scatter of the free-flight speeds about a straight line,
+     forward difference and central at h = 1, 2, 4 frames: arc 662 0.58 / 0.28 / 0.15 / 0.09
+     m/s, pack medians 0.80 / 0.42 / 0.22 / 0.11; the release rule on arc 662 stops at frame
+     25 / 12 / 11 / 13; across the pack the release moves 1 to 16, -1 to 16, 0, and -1 to 2
+     frames from the one found at h = 2. -->
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Working out the speed over <span class="term">more frames</span> cuts the noise and blurs the moment the hand lets go.</p>
+    <p class="sub">Step 1 of 7 &middot; What does one arc look like?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1fr); max-width:62%; margin:0 auto">
+      <img src="data/img/class05/c5-a5-spans.svg?v=20261109080753"
+           alt="The vertical speed of arc 662 worked out four ways, with the frame where the release rule stops marked in red. Forward difference: the speed jumps up and down by about half a meter a second and the rule stops at frame 25, in mid-flight. Central difference with h = 1 frame: less jumpy, the rule stops at frame 12. With h = 2 frames: a nearly straight fall, the rule stops at frame 11. With h = 4 frames: smoother still, with the peak at the release rounded off, and the rule stops at frame 13.">
     </div>
   </div>
 </section>
 
 <!-- ============================================================ step 2 -->
 
-<section class="deck-slide point compact">
+<section class="deck-slide point compact" data-nofit>
   <div class="head">
     <p class="say">Which frame would you take as the <span class="term">first frame</span> of free flight?</p>
     <p class="sub">Step 2 of 7 &middot; Where does free flight start?</p>
   </div>
   <div class="stage tight">
-    <div class="figside" style="grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)">
-      <img src="data/img/class05/c5-a5-arc.svg?v=20261102180601"
-           alt="Arc 662 against time, height above and vertical speed below, as on the previous slide.">
+    <div class="figside" style="grid-template-columns:minmax(0,1fr) minmax(0,1.15fr)">
+      <img style="max-height:72vh" src="data/img/class05/c5-a5-vote.svg?v=20261109080753"
+           alt="Arc 662 by frame number, every frame, with frames 10 to 13 shaded. Above, the height rises and falls. Below it, three plots of the vertical speed, worked out by central differences at h = 1, 2 and 4 frames: each dips, climbs to a peak inside the shaded frames, then falls on a nearly straight line. The h = 1 plot is the most jagged and the h = 4 plot the smoothest, with its peak the most rounded.">
       <div class="pcol">
-        <div class="pcard gold"><span class="tag">predict &middot; vote</span><b>Arc 662</b>
+        <div class="pcard gold"><span class="tag">predict &middot; vote</span><b>Arc 662, frames 10 to 13</b>
           <div class="vote">
-            <div><b>A</b>The lowest point, where the ball starts up</div>
-            <div><b>B</b>The frame where the speed stops climbing</div>
-            <div><b>C</b>A few frames after that</div>
-            <div><b>D</b>The top of the arc</div>
+            <div><b>A</b>Frame 10</div>
+            <div><b>B</b>Frame 11</div>
+            <div><b>C</b>Frame 12</div>
+            <div><b>D</b>Frame 13</div>
           </div></div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- How the start and end are found, animated by CG_BOARDS.release in
+     src/standalone/class-05-figs.js from the numbers trace_a5.py prints ("release animation
+     data"). The code is the example notebook's (pipeline/examples/a06.py), with s['x'] and
+     s['hoop_x'] written as x and hoop_x. -->
+<section class="deck-slide point compact" data-nofit>
+  <div class="head">
+    <p class="say">The code walks back from the top of the arc to find the <span class="term">start</span>, then finds the first frame near the hoop for the <span class="term">end</span>.</p>
+    <p class="sub">Step 2 of 7 &middot; Where does free flight start?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside c5rel" data-board="release" style="grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)">
+      <div>
+        <div class="c5rel-speed"></div>
+        <p class="c5ro c5rel-ro1">&nbsp;</p>
+        <div class="c5rel-dist"></div>
+        <p class="c5ro c5rel-ro2">&nbsp;</p>
+      </div>
+      <pre class="c5relcode"><span data-line="top">i = int(np.argmax(z))</span><span data-line="while">while i &gt; 3 and (vz[i-1] &gt; vz[i] or vz[i-2] &gt; vz[i]):</span><span data-line="step">    i = i - 1</span><span data-line="start">start = i</span><span> </span><span data-line="d">dx = x - hoop_x</span><span data-line="d">dy = y - hoop_y</span><span data-line="end">end = int(np.argmax(np.hypot(dx, dy) &lt; 1.0))</span></pre>
     </div>
   </div>
 </section>
@@ -1044,15 +1313,15 @@ mean = total / 4</code></span>
   </div>
   <div class="stage tight">
     <div class="figside" style="grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)">
-      <img src="data/img/class05/c5-a5-release.svg?v=20261102180601"
+      <img src="data/img/class05/c5-a5-release.svg?v=20261109080753"
            alt="Arc 662 again, with free flight shaded from the release at 0.44 s to the first frame within 1 m of the hoop at 1.48 s.">
       <div class="pcol">
-        <div class="pcard"><span class="tag">what we found</span><b>Frame 11, at 0.44&nbsp;s</b>
+        <div class="pcard"><b>Frame 11, at 0.44&nbsp;s</b>
           <span>Walking back from the top of the arc, the upward speed keeps growing until frame 11. On the 23 arcs we use, the same rule gives a frame from 3 to 19.</span></div>
-        <div class="pcard"><span class="tag">what we learn</span><b>A rule goes in the report</b>
-          <span>Starting a frame or two late costs little, since each flight has 23 to 31 frames. Starting early puts the hand in the fit. We end at the first frame within 1&nbsp;m of the hoop, before the ball can touch the rim.</span></div>
-        <div class="pcard gold"><span class="tag">next</span><b>Fit both models</b>
-          <span>To the frames between the two lines.</span></div>
+        <div class="pcard"><b>Late costs less than early</b>
+          <span>Starting a frame or two late costs little, since each flight has 23 to 31 frames. Starting early puts the hand in the fit.</span></div>
+        <p class="c5choice"><b>Our choice:</b> start at the last frame where the upward speed grows, since only the hand can make it grow. End at the first frame within 1&nbsp;m of the hoop, because once the ball meets the rim or the backboard, gravity is no longer the only force on it. The file marks neither moment, so the report gives both rules.</p>
+        <p class="c5hint">In NumPy, <code>np.argmax(z)</code> finds the frame at the top of the arc. From there a <code>while</code> loop walks back as long as the speed keeps growing.</p>
       </div>
     </div>
   </div>
@@ -1066,26 +1335,53 @@ mean = total / 4</code></span>
     <p class="sub">Step 3 of 7 &middot; How do we fit each model?</p>
   </div>
   <div class="stage tight">
-    <div class="pcards c2">
-      <div class="pcard"><span class="tag">gravity fitted</span><b>Three unknowns</b>
-        <div class="work" style="font-size:1.15em">$$z = c_0 + c_1 t + c_2 t^2 \qquad g = -2c_2$$</div>
-        <span><code>A = np.column_stack([np.ones_like(t), t, t**2])</code><br>
-        <code>c = np.linalg.lstsq(A, z, rcond=None)[0]</code></span></div>
-      <div class="pcard"><span class="tag">gravity held at 9.81</span><b>Two unknowns</b>
-        <div class="work" style="font-size:1.15em">$$z + \tfrac{1}{2}(9.81)\,t^2 = c_0 + c_1 t$$</div>
-        <span><code>A = np.column_stack([np.ones_like(t), t])</code><br>
-        <code>c = np.linalg.lstsq(A, z + 0.5*9.81*t**2, rcond=None)[0]</code></span></div>
-    </div>
-    <div class="pcards c2 do">
-      <div class="pcard"><span class="tag">what we learn</span><b>The known term moves to the data side</b>
-        <span>With gravity held, the gravity term is no longer unknown, so we add it to every height and fit a straight line to what is left.</span></div>
-      <div class="pcard"><span class="tag">next</span><b>Which one fits better?</b>
-        <span>Fit both to the whole flight of every arc and compare.</span></div>
+    <div class="figside" style="grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)">
+      <img style="max-height:52vh" src="data/img/class05/c5-a5-fits.svg?v=20261109080753"
+           alt="Arc 662's 26 flight frames, height against time, drawn twice. Above, the parabola fitted with gravity free, which finds g = 9.72. Below, the parabola fitted with gravity held at 9.81. Both curves pass through the middle of the frames and look the same at this scale.">
+      <div class="pcol">
+        <div class="pcard"><span class="tag">gravity fitted</span><b>Three unknowns</b>
+          <div class="work" style="font-size:1.15em">$$z = c_0 + c_1 t + c_2 t^2 \qquad g = -2c_2$$</div>
+          <span><code class="c5nw">A = np.column_stack([np.ones_like(t), t, t**2])</code><br>
+          <code class="c5nw">c = np.linalg.lstsq(A, z, rcond=None)[0]</code></span></div>
+        <div class="pcard"><span class="tag">gravity held at 9.81</span><b>Two unknowns</b>
+          <div class="work" style="font-size:1.15em">$$z + \tfrac{1}{2}(9.81)\,t^2 = c_0 + c_1 t$$</div>
+          <span><code class="c5nw">A = np.column_stack([np.ones_like(t), t])</code><br>
+          <code class="c5nw">c = np.linalg.lstsq(A, z + 0.5*9.81*t**2, rcond=None)[0]</code></span></div>
+        <p class="c5choice"><b>Our choice:</b> fit the height alone, by least squares. Gravity pulls straight down, so it shows up only in the height, and from above the ball crosses the floor in a straight line at a steady speed. Least squares fits a model that is linear in its parameters in one solve, and it counts every frame the same.</p>
+        <p class="c5hint">SciPy&rsquo;s <code>scipy.optimize.curve_fit</code> fits either model from a Python function of t, with no matrix to build, and gives the same coefficients.</p>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- ============================================================ step 4 -->
+
+<!-- How the RMS is computed. Numbers from trace_a5.py ("arc 662 residuals"): gravity fitted
+     to the 26 flight frames of arc 662, residual = frame minus curve, -2.79 to 2.98 cm,
+     mean 0.00, sum of squares 63.98, mean square 2.46, RMS 1.57 cm. Gravity held: -2.92 to
+     2.72 cm, mean 0.00, sum of squares 67.36, mean square 2.59, RMS 1.61 cm. -->
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">The RMS <span class="term">squares</span> each residual, averages the squares, and takes the square root.</p>
+    <p class="sub">Step 4 of 7 &middot; How do we measure how close a curve is?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
+      <img style="max-height:50vh" src="data/img/class05/c5-a5-residuals.svg?v=20261109080753"
+           alt="The 26 residuals of arc 662 as vertical lines from zero against time, gravity fitted above and gravity held at 9.81 below. Both sets run from about -3 cm to +3 cm, above and below zero with no pattern. Dashed lines mark plus and minus the RMS: 1.57 cm with gravity fitted, 1.61 cm with gravity held.">
+      <div class="pcol">
+        <div class="pcard"><span class="tag">a new word</span><b>Residual</b>
+          <span>The frame&rsquo;s height minus the curve&rsquo;s height at that time. Arc 662 has 26 frames in flight, so each model has 26 residuals. With gravity fitted they run from &minus;2.79&nbsp;cm to +2.98&nbsp;cm.</span></div>
+        <div class="pcard"><span class="tag">why square</span><b>The plain average is 0.00&nbsp;cm</b>
+          <span>The gaps above the curve cancel the gaps below it. Squaring makes every gap count, whichever side it is on, and a gap twice as big counts four times as much.</span></div>
+        <div class="pcard"><span class="tag">a new word</span><b>RMS, root mean square</b>
+          <div class="work" style="font-size:.8em">$$\begin{aligned}\text{square each:}\quad &(-1.77)^2 = 3.14,\ \ 0.77^2 = 0.59,\ \ \ldots\\ \text{average:}\quad &63.98 \div 26 = 2.46\ \text{cm}^2\\ \text{square root:}\quad &\sqrt{2.46} = 1.57\ \text{cm}\end{aligned}$$</div>
+          <span>With gravity held at 9.81, the same steps give $\sqrt{67.36 \div 26} = 1.61$&nbsp;cm. In step 6 the same calculation on frames the model was not fitted to gives its error.</span></div>
+        <p class="c5hint">In NumPy, <code>res = z - z_fit</code> gives all 26 residuals, and <code>np.sqrt(np.mean(res**2))</code> gives the RMS.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
 <section class="deck-slide point compact">
   <div class="head">
@@ -1114,13 +1410,19 @@ mean = total / 4</code></span>
     <p class="sub">Step 4 of 7 &middot; Which model fits the data better?</p>
   </div>
   <div class="stage tight">
-    <div class="pcards c3">
+    <div class="figside" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
+      <img style="max-height:50vh" src="data/img/class05/c5-a5-whole.svg?v=20261109080753"
+           alt="One row for each of the 23 arcs, with two dots on each row: the RMS of the residuals with gravity held at 9.81 and with gravity fitted, both fitted to the whole flight. The fitted dot is left of the held dot on every row. On three rows the two dots sit on top of each other; on the rest the gap runs up to 1.33 cm. The fitted RMS runs from 1.44 to 3.18 cm and the held RMS from 1.61 to 4.45 cm.">
+      <div class="pcol">
       <div class="pcard"><span class="tag">what we found</span><b>2.48&nbsp;cm against 2.55&nbsp;cm</b>
         <span>The median RMS of the residuals, gravity fitted and gravity held. Both are under the 3.07&nbsp;cm of vertical tracking noise given in the header.</span></div>
       <div class="pcard"><span class="tag">what we learn</span><b>The RMS cannot choose between them</b>
         <span>The free model is able to pick 9.81 itself, so it can never fit worse than the model held at 9.81. Its RMS comes out smaller whatever the truth is.</span></div>
       <div class="pcard gold"><span class="tag">next</span><b>What does it do with the extra freedom?</b>
         <span>Look at the gravity it finds on each arc.</span></div>
+    <p class="c5choice"><b>Our choice:</b> every arc, one at a time. A single arc can mislead, so we fit both models to each of the 23 arcs and count how many favour each.</p>
+    <p class="c5hint">In NumPy, the RMS of the residuals is <code>np.sqrt(np.mean((z_fit - z)**2))</code>, where <code>z_fit</code> is the fitted curve at every frame.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -1134,15 +1436,16 @@ mean = total / 4</code></span>
   </div>
   <div class="stage tight">
     <div class="figside" style="grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)">
-      <img src="data/img/class05/c5-a5-gravity.svg?v=20261102180601"
+      <img src="data/img/class05/c5-a5-gravity.svg?v=20261109080753"
            alt="Histogram of the gravity the free model finds on each of 23 arcs. Fitted to the whole flight, the values cluster from about 9 to 10.4 m/s squared around the dashed line at 9.81. Fitted to the first half only, they spread from about 7.3 to 11.">
       <div class="pcol">
         <div class="pcard"><span class="tag">what we found</span><b>8.92 to 10.43&nbsp;m/s&sup2;</b>
           <span>Fitted to the whole flight (mean 9.67). Fitted to the first half only, the range widens to 7.32 to 11.02.</span></div>
         <div class="pcard"><span class="tag">what we learn</span><b>The fit follows the noise</b>
-          <span>The spread is far larger than any real change in gravity from one shot to the next, so most of it is probably the fit bending to the tracking noise. With fewer frames it can bend further.</span></div>
+          <span>Gravity is the same for every shot in a game, and anywhere on Earth it lies between 9.78 and 9.83. A spread of 1.5&nbsp;m/s&sup2; is thirty times that range, so most of it is probably the fit bending to the tracking noise. With fewer frames it can bend further.</span></div>
         <div class="pcard gold"><span class="tag">next</span><b>Does that matter for a prediction?</b>
           <span>Test each model on frames it has not seen.</span></div>
+        <p class="c5hint">Keep each arc&rsquo;s gravity in a list. Then <code>np.mean</code>, <code>np.min</code> and <code>np.max</code> summarize all 23 arcs at once.</p>
       </div>
     </div>
   </div>
@@ -1156,13 +1459,70 @@ mean = total / 4</code></span>
     <p class="sub">Step 6 of 7 &middot; Which model predicts better?</p>
   </div>
   <div class="stage tight">
-    <div class="pcards c1">
-      <div class="pcard gold"><span class="tag">predict &middot; vote</span><b>The RMS of the gaps between each curve and the second half, which neither model saw</b>
-        <div class="vote">
-          <div><b>A</b>Gravity fitted</div>
-          <div><b>B</b>Gravity held</div>
-          <div><b>C</b>About the same</div>
-        </div></div>
+    <div class="figside" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
+      <img style="max-height:46vh" src="data/img/class05/c5-a5-vote6.svg?v=20261109080753"
+           alt="Arc 662, height against time. The first 13 frames are filled and the last 13 hollow on a shaded background. Two curves, one solid and one dashed, are fitted to the first 13 frames and carried on through the rest. They lie together over the filled frames and separate over the hollow ones. Nothing says which curve is which model.">
+      <div class="pcol">
+        <div class="pcard c5why"><span class="tag">our choice</span><b>Why hold back the second half</b>
+          <ul>
+            <li>Bob will run the model on shots it was not fitted to, so we score each model on frames it was not given.</li>
+            <li>He wants to know where the ball is going, so we keep the later frames back and predict forward, toward the hoop.</li>
+            <li>Half leaves 11 to 16 frames for each job, enough for the fit to settle and enough for the score to average out the noise. Step 7 tries a shorter fit.</li>
+          </ul></div>
+        <div class="pcard gold"><span class="tag">predict &middot; vote</span><b>The RMS of the gaps between each curve and the second half, which neither model saw</b>
+          <div class="vote">
+            <div><b>A</b>Gravity fitted</div>
+            <div><b>B</b>Gravity held</div>
+            <div><b>C</b>About the same</div>
+          </div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How the error is computed. Numbers from trace_a5.py ("half split"): arc 662 has 26 flight
+     frames, fitted to the first 13 and scored on the last 13. Gravity fitted: g 9.34, RMS on the
+     fitted frames 1.49 cm, on the unseen frames 9.19 cm (gaps -15.1 to -2.0). Gravity held: RMS
+     1.56 cm and 2.53 cm (gaps -4.2 to 0.0). -->
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Each model gets two RMS values, one on the frames it was <span class="term">fitted</span> to and one on the frames it <span class="term">predicts</span>.</p>
+    <p class="sub">Step 6 of 7 &middot; Which model predicts better?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
+      <img style="max-height:55vh" src="data/img/class05/c5-a5-split.svg?v=20261109080753"
+           alt="Arc 662 in two panels against time. Above, its height: the first 13 frames filled, the last 13 hollow on a shaded background, with both fitted curves running through all 26. They lie together over the first 13 and separate toward the end, where the fitted-gravity curve passes above the hollow dots. Below, each frame minus each curve in centimeters. On the first 13 frames both sets of gaps stay within about 3 cm of zero. On the last 13 the held model's gaps stay within 4.2 cm, while the fitted model's grow to 15.1 cm below the frames by the end.">
+      <div class="pcol">
+        <div class="pcard"><span class="tag">the first 13 frames</span><b>RMS of the fit: 1.49&nbsp;cm fitted, 1.56&nbsp;cm held</b>
+          <span>Each model is fitted to the first 13 frames of the flight, the filled dots. The gaps on these frames are residuals, as in step 4.</span></div>
+        <div class="pcard"><span class="tag">the last 13 frames</span><b>RMS of the error: 9.19&nbsp;cm fitted, 2.53&nbsp;cm held</b>
+          <span>Each curve carries on through the last 13 frames, the hollow dots, which the fit never saw. The gaps there are errors, and their RMS comes from the same three steps.</span></div>
+        <p class="c5hint">With <code>half = len(t) // 2</code>, fit to <code>t[:half]</code> and score on <code>t[half:]</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Why arc 325 is left out. Numbers from trace_a5.py ("arc 325"): flight frames 13 to 40;
+     frames 25-35 fall -0.0164 m each (one -0.0163), frames 35-44 fall -0.1459 m (two -0.146);
+     whole-flight RMS 5.76 cm against 1.44 to 3.18 cm for the other 23. -->
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Arc 325 is left out, since part of its flight was <span class="term">filled in</span>.</p>
+    <p class="sub">Step 6 of 7 &middot; Which model predicts better?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
+      <img style="max-height:52vh" src="data/img/class05/c5-a5-arc325.svg?v=20261109080753"
+           alt="Two panels against frame. Above, the height of arc 325 at every frame, with frames 25 to 44 in red forming two straight segments, a shallow one and then a steep one. Below, the change in height from one frame to the next for arc 325 and for arc 662. Arc 662's changes wander from frame to frame. Arc 325's changes sit on two flat runs over the red frames, about -0.02 m and then about -0.15 m.">
+      <div class="pcol">
+        <div class="pcard"><span class="tag">the steps</span><b>The same fall every frame</b>
+          <span>From frame 25 to frame 35 the height falls 0.0164&nbsp;m each frame, and from frame 35 to frame 44 it falls 0.1459&nbsp;m. With 3&nbsp;cm of tracking noise, real steps differ from frame to frame, as they do in arc 662.</span></div>
+        <div class="pcard"><span class="tag">the fit</span><b>An RMS of 5.76&nbsp;cm</b>
+          <span>Fitted to its whole flight, arc 325 sits about twice as far from its curve as any other arc, where the rest run from 1.44 to 3.18&nbsp;cm. The tracker probably lost the ball near the top, and the gap was filled with straight lines. That leaves 23 arcs.</span></div>
+        <p class="c5hint">In NumPy, <code>np.diff(z)</code> gives the change in height from each frame to the next.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -1174,7 +1534,7 @@ mean = total / 4</code></span>
   </div>
   <div class="stage tight">
     <div class="figside" style="grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)">
-      <img src="data/img/class05/c5-a5-unseen.svg?v=20261102180601"
+      <img src="data/img/class05/c5-a5-unseen.svg?v=20261109080753"
            alt="One dot per arc on log axes: the RMS of the errors on the second half with gravity held, across, against gravity fitted, up. Most dots sit above the dashed line of equal error, and one sits near 36 cm fitted against 4 cm held.">
       <div class="pcol">
         <div class="pcard"><span class="tag">what we found</span><b>4.2&nbsp;cm held, 5.8&nbsp;cm fitted</b>
@@ -1183,12 +1543,37 @@ mean = total / 4</code></span>
           <span>The residual is the gap on the frames a model was given. The gap on frames it was not given is its error, and that is what a prediction depends on. Fitting gravity buys a closer fit and costs a worse prediction.</span></div>
         <div class="pcard gold"><span class="tag">next</span><b>Look back before we tell Bob</b>
           <span>What does the answer rest on?</span></div>
+        <p class="c5choice"><b>Our choice:</b> the median and the count. One arc missed by 35.7&nbsp;cm, and a mean would carry that one arc into the summary. The count shows whether the lead comes from most of the arcs or from a few.</p>
+        <p class="c5hint">With <code>half = len(t) // 2</code>, fit to <code>t[:half]</code> and score on <code>t[half:]</code>. Then <code>np.sum(err_held &lt; err_fit)</code> counts the arcs where holding gravity is closer.</p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ============================================================ step 7 -->
+
+<!-- Arc 739. Numbers from trace_a5.py ("arc 739", "first frame heights"): first frame 2.46 m,
+     the other 22 arcs 0.67 to 2.32 m; release rule stops at frame 3. Unseen-half RMS by start
+     frame 3..8: fitted 9.2 25.5 23.4 12.9 5.5 15.7, held 9.5 7.3 5.5 3.6 3.8 3.7 cm. At start 3
+     the fitted model is closer, so the count is 14 of 23; any later start makes it 15. -->
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Where arc 739&rsquo;s flight starts is <span class="term">uncertain</span>, and the verdict on that arc depends on it.</p>
+    <p class="sub">Step 7 of 7 &middot; Does the answer make sense?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
+      <img style="max-height:55vh" src="data/img/class05/c5-a5-arc739.svg?v=20261109080753"
+           alt="Two panels. Above, the vertical speed against frame for arcs 739 and 662 over the first 20 frames. Arc 662's speed falls, then rises from frame 6 to frame 11 as the hand pushes, then falls. Arc 739's speed starts near 5 m/s and falls slowly to frame 7, then faster. Below, bars of the RMS of the error on the unseen half of arc 739 for flight starts at frames 3 to 8, gravity fitted beside gravity held. At frame 3 the two bars are about equal, 9.2 and 9.5 cm. At frames 4 to 8 the held bar is shorter every time, between 3.6 and 7.3 cm, while the fitted bar runs from 5.5 to 25.5 cm.">
+      <div class="pcol">
+        <div class="pcard"><span class="tag">the start</span><b>No clear push in the record</b>
+          <span>Arc 739&rsquo;s first frame is 2.46&nbsp;m up, higher than the first frame of any other arc. From frame 2 to frame 7 its speed falls about 1&nbsp;m/s, where gravity alone would take off about 2&nbsp;m/s, so the hand may still be on the ball. The rule walks back to frame 3, the earliest frame it can return, and stops there. The flight could start anywhere from frame 3 to about frame 7.</span></div>
+        <div class="pcard"><span class="tag">the count</span><b>14 or 15 of 23</b>
+          <span>Starting at frame 3, the fitted model predicts arc 739 a little better, 9.2&nbsp;cm against 9.5&nbsp;cm. Starting at any frame from 4 to 8, holding gravity is closer. The report should say which start it used and that the count could be 15.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <section class="deck-slide point">
   <div class="head">
@@ -1210,6 +1595,7 @@ mean = total / 4</code></span>
       <div class="pcard"><span class="tag">what we conclude</span><b>Every check points the same way</b>
         <span>Holding gravity at 9.81 predicts better, and its lead grows as the model sees less of the flight.</span></div>
     </div>
+    <p class="c5hint">In NumPy, <code>np.diff(z)</code> gives the change in height from each frame to the next, which is how the even steps of arc 325 show up.</p>
   </div>
 </section>
 
@@ -1299,7 +1685,9 @@ mean = total / 4</code></span>
   }
   function fitAll() {
     var stages = [], sizes = [];
-    document.querySelectorAll(".deck-slide:not(.part):not(.arrive)").forEach(function (sl) {
+    /* data-nofit marks a slide whose stage is sized in --stage-code alone, so its
+       measured size says nothing and would drag the median down */
+    document.querySelectorAll(".deck-slide:not(.part):not(.arrive):not([data-nofit])").forEach(function (sl) {
       var st = sl.querySelector(".stage");
       if (!st) return;
       stages.push(st);
@@ -1322,6 +1710,6 @@ mean = total / 4</code></span>
 })();
 </script>
 
-<script type="module" src="js/bundle/class-05.js?v=20261102180601"></script>
+<script type="module" src="js/bundle/class-05.js?v=20261109080753"></script>
 </body>
 </html>

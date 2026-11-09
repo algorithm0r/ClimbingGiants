@@ -969,7 +969,7 @@ function realNoiseRaw(n, sd = 1) {
 
 /* Two demos for the two problems on this page.
    predict: fit the first n free-flight frames of a real tracked shot (a parabola
-   in height, lines in x and y), evaluate the fitted formula where the rim is, and
+   in height, its curvature fixed by g or fitted, and lines in x and y), evaluate the fitted formula where the rim is, and
    call the shot in, rim or out, beside what the frames say after the fact.
    slope: the runs of the Slope Stability Lab's example class on one slope, with a
    damage threshold d* the reader sets. There is no formula, so the panel shows
@@ -1007,7 +1007,9 @@ mountDemo({
     async data() {
       const d = await (await fetch('data/arcs.json')).json();
       const a = d.arcs.find(x => x.role === 'clean');
-      const k = a.rel, nf = a.key.nf;
+      /* frame 18, the median of the five release rules on the page, which is
+         2 frames before the release in the tracking labels (a.rel) */
+      const k = 18, nf = a.rel + a.key.nf - k;
       const T = a.t.map(v => v - a.t[k]);
       /* after the fact: the frames either side of the rim on the way down */
       let after = null;
@@ -1028,11 +1030,14 @@ mountDemo({
     caption: 'Filled dots are the frames the fit uses. The dashed line is every tracked frame, ' +
              'including the ones the fit has not seen and the ball bouncing back after it reaches ' +
              'the rim. Rings mark where the fitted formula crosses 3.048&nbsp;m, both times.',
-    controls: [{key: 'n', label: 'frames fitted', min: 10, max: 24, step: 1, value: 10, dp: 0, unit: ''}],
+    controls: [{key: 'n', label: 'frames fitted', min: 6, max: 26, step: 1, value: 8, dp: 0, unit: ''}],
+    segments: [{key: 'fit', label: 'curvature', value: 'g', options: [
+      {value: 'g', label: 'g fixed at 9.81'}, {value: 'free', label: 'fitted'}]}],
     panels: [{label: 'height', unit: 'm', height: 260, xAxis: true,
               xLabel: 'time since release', xUnit: 's', xScale: 1}],
     readouts: [
       {key: 'upto',  label: 'last frame fitted'},
+      {key: 'g',     label: 'gravity in the fit'},
       {key: 'tc',    label: 'predicted crossing'},
       {key: 'dist',  label: 'from the hoop center'},
       {key: 'call',  label: 'the formula says'},
@@ -1042,7 +1047,9 @@ mountDemo({
       const {a, k, T} = this, n = Math.round(s.n);
       const ft = [], fz = [], fx = [], fy = [];
       for (let i = k; i < k + n; i++) { ft.push(T[i]); fz.push(a.z[i]); fx.push(a.x[i]); fy.push(a.y[i]); }
-      const [c0, c1, c2] = polyfit(ft, fz, 2);
+      let c0, c1, c2 = -4.905;
+      if (s.fit === 'free') [c0, c1, c2] = polyfit(ft, fz, 2);
+      else [c0, c1] = polyfit(ft, fz.map((v, j) => v - c2 * ft[j] * ft[j]), 1);
       const [x0, x1] = polyfit(ft, fx, 1), [y0, y1] = polyfit(ft, fy, 1);
       const disc = c1 * c1 - 4 * c2 * (c0 - RIM);
       const roots = disc < 0 ? [] : [(-c1 + Math.sqrt(disc)) / (2 * c2), (-c1 - Math.sqrt(disc)) / (2 * c2)].sort((p, q) => p - q);
@@ -1063,6 +1070,7 @@ mountDemo({
           }}],
         readouts: {
           upto: ft[ft.length - 1].toFixed(2) + ' s (' + n + ' frames)',
+          g: (-2 * c2).toFixed(2) + ' m/s²' + (s.fit === 'free' ? '' : ', fixed'),
           tc: isFinite(tc) ? tc.toFixed(3) + ' s' : 'none',
           dist: isFinite(tc) ? d.toFixed(3) + ' m' : '',
           call: isFinite(tc) ? call(d, this) : '',

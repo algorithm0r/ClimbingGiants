@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Evaluation cost — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
-  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
+  <link rel="stylesheet" href="css/blocks.css?v=20261109080753">
+  <link rel="stylesheet" href="css/demos.css?v=20261109080753">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -846,9 +846,6 @@
           <a href="newton-and-secant.html">Newton and secant</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="root-finding-fails.html">Root-finding failures</a>
-        
-          <span class="site-nav-sep">·</span>
           <strong>Evaluation cost</strong>
         
           <span class="site-nav-sep">·</span>
@@ -913,13 +910,15 @@
     <div class="eyebrow">Week 7 · Root Finding and Search</div>
 <h1>Evaluation cost</h1>
 
+<p>Video: <a href="https://www.youtube.com/watch?v=8YBJbpMY4tM">Evaluation cost when finding roots</a> (0:14:16). <a href="lecture-22.html">Slides</a></p>
+
 <div class="claim">
   <span class="label">Claim</span>
   <p class="exact">Methods are compared by the number of evaluations of $f$ they consume to reach
   a
   <dfn data-g="tolerance">tolerance</dfn>, not by the number of iterations they take. An iteration costs almost nothing beyond its evaluations. An evaluation costs
-  whatever computing $f$ costs, which is nanoseconds for a fitted formula and minutes for a
-  simulation, and the methods in this week differ in how many evaluations each iteration needs.</p>
+  whatever computing $f$ costs, which is nanoseconds for a fitted formula, minutes for a
+  simulation and up to years for a physical test, and the methods in this week differ in how many evaluations each iteration needs.</p>
   <p class="plain">  Count evaluations, since they are where the time goes, and find out what one evaluation costs before choosing a method.</p>
 </div>
 
@@ -942,8 +941,10 @@ the methods.</p>
 <h2 id="the-shot-in-evaluations">The Shot, in Evaluations</h2>
 
 <p>The shot's falling crossing of the rim is the root of $f(t) = z(t) - 3.048$ m, where $z(t)$ is
-the parabola fitted to the 24 free-flight frames of arc 79 and $t$ is the time since release. Its
-root is 1.04366 s. Bisection starts from the bracket [0.5, 1.5] s, Newton from the last frame
+the parabola fitted, with $g$ as one of its three coefficients, to the 24 free-flight frames of arc 79
+from frame 20. Here $t$ counts from
+frame 20, 0.08&nbsp;s after the release <a href="conditions-become-roots.html#finding-the-release" title="Conditions as roots">page 19</a> finds. Its
+root is 1.04366 s, which is 1.124&nbsp;s on that page's clock. Bisection starts from the bracket [0.5, 1.5] s, Newton from the last frame
 fitted, 0.92 s, and the secant method from the last two, 0.88 and 0.92 s. An estimate's cost is
 the number of evaluations used to compute it:</p>
 
@@ -953,6 +954,7 @@ the number of evaluations used to compute it:</p>
   <tr><td>bisection</td><td class="num">42</td><td class="num">bracket 9.1×10⁻¹³ wide</td><td class="num">1 (factor 2)</td></tr>
   <tr><td>Newton</td><td class="num">8</td><td class="num">3.3×10⁻¹⁵</td><td class="num">2.00</td></tr>
   <tr><td>secant</td><td class="num">7</td><td class="num">below 10⁻¹⁵</td><td class="num">1.6</td></tr>
+  <tr><td>quadratic formula</td><td class="num">0</td><td class="num">below 10⁻¹⁶</td><td class="num">not iterative</td></tr>
 </table>
 
 <p>Each row is the first count that gets within 10⁻¹² s. Bisection is held to its own guarantee,
@@ -965,9 +967,23 @@ golden ratio, 1.618, and the arithmetic that makes it competitive is that $1.618
 beats $2$ per two evaluations, since $1.618 > \sqrt{2}$. The measured orders are computed from
 the successive errors of each run.</p>
 
+<p>The shot's $f$ is a quadratic, so its root also has a formula,
+$t = \left(-c_1 - \sqrt{c_1^2 - 4 c_2 (c_0 - 3.048)}\right) / (2 c_2)$, with $c_0$, $c_1$ and $c_2$ the
+fitted coefficients. The formula evaluates $f$ zero times. It delivers the root, with no guess and
+no check, where each search in the table tries a guess, checks $f$ there, and makes the next guess
+from the check. It computes the root from the
+coefficients with one square root and is correct to the last digit a double holds, which is
+why the error column can be measured at all. When a formula like this exists, it is the method
+to use. The searches are for problems like the slope below, where none exists.</p>
+
 <p>On the shot the difference in time is a few microseconds. One evaluation of the fitted parabola
 is three multiplications and three additions, which Python does in about 64 nanoseconds. Bisection's
-42 evaluations take about 2.7 microseconds, and the secant method's 7 take about 0.45.</p>
+42 evaluations take about 2.7 microseconds and the secant method's 7 take about 0.45. The
+quadratic formula takes about 0.1, the time of one and a half evaluations.</p>
+
+<p>At that price a sweep is the simplest search. Evaluating $f$ 2,000 times across the flight
+takes about 0.13 milliseconds, and a plot of the values shows both crossings of the rim. The root
+can be read off the plot, or the sweep can supply a bracket for one of the methods above.</p>
 
 <cg-demo case="budget"></cg-demo>
 
@@ -986,6 +1002,21 @@ is three multiplications and three additions, which Python does in about 64 nano
   secant method.</li>
 </ul>
 </div></details>
+
+<h2 id="linear-solve">A Linear Solve, in Seconds</h2>
+
+<p><a href="newton-and-secant.html#n-unknowns">Newton's step on many unknowns</a> pays for one
+linear solve at each step, on top of evaluating $f$. The time for that solve grows with the number
+of unknowns. These were timed with NumPy and SciPy on one PC:</p>
+
+<table class="data">
+  <tr><th>System</th><th class="num">unknowns</th><th class="num">one linear solve</th></tr>
+  <tr><td>a dense matrix</td><td class="num">8,000</td><td class="num">1.4 s</td></tr>
+  <tr><td>a sparse matrix, from a grid of 1,000 by 1,000</td><td class="num">1,000,000</td><td class="num">9.0 s</td></tr>
+</table>
+
+<p>Five Newton steps on the million-unknown grid take about 5 &times; 9 = 45 s in linear solves
+alone. One of those steps takes as long as about 140 million evaluations of the shot's parabola.</p>
 
 <h2 id="genuinely-expensive-f">The Slope, in Runs</h2>
 
@@ -1052,6 +1083,83 @@ never sees.</p>
 magnitude, which would say whether the root is near this end of the bracket or the far one, is discarded. Methods that use it, the secant method among them, typically converge faster for that reason. It is also why bisection's rate is independent
 of the function, since a method that ignores the values cannot be helped or hindered by them.</p>
 </div>
+
+<h2 id="physical-tests">Physical Tests, in Cars and Years</h2>
+
+<p>The slope is a simulation, so a run costs machine time and nothing else. A physical test can
+destroy the thing tested, and it can take years. Each of these costs leads engineers to a different
+way of finding the value they need.</p>
+
+<h3 id="crash-tests">Crash Tests</h3>
+
+<p>In a frontal crash test the car is driven into a rigid wall, so each evaluation destroys a car.
+Every crash test in this course's data was run at 35 mph. One industry article puts a development
+prototype at 250,000 to 1 million dollars (<a
+href="https://www.automotivetestingtechnologyinternational.com/news/vehicle-development/dynisma-states-its-simulators-could-save-us10m-per-development-program.html">a
+simulator vendor's figure</a>, so the source has an interest in it), and a new model takes 50 to
+70 of them. A production car costs less. <a href="https://trid.trb.org/View/368325">NHTSA's 1992
+frontal test program</a> crashed 34 cars for 2.07 million dollars, about 61,000 dollars a test
+with the car.</p>
+
+<p>Suppose the question is the speed at which a car's crush reaches an allowed depth. Bisection
+from tests at 15 and 35 mph needs 5 halvings to bring the 20 mph bracket under 1 mph, or 7 cars
+before any repeats. Engineers have instead crashed a few cars and fit a line. In the 1970s <a
+href="https://journal.nafe.org/ojs/index.php/nafe/article/download/519/489/1494">Campbell</a> found
+crush roughly linear in speed, so a line through two or three tests gives the crush at any speed.
+However, <a href="https://engrxiv.org/preprint/download/7697/12575/10872">a study of cars built from
+2003 to 2020</a> finds that the line fits them poorly. A fitted line needs fewer crashes than a
+search, and its accuracy depends on how close crush is to linear in speed.</p>
+
+<h3 id="fatigue">Fatigue</h3>
+
+<p>A fatigue test pushes and pulls one specimen until it breaks or reaches a set number of cycles.
+A steel specimen that lasts ten million cycles is taken to be below its fatigue limit. At 20
+cycles a second, 10<sup>7</sup> cycles take 5.8 days.</p>
+
+<p>The <a href="https://www.abcm.org.br/anais/cobem/2009/pdf/COB09-1526.pdf">staircase method</a>
+searches for the fatigue limit one specimen at a time. After a specimen survives, the next one runs
+one step higher in stress, and after a break, one step lower. Each specimen's stress depends on the
+last result, so the specimens cannot run side by side the way a scan's points could. A staircase
+typically uses 10 to 15 specimens. In a staircase of 12 where 6 survive, the survivors alone take
+6 &times; 5.8 = 35 days of testing.</p>
+
+<h3 id="creep">Creep</h3>
+
+<p>Creep is slow stretching under load at high temperature. Design values for high-temperature
+steels are often the stress that breaks a part at 100,000 hours, about 11 years, and <a
+href="https://www.asminternational.org/?p=20608">tests seldom run past 10,000 hours</a> (about 1.1
+years). Tests run hotter so they break sooner, and a fitted model (the Larson&ndash;Miller parameter
+is one) carries them to 100,000 hours. The design value comes from that fit, and no test
+reaches the 100,000 hours itself.</p>
+
+<h3 id="full-scale-fatigue">Full-Scale Aircraft Fatigue</h3>
+
+<p>A full-scale fatigue test loads a complete airframe with actuators through one simulated flight
+after another. <a
+href="https://www.boeing.com/features/2026/07/bending-777-9-inside-fatigue-testing-for-three-lifetimes">The
+777-9's test airframe</a> is being cycled through 120,000 flights at about 160 a day, which is
+about 750 days, or 2 years. <a
+href="https://www.aerospacetestinginternational.com/features/a-fatigue-test-has-proved-the-longevity-of-one-of-the-worlds-most-popular-trainer-jets.html">The
+Hawk trainer's test</a> ran five lifetimes over 14 years. Until the test is finished, <a
+href="https://www.gpo.gov/fdsys/pkg/CFR-2012-title14-vol1/pdf/CFR-2012-title14-vol1-sec26-21.pdf">US
+rules</a> let the fleet fly at most half the flights the test airframe has reached. For the years
+this one evaluation runs, it limits how far the whole fleet can fly.</p>
+
+<h3 id="simulation-and-test">Simulation and Test</h3>
+
+<p>In crash and aircraft design, simulation takes most of the evaluations, and tests check it. A
+simulation is cheaper than a test, though not free. <a
+href="https://www.dynalook.com/international-conf-2010/ComputingTechnology-5.pdf">One run of a
+full-car crash model</a> of about 10 million elements was reported in 2010 at 43 hours on 512
+cores, and physical crashes are still run. For aircraft, <a
+href="https://www.law.cornell.edu/cfr/text/14/25.571">US rules</a> ask for analysis supported by
+test evidence, and a full-scale fatigue test for fatigue damage spread across the structure. For
+materials, fatigue and creep models fitted to a few specimens carry the results to parts, stresses
+and times nobody tested.</p>
+
+<p>Across these examples, the cost of one evaluation largely decides how a root is found. A sweep
+suits an evaluation of 64 ns, and a counted bisection suits one of a minute or two. When an
+evaluation costs a car or a year, engineers usually fit a model to a few tests and solve the model.</p>
 
 <div class="check">
   <span class="label">Check</span>
@@ -1120,11 +1228,11 @@ bisection, secant and Newton on any signal, counting evaluations.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/evaluations-are-the-currency.js?v=20261102180601"></script>
+  <script type="module" src="js/bundle/evaluations-are-the-currency.js?v=20261109080753"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-09">November 9, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

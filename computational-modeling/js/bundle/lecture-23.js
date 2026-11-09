@@ -1,4 +1,4 @@
-/* Generated bundle: kit, the evaluations-are-the-currency demo, this deck's
+/* Generated bundle: kit, the windowed-optimum demo, this deck's
    figures, the slide runtime, the presenter tools, page.js.
    Do not edit. */
 
@@ -968,209 +968,225 @@ function realNoiseRaw(n, sd = 1) {
   return scaleTo(out, sd);
 }
 
-/* Two demos. The first runs three methods on the shot's fitted height under a
-   shared evaluation budget, with evaluations on the x axis so the curves are
-   comparable. The second is the example class's 7.4 MPa slope, where each
-   evaluation is a run of the lab, plotted as the bracket width each run left. */
+/* ---------- the windowed optimum ---------- */
+class CgDemo extends HTMLElement {
+  async connectedCallback() {
+    if (this._done) return; this._done = true;
+    if (this.getAttribute('case') === 'prefix') { await prefixDemo(this); return; }
+    const root = document.createElement('div'); root.className = 'cgd';
+    root.innerHTML = `<div class="cgd-setting">Driver head resultant acceleration, 2019 BMW X5 into
+      a rigid barrier, first 160 ms of the record. Place a window by hand, or run the search over
+      every admissible window.</div>
+      <div class="cgd-plots"></div>
+      <div class="cgd-controls">
+        <label>Window starts at
+          <input type="range" data-c="start" step="any">
+          <span class="cgd-val" data-v="start"></span></label>
+        <label>Length
+          <input type="range" data-c="len" min="1" step="any">
+          <span class="cgd-val" data-v="len"></span></label>
+        <label>Limit <span class="cgd-seg" data-role="wmax">
+          <button type="button" data-w="15" aria-pressed="true">15 ms</button>
+          <button type="button" data-w="36">36 ms</button>
+          <button type="button" data-w="0">none</button>
+        </span></label>
+        <span class="cgd-seg">
+          <button type="button" data-search>Run the search</button>
+        </span>
+      </div>
+      <div class="cgd-readouts">
+        <div><span class="k">your window</span><span class="v" data-r="win"></span></div>
+        <div><span class="k">mean over it</span><span class="v" data-r="mean"></span></div>
+        <div><span class="k">your score</span><span class="v" data-r="score"></span></div>
+        <div><span class="k">best found</span><span class="v" data-r="best">—</span></div>
+        <div><span class="k">its window</span><span class="v" data-r="bwin">—</span></div>
+        <div><span class="k">windows searched</span><span class="v" data-r="nwin">—</span></div>
+      </div>
+      <div class="cgd-caption">The shaded strip is the window you have placed; the amber strip is
+      the best window found by the search. The score is the quantity inside the maximum in the
+      definition, evaluated for one window.</div>
+      <div class="source measured"><span class="tag">Measured</span><span>Channels 001, 002 and 003 &mdash; driver head center of gravity, three axes &mdash; baseline corrected, passed through the CFC&nbsp;1000 filter and combined into a resultant. NHTSA test 10642, 2019 BMW&nbsp;X5 into a rigid barrier at 15.65&nbsp;m/s, TRC of Ohio, 7 January 2019.</span></div>`;
+    this.appendChild(root);
 
-const RIM = 3.048, DSTAR = 5;
-function polyfit(xs, ys, deg) {
-  const n = deg + 1;
-  const A = Array.from({length: n}, (_, i) => {
-    const row = new Float64Array(n + 1);
-    for (let j = 0; j < n; j++) { let q = 0; for (let k = 0; k < xs.length; k++) q += Math.pow(xs[k], i + j); row[j] = q; }
-    let q = 0; for (let k = 0; k < xs.length; k++) q += ys[k] * Math.pow(xs[k], i);
-    row[n] = q; return row;
-  });
-  for (let k = 0; k < n; k++) {
-    let p = k;
-    for (let i = k + 1; i < n; i++) if (Math.abs(A[i][k]) > Math.abs(A[p][k])) p = i;
-    [A[k], A[p]] = [A[p], A[k]];
-    if (Math.abs(A[k][k]) < 1e-300) return null;
-    for (let i = 0; i < n; i++) {
-      if (i === k) continue;
-      const f = A[i][k] / A[k][k];
-      for (let c = k; c <= n; c++) A[i][c] -= f * A[k][c];
-    }
-  }
-  return Array.from({length: n}, (_, i) => A[i][n] / A[i][i]);
-}
+    const d = await (await fetch('data/test10642-head-resultant-cfc1000.json')).json();
+    const n = d.n, dt = d.dt, a = Float64Array.from(d.a);
+    const t = new Float64Array(n);
+    for (let i = 0; i < n; i++) t[i] = d.t0 + i * dt;
+    /* the prefix sum, built once */
+    const S = new Float64Array(n);
+    for (let i = 1; i < n; i++) S[i] = S[i-1] + (a[i] + a[i-1]) * 0.5 * dt;
 
-const FLOOR = 1e-16;
+    const plots = $('.cgd-plots', root);
+    const p = panel(plots, {label: 'head resultant', unit: 'g', height: 250, xAxis: true,
+      xLabel: 'time', xUnit: 'ms', xScale: 1000});
+    const C = k => $(`[data-c="${k}"]`, root), V = k => $(`[data-v="${k}"]`, root),
+          R = k => $(`[data-r="${k}"]`, root);
+    const idx = tv => Math.max(0, Math.min(n - 1, Math.round((tv - d.t0) / dt)));
+    let wmax = 0.015, best = null;
 
-/* each returns [{evals, err}]: an estimate's error against the evaluations used
-   to compute it, the count page 21 uses. Bisection reports its bracket width,
-   the bound it guarantees, as pages 20 and 21 do. */
-function runBisection(F, err, budget) {
-  let a = 0.5, b = 1.5, fa = F(a), evals = 2;
-  const out = [{evals, err: b - a}];
-  while (evals < budget) {
-    const m = 0.5 * (a + b), fm = F(m); evals++;
-    if (fa * fm <= 0) b = m; else { a = m; fa = fm; }
-    out.push({evals, err: b - a});
-  }
-  return out;
-}
-function runNewton(F, DF, err, budget, x0) {
-  let x = x0, evals = 0;
-  const out = [{evals, err: err(x)}];
-  while (evals + 2 <= budget) {
-    const d = DF(x), fx = F(x); evals += 2;
-    if (d === 0 || !isFinite(d)) break;
-    x = x - fx / d;
-    if (!isFinite(x)) break;
-    out.push({evals, err: err(x)});
-  }
-  return out;
-}
-function runSecant(F, err, budget, x0, x1) {
-  let a = x0, b = x1, fa = F(a), evals = 1;
-  const out = [{evals: 0, err: err(b)}];
-  while (evals < budget) {
-    const fb = F(b); evals++;
-    if (fb === fa) break;
-    const x = b - fb * (b - a) / (fb - fa);
-    if (!isFinite(x)) break;
-    out.push({evals, err: err(x)});
-    a = b; fa = fb; b = x;
-  }
-  return out;
-}
+    /* score of one window, from the prefix sum: one subtraction */
+    const score = (i, j) => {
+      const T = t[j] - t[i];
+      if (!(T > 0)) return 0;
+      const mean = (S[j] - S[i]) / T;
+      return mean <= 0 ? 0 : Math.pow(mean, 2.5) * T;
+    };
 
-/* redraw each run on a common evaluation axis, holding the last value */
-function onAxis(run, budget) {
-  const y = new Float64Array(budget + 1);
-  let j = 0;
-  for (let e = 0; e <= budget; e++) {
-    while (j + 1 < run.length && run[j + 1].evals <= e) j++;
-    y[e] = run[j].err;
-  }
-  return y;
-}
-
-mountDemo({
-  budget: {
-    /* the same fit as pages 19 and 20: arc 79's free-flight frames, time from release */
-    async data() {
-      const d = await (await fetch('data/arcs.json')).json();
-      const a = d.arcs.find(x => x.role === 'clean');
-      const k = a.rel, nf = a.key.nf;
-      const T = [], Z = [];
-      for (let i = k; i < k + nf; i++) { T.push(a.t[i] - a.t[k]); Z.push(a.z[i]); }
-      const [c0, c1, c2] = polyfit(T, Z, 2);
-      const F = t => c0 + c1 * t + c2 * t * t - RIM;
-      const DF = t => c1 + 2 * c2 * t;
-      /* the falling root in closed form, so the error axis measures the methods */
-      const C = c0 - RIM, root = (-c1 - Math.sqrt(c1 * c1 - 4 * c2 * C)) / (2 * c2);
-      return {F, DF, err: t => Math.max(FLOOR, Math.abs(t - root))};
-    },
-    setting: 'When does the shot fall through the rim? The root of <em>f</em>(<em>t</em>)&nbsp;=&nbsp;<em>z</em>(<em>t</em>)&nbsp;&minus;&nbsp;3.048&nbsp;m answers it, ' +
-             'with <em>z</em>(<em>t</em>) the parabola fitted to the shot. Bisection starts from the bracket [0.5,&nbsp;1.5]&nbsp;s, Newton from ' +
-             'the last frame fitted, 0.92&nbsp;s, and the secant method from the last two, 0.88 and 0.92&nbsp;s. The horizontal axis is ' +
-             'the evaluations used to compute each estimate.',
-    source: {kind: 'measured', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz. The height is a least-squares parabola through the 24 free-flight frames of one shot (arc 79). Its falling root is also available from the quadratic formula, so the error is the actual error.'},
-    caption: 'Bisection is the dashed straight line, the width of its bracket, which halves with each evaluation whatever the function does. ' +
-             'The width is the bound bisection guarantees. The other two keep no bracket, so they are shown by their actual error. ' +
-             'The secant curve and the Newton dots bend down because they use the values of <em>f</em> as well as their signs. ' +
-             'Errors below 10⁻¹⁶&nbsp;s are drawn at 10⁻¹⁶&nbsp;s, about the spacing of double-precision numbers near 1&nbsp;s. ' +
-             'The last readout gives the machine time if each evaluation were a run of the Slope Stability Lab.',
-    controls: [{key: 'budget', label: 'evaluation budget', min: 6, max: 44, step: 1, value: 24, dp: 0}],
-    panels: [{label: 'error in the crossing time', unit: 's', height: 250, xAxis: true,
-              xLabel: 'evaluations of f spent', xUnit: '', xScale: 1, yLog: true}],
-    readouts: [
-      {key: 'b',  label: 'budget'},
-      {key: 'eb', label: 'bisection bracket'},
-      {key: 'en', label: 'Newton reaches'},
-      {key: 'es', label: 'secant reaches'},
-      {key: 'run', label: 'as slope runs'}
-    ],
-    compute(s) {
-      const {F, DF, err} = this, B = Math.round(s.budget);
-      const runs = {
-        bisection: runBisection(F, err, B),
-        newton: runNewton(F, DF, err, B, 0.92),
-        secant: runSecant(F, err, B, 0.88, 0.92)
-      };
-      const X = linspace(0, B, B + 1);
-      const yb = onAxis(runs.bisection, B);
-      const ys = onAxis(runs.secant, B);
-      const final = k => runs[k][runs[k].length - 1].err;
-      const show = v => v <= FLOOR ? 'below 10⁻¹⁶ s' : v.toExponential(1) + ' s';
-      return {
-        panels: [{x: X, y: ys, ghost: yb, range: [0, B],
-          opts: {
-            label: 'error (secant solid, Newton dots) and bracket width (bisection dashed)',
-            pred: null,
-            marks: runs.newton.map(p => ({t: p.evals, y: p.err}))
-          }}],
-        readouts: {
-          b: B + ' evaluations',
-          eb: show(final('bisection')),
-          en: show(final('newton')),
-          es: show(final('secant')),
-          run: B + ' to ' + 2 * B + ' minutes, ' + (B <= 40 ? 'within' : 'over') + ' the 40-run budget'
+    const search = () => {
+      const cap = wmax > 0 ? wmax : Infinity;
+      let bv = -Infinity, bi = 0, bj = 0, count = 0;
+      for (let i = 0; i < n - 1; i++) {
+        for (let j = i + 1; j < n; j++) {
+          if (t[j] - t[i] > cap) break;
+          count++;
+          const s = score(i, j);
+          if (s > bv) { bv = s; bi = i; bj = j; }
         }
-      };
-    }
-  },
+      }
+      best = {v: bv, i: bi, j: bj, count};
+    };
 
-  /* Second demo: what each run bought on the example class's 7.4 MPa slope.
-     The bracket is the strongest shaking still under the threshold and the
-     weakest over it, among the runs made so far. */
-  cost: {
-    async data() {
-      const d = await (await fetch('data/slope-example-runs.json')).json();
-      const runs = d.runs.filter(r => r.strength_mpa === 7.4).sort((p, q) => p.run_id - q.run_id);
-      const width = [];
-      for (let n = 1; n <= runs.length; n++) {
-        const made = runs.slice(0, n);
-        const under = made.filter(r => r.slope_moved_cm < DSTAR).map(r => r.pga_g);
-        const over = made.filter(r => r.slope_moved_cm >= DSTAR).map(r => r.pga_g);
-        width.push(under.length && over.length ? Math.min(...over) - Math.max(...under) : NaN);
+    const render = () => {
+      const t0 = parseFloat(C('start').value) / 1000;
+      const L = parseFloat(C('len').value) / 1000;
+      /* snap the end down, never up: a hand-placed window must obey the same
+         length limit the search obeys, or it can outscore the optimum */
+      const kmax = wmax > 0 ? Math.floor(wmax / dt + 1e-9) : n - 1;
+      const i = idx(t0);
+      const j = Math.min(n - 1, i + Math.min(kmax, Math.floor(L / dt + 1e-9)));
+      const s = score(i, j);
+      const T = t[j] - t[i];
+      const bands = [];
+      const marks = [];
+      if (best) {
+        bands.push({x0: t[best.i], x1: t[best.j], cls: 'bestband'});
+        const bT = t[best.j] - t[best.i];
+        marks.push({t: (t[best.i] + t[best.j]) / 2, y: (S[best.j] - S[best.i]) / bT,
+          square: true, text: 'best ' + best.v.toFixed(1), dx: 0, dy: -12, anchor: 'middle'});
       }
-      const repeat = runs.map((r, i) => runs.slice(0, i).some(q => q.pga_g === r.pga_g));
-      return {runs, width, repeat};
-    },
-    setting: 'The 7.4&nbsp;MPa slope, with damage taken as more than 5&nbsp;cm of movement. ' +
-             'Each point is one run of the lab, and its height is the width of the bracket left by the runs so far.',
-    source: {kind: 'simulated', text: 'The Slope Stability Lab&rsquo;s public example class, fetched 2026-11-02. Each run is one GPU simulation of the slope, a minute or two of machine time. The 5&nbsp;cm threshold is one choice, since the lab leaves the definition of damage to you.'},
-    caption: 'The first two runs leave no bracket, and the third leaves one 2&nbsp;g wide. Each halving after that lowers the width by a factor of 2, ' +
-             'and a factor of 10 (one more digit of PGA) takes about 3.3 halvings. Rings mark repeats of a setting already run. ' +
-             'Each repeat is a new run that costs one from the budget and leaves the width where it was.',
-    controls: [{key: 'n', label: 'runs made', min: 3, max: 17, step: 1, value: 17, dp: 0}],
-    panels: [{label: 'bracket width', unit: 'g', height: 250, xAxis: true,
-              xLabel: 'runs on this slope', xUnit: '', xScale: 1, yLog: true}],
-    readouts: [
-      {key: 'n',     label: 'runs made'},
-      {key: 'rep',   label: 'of them repeats'},
-      {key: 'width', label: 'bracket width'},
-      {key: 'dig',   label: 'digits since the first bracket'},
-      {key: 'time',  label: 'machine time'}
-    ],
-    compute(s) {
-      const n = Math.round(s.n), {width, repeat} = this;
-      const X = [], Y = [], R = [];
-      for (let i = 0; i < n; i++) {
-        if (!isFinite(width[i])) continue;
-        X.push(i + 1); Y.push(width[i]);
-        if (repeat[i]) R.push({x: i + 1, y: width[i]});
+      bands.push({x0: t[i], x1: t[j]});
+      p(t, a, null, [0, 0.16], {bands, marks});
+      V('start').textContent = (t[i] * 1000).toFixed(2) + ' ms';
+      V('len').textContent = (T * 1000).toFixed(2) + ' ms';
+      R('win').textContent = (t[i]*1000).toFixed(1) + '–' + (t[j]*1000).toFixed(1) + ' ms';
+      R('mean').textContent = (T > 0 ? ((S[j]-S[i])/T).toFixed(1) : '—') + ' g';
+      R('score').textContent = s.toFixed(1);
+      if (best) {
+        R('best').textContent = best.v.toFixed(1);
+        R('bwin').textContent = (t[best.i]*1000).toFixed(2) + '–' + (t[best.j]*1000).toFixed(2) + ' ms';
+        R('nwin').textContent = best.count.toLocaleString();
       }
-      const reps = repeat.slice(0, n).filter(Boolean).length;
-      const w = width[n - 1], w0 = width.find(isFinite);
-      return {
-        panels: [{x: X, y: Y, range: [0, 18],
-          opts: {dots: true, dotR: 3.6, yRange: [0.001, 3], rings: R}}],
-        readouts: {
-          n: String(n),
-          rep: String(reps),
-          width: +w.toPrecision(3) + ' g',
-          dig: Math.log10(w0 / w).toFixed(1),
-          time: n + ' to ' + 2 * n + ' minutes'
-        }
-      };
-    }
+    };
+
+    const setLimit = () => {
+      const c = C('len');
+      c.max = ((wmax > 0 ? wmax : 0.060) * 1000).toFixed(0);
+      if (parseFloat(c.value) > parseFloat(c.max)) c.value = c.max;
+      best = null;
+      R('best').textContent = R('bwin').textContent = R('nwin').textContent = '—';
+    };
+
+    C('start').min = 0; C('start').max = 140; C('start').value = 35;
+    C('len').value = 15;
+    setLimit();
+
+    $('[data-role="wmax"]', root).addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      wmax = (+b.dataset.w) / 1000;
+      [...e.currentTarget.children].forEach(x => x.setAttribute('aria-pressed', x === b));
+      setLimit(); render();
+    });
+    $('[data-search]', root).addEventListener('click', () => { search(); render(); });
+    root.querySelectorAll('input[type=range]').forEach(el =>
+      el.addEventListener('input', render));
+
+    render();
   }
-});
+}
+customElements.define('cg-demo', CgDemo);
+
+/* ---------------------------------------------------------------------------
+   Second demo: the prefix sum itself.
+
+   The page states that any window's integral is a difference of two stored
+   values and that this saves a factor of about ninety. Neither is visible in the
+   search demo, where the prefix sum is machinery the reader never sees. Here it
+   is the subject: S is drawn, the two values being subtracted are marked on it,
+   and the gap between them is the window's integral.
+--------------------------------------------------------------------------- */
+async function prefixDemo(host) {
+  const root = document.createElement('div');
+  root.className = 'cgd';
+  root.innerHTML = `<div class="cgd-setting">The same head resultant, and its cumulative integral
+      <em>S</em>. Any window's integral is the vertical gap between two points on <em>S</em> — one
+      subtraction, whatever the window's length.</div>
+    <div class="cgd-plots"></div>
+    <div class="cgd-controls">
+      <label>Window starts at <input type="range" data-c="t0" min="0" max="140" step="any" value="70">
+        <span class="cgd-val" data-v="t0"></span></label>
+      <label>Length <input type="range" data-c="len" min="1" max="60" step="any" value="15">
+        <span class="cgd-val" data-v="len"></span></label>
+    </div>
+    <div class="cgd-readouts">
+      <div><span class="k">S at the end</span><span class="v" data-r="sj"></span></div>
+      <div><span class="k">S at the start</span><span class="v" data-r="si"></span></div>
+      <div><span class="k">difference</span><span class="v" data-r="diff"></span></div>
+      <div><span class="k">same, summed directly</span><span class="v" data-r="direct"></span></div>
+      <div><span class="k">samples that would take</span><span class="v" data-r="cost"></span></div>
+      <div><span class="k">operations either way</span><span class="v" data-r="ops"></span></div>
+    </div>
+    <div class="cgd-caption">Above: the acceleration, with the window shaded. Below: its cumulative
+      integral, with the two values being subtracted marked and the gap between them drawn. Widen
+      the window and the direct sum needs more terms; the subtraction still needs one.</div>
+    <div class="source measured"><span class="tag">Measured</span><span>Driver head resultant,
+      channels 001, 002 and 003, baseline corrected, CFC&nbsp;1000 filtered and combined. NHTSA test 10642, 2019 BMW&nbsp;X5
+      into a rigid barrier, TRC of Ohio, 7 January 2019.</span></div>`;
+  host.appendChild(root);
+
+  const d = await (await fetch('data/test10642-head-resultant-cfc1000.json')).json();
+  const n = d.n, dt = d.dt, a = Float64Array.from(d.a);
+  const t = new Float64Array(n);
+  for (let i = 0; i < n; i++) t[i] = d.t0 + i * dt;
+  const S = new Float64Array(n);
+  for (let i = 1; i < n; i++) S[i] = S[i-1] + (a[i] + a[i-1]) * 0.5 * dt;
+
+  const box = root.querySelector('.cgd-plots');
+  const pA = panel(box, {label: 'head resultant', unit: 'g', height: 150});
+  const pS = panel(box, {label: 'S — the cumulative integral', unit: 'g·s', height: 175,
+    xAxis: true, xLabel: 'time', xUnit: 'ms', xScale: 1000});
+  const C = k => root.querySelector(`[data-c="${k}"]`);
+  const R = k => root.querySelector(`[data-r="${k}"]`);
+  const idx = tv => Math.max(0, Math.min(n - 1, Math.round((tv - d.t0) / dt)));
+
+  const render = () => {
+    const t0 = parseFloat(C('t0').value) / 1000, L = parseFloat(C('len').value) / 1000;
+    const i = idx(t0), j = Math.min(n - 1, idx(t0 + L));
+    root.querySelector('[data-v="t0"]').textContent = (t[i] * 1000).toFixed(1) + ' ms';
+    root.querySelector('[data-v="len"]').textContent = ((t[j] - t[i]) * 1000).toFixed(1) + ' ms';
+
+    /* the same integral, summed from the samples, to show the two agree */
+    let direct = 0;
+    for (let k = i + 1; k <= j; k++) direct += (a[k] + a[k-1]) * 0.5 * dt;
+
+    pA(t, a, null, [0, 0.16], {bands: [{x0: t[i], x1: t[j]}]});
+    pS(t, S, null, [0, 0.16], {
+      bands: [{x0: t[i], x1: t[j]}],
+      marks: [
+        {t: t[i], y: S[i], cast: 'y', text: 'S(' + (t[i]*1000).toFixed(1) + ')', dx: 8, dy: 14},
+        {t: t[j], y: S[j], cast: 'y', text: 'S(' + (t[j]*1000).toFixed(1) + ')', dx: 8, dy: -10}
+      ],
+      curves: [{x: Float64Array.from([t[j], t[j]]), y: Float64Array.from([S[i], S[j]]), cls: 'cast'}]
+    });
+    R('sj').textContent = S[j].toFixed(5) + ' g·s';
+    R('si').textContent = S[i].toFixed(5) + ' g·s';
+    R('diff').textContent = (S[j] - S[i]).toFixed(5) + ' g·s';
+    R('direct').textContent = direct.toFixed(5) + ' g·s';
+    R('cost').textContent = (j - i).toLocaleString() + ' samples';
+    R('ops').textContent = '1 vs ' + (j - i).toLocaleString();
+  };
+  root.querySelectorAll('input[type=range]').forEach(el => el.addEventListener('input', render));
+  render();
+}
 
 /* Whiteboards: math worked out on a slide as if written by hand (the
    handwriting, the wipes, circles, strikes and moves), with presenter controls.
@@ -1360,132 +1376,238 @@ setTimeout(() => {
   });
 }, 0);
 
-/* Lecture 23's own figures, on the two problems of week 7.
-   The shot: f(t) = z(t) - 3.048 m on the parabola fitted to arc 79's 24
-   free-flight frames (the same fit as the notes page's demo), counted the way
-   page 21 and the demo count, an estimate costing the evaluations used to
-   compute it: bisection on [0.5, 1.5] s spends 2 on the ends and 1 a step;
-   Newton from 0.92 s (the last frame fitted) spends 2 a step (f and f');
-   the secant method from 0.88 and 0.92 s spends 2 on its first step and 1
-   on each step after.
-   lec23-steps / lec23-evals: the same runs on two horizontal axes.
-   The slope: the example class's runs, data/slope-example-runs.json.
-   lec23-trail: the 7.4 MPa slope's bracket width after each of its runs.
-   lec23-queue: all 78 runs in the order the class made them, one row a slope.
+/* Lecture 23's own figures, on the driver head resultant of NHTSA test 10642
+   (2019 BMW X5 into a barrier), data/test10642-head-resultant-cfc1000.json: 4501
+   samples at 12 500 Hz from -50 ms, in g, each axis baseline corrected and CFC
+   1000 filtered (pipeline/build_head_cfc1000.py). HIC15 = 208.2 on
+   69.92-84.88 ms, HIC36 = 389.4, no limit 394.0.
+   lec23-trace: the record.        lec23-peak / lec23-best: two 15 ms windows.
+   lec23-sweep: fifteen window lengths slid along the record, animated.
+   lec23-map: score by start and length.   lec23-limit: best score by limit.
+   lec23-prefix: the trace and its running integral.
    Hosts are found by data-fig. */
 (() => {
-  const hosts = f => document.querySelectorAll('[data-fig="' + f + '"] .fig-body');
-  const any = (...fs) => fs.some(f => hosts(f).length);
-  const axis = (xr, yr, xt, yt, xl, yl, fy = v => String(v)) => [
+  const axis = (xr, yr, xt, yt, xl, yl) => [
     ...xt.map(v => ({x: v, y: yr[0], dy: 13, anchor: 'middle', text: String(v)})),
-    ...yt.map(v => ({x: xr[0], y: v, dx: 4, dy: 4, anchor: 'start', text: fy(v)})),
+    ...yt.map(v => ({x: xr[0], y: v, dx: 4, dy: 4, anchor: 'start', text: String(v)})),
     {x: xr[1], y: yr[0], dy: -5, anchor: 'end', text: xl},
     {x: xr[0], y: yr[1], dx: 4, dy: 10, anchor: 'start', text: yl}];
-  const SUP = {'-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹'};
-  const pow10 = v => '10' + String(v).split('').map(c => SUP[c]).join('');
-  const box = (a, b, y0, y1) => [{x: a, y: y0}, {x: b, y: y0}, {x: b, y: y1}, {x: a, y: y1}];
 
-  if (any('lec23-steps', 'lec23-evals')) fetch('data/arcs.json').then(r => r.json()).then(d => {
-    const a = d.arcs.find(x => x.role === 'clean');
-    const k = a.rel, nf = a.key.nf, T = [], Z = [];
-    for (let i = k; i < k + nf; i++) { T.push(a.t[i] - a.t[k]); Z.push(a.z[i]); }
-    const [c0, c1, c2] = polyfit(T, Z, 2);
-    const F = t => c0 + c1 * t + c2 * t * t - 3.048, DF = t => c1 + 2 * c2 * t;
-    const C = c0 - 3.048, ROOT = (-c1 - Math.sqrt(c1 * c1 - 4 * c2 * C)) / (2 * c2);
-    /* an error below double precision is drawn on the 10^-16 floor */
-    const err = t => Math.max(1e-16, Math.abs(t - ROOT));
+  fetch('data/test10642-head-resultant-cfc1000.json').then(r => r.json()).then(d => {
+    const a = d.a, n = a.length, dt = d.dt;
+    const ms = Float64Array.from(a, (_, i) => (d.t0 + i * dt) * 1e3);
+    const S = new Float64Array(n);
+    for (let i = 1; i < n; i++) S[i] = S[i - 1] + 0.5 * (a[i] + a[i - 1]) * dt;
+    const at = v => Math.round((v / 1e3 - d.t0) / dt);
+    const score = (i, j) => { const T = (j - i) * dt, m = (S[j] - S[i]) / T; return m > 0 ? T * m ** 2.5 : 0; };
+    let pk = 0; for (let i = 1; i < n; i++) if (a[i] > a[pk]) pk = i;
 
-    /* each run as [{step, evals, err}]; bisection's err is its bracket width,
-       the bound it guarantees, as pages 20 and 21 count it */
-    const bis = [];
-    { let lo = 0.5, hi = 1.5, flo = F(lo), ev = 2;
-      bis.push({step: 0, evals: ev, err: hi - lo});
-      for (let s = 1; s <= 41; s++) {
-        const m = 0.5 * (lo + hi), fm = F(m); ev++;
-        if (flo * fm <= 0) hi = m; else { lo = m; flo = fm; }
-        bis.push({step: s, evals: ev, err: hi - lo});
-      } }
-    const newt = [];
-    { let x = 0.92; newt.push({step: 0, evals: 0, err: err(x)});
-      for (let s = 1; s <= 5; s++) { x = x - F(x) / DF(x); newt.push({step: s, evals: 2 * s, err: err(x)}); } }
-    const sec = [];
-    { let p = 0.88, q = 0.92; sec.push({step: 0, evals: 0, err: err(q)});
-      for (let s = 1; s <= 7; s++) {
-        if (F(q) === F(p)) break;
-        const x = q - F(q) * (q - p) / (F(q) - F(p)); p = q; q = x;
-        sec.push({step: s, evals: 1 + s, err: err(x)});
-      } }
-    const first = run => run.find(p => p.err < 1e-12);
+    /* the best score for every window length, in samples, up to 60 ms */
+    const KMAX = Math.round(0.060 / dt), byLen = new Float64Array(KMAX + 1), argLen = new Int32Array(KMAX + 1);
+    for (let k = 1; k <= KMAX; k++)
+      for (let i = 0; i + k < n; i++) { const s = score(i, i + k); if (s > byLen[k]) { byLen[k] = s; argLen[k] = i; } }
+    const bestUpTo = k => { let b = 0, bi = 0, bk = 1; for (let q = 1; q <= k; q++) if (byLen[q] > b) { b = byLen[q]; bi = argLen[q]; bk = q; } return {s: b, i: bi, k: bk}; };
+    const H15 = bestUpTo(Math.floor(0.015 / dt + 1e-6));
 
-    const plot = (host, key, xr, xl, labels) => {
-      const yr = [-17.6, 0.9];
-      const P = (run, cls) => run.filter(p => p[key] <= xr[1]).map(p => ({x: p[key], y: Math.log10(p.err), r: 3.2, cls}));
-      const C = (run, cls) => { const q = P(run); return {x: q.map(p => p.x), y: q.map(p => p.y), cls}; };
-      diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr,
-        alt: 'Error on a log scale for bisection, Newton and the secant method on the shot, against ' + xl + '.',
-        curves: [C(bis, 'ghost'), C(newt), C(sec, 'alt')],
-        leads: [{from: [xr[0], -12], to: [xr[1], -12], cls: 'level'}],
-        points: [...P(bis, 'dot'), ...P(newt, 'dot'), ...P(sec, 'miss')],
-        notes: [...axis(xr, yr, labels.ticks, [-16, -12, -8, -4], xl + ' →', '↑ error, or bracket width for bisection (s), log scale', pow10),
-          {x: labels.lv, y: -12, dy: -4, anchor: 'middle', text: '10⁻¹² s'}, ...labels.notes]});
+    const trace = (i0, i1) => {
+      const x = [], y = [];
+      for (let i = i0; i <= i1; i++) { x.push(ms[i]); y.push(a[i]); }
+      return {x, y};
+    };
+    const under = (i, j) => {
+      const p = [{x: ms[i], y: 0}];
+      for (let q = i; q <= j; q++) p.push({x: ms[q], y: a[q]});
+      p.push({x: ms[j], y: 0});
+      return p;
     };
 
-    hosts('lec23-steps').forEach(host => {
-      const n = first(newt), s = first(sec);
-      plot(host, 'step', [-0.4, 14.5], 'steps', {lv: 12, ticks: [0, 2, 4, 6, 8, 10, 12, 14], notes: [
-        {x: n.step, y: Math.log10(n.err), dx: -7, dy: 4, anchor: 'end', text: 'Newton, ' + n.step + ' steps'},
-        {x: s.step, y: Math.log10(s.err), dx: 8, dy: -6, anchor: 'start', cls: 'hi', text: 'secant, ' + s.step + ' steps'},
-        {x: 12.5, y: Math.log10(bis[13].err), dy: -9, anchor: 'middle', text: 'bisection, bracket width'}]});
+    document.querySelectorAll('[data-fig="lec23-trace"] .fig-body').forEach(host => {
+      const xr = [-10, 170], yr = [0, 55];
+      diagram(host, {w: 440, h: 195, xRange: xr, yRange: yr,
+        alt: 'Head resultant acceleration against time, rising from about 30 ms to a peak of 48.6 g at 78.5 ms and falling by about 130 ms.',
+        curves: [trace(at(-10), at(170))],
+        points: [{x: ms[pk], y: a[pk], r: 3.6}],
+        notes: [...axis(xr, yr, [0, 40, 80, 120, 160], [10, 20, 30, 40, 50], 'time from impact (ms) →', '↑ acceleration (g)'),
+          {x: ms[pk], y: a[pk], dx: 7, dy: 2, anchor: 'start', cls: 'hi', text: a[pk].toFixed(1) + ' g at ' + ms[pk].toFixed(1) + ' ms'}]});
     });
 
-    hosts('lec23-evals').forEach(host => {
-      const n = first(newt), s = first(sec), b = first(bis);
-      plot(host, 'evals', [-1, 45], 'evaluations', {lv: 22, ticks: [0, 10, 20, 30, 40], notes: [
-        {x: 12, y: -13.4, anchor: 'start', cls: 'hi', text: 'secant: ' + s.evals + ' evaluations'},
-        {x: 12, y: -15.0, anchor: 'start', text: 'Newton: ' + n.evals + ' evaluations'},
-        {x: b.evals, y: Math.log10(b.err), dx: -4, dy: 14, anchor: 'end', text: 'bisection bracket: ' + b.evals + ' evaluations'}]});
+    const windowFig = (host, wins, alt) => {
+      const xr = [40, 125], yr = [0, 55];
+      const areas = [], leads = [], notes = [...axis(xr, yr, [40, 60, 80, 100, 120], [10, 20, 30, 40, 50], 'time from impact (ms) →', '↑ acceleration (g)')];
+      for (const w of wins) {
+        const m = (S[w.j] - S[w.i]) / ((w.j - w.i) * dt);
+        if (w.fill) areas.push({pts: under(w.i, w.j), cls: 'fill'});
+        else leads.push({from: [ms[w.i], 0], to: [ms[w.i], 52], cls: 'cast'}, {from: [ms[w.j], 0], to: [ms[w.j], 52], cls: 'cast'});
+        leads.push({from: [ms[w.i], m], to: [ms[w.j], m], cls: w.fill ? 'level' : 'ghost'});
+        notes.push(w.fill ? {x: (ms[w.i] + ms[w.j]) / 2, y: 4, anchor: 'middle', cls: 'hi', text: w.label + ', ' + score(w.i, w.j).toFixed(1)}
+                          : {x: ms[w.j], y: 51, dx: 5, anchor: 'start', text: w.label + ', ' + score(w.i, w.j).toFixed(1)});
+        if (w.fill) notes.push({x: ms[w.i], y: m, dx: -5, dy: 4, anchor: 'end', text: 'mean ' + m.toFixed(1) + ' g'});
+      }
+      diagram(host, {w: 440, h: 190, xRange: xr, yRange: yr, alt,
+        areas, leads, curves: [trace(at(40), at(125))],
+        points: [{x: ms[pk], y: a[pk], r: 3.4}], notes});
+    };
+    const half = Math.round(0.0075 / dt);
+    const peakWin = {i: pk - half, j: pk - half + 187};
+
+    document.querySelectorAll('[data-fig="lec23-peak"] .fig-body').forEach(host =>
+      windowFig(host, [{...peakWin, fill: true, label: 'centered on the peak', ly: 20}],
+        'A 15 ms window centered on the peak, shaded under the trace, with its mean as a dotted line.'));
+
+    document.querySelectorAll('[data-fig="lec23-best"] .fig-body').forEach(host =>
+      windowFig(host, [{i: H15.i, j: H15.i + H15.k, fill: true, label: 'best', ly: 20},
+                       {...peakWin, fill: false, label: 'centered on the peak', ly: 12}],
+        'The best 15 ms window, shaded, starting a little before the peak-centered window, drawn as dashed lines.'));
+
+    /* lec23-sweep: fifteen passes, one window length a pass (1 to 15 ms, rounded
+       down to whole samples), each slid along 20-140 ms. The top panel is the
+       trace with the current window shaded and the best window so far dashed; the
+       bottom one is each pass's score against window start. The passes end on
+       HIC15 = 208.2, and starts outside 20-140 ms score below 10 at every
+       length. The still state is the end of the last pass. It plays when its
+       slide is shown, and a Replay button under it runs it again. */
+    document.querySelectorAll('[data-fig="lec23-sweep"] .fig-body').forEach(host => {
+      const lo = 20, hi = 140, i0 = at(lo), STEP = 2, NP = 15;
+      const lens = Array.from({length: NP}, (_, q) => Math.floor((q + 1) / 1e3 / dt + 1e-6));
+      const curves = lens.map(k => { const x = [], y = [];
+        for (let i = i0; ms[i + k] <= hi; i += STEP) { x.push(ms[i]); y.push(score(i, i + k)); }
+        return {x, y}; });
+      const ticks = [20, 40, 60, 80, 100, 120, 140];
+      const axTop = axis([lo, hi], [0, 55], ticks, [20, 40], 'time from impact (ms) →', '↑ acceleration (g)');
+      const axBot = axis([lo, hi], [0, 280], ticks, [100, 200], 'window start (ms) →', '↑ score');
+      const tr = trace(i0, at(hi));
+      /* p passes finished; pass p (if any) drawn through its point q */
+      const show = (p, q) => {
+        let best = {s: 0, i: 0, k: 1};
+        for (let r = 0; r <= Math.min(p, NP - 1); r++) {
+          const c = curves[r], m = r < p ? c.x.length : q + 1;
+          for (let u = 0; u < m; u++) if (c.y[u] > best.s) best = {s: c.y[u], i: i0 + u * STEP, k: lens[r]};
+        }
+        const live = p < NP, k = lens[live ? p : NP - 1], ci = live ? i0 + q * STEP : best.i;
+        const lines = curves.slice(0, p).map(c => ({...c, cls: 'ghost'}));
+        if (live) lines.push({x: curves[p].x.slice(0, q + 1), y: curves[p].y.slice(0, q + 1)});
+        else lines[NP - 1] = {...curves[NP - 1]};
+        host.textContent = '';
+        diagram(host, {w: 440, h: 96, xRange: [lo, hi], yRange: [0, 55],
+          alt: 'The head trace with a window sliding along it, a longer window on each pass.',
+          areas: [{pts: under(ci, ci + k), cls: 'fill'}],
+          leads: [{from: [ms[best.i], 0], to: [ms[best.i], 52], cls: 'cast'},
+                  {from: [ms[best.i + best.k], 0], to: [ms[best.i + best.k], 52], cls: 'cast'}],
+          curves: [tr],
+          notes: [...axTop, {x: hi, y: 49, anchor: 'end', cls: 'hi', text: 'window ' + (k * dt * 1e3).toFixed(2) + ' ms'}]});
+        diagram(host, {w: 440, h: 96, xRange: [lo, hi], yRange: [0, 280],
+          alt: 'Score against window start, one curve a pass, each higher than the last; the best is 208.2 at a start of 69.92 ms.',
+          curves: lines,
+          points: [{x: ms[best.i], y: best.s, r: 3.8}],
+          notes: [...axBot, {x: ms[best.i], y: best.s, dx: 7, dy: -2, anchor: 'start', cls: 'hi',
+                   text: (live ? 'best so far, ' : 'HIC15, ') + best.s.toFixed(1)}]});
+      };
+      show(NP, 0);
+      const slide = host.closest('.deck-slide');
+      let timer = null;
+      const play = () => {
+        clearTimeout(timer);
+        let p = 0, q = 0;
+        const step = () => {
+          const n = curves[p].x.length;
+          show(p, q);
+          if (q < n - 1) { q = Math.min(n - 1, q + Math.ceil(n / 36)); timer = setTimeout(step, 30); return; }
+          p++; q = 0;
+          if (p < NP) timer = setTimeout(step, 220);
+          else show(NP, 0);
+        };
+        step();
+      };
+      /* a button, because the deck reads a click anywhere else as "next slide" */
+      const fig = host.closest('figure');
+      if (fig && slide) {
+        const btn = document.createElement('button');
+        btn.type = 'button'; btn.className = 'sweep-replay'; btn.textContent = 'Replay';
+        btn.addEventListener('click', play);
+        fig.after(btn);
+      }
+      if (slide) {
+        let was = slide.classList.contains('on');
+        if (was) play();
+        new MutationObserver(() => {
+          const on = slide.classList.contains('on');
+          if (on && !was) play();
+          if (!on) clearTimeout(timer);
+          was = on;
+        }).observe(slide, {attributes: true, attributeFilter: ['class']});
+      }
     });
-  });
 
-  if (any('lec23-trail', 'lec23-queue')) fetch('data/slope-example-runs.json').then(r => r.json()).then(d => {
-    const runs = d.runs.slice().sort((p, q) => p.run_id - q.run_id);
-
-    hosts('lec23-trail').forEach(host => {
-      const mine = runs.filter(r => r.strength_mpa === 7.4);
-      const pts = [];
-      mine.forEach((r, i) => {
-        const made = mine.slice(0, i + 1);
-        const under = made.filter(q => q.slope_moved_cm < 5).map(q => q.pga_g);
-        const over = made.filter(q => q.slope_moved_cm >= 5).map(q => q.pga_g);
-        if (!under.length || !over.length) return;
-        const rep = mine.slice(0, i).some(q => q.pga_g === r.pga_g);
-        pts.push({n: i + 1, w: Math.min(...over) - Math.max(...under), rep});
-      });
-      const xr = [0.3, 19.5], yr = [-3.2, 0.75], L = v => Math.log10(v);
-      const w0 = pts[0], wn = pts[pts.length - 1];
-      diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr,
-        alt: 'Bracket width on a log scale after each of the 7.4 MPa slope\'s 17 runs: 2 g after the third run, halving with each new setting, flat at each of the four repeats, 0.00195 g after the seventeenth.',
-        curves: [{x: pts.map(p => p.n), y: pts.map(p => L(p.w)), cls: 'ghost'}],
-        points: pts.map(p => ({x: p.n, y: L(p.w), r: p.rep ? 4.6 : 4, cls: p.rep ? 'miss' : 'dot'})),
-        notes: [...axis(xr, yr, [1, 3, 5, 7, 9, 11, 13, 15, 17], [-3, -2, -1, 0], 'runs on this slope →', '↑ bracket width (g), log scale', pow10),
-          {x: w0.n, y: L(w0.w), dx: -8, dy: 4, anchor: 'end', text: '2 g'},
-          {x: wn.n, y: L(wn.w), dx: 8, dy: 4, anchor: 'start', text: '0.002 g'},
-          {x: 11.5, y: L(0.015625), dy: -12, anchor: 'middle', cls: 'hi', text: 'rings: repeats'}]});
+    document.querySelectorAll('[data-fig="lec23-map"] .fig-body').forEach(host => {
+      const xr = [40, 100], yr = [0, 45], w = 440, h = 230;
+      const svg = diagram(host, {w, h, xRange: xr, yRange: yr,
+        alt: 'Window score by start time and length, brightest near a start of 55 to 70 ms; the 15 and 36 ms limits are drawn as lines and the best window under each sits on its line.',
+        leads: [{from: [40, 15], to: [100, 15], cls: 'alt'}, {from: [40, 36], to: [100, 36], cls: 'alt'}],
+        points: [{x: 69.92, y: 14.96, r: 4}, {x: 56.64, y: 36.0, r: 4}, {x: 55.52, y: 39.44, r: 4, cls: 'miss'}],
+        notes: [...axis(xr, yr, [40, 50, 60, 70, 80, 90, 100], [10, 20, 30, 40], 'window start (ms) →', '↑ window length (ms)'),
+          {x: 100, y: 15, dy: -5, anchor: 'end', cls: 'hi', text: '15 ms limit'},
+          {x: 100, y: 36, dy: -5, anchor: 'end', cls: 'hi', text: '36 ms limit'},
+          {x: 69.92, y: 14.96, dx: 6, dy: 14, anchor: 'start', text: 'HIC15, 208.2'},
+          {x: 56.64, y: 36.0, dx: 7, dy: 12, anchor: 'start', text: 'HIC36, 389.4'},
+          {x: 55.52, y: 39.44, dx: 7, dy: -3, anchor: 'start', text: 'no limit, 394.0'}]});
+      /* the cells go under the axis and the marks, in diagram()'s own mapping */
+      const PADL = 10, PADR = 10, PADT = 10, PADB = 16;
+      const X = v => PADL + (v - xr[0]) / (xr[1] - xr[0]) * (w - PADL - PADR);
+      const Y = v => h - PADB - (v - yr[0]) / (yr[1] - yr[0]) * (h - PADT - PADB);
+      const first = svg.querySelector('.axis');
+      const ds = 5, dk = 12, top = 394.0;
+      for (let i = at(40); i < at(100); i += ds)
+        for (let k = dk; k * dt * 1e3 <= 45; k += dk) {
+          const s = score(i, i + k);
+          if (s <= 0) continue;
+          const r = svgEl('rect', {x: X(ms[i]), y: Y((k + dk / 2) * dt * 1e3), width: X(ms[i + ds]) - X(ms[i]) + 0.3,
+                                   height: Y(0) - Y(dk * dt * 1e3) + 0.3});
+          r.setAttribute('style', 'fill:#5F7038;fill-opacity:' + (0.92 * s / top).toFixed(3));
+          svg.insertBefore(r, first);
+        }
     });
 
-    hosts('lec23-queue').forEach(host => {
-      const S = [7.4, 5.8, 4.2, 2.6, 1.0], N = runs.length;
-      const xr = [-15, N + 1], yr = [-0.9, 5.2];
-      const areas = runs.map((r, i) => {
-        const row = 4 - S.indexOf(r.strength_mpa);
-        return {pts: box(i + 0.12, i + 0.88, row + 0.18, row + 0.82), cls: r.strength_mpa === 7.4 ? 'tri' : 'fill'};
-      });
-      diagram(host, {w: 440, h: 200, xRange: xr, yRange: yr, axes: false,
-        alt: 'The class\'s 78 runs in the order they were made, one row for each slope. The 7.4 MPa slope\'s 17 runs are spread from the 6th place to the 78th.',
-        areas,
-        notes: [...S.map((s, j) => ({x: -1, y: 4 - j + 0.5, dy: 4, anchor: 'end', cls: s === 7.4 ? 'hi' : '', text: s.toFixed(1) + ' MPa'})),
-          ...[1, 20, 40, 60, 78].map(v => ({x: v - 0.5, y: -0.1, dy: 4, anchor: 'middle', text: String(v)})),
-          {x: N, y: -0.1, dy: 18, anchor: 'end', text: 'place in the queue →'}]});
+    document.querySelectorAll('[data-fig="lec23-limit"] .fig-body').forEach(host => {
+      const xs = [], ys = [];
+      let b = 0;
+      for (let k = 1; k <= KMAX; k++) { b = Math.max(b, byLen[k]); xs.push(k * dt * 1e3); ys.push(b); }
+      const xr = [0, 61], yr = [0, 450];
+      const mark = (lim, label, dx, dy, anchor) => {
+        const r = bestUpTo(Math.floor(lim / 1e3 / dt + 1e-6));
+        return [{x: lim, y: r.s, r: 4.2}, {x: lim, y: r.s, dx, dy, anchor, cls: 'hi', text: label + ' ' + r.s.toFixed(1)}];
+      };
+      const m15 = mark(15, 'HIC15', 7, 12, 'start'), m36 = mark(36, 'HIC36', 7, 16, 'start');
+      const all = bestUpTo(KMAX);
+      diagram(host, {w: 440, h: 190, xRange: xr, yRange: yr,
+        alt: 'Best score against the length limit, rising steeply to 208.2 at 15 ms and 389.4 at 36 ms, then flat at 394.0 from 39.44 ms.',
+        curves: [{x: xs, y: ys}],
+        drops: [{x: 15, y: m15[0].y}, {x: 36, y: m36[0].y}],
+        points: [m15[0], m36[0], {x: all.k * dt * 1e3, y: all.s, r: 4.2, cls: 'miss'}],
+        notes: [...axis(xr, yr, [0, 15, 30, 36, 45, 60], [100, 200, 300, 400], 'length limit w (ms) →', '↑ best score'),
+          m15[1], m36[1],
+          {x: all.k * dt * 1e3, y: all.s, dx: 4, dy: -9, anchor: 'start', text: 'no limit: ' + all.s.toFixed(1) + ' at ' + (all.k * dt * 1e3).toFixed(2) + ' ms'}]});
+    });
+
+    document.querySelectorAll('[data-fig="lec23-prefix"] .fig-body').forEach(host => {
+      const [l, r] = diagramRow(host, 2), xr = [40, 125];
+      const i = H15.i, j = H15.i + H15.k;
+      diagram(l, {w: 300, h: 200, xRange: xr, yRange: [0, 55], title: 'a (g)',
+        alt: 'The trace with the best 15 ms window shaded.',
+        areas: [{pts: under(i, j), cls: 'fill'}],
+        curves: [trace(at(40), at(125))],
+        notes: [...axis(xr, [0, 55], [40, 80, 120], [20, 40], 'ms →', ''),
+          {x: (ms[i] + ms[j]) / 2, y: 8, anchor: 'middle', cls: 'hi', text: 'the integral'}]});
+      const SS = trace(at(40), at(125)); SS.y = SS.x.map((_, q) => S[at(40) + q]);
+      const top = S[at(125)] * 1.05;
+      diagram(r, {w: 300, h: 200, xRange: xr, yRange: [0, top], title: 'S, the running integral (g·s)',
+        alt: 'The running integral of the trace, with the window’s integral as the vertical gap between its values at the two ends.',
+        curves: [SS],
+        leads: [{from: [ms[i], S[i]], to: [ms[j], S[i]], cls: 'cast'}, {from: [ms[j], S[i]], to: [ms[j], S[j]], cls: 'alt', over: true}],
+        points: [{x: ms[i], y: S[i], r: 3.8}, {x: ms[j], y: S[j], r: 3.8}],
+        notes: [...axis(xr, [0, top], [40, 80, 120], [], 'ms →', ''),
+          {x: ms[i], y: S[i], dx: -6, dy: -4, anchor: 'end', tex: 'S_i'},
+          {x: ms[j], y: S[j], dx: -6, dy: -4, anchor: 'end', tex: 'S_j'},
+          {x: ms[j], y: (S[i] + S[j]) / 2, dx: 6, dy: 4, anchor: 'start', cls: 'hi', tex: 'S_j - S_i'}]});
     });
   });
 })();

@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Order of accuracy — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
-  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
+  <link rel="stylesheet" href="css/blocks.css?v=20261109080753">
+  <link rel="stylesheet" href="css/demos.css?v=20261109080753">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -933,7 +933,7 @@ strong evidence and a single ratio of 3.7 is weak evidence.</p>
 <p>Euler takes the rate at the start of a step and uses it for the whole step. Heun's method and
 RK4 evaluate the rate at more than one point inside the step and step with a weighted average of
 those evaluations. Each evaluation is called a slope, meaning the rate function $f$ evaluated at
-some time and some state (writing the state as $s$, as the code on <a href="from-a-rate-to-a-trajectory.html" title="Euler&#x27;s method">page 25</a> does).</p>
+some time and some state (writing the state as $s$, as the code on <a href="from-a-rate-to-a-trajectory.html" title="Euler&#x27;s method">page 24</a> does).</p>
 
 <p>Heun's method takes two slopes. The first is Euler's, $k_1 = f(t, s)$. The second is taken at
 the end of the step, at the state Euler would have reached, $k_2 = f(t + h,\ s + h k_1)$, and the
@@ -977,7 +977,7 @@ step goes on.</p>
 
 <p>The reference is RK4 at $h = 10^{-5}$, which reaches 3.875229&nbsp;m. Euler uses only the
 release speed and so overshoots. Heun averages the speed at the start with an estimate at the
-end, and RK4 adds two estimates at the midpoint. In code each is the Euler stepper from <a href="from-a-rate-to-a-trajectory.html" title="Euler&#x27;s method">page 25</a>
+end, and RK4 adds two estimates at the midpoint. In code each is the Euler stepper from <a href="from-a-rate-to-a-trajectory.html" title="Euler&#x27;s method">page 24</a>
 with its update line replaced by the lines that take the slopes:</p>
 
 <div class="codetabs">
@@ -1109,10 +1109,10 @@ reference is wrong too. Where an exact solution exists, use it.</p>
 
 <h2 id="halving-the-step-on-the-shot">Halving the Step on the Shot</h2>
 
-<p>The tracked shot on <a href="state-as-a-vector.html" title="State as a vector">page 26</a> has no exact answer with drag in it, so each run is compared
+<p>The tracked shot on <a href="state-as-a-vector.html" title="State as a vector">page 25</a> has no exact answer with drag in it, so each run is compared
 with the run at half its step. The number compared is the predicted position at the last
 free-flight frame, 0.72&nbsp;s after the starting state at frame 5. The runs use the
-<code>euler</code> function from <a href="from-a-rate-to-a-trajectory.html" title="Euler&#x27;s method">page 25</a>, the <code>rk4</code> function above, and the
+<code>euler</code> function from <a href="from-a-rate-to-a-trajectory.html" title="Euler&#x27;s method">page 24</a>, the <code>rk4</code> function above, and the
 <code>shot</code> function and starting state <code>s0</code> from that page. The frames of this shot
 are 40&nbsp;ms apart, so $m$ steps per frame is a step of $40/m$&nbsp;ms, and $18m$ steps reach
 the last frame.</p>
@@ -1173,7 +1173,7 @@ end</pre>
 changes reach the rounding floor at about 10<sup>&minus;14</sup>&nbsp;m. (In the last two rows the Python and MATLAB versions differ in
 the second figure, so only the size is given.) For a first-order method the change between two runs is about
 the error left in the finer one, so Euler at 1.25&nbsp;ms is still about 4&nbsp;mm from where it
-is heading. (The 1&nbsp;ms run on <a href="state-as-a-vector.html" title="State as a vector">page 26</a> is 3.4&nbsp;mm from the RK4 result.) The example
+is heading. (The 1&nbsp;ms run on <a href="state-as-a-vector.html" title="State as a vector">page 25</a> is 3.4&nbsp;mm from the RK4 result.) The example
 takes a tenth of the tracking noise, 3&nbsp;mm, as settled. Euler gets there at 0.625&nbsp;ms,
 which is 1&nbsp;152 steps for the 0.72&nbsp;s. RK4 at one step per frame (18 steps, 72 rate
 evaluations) differs from the run at half its step by 13 nanometers. Drag moves the same point
@@ -1271,11 +1271,11 @@ and RK4 on an equation you write, with the order measured from the run and not q
   </script>
   
 
-  <script type="module" src="js/bundle/order-of-accuracy-measured.js?v=20261102180601"></script>
+  <script type="module" src="js/bundle/order-of-accuracy-measured.js?v=20261109080753"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-08">November 8, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

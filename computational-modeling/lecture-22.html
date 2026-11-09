@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lecture 22 — Root-finding failures</title>
+<title>Lecture 22 — Evaluation cost</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261102180601">
-<link rel="stylesheet" href="css/demos.css?v=20261102180601">
+<link rel="stylesheet" href="css/blocks.css?v=20261109080753">
+<link rel="stylesheet" href="css/demos.css?v=20261109080753">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -690,209 +690,239 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <section class="deck-slide part">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
-    <p class="say">Four ways root finding fails on a fitted shot and a simulated slope</p>
+    <p class="say">The cost of one evaluation of <i>f</i>, from a formula to a full-scale test</p>
   </div>
 </section>
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">A root finder stops when <span class="def">its own test passes</span>.</p>
-    <p class="sub"><i>a</i> and <i>b</i> are the ends of bisection&rsquo;s bracket, <i>x</i> is Newton&rsquo;s current estimate, and tol is the tolerance.</p>
-  </div>
-  <div class="stage">
-    <style>.deck-slide .work.spaced .katex-display{margin:.6em 0}</style>
-    <div class="work spaced" style="font-size:calc(var(--stage-text) * 1)">
-      $$\begin{aligned}
-      \text{bisection stops when}&\quad b - a < \text{tol} \\[6pt]
-      \text{Newton stops when}&\quad |f(x)| < \text{tol}
-      \end{aligned}$$
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">The tracked ball passed rim height <span class="def">twice, rising in the hand and falling at the hoop</span>.</p>
-    <p class="sub">A three-pointer tracked at 25 frames a second, with time measured from release. The line through the free-flight frames is a fitted parabola.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="lec22-frames"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">The fitted parabola has <span class="def">a root at each crossing</span>.</p>
-    <p class="sub"><i>f</i>(<i>t</i>) = 3.4520 + 4.7428<i>t</i> &minus; 4.9153<i>t</i>&sup2; &minus; 3.048, fitted to the 24 free-flight frames. The question, did it go in, asks for the falling one.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="lec22-roots"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">Newton from 0.20&nbsp;s returns <span class="def">the rising crossing, &minus;0.0787&nbsp;s</span>.</p>
-    <p class="sub">The start is left of the apex at 0.482&nbsp;s, so the tangent points backwards. The residual is 2&times;10<sup>&minus;15</sup>&nbsp;m.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="lec22-shot-newton"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">A bracket around both crossings has <span class="def">the same sign at its ends</span>.</p>
-    <p class="sub">Bisection refuses to start on [&minus;0.4,&nbsp;1.5]&nbsp;s, though the interval holds two roots. Two crossings return <i>f</i> to the sign it started with.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="lec22-shot-wide"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">The sign of <i>f</i> either side of a root <span class="def">says which way the ball crosses</span>.</p>
-    <p class="sub">At the falling crossing <i>f</i> goes from positive to negative. The dots are 0.08&nbsp;s either side so the signs can be seen.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide legible" data-fig="lec22-direction"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">Fitted to the first six frames, the parabola <span class="def">crosses rim height at 1.465&nbsp;s</span>.</p>
-    <p class="sub">The six frames are the first 0.20&nbsp;s after release. The root finder returns 1.4651&nbsp;s with a residual below 10<sup>&minus;10</sup>&nbsp;m. All 24 frames put the crossing at 1.044&nbsp;s.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="lec22-six"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">The fitted gravity, <span class="def">6.29&nbsp;m/s&sup2;, shows the six-frame parabola is wrong</span>.</p>
-    <p class="sub">The <i>t</i>&sup2; coefficient of a fitted parabola is &minus;<i>g</i>/2. A ball in free flight falls at about 9.8&nbsp;m/s&sup2;. As frames arrive, both numbers settle.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide legible" data-fig="lec22-gravity"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">On the slope, <span class="term">each value of <i>f</i></span> <span class="def">is one simulation</span>.</p>
-    <p class="sub"><i>f</i>(PGA) = slope moved &minus; <i>d</i>*. A run takes a minute or two on a GPU. The threshold <i>d</i>* is yours to choose, and the lab&rsquo;s catalog suggests 5 or 15&nbsp;cm.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="lec22-slope-runs"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">With <i>d</i>* = 5&nbsp;cm, bisection on [1,&nbsp;2]&nbsp;g <span class="def">closes in between 1.25 and 1.28&nbsp;g</span>.</p>
-    <p class="sub">These are the 2.6&nbsp;MPa slope&rsquo;s runs, numbered in the order bisection uses them.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="lec22-bis5"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">With <i>d</i>* = 15&nbsp;cm, <span class="def">bisection moves above 1.5&nbsp;g</span>.</p>
-    <p class="sub">1.5&nbsp;g moved 14.3&nbsp;cm and counts as surviving. The slope moved more than 15&nbsp;cm at 1.28125, 1.3125 and 1.375&nbsp;g, below the bracket bisection keeps.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="lec22-bis15"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">On the 5.8&nbsp;MPa slope, [2.7,&nbsp;2.9]&nbsp;g <span class="def">survives at both ends and fails twice inside</span>.</p>
-    <p class="sub">With <i>d</i>* = 15&nbsp;cm, bisection finds the same sign at both ends and does not start.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="lec22-58"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">Two runs at one setting <span class="def">can move the slope by different amounts</span>.</p>
-    <p class="sub">The 2.6&nbsp;MPa slope at 1.28&nbsp;g, run twice. Of 13 settings run more than once, 8 gave identical readings.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="lec22-repeats"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">Near the threshold, <span class="def">a repeat can change the sign of <i>f</i></span>.</p>
-    <p class="sub">The 1.0&nbsp;MPa slope at 0.4375&nbsp;g. Any threshold in the shaded band, between 5.68 and 6.33&nbsp;cm, gives fails, survives, fails.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="lec22-flip"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">Three checks <span class="def">can catch the four failures</span>.</p>
-    <p class="sub">None of them needs the true root.</p>
+    <p class="say">Newton evaluates <i>f</i> and <i>f</i>&prime; at each step, and the other two <span class="def">evaluate <i>f</i> once</span>.</p>
+    <p class="sub">An <span class="term">evaluation</span> is one computation of <i>f</i> or <i>f</i>&prime;. The bookkeeping in between costs almost nothing.</p>
   </div>
   <div class="stage">
     <div class="pcards c3">
-      <div class="pcard"><span class="tag">residual, domain, direction</span><b>Evaluate <i>f</i> at it and either side</b>
-        <span>&minus;0.0787&nbsp;s is a root, and <i>f</i> rises through it.</span></div>
-      <div class="pcard"><span class="tag">fitted g, repeat runs</span><b>Compare <i>f</i> with what it stands for</b>
-        <span>Six frames imply 6.29&nbsp;m/s&sup2;. A repeated run shows the spread.</span></div>
-      <div class="pcard"><span class="tag">plot or sorted runs</span><b>Look at <i>f</i> everywhere before solving</b>
-        <span>A plot of the shot shows two crossings. The sorted slope runs show a failure at 1.28&nbsp;g below a survival at 1.5&nbsp;g.</span></div>
+      <div class="pcard"><span class="tag">bisection</span><b>1 per step</b>
+        <span><i>f</i> at the midpoint of the bracket.</span></div>
+      <div class="pcard"><span class="tag">secant</span><b>1 per step</b>
+        <span><i>f</i> at the new estimate. The previous value is reused.</span></div>
+      <div class="pcard"><span class="tag">Newton</span><b>2 per step</b>
+        <span><i>f</i> and <i>f</i>&prime; at the current estimate.</span></div>
     </div>
   </div>
 </section>
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">The first check runs after the solver, <span class="def">on whatever it returned</span>.</p>
-    <p class="sub"><i>h</i> is a small step to either side of <i>x</i>.</p>
+    <p class="say">Newton&rsquo;s <i>f</i>&prime; costs <span class="def">one evaluation, or one or two more of <i>f</i></span>.</p>
+    <p class="sub">An evaluation of <i>f</i>&prime; counts as one, the same as an evaluation of <i>f</i>.</p>
   </div>
   <div class="stage">
-    <div class="panels" style="font-size:calc(var(--stage-code) * .9)">
-      <div class="code">def verify(f, x, domain, tol=1e-8, h=1e-4):</div><div class="note"></div>
-      <div class="code">    report = {}</div><div class="note"></div>
-      <div class="code">    report['is_root'] = abs(f(x)) &lt; tol</div><div class="note">repeat the residual test on your own <i>f</i></div>
-      <div class="code">    report['in_domain'] = domain[0] &lt;= x &lt;= domain[1]</div><div class="note">compare <i>x</i> with the problem</div>
-      <div class="code">    before = f(x - h)</div><div class="note"></div>
-      <div class="code">    after = f(x + h)</div><div class="note">one step either side of <i>x</i></div>
-      <div class="code">    <span class="k">if before &lt; 0 and after &gt; 0:</span></div><div class="note"></div>
-      <div class="code">    <span class="k">    report['crossing'] = 'rising'</span></div><div class="note"><i>f</i> goes from negative to positive</div>
-      <div class="code">    <span class="k">elif before &gt; 0 and after &lt; 0:</span></div><div class="note"></div>
-      <div class="code">    <span class="k">    report['crossing'] = 'falling'</span></div><div class="note"><i>f</i> goes from positive to negative</div>
-      <div class="code">    else:</div><div class="note"></div>
-      <div class="code">        report['crossing'] = 'none'</div><div class="note">no sign change either side</div>
-      <div class="code">    return report</div><div class="note"></div>
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">analytic</span><b>One line on the shot</b>
+        <span>With <i>c</i><sub>1</sub> and <i>c</i><sub>2</sub> the fitted coefficients, <i>f</i>&prime;(<i>t</i>)&nbsp;=&nbsp;<i>c</i><sub>1</sub>&nbsp;+&nbsp;2<i>c</i><sub>2</sub><i>t</i> costs about what <i>f</i> costs.</span></div>
+      <div class="pcard"><span class="tag">numerical</span><b>One or two more evaluations</b>
+        <span>A finite difference of <i>f</i> replaces <i>f</i>&prime; at a cost of one or two more values of <i>f</i> each step.</span></div>
+      <div class="pcard gold"><span class="tag">no formula</span><b>Two more runs on the slope</b>
+        <span>A finite difference costs two more runs of the simulation, and across a jump it means nothing.</span></div>
     </div>
   </div>
 </section>
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say"><code>verify</code> <span class="def">catches the rising crossing and passes the six-frame root</span>.</p>
-    <p class="sub">The shot is checked over the 2.45&nbsp;s its tracking covers, &minus;0.81 to 1.64&nbsp;s. <code>verify</code> tests <i>x</i> against <i>f</i>, and the six-frame <i>f</i> is the wrong parabola.</p>
+    <p class="say">One evaluation of the shot&rsquo;s <i>f</i> <span class="def">takes about 64 nanoseconds</span>.</p>
+    <p class="sub"><i>f</i>(<i>t</i>)&nbsp;=&nbsp;<i>z</i>(<i>t</i>)&nbsp;&minus;&nbsp;3.048&nbsp;m, the shot&rsquo;s fitted height minus the rim height. The fitted parabola is three multiplications and three additions, timed in Python.</p>
   </div>
   <div class="stage">
-    <table class="tbl nums">
-      <tr><th>returned by</th><th>returned t</th><th>is_root</th><th>in_domain</th><th>crossing</th></tr>
-      <tr><td>Newton from 0.20&nbsp;s</td><td>&minus;0.0787&nbsp;s</td><td>yes</td><td>yes</td><td class="key">rising</td></tr>
-      <tr><td>Newton from 1.2&nbsp;s</td><td>1.0437&nbsp;s</td><td>yes</td><td>yes</td><td>falling</td></tr>
-      <tr><td>six frames, Newton from 1.2&nbsp;s</td><td class="key">1.4651&nbsp;s</td><td>yes</td><td>yes</td><td>falling</td></tr>
-    </table>
+    <div class="work spaced" style="font-size:calc(var(--stage-text) * .8)">
+      $$\begin{aligned}
+      1\ \text{evaluation} &= \textcolor{#8A6508}{64\ \text{ns}} && \text{the parabola at one time } t \\[4pt]
+      1\ \text{s} \,/\, 64\ \text{ns} &= \textcolor{#8A6508}{1.6 \times 10^{7}} && \text{evaluations in a second}
+    \end{aligned}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">When an evaluation costs 64&nbsp;ns, <span class="def">sweep <i>f</i> and read the root off the plot</span>.</p>
+    <p class="sub">Choosing between bisection, Newton and the secant method would save a fraction of 0.13&nbsp;ms.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec22-sweep"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">On the shot, the quadratic formula <span class="def">delivers the root, with no guess and no check</span>.</p>
+    <p class="sub"><i>c</i><sub>0</sub>, <i>c</i><sub>1</sub> and <i>c</i><sub>2</sub> are the coefficients of the fitted parabola. The formula takes one square root and no evaluations of <i>f</i>.</p>
+  </div>
+  <div class="stage">
+    <div class="work spaced" style="font-size:calc(var(--stage-text) * .8)">
+      $$\begin{aligned}
+      t &= \frac{-c_1 - \sqrt{c_1^2 - 4 c_2 (c_0 - 3.048)}}{2 c_2} = \textcolor{#8A6508}{1.0437\ \text{s}} && \\[6pt]
+      \text{time} &\approx 1.5 \times 64\ \text{ns} = \textcolor{#8A6508}{0.1\ \mu\text{s}} && \text{timed in Python against one evaluation}
+    \end{aligned}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">A sparse linear solve with a million unknowns <span class="def">takes about 9 seconds</span>.</p>
+    <p class="sub">Newton on many unknowns pays for one linear solve at each step, on top of evaluating <i>f</i>. Timed with NumPy and SciPy on one PC.</p>
+  </div>
+  <div class="stage">
+    <div class="work spaced" style="font-size:calc(var(--stage-text) * .8)">
+      $$\begin{aligned}
+      8{,}000 \text{ unknowns, dense} &= \textcolor{#8A6508}{1.4\ \text{s}} && \text{one linear solve} \\[6pt]
+      1{,}000{,}000 \text{ unknowns, sparse} &= \textcolor{#8A6508}{9.0\ \text{s}} && \text{a grid of 1,000 by 1,000} \\[6pt]
+      5 \text{ Newton steps} &\approx 5 \times 9\ \text{s} = \textcolor{#8A6508}{45\ \text{s}} && \text{one linear solve a step}
+    \end{aligned}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">One run of the slope takes as long as <span class="def">one to two billion evaluations of the shot</span>.</p>
+    <p class="sub"><i>f</i>(PGA)&nbsp;=&nbsp;slope moved&nbsp;&minus;&nbsp;<i>d</i>*, where PGA is the peak ground acceleration and <i>d</i>* the movement taken as damage. Each value of <i>f</i> is one GPU simulation.</p>
+  </div>
+  <div class="stage">
+    <div class="work spaced" style="font-size:calc(var(--stage-text) * .8)">
+      $$\begin{aligned}
+      1\ \text{run} &= 60\ \text{to}\ 120\ \text{s} && \text{a minute or two of GPU time} \\[4pt]
+      60\ \text{s} \,/\, 64\ \text{ns} &= \textcolor{#8A6508}{0.94 \times 10^{9}} && \text{evaluations of the shot in a one-minute run} \\[4pt]
+      120\ \text{s} \,/\, 64\ \text{ns} &= \textcolor{#8A6508}{1.9 \times 10^{9}} && \text{in a two-minute run}
+    \end{aligned}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">On the 7.4&nbsp;MPa slope, 14 runs <span class="def">narrowed the bracket from 2&nbsp;g to 0.002&nbsp;g</span>.</p>
+    <p class="sub">The first 3 runs found the 2&nbsp;g bracket. Damage is taken as more than 5&nbsp;cm of movement, which is one choice. Each new setting halved the bracket, and the four repeats left it where it was.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec22-trail"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">The 7.4&nbsp;MPa slope&rsquo;s 17 runs <span class="def">shared one queue with 61 runs on the other four slopes</span>.</p>
+    <p class="sub">The lab runs one simulation at a time. Each row is one slope and each mark one run, in the order the class made them. At a minute or two a run, the 78 runs are 78 to 156 minutes of machine time.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide legible" data-fig="lec22-queue"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">In a crash test, <span class="def">each evaluation destroys a car</span>.</p>
+    <p class="sub">A frontal test drives the car into a rigid wall. Every crash test in this course&rsquo;s data was run at 35&nbsp;mph.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">prototype</span><b>250,000 to 1 million dollars</b>
+        <span>The reported cost of one development prototype. A new model takes 50 to 70 of them.</span></div>
+      <div class="pcard"><span class="tag">production car</span><b>34 cars for 2.07 million dollars</b>
+        <span>NHTSA&rsquo;s frontal test program in 1992, about 61,000 dollars a test with the car.</span></div>
+      <div class="pcard gold"><span class="tag">the speed for an allowed crush</span><b>7 cars, before any repeats</b>
+        <span>Two at 15 and 35&nbsp;mph, then 5 halvings to bring the bracket under 1&nbsp;mph.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">With a car per evaluation, engineers <span class="def">have crashed a few and fit a line</span>.</p>
+    <p class="sub">In the 1970s Campbell found crush roughly linear in speed. A study of cars built from 2003 to 2020 finds the line fits them poorly.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec22-crash"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">A fatigue test pushes and pulls one specimen <span class="def">ten million times</span>.</p>
+    <p class="sub">At 20 cycles a second, 10<sup>7</sup> cycles take 5.8 days. A steel specimen that lasts that long is taken to be below its fatigue limit.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec22-fatigue"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">Each specimen&rsquo;s stress depends on the last result, <span class="def">so the specimens run one at a time</span>.</p>
+    <p class="sub">An example of the staircase method. 10 to 15 specimens is typical. The six here that survived take 6&nbsp;&times;&nbsp;5.8&nbsp;=&nbsp;35 days, not counting the six that broke.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec22-stair"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">Creep design often needs 100,000 hours, <span class="def">and tests seldom run past 10,000</span>.</p>
+    <p class="sub">Creep is slow stretching under load at high temperature. Tests run hotter so they break sooner, and a fitted model carries them to 100,000 hours, about 11 years.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec22-creep"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">A full-scale fatigue test <span class="def">cycles one airframe for years</span>.</p>
+    <p class="sub">Actuators load a complete airframe through one simulated flight after another. US rules let the fleet fly only half the flights the test airframe has reached.</p>
+  </div>
+  <div class="stage">
+    <div class="work spaced" style="font-size:calc(var(--stage-text) * .8)">
+      $$\begin{aligned}
+      120{,}000 \text{ flights} \,/\, 160 \text{ a day} &\approx \textcolor{#8A6508}{750\ \text{days}} && \text{the 777-9, about 2 years} \\[6pt]
+      \text{five lifetimes} &= \textcolor{#8A6508}{14\ \text{years}} && \text{the Hawk trainer} \\[6pt]
+      \text{fleet flights} &\le \tfrac{1}{2} \times \text{test flights} && \text{until the test is finished}
+    \end{aligned}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">In crash and aircraft design, simulation takes most of the evaluations, <span class="def">and tests check it</span>.</p>
+    <p class="sub">A simulation is cheaper than a test, though not free.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">crash</span><b>43 hours on 512 cores</b>
+        <span>One run of a full-car model of about 10 million elements, as reported in 2010. Physical crashes are still run.</span></div>
+      <div class="pcard"><span class="tag">aircraft</span><b>Analysis supported by test</b>
+        <span>US rules ask for analysis supported by test evidence, and a full-scale fatigue test for damage spread across the structure.</span></div>
+      <div class="pcard gold"><span class="tag">materials</span><b>Models fitted to tests</b>
+        <span>Fatigue and creep models carry a few specimens to parts, stresses and times nobody tested.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">The cost of one evaluation <span class="def">largely decides how a root is found</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">nanoseconds</span><b>Sweep</b>
+        <span>A formula costs almost nothing to evaluate. Plot it finely, or solve it in closed form.</span></div>
+      <div class="pcard"><span class="tag">seconds to minutes</span><b>Count evaluations</b>
+        <span>Each evaluation is worth counting, and the budget picks the method.</span></div>
+      <div class="pcard gold"><span class="tag">cars, weeks, years</span><b>Avoid evaluations</b>
+        <span>Fit a model to a few tests, plan around the scatter, extrapolate, and simulate.</span></div>
+    </div>
   </div>
 </section>
 
@@ -903,6 +933,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <div class="deck-notes"></div>
 
 
-<script type="module" src="js/bundle/lecture-22.js?v=20261102180601"></script>
+<script type="module" src="js/bundle/lecture-22.js?v=20261109080753"></script>
 </body>
 </html>

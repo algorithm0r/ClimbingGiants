@@ -968,11 +968,14 @@ function realNoiseRaw(n, sd = 1) {
   return scaleTo(out, sd);
 }
 
-/* Two demos. The first steps bisection on the shot's fitted height, a formula
+/* Four demos. The first steps bisection on the shot's fitted height, a formula
    that costs well under a microsecond to evaluate, so the bracket can be halved forty times
    for free and its width compared with the true error. The second steps through
    the example class's runs on the 7.4 MPa slope in the Slope Stability Lab,
-   where each evaluation is a simulation and the bracket halves once per run. */
+   where each evaluation is a simulation and the bracket halves once per run.
+   The third walks bisection through the class's runs on other slopes and
+   thresholds, where the signs mislead. The fourth is a constructed beam whose
+   ratio form has a pole inside the bracket. */
 
 const RIM = 3.048;
 
@@ -1013,6 +1016,33 @@ function history(F, a0, b0, steps) {
 }
 
 const DSTAR = 5;   // cm, one illustrative damage threshold; the lab leaves it to the student
+
+const SLOPE_SETUPS = [
+  {strength: 2.6, bracket: [1, 2]},
+  {strength: 5.8, bracket: [2, 4]},
+  {strength: 5.8, bracket: [2.7, 2.9]}
+];
+
+/* the overhanging beam: 10 kN/m over 6 m, supports at 0 and 4 m, so between
+   the supports M = 15x - 5x^2 kN.m, zero at the point of contraflexure, 3 m */
+const M_C = x => 15 * x - 5 * x * x;
+const MSTAR = 8;   // kN.m
+const POLE_FORMS = {
+  ratio: {f: x => MSTAR / M_C(x) - 1, label: 'g = 8/M − 1', unit: '', clamp: [-6, 6]},
+  diff:  {f: x => M_C(x) - MSTAR, label: 'f = M − 8', unit: 'kN·m', clamp: [-22, 4]}
+};
+
+/* bisection to a width, refusing a pair of ends with the same sign */
+function bisectTo(f, a, b, tol) {
+  let fa = f(a), ev = 2;
+  if (fa * f(b) > 0) return {refused: true, ev};
+  while (b - a > tol) {
+    const m = 0.5 * (a + b), fm = f(m);
+    ev++;
+    if (fa * fm <= 0) b = m; else { a = m; fa = fm; }
+  }
+  return {x: 0.5 * (a + b), ev};
+}
 
 mountDemo({
   bisect: {
@@ -1121,6 +1151,101 @@ mountDemo({
           brack: has ? '[' + g(lo) + ', ' + g(hi) + '] g' : 'none yet',
           width: has ? g(hi - lo) + ' g' : '—',
           time: n + ' to ' + 2 * n + ' minutes'
+        }
+      };
+    }
+  },
+
+  /* Third demo: bisection walked through the class's runs on a chosen slope,
+     bracket and threshold. It stops where the next midpoint has no run. */
+  'slope-bracket': {
+    async data() {
+      const d = await (await fetch('data/slope-example-runs.json')).json();
+      return {runs: d.runs};
+    },
+    setting: 'The largest shaking a slope survives, with damage taken as moving more than a threshold <em>d</em>*, so <em>f</em>(PGA)&nbsp;=&nbsp;slope moved&nbsp;&minus;&nbsp;<em>d</em>*. Bisection is walked through the runs the example class made, and it stops where its next midpoint has no run.',
+    caption: 'Dots are every run the class made on this slope. Numbered dots are the runs bisection uses, in its order, starting with the two ends. The dashed line is the threshold and the shaded band is the bracket bisection is left with.',
+    source: {kind: 'simulated', text: 'The Slope Stability Lab&rsquo;s public example class, fetched 2026-11-02. Each run is one GPU simulation of a rock slope shaken by a recorded earthquake scaled to a peak ground acceleration (PGA), a minute or two of machine time. The threshold is one choice, since the lab leaves the definition of damage to you.'},
+    segments: [
+      {key: 'setup', label: 'slope and bracket', value: '0', options: SLOPE_SETUPS.map((q, i) =>
+        ({value: String(i), label: q.strength + ' MPa, [' + q.bracket[0] + ', ' + q.bracket[1] + '] g'}))},
+      {key: 'dstar', label: 'threshold', value: '5', options: [
+        {value: '5', label: '5 cm'}, {value: '15', label: '15 cm'}]}],
+    panels: [{label: 'slope moved', unit: 'cm', height: 250, xAxis: true,
+              xLabel: 'peak ground acceleration', xUnit: 'g', xScale: 1, yLog: true}],
+    readouts: [
+      {key: 'path', label: 'runs bisection uses'}, {key: 'brack', label: 'bracket left'},
+      {key: 'next', label: 'next run needed'}, {key: 'below', label: 'over the threshold below the bracket'}],
+    compute(s) {
+      const q = SLOPE_SETUPS[+s.setup], dstar = +s.dstar;
+      const runs = this.runs.filter(r => r.strength_mpa === q.strength);
+      const at = x => runs.filter(r => Math.abs(r.pga_g - x) < 1e-6).sort((p, v) => p.run_id - v.run_id);
+      const F = r => r.slope_moved_cm - dstar;
+      let [a, b] = q.bracket;
+      const used = [at(a)[0], at(b)[0]];
+      const fa0 = F(used[0]), fb0 = F(used[1]);
+      const refused = fa0 * fb0 > 0;
+      let next = null, fa = fa0;
+      if (!refused) {
+        for (;;) {
+          const m = (a + b) / 2, hit = at(m);
+          if (!hit.length) { next = m; break; }
+          used.push(hit[0]);
+          if (fa * F(hit[0]) <= 0) b = m; else { a = m; fa = F(hit[0]); }
+        }
+      }
+      const g = v => String(+v.toFixed(5));
+      const lo = Math.min(...runs.map(r => r.pga_g)), hi = Math.max(...runs.map(r => r.pga_g));
+      const over = runs.filter(r => r.pga_g < a && r.slope_moved_cm > dstar).map(r => r.pga_g);
+      return {
+        panels: [{x: runs.map(r => r.pga_g), y: runs.map(r => r.slope_moved_cm),
+          range: [Math.max(0, lo - 0.1), hi + 0.1],
+          opts: {dots: true, yRange: [0.1, 1000],
+                 hlines: [{y: dstar, text: dstar + ' cm'}],
+                 bands: refused ? [] : [{x0: a, x1: b}],
+                 iterates: used.map(r => ({x: r.pga_g, y: r.slope_moved_cm}))}}],
+        readouts: {
+          path: used.map(r => g(r.pga_g) + ' g (' + +r.slope_moved_cm.toPrecision(3) + ' cm)').join(', '),
+          brack: refused ? 'none, both ends ' + (fa0 < 0 ? 'under' : 'over') + ' the threshold, so bisection refuses'
+                         : '[' + g(a) + ', ' + g(b) + '] g',
+          next: refused ? '—' : g(next) + ' g, which the class has not run',
+          below: refused ? '—' : over.length ? [...new Set(over)].sort((p, v) => p - v).map(g).join(', ') + ' g' : 'none'
+        }
+      };
+    }
+  },
+
+  /* Fourth demo: the same bracket handed to the condition in two forms. The
+     ratio form has a pole at 3 m, and bisection closes on it. */
+  pole: {
+    async data() {
+      const XS = linspace(0.3, 3.9, 1400);
+      const YS = {};
+      for (const k in POLE_FORMS) YS[k] = Float64Array.from(XS, POLE_FORMS[k].f);
+      return {XS, YS};
+    },
+    setting: 'Overhanging beam, 10&nbsp;kN/m over 6&nbsp;m, supports at 0 and 4&nbsp;m, so <em>M</em>(<em>x</em>)&nbsp;=&nbsp;15<em>x</em>&nbsp;&minus;&nbsp;5<em>x</em>&sup2;&nbsp;kN&middot;m between them. Where is <em>M</em>&nbsp;=&nbsp;8&nbsp;kN&middot;m? Bisection is handed [2.4,&nbsp;3.7]&nbsp;m.',
+    caption: 'The shaded band is the bracket. Rings mark the two places where <em>M</em>&nbsp;=&nbsp;8&nbsp;kN&middot;m, and the square is what bisection returned. In the ratio form the trace breaks at 3&nbsp;m, where <em>M</em> is zero.',
+    source: {kind: 'constructed', text: 'Constructed with ordinary numbers. Neither the tracked shots nor the slope runs have a pole, so it is shown on a function with a known answer.'},
+    segments: [{key: 'form', label: 'condition written as', value: 'ratio', options: [
+      {value: 'ratio', label: '8/M − 1 = 0'}, {value: 'diff', label: 'M − 8 = 0'}]}],
+    panels: [{label: 'the condition', unit: '', height: 240, xAxis: true,
+              xLabel: 'position along the beam', xUnit: 'm', xScale: 1, yClamp: [-6, 6]}],
+    readouts: [
+      {key: 'ends', label: 'signs at 2.4 and 3.7 m'}, {key: 'bi', label: 'bisection returns'},
+      {key: 'res', label: 'M − 8 there'}],
+    compute(s) {
+      const F = POLE_FORMS[s.form], r = bisectTo(F.f, 2.4, 3.7, 1e-8);
+      const sgn = v => (v > 0 ? '+' : '−') + Math.abs(v).toFixed(3);
+      return {
+        panels: [{x: this.XS, y: this.YS[s.form], range: [0.3, 3.9],
+          opts: {yRange: F.clamp, bands: [{x0: 2.4, x1: 3.7}],
+                 rings: [{x: 0.69377, y: 0, text: '0.694 m'}, {x: 2.30623, y: 0, text: '2.306 m'}],
+                 marks: r.refused ? [] : [{t: r.x, y: 0, square: true, text: 'bisection', dx: 8, dy: 30}]}}],
+        readouts: {
+          ends: sgn(F.f(2.4)) + ' and ' + sgn(F.f(3.7)) + (r.refused ? ', the same sign' : ', opposite signs'),
+          bi: r.refused ? 'nothing, the ends have the same sign' : r.x.toFixed(8) + ' m after ' + r.ev + ' evaluations',
+          res: r.refused ? '—' : (M_C(r.x) - MSTAR).toFixed(3) + ' kN·m'
         }
       };
     }
@@ -1315,15 +1440,12 @@ setTimeout(() => {
   });
 }, 0);
 
-/* Lecture 20's own figures, on two problems.
-   The shot: data/arcs.json, the 'clean' arc (shot 79). The height is the
-   parabola fitted to its 24 free-flight frames, t from release (the same fit as
-   page 19), and f = z - 3.048 m has its falling root at 1.043663 s.
-   The slope: data/slope-example-runs.json, the 7.4 MPa slope, the example
-   class's runs in order, with an illustrative damage threshold of 5 cm.
-   Hosts are found by data-fig. polyfit comes from the notes page's demo. */
+/* Lecture 20's own figures, all on one problem: data/slope-example-runs.json,
+   the example class's runs in order, on the 7.4 MPa slope with an illustrative
+   damage threshold of 5 cm. Distance moved is drawn on a log scale, so f > 0 is
+   above the threshold line. Hosts are found by data-fig. */
 (() => {
-  const RIM = 3.048, DSTAR = 5;
+  const DSTAR = 5;
   const axis = (xr, yr, xt, yt, xl, yl, fy = v => String(v)) => [
     ...xt.map(v => ({x: v, y: yr[0], dy: 13, anchor: 'middle', text: String(v)})),
     ...yt.map(v => ({x: xr[0], y: v, dx: 4, dy: 4, anchor: 'start', text: fy(v)})),
@@ -1332,125 +1454,78 @@ setTimeout(() => {
   /* a row that stays one row however many panels it holds */
   const row = (host, k) => { const c = diagramRow(host, k); c[0].parentNode.style.gridTemplateColumns = 'repeat(' + k + ', minmax(0, 1fr))'; return c; };
   const box = (a, b, y0, y1) => [{x: a, y: y0}, {x: b, y: y0}, {x: b, y: y1}, {x: a, y: y1}];
-  const sgn = (v, dp = 2) => (v < 0 ? '−' : '+') + Math.abs(v).toFixed(dp);
-  const SUP = {'-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹'};
-  const pow10 = v => '10' + String(v).split('').map(c => SUP[c]).join('');
   const each = (name, draw) => document.querySelectorAll('[data-fig="' + name + '"] .fig-body').forEach(draw);
+  const L = v => Math.log10(v);
+  const cm = v => String(10 ** v);
+  const fmt = v => +v.toPrecision(3) + ' cm';
 
-  fetch('data/arcs.json').then(r => r.json()).then(d => {
-    const a = d.arcs.find(x => x.role === 'clean');
-    const k = a.rel, nf = a.key.nf;
-    const T = a.t.map(v => v - a.t[k]);
-    const ft = [], fz = [];
-    for (let i = k; i < k + nf; i++) { ft.push(T[i]); fz.push(a.z[i]); }
-    const [c0, c1, c2] = polyfit(ft, fz, 2);
-    const z = t => c0 + c1 * t + c2 * t * t, F = t => z(t) - RIM;
-    const ROOT = (-c1 - Math.sqrt(c1 * c1 - 4 * c2 * (c0 - RIM))) / (2 * c2);
-
-    each('lec20-shot', host => {
-      const xr = [-0.05, 1.45], yr = [0, 5.2], TT = linspace(0, 1.4, 200);
-      const fitPts = [], later = [];
-      for (let i = k; i < T.length; i++) if (T[i] <= 1.4)
-        (i < k + nf ? fitPts : later).push({x: T[i], y: a.z[i], r: 3});
-      diagram(host, {w: 440, h: 180, xRange: xr, yRange: yr,
-        alt: 'The tracked heights of the shot after release, the parabola fitted to the first 24 of them, and the rim height.',
-        curves: [{x: TT, y: [...TT].map(z), cls: 'ghost'}],
-        leads: [{from: [xr[0], RIM], to: [xr[1], RIM], cls: 'level'}],
-        points: [...fitPts, ...later.map(p => ({...p, cls: 'miss'}))],
-        notes: [...axis(xr, yr, [0, 0.5, 1], [1, 2, 4], 'time since release (s) →', '↑ height z (m)'),
-          {x: xr[1], y: RIM, dy: -5, anchor: 'end', text: 'rim, 3.048 m'},
-          {x: 0.03, y: 2.1, anchor: 'start', text: 'filled: the 24 fitted frames'},
-          {x: 0.03, y: 2.1, dy: 15, anchor: 'start', text: 'hollow: the frames after them'},
-          {x: 0.03, y: 2.1, dy: 30, anchor: 'start', text: 'dashed: the fitted parabola'}]});
-    });
-
-    each('lec20-bracket', host => {
-      /* only the two samples are known, so a dashed straight line joins them in
-         place of the curve, and the root is not marked */
-      const xr = [0.4, 1.6], yr = [-4.3, 2.8];
-      diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr, zero: true,
-        alt: 'f sampled at 0.5 s, positive, and at 1.5 s, negative, joined by a dashed straight line, with the bracket between them shaded.',
-        areas: [{pts: box(0.5, 1.5, yr[0], yr[1]), cls: 'fill'}],
-        curves: [{x: [0.5, 1.5], y: [F(0.5), F(1.5)], cls: 'ghost'}],
-        points: [{x: 0.5, y: F(0.5)}, {x: 1.5, y: F(1.5)}],
-        notes: [...axis(xr, yr, [0.5, 0.75, 1, 1.25, 1.5], [-2, 2], 't (s) →', '↑ f = z − 3.048 (m)'),
-          {x: 0.5, y: F(0.5), dx: 7, dy: -7, anchor: 'start', cls: 'hi', text: 'f(0.5) = ' + sgn(F(0.5)) + ' m'},
-          {x: 1.5, y: F(1.5), dx: -7, dy: 4, anchor: 'end', cls: 'hi', text: 'f(1.5) = ' + sgn(F(1.5)) + ' m'},
-          {x: 1.0, y: yr[0], dy: -10, anchor: 'middle', text: 'a root is somewhere in here'}]});
-    });
-
-    each('lec20-steps', host => {
-      /* only the samples are drawn: the bracket's two ends and the new midpoint,
-         joined by dashed straight lines, as on the bracket slide */
-      const cells = row(host, 3), yr = [-4.2, 2.8];
-      let a0 = 0.5, b0 = 1.5, fa = F(a0), fb = F(b0);
-      const seen = [{x: a0, y: fa}, {x: b0, y: fb}];   // every evaluation so far
-      cells.forEach((cell, i) => {
-        const m = 0.5 * (a0 + b0), fm = F(m), left = fa * fm <= 0;
-        const keep = left ? [a0, m] : [m, b0];
-        const before = seen.slice();
-        seen.push({x: m, y: fm});
-        const line = seen.slice().sort((p, q) => p.x - q.x);
-        diagram(cell, {w: 240, h: 210, xRange: [0.45, 1.55], yRange: yr, zero: true,
-          title: 'step ' + (i + 1) + ', m = ' + +m.toFixed(4) + ' s',
-          alt: 'Bisection step ' + (i + 1) + ': every point evaluated so far, the bracket, its midpoint, and the half kept.',
-          areas: [{pts: box(a0, b0, yr[0], yr[1]), cls: 'fill'}, {pts: box(keep[0], keep[1], yr[0], yr[1]), cls: 'pos'}],
-          curves: [{x: line.map(p => p.x), y: line.map(p => p.y), cls: 'ghost'}],
-          drops: [{x: m, y: fm}],
-          points: [...before.map(p => ({...p, r: 3.4})), {x: m, y: fm, r: 4.6, cls: 'miss'}],
-          notes: [{x: 0.47, y: yr[0], dy: -21, anchor: 'start', text: 'f(m) = ' + sgn(fm) + ' m'},
-                  {x: 0.47, y: yr[0], dy: -6, anchor: 'start', cls: 'hi', text: 'keep the ' + (left ? 'left' : 'right') + ' half'}]});
-        if (left) { b0 = m; fb = fm; } else { a0 = m; fa = fm; }
-      });
-    });
-
-    each('lec20-halve', host => {
-      let lo = 0.5, hi = 1.5, fa = F(lo), ev = 2;
-      const half = [], err = [];
-      const add = () => {
-        half.push({x: ev, y: Math.log10((hi - lo) / 2), r: 2.8});
-        err.push({x: ev, y: Math.log10(Math.max(1e-16, Math.abs(0.5 * (lo + hi) - ROOT))), r: 2.8, cls: 'miss'});
-      };
-      add();
-      while (ev < 42) {
-        const m = 0.5 * (lo + hi), fm = F(m); ev++;
-        if (fa * fm <= 0) hi = m; else { lo = m; fa = fm; }
-        add();
-      }
-      const xr = [0, 43], yr = [-14.5, 0.5];
-      diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr,
-        alt: 'Half the bracket width falls on a straight line on a log scale, one halving per evaluation, with the true error at or below it.',
-        points: [...err, ...half],
-        notes: [...axis(xr, yr, [10, 20, 30, 40], [-12, -8, -4], 'evaluations of f →', '↑ seconds, log scale', pow10),
-          {x: 14, y: Math.log10(1 / 2 ** 13), dx: 6, dy: -8, anchor: 'start', text: 'half the bracket width'},
-          {x: 4, y: -11, anchor: 'start', cls: 'hi', text: 'true error, hollow, at or below it'}]});
-    });
-
-    each('lec20-tworoots', host => {
-      const cells = row(host, 2), xr = [-0.35, 1.6], yr = [-4.9, 2.5], TT = linspace(-0.3, 1.55, 200);
-      [[0.5, 1.5, 'one crossing inside: signs differ'], [-0.2, 1.5, 'two crossings inside: both ends negative']]
-        .forEach(([p, q, title], i) => diagram(cells[i], {w: 300, h: 210, xRange: xr, yRange: yr, zero: true, title,
-          alt: title,
-          areas: [{pts: box(p, q, yr[0], yr[1]), cls: 'fill'}],
-          curves: [{x: TT, y: [...TT].map(F), cls: 'ghost'}],
-          points: [{x: p, y: F(p), r: 4.4}, {x: q, y: F(q), r: 4.4}],
-          notes: [...axis(xr, yr, [0, 0.5, 1, 1.5], [-2, 2], '', ''),
-            {x: p, y: F(p), dx: 7, dy: F(p) > 0 ? -7 : 16, anchor: 'start', cls: 'hi', text: sgn(F(p)) + ' m'},
-            {x: q, y: F(q), dx: -7, dy: 4, anchor: 'end', cls: 'hi', text: sgn(F(q)) + ' m'}]}));
-    });
+  /* the run clips are the lab's real-time recordings; data-rate plays them
+     faster, set again on each play since a reload resets the rate */
+  document.querySelectorAll('video[data-rate]').forEach(v => {
+    const rate = () => { v.defaultPlaybackRate = v.playbackRate = +v.dataset.rate; };
+    rate(); v.addEventListener('play', rate); v.addEventListener('loadedmetadata', rate);
   });
 
   fetch('data/slope-example-runs.json').then(r => r.json()).then(d => {
     const runs = d.runs.filter(r => r.strength_mpa === 7.4).sort((p, q) => p.run_id - q.run_id);
-    const L = v => Math.log10(v);
-    const cm = v => String(10 ** v);
+    /* the distance moved at a setting, from the class's first run there */
+    const moved = g => runs.find(r => Math.abs(r.pga_g - g) < 1e-4).slope_moved_cm;
+
+    each('lec20-bracket', host => {
+      /* only the three scan runs are known, so dashed straight lines join them
+         in place of a curve, and the root is not marked */
+      const xr = [0, 4.4], yr = [-1, 3];
+      const scan = [0.6, 2.0, 4.0].map(g => ({x: g, y: L(moved(g))}));
+      diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr,
+        alt: 'The scan runs at 0.6, 2.0 and 4.0 g joined by dashed straight lines, with the 5 cm threshold; the run at 2.0 g is below it and the run at 4.0 g above, and the bracket between them is shaded.',
+        areas: [{pts: box(2.0, 4.0, yr[0], yr[1]), cls: 'fill'}],
+        leads: [{from: [xr[0], L(DSTAR)], to: [xr[1], L(DSTAR)], cls: 'level'}],
+        curves: [{x: scan.map(p => p.x), y: scan.map(p => p.y), cls: 'ghost'}],
+        points: scan.map(p => ({...p, r: 3.6})),
+        notes: [...axis(xr, yr, [0, 1, 2, 3, 4], [0, 1, 2], 'PGA (g) →', '↑ slope moved (cm), log scale', cm),
+          {x: xr[1], y: L(DSTAR), dy: -5, anchor: 'end', text: 'd* = 5 cm'},
+          {x: 2.0, y: L(moved(2.0)), dx: -7, dy: -9, anchor: 'end', cls: 'hi', text: '2.0 g: ' + fmt(moved(2.0)) + ', f < 0'},
+          {x: 4.0, y: L(moved(4.0)), dx: -7, dy: 4, anchor: 'end', cls: 'hi', text: '4.0 g: ' + fmt(moved(4.0)) + ', f > 0'},
+          {x: 3.0, y: yr[1], dy: 16, anchor: 'middle', text: 'a root is somewhere in here'}]});
+    });
+
+    each('lec20-steps', host => {
+      /* all ten midpoint runs, two rows of five; each row shares one scale,
+         the top 2 to 4 g and the bottom zoomed near 2.9 g, and each panel shows
+         every run so far inside that view, joined by dashed straight lines as
+         on the bracket slide */
+      const cells = diagramRow(host, 10), yr = [-1, 3];
+      cells[0].parentNode.style.gridTemplateColumns = 'repeat(5, minmax(0, 1fr))';
+      const g5 = v => String((runs.find(r => Math.abs(r.pga_g - v) < 1e-4) || {pga_g: v}).pga_g);   // as the lab printed it
+      let a0 = 2.0, b0 = 4.0;
+      const seen = [{x: a0, y: L(moved(a0))}, {x: b0, y: L(moved(b0))}];   // every run from 2 g up
+      cells.forEach((cell, i) => {
+        const m = 0.5 * (a0 + b0), dm = moved(m), left = dm >= DSTAR;
+        const keep = left ? [a0, m] : [m, b0];
+        const xr = i < 5 ? [1.9, 4.1] : [2.865, 2.945], xt = i < 5 ? [2, 3, 4] : [2.88, 2.91, 2.94];
+        const inView = p => p.x >= xr[0] && p.x <= xr[1];
+        const before = seen.filter(inView);
+        seen.push({x: m, y: L(dm)});
+        const line = seen.filter(inView).sort((p, q) => p.x - q.x);
+        diagram(cell, {w: 200, h: 172, xRange: xr, yRange: yr,
+          title: (i + 1) + ': m = ' + g5(m) + ' g',
+          alt: 'Midpoint run ' + (i + 1) + ': the bracket, the runs inside it so far, the new run at its midpoint, and the half kept.',
+          areas: [{pts: box(a0, b0, yr[0], yr[1]), cls: 'fill'}, {pts: box(keep[0], keep[1], yr[0], yr[1]), cls: 'pos'}],
+          leads: [{from: [xr[0], L(DSTAR)], to: [xr[1], L(DSTAR)], cls: 'level'}],
+          curves: [{x: line.map(p => p.x), y: line.map(p => p.y), cls: 'ghost'}],
+          points: [...before.map(p => ({...p, r: 3.4})), {x: m, y: L(dm), r: 4.8, cls: 'miss'}],
+          notes: [...xt.map(v => ({x: v, y: yr[0], dy: 13, anchor: 'middle', text: String(v)})),
+                  {x: (xr[0] + xr[1]) / 2, y: yr[1], dy: 13, anchor: 'middle', cls: 'hi', text: +dm.toPrecision(3) + ' cm, keep ' + (left ? 'left' : 'right')}]});
+        if (left) b0 = m; else a0 = m;
+      });
+    });
 
     each('lec20-slope', host => {
       const cells = row(host, 2), yr = [-1, 3];
       const under = runs.filter(r => r.slope_moved_cm < DSTAR).map(r => r.pga_g);
       const over = runs.filter(r => r.slope_moved_cm >= DSTAR).map(r => r.pga_g);
       const lo = Math.max(...under), hi = Math.min(...over);
-      [[[0, 4.2], [0, 1, 2, 3, 4], 'all 17 runs'], [[2.86, 2.96], [2.87, 2.89, 2.91, 2.93, 2.95], 'the same, from 2.86 to 2.96 g']]
+      [[[0, 4.2], [0, 1, 2, 3, 4], '17 runs at 13 settings'], [[2.86, 2.96], [2.87, 2.89, 2.91, 2.93, 2.95], 'the runs from 2.86 to 2.96 g']]
         .forEach(([xr, xt, title], i) => diagram(cells[i], {w: 300, h: 210, xRange: xr, yRange: yr, title,
           alt: 'The slope runs, distance moved against PGA on a log scale, with the 5 cm threshold.',
           areas: i ? [{pts: box(lo, hi, yr[0], yr[1]), cls: 'pos'}] : [],
@@ -1462,26 +1537,38 @@ setTimeout(() => {
                   {x: 2.955, y: 0.3, dy: 15, anchor: 'end', cls: 'hi', text: '[2.88867, 2.89062] g'}] : [])]}));
     });
 
-    each('lec20-cost', host => {
-      /* the bracket's width after each midpoint run, from [2.0, 4.0] g;
-         a repeat at a setting already run adds nothing to the bracket */
-      const mids = runs.filter((r, i) => i >= 3 && !runs.slice(0, i).some(q => q.pga_g === r.pga_g));
-      let lo = 2.0, hi = 4.0;
-      const pts = [{x: 0, y: L(hi - lo), r: 3.4}];
-      mids.forEach((r, i) => {
-        if (r.slope_moved_cm >= DSTAR) hi = r.pga_g; else lo = r.pga_g;
-        pts.push({x: i + 1, y: L(hi - lo), r: 3.4});
-      });
-      const xr = [-0.3, 13], yr = [-3.4, 0.7], KK = linspace(0, 11, 2);
-      const goals = [[0.1, 5], [0.01, 8], [0.001, 11]];
-      diagram(host, {w: 440, h: 200, xRange: xr, yRange: yr,
-        alt: 'The bracket width on a log scale against midpoint runs, halving with every run, with the runs needed for 0.1, 0.01 and 0.001 g marked.',
-        curves: [{x: KK, y: [...KK].map(n => L(2 / 2 ** n)), cls: 'ghost'}],
-        leads: goals.map(([w]) => ({from: [xr[0], L(w)], to: [xr[1], L(w)], cls: 'level'})),
-        points: [...pts, {x: 11, y: L(2 / 2 ** 11), r: 4.4, cls: 'miss'}],
-        notes: [...axis(xr, yr, [0, 2, 4, 6, 8, 10], [], 'midpoint runs →', '↑ bracket width (g), log scale'),
-          ...goals.map(([w, n]) => ({x: 0.2, y: L(w), dy: -5, anchor: 'start', cls: 'hi',
-            text: w + ' g: ' + n + ' runs, ' + n + ' to ' + 2 * n + ' min'}))]});
+    each('lec20-bits', host => {
+      /* each midpoint run from [2, 4] g writes one binary digit: keeping the
+         left half is 0 and the right half 1, so the ten bits are the binary
+         fraction in 2 + 2 × 0.b1b2...; under them, the runs it takes the width
+         to fall by ten, log2 10 = 3.32 each. Run k's box spans [k - 1, k], so
+         x is also the number of runs made. */
+      let a0 = 2.0, b0 = 4.0;
+      const bits = [];
+      for (let k = 0; k < 10; k++) {
+        const m = 0.5 * (a0 + b0), right = moved(m) < DSTAR;
+        bits.push(right ? 1 : 0);
+        if (right) a0 = m; else b0 = m;
+      }
+      const D = Math.log2(10), xr = [-2.4, 11.2], yr = [0, 10];
+      const cell = k => box(k - 0.92, k - 0.08, 6.3, 8.5);
+      diagram(host, {w: 480, h: 190, xRange: xr, yRange: yr, axes: false,
+        alt: 'Ten boxes, one per midpoint run, holding the bits 0111000111, after "2 + 2 × 0.", and an empty eleventh box. Below, a bar split every 3.3 runs, where the bracket width falls from 2 to 0.2, 0.02 and 0.002 g.',
+        areas: [...bits.map((b, i) => ({pts: cell(i + 1), cls: b ? 'pos' : 'fill'})), {pts: cell(11), cls: 'ghost'},
+          ...[0, 1, 2].map(j => ({pts: box(j * D, (j + 1) * D, 2.4, 4.4), cls: j % 2 ? 'pos' : 'fill'}))],
+        leads: [1, 2, 3].map(j => ({from: [j * D, 1.9], to: [j * D, 4.4], cls: 'level'})),
+        notes: [{x: 0, y: 9.4, dx: -4, anchor: 'end', text: 'run'},
+          ...bits.map((b, i) => ({x: i + 0.5, y: 9.4, anchor: 'middle', text: String(i + 1)})),
+          {x: 10.5, y: 9.4, anchor: 'middle', text: '11'},
+          {x: 0, y: 7.4, dx: -4, dy: 5, anchor: 'end', cls: 'hi', text: '2 + 2 × 0.'},
+          ...bits.map((b, i) => ({x: i + 0.5, y: 7.4, dy: 5, anchor: 'middle', cls: 'hi', text: String(b)})),
+          {x: 10.5, y: 7.4, dy: 5, anchor: 'middle', text: '?'},
+          {x: 0, y: 5.3, dx: -4, dy: 4, anchor: 'end', text: 'kept half'},
+          ...bits.map((b, i) => ({x: i + 0.5, y: 5.3, dy: 4, anchor: 'middle', text: b ? 'right' : 'left'})),
+          {x: 0, y: 3.4, dx: -4, dy: 4, anchor: 'end', text: 'width'},
+          ...['2 → 0.2 g', '0.2 → 0.02 g', '0.02 → 0.002 g'].map((t, j) => ({x: (j + 0.5) * D, y: 3.4, dy: 4, anchor: 'middle', text: t})),
+          {x: 0, y: 1.9, dx: -10, dy: 13, anchor: 'end', text: 'runs made'},
+          ...['0', '3.3', '6.6', '10'].map((t, j) => ({x: j * D, y: 1.9, dy: 13, anchor: 'middle', text: t}))]});
     });
   });
 })();

@@ -6,8 +6,8 @@
 <title>Lecture 21 — Newton and the secant method</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261102180601">
-<link rel="stylesheet" href="css/demos.css?v=20261102180601">
+<link rel="stylesheet" href="css/blocks.css?v=20261109080753">
+<link rel="stylesheet" href="css/demos.css?v=20261109080753">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -696,8 +696,29 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">Newton&rsquo;s method follows the tangent <span class="def">down to the axis</span>.</p>
-    <p class="sub">The shot&rsquo;s fitted height less the rim, <i>f</i>(<i>t</i>)&nbsp;=&nbsp;<i>z</i>(<i>t</i>)&nbsp;&minus;&nbsp;3.048&nbsp;m, from <i>t</i><sub>0</sub>&nbsp;=&nbsp;0.92&nbsp;s, the last frame fitted. Where the tangent crosses zero is the next estimate.</p>
+    <p class="say">Newton&rsquo;s method keeps <span class="def">only the linear part</span>, solves it, and repeats.</p>
+    <p class="sub">The root of <i>f</i>(<i>x</i>)&nbsp;=&nbsp;<i>x</i><sup>3</sup>&nbsp;&minus;&nbsp;100 is the cube root of 100, 4.6416, which a calculator checks. Start from a guess of 5 and write <i>x</i>&nbsp;=&nbsp;5&nbsp;+&nbsp;<i>p</i>, where <i>p</i> is the correction. Newton worked this way on <i>x</i><sup>3</sup>&nbsp;&minus;&nbsp;2<i>x</i>&nbsp;&minus;&nbsp;5&nbsp;=&nbsp;0 in a 1669 manuscript.</p>
+  </div>
+  <div class="stage">
+    <style>.deck-slide .work.spaced .katex-display{margin:.6em 0}.deck-slide .l21duo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.4rem;align-items:center}.deck-slide .l21duo .figure{margin:0}</style>
+    <div class="l21duo">
+    <figure class="figure wide" data-fig="lec21-cubic"><div class="fig-body"></div></figure>
+    <div class="work spaced" style="font-size:calc(var(--stage-text) * .55)">
+      $$\begin{aligned}
+      (5 + p)^3 - 100 &= 25 + 75\,p + 15\,p^2 + p^3 && \text{expand} \\[4pt]
+      0 &= 25 + 75\,p && \text{keep only the linear part} \\[4pt]
+      p &= -\tfrac{1}{3} && \text{solve it} \\[4pt]
+      x_1 &= 5 - \tfrac{1}{3} = \textcolor{#8A6508}{4.6667} && \text{the next guess, and repeat}
+    \end{aligned}$$
+    </div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">The linear part is <span class="def">the tangent line</span>, so each step follows the tangent down to zero.</p>
+    <p class="sub">At <i>x</i><sub>0</sub>&nbsp;=&nbsp;5, <i>f</i>&nbsp;=&nbsp;25 and the slope is 75, the coefficient of <i>p</i> in the linear part. The tangent crosses zero at 4.6667, a little short of the root.</p>
   </div>
   <div class="stage">
     <figure class="figure wide" data-fig="lec21-tangent"><div class="fig-body"></div></figure>
@@ -706,68 +727,72 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">The fitted formula for <i>f</i> <span class="def">gives a formula for <i>f</i>&prime;</span>.</p>
-    <p class="sub"><i>t</i> is seconds since release. <i>f</i>&prime; (<i>f</i> prime) is the slope of <i>f</i>, here the ball&rsquo;s vertical velocity in meters per second.</p>
+    <p class="say">In general the correction is <span class="def">minus <i>f</i> divided by its slope</span>.</p>
+    <p class="sub"><i>x</i><sub><i>k</i></sub> is the guess after <i>k</i> steps and <i>p</i> the correction. <i>f</i>&prime; (<i>f</i> prime) is the slope of <i>f</i>, here 3<i>x</i><sup>2</sup>.</p>
   </div>
   <div class="stage">
-    <style>.deck-slide .work.spaced .katex-display{margin:.6em 0}</style>
-    <div class="work spaced" style="font-size:calc(var(--stage-text) * .8)">
+    <div class="l21duo">
+    <figure class="figure wide" data-fig="lec21-step"><div class="fig-body"></div></figure>
+    <div class="work spaced" style="font-size:calc(var(--stage-text) * .62)">
       $$\begin{aligned}
-      f(t) &= -4.9153\,t^2 + 4.7428\,t + 3.4520 - 3.048 && \text{the fitted parabola less the rim} \\[4pt]
-      f'(t) &= -9.8306\,t + 4.7428 && \text{differentiate each term with the power rule} \\[4pt]
-      f'(0.92) &= \textcolor{#8A6508}{-4.3013\ \text{m/s}} && \text{falling at the last frame fitted}
+      f(x_k + p) &\approx f(x_k) + f'(x_k)\,p && \text{the linear part} \\[4pt]
+      0 &= f(x_k) + f'(x_k)\,p && \text{set it to zero} \\[4pt]
+      p &= -\frac{f(x_k)}{f'(x_k)} && \text{solve it} \\[4pt]
+      x_{k+1} &= \textcolor{#8A6508}{x_k - \frac{f(x_k)}{f'(x_k)}} && \text{take the step}
     \end{aligned}$$
+    </div>
     </div>
   </div>
 </section>
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">Setting the tangent line to zero <span class="def">gives Newton&rsquo;s step</span>.</p>
-    <p class="sub"><i>t</i><sub><i>k</i></sub> is the estimate after <i>k</i> steps, and <i>t</i><sub><i>k</i>+1</sub> is the next one. <i>y</i> is the height of the tangent line at time <i>t</i>.</p>
+    <p class="say">Near the root, <span class="def">the correct digits roughly double</span> at each step.</p>
+    <p class="sub">Gold digits match the root, 4.64158883361278. The residual <i>f</i>(<i>x</i><sub><i>k</i></sub>) is zero at the root, and Newton&rsquo;s last is about as small as <i>f</i> gets in double precision. Bisection on [4,&nbsp;5] halves its bracket each step, and 2<sup>3.3</sup>&nbsp;&asymp;&nbsp;10, so it gains a digit about every 3.3 steps.</p>
   </div>
   <div class="stage">
-    <div class="work spaced" style="font-size:calc(var(--stage-text) * .8)">
-      $$\begin{aligned}
-      y &= f(t_k) + f'(t_k)\,(t - t_k) && \text{the tangent line at } t_k \\[4pt]
-      0 &= f(t_k) + f'(t_k)\,(t_{k+1} - t_k) && \text{it crosses zero at } t_{k+1} \\[4pt]
-      t_{k+1} - t_k &= -\frac{f(t_k)}{f'(t_k)} && \text{divide both sides by } f'(t_k) \\[4pt]
-      t_{k+1} &= \textcolor{#8A6508}{t_k - \frac{f(t_k)}{f'(t_k)}} && \text{add } t_k
-    \end{aligned}$$
+    <div class="work" style="font-size:calc(var(--stage-text) * .7)">
+      $$\begin{array}{c|ll|ll}
+      \text{step } k & \text{Newton } x_k & f(x_k) & \text{bisection midpoint} & f(\text{midpoint}) \\ \hline
+      0 & 5 & 25 & \textcolor{#8A6508}{4}.5 & -8.9 \\
+      1 & \textcolor{#8A6508}{4.6}6666666666667 & 1.6 & \textcolor{#8A6508}{4}.75 & 7.2 \\
+      2 & \textcolor{#8A6508}{4.641}72335600907 & 8.7\times10^{-3} & \textcolor{#8A6508}{4.6}25 & -1.1 \\
+      3 & \textcolor{#8A6508}{4.64158883}751135 & 2.5\times10^{-7} & \textcolor{#8A6508}{4.6}875 & 3.0 \\
+      4 & \textcolor{#8A6508}{4.64158883361278} & -2.8\times10^{-14} & \textcolor{#8A6508}{4.6}5625 & 0.95
+      \end{array}$$
     </div>
   </div>
 </section>
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">From 0.92&nbsp;s, three steps give <span class="def">seven correct digits</span>.</p>
-    <p class="sub"><i>f</i> in meters and <i>f</i>&prime; in meters per second, so each step is in seconds. The falling root is 1.0436631&nbsp;s.</p>
+    <p class="say">Where the slope is nearly flat, <span class="def">one Newton step can throw the guess far away</span>.</p>
+    <p class="sub">From <i>x</i><sub>0</sub>&nbsp;=&nbsp;0.5, <i>f</i>&nbsp;=&nbsp;&minus;99.875 and the slope is 0.75, so the correction is 133.2. Far from the root each step takes off about a third of <i>x</i>. Newton needs 14 steps to reach full precision, against 4 from <i>x</i><sub>0</sub>&nbsp;=&nbsp;5.</p>
   </div>
   <div class="stage">
-    <div class="work spaced" style="font-size:calc(var(--stage-text) * .8)">
-      $$\begin{aligned}
-      t_1 &= 0.92 - \frac{0.60708}{-4.30127} = 0.92 + 0.14114 = 1.061139 \\[6pt]
-      t_2 &= 1.061139 - \frac{-0.097913}{-5.68874} = 1.061139 - 0.017212 = 1.043927 \\[6pt]
-      t_3 &= 1.043927 - \frac{-0.0014561}{-5.51954} = 1.043927 - 0.0002638 = \textcolor{#8A6508}{1.0436632}
-    \end{aligned}$$
+    <div class="l21duo" style="grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)">
+    <figure class="figure wide" data-fig="lec21-flat"><div class="fig-body"></div></figure>
+    <div class="work" style="font-size:calc(var(--stage-text) * .56)">
+      $$\begin{array}{c|l|c|l}
+      \text{step } k & x_k & \text{step } k & x_k \\ \hline
+      0 & 0.5 & 8 & 8.1604 \\
+      1 & 133.67 & 9 & 5.9408 \\
+      2 & 89.113 & 10 & \textcolor{#8A6508}{4}.9050 \\
+      3 & 59.413 & 11 & \textcolor{#8A6508}{4.6}555 \\
+      4 & 39.618 & 12 & \textcolor{#8A6508}{4.641}63025 \\
+      5 & 26.433 & 13 & \textcolor{#8A6508}{4.641588833}98 \\
+      6 & 17.670 & 14 & \textcolor{#8A6508}{4.64158883361278} \\
+      7 & 11.887 & &
+      \end{array}$$
+    </div>
     </div>
   </div>
 </section>
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">Near the root, <span class="def">the number of correct digits roughly doubles</span> at each step.</p>
-    <p class="sub">The error is the distance from the estimate to the root. Each dot is one step, on a logarithmic scale.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="lec21-digits"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">The secant method uses <span class="def">the line through the last two estimates</span>.</p>
-    <p class="sub">Two starting guesses, the last two frames fitted, <i>t</i><sub>0</sub>&nbsp;=&nbsp;0.88 and <i>t</i><sub>1</sub>&nbsp;=&nbsp;0.92&nbsp;s. The next estimate is where the line crosses zero, and no derivative is needed.</p>
+    <p class="say">The secant method takes the same step <span class="def">with the slope from the last two points</span>.</p>
+    <p class="sub">Two starting guesses, <i>x</i><sub>0</sub>&nbsp;=&nbsp;4 and <i>x</i><sub>1</sub>&nbsp;=&nbsp;5. The line through <i>f</i>(4)&nbsp;=&nbsp;&minus;36 and <i>f</i>(5)&nbsp;=&nbsp;25 crosses zero at 4.5902.</p>
   </div>
   <div class="stage">
     <figure class="figure wide" data-fig="lec21-secant"><div class="fig-body"></div></figure>
@@ -776,33 +801,43 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">The slope of the secant <span class="def">takes the place of <i>f</i>&prime;</span>.</p>
-    <p class="sub">The slope is the backward difference, with the step set by the last two estimates.</p>
+    <p class="say">Each secant step <span class="def">evaluates <i>f</i> once</span> and needs no derivative.</p>
+    <p class="sub">The slope is a backward difference, with <i>h</i> the last step. The step before already evaluated <i>f</i>(<i>x</i><sub><i>k</i>&minus;1</sub>), so the slope costs nothing, and <i>h</i> is whatever that step was, not a choice.</p>
   </div>
   <div class="stage">
     <div class="work spaced" style="font-size:calc(var(--stage-text) * .8)">
       $$\begin{aligned}
-      f'(t_k) &\approx \frac{f(t_k) - f(t_{k-1})}{t_k - t_{k-1}} && \text{the slope through the last two points} \\[8pt]
-      t_{k+1} &= \textcolor{#8A6508}{t_k - f(t_k)\,\frac{t_k - t_{k-1}}{f(t_k) - f(t_{k-1})}} && \text{put it into Newton\textquoteright s step}
+      f'(x_k) &\approx \frac{f(x_k) - f(x_{k-1})}{x_k - x_{k-1}} && \text{backward difference, } h = x_k - x_{k-1} \\[8pt]
+      x_{k+1} &= \textcolor{#8A6508}{x_k - f(x_k)\,\frac{x_k - x_{k-1}}{f(x_k) - f(x_{k-1})}} && \text{put it into Newton\textquoteright s step} \\[8pt]
+      x_2 &= 5 - 25 \cdot \frac{5 - 4}{25 - (-36)} = 5 - 0.4098 = 4.5902 && \text{the first step}
     \end{aligned}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">The methods differ in <span class="def">what they take from each check</span>.</p>
+    <p class="sub">Without a formula that delivers the root, as the quadratic formula does, each method tries a guess, checks <i>f</i> there, and makes the next guess from the check.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c4">
+      <div class="pcard"><span class="tag">scan</span><b>Nothing</b>
+        <span>Its guesses are fixed in advance. The check says only where the sign changed.</span></div>
+      <div class="pcard"><span class="tag">bisection</span><b>The sign</b>
+        <span>The sign of <i>f</i> at the midpoint says which half of the bracket keeps the root.</span></div>
+      <div class="pcard"><span class="tag">secant</span><b>The last two values</b>
+        <span>The line through <i>f</i> at the last two guesses crosses zero at the next guess.</span></div>
+      <div class="pcard"><span class="tag">Newton</span><b>The value and the slope</b>
+        <span><i>f</i> and <i>f</i>&prime; at the guess give the tangent, which crosses zero at the next guess.</span></div>
     </div>
   </div>
 </section>
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">Counted in steps, Newton converges <span class="def">a little faster than the secant method</span>.</p>
-    <p class="sub">Near a simple root, one where <i>f</i> crosses zero with a slope that is not zero, Newton&rsquo;s error is roughly squared each step (order 2). The secant method&rsquo;s order is 1.618, the golden ratio.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="lec21-steps"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">Counted in evaluations, <span class="def">the secant method is faster</span>.</p>
-    <p class="sub">Each Newton step evaluates <i>f</i> and <i>f</i>&prime;. Each secant step evaluates <i>f</i> once, so six evaluations buy five secant steps and three Newton steps.</p>
+    <p class="say">In one unknown, <span class="def">bisection is usually fast enough</span>.</p>
+    <p class="sub">Newton&rsquo;s <i>f</i>&prime; counts as an evaluation. Bisection checks the sign at both ends of [4,&nbsp;5], then 40 midpoints guarantee 12 digits. In Python on a desktop, its 42 evaluations take a few microseconds and Newton&rsquo;s 8 under 1.</p>
   </div>
   <div class="stage">
     <figure class="figure wide" data-fig="lec21-evals"><div class="fig-body"></div></figure>
@@ -811,80 +846,43 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">Neither method keeps a bracket, so <span class="def">a step can land far from the root</span>.</p>
-    <p class="sub">The fitted ball is highest at 0.48&nbsp;s, where <i>f</i>&prime;&nbsp;=&nbsp;0.</p>
+    <p class="say">Brent&rsquo;s method <span class="def">keeps bisection&rsquo;s bracket and takes secant and parabola steps</span> inside it.</p>
+    <p class="sub">SciPy&rsquo;s <code>brentq(f, 4, 5)</code> and MATLAB&rsquo;s <code>fzero</code> use it. A parabola step fits a sideways parabola, <i>x</i> as a function of <i>f</i>, through the last three points. A step that would leave the bracket, or shrink it too slowly, becomes a halving instead. The last evaluation sits 10<sup>&minus;12</sup> past the one before it, and the sign change between them holds the root.</p>
   </div>
   <div class="stage">
-    <div class="pcards c2">
-      <div class="pcard"><span class="tag">flat tangent</span><b>First step to 9.47&nbsp;s</b>
-        <span>From 0.50&nbsp;s, just after the top, <i>f</i>&prime;&nbsp;=&nbsp;&minus;0.17&nbsp;m/s and the first step lands at 9.47&nbsp;s.</span></div>
-      <div class="pcard"><span class="tag">rising crossing</span><b>Converges on &minus;0.079&nbsp;s</b>
-        <span>From 0.40&nbsp;s, before the top, Newton converges on the crossing on the way up, before release.</span></div>
+    <div class="l21duo" style="grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr)">
+    <figure class="figure wide" data-fig="lec21-brent"><div class="fig-body"></div></figure>
+    <div class="work" style="font-size:calc(var(--stage-text) * .45)">
+      $$\begin{array}{c|ll|l}
+      \text{evaluation} & x & f(x) & \text{how } x \text{ was chosen} \\ \hline
+      1 & \textcolor{#8A6508}{4} & -36 & \text{one end of the bracket} \\
+      2 & 5 & 25 & \text{the other end} \\
+      3 & \textcolor{#8A6508}{4}.590163934426229 & -3.3 & \text{secant step, as on the secant slide} \\
+      4 & \textcolor{#8A6508}{4.6}37788377299717 & -0.25 & \text{secant step} \\
+      5 & \textcolor{#8A6508}{4.6415}93915244917 & 3.3\times10^{-4} & \text{parabola step} \\
+      6 & \textcolor{#8A6508}{4.6415888}29449753 & -2.7\times10^{-7} & \text{secant step} \\
+      7 & \textcolor{#8A6508}{4.6415888336127}74 & -3.1\times10^{-13} & \text{parabola step, the answer} \\
+      8 & \textcolor{#8A6508}{4.64158883361}3776 & 6.4\times10^{-11} & \text{a check } 10^{-12} \text{ past it}
+      \end{array}$$
+    </div>
     </div>
   </div>
 </section>
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">On the slope, <i>f</i> has no formula, so <span class="def">there is no <i>f</i>&prime; to evaluate</span>.</p>
-    <p class="sub"><i>f</i>&nbsp;=&nbsp;moved&nbsp;&minus;&nbsp;<i>d</i>*, how far the slope moved less a damage threshold, here 5&nbsp;cm as one choice. PGA is the shaking&rsquo;s peak ground acceleration in g. Each dot is one run on the 5.8&nbsp;MPa (bond strength) slope, a minute or two on a GPU.</p>
+    <p class="say">In practice Newton&rsquo;s step runs on systems of <span class="def">thousands to millions of unknowns</span>.</p>
+    <p class="sub">Each step still keeps only the linear part and solves it. With many unknowns, every equation has a slope in every unknown, and solving the linear part means solving all the equations together. That generalization is the work of linear algebra.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="lec21-slope"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">A secant line through two runs <span class="def">misses the runs between them</span>.</p>
-    <p class="sub">The line through 2.72&nbsp;g (2.9&nbsp;cm) and 2.8&nbsp;g (23.0&nbsp;cm) puts 2.75&nbsp;g at 10.4&nbsp;cm. The run at 2.75&nbsp;g moved 307&nbsp;cm.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="lec21-jump"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">Below the jump the runs are nearly flat, so <span class="def">the secant step leaves the bracket</span>.</p>
-    <p class="sub">The 7.4&nbsp;MPa slope. The line through the last two runs, 0.23 and 0.26&nbsp;cm, reaches 5&nbsp;cm at 3.19&nbsp;g, while the bracket is [2.88867,&nbsp;2.89062]&nbsp;g.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="lec21-flat"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">Brent&rsquo;s method keeps a bracket and <span class="def">takes fast steps inside it</span>.</p>
-    <p class="sub"><code>scipy.optimize.brentq</code> and MATLAB&rsquo;s <code>fzero</code> use it. Its fast steps are secant steps and a parabola through the last three points.</p>
-  </div>
-  <div class="stage">
-    <div class="pcards c3">
-      <div class="pcard"><span class="tag">sign change</span><b>Find a bracket</b>
-        <span>Plot or scan for a sign change.</span></div>
-      <div class="pcard"><span class="tag">secant or parabola</span><b>Propose a fast step</b>
-        <span>Take a secant or interpolation step from inside the bracket.</span></div>
-      <div class="pcard gold"><span class="tag">3.19&nbsp;g &rarr; 2.88965&nbsp;g</span><b>Bisect instead</b>
-        <span>A step outside the bracket, such as 3.19&nbsp;g on the slope, is replaced by the midpoint, 2.88965&nbsp;g.</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">On the shot, <span class="def">one library call</span> on a bracket finds the crossing.</p>
-    <p class="sub">SciPy is Python&rsquo;s scientific library. <i>f</i> is the fitted height less 3.048&nbsp;m, and <code>df</code> is its derivative.</p>
-  </div>
-  <div class="stage">
-    <div class="panels" style="font-size:calc(var(--stage-code) * .86)">
-      <div class="code"><span class="dim"># Python, with SciPy</span></div><div class="note"></div>
-      <div class="code">from scipy.optimize import brentq, newton</div><div class="note"></div>
-      <div class="code"><span class="k">t = brentq(f, 0.5, 1.5)</span></div><div class="note">from the bracket, <span class="v">1.0436631</span></div>
-      <div class="code">t = newton(f, 0.92, fprime=df)</div><div class="note">Newton from 0.92, the same root</div>
-      <div class="code">&nbsp;</div><div class="note"></div>
-      <div class="code"><span class="dim">% MATLAB</span></div><div class="note"></div>
-      <div class="code"><span class="k">t = fzero(f, [0.5 1.5]);</span></div><div class="note">the same root from the same bracket</div>
+    <div class="work" style="font-size:calc(var(--stage-text) * .7)">
+      $$\begin{array}{l|l|l}
+      \text{system} & \text{unknowns} & \text{how many unknowns} \\ \hline
+      \text{this lecture} & x & 1 \\[4pt]
+      \text{a power grid, how the power flows} & \text{voltage and its phase at each junction} & \textcolor{#8A6508}{\text{two at each of up to } 100{,}000 \text{ junctions}} \\[4pt]
+      \text{a structure that bends and yields} & \text{how far each mesh point moves} & \textcolor{#8A6508}{100{,}000 \text{ to a million}} \\[4pt]
+      \text{a circuit simulator} & \text{the voltage at each node} & \textcolor{#8A6508}{\text{one per node, at every time step}}
+      \end{array}$$
     </div>
   </div>
 </section>
@@ -896,6 +894,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <div class="deck-notes"></div>
 
 
-<script type="module" src="js/bundle/lecture-21.js?v=20261102180601"></script>
+<script type="module" src="js/bundle/lecture-21.js?v=20261109080753"></script>
 </body>
 </html>

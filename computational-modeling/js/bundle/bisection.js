@@ -967,11 +967,14 @@ function realNoiseRaw(n, sd = 1) {
   return scaleTo(out, sd);
 }
 
-/* Two demos. The first steps bisection on the shot's fitted height, a formula
+/* Four demos. The first steps bisection on the shot's fitted height, a formula
    that costs well under a microsecond to evaluate, so the bracket can be halved forty times
    for free and its width compared with the true error. The second steps through
    the example class's runs on the 7.4 MPa slope in the Slope Stability Lab,
-   where each evaluation is a simulation and the bracket halves once per run. */
+   where each evaluation is a simulation and the bracket halves once per run.
+   The third walks bisection through the class's runs on other slopes and
+   thresholds, where the signs mislead. The fourth is a constructed beam whose
+   ratio form has a pole inside the bracket. */
 
 const RIM = 3.048;
 
@@ -1012,6 +1015,33 @@ function history(F, a0, b0, steps) {
 }
 
 const DSTAR = 5;   // cm, one illustrative damage threshold; the lab leaves it to the student
+
+const SLOPE_SETUPS = [
+  {strength: 2.6, bracket: [1, 2]},
+  {strength: 5.8, bracket: [2, 4]},
+  {strength: 5.8, bracket: [2.7, 2.9]}
+];
+
+/* the overhanging beam: 10 kN/m over 6 m, supports at 0 and 4 m, so between
+   the supports M = 15x - 5x^2 kN.m, zero at the point of contraflexure, 3 m */
+const M_C = x => 15 * x - 5 * x * x;
+const MSTAR = 8;   // kN.m
+const POLE_FORMS = {
+  ratio: {f: x => MSTAR / M_C(x) - 1, label: 'g = 8/M − 1', unit: '', clamp: [-6, 6]},
+  diff:  {f: x => M_C(x) - MSTAR, label: 'f = M − 8', unit: 'kN·m', clamp: [-22, 4]}
+};
+
+/* bisection to a width, refusing a pair of ends with the same sign */
+function bisectTo(f, a, b, tol) {
+  let fa = f(a), ev = 2;
+  if (fa * f(b) > 0) return {refused: true, ev};
+  while (b - a > tol) {
+    const m = 0.5 * (a + b), fm = f(m);
+    ev++;
+    if (fa * fm <= 0) b = m; else { a = m; fa = fm; }
+  }
+  return {x: 0.5 * (a + b), ev};
+}
 
 mountDemo({
   bisect: {
@@ -1120,6 +1150,101 @@ mountDemo({
           brack: has ? '[' + g(lo) + ', ' + g(hi) + '] g' : 'none yet',
           width: has ? g(hi - lo) + ' g' : '—',
           time: n + ' to ' + 2 * n + ' minutes'
+        }
+      };
+    }
+  },
+
+  /* Third demo: bisection walked through the class's runs on a chosen slope,
+     bracket and threshold. It stops where the next midpoint has no run. */
+  'slope-bracket': {
+    async data() {
+      const d = await (await fetch('data/slope-example-runs.json')).json();
+      return {runs: d.runs};
+    },
+    setting: 'The largest shaking a slope survives, with damage taken as moving more than a threshold <em>d</em>*, so <em>f</em>(PGA)&nbsp;=&nbsp;slope moved&nbsp;&minus;&nbsp;<em>d</em>*. Bisection is walked through the runs the example class made, and it stops where its next midpoint has no run.',
+    caption: 'Dots are every run the class made on this slope. Numbered dots are the runs bisection uses, in its order, starting with the two ends. The dashed line is the threshold and the shaded band is the bracket bisection is left with.',
+    source: {kind: 'simulated', text: 'The Slope Stability Lab&rsquo;s public example class, fetched 2026-11-02. Each run is one GPU simulation of a rock slope shaken by a recorded earthquake scaled to a peak ground acceleration (PGA), a minute or two of machine time. The threshold is one choice, since the lab leaves the definition of damage to you.'},
+    segments: [
+      {key: 'setup', label: 'slope and bracket', value: '0', options: SLOPE_SETUPS.map((q, i) =>
+        ({value: String(i), label: q.strength + ' MPa, [' + q.bracket[0] + ', ' + q.bracket[1] + '] g'}))},
+      {key: 'dstar', label: 'threshold', value: '5', options: [
+        {value: '5', label: '5 cm'}, {value: '15', label: '15 cm'}]}],
+    panels: [{label: 'slope moved', unit: 'cm', height: 250, xAxis: true,
+              xLabel: 'peak ground acceleration', xUnit: 'g', xScale: 1, yLog: true}],
+    readouts: [
+      {key: 'path', label: 'runs bisection uses'}, {key: 'brack', label: 'bracket left'},
+      {key: 'next', label: 'next run needed'}, {key: 'below', label: 'over the threshold below the bracket'}],
+    compute(s) {
+      const q = SLOPE_SETUPS[+s.setup], dstar = +s.dstar;
+      const runs = this.runs.filter(r => r.strength_mpa === q.strength);
+      const at = x => runs.filter(r => Math.abs(r.pga_g - x) < 1e-6).sort((p, v) => p.run_id - v.run_id);
+      const F = r => r.slope_moved_cm - dstar;
+      let [a, b] = q.bracket;
+      const used = [at(a)[0], at(b)[0]];
+      const fa0 = F(used[0]), fb0 = F(used[1]);
+      const refused = fa0 * fb0 > 0;
+      let next = null, fa = fa0;
+      if (!refused) {
+        for (;;) {
+          const m = (a + b) / 2, hit = at(m);
+          if (!hit.length) { next = m; break; }
+          used.push(hit[0]);
+          if (fa * F(hit[0]) <= 0) b = m; else { a = m; fa = F(hit[0]); }
+        }
+      }
+      const g = v => String(+v.toFixed(5));
+      const lo = Math.min(...runs.map(r => r.pga_g)), hi = Math.max(...runs.map(r => r.pga_g));
+      const over = runs.filter(r => r.pga_g < a && r.slope_moved_cm > dstar).map(r => r.pga_g);
+      return {
+        panels: [{x: runs.map(r => r.pga_g), y: runs.map(r => r.slope_moved_cm),
+          range: [Math.max(0, lo - 0.1), hi + 0.1],
+          opts: {dots: true, yRange: [0.1, 1000],
+                 hlines: [{y: dstar, text: dstar + ' cm'}],
+                 bands: refused ? [] : [{x0: a, x1: b}],
+                 iterates: used.map(r => ({x: r.pga_g, y: r.slope_moved_cm}))}}],
+        readouts: {
+          path: used.map(r => g(r.pga_g) + ' g (' + +r.slope_moved_cm.toPrecision(3) + ' cm)').join(', '),
+          brack: refused ? 'none, both ends ' + (fa0 < 0 ? 'under' : 'over') + ' the threshold, so bisection refuses'
+                         : '[' + g(a) + ', ' + g(b) + '] g',
+          next: refused ? '—' : g(next) + ' g, which the class has not run',
+          below: refused ? '—' : over.length ? [...new Set(over)].sort((p, v) => p - v).map(g).join(', ') + ' g' : 'none'
+        }
+      };
+    }
+  },
+
+  /* Fourth demo: the same bracket handed to the condition in two forms. The
+     ratio form has a pole at 3 m, and bisection closes on it. */
+  pole: {
+    async data() {
+      const XS = linspace(0.3, 3.9, 1400);
+      const YS = {};
+      for (const k in POLE_FORMS) YS[k] = Float64Array.from(XS, POLE_FORMS[k].f);
+      return {XS, YS};
+    },
+    setting: 'Overhanging beam, 10&nbsp;kN/m over 6&nbsp;m, supports at 0 and 4&nbsp;m, so <em>M</em>(<em>x</em>)&nbsp;=&nbsp;15<em>x</em>&nbsp;&minus;&nbsp;5<em>x</em>&sup2;&nbsp;kN&middot;m between them. Where is <em>M</em>&nbsp;=&nbsp;8&nbsp;kN&middot;m? Bisection is handed [2.4,&nbsp;3.7]&nbsp;m.',
+    caption: 'The shaded band is the bracket. Rings mark the two places where <em>M</em>&nbsp;=&nbsp;8&nbsp;kN&middot;m, and the square is what bisection returned. In the ratio form the trace breaks at 3&nbsp;m, where <em>M</em> is zero.',
+    source: {kind: 'constructed', text: 'Constructed with ordinary numbers. Neither the tracked shots nor the slope runs have a pole, so it is shown on a function with a known answer.'},
+    segments: [{key: 'form', label: 'condition written as', value: 'ratio', options: [
+      {value: 'ratio', label: '8/M − 1 = 0'}, {value: 'diff', label: 'M − 8 = 0'}]}],
+    panels: [{label: 'the condition', unit: '', height: 240, xAxis: true,
+              xLabel: 'position along the beam', xUnit: 'm', xScale: 1, yClamp: [-6, 6]}],
+    readouts: [
+      {key: 'ends', label: 'signs at 2.4 and 3.7 m'}, {key: 'bi', label: 'bisection returns'},
+      {key: 'res', label: 'M − 8 there'}],
+    compute(s) {
+      const F = POLE_FORMS[s.form], r = bisectTo(F.f, 2.4, 3.7, 1e-8);
+      const sgn = v => (v > 0 ? '+' : '−') + Math.abs(v).toFixed(3);
+      return {
+        panels: [{x: this.XS, y: this.YS[s.form], range: [0.3, 3.9],
+          opts: {yRange: F.clamp, bands: [{x0: 2.4, x1: 3.7}],
+                 rings: [{x: 0.69377, y: 0, text: '0.694 m'}, {x: 2.30623, y: 0, text: '2.306 m'}],
+                 marks: r.refused ? [] : [{t: r.x, y: 0, square: true, text: 'bisection', dx: 8, dy: 30}]}}],
+        readouts: {
+          ends: sgn(F.f(2.4)) + ' and ' + sgn(F.f(3.7)) + (r.refused ? ', the same sign' : ', opposite signs'),
+          bi: r.refused ? 'nothing, the ends have the same sign' : r.x.toFixed(8) + ' m after ' + r.ev + ' evaluations',
+          res: r.refused ? '—' : (M_C(r.x) - MSTAR).toFixed(3) + ' kN·m'
         }
       };
     }

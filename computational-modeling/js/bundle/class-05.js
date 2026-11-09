@@ -1698,7 +1698,85 @@ setTimeout(() => {
           {d: 1300, run: f => h.ring('rb', f)}
         ];
       }
-    })
+    }),
+
+    /* arc 662's start and end frames, found the way the example notebook finds
+       them: walk back from the top while an earlier speed is faster, then take
+       the first frame within 1 m of the hoop. The numbers are printed by
+       in-class/class-05/trace_a5.py ("release animation data"): vertical speed
+       by central difference, h = 2 frames, and the distance across the floor
+       from the hoop. Every beat sets its state outright, so a fast replay and
+       a played one end the same. The host holds .c5rel-speed, .c5rel-dist, the
+       two readouts and the code lines (data-line). */
+    release: root => {
+      const TOP = 26, START = 11, END = 37, N = 56;
+      const VZ = [null, null, 6.14, 4.8, 4.04, 3.13, 2.38, 2.47, 2.66, 3.19, 4.41, 5.18, 5.15, 5.03, 4.29,
+        4.1, 3.62, 3.51, 3.19, 2.49, 2.48, 1.74, 1.39, 0.88, 0.45, 0.01, -0.33, -0.48, -0.95, -1.19, -1.69,
+        -1.99, -2.36, -2.83, -3.17, -3.49, -4.25, -4.44, -5.16, -4.79, -4.24, -3.64, -2.19, -1.84, -1.59,
+        -2.12, -2.76, -2.51, -2.66, -2.99, -3.14, -4.47, -5.11, -4.82, null, null];
+      const DIST = [7.45, 7.48, 7.53, 7.6, 7.6, 7.57, 7.63, 7.58, 7.55, 7.47, 7.38, 7.16, 6.94, 6.67, 6.41,
+        6.17, 5.93, 5.67, 5.45, 5.2, 4.91, 4.71, 4.46, 4.21, 3.98, 3.73, 3.46, 3.24, 3.01, 2.78, 2.55, 2.33,
+        2.1, 1.86, 1.63, 1.36, 1.15, 0.95, 0.69, 0.45, 0.21, 0.02, 0.08, 0.15, 0.21, 0.25, 0.25, 0.26, 0.27,
+        0.3, 0.29, 0.32, 0.32, 0.37, 0.37, 0.43];
+      const GRAY = '#b9b0a0', INK = '#3f3b36', TERM = '#5F7038', DEF = '#8A6508';
+      const q = s => root.querySelector(s);
+      const fmt = v => MINUS(v.toFixed(2));
+      const xs = {lo: -1, hi: N, ticks: [0, 10, 20, 30, 40, 50]};
+
+      const a = chart(q('.c5rel-speed'), {h: 270, padL: 60, padT: 34, x: xs,
+        y: {lo: -6, hi: 7, ticks: [-5, 0, 5], label: 'vertical speed (m/s)'},
+        alt: 'Vertical speed of arc 662 against frame, by central difference with h = 2 frames.'});
+      const b = chart(q('.c5rel-dist'), {h: 270, padL: 60, padT: 34, x: Object.assign({label: 'frame'}, xs),
+        y: {lo: 0, hi: 8, ticks: [0, 2, 4, 6, 8], label: 'distance to the hoop across the floor (m)'},
+        alt: 'Distance across the floor from arc 662 to the hoop against frame.'});
+      /* the flight band goes in first so the dots sit on top of it */
+      const band = [[a, 7, -6], [b, 8, 0]].map(([c, hi, lo]) => c.add('rect', {x: c.X(START - 0.5),
+        width: c.X(END - 0.5) - c.X(START - 0.5), y: c.Y(hi), height: c.Y(lo) - c.Y(hi), style: 'fill:#5F7038;opacity:.12'}));
+      const one = b.add('line', {x1: b.X(-1), x2: b.X(N), y1: b.Y(1), y2: b.Y(1),
+        style: `stroke:${DEF};stroke-width:2;stroke-dasharray:7 5`});
+      const oneLab = b.add('text', {x: b.X(N) - 6, y: b.Y(1) - 8, 'text-anchor': 'end', style: `fill:${DEF};font-weight:700`}, '1 m');
+      const sd = VZ.map((v, i) => v === null ? null : a.add('circle', {cx: a.X(i), cy: a.Y(v), r: 4.5}));
+      const dd = DIST.map((v, i) => b.add('circle', {cx: b.X(i), cy: b.Y(v), r: 4.5}));
+      const cur = a.add('line', {y1: a.Y(7), y2: a.Y(-6), style: `stroke:${INK};stroke-width:1.5;stroke-dasharray:4 4`});
+      const ring = a.add('circle', {r: 10, style: `fill:none;stroke:${INK};stroke-width:2.5`});
+      const mark = [a, b].map(c => c.add('text', {'text-anchor': 'middle', style: `fill:${DEF};font-weight:700`}));
+      const ro = [q('.c5rel-ro1'), q('.c5rel-ro2')];
+      const lines = [...root.querySelectorAll('[data-line]')];
+
+      const show = (el, on) => { el.style.visibility = on ? '' : 'hidden'; };
+      const code = (...ks) => lines.forEach(l => l.classList.toggle('on', ks.includes(l.dataset.line)));
+      const at = i => { cur.setAttribute('x1', a.X(i)); cur.setAttribute('x2', a.X(i));
+        ring.setAttribute('cx', a.X(i)); ring.setAttribute('cy', a.Y(VZ[i])); show(cur, true); show(ring, true); };
+      const put = (k, i, y, txt) => { const c = k ? b : a; mark[k].setAttribute('x', c.X(i));
+        mark[k].setAttribute('y', y); mark[k].textContent = txt; show(mark[k], true); };
+
+      function reset() {
+        sd.forEach(c => c && c.setAttribute('style', `fill:${GRAY}`));
+        dd.forEach(c => c.setAttribute('style', `fill:${GRAY}`));
+        [cur, ring, one, oneLab, ...band, ...mark].forEach(e => show(e, false));
+        ro[0].textContent = ro[1].textContent = ' ';
+        code();
+      }
+      const beats = [{d: 1800, run() { at(TOP); sd[TOP].style.fill = INK; code('top');
+        ro[0].textContent = `The top of the arc is frame ${TOP}, where the speed crosses zero.`; }}];
+      for (let i = TOP; i > START; i--)
+        beats.push({d: i === TOP ? 1300 : 520, run() {
+          sd[i].style.fill = TERM; at(i - 1); sd[i - 1].style.fill = INK; code('while', 'step');
+          const by = VZ[i - 1] > VZ[i] ? i - 1 : i - 2;
+          ro[0].textContent = `Frame ${by} is faster than frame ${i} (${fmt(VZ[by])} against ${fmt(VZ[i])} m/s), so step back to frame ${i - 1}.`; }});
+      beats.push({d: 2600, run() {
+        sd[START].style.fill = DEF; [sd[START - 1], sd[START - 2]].forEach(c => { c.style.fill = INK; });
+        code('while', 'start'); put(0, START, a.Y(VZ[START]) - 18, `start = ${START}`);
+        ro[0].textContent = `Frames ${START - 1} and ${START - 2} are slower than frame ${START} (${fmt(VZ[START - 1])} and ${fmt(VZ[START - 2])} against ${fmt(VZ[START])} m/s), so the walk stops and the flight starts at frame ${START}.`; }});
+      beats.push({d: 1800, run() { show(cur, false); show(ring, false); show(one, true); show(oneLab, true); code('d');
+        ro[1].textContent = 'Seen from above, the ball closes on the hoop.'; }});
+      beats.push({d: 1800, run() { DIST.forEach((v, i) => { if (v < 1) dd[i].style.fill = INK; }); code('d', 'end');
+        ro[1].textContent = `np.hypot(dx, dy) < 1.0 is True on frame ${END} and every frame after it.`; }});
+      beats.push({d: 3000, run() { dd[END].style.fill = DEF; band.forEach(e => show(e, true)); code('end');
+        put(1, END, b.Y(DIST[END]) - 18, `end = ${END}`);
+        ro[1].textContent = `np.argmax takes the first True, so end = ${END}, and the flight is frames ${START} to ${END - 1}.`; }});
+      return {reset, beats: () => beats};
+    }
   });
 
   /* ------------------------------------------------------------ mounting */

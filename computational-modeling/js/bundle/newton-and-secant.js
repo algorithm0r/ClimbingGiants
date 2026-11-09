@@ -967,41 +967,23 @@ function realNoiseRaw(n, sd = 1) {
   return scaleTo(out, sd);
 }
 
-/* Two demos for the two problems on this page.
-   newton: Newton and the secant method stepped one iteration at a time on the
-   shot's fitted height, with the tangent or secant line drawn so the next
-   estimate is visibly its axis crossing. The fit is the one pages 19 and 20 use
-   (arc 79, its 24 free-flight frames, time from release). The measured
-   convergence order is computed from the errors, not quoted.
-   slope: the secant line through two of the example class's runs in the Slope
-   Stability Lab, and where it puts the next run. There is no formula, so there
-   is no derivative and no Newton step, and the line is all a secant step has. */
+/* Two demos for this page.
+   newton: Newton, the secant method and bisection stepped one iteration at a
+   time on f(x) = x^3 - 100, whose root is the cube root of 100. The tangent or
+   secant line is drawn so the next estimate is visibly its axis crossing, and
+   the view follows the estimates in. The measured order is computed from the
+   errors, not quoted.
+   shot: Newton on the fitted height of a three-pointer, which crosses the rim
+   twice, so the start decides which crossing comes back.
+   plane: Newton in two unknowns on F1 = x^2 + y^2 - 4 and F2 = e^x - 1 - y.
+   The linear part of each equation at the current point is drawn as a
+   straight line, and the next point is where the two lines cross. */
 
-const RIM = 3.048;
+const ROOT = Math.cbrt(100);
+const f  = x => x * x * x - 100;
+const df = x => 3 * x * x;
 
-function polyfit(xs, ys, deg) {
-  const n = deg + 1;
-  const A = Array.from({length: n}, (_, i) => {
-    const row = new Float64Array(n + 1);
-    for (let j = 0; j < n; j++) { let q = 0; for (let k = 0; k < xs.length; k++) q += Math.pow(xs[k], i + j); row[j] = q; }
-    let q = 0; for (let k = 0; k < xs.length; k++) q += ys[k] * Math.pow(xs[k], i);
-    row[n] = q; return row;
-  });
-  for (let k = 0; k < n; k++) {
-    let p = k;
-    for (let i = k + 1; i < n; i++) if (Math.abs(A[i][k]) > Math.abs(A[p][k])) p = i;
-    [A[k], A[p]] = [A[p], A[k]];
-    if (Math.abs(A[k][k]) < 1e-300) return null;
-    for (let i = 0; i < n; i++) {
-      if (i === k) continue;
-      const f = A[i][k] / A[k][k];
-      for (let c = k; c <= n; c++) A[i][c] -= f * A[k][c];
-    }
-  }
-  return Array.from({length: n}, (_, i) => A[i][n] / A[i][i]);
-}
-
-function newtonPath(F, DF, x0, n) {
+function newtonPath(x0, n, F = f, DF = df) {
   const p = [{x: x0, evals: 0}];
   let x = x0, evals = 0;
   for (let k = 0; k < n; k++) {
@@ -1015,174 +997,241 @@ function newtonPath(F, DF, x0, n) {
 }
 /* evals counts the evaluations of f used to produce each estimate, as
    newtonPath does, so the two starts cost nothing until a step uses them */
-function secantPath(F, x0, x1, n) {
+function secantPath(x0, x1, n) {
   const p = [{x: x0, evals: 0}, {x: x1, evals: 0}];
-  let a = x0, b = x1, fa = F(a), fb = F(b), evals = 2;
+  let a = x0, b = x1, fa = f(a), fb = f(b), evals = 2;
   for (let k = 0; k < n; k++) {
     if (fb === fa) break;
     const x = b - fb * (b - a) / (fb - fa);
     if (!isFinite(x)) break;
     p.push({x, evals});
-    a = b; fa = fb; b = x; fb = F(x); evals++;
+    a = b; fa = fb; b = x; fb = f(x); evals++;
+  }
+  return p;
+}
+/* the estimate is the bracket's midpoint; after the two ends and k midpoint
+   evaluations the bracket has been halved k times */
+function bisectPath(a, b, n) {
+  if (f(a) * f(b) > 0) return null;
+  const p = [];
+  for (let k = 0; k <= n; k++) {
+    const m = (a + b) / 2;
+    p.push({x: m, evals: k + 2, a, b});
+    if (f(m) * f(a) <= 0) b = m; else a = m;
+  }
+  return p;
+}
+/* leading significant digits that agree with the root, to 15 */
+function correctDigits(x) {
+  const s = x.toPrecision(15).replace('.', ''), r = ROOT.toPrecision(15).replace('.', '');
+  let n = 0;
+  while (n < 15 && s[n] === r[n]) n++;
+  return n;
+}
+
+/* arc 79's height, a least-squares parabola through its 24 free-flight frames
+   in data/arcs.json (t in seconds after release), less the rim height */
+const SC = 3.4519539999999975, SB = 4.742841600790515, SQ = -4.9152791501976285;
+const fs  = t => SC + SB * t + SQ * t * t - 3.048;
+const dfs = t => SB + 2 * SQ * t;
+const SHOT_ROOTS = [-0.0787450721323109, 1.043663127823984];
+
+/* the two-unknown problem */
+const F1 = (x, y) => x * x + y * y - 4, F2 = (x, y) => Math.exp(x) - 1 - y;
+const ROOT2 = [1.0041687384746592, 1.72963728702587];
+function planePath(x0, y0, n) {
+  const p = [{x: x0, y: y0}];
+  let x = x0, y = y0;
+  for (let k = 0; k < n; k++) {
+    /* J d = -F, solved by elimination */
+    const a = 2 * x, b = 2 * y, c = Math.exp(x), d = -1, r1 = -F1(x, y), r2 = -F2(x, y);
+    const det = a * d - b * c;
+    if (det === 0) break;
+    x += (r1 * d - b * r2) / det;
+    y += (a * r2 - c * r1) / det;
+    if (!isFinite(x) || !isFinite(y)) break;
+    p.push({x, y});
   }
   return p;
 }
 
-/* the slope pairs the page walks through, by bond strength and PGA */
-const PAIRS = {
-  a: {mpa: 5.8, g: [2.72, 2.8]},
-  b: {mpa: 5.8, g: [2.75, 2.8]},
-  c: {mpa: 7.4, g: [2.875, 2.9375]},
-  d: {mpa: 7.4, g: [2.88672, 2.88867]}
-};
-
 mountDemo({
   newton: {
-    async data() {
-      const d = await (await fetch('data/arcs.json')).json();
-      const a = d.arcs.find(x => x.role === 'clean');
-      const k = a.rel, nf = a.key.nf;
-      const T = [], Z = [];
-      for (let i = k; i < k + nf; i++) { T.push(a.t[i] - a.t[k]); Z.push(a.z[i]); }
-      const [c0, b0, a0] = polyfit(T, Z, 2);
-      const F  = t => c0 + b0 * t + a0 * t * t - RIM;
-      const DF = t => b0 + 2 * a0 * t;
-      /* both crossings in closed form, for the error readout */
-      const C = c0 - RIM, q = Math.sqrt(b0 * b0 - 4 * a0 * C);
-      const roots = [(-b0 + q) / (2 * a0), (-b0 - q) / (2 * a0)].sort((p, r) => p - r);
-      const XS = linspace(-0.3, 1.6, 400);
-      return {F, DF, roots, XS, YS: Float64Array.from(XS, F)};
-    },
-    setting: 'When does the shot fall through the rim? <em>f</em>(<em>t</em>)&nbsp;=&nbsp;' +
-             '<em>z</em>(<em>t</em>)&nbsp;&minus;&nbsp;3.048&nbsp;m on the parabola fitted to the ' +
-             'shot&rsquo;s 24 free-flight frames, the last of them at 0.92&nbsp;s. Bisection on ' +
-             '[0.5,&nbsp;1.5]&nbsp;s needs 40 midpoint evaluations to bring the bracket under 10⁻¹²&nbsp;s.',
-    source: {kind: 'measured', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz, arc 79. The same fit as the bisection page, so the evaluation counts can be compared directly.'},
-    caption: 'The dotted line is the tangent (Newton) or the secant through the last two ' +
-             'estimates. The next estimate is where that line crosses zero. The secant ' +
-             'method also starts from the frame before, 0.04&nbsp;s earlier. The shaded strip ' +
-             'is before release.',
+    setting: 'The cube root of 100 is the root of <em>f</em>(<em>x</em>)&nbsp;=&nbsp;<em>x</em><sup>3</sup>&nbsp;&minus;&nbsp;100, ' +
+             '4.64158883361278 to 15 digits. Newton&rsquo;s slope is <em>f</em>&prime;(<em>x</em>)&nbsp;=&nbsp;3<em>x</em><sup>2</sup>.',
+    source: {kind: 'constructed', text: 'A formula with a known root, so every error is exact.'},
+    caption: 'The dotted line is the tangent (Newton) or the line through the last two estimates ' +
+             '(secant), and the next estimate is where it crosses zero. The secant method starts ' +
+             'from the starting guess and 1 below it, so its steps count from its second estimate. ' +
+             'Bisection ignores the starting guess and halves the bracket [4,&nbsp;5], shaded. ' +
+             'Evaluations count those used to make the estimate shown. The view follows the estimates in.',
     controls: [
-      {key: 'x0', label: 'start', min: 0.3, max: 1.5, step: 'any', value: 0.92, dp: 2, unit: 's'},
-      {key: 'k',  label: 'steps taken', min: 0, max: 8, step: 1, value: 0, dp: 0}
+      {key: 'x0', label: 'starting guess', min: 0.5, max: 8, step: 'any', value: 5, dp: 2},
+      {key: 'k',  label: 'steps taken', min: 0, max: 16, step: 1, value: 0, dp: 0}
     ],
     segments: [{key: 'm', label: 'method', value: 'newton', options: [
-      {value: 'newton', label: 'Newton'}, {value: 'secant', label: 'Secant'}]}],
-    panels: [{label: 'f = z − 3.048', unit: 'm', height: 250, xAxis: true,
-              xLabel: 'time since release', xUnit: 's', xScale: 1,
-              lens: true, lensZoom: 30}],
+      {value: 'newton', label: 'Newton'}, {value: 'secant', label: 'Secant'},
+      {value: 'bisect', label: 'Bisection'}]}],
+    panels: [{label: 'f = x³ − 100', height: 250, xAxis: true, xLabel: 'x', xUnit: '', xScale: 1}],
     readouts: [
-      {key: 'est',   label: 'estimate'},
-      {key: 'near',  label: 'nearest crossing'},
-      {key: 'err',   label: 'error'},
-      {key: 'prev',  label: 'error last step'},
-      {key: 'evals', label: 'evaluations'},
-      {key: 'order', label: 'order, measured'}
+      {key: 'est',    label: 'estimate'},
+      {key: 'digits', label: 'correct digits'},
+      {key: 'err',    label: 'error'},
+      {key: 'res',    label: 'residual f(x)'},
+      {key: 'evals',  label: 'evaluations of f and f′'},
+      {key: 'order',  label: 'measured order'}
     ],
     compute(s) {
-      const {F, DF, roots} = this;
-      const k = Math.round(s.k);
-      const path = s.m === 'newton' ? newtonPath(F, DF, s.x0, 8)
-                                    : secantPath(F, s.x0 - 0.04, s.x0, 8);
-      const i = Math.min(k, path.length - 1);
-      const cur = path[i], prev = path[Math.max(0, i - 1)];
-      /* the error is measured against whichever crossing the estimate is
-         nearer, since a start before the apex converges on the rising one */
-      const r = Math.abs(cur.x - roots[0]) < Math.abs(cur.x - roots[1]) ? roots[0] : roots[1];
-      const e = Math.abs(cur.x - r), ep = Math.abs(prev.x - r);
+      const k = Math.round(s.k), m = s.m;
+      const path = m === 'newton' ? newtonPath(s.x0, 16)
+                 : m === 'secant' ? secantPath(s.x0 - 1, s.x0, 16)
+                 : bisectPath(4, 5, 16);
+      /* the secant's two starts are estimates 0 and 1, so its step k is estimate k + 1 */
+      const i = Math.min(m === 'secant' ? k + 1 : k, path.length - 1);
+      const cur = path[i];
+      const e = Math.abs(cur.x - ROOT);
       /* order from the last three errors: e_{k+1} ~ C e_k^p, only once the
-         errors are actually falling, since an early transient gives numbers
-         like -15 that say nothing about the method */
+         errors are falling and under 0.1, since an early transient says
+         nothing about the method */
       let order = null;
-      if (i >= 2) {
-        const e2 = Math.abs(path[i].x - r), e1 = Math.abs(path[i-1].x - r),
-              e0 = Math.abs(path[i-2].x - r);
-        if (e2 > 1e-15 && e1 > 1e-15 && e0 > 1e-15 && e2 < e1 && e1 < e0)
+      if (i >= 2 && m !== 'bisect') {
+        const e2 = Math.abs(path[i].x - ROOT), e1 = Math.abs(path[i-1].x - ROOT), e0 = Math.abs(path[i-2].x - ROOT);
+        if (e2 > 1e-14 && e1 > 1e-14 && e0 < 0.1 && e2 < e1 && e1 < e0)
           order = Math.log(e2 / e1) / Math.log(e1 / e0);
       }
       /* the line whose axis crossing is the next estimate */
-      let pred = null;
+      let pred = null, next = null;
       if (i < path.length - 1) {
-        if (s.m === 'newton') {
-          const x = cur.x, fx = F(x), d = DF(x);
+        next = path[i + 1].x;
+        if (m === 'newton') {
+          const x = cur.x, fx = f(x), d = df(x);
           pred = v => fx + d * (v - x);
-        } else if (i >= 1) {
-          const xa = prev.x, xb = cur.x, fa = F(xa), fb = F(xb);
+        } else if (m === 'secant' && i >= 1) {
+          const xa = path[i - 1].x, xb = cur.x, fa = f(xa), fb = f(xb);
           pred = v => fa + (fb - fa) / (xb - xa) * (v - xa);
         }
       }
+      /* the view holds the current estimate, the next one and the root, so it
+         narrows as the steps close in */
+      const pts = [cur.x, ROOT];
+      if (next !== null) pts.push(next);
+      if (m === 'secant' && i >= 1) pts.push(path[i - 1].x);
+      if (m === 'bisect') pts.push(cur.a, cur.b);
+      let lo = Math.min(...pts), hi = Math.max(...pts);
+      const w = Math.max(hi - lo, 2e-3) * 0.3;
+      lo -= w; hi += w;
+      const XS = linspace(lo, hi, 300);
       return {
-        panels: [{x: this.XS, y: this.YS, range: [-0.3, 1.6],
-          opts: {pred,
-                 bands: [{x0: -0.3, x1: 0}],
-                 rings: [{x: roots[0], y: 0, text: 'rising'}, {x: roots[1], y: 0, text: 'falling'}],
-                 iterates: path.slice(0, i + 1).map(p => ({x: p.x, y: F(p.x)}))}}],
+        panels: [{x: XS, y: Float64Array.from(XS, f), range: [lo, hi], opts: {
+          pred,
+          bands: m === 'bisect' ? [{x0: cur.a, x1: cur.b}] : [],
+          rings: [{x: ROOT, y: 0, text: 'root'}],
+          iterates: path.slice(0, i + 1).map(p => ({x: p.x, y: f(p.x)}))}}],
         readouts: {
-          est: cur.x.toFixed(9) + ' s',
-          near: (r === roots[1] ? 'falling, ' : 'rising, ') + r.toFixed(4) + ' s',
-          err: e === 0 ? 'exact' : e.toExponential(2) + ' s',
-          prev: i === 0 ? '—' : ep.toExponential(2) + ' s',
+          est: cur.x.toPrecision(15),
+          digits: String(correctDigits(cur.x)),
+          err: e < 1e-15 ? 'below 10⁻¹⁵' : e.toExponential(2),
+          res: f(cur.x).toPrecision(3),
           evals: String(cur.evals),
-          order: order === null ? '—' : order.toFixed(2)
+          order: m === 'bisect' ? '1, halving' : order === null ? '—' : order.toFixed(2)
         }
       };
     }
   },
 
-  slope: {
-    async data() {
-      const d = await (await fetch('data/slope-example-runs.json')).json();
-      return {runs: d.runs};
-    },
-    setting: 'A rock slope in the Slope Stability Lab&rsquo;s example class. Each dot is one run of ' +
-             'the simulation, a minute or two on a GPU, and <em>f</em>&nbsp;=&nbsp;moved&nbsp;&minus;&nbsp;' +
-             '<em>d</em>*. The line through two runs is the secant, and where it reaches ' +
-             '<em>d</em>* is where a secant step would put the next run.',
-    source: {kind: 'measured', text: 'Slope Stability Lab example class (the test round), fetched 2026-11-02. Repeated runs at one setting are averaged. The lab leaves the definition of damage to each student, so <em>d</em>* is a slider.'},
-    caption: 'The horizontal line is <em>d</em>*. The ring on it is the next run the secant ' +
-             'proposes, and the two rings on dots are the runs the line goes through. Nothing ' +
-             'between two dots is known until a run is made there.',
-    controls: [{key: 'd', label: 'damage threshold d*', min: 1, max: 30, step: 'any', value: 5, dp: 1, unit: 'cm'}],
-    segments: [{key: 'pair', label: 'two runs', value: 'a', options: [
-      {value: 'a', label: '2.72 and 2.8 g, 5.8 MPa'}, {value: 'b', label: '2.75 and 2.8 g, 5.8 MPa'},
-      {value: 'c', label: '2.875 and 2.9375 g, 7.4 MPa'}, {value: 'd', label: '2.88672 and 2.88867 g, 7.4 MPa'}]}],
-    panels: [{label: 'slope moved', unit: 'cm', height: 260, xAxis: true,
-              xLabel: 'PGA', xUnit: 'g', xScale: 1}],
+  shot: {
+    setting: 'The fitted height of a missed three-pointer less the rim height, <em>f</em>(<em>t</em>)&nbsp;=&nbsp;<em>z</em>(<em>t</em>)&nbsp;&minus;&nbsp;3.048&nbsp;m. ' +
+             'It crosses zero rising at &minus;0.0787&nbsp;s, with the ball still in the hand, and falling at 1.0437&nbsp;s. The apex is at 0.482&nbsp;s.',
+    source: {kind: 'measured', text: 'Arc 79, tracked at 25 frames a second (SportVU, 2015&ndash;16 NBA season), with a parabola fitted to its 24 free-flight frames.'},
+    caption: 'The dotted line is the tangent at the current estimate, and the next estimate is where it crosses zero. ' +
+             'The two rings are the roots. Start near the apex to see a nearly flat tangent throw the step far away.',
+    controls: [
+      {key: 't0', label: 'starting guess', min: -0.3, max: 1.4, step: 'any', value: 0.5, dp: 2},
+      {key: 'k',  label: 'steps taken', min: 0, max: 10, step: 1, value: 0, dp: 0}
+    ],
+    panels: [{label: 'f (m)', height: 250, xAxis: true, xLabel: 't', xUnit: 's', xScale: 1}],
     readouts: [
-      {key: 'two',  label: 'the two runs'},
-      {key: 'next', label: 'secant step, next run'},
-      {key: 'side', label: 'it lands'},
-      {key: 'near', label: 'nearest run the class made'}
+      {key: 'est',   label: 'estimate'},
+      {key: 'slope', label: 'slope f′ there'},
+      {key: 'res',   label: 'residual f(t)'},
+      {key: 'near',  label: 'nearest root'}
     ],
     compute(s) {
-      const P = PAIRS[s.pair];
-      const runs = this.runs.filter(r => r.strength_mpa === P.mpa).sort((p, q) => p.pga_g - q.pga_g);
-      const at = new Map();
-      for (const r of runs) { if (!at.has(r.pga_g)) at.set(r.pga_g, []); at.get(r.pga_g).push(r.slope_moved_cm); }
-      const mean = g => { const v = at.get(g); return v.reduce((p, q) => p + q, 0) / v.length; };
-      const [ga, gb] = P.g, ya = mean(ga), yb = mean(gb);
-      const slope = (yb - ya) / (gb - ga);
-      const next = gb + (s.d - yb) / slope;
-      /* the class's nearest run to the proposed one, for comparison */
-      let near = runs[0];
-      for (const r of runs) if (Math.abs(r.pga_g - next) < Math.abs(near.pga_g - next)) near = r;
-      const lo = Math.min(ga, next), hi = Math.max(gb, next), w = Math.max(0.004, (hi - lo) * 0.25);
-      const range = [Math.max(0, lo - w), Math.min(4.2, hi + w)];
-      const g = v => String(+v.toFixed(5)) + ' g';
-      const inside = next > ga && next < gb;
+      const path = newtonPath(s.t0, 10, fs, dfs);
+      const i = Math.min(Math.round(s.k), path.length - 1);
+      const t = path[i].x;
+      const next = i < path.length - 1 ? path[i + 1].x : null;
+      const ft = fs(t), d = dfs(t);
+      const pred = next === null ? null : v => ft + d * (v - t);
+      /* the view holds both roots, the current estimate and the next one */
+      const pts = [...SHOT_ROOTS, t];
+      if (next !== null) pts.push(next);
+      let lo = Math.min(...pts), hi = Math.max(...pts);
+      const w = (hi - lo) * 0.12;
+      lo -= w; hi += w;
+      const XS = linspace(lo, hi, 400);
+      const near = Math.abs(t - SHOT_ROOTS[0]) < Math.abs(t - SHOT_ROOTS[1]) ? 0 : 1;
+      const gap = Math.abs(t - SHOT_ROOTS[near]);
       return {
-        panels: [{x: runs.map(r => r.pga_g), y: runs.map(r => r.slope_moved_cm), range, opts: {
-          label: 'slope moved, one dot a run', dots: true, dotR: 4,
-          pred: v => ya + slope * (v - ga),
-          hlines: [{y: s.d, text: 'd* = ' + s.d.toFixed(1) + ' cm'}],
-          rings: next >= range[0] && next <= range[1] ? [{x: next, y: s.d}] : [],
-          marks: [{t: ga, y: ya, ring: true}, {t: gb, y: yb, ring: true}]
-        }}],
+        panels: [{x: XS, y: Float64Array.from(XS, fs), range: [lo, hi], opts: {
+          pred,
+          rings: [{x: SHOT_ROOTS[0], y: 0, text: 'rising'}, {x: SHOT_ROOTS[1], y: 0, text: 'falling'}],
+          iterates: path.slice(0, i + 1).map(p => ({x: p.x, y: fs(p.x)}))}}],
         readouts: {
-          two: g(ga) + ' moved ' + ya.toFixed(2) + ' cm, ' + g(gb) + ' moved ' + yb.toFixed(2) + ' cm',
-          next: g(next),
-          side: inside ? 'between the two runs' : (next > gb ? 'above both runs' : 'below both runs'),
-          near: g(near.pga_g) + ', moved ' + near.slope_moved_cm.toFixed(2) + ' cm'
+          est: t.toFixed(4) + ' s',
+          slope: d.toFixed(2) + ' m/s',
+          res: ft.toPrecision(3) + ' m',
+          near: (near ? 'falling' : 'rising') + ', ' + (gap < 1e-12 ? 'reached' : gap.toExponential(1) + ' s away')
+        }
+      };
+    }
+  },
+
+  plane: {
+    setting: 'Two equations in two unknowns, a circle of radius 2, <em>F</em><sub>1</sub>&nbsp;=&nbsp;' +
+             '<em>x</em><sup>2</sup>&nbsp;+&nbsp;<em>y</em><sup>2</sup>&nbsp;&minus;&nbsp;4&nbsp;=&nbsp;0, and a curve, ' +
+             '<em>F</em><sub>2</sub>&nbsp;=&nbsp;<em>e</em><sup><em>x</em></sup>&nbsp;&minus;&nbsp;1&nbsp;&minus;&nbsp;<em>y</em>&nbsp;=&nbsp;0. ' +
+             'They cross at (1.004169,&nbsp;1.729637).',
+    source: {kind: 'constructed', text: 'Two formulas chosen so the root can be checked.'},
+    caption: 'The two straight dotted lines are each equation&rsquo;s linear part at the current point, ' +
+             'set to zero. Newton&rsquo;s next point is where they cross. The ring is the root.',
+    controls: [
+      {key: 'x0', label: 'start x', min: 0.2, max: 1.8, step: 'any', value: 1, dp: 2},
+      {key: 'y0', label: 'start y', min: 0.4, max: 2.4, step: 'any', value: 1, dp: 2},
+      {key: 'k',  label: 'steps taken', min: 0, max: 6, step: 1, value: 0, dp: 0}
+    ],
+    panels: [{label: 'y', height: 300, xAxis: true, xLabel: 'x', xUnit: '', xScale: 1}],
+    readouts: [
+      {key: 'pt',   label: 'current point (x, y)'},
+      {key: 'res',  label: 'residuals F₁, F₂'},
+      {key: 'big',  label: 'max(|F₁|, |F₂|)'},
+      {key: 'err',  label: 'distance to root'}
+    ],
+    compute(s) {
+      const path = planePath(s.x0, s.y0, 6);
+      const i = Math.min(Math.round(s.k), path.length - 1);
+      const {x, y} = path[i];
+      const XS = linspace(0, 2, 300);
+      const circle = Float64Array.from(XS, v => Math.sqrt(Math.max(0, 4 - v * v)));
+      const curves = [{x: XS, y: Float64Array.from(XS, v => Math.exp(v) - 1), cls: 'trace'}];
+      if (i < path.length - 1) {
+        /* F1 + 2x(X - x) + 2y(Y - y) = 0 and F2 + e^x(X - x) - (Y - y) = 0 */
+        const f1 = F1(x, y), f2 = F2(x, y), ex = Math.exp(x);
+        curves.push({x: XS, y: Float64Array.from(XS, v => y + (-f1 - 2 * x * (v - x)) / (2 * y)), cls: 'pred'});
+        curves.push({x: XS, y: Float64Array.from(XS, v => y + f2 + ex * (v - x)), cls: 'pred'});
+      }
+      const r1 = F1(x, y), r2 = F2(x, y);
+      const d = Math.hypot(x - ROOT2[0], y - ROOT2[1]);
+      return {
+        panels: [{x: XS, y: circle, range: [0, 2], opts: {
+          yRange: [0, 2.6], curves,
+          rings: [{x: ROOT2[0], y: ROOT2[1]}],
+          iterates: path.slice(0, i + 1)}}],
+        readouts: {
+          pt: '(' + x.toFixed(6) + ', ' + y.toFixed(6) + ')',
+          res: r1.toPrecision(3) + ', ' + r2.toPrecision(3),
+          big: Math.max(Math.abs(r1), Math.abs(r2)).toPrecision(2),
+          err: d < 1e-15 ? 'below 10⁻¹⁵' : d.toExponential(2)
         }
       };
     }

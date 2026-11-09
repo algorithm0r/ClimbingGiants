@@ -1,0 +1,1339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Class 6</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="css/blocks.css?v=20261109080753">
+<link rel="stylesheet" href="css/demos.css?v=20261109080753">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+/* The deck's own styling, inlined here because none of it belongs to the notes
+   pages and build.py sorts styles.css into layers this would not fit. The
+   variables are the site's own values, copied so the deck cannot drift. */
+:root{
+  /* Stage content comes in two sizes and only two. Every block that
+     carries prose uses the first, every block that carries code uses the
+     second, so a table on one slide and a list on the next are set alike. */
+  --claim:      clamp(2.1rem, min(4.5vw, 8.4vh), 4.5rem);
+  --stage-text: clamp(1.25rem, min(2.65vw, 4.1vh), 2.65rem);
+  --stage-code: clamp(1.1rem, min(2.35vw, 3.5vh), 2.35rem);
+  --gutter:     3.5vw;
+  --card:#FFFFFF; --subtle:#EEE9E0; --ink:#1A1A1A; --warm-gray:#5A5550;
+  --course-accent:#5F7038; --course-accent-dark:#47542A;
+  /* Two emphasis colours, both already carrying meaning on the site.
+     term: the thing being named or defined, and the subject of the claim.
+     def:  what is said about it -- the verb phrase, or the definition.
+     Both are a step lighter than the notes pages use them, because against
+     near-black ink at this size the darker green read as black. Measured:
+     the term is 48.5 dE from the ink rather than 35.8, and both still clear
+     5.3 contrast on white, which survives a washed-out projector. */
+  --term:#5F7038; --def:#8A6508;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--card); color:var(--ink); overflow:hidden;
+  font-family:"Segoe UI",-apple-system,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+body.blank .deck-slide{visibility:hidden}
+
+/* Nothing on a slide is hidden, so a slide is simply centred: text alone sits
+   in the middle, and text with a figure finds its own balance. The stage keeps
+   a floor so a figure arriving with its data does not shift what is above it. */
+.deck-slide{
+  position:fixed; inset:0; display:none; padding:4vh var(--gutter) 5vh;
+  flex-direction:column; justify-content:center; align-items:center; gap:2.4vh;
+}
+.deck-slide.on{display:flex}
+
+.deck-slide .head{text-align:center; width:100%; max-width:100%}
+.deck-slide .say{
+  margin:0 auto; text-align:center;
+  font-size:var(--claim); line-height:1.1; font-weight:600;
+  /* one measure for every claim, so the margins do not change slide to
+     slide and a line wraps only because it is long */
+  letter-spacing:-.015em; max-width:100%;
+  /* a claim that does wrap splits into even lines, not a line and one word */
+  text-wrap:balance;
+}
+.term{color:var(--term)}
+.def{color:var(--def)}
+
+.deck-slide .sub{
+  /* auto side margins, or the box sits left of centre whenever max-width is
+     narrower than the slide and only the text inside it is centred */
+  margin:1.2rem auto 0; font-size:var(--stage-text); line-height:1.4;
+  color:var(--warm-gray); max-width:100%; text-align:center; font-weight:400;
+}
+.deck-slide .sub code{font-size:1.02em; color:var(--def); font-weight:600}
+.deck-slide .stage{
+  width:100%; max-width:100%; margin:0 auto;
+  display:flex; flex-direction:column; justify-content:center;
+}
+/* .full used to widen a capped stage. Nothing is capped now, so it only
+   marks a slide that carries one. */
+/* Only a figure or a demo needs its space held: both arrive with their data
+   after first paint, and without a floor the claim above them jumps when they
+   do. Text in the stage is there from the start and can size itself. */
+.deck-slide .stage:has(.figure),
+.deck-slide .stage:has(cg-demo){min-height:38vh}
+/* A table or a block of arithmetic reads as part of the claim when it sits as
+   close to it as a figure does, so those get a little more air above them. */
+.deck-slide .stage:has(.tbl),
+.deck-slide .stage:has(.work){margin-top:1.6vh}
+/* A notes-page figure on a projector. Three things, and the third is the one
+   that bites: blocks.css caps .figure.narrow at 32rem, which is a text
+   column's width and not a slide's; the SVGs carry a viewBox and no fixed
+   size, so widening the box is the whole of the scaling they need; and the
+   stage is a flex column, where auto side margins do centre a box but also
+   cancel its stretch, collapsing it onto the SVG's own 300px. align-self
+   centres a flex item without giving up its width. */
+.deck-slide .stage .figure{
+  margin:0; border:0; background:none; align-self:center; width:100%;
+}
+/* A narrow figure is a squarish one, about 3:2, so its width is also capped
+   by the screen's height; otherwise on a laptop it stands taller than the
+   stage and pushes its own title up under the claim. */
+.deck-slide .stage .figure.narrow{max-width:min(62rem,74vw,100vh)}
+/* A wide figure, about 5:2, that shares the stage with a line of math. Full
+   width would stand too tall under two lines of claim on a laptop, so its
+   width is capped by the screen's height too, at a looser ratio. */
+.deck-slide .stage .figure.wide{max-width:min(100%,130vh)}
+/* A notes-page row of small diagrams, each drawn in a 300-unit viewBox, sets
+   its labels at about 11px on a projector. Opted into per figure, because a
+   label placed for 10.5px text can collide once it is larger. */
+.deck-slide .figure.legible .cgs text{font-size:15px}
+.deck-slide .figure.legible .cgs text.cgs-title{font-size:15px}
+/* Point cards in a video deck, the class-02 style: a row of bordered cards under
+   the claim, each a small tag, a bold title and one sentence. For a claim that
+   needs a few items of text under it. Sized from the stage text; the class decks
+   keep their own rules below. */
+body:not(.inclass) .deck-slide .pcards{display:grid; gap:1.2vw; width:100%; margin-top:1vh;
+  font-size:calc(var(--stage-text) * .74); line-height:1.32; text-align:left}
+body:not(.inclass) .deck-slide .pcards.c2{grid-template-columns:repeat(2, minmax(0,1fr))}
+body:not(.inclass) .deck-slide .pcards.c3{grid-template-columns:repeat(3, minmax(0,1fr))}
+body:not(.inclass) .deck-slide .pcards.c4{grid-template-columns:repeat(4, minmax(0,1fr))}
+body:not(.inclass) .deck-slide .pcard{border:1px solid #d9d3c7; border-radius:5px; background:#fff;
+  padding:1.8vh 1.1vw; display:flex; flex-direction:column; gap:.8vh; min-width:0}
+body:not(.inclass) .deck-slide .pcard .tag{align-self:flex-start; font-size:.62em; font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase; padding:.15em .5em; border-radius:3px;
+  background:var(--subtle); color:var(--warm-gray)}
+body:not(.inclass) .deck-slide .pcard > b{color:var(--course-accent-dark); font-size:1.15em; line-height:1.15}
+body:not(.inclass) .deck-slide .pcard > span{color:var(--warm-gray)}
+body:not(.inclass) .deck-slide .pcard.gold{background:#fbf6ea; border-color:#d9c08a}
+body:not(.inclass) .deck-slide .pcard.gold > b{color:#8A6508}
+body:not(.inclass) .deck-slide .pcard.gold .tag{background:#f1e4c4; color:#8A6508}
+/* A figure with its formula beside it. The figure is squarish, so side by side
+   is the only way both fit under a claim; its width is capped by the screen's
+   height for the same reason a narrow figure's is. */
+.deck-slide .figmath{
+  display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:3vw; align-items:center; width:100%;
+}
+.deck-slide .figmath .figure{max-width:min(100%,92vh); justify-self:end}
+.deck-slide .figmath .work{margin:0; justify-self:start; font-size:calc(var(--stage-text) * .88)}
+/* A video carries its own size and does not scale to a viewBox, and the sweep
+   video across a full stage would stand 685 tall, which with a claim above it
+   does not fit a laptop. It stays at its own width, or smaller. */
+.deck-slide .stage .fig-body video{
+  width:100%; max-width:min(72rem,94vw); height:auto; max-height:62vh;
+  margin:0 auto;
+}
+.deck-slide .stage figcaption,.deck-slide .stage .source{display:none}
+.deck-slide .stage cg-demo{display:block; margin:0}
+/* The notes demo carries its setting, caption, source and whole header. A
+   slide has room for the plot, the channel buttons and the six rows. */
+.deck-slide .stage .cgd-setting,
+.deck-slide .stage .cgd-caption,
+.deck-slide .stage .source{display:none}
+/* Lecture 1's channel demo shows only the six header rows it is about. That
+   is a property of that demo, not of decks, so it is opted into. Without the
+   scope it also hid lecture 2's state table, whose rows carry no such class. */
+.deck-slide .stage.six-only .cgd-table tr:not(.six){display:none}
+.deck-slide .stage .cgd{border:0; background:none}
+.deck-slide .stage .cgd-table{border-top:1px solid #ece7dd}
+
+/* A demo's tooling, at lecture size. demos.css sets these for a notes page
+   read at arm's length: .7rem readout labels and an 11px axis. On a projector,
+   and worse in a recording downscaled to 1080p, they are the smallest text on
+   the slide -- and on the decimate demo they are the whole point of it, since
+   "peak read" against "peak at full rate" is the claim. The plot needs nothing;
+   only the chrome around it does.
+
+   Sized from --stage-code so this tracks the viewport like every other size in
+   the deck, rather than fixing a pixel count that is right on one screen. Note
+   .stage.big already applies zoom:1.4, so the rendered size is 1.4x these. */
+.deck-slide .stage .cgd-controls{padding:1rem 1.2rem}
+.deck-slide .stage .cgd-controls label{font-size:calc(var(--stage-code) * .55)}
+.deck-slide .stage .cgd-val{font-size:calc(var(--stage-code) * .55)}
+/* the slider is dragged on camera, so it gets room to be seen moving */
+.deck-slide .stage .cgd-controls input[type=range]{width:min(300px, 22vw)}
+.deck-slide .stage .cgd-readouts{padding:.9rem 1.2rem}
+.deck-slide .stage .cgd-readouts .k{font-size:calc(var(--stage-code) * .48)}
+.deck-slide .stage .cgd-readouts .v{font-size:calc(var(--stage-code) * .72)}
+/* axis numbers and the two axis titles, which are set in SVG user units */
+.deck-slide .stage .cgp text{font-size:15px}
+.deck-slide .stage .cgp text.ylab,
+.deck-slide .stage .cgp text.mk{font-size:15px}
+/* A demo built for a page can be far too small on a projector, and its own
+   sizes are in rem so a parent font-size will not reach them. Scale the whole
+   element instead, on the slides that need it. */
+.deck-slide .stage.big cg-demo{zoom:1.4}
+/* zoom is a fixed number, so it has to step down as the screen gets shorter,
+   or the demo runs off the bottom of a laptop screen */
+@media (max-height:860px){ .deck-slide .stage.big cg-demo{zoom:1.2} }
+@media (max-height:720px){ .deck-slide .stage.big cg-demo{zoom:1.0} }
+@media (max-height:620px){ .deck-slide .stage.big cg-demo{zoom:.85} }
+/* A demo with several stacked panels (acceleration, velocity, displacement)
+   is too tall to zoom. Each panel is capped by the screen's height instead,
+   and keeps its aspect, so the stack narrows and centers. */
+.deck-slide .stage.tall .cgd-plots svg{max-height:15vh}
+/* the controls and readouts still need lecture size, so they get the zoom the
+   whole demo gets on a .big stage, stepped down the same way */
+.deck-slide .stage.tall .cgd-controls,
+.deck-slide .stage.tall .cgd-readouts{zoom:1.4}
+/* a laptop screen has no height to spare once the claim wraps: the controls
+   drop to their own size and the plots give up a little more */
+@media (max-height:860px){ .deck-slide .stage.tall .cgd-controls,
+  .deck-slide .stage.tall .cgd-readouts{zoom:1.0}
+  .deck-slide .stage.tall .cgd-plots svg{max-height:13vh} }
+
+.deck-slide.part{background:var(--course-accent-dark); color:#fff; grid-template-rows:1fr}
+.deck-slide.part .course{
+  font-size:clamp(1.4rem,min(2.7vw,5vh),2.7rem); letter-spacing:.05em;
+  text-transform:uppercase; opacity:.82; margin:0 0 1.1rem; font-weight:600;
+  text-align:center; line-height:1.1;
+}
+/* A divider is a title, so it is set larger than a claim and spans the slide
+   like one. At this size the longest title in the course, 44 characters, runs
+   to two lines and everything shorter fits on one. */
+.deck-slide.part .say{
+  color:#fff; max-width:100%; font-size:clamp(2.4rem,min(5.1vw,9.4vh),5.1rem);
+  line-height:1.08;
+}
+
+/* raw file text, and arithmetic worked on the slide */
+.deck-slide .raw{
+  font-family:"SF Mono",Consolas,monospace; text-align:left; display:table;
+  margin:0 auto; font-size:var(--stage-code); line-height:1.45;
+  color:#3f3b36;
+}
+.deck-slide .raw .k{color:var(--term); font-weight:600}
+.deck-slide .raw .v{color:var(--def)}
+.deck-slide .raw .dim{color:#a8a294}
+/* worked arithmetic, set by KaTeX. The aligned environment does the spacing,
+   so there is no hand padding and no monospace face to fake a column. */
+.deck-slide .work{margin:0 auto; font-size:var(--stage-text)}
+.deck-slide .work .katex-display{margin:0; overflow:visible}
+/* two display equations under one claim need air between them, or the
+   second one's numerator lands on the first one's denominator */
+.deck-slide .work .katex-display + .katex-display{margin-top:.8em}
+
+/* A hover note on one piece of code. display rather than visibility, because a
+   hidden absolutely-positioned box still counts towards a scroll container's
+   overflow and a slide clips what leaves it. */
+.deck-slide .tip{cursor:help; border-bottom:1px dotted var(--warm-gray)}
+.deck-slide .tip::after{
+  /* to the right of the call, not under it, so the note never covers the
+     lines it is talking about */
+  content:attr(data-note); position:absolute; left:calc(100% + 1.6rem); top:50%;
+  transform:translateY(-50%);
+  z-index:60; display:none; width:max-content; max-width:30ch;
+  background:#1d1b18; color:#e8e4dc; padding:.6rem .85rem; border-radius:4px;
+  font-family:"Segoe UI",-apple-system,system-ui,sans-serif; font-weight:400;
+  font-size:.64em; line-height:1.45; white-space:normal; text-align:left;
+  box-shadow:0 6px 18px rgba(0,0,0,.18);
+}
+.deck-slide .tip:hover{background:#fdf5db}
+.deck-slide .tip:hover::after{display:block}
+
+/* Working on paper beside the same working as a program, row for row, so a
+   hand step and the line that carries it sit on one line of the slide. */
+.deck-slide .pair{
+  display:grid; grid-template-columns:auto auto; gap:.35rem 3rem;
+  margin:1.6vh auto 0; text-align:left; align-items:baseline; position:relative;
+  font-size:var(--stage-code);
+}
+.deck-slide .pair .ph{
+  color:var(--warm-gray); font-size:.72em; letter-spacing:.07em;
+  text-transform:uppercase; font-weight:600; padding-bottom:.3rem;
+}
+.deck-slide .pair .hand{font-family:Georgia,"Times New Roman",serif; color:#3f3b36}
+.deck-slide .pair .code{font-family:"SF Mono",Consolas,monospace; white-space:pre;
+  color:#3f3b36}
+.deck-slide .pair .code .k{color:var(--term); font-weight:600}
+.deck-slide .pair .code .v{color:var(--def)}
+
+/* Code and what there is to say about it, on one slide. A comment belongs on
+   the line it is about, so the two panels share grid rows. */
+.deck-slide .panels{
+  display:grid; grid-template-columns:auto 1fr; gap:.15rem 2.6rem;
+  margin:1.6vh auto 0; text-align:left; align-items:baseline; position:relative;
+  font-size:var(--stage-code);
+}
+.deck-slide .panels .code{
+  font-family:"SF Mono",Consolas,monospace; white-space:pre; color:#3f3b36;
+}
+.deck-slide .panels .code .k{color:var(--term); font-weight:600}
+.deck-slide .panels .code .v{color:var(--def)}
+.deck-slide .panels .code .dim{color:#a8a294}
+.deck-slide .panels .note{color:var(--warm-gray); font-size:.86em; line-height:1.35}
+
+/* a two-by-two, for a division that runs the same way in two domains */
+.deck-slide .grid2{
+  display:grid; grid-template-columns:auto 1fr 1fr; gap:.7rem 2.4rem;
+  font-size:var(--stage-text); margin:0 auto; text-align:left;
+  align-items:baseline;
+}
+.deck-slide .grid2 .hd{color:var(--warm-gray); font-size:.78em; letter-spacing:.06em;
+  text-transform:uppercase; font-weight:600}
+.deck-slide .grid2 .rw{color:var(--term); font-weight:600}
+.deck-slide .grid2 .cell{color:var(--ink)}
+
+/* a name and what is under it */
+.deck-slide .names{
+  display:grid; grid-template-columns:auto 1fr; gap:1.2rem 1.8rem;
+  font-size:var(--stage-text); margin:0 auto; text-align:left;
+  align-items:baseline;
+}
+.deck-slide .names .nm{font-family:"SF Mono",Consolas,monospace; color:var(--term);
+  font-weight:600}
+.deck-slide .names .val{font-family:"SF Mono",Consolas,monospace; color:var(--ink)}
+.deck-slide .names .how{color:var(--warm-gray); font-size:.82em}
+
+/* a small table of names, as the by-hand calculation leaves them */
+.deck-slide .tbl{border-collapse:collapse; margin:0 auto;
+  font-size:var(--stage-text)}
+.deck-slide .tbl th{text-align:left; font-size:.72em; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--warm-gray); padding:0 1.6rem .5rem 0;
+  font-weight:600}
+.deck-slide .tbl td{padding:.34rem 1.6rem .34rem 0; vertical-align:baseline}
+.deck-slide .tbl td:first-child{font-family:"SF Mono",Consolas,monospace;
+  color:var(--term); font-weight:600}
+.deck-slide .tbl td:nth-child(2){color:var(--def); font-weight:600}
+.deck-slide .tbl td:nth-child(3){color:var(--warm-gray);
+  font-family:"SF Mono",Consolas,monospace; font-size:.86em}
+
+/* The three rules above describe one table: a name, what it holds, where it
+   came from. A table whose columns are all the same kind of thing opts out of
+   them, or the columns stop looking comparable, which is the whole reason it
+   is on the slide. .key marks the column the claim is about. */
+.deck-slide .tbl.nums td{font-variant-numeric:tabular-nums}
+/* every value column alike: one font, one size, one weight. Styling column 2
+   and column 3 separately set a three-column table's numbers in two fonts. */
+.deck-slide .tbl.nums td:nth-child(n+2){color:var(--warm-gray); font-weight:400;
+  font-family:"SF Mono",Consolas,monospace; font-size:1em}
+.deck-slide .tbl.nums td.key{color:var(--def); font-weight:600}
+
+/* A record of photographs, shown as the record it is. The strip leaves a
+   gutter between frames on purpose: the gutter is the part of the event nobody
+   photographed, which is the whole reason the figure is on the slide. */
+.deck-slide .strip img{display:block; width:100%; height:auto}
+
+/* Two frames either side of one interval, with the interval named between
+   them at a size that says it matters. */
+.deck-slide .frames{
+  display:flex; align-items:center; justify-content:center; gap:2.4vw;
+  width:100%;
+}
+.deck-slide .frames figure{margin:0; text-align:center}
+.deck-slide .frames img{
+  display:block; width:100%; max-width:27vw; max-height:54vh; height:auto;
+}
+/* the stage hides figcaptions, because a notes-page caption is prose the slide
+   has already said. These are not that: they are the timestamps, and they are
+   the point of the pair. */
+.deck-slide .stage .frames figcaption{
+  display:block; margin-top:.55rem; font-size:var(--stage-code);
+  color:var(--warm-gray); font-family:"SF Mono",Consolas,monospace;
+}
+/* The interval nothing was recorded or computed in. Not scoped to one layout:
+   the frame pair and the two-run pair both use it. */
+.deck-slide .gapmark{
+  font-size:var(--stage-text); color:var(--def); font-weight:600;
+  text-align:center; line-height:1.2; white-space:nowrap; flex:0 0 auto;
+}
+.deck-slide .gapmark span{
+  display:block; font-size:.58em; color:var(--warm-gray); font-weight:400;
+  margin-top:.4rem; white-space:normal; max-width:14ch; margin-inline:auto;
+}
+
+/* A photograph that is not ours, with the credit its licence requires. The
+   stage hides .source because a notes-page source block is prose; a credit
+   line is four words and has to be visible wherever the image is. */
+.deck-slide .stage .credit{
+  display:block; margin:.7rem auto 0; text-align:center;
+  font-size:calc(var(--stage-code) * .62); color:var(--warm-gray);
+  font-weight:400; line-height:1.4;
+}
+.deck-slide .stage .portrait img{
+  display:block; margin:0 auto; width:auto; height:auto;
+  max-height:52vh; max-width:100%;
+}
+
+/* Two runs of a sweep, side by side, with the unswept interval between them.
+   Wider and shorter than the frame pair, because a settled hill is a wide
+   flat thing. Each run is a looping clip, rendered on one shared view box. */
+.deck-slide .runs{
+  display:flex; align-items:center; justify-content:center; gap:1.6vw;
+  width:100%;
+}
+.deck-slide .runs figure{margin:0; text-align:center; flex:0 1 auto}
+.deck-slide .runs img, .deck-slide .runs video{display:block; width:100%; max-width:38vw; height:auto}
+.deck-slide .stage .runs figcaption{
+  display:block; margin-top:.6rem; font-size:calc(var(--stage-text) * .8);
+  color:var(--ink); line-height:1.35;
+}
+.deck-slide .stage .runs figcaption b{color:var(--term); font-weight:600}
+.deck-slide .stage .runs figcaption span{
+  display:block; color:var(--warm-gray); font-size:.86em; margin-top:.15rem;
+}
+
+/* Two columns of prose under one claim: a question on the left and what came
+   of it on the right, each with a heading of its own. */
+.deck-slide .duo{
+  display:grid; grid-template-columns:1fr 1fr; gap:1.2vh 3.2vw;
+  width:100%; text-align:left; font-size:var(--stage-text);
+}
+/* a portrait beside the prose about it */
+.deck-slide .duo.photo{grid-template-columns:auto minmax(0,1fr); align-items:start}
+.deck-slide .duo.photo figure{margin:0}
+.deck-slide .duo.photo img{
+  display:block; width:100%; max-width:min(22vw,320px); height:auto;
+}
+.deck-slide .stage .duo.photo figcaption{
+  display:block; margin-top:.5rem; text-align:center;
+  font-size:calc(var(--stage-code) * .62); color:var(--warm-gray);
+}
+.deck-slide .duo.photo h3:not(:first-child){margin-top:1.1rem}
+.deck-slide .duo h3{
+  margin:0 0 .5rem; font-size:.82em; font-weight:600; color:var(--term);
+  letter-spacing:.04em; text-transform:uppercase;
+}
+.deck-slide .duo p{margin:0 0 .7rem; line-height:1.35}
+.deck-slide .duo p:last-child{margin-bottom:0}
+.deck-slide .duo em{font-style:normal; color:var(--def); font-weight:600}
+/* not .aside: that is a site-wide block in blocks.css and it arrives with a
+   background. This is one quiet line under a claim. */
+.deck-slide .duo .footnote{color:var(--warm-gray); font-size:.86em}
+
+/* A signal chain: boxes with arrows between them, left to right. */
+.deck-slide .chain{
+  display:flex; align-items:stretch; justify-content:center; gap:.8vw;
+  width:100%; font-size:calc(var(--stage-text) * .84);
+}
+.deck-slide .chain > div{flex:0 1 auto; text-align:center}
+.deck-slide .chain .box{
+  border:1px solid #d9d2c4; border-radius:5px; padding:.7rem .9rem;
+  display:flex; flex-direction:column; justify-content:center; height:100%;
+}
+.deck-slide .chain .box b{display:block; color:var(--term); font-weight:600}
+.deck-slide .chain .box span{
+  display:block; color:var(--warm-gray); font-size:.8em; margin-top:.3rem;
+  line-height:1.3;
+}
+.deck-slide .chain .arrow{
+  display:flex; align-items:center; color:var(--warm-gray);
+  font-size:1.4em; padding:0 .1vw;
+}
+/* one box in the chain is where the damage is done */
+.deck-slide .chain .box.here{border-color:var(--def); border-width:2px}
+.deck-slide .chain .mark{
+  display:block; margin-top:.5rem; color:var(--def); font-weight:600;
+  font-size:.78em;
+}
+
+/* the six fields: the name, then what it settles, in plain words */
+.deck-slide .fields{
+  list-style:none; margin:0 auto; padding:0; display:grid; gap:.7rem;
+  font-size:var(--stage-text); text-align:left; max-width:58ch;
+}
+.deck-slide .fields b{color:var(--term); font-weight:600}
+.deck-slide .fields span{color:var(--warm-gray)}
+/* A one-word term is separated from its definition by its colour alone, which
+   is enough. A term several words long is not: it runs straight into the
+   definition and the eye has nowhere to break. Those go in two columns, opted
+   into, since most lists do not need it. */
+.deck-slide .fields.cols{grid-template-columns:auto 1fr; gap:.8rem 1.8rem;
+  max-width:74ch}
+.deck-slide .fields.cols li{display:contents}
+.deck-slide .fields.cols b{text-align:right}
+
+.deck-bar{position:fixed; left:0; right:0; bottom:0; height:3px; background:var(--subtle); z-index:40}
+.deck-bar > i{display:block; height:100%; width:0; background:var(--course-accent)}
+.deck-num{
+  position:fixed; right:1.6vw; bottom:1.6vh; font-size:.85rem; color:var(--warm-gray);
+  z-index:40; font-variant-numeric:tabular-nums;
+}
+.deck-notes{
+  position:fixed; left:0; right:0; bottom:0; max-height:38vh; overflow:auto;
+  display:none; padding:1.1rem 2rem 1.6rem; z-index:50;
+  background:#1d1b18; color:#e8e4dc; font-size:1rem; line-height:1.55;
+  border-top:3px solid var(--course-accent);
+}
+body.notes-on .deck-notes{display:block}
+.deck-notes p{margin:0 0 .6rem; max-width:80ch}
+.deck-help{
+  position:fixed; left:1.6vw; bottom:1.4vh; font-size:.76rem; color:var(--warm-gray);
+  z-index:40; opacity:.5;
+}
+/* Presenter tools. All of it is inert until p or d is pressed, so a student
+   who never presses either sees the deck exactly as it was. */
+
+/* The ink sits above the slide and below the notes panel, so opening the
+   notes covers a drawing rather than the other way round. pointer-events is
+   set from script: off while not inking, or the canvas would eat the clicks
+   that advance and the ones a demo wants. */
+.deck-ink{position:fixed; inset:0; z-index:45; pointer-events:none}
+/* b blanks the screen. A drawing is part of what is on the screen. */
+body.blank .deck-ink{visibility:hidden}
+
+/* The pointer. A mouse arrow is a few dark pixels and disappears on a
+   recording scaled to half size, so while presenting the system cursor is
+   hidden and this stands in for it. Amber with a white ring: the slides are
+   near-white and the dividers are dark green, and neither the term green nor
+   the def gold can be seen against both. */
+body.pointing, body.inking{cursor:none}
+.deck-dot{
+  --dot:clamp(14px, 2.2vh, 26px);
+  position:fixed; left:0; top:0; width:var(--dot); height:var(--dot);
+  margin:calc(var(--dot) / -2) 0 0 calc(var(--dot) / -2);
+  border-radius:50%; background:#E8A33D; border:2px solid #FFF;
+  box-shadow:0 0 0 1px rgba(0,0,0,.35), 0 2px 10px rgba(0,0,0,.35);
+  z-index:70; pointer-events:none; display:none;
+}
+body.pointing .deck-dot, body.inking .deck-dot{display:block}
+/* While inking the dot takes the pen's colour, so the nib says what it will
+   draw before it draws it. Smaller, because it is a nib and not a pointer. */
+body.inking .deck-dot{--dot:clamp(9px, 1.3vh, 15px)}
+
+/* Which mode is on, and what the keys are once it is. Sits where the help
+   line sits, one line above it. */
+.deck-hud{
+  position:fixed; left:1.6vw; bottom:calc(1.4vh + 1.5rem); z-index:40;
+  font-size:.76rem; color:var(--warm-gray); display:flex; align-items:center;
+  gap:.45rem; pointer-events:none;
+}
+.deck-hud:empty{display:none}
+.deck-hud i{
+  width:.62rem; height:.62rem; border-radius:50%; background:#E8A33D;
+  box-shadow:0 0 0 1px rgba(0,0,0,.2);
+}
+.deck-hud span{opacity:.55; margin-left:.35rem}
+
+@media print{
+  body{overflow:visible}
+  .deck-slide{position:static; display:flex; page-break-after:always; height:100vh}
+  .deck-bar,.deck-num,.deck-help,.deck-notes{display:none}
+  .deck-ink,.deck-dot,.deck-hud{display:none}
+}
+/* ---------------------------------------------------------------------------
+   In-class decks (front matter deck: "class"). The video decks above make one
+   claim per slide for a recording; a class deck delivers information to a room
+   that can read, so a slide carries a topic label and dense, scannable blocks:
+   cards in columns, compact tables, short lists. Everything is scoped to
+   body.inclass so the video decks are untouched.
+--------------------------------------------------------------------------- */
+body.inclass{--ic-text:clamp(1.1rem, min(2.05vw, 3.6vh), 2.2rem)}
+body.inclass .deck-slide:not(.part){justify-content:flex-start; align-items:stretch;
+  padding:4.5vh var(--gutter) 5vh; gap:2.2vh}
+body.inclass .deck-slide:not(.part) .head{text-align:left;
+  border-bottom:3px solid var(--course-accent); padding-bottom:1vh}
+body.inclass .deck-slide:not(.part) .say{text-align:left; margin:0;
+  font-size:clamp(1.5rem, min(2.9vw, 5.2vh), 2.9rem); text-wrap:wrap}
+body.inclass .deck-slide .kicker{display:block; font-size:.42em; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--warm-gray); font-weight:600; margin-bottom:.35vh}
+body.inclass .deck-slide .stage{font-size:var(--ic-text); line-height:1.38;
+  justify-content:flex-start; flex:1; min-height:0}
+/* cards in two or three columns */
+body.inclass .cols{display:grid; gap:1.6vh 2vw; align-items:start; width:100%}
+body.inclass .cols.c2{grid-template-columns:repeat(2, minmax(0,1fr))}
+body.inclass .cols.c3{grid-template-columns:repeat(3, minmax(0,1fr))}
+body.inclass .card{background:#f7f9f1; border-left:5px solid var(--course-accent);
+  padding:1.3vh 1.2vw 1.4vh; border-radius:3px}
+body.inclass .card h3{margin:0 0 .6vh; font-size:1.08em; color:var(--course-accent-dark)}
+body.inclass .card p{margin:0 0 .6vh}
+body.inclass .card ul, body.inclass .stage > ul{margin:0; padding-left:1.15em}
+body.inclass .card li, body.inclass .stage > ul li{margin:.25vh 0}
+body.inclass .card .dim{color:var(--warm-gray)}
+body.inclass .card.gold{background:#fbf6ea; border-left-color:#B8860B}
+body.inclass .card.gold h3{color:#8A6508}
+/* compact tables */
+body.inclass .ic-tbl{border-collapse:collapse; width:100%; font-size:.95em}
+body.inclass .ic-tbl th{text-align:left; font-size:.78em; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--warm-gray); border-bottom:2px solid var(--course-accent); padding:.4vh .8vw .4vh 0}
+body.inclass .ic-tbl td{padding:.45vh .8vw .45vh 0; border-bottom:1px solid #e6e0d4; vertical-align:top}
+body.inclass .ic-tbl td.n{font-variant-numeric:tabular-nums; color:var(--def); font-weight:600}
+/* a figure beside text */
+body.inclass .figside{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
+  gap:2vw; align-items:start; width:100%}
+body.inclass .figside img, body.inclass .figside video{width:100%; height:auto; display:block;
+  max-height:58vh; object-fit:contain; border:1px solid #e6e0d4}
+body.inclass .wideimg{width:100%; max-height:30vh; object-fit:contain; display:block; margin-top:1.2vh}
+body.inclass .src{font-size:.72em; color:var(--warm-gray); margin-top:.6vh}
+/* a "moment to arrive" slide (Five for Flourishing): the image, full screen */
+body.inclass .deck-slide.arrive{padding:0; justify-content:center; align-items:center; background:#000}
+body.inclass .deck-slide.arrive img{max-width:100vw; max-height:100vh; width:auto; height:auto; display:block}
+/* a sparse overview: one line and a row of pictures to talk over */
+body.inclass .lead{font-size:1.35em; line-height:1.3; margin:1vh 0 3vh; color:var(--ink)}
+body.inclass .trio{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:2vw; align-items:end}
+body.inclass .trio figure{margin:0}
+body.inclass .trio img{width:100%; height:34vh; object-fit:contain; display:block; border:1px solid #e6e0d4; background:#fff}
+body.inclass .trio figcaption{text-align:center; color:var(--course-accent-dark); font-weight:600; margin-top:1vh}
+/* a dense roster slide: smaller text, section headings between card rows */
+body.inclass .stage.tight{font-size:calc(var(--ic-text) * .74); line-height:1.28}
+body.inclass .stage.tight .card{padding:.9vh .9vw}
+body.inclass .stage.tight .card h3{margin-bottom:.3vh}
+body.inclass .stage.tight .cols{gap:1vh 1.2vw}
+body.inclass .sec{margin:1vh 0 .6vh; font-size:1em; color:var(--warm-gray);
+  text-transform:uppercase; letter-spacing:.06em}
+body.inclass .stage.tight .sec:first-child{margin-top:0}
+body.inclass .qr{display:flex; gap:1.4vw; align-items:center}
+body.inclass .qr p{margin:0 0 .6vh; font-weight:600}
+body.inclass .card .ico{height:1.15em; width:auto; vertical-align:-.2em; margin-right:.25em}
+/* a point slide, after the TCSS 490 decks: no title bar, the main point centred as the
+   heading with a grey line under it, and the content centred below */
+body.inclass .deck-slide.point:not(.part){padding-top:9vh; gap:3vh}
+body.inclass .deck-slide.point:not(.part) .head{text-align:center; border-bottom:0; padding-bottom:0}
+body.inclass .deck-slide.point:not(.part) .say{text-align:center; text-wrap:balance;
+  font-size:clamp(1.8rem, min(3.6vw, 6.4vh), 3.6rem)}
+/* a point slide with a figure: a smaller heading leaves the figure room, since the fit
+   script cannot shrink a figure, only the text beside it */
+body.inclass .deck-slide.point.compact:not(.part){padding-top:5vh; gap:2vh}
+body.inclass .deck-slide.point.compact:not(.part) .say{font-size:clamp(1.5rem, min(3vw, 5.4vh), 3rem)}
+/* point cards, after the TCSS 490 decks: a row of bordered cards under the slide's
+   main point, each a small tag, a title and one sentence */
+body.inclass .pcards{display:grid; gap:1.2vw; width:100%; margin-top:1vh}
+body.inclass .pcards.c3{grid-template-columns:repeat(3, minmax(0,1fr))}
+body.inclass .pcards.c4{grid-template-columns:repeat(4, minmax(0,1fr))}
+body.inclass .pcard{border:1px solid #d9d3c7; border-radius:5px; background:#fff;
+  padding:1.8vh 1.1vw; display:flex; flex-direction:column; gap:.8vh; min-width:0}
+body.inclass .pcard .tag{align-self:flex-start; font-size:.62em; font-weight:700; letter-spacing:.06em;
+  text-transform:uppercase; padding:.15em .5em; border-radius:3px; background:var(--subtle); color:var(--warm-gray)}
+body.inclass .pcard > b{color:var(--course-accent-dark); font-size:1.15em; line-height:1.15}
+body.inclass .pcard > span, body.inclass .pcard > p{color:var(--warm-gray); line-height:1.32; margin:0}
+body.inclass .pcard ul, body.inclass .pcard ol{margin:0; padding-left:1.15em; color:var(--warm-gray); line-height:1.32}
+body.inclass .pcard li{margin:.3vh 0}
+body.inclass .pcard li b{color:var(--ink)}
+body.inclass .pcard .vote{margin-top:.4vh}
+/* one gold card among plain ones */
+body.inclass .pcard.gold{background:#fbf6ea; border-color:#d9c08a}
+body.inclass .pcard.gold > b{color:#8A6508}
+body.inclass .pcard.gold .tag{background:#f1e4c4; color:#8A6508}
+body.inclass .pcol{display:flex; flex-direction:column; gap:1.2vh; min-width:0}
+body.inclass .pcards.c1{grid-template-columns:minmax(0,1fr)}
+body.inclass .pcards.c2{grid-template-columns:repeat(2, minmax(0,1fr))}
+body.inclass .pcard .q{color:var(--ink); font-style:italic}
+/* the row of point cards that says what to do */
+body.inclass .pcards.do .pcard{background:#fbf6ea; border-color:#d9c08a}
+body.inclass .pcards.do .pcard > b{color:#8A6508}
+body.inclass .pcards.do .tag{background:#f1e4c4; color:#8A6508}
+/* a quieter row of point cards under the main row */
+body.inclass .pcards.minor{font-size:.78em; margin-top:1.6vh}
+body.inclass .pcards.minor .pcard{background:#f7f6f2; border-color:#e6e0d4; padding:1.2vh 1vw}
+body.inclass .pcards.minor .pcard > b{color:var(--warm-gray)}
+/* the learning-group roster: one card per group, names listed down the card so a
+   student scans for their own while the details beside it are reviewed */
+body.inclass .groups{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:1vh .8vw; align-content:start}
+body.inclass .gcard{background:#f7f9f1; border-top:4px solid var(--course-accent); border-radius:3px;
+  padding:.8vh .7vw .9vh; font-size:.86em; line-height:1.28}
+body.inclass .gcard h4{margin:0 0 .4vh; font-size:1.08em; color:var(--course-accent-dark)}
+body.inclass .gcard h4 span{font-weight:400; color:var(--warm-gray); font-size:.8em; margin-left:.3em}
+body.inclass .gcard ul{list-style:none; margin:0; padding:0}
+body.inclass .gcard li{margin:0; white-space:nowrap}
+/* a day-by-day timeline, set large: it is the whole slide */
+body.inclass .timeline{font-size:1.15em}
+body.inclass .timeline td{padding:1.6vh 1.5vw 1.6vh 0}
+body.inclass .timeline td:first-child{white-space:nowrap; width:1%; color:var(--course-accent-dark)}
+body.inclass .stage a{color:var(--course-accent-dark)}
+body.inclass .qr img{width:22vh; height:22vh; display:block}
+/* class 2: figure hosts, channel legend chips, vote cards, and an amber kicker
+   for the slides where the room does something */
+body.inclass .c2fig{width:100%}
+body.inclass .c2fig > svg{display:block; width:100%; height:auto; max-height:62vh}
+body.inclass .c2fig.half > svg{max-height:31vh}
+body.inclass .c2fig .cgd .cgp:not(.c2chart) text{font-size:15px}
+body.inclass .c2key b{display:inline-block; width:.75em; height:.75em; border-radius:50%; vertical-align:-.05em}
+body.inclass .c2key b.head{background:#5F7038}
+body.inclass .c2key b.cross{background:#b0443a}
+body.inclass .c2key b.amber{background:#b8860b}
+body.inclass .c2key b.sq{border-radius:1px}
+body.inclass .c2key i.amber{border-color:#b8860b}
+body.inclass .c2key i.faint{border-color:#cfc8bb}
+body.inclass .card .c2fig{margin:.4vh 0 .6vh}
+body.inclass .c2row{display:grid; grid-template-columns:1fr 1fr; gap:1.2vw; margin-top:.6vh}
+body.inclass .c2row svg{display:block; width:100%; height:auto; max-height:30vh}
+body.inclass .c2fig .cgd{margin:0}
+body.inclass .c2key{display:inline-flex; align-items:center; gap:.35em; margin-right:1.1em; font-weight:600}
+body.inclass .c2key i{display:inline-block; width:1.8em; border-top:3px solid}
+body.inclass .c2key i.head{border-color:#5F7038}
+body.inclass .c2key i.cross{border-color:#b0443a}
+body.inclass .c2key i.chest{border-top-style:dashed; border-color:#3A5F8A}
+body.inclass .c2key i.neck{border-top-style:dotted; border-color:#b8860b}
+body.inclass .vote{display:grid; grid-template-columns:1fr; gap:.8vh; margin-top:1vh}
+body.inclass .vote div{display:flex; align-items:center; gap:1vw; border:2px solid var(--course-accent); border-radius:6px; padding:.6vh 1vw; background:#fff}
+body.inclass .vote b{font-size:1.4em; color:var(--course-accent-dark); min-width:1.2em}
+body.inclass .kicker.act{color:#8A6508}
+/* a slide being measured by the fit script below: laid out, never seen */
+body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
+</style>
+</head>
+<body class="inclass" data-pagefind-ignore="all">
+
+
+<!-- Every number and figure in the Assignment 6 walk comes from
+     Teaching/TME 310 - Computational Modelling/in-class/class-06/trace_a6.py, run on the
+     example pack (test 9793, data/example/test_short.json and train.json), with the example
+     notebook's rules (pipeline/examples/a07.py). The figures are data/img/class06/c6-*.svg. -->
+
+<style>
+body.inclass .deck-slide.point.c6mid{justify-content:center}
+.deck-slide.point.c6mid .stage{flex:0 0 auto; margin-top:5vh; align-items:center}
+.deck-slide.point.c6mid .stage:has(> .pcards){height:36vh}
+.deck-slide .c6stack{display:flex; flex-direction:column; gap:.6vh; width:97%; margin:0 auto;
+  font-size:calc(var(--stage-code) * .74)}
+.deck-slide .c6layer{display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.4fr) minmax(0,1.3fr);
+  gap:1.4vw; align-items:center; background:var(--subtle); border-left:4px solid var(--course-accent);
+  border-radius:4px; padding:1vh 1.2vw; text-align:left; line-height:1.25}
+.deck-slide .c6layer .lay{font-weight:700; color:var(--course-accent-dark)}
+.deck-slide .c6layer.c6cols{background:none; border-left-color:transparent; padding-top:0; padding-bottom:0}
+.deck-slide .c6layer.c6cols span{font-size:.8em; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--warm-gray); white-space:nowrap}
+.deck-slide .c6choice{font-size:.8em; line-height:1.4; max-width:96%; margin:1.4vh auto 0; padding:.7vh 1.2vw;
+  text-align:left; background:#f3eff8; border-left:.3em solid var(--course-accent); border-radius:.3em; color:var(--ink)}
+.deck-slide .pcol .c6choice{max-width:none; margin:.3vh 0 0; font-size:.9em}
+.deck-slide .c6choice > b{color:var(--course-accent-dark)}
+.deck-slide .c6hint{font-size:.78em; color:var(--warm-gray); max-width:90%; margin:1.2vh auto 0;
+  text-align:center; line-height:1.4}
+.deck-slide .pcol .c6hint{text-align:left; margin:.3vh 0 0; max-width:none}
+.deck-slide .c6hint code{font-family:"SF Mono",Consolas,monospace; color:var(--term); font-weight:600}
+.deck-slide .c6newton{display:grid; grid-template-columns:repeat(4, auto); justify-content:center; gap:1.1vh 3vw;
+  font-family:"SF Mono",Consolas,monospace; font-size:calc(var(--stage-code) * 1.05); color:#3f3b36}
+.deck-slide .c6newton .h{font-family:var(--font-body, sans-serif); font-size:.62em; font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--warm-gray); align-self:end}
+.deck-slide .c6ok{color:var(--term); font-weight:700}
+.deck-slide .c6bad{color:#a3341f; font-weight:700}
+</style>
+
+<section class="deck-slide arrive">
+  <img src="data/img/f4f/f4f-07.png?v=20261109080753" width="1920" height="1080"
+       alt="Husky Volunteers. Husky Volunteers supports UWT students in their pursuit of creating more positive community interactions by providing service-learning and leadership opportunities. The Husky Volunteers Team is here to help you find opportunities to serve and learn in the Tacoma community and surrounding areas. Scan the QR code to learn more. Beside it, the Husky Volunteers paw logo and a QR code.">
+</section>
+
+<section class="deck-slide part">
+  <div class="head">
+    <p class="course">TME 310 &middot; Computational Physical Modeling</p>
+    <p class="say">Class 6</p>
+  </div>
+</section>
+
+<!-- ============================================================ last week, this week
+     Arc 662 is the arc class 5 used. Holding gravity predicted the unseen half better on 14 of
+     23 arcs (class 5, trace_a5.py). Record 158: last frame at 1.00 s, falling crossing at
+     1.742 s (trace_a6.py, steps 4 and 5). -->
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Last week we fitted the <span class="term">whole arc</span>, and this week we use the fit to say whether the ball goes in.</p>
+    <p class="sub">Assignment 5 found that holding gravity at 9.81 predicted the unseen half better on 14 of 23 arcs. Assignment 6 runs that model forward from the first few frames of flight to the rim.</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1fr); max-width:88%; margin:0 auto">
+      <img src="data/img/class06/c6-bridge.svg?v=20261109080753"
+           alt="Two panels, height against time. Left, last week: arc 662, every frame from the hand to the floor, with the parabola fitted to its flight in gold running through the middle of the frames above the rim line. Right, this week: record 158, which stops at 1.00 s while the ball is still rising. The parabola fitted to its last frames is carried on, dashed, across a shaded stretch marked no frames, 0.74 s, and comes down through the rim line at a circled point.">
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ the break -->
+
+<section class="deck-slide part">
+  <div class="head">
+    <p class="course">TME 310 &middot; Computational Physical Modeling</p>
+    <p class="say">Break &middot; 10 minutes</p>
+  </div>
+</section>
+
+<!-- ============================================================ Assignment 6 -->
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">Bob wants to know whether a shot is <span class="term">going in</span> before it gets there.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">the request</span><b>Bob, on the basketball</b>
+        <span><em>"I want to know whether a shot is going in before it gets there. The short records stop a few frames after the ball leaves the hand, which is about all the warning anyone gets. Take the dozen short records. Tell me when and where each ball comes down through the height of the rim, and whether it goes in."</em></span></div>
+      <div class="pcard gold"><span class="tag">Assignment 6</span><b>What Bob needs back</b>
+        <ul>
+          <li><b>The time of each crossing</b>, and where the ball is then</li>
+          <li><b>Whether each shot goes in</b>, misses, or is too close to call</li>
+          <li><b>How you know</b> it is the crossing he means</li>
+        </ul></div>
+      <div class="pcard"><span class="tag">before the next slide</span><b>What questions do you need to answer to better understand this problem?</b>
+        <span>With your group, list them.</span></div>
+    </div>
+    <p class="src">Today we work the problem on the 12 short records in the example pack (test 9793), the same records the example reports use.</p>
+  </div>
+</section>
+
+<!-- Hoop and ball radii from the header: 0.2286 m and 0.1195 m. -->
+<section class="deck-slide point c6mid" data-nofit>
+  <div class="head">
+    <p class="say">Each phrase in the request asks for something we have to <span class="term">work out</span> from the record.</p>
+    <p class="sub">Bob knows the game, so he leaves out what a basketball player takes for granted.</p>
+  </div>
+  <div class="stage">
+    <div class="c6stack">
+      <div class="c6layer c6cols"><span>The request says</span><span>What it takes to read it</span><span>So he means</span></div>
+      <div class="c6layer"><span class="lay">&ldquo;before it gets there&rdquo;</span>
+        <span>The short records stop a few frames after the release, long before the hoop.</span>
+        <span>The crossing has to come from the fitted model, since no frame shows it.</span></div>
+      <div class="c6layer"><span class="lay">&ldquo;comes down through the height of the rim&rdquo;</span>
+        <span>An arc passes through every height below its top twice, once rising and once falling.</span>
+        <span>The falling crossing of 3.048&nbsp;m, the rim height in the header.</span></div>
+      <div class="c6layer"><span class="lay">&ldquo;when and where&rdquo;</span>
+        <span>The record gives the ball&rsquo;s centre along and across the court, and its height, at each frame.</span>
+        <span>The time of the crossing, and the ball&rsquo;s centre measured from the hoop&rsquo;s centre at that time.</span></div>
+      <div class="c6layer"><span class="lay">&ldquo;whether it goes in&rdquo;</span>
+        <span>The header gives the radius of the hoop and the radius of the ball.</span>
+        <span>In, out, or on the rim, decided by how far the ball&rsquo;s centre is from the hoop&rsquo;s centre.</span></div>
+      <div class="c6layer"><span class="lay">&ldquo;too close to call from the frames you have&rdquo;</span>
+        <span>A fit to a few frames can move when the frames change.</span>
+        <span>Each call comes with how far its crossing could move.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">Today we follow one record to the rim, then ask how far Bob can <span class="term">trust</span> the answer.</p>
+    <p class="sub">Eight questions, in the order we take them today.</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c4">
+      <div class="pcard"><span class="tag">step 1</span><b>What is in a short record?</b>
+        <span>Plot it and read the header.</span></div>
+      <div class="pcard"><span class="tag">step 2</span><b>Where does free flight start?</b>
+        <span>The release rule from Assignment 5.</span></div>
+      <div class="pcard"><span class="tag">step 3</span><b>Should we fit gravity or hold it?</b>
+        <span>Assignment 5 chose on whole flights.</span></div>
+      <div class="pcard"><span class="tag">step 4</span><b>When is the ball at rim height?</b>
+        <span><a href="conditions-become-roots.html">Conditions as roots</a>.</span></div>
+      <div class="pcard"><span class="tag">step 5</span><b>Which root is the crossing?</b>
+        <span><a href="conditions-become-roots.html#which-root-actually-happened">Two crossings, one asked for</a>.</span></div>
+      <div class="pcard"><span class="tag">step 6</span><b>Where does it come down, and does it go in?</b>
+        <span>Straight lines from above, then the radii.</span></div>
+      <div class="pcard"><span class="tag">step 7</span><b>How sure is each call?</b>
+        <span>Drop a frame, then try the training arcs.</span></div>
+      <div class="pcard"><span class="tag">step 8</span><b>Does the answer make sense?</b>
+        <span>P&oacute;lya&rsquo;s fourth step, looking back.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ step 1
+     trace_a6.py, step 1: 26 frames each; first frame 0.58 to 1.43 m up; highest frame is the
+     last or next to last on all 12; last frame 4.22 to 4.64 m up and 4.8 to 6.3 m from the hoop. -->
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Every short record begins with the ball <span class="term">in the hand</span> and ends with it still rising.</p>
+    <p class="sub">Step 1 of 8 &middot; What is in a short record?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)">
+      <img src="data/img/class06/c6-a6-records.svg?v=20261109080753"
+           alt="Height against time for all 12 short records, 26 frames each, with record 158 drawn in green. Every record starts between about 0.6 and 1.4 m, climbs past the rim line near 0.7 s, and is still climbing at its last frame, between 4.2 and 4.6 m.">
+      <div class="pcol">
+        <div class="pcard"><span class="tag">what we found</span><b>26 frames, 0.58 to 1.43&nbsp;m at the start</b>
+          <span>The header says each record begins <em>partway into the flight</em>. The first frames sit well below the rim and climb faster each frame, so the shooter is still pushing the ball. The last frame is the highest on all 12, 4.2 to 4.6&nbsp;m up and still 4.8 to 6.3&nbsp;m from the hoop.</span></div>
+        <div class="pcard"><span class="tag">what we learn</span><b>The header is wrong about the start</b>
+          <span>Only part of each record is free flight, and no record reaches the top of its arc.</span></div>
+        <div class="pcard gold"><span class="tag">next</span><b>Which frames are flight?</b>
+          <span>Find the release.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ step 2 -->
+
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Record 158 has 26 frames. How many of them are <span class="term">free flight</span>?</p>
+    <p class="sub">Step 2 of 8 &middot; Where does free flight start?</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">last week</span><b>The release rule</b>
+        <span>Walk back from the top of the arc while the upward speed keeps growing. Gravity only slows a rising ball, so a growing speed means the hand is still pushing.</span></div>
+      <div class="pcard"><span class="tag">this week</span><b>No top in the record</b>
+        <span>These records stop while the ball is still rising, so the walk has to start somewhere else.</span></div>
+      <div class="pcard gold"><span class="tag">predict &middot; vote</span><b>Frames of free flight in record 158</b>
+        <div class="vote">
+          <div><b>A</b>About 25</div>
+          <div><b>B</b>About 17</div>
+          <div><b>C</b>About 9</div>
+          <div><b>D</b>About 4</div>
+        </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- trace_a6.py, step 2: record 158 release frame 17 (0.68 s), 9 flight frames, 3.11 m up;
+     across the 12, release frames 16 to 20 at 2.84 to 3.74 m, 6 to 10 flight frames (median 8).
+     Assignment 5's whole flights had 23 to 31 frames. -->
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">The ball leaves the hand at <span class="term">frame 17</span>, which leaves 9 frames of flight.</p>
+    <p class="sub">Step 2 of 8 &middot; Where does free flight start?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)">
+      <img src="data/img/class06/c6-a6-release.svg?v=20261109080753"
+           alt="Record 158 in two panels against time, height above and vertical speed below. The speed climbs while the hand pushes and falls after it lets go. A green line at 0.68 s marks the release, and the 9 frames after it are shaded as free flight.">
+      <div class="pcol">
+        <div class="pcard"><span class="tag">what we found</span><b>6 to 10 frames of flight</b>
+          <span>Across the 12 records the release falls at frame 16 to 20, between 2.84 and 3.74&nbsp;m up. A whole flight last week had 23 to 31 frames.</span></div>
+        <div class="pcard"><span class="tag">what we learn</span><b>Each frame counts for more</b>
+          <span>With 8 frames in the median record, starting one frame late throws away an eighth of the flight.</span></div>
+        <div class="pcard gold"><span class="tag">next</span><b>Is 8 frames enough to fit gravity?</b>
+          <span>Assignment 5 chose with 23 or more.</span></div>
+        <p class="c6choice"><b>Our choice:</b> start the walk at the last frame that has a speed, and walk back while the speed keeps growing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- The three example programs on record 158 (trace_a6.py prints them; a6_rim_call.py,
+     a6_rim_crossing.py and the notebook run on the example pack): memo starts 2 frames after
+     the last push (frame 19), d 0.425 m; technical report 1 frame after (frame 18), d 0.305 m;
+     notebook the walk back (frame 17), d 0.261 m. -->
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">The three example reports start record 158 at <span class="term">three different frames</span>, and the ball comes down in three different places.</p>
+    <p class="sub">Step 2 of 8 &middot; Where does free flight start?</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">notebook &middot; frame 17</span><b>0.26&nbsp;m from the centre</b>
+        <span>The walk back from the last frame. Its fit uses 9 frames.</span></div>
+      <div class="pcard"><span class="tag">technical report &middot; frame 18</span><b>0.31&nbsp;m from the centre</b>
+        <span>One frame after the last upward push. Its fit uses 8 frames.</span></div>
+      <div class="pcard"><span class="tag">memo &middot; frame 19</span><b>0.43&nbsp;m from the centre</b>
+        <span>Two frames after the last upward push. Its fit uses 7 frames, and the memo calls the shot out.</span></div>
+    </div>
+    <p class="c6hint">All three rules are reasonable. On a record this short, the frame you start on moves the crossing by 16&nbsp;cm, which is enough to change the call.</p>
+  </div>
+</section>
+
+<!-- ============================================================ step 3 -->
+
+<section class="deck-slide point c6mid" data-nofit>
+  <div class="head">
+    <p class="say">With 6 to 10 frames of flight, should we <span class="term">fit gravity</span> or hold it at 9.81?</p>
+    <p class="sub">Step 3 of 8 &middot; Should we fit gravity or hold it?</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">last week</span><b>Held gravity predicted better</b>
+        <span>Fitted to half of each whole flight, holding gravity at 9.81 was closer on the unseen half for 14 of 23 arcs.</span></div>
+      <div class="pcard gold"><span class="tag">predict &middot; vote</span><b>On the short records</b>
+        <div class="vote">
+          <div><b>A</b>Fit gravity</div>
+          <div><b>B</b>Hold it at 9.81</div>
+          <div><b>C</b>It makes little difference</div>
+        </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- trace_a6.py, step 3: gravity fitted to the 12 short flights 0.41 to 13.52 m/s^2 (median
+     9.38), 7 of 12 more than 1 away from 9.81; fitted to the 23 whole flights 8.92 to 10.43. -->
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Fitted to a short flight, gravity comes out anywhere from <span class="term">0.41 to 13.52</span>&nbsp;m/s&sup2;.</p>
+    <p class="sub">Step 3 of 8 &middot; Should we fit gravity or hold it?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)">
+      <img src="data/img/class06/c6-a6-gravity.svg?v=20261109080753"
+           alt="Two rows of dots on a scale of fitted gravity, with a dashed line at 9.81. The top row, 23 whole flights of 23 to 31 frames, clusters between about 9 and 10.4. The bottom row, 12 short records of 6 to 10 frames, spreads from about 0.4 to 13.5.">
+      <div class="pcol">
+        <div class="pcard"><span class="tag">what we found</span><b>7 of 12 off by more than 1&nbsp;m/s&sup2;</b>
+          <span>On whole flights last week the fitted gravity ran from 8.92 to 10.43. On these short flights it runs from 0.41 to 13.52.</span></div>
+        <div class="pcard"><span class="tag">what we learn</span><b>Hold gravity at 9.81</b>
+          <span>With so few frames the fit most likely bends to the tracking noise. Gravity is the same for every shot, so holding it leaves the frames to fix only the starting height and upward speed.</span></div>
+        <div class="pcard gold"><span class="tag">next</span><b>When does the fitted ball reach the rim?</b>
+          <span>Write the condition as a root.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ step 4
+     trace_a6.py, step 4: record 158, z = -2.643 + 11.811 t - 4.905 t^2 (t in s from the first
+     frame), top at 1.204 s and 4.47 m, last frame at 1.00 s; across the 12 the falling crossing
+     comes 0.74 to 1.05 s after the last frame. -->
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Subtracting the rim height turns &ldquo;when is the ball at the rim&rdquo; into a <span class="term">root</span>, and the quadratic formula gives it exactly.</p>
+    <p class="sub">Step 4 of 8 &middot; When is the ball at rim height?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)">
+      <img src="data/img/class06/c6-a6-root.svg?v=20261109080753"
+           alt="Record 158, height minus rim height against time. The frames in the hand, shaded, rise from about -2.2 m. The gold parabola fitted to the flight frames crosses zero twice, at 0.666 s on the way up, marked with a square, and at 1.742 s on the way down, marked with a red dot.">
+      <div class="pcol">
+        <div class="pcard"><span class="tag">record 158, gravity held</span><b>z = &minus;2.643 + 11.811&nbsp;t &minus; 4.905&nbsp;t&sup2;</b>
+          <span>The fit to its 9 flight frames. The top of the arc comes at 1.20&nbsp;s and 4.47&nbsp;m.</span></div>
+        <div class="pcard"><span class="tag">height above the rim</span><b>&minus;4.905&nbsp;t&sup2; + 11.811&nbsp;t &minus; 5.691 = 0</b>
+          <span>Subtract 3.048 from z. This is a quadratic with a = &minus;4.905, b = 11.811 and c = &minus;5.691, so the formula gives both roots with no starting guess.</span>
+          <div class="work" style="font-size:1.05em">$$t = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$</div></div>
+        <div class="pcard gold"><span class="tag">what we found</span><b>Two roots, 0.666&nbsp;s and 1.742&nbsp;s</b>
+          <span>The later one is 0.74&nbsp;s after the last frame. Across the 12 records the falling crossing comes 0.74 to 1.05&nbsp;s after the last frame.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ step 5
+     trace_a6.py, step 5, quadratic formula on record 158: b^2 = 139.49, 4ac = 111.67,
+     b^2 - 4ac = 27.83, square root 5.275, 2a = -9.81; + sign (-6.535) / -9.81 = 0.6662 s,
+     - sign (-17.086) / -9.81 = 1.7417 s. -->
+<section class="deck-slide point c6mid" data-nofit>
+  <div class="head">
+    <p class="say">Which sign in the <span class="term">&plusmn;</span> gives the falling crossing?</p>
+    <p class="sub">Step 5 of 8 &middot; Which root is the crossing?</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">record 158</span><b>$t = \dfrac{-11.811 \pm 5.275}{-9.81}$</b>
+        <span>The square root of b&sup2; &minus; 4ac = 139.49 &minus; 111.67 = 27.83 is 5.275, and 2a = &minus;9.81.</span></div>
+      <div class="pcard gold"><span class="tag">predict &middot; vote</span><b>The falling crossing, the later root</b>
+        <div class="vote">
+          <div><b>A</b>The + sign</div>
+          <div><b>B</b>The &minus; sign</div>
+          <div><b>C</b>It depends on the shot</div>
+        </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- trace_a6.py, step 5: rising roots 0.657 to 0.752 s; releases at 0.64 to 0.80 s; the rising
+     root comes before the release on 7 of 12. Record 158: rising root 0.666 s, release 0.68 s.
+     Newton from top - 0.5 = 0.704 s returns 0.6662 s; from top + 0.5 = 1.704 s returns 1.7417 s. -->
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">Because a is <span class="term">negative</span>, the minus sign gives the later root, which is the falling crossing.</p>
+    <p class="sub">Step 5 of 8 &middot; Which root is the crossing?</p>
+  </div>
+  <div class="stage tight">
+    <div class="c6newton" style="margin-top:2vh">
+      <span class="h">sign</span><span class="h">&minus;b &plusmn; 5.275</span><span class="h">&divide; 2a</span><span class="h">root</span>
+      <span>+</span><span>&minus;6.535</span><span>&divide; &minus;9.81</span><span class="c6bad">0.666 s</span>
+      <span>&minus;</span><span>&minus;17.086</span><span>&divide; &minus;9.81</span><span class="c6ok">1.742 s</span>
+    </div>
+    <div class="pcards c3" style="margin-top:3vh">
+      <div class="pcard"><span class="tag">what we found</span><b>The rising root is in the hand</b>
+        <span>Record 158 leaves the hand at 0.68&nbsp;s, after its rising root at 0.666&nbsp;s. On 7 of the 12 records the rising root comes before the release.</span></div>
+      <div class="pcard"><span class="tag">what we learn</span><b>Check the root you get</b>
+        <span>The falling crossing comes after the top (1.204&nbsp;s), and f goes from positive to negative through it. Each check is one comparison in the program.</span></div>
+      <div class="pcard gold"><span class="tag">next</span><b>Does the ball go in?</b>
+        <span>Find where the ball is at 1.742&nbsp;s.</span></div>
+    </div>
+    <p class="c6hint">Next week drag takes away the formula, and Newton (the method that found $\sqrt{2}$ last week) does this job. Started half a second before the top it returns 0.666&nbsp;s, and started half a second after it returns 1.742&nbsp;s.</p>
+  </div>
+</section>
+
+<!-- ============================================================ step 6
+     trace_a6.py, step 6: record 158, x = -10.500 + 5.893 t, y = -2.983 + 1.777 t (m from the hoop
+     centre), floor speed 6.16 m/s; frames 2.9 cm RMS from the lines (largest 5.4 cm; header
+     horizontal noise 2.84 cm); at t = 1.7417 s, x -0.236, y 0.113, d 0.261 m; last flight frame
+     4.78 m from the hoop centre, a 1 degree turn over that is 8.3 cm. -->
+<section class="deck-slide point compact" data-fill="0.95">
+  <div class="head">
+    <p class="say">From above the ball moves in a <span class="term">straight line</span> at a steady speed, so x and y are each a straight line in time.</p>
+    <p class="sub">Step 6 of 8 &middot; Where does it come down, and does it go in?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)">
+      <img style="max-height:54vh" src="data/img/class06/c6-a6-above.svg?v=20261109080753"
+           alt="Record 158. Above, from overhead, as distance along and across the court from the hoop centre: the frames in the hand cluster near 7.5 m out, the flight frames run in a straight line toward the hoop, and a dashed line carries them on to a red dot at (-0.236, 0.113), just short of the hoop circle. Below, x and y against time: each set of flight frames lies on a straight line, carried on dashed to a red dot at 1.742 s.">
+      <div class="pcol">
+        <div class="pcard"><span class="tag">record 158, the same 9 frames</span><b>x = &minus;10.500 + 5.893&nbsp;t &nbsp;&nbsp; y = &minus;2.983 + 1.777&nbsp;t</b>
+          <span>With drag and spin left out, nothing pushes the ball sideways or slows it across the floor. Each line is fitted by least squares, in metres from the hoop&rsquo;s centre, and the frames sit 2.9&nbsp;cm from them (RMS), about the 2.84&nbsp;cm of tracking noise in the header.</span></div>
+        <div class="pcard"><span class="tag">at the crossing, t = 1.742&nbsp;s</span><b>x = &minus;0.236, y = 0.113, d = 0.261&nbsp;m</b>
+          <span>Put the crossing time into both lines. The ball is 24&nbsp;cm from the centre along the court and 11&nbsp;cm across it, and d = &radic;(x&sup2; + y&sup2;).</span></div>
+        <div class="pcard gold"><span class="tag">what we learn</span><b>The lines run 4.8&nbsp;m past the data</b>
+          <span>The ball crosses the floor at 6.16&nbsp;m/s, so a crossing time off by 0.01&nbsp;s puts it 6&nbsp;cm long or short. A path turned by 1&deg; misses by 8&nbsp;cm at the hoop.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- step 6, the radii
+     Header: hoop inner radius 0.2286 m, ball radius 0.1195 m. trace_a6.py, step 6, by distance
+     alone: in 332, 872, 1326; on the rim 158, 503, 502, 490; out 685, 1299, 734, 1317, 838. -->
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">A ball coming straight down goes in cleanly when its centre is within <span class="term">0.109&nbsp;m</span> of the hoop&rsquo;s centre, and misses the rim beyond 0.348&nbsp;m.</p>
+    <p class="sub">Step 6 of 8 &middot; Where does it come down, and does it go in?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1fr); max-width:80%; margin:0 auto">
+      <img style="max-height:36vh" src="data/img/class06/c6-a6-hoop.svg?v=20261109080753"
+           alt="Three views of the hoop from above, a dark circle of radius 0.229 m with a green dashed circle inside it at 0.109 m and a red dashed circle outside at 0.348 m. Left, a green ball with its centre on the inner circle just clears the rim. Middle, a gold ball centred on the rim. Right, a red ball with its centre on the outer circle just misses the rim on the outside.">
+    </div>
+    <div class="pcards c3">
+      <div class="pcard"><span class="tag">in</span><b>0.2286 &minus; 0.1195 = 0.109&nbsp;m</b>
+        <span>Hoop radius minus ball radius. Inside this, no part of the ball reaches the rim.</span></div>
+      <div class="pcard"><span class="tag">out</span><b>0.2286 + 0.1195 = 0.348&nbsp;m</b>
+        <span>Hoop radius plus ball radius. Outside this, no part of the ball reaches the rim.</span></div>
+      <div class="pcard gold"><span class="tag">what we found</span><b>3 in, 4 on the rim, 5 out</b>
+        <span>The 12 crossings by distance alone. A ball on the rim may go either way.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ step 7 -->
+
+<section class="deck-slide point c6mid" data-nofit>
+  <div class="head">
+    <p class="say">Drop the <span class="term">last frame</span> of each record and fit again. How far does the crossing move?</p>
+    <p class="sub">Step 7 of 8 &middot; How sure is each call?</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">why drop a frame</span><b>One frame is the smallest change we can make</b>
+        <span>The tracking noise is about 3&nbsp;cm a frame. A crossing that barely moves when one frame goes is one we can trust.</span></div>
+      <div class="pcard gold"><span class="tag">predict &middot; vote</span><b>The largest move across the 12</b>
+        <div class="vote">
+          <div><b>A</b>Under 1&nbsp;cm</div>
+          <div><b>B</b>A few centimetres</div>
+          <div><b>C</b>Tens of centimetres</div>
+        </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- trace_a6.py, step 7: one frame fewer moves the crossing 0.020 to 0.417 m (median 0.077).
+     A call is in if d + move < 0.109, out if d - move > 0.348, else too close: in 1326; out 1299,
+     734; too close 685, 332, 872, 158, 503, 502, 1317, 490, 838. -->
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">One frame fewer moves the crossing by <span class="term">2 to 42&nbsp;cm</span>, and that leaves 9 of the 12 shots too close to call.</p>
+    <p class="sub">Step 7 of 8 &middot; How sure is each call?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
+      <img style="max-height:62vh" src="data/img/class06/c6-a6-calls.svg?v=20261109080753"
+           alt="The 12 predicted crossings seen from above, around the hoop with its in and out circles. A gray line runs from each dot to where the crossing lands with one frame fewer. Record 1326 sits in green at the centre. Records 1299 and 734 sit in red outside the out circle. The other nine, in gold, sit near the rim or have long gray lines that reach across a boundary, the longest about 0.4 m for record 685.">
+      <div class="pcol">
+        <div class="pcard"><span class="tag">what we found</span><b>1 in, 2 out, 9 too close</b>
+          <span>The median move is 7.7&nbsp;cm, and most of each move runs along the path, so the doubt is mostly long or short. Record 685 moves 42&nbsp;cm, and record 332, 0.108&nbsp;m from the centre, moves 15&nbsp;cm.</span></div>
+        <div class="pcard"><span class="tag">what we learn</span><b>A call has to survive the move</b>
+          <span>A shot is in only if it stays in after the move, and out only if it stays out.</span></div>
+        <div class="pcard gold"><span class="tag">next</span><b>Are the three calls right?</b>
+          <span>The short records have no answer, so try the training arcs.</span></div>
+        <p class="c6choice"><b>Our choice:</b> the move from one frame fewer, as each shot&rsquo;s own margin. A record with a shaky fit gets a wide margin.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- trace_a6.py, training check: 23 arcs (325 left out) cut to 8 flight frames, the median of
+     the 12. Against the whole flight: place error median 0.233 m, worst 0.836 m; time error
+     median 0.016 s. Calls against the play-by-play: in 0; out 5, of which 2 made (1144, 83);
+     too close 18, of which 10 made. -->
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Cut to <span class="term">8 frames</span> of flight, the training arcs give the crossing time to about 0.02&nbsp;s and the place only to about a quarter of a metre.</p>
+    <p class="sub">Step 7 of 8 &middot; How sure is each call?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
+      <img style="max-height:62vh" src="data/img/class06/c6-a6-train.svg?v=20261109080753"
+           alt="The 23 training arcs seen from above, around the hoop. Each arc has a hollow dot where the fit to its whole flight crosses the rim and a filled dot where the fit to 8 frames crosses it, joined by a gray line. Made shots are green and misses red. The hollow dots crowd the hoop, and many filled dots sit tens of centimetres away from them, a few as far as 0.8 m.">
+      <div class="pcol">
+        <div class="pcard"><span class="tag">what we found</span><b>Median errors of 0.016&nbsp;s and 0.23&nbsp;m</b>
+          <span>The medians on 23 arcs, against the fit to the whole flight. The worst place is 0.84&nbsp;m off.</span></div>
+        <div class="pcard"><span class="tag">against the play-by-play</span><b>None called in, 5 called out</b>
+          <span>Two of the five called out went in. The other 18 are too close, and 10 of those went in.</span></div>
+        <div class="pcard gold"><span class="tag">next</span><b>Does the whole flight do better?</b>
+          <span>Look back at the arcs Bob would call easy.</span></div>
+        <p class="c6hint">Training arcs record the whole flight and <code>pbp_made</code>, so a method can be scored on them before it meets the short records.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ step 8
+     trace_a6.py, look back: arc 1111, whole-flight crossing 0.062 m from the centre, missed,
+     1 m out at 1.60 s. 10 of 23 arcs rise again between 1 m out and the crossing, and 10 of the
+     11 misses do. The whole-flight crossing is inside 0.109 m on 5 misses (1111, 700, 739, 1151,
+     749). -->
+<section class="deck-slide point compact">
+  <div class="head">
+    <p class="say">Arc 1111 should go in by its fitted flight, and it <span class="term">hits the rim</span> instead.</p>
+    <p class="sub">Step 8 of 8 &middot; Does the answer make sense?</p>
+  </div>
+  <div class="stage tight">
+    <div class="figside" style="grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)">
+      <img src="data/img/class06/c6-a6-bounce.svg?v=20261109080753"
+           alt="Arc 1111, height against time. The frames rise to about 4.6 m and fall along the dashed fitted parabola until a gray line marking 1 m from the hoop at 1.60 s. Just after it the frames stop falling near 3.1 m, rise again to about 3.5 m, and then fall below the rim line, while the dashed parabola carries straight on down through the rim.">
+      <div class="pcol">
+        <div class="pcard"><span class="tag">what we found</span><b>6&nbsp;cm from the centre, and a miss</b>
+          <span>Fitted to its whole flight, arc 1111 crosses the rim 0.062&nbsp;m from the centre. The frames show the ball stop near rim height and rise again.</span></div>
+        <div class="pcard"><span class="tag">across the pack</span><b>10 of 11 misses rise again</b>
+          <span>Most likely they meet the rim or the backboard before they come down. The fit to the whole flight puts 5 of these misses inside 0.109&nbsp;m.</span></div>
+        <div class="pcard"><span class="tag">what we learn</span><b>The radii assume a straight drop through a flat hoop</b>
+          <span>A ball that clips the rim or the backboard on the way in breaks that assumption, wherever its free flight would have crossed.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">From 8 frames, the model can tell Bob <span class="term">when</span> the ball reaches the rim, and rarely whether it goes in.</p>
+    <p class="sub">Step 8 of 8 &middot; Does the answer make sense?</p>
+  </div>
+  <div class="stage tight">
+    <div class="pcards c4">
+      <div class="pcard"><span class="tag">the time</span><b>About 0.02&nbsp;s (median)</b>
+        <span>On the training arcs the crossing time from 8 frames sits within 0.016&nbsp;s of the whole flight&rsquo;s (median).</span></div>
+      <div class="pcard"><span class="tag">the place</span><b>About 0.23&nbsp;m (median)</b>
+        <span>That is the radius of the hoop, so the place cannot separate most makes from misses.</span></div>
+      <div class="pcard"><span class="tag">the calls</span><b>3 of 12 called</b>
+        <span>On the training arcs the calls made at this length were wrong 2 times in 5.</span></div>
+      <div class="pcard"><span class="tag">the rule</span><b>Free flight can end before the crossing</b>
+        <span>Even the whole flight calls 5 misses in, and all 5 rose again before they came down.</span></div>
+    </div>
+    <div class="pcards c1 do">
+      <div class="pcard"><span class="tag">for Bob</span><b>A prediction this early gives the time, and a call only on the few shots far from the rim</b>
+        <span>The report should say how often those calls were right on the training arcs.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ your report -->
+
+<section class="deck-slide point">
+  <div class="head">
+    <p class="say">Each step left a <span class="term">choice</span> that your report should state.</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">Assignment 6</span><b>The eight steps, and the choice at each</b>
+        <ol>
+          <li><b>The records.</b> Where each one starts, and what the header says.</li>
+          <li><b>The release.</b> Your rule, and how many flight frames it leaves.</li>
+          <li><b>Gravity.</b> Fitted or held, and why on so few frames.</li>
+          <li><b>The root.</b> The condition you solved, and the method.</li>
+          <li><b>Which root.</b> How you know it is the falling crossing.</li>
+          <li><b>Where, and in or out.</b> The lines from above, and where the radii come from.</li>
+          <li><b>The margin.</b> How far each crossing could move.</li>
+          <li><b>The checks.</b> What the training arcs showed.</li>
+        </ol></div>
+      <div class="pcard gold"><span class="tag">Assignment 6</span><b>Where your evidence runs out</b>
+        <ul>
+          <li>The header says the records start in flight, and they start in the hand.</li>
+          <li>The training arcs are cut to match the short records, and the cut is your choice.</li>
+          <li>Many training arcs meet the rim before they cross it, so their frames do not show free flight there.</li>
+          <li>The model leaves out drag and spin. Assignment 7 adds drag.</li>
+        </ul>
+        <span>Please see the <a href="reports-07.html">example reports</a>.</span></div>
+    </div>
+  </div>
+</section>
+
+
+<div class="deck-bar"><i></i></div>
+<div class="deck-num">1</div>
+<div class="deck-help">&larr; &rarr; move &nbsp;·&nbsp; n notes &nbsp;·&nbsp; b blank &nbsp;·&nbsp; p pointer &nbsp;·&nbsp; d draw</div>
+<div class="deck-notes"></div>
+
+
+<script>
+/* Size the text on in-class slides. One fixed size leaves the sparse slides half
+   empty; sizing each slide to fill makes the text jump from slide to slide. So
+   each slide's largest fitting size is found (by bisection, content filling at
+   most FILL of the space below the title), the deck takes the median of those,
+   and every slide uses that shared size unless its own content needs smaller.
+   Slides other than the current one are display:none and measure as zero, so
+   each is shown unseen (.fitting) while it is measured. */
+(function () {
+  var FILL = 0.85, CAP_VH = 7;
+  /* the stage is a fixed-height flex item, so its own scrollHeight never drops
+     below its height; what counts is how far down the last block reaches */
+  function fits(st) {
+    var top = st.getBoundingClientRect().top, bottom = top;
+    for (var c = st.firstElementChild; c; c = c.nextElementSibling)
+      bottom = Math.max(bottom, c.getBoundingClientRect().bottom);
+    /* a slide whose figure cannot shrink may claim more of the space with
+       data-fill on its section, or its text is squeezed to the minimum */
+    var sl = st.closest(".deck-slide"), fill = parseFloat(sl && sl.dataset.fill) || FILL;
+    if (bottom - top > st.clientHeight * fill || st.scrollWidth > st.clientWidth + 1) return false;
+    /* a name on a group card stays on one line, so the text stops growing
+       before the longest name would overrun its card */
+    var names = st.querySelectorAll(".gcard li");
+    for (var i = 0; i < names.length; i++)
+      if (names[i].scrollWidth > names[i].clientWidth + 1) return false;
+    return true;
+  }
+  function measure(sl, fn) {
+    var on = sl.classList.contains("on");
+    if (!on) sl.classList.add("fitting");
+    var r = fn();
+    if (!on) sl.classList.remove("fitting");
+    return r;
+  }
+  function largest(st) {
+    st.style.fontSize = "";
+    var base = parseFloat(getComputedStyle(st).fontSize);
+    var lo = base * 0.5, hi = Math.max(base, innerHeight * CAP_VH / 100);
+    st.style.fontSize = hi + "px";
+    if (fits(st)) return hi;
+    for (var i = 0; i < 14; i++) {
+      var mid = (lo + hi) / 2;
+      st.style.fontSize = mid + "px";
+      if (fits(st)) lo = mid; else hi = mid;
+    }
+    return lo;
+  }
+  function fitAll() {
+    var stages = [], sizes = [];
+    /* data-nofit marks a slide whose stage is sized in --stage-code alone, so its
+       measured size says nothing and would drag the median down */
+    document.querySelectorAll(".deck-slide:not(.part):not(.arrive):not([data-nofit])").forEach(function (sl) {
+      var st = sl.querySelector(".stage");
+      if (!st) return;
+      stages.push(st);
+      sizes.push(measure(sl, function () { return largest(st); }));
+    });
+    if (!sizes.length) return;
+    var sorted = sizes.slice().sort(function (a, b) { return a - b; });
+    var shared = sorted[Math.floor((sorted.length - 1) / 2)];
+    stages.forEach(function (st, i) { st.style.fontSize = Math.min(shared, sizes[i]) + "px"; });
+  }
+  addEventListener("load", fitAll);
+  /* refit once the new size has settled (entering full screen fires resize
+     before the layout has its final height) */
+  var raf = 0;
+  addEventListener("resize", function () {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(function () { raf = requestAnimationFrame(fitAll); });
+  });
+  if (document.fonts) document.fonts.ready.then(fitAll);
+})();
+</script>
+
+<script type="module" src="js/bundle/class-06.js?v=20261109080753"></script>
+</body>
+</html>

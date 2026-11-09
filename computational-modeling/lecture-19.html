@@ -6,8 +6,8 @@
 <title>Lecture 19 — Conditions as roots</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261102180601">
-<link rel="stylesheet" href="css/demos.css?v=20261102180601">
+<link rel="stylesheet" href="css/blocks.css?v=20261109080753">
+<link rel="stylesheet" href="css/demos.css?v=20261109080753">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -696,11 +696,23 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">Whether the shot went in depends on where the ball is <span class="def">when it comes down to the rim</span>.</p>
-    <p class="sub">The height channel of a tracked three-pointer, 25 frames a second. The question becomes finding the point where the falling height reaches 3.048&nbsp;m.</p>
+    <p class="say">How can we tell <span class="def">if this shot went in</span>?</p>
+    <p class="sub">Optical tracking of a three-pointer at 25 frames a second, from the dribble to after the hoop. Each orange circle is the ball, drawn around its tracked center.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="lec19-shot"><div class="fig-body"></div></figure>
+    <style>.cgs .ball{fill:none;stroke:#e07b1f;stroke-width:1}.cgs .ctr{fill:#5a5148;stroke:none}.cgs .rim{fill:none;stroke:#b0443a;stroke-width:1.8}.cgs .court{fill:none;stroke:#cfc7b8;stroke-width:1.2}.cgs .board{stroke:#7a7064;stroke-width:2}</style>
+    <figure class="figure wide" data-fig="lec19-question"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">Scanning neighboring frames finds <span class="def">the two on either side of the rim height</span>.</p>
+    <p class="sub">This is a post-hoc answer. It works because the tracking recorded every frame, so we can compare each one with the next until one is below 3.048&nbsp;m and the other above.</p>
+  </div>
+  <div class="stage">
+    <style>.cgs .ball.scan{stroke:#b8860b;stroke-width:2.4}.cgs .ctr.scan{fill:#b8860b}.cgs .ball.found{stroke:#2f6690;stroke-width:2.4}.cgs .ctr.found{fill:#2f6690}.cgs .dim{opacity:.15}.cgs text.scanlab{fill:#2f6690;font-weight:600;opacity:0}.cgs text.scanlab.on{opacity:1}</style>
+    <figure class="figure wide" data-fig="lec19-scan"><div class="fig-body"></div></figure>
   </div>
 </section>
 
@@ -717,7 +729,7 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <section class="deck-slide full">
   <div class="head">
     <p class="say">After the fact, the frames on either side of the rim give the crossing <span class="def">by interpolation</span>.</p>
-    <p class="sub">The straight line from 3.1405&nbsp;m at 1.04&nbsp;s to 2.8986&nbsp;m at 1.08&nbsp;s reaches 3.048&nbsp;m 0.38 of the way along, at 1.055&nbsp;s. The same fraction along the horizontal channels <i>x</i> and <i>y</i> puts the center 0.339&nbsp;m from the hoop&rsquo;s, touching the rim. The play-by-play records a miss.</p>
+    <p class="sub">The straight line from 3.1405&nbsp;m at 1.12&nbsp;s to 2.8986&nbsp;m at 1.16&nbsp;s reaches 3.048&nbsp;m 0.38 of the way along, at 1.135&nbsp;s. The same fraction along the horizontal channels <i>x</i> and <i>y</i> puts the center 0.339&nbsp;m from the hoop&rsquo;s, touching the rim. The play-by-play records a miss.</p>
   </div>
   <div class="stage">
     <figure class="figure wide" data-fig="lec19-interp"><div class="fig-body"></div></figure>
@@ -726,46 +738,154 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">A formula fitted to the first 10 frames <span class="def">rules out a clean make 0.7&nbsp;s early</span>.</p>
-    <p class="sub">A parabola in height and lines in <i>x</i> and <i>y</i>, fitted up to <i>t</i> = 0.36&nbsp;s after release, puts the center 0.406&nbsp;m from the hoop&rsquo;s at 1.107&nbsp;s. Fits from 10 frames up all land 0.29 to 0.41&nbsp;m out.</p>
+    <p class="say">How well can we <span class="def">predict</span> the make or miss from the frames before the rim?</p>
+    <p class="sub">The scan needs the frames after the rim. A prediction can use only the frames before it.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="lec19-predict"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">Subtracting the target turns <span class="term">a condition</span> into <span class="def">a root</span>.</p>
-    <p class="sub">A <span class="term">root</span> of <i>f</i> is a value where <i>f</i> is zero. The height <i>z</i>(<i>t</i>) in meters is the parabola fitted to all 24 free-flight frames instead of 10, with <i>t</i> in seconds after release.</p>
-  </div>
-  <div class="stage">
-    <style>.deck-slide .work.spaced .katex-display{margin:.6em 0}</style>
-    <div class="work spaced" style="font-size:calc(var(--stage-text) * .8)">
-      $$\begin{aligned}
-      &3.4520 + 4.7428t - 4.9153t^2 = 3.048 && \text{the height } z(t) \text{ reaches the rim} \\[4pt]
-      &3.4520 + 4.7428t - 4.9153t^2 - 3.048 = 0 && \text{subtract 3.048 from both sides} \\[4pt]
-      &f(t) = 3.4520 + 4.7428t - 4.9153t^2 - 3.048 && \text{name the left side } f \\[4pt]
-      &f(t) = 0 && \text{the crossing is a root of } f
-    \end{aligned}$$
+    <style>.deck-slide .chain.even > div:not(.arrow){flex:1 1 0}</style>
+    <div class="chain even">
+      <div><div class="box"><b>Find the release</b><span>the first frame in free flight</span></div></div>
+      <div class="arrow">&rarr;</div>
+      <div><div class="box"><b>Fit a model</b><span>a parabola through the frames after it</span></div></div>
+      <div class="arrow">&rarr;</div>
+      <div><div class="box"><b>Extrapolate</b><span>evaluate it past the last frame used</span></div></div>
+      <div class="arrow">&rarr;</div>
+      <div><div class="box"><b>Solve for the crossing</b><span>the falling root of z(t)&nbsp;&minus;&nbsp;3.048</span></div></div>
+      <div class="arrow">&rarr;</div>
+      <div><div class="box"><b>Judge it</b><span>where the center is, against the hoop</span></div></div>
+      <div class="arrow">&rarr;</div>
+      <div><div class="box"><b>Check the backboard</b><span>another root, if the ball reaches it</span></div></div>
     </div>
   </div>
 </section>
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say"><i>f</i> is the height curve <span class="def">moved down by 3.048&nbsp;m</span>.</p>
-    <p class="sub">The crossings of the rim height on the left are the zeros of <i>f</i> on the right, at the same times.</p>
+    <p class="say">Scanning the frames as they arrive finds the release <span class="def">where a signal crosses a level or peaks</span>.</p>
+    <p class="sub">Each test needs only the newest few frames, so it keeps up with the tracking. With a formula we choose where to evaluate it. Here the frames come to us once, in order.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide legible" data-fig="lec19-shift"><div class="fig-body"></div></figure>
+    <figure class="figure wide" data-fig="lec19-rules"><div class="fig-body"></div></figure>
   </div>
 </section>
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">A root finder returns one root, and <span class="def">a plot of <i>f</i> shows how many there are</span>.</p>
-    <p class="sub">The plot shows how many roots there are and roughly where. Each root then gets its own bracket or starting guess.</p>
+    <p class="say">Subtracting the level turns <span class="term">the height passes a level</span> into <span class="def">a sign change of <i>f</i></span>.</p>
+    <p class="sub">A <span class="term">root</span> of <i>f</i> is where <i>f</i> is zero, and a sign change between two frames puts a root between them. <i>L</i> is 2.75&nbsp;m for a jump shot, or 3.048&nbsp;m for the rim.</p>
+  </div>
+  <div class="stage">
+    <style>.cgs .fpos{fill:#2f6690;stroke:#fff;stroke-width:1}.cgs .fneg{fill:#fff;stroke:#b0443a;stroke-width:1.5}.cgs .pre{fill:#d9d3c7;stroke:none}.cgs .chord{stroke:#b8860b;stroke-width:2.2}.cgs .gate{stroke:#7a7064;stroke-width:1.2;stroke-dasharray:1 3}.deck-slide .work.steps{font-size:calc(var(--stage-text) * .78);margin-bottom:1vh}</style>
+    <div class="work steps">
+    $$\begin{array}{ccccccc}
+    z_i > L & \longrightarrow & z_i - L > 0 & \longrightarrow & f_i = z_i - L & \longrightarrow & f_{i-1} < 0 < f_i \\[2pt]
+    {\small z_i \text{ passes } L} && {\small \text{subtract } L} && {\small \text{name it } f_i} && {\small \text{sign change, } {-} \text{ to } {+}}
+    \end{array}$$
+    </div>
+    <figure class="figure wide" data-fig="lec19-root-height"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">Subtracting from 7.24&nbsp;m turns <span class="term">inside the three-point line</span> into <span class="def">the same sign change</span>.</p>
+    <p class="sub">Seen from above, the ball&rsquo;s center in frame <i>i</i> is at (<i>x</i><sub><i>i</i></sub>, <i>y</i><sub><i>i</i></sub>) and the hoop&rsquo;s center is at (<i>x</i><sub><i>h</i></sub>, <i>y</i><sub><i>h</i></sub>). The distance <i>d</i><sub><i>i</i></sub> between them falls as the ball comes in, so 7.24&nbsp;&minus;&nbsp;<i>d</i><sub><i>i</i></sub> rises and the sign changes from &minus; to + as for the height.</p>
+  </div>
+  <div class="stage">
+    <style>.cgs .leg{stroke:#7a7064;stroke-width:1.3;stroke-dasharray:4 3}</style>
+    <div class="work steps" style="font-size:calc(var(--stage-text) * .6)">
+    $$\begin{array}{ccccccccc}
+    d_i = \sqrt{(x_i - x_h)^2 + (y_i - y_h)^2} & \longrightarrow & d_i < 7.24 & \longrightarrow & 7.24 - d_i > 0 & \longrightarrow & f_i = 7.24 - d_i & \longrightarrow & f_{i-1} < 0 < f_i \\[2pt]
+    {\small \text{the triangle's long side}} && {\small \text{inside the line}} && {\small \text{subtract } d_i} && {\small \text{name it } f_i} && {\small \text{sign change, } {-} \text{ to } {+}}
+    \end{array}$$
+    </div>
+    <figure class="figure wide" data-fig="lec19-root-dist"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">A peak in the vertical speed is <span class="def">a sign change of its difference</span>.</p>
+    <p class="sub">The vertical speed <i>v</i><sub><i>i</i></sub> is itself a difference, of heights <i>z</i> over times <i>t</i>. <i>f</i><sub>18</sub> needs the heights up to frame 21, so the scan finds the release 0.12&nbsp;s after it.</p>
+  </div>
+  <div class="stage">
+    <div class="work steps" style="font-size:calc(var(--stage-text) * .68)">
+    $$\begin{array}{ccccccc}
+    v_i = \dfrac{z_{i+2} - z_{i-2}}{t_{i+2} - t_{i-2}} & \longrightarrow & v_{i+1} < v_i & \longrightarrow & f_i = v_{i+1} - v_i < 0 & \longrightarrow & f_{i-1} > 0 > f_i \\[2pt]
+    {\small \text{a difference of heights}} && {\small v \text{ stops growing}} && {\small \text{subtract } v_i \text{, name it } f_i} && {\small \text{sign change, } {+} \text{ to } {-}}
+    \end{array}$$
+    </div>
+    <figure class="figure wide" data-fig="lec19-root-vz"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">Each speed rule starts its scan at <span class="def">a level crossing of its own</span>.</p>
+    <p class="sub">The dribble has peaks of its own, and without a guard this scan stops at frame 6. The guard for the vertical speed is the height passing 2&nbsp;m, at frame 13.</p>
+  </div>
+  <div class="stage">
+    <div class="work steps" style="font-size:calc(var(--stage-text) * .68)">
+    $$\begin{array}{ccccccc}
+    s_i = -\dfrac{d_{i+2} - d_{i-2}}{t_{i+2} - t_{i-2}} & \longrightarrow & s_i - 3 > 0 & \longrightarrow & f_i = s_{i+1} - s_i < 0 & \longrightarrow & f_{i-1} > 0 > f_i \\[2pt]
+    {\small \text{a difference of distances}} && {\small \text{the guard, a level crossing}} && {\small s \text{ stops growing}} && {\small \text{sign change, } {+} \text{ to } {-}}
+    \end{array}$$
+    </div>
+    <figure class="figure wide" data-fig="lec19-root-sc"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">The picks spread over four frames, and their median is <span class="def">frame 18</span>.</p>
+    <p class="sub">A vote needs two rules to agree exactly. The median takes the middle pick, so one stray rule cannot move it.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec19-vote"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">Each new frame refits the parabola and <span class="def">updates the predicted crossing</span>.</p>
+    <p class="sub">From the release, frame 18. Blue fixes the curvature at <i>g</i> = 9.81&nbsp;m/s&sup2; and fits two coefficients. Red fits all three. Lines in <i>x</i> and <i>y</i> place the center at the predicted time.</p>
+  </div>
+  <div class="stage">
+    <style>.cgs .fitg{fill:none;stroke:#2f6690;stroke-width:2}.cgs .fitf{fill:none;stroke:#b0443a;stroke-width:1.4;stroke-dasharray:4 3}.cgs .pg{fill:#2f6690;stroke:#fff;stroke-width:1}.cgs .pf{fill:#fff;stroke:#b0443a;stroke-width:1.6}.cgs .trailg{fill:#2f6690;opacity:.25;stroke:none}.cgs .trailf{fill:none;stroke:#b0443a;opacity:.35}.cgs .fut{fill:none;stroke:#cfc7b8;stroke-width:1}.cgs text.tg{fill:#2f6690;font-weight:600}.cgs text.tf{fill:#b0443a;font-weight:600}.rctl{display:flex;align-items:center;justify-content:center;gap:.2rem;margin-top:.6vh}.rctl button{display:grid;place-items:center;width:2.1rem;height:2.1rem;padding:0;border:0;border-radius:50%;background:transparent;color:var(--ink);cursor:pointer}.rctl button svg{width:1.25rem;height:1.25rem;display:block}.rctl button:hover{background:var(--subtle)}.rctl button[data-a=pp]{width:2.6rem;height:2.6rem;margin:0 .2rem;background:var(--course-accent-dark);color:#fff}.rctl button[data-a=pp] span{display:none}.rctl button[data-a=pp].playing .i-pause,.rctl button[data-a=pp]:not(.playing) .i-play{display:block}.rctl input{width:min(40%,22rem);margin-left:1rem;accent-color:var(--course-accent-dark)}</style>
+    <figure class="figure wide" data-fig="lec19-refit" style="max-width:min(100%,116vh)"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">With <i>g</i> known, every prediction from frame 25 on says <span class="def">the ball touches the rim</span>.</p>
+    <p class="sub">Frame 25 is 0.28&nbsp;s after the release, more than 0.8&nbsp;s before the ball reaches the rim. Fitting all three coefficients settles only from frame 32. The dashed line is the post-hoc answer.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec19-converge"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">Subtracting the rim height turns <span class="term">the fitted height reaches the rim</span> into <span class="def">a root of <i>f</i></span>.</p>
+    <p class="sub">The fit to frames 18 to 25 with <i>g</i> known is <i>z</i>(<i>t</i>) = 3.0223 + 5.6075<i>t</i> &minus; 4.905<i>t</i>&sup2;, with <i>t</i> in seconds after the release. <i>f</i> is a formula, so it has a value at every <i>t</i>, between the frames too.</p>
+  </div>
+  <div class="stage">
+    <div class="work steps">
+    $$\begin{array}{ccccccc}
+    z(t) = 3.048 & \longrightarrow & z(t) - 3.048 = 0 & \longrightarrow & f(t) = z(t) - 3.048 & \longrightarrow & f(t) = 0 \\[2pt]
+    {\small z \text{ reaches the rim}} && {\small \text{subtract } 3.048} && {\small \text{name it } f} && {\small \text{a root of } f}
+    \end{array}$$
+    </div>
+    <figure class="figure wide" data-fig="lec19-root-fit" style="max-width:min(100%,120vh)"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">A straight line between the two samples on either side of a root <span class="def">estimates the root</span>.</p>
+    <p class="sub">The scan evaluates <i>f</i> every 0.05&nbsp;s and keeps each pair of neighboring samples whose signs differ. With the samples at times <i>a</i> and <i>b</i>, the line between them crosses zero at <span style="white-space:nowrap"><i>a</i> &minus; <i>f</i>(<i>a</i>)(<i>b</i> &minus; <i>a</i>)&thinsp;/&thinsp;(<i>f</i>(<i>b</i>) &minus; <i>f</i>(<i>a</i>))</span>.</p>
   </div>
   <div class="stage">
     <figure class="figure wide" data-fig="lec19-plot"><div class="fig-body"></div></figure>
@@ -774,8 +894,8 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">Both crossings happened, and the question asks for <span class="def">the falling one</span>.</p>
-    <p class="sub">The ball rose through 3.048&nbsp;m in the shooter&rsquo;s hands and fell through it 1.04&nbsp;s after release. <i>f</i> is zero at both, so the choice comes from the question.</p>
+    <p class="say">There is often more than one root, and we are usually looking for <span class="def">a specific one</span>.</p>
+    <p class="sub">The ball rose through 3.048&nbsp;m just as it left the hand and fell through it 1.14&nbsp;s after the release. <i>f</i> is zero at both times. Whether the shot went in depends on the falling crossing.</p>
   </div>
   <div class="stage">
     <figure class="figure wide" data-fig="lec19-both"><div class="fig-body"></div></figure>
@@ -784,20 +904,20 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">A polynomial solver returns both roots, and <span class="def">one comparison keeps the falling one</span>.</p>
-    <p class="sub">Both libraries list the coefficients highest power first. polyder gives the coefficients of <i>f</i>&prime;, the vertical velocity, which is negative on the way down.</p>
+    <p class="say">A polynomial solver returns both roots, and <span class="def">the sign of the velocity</span> picks the falling one.</p>
+    <p class="sub">The vertical velocity is <i>f</i>&prime;, the derivative of <i>f</i>. It is +5.56&nbsp;m/s at the first root, on the way up, and &minus;5.56&nbsp;m/s at the second, on the way down.</p>
   </div>
   <div class="stage">
-    <div class="panels" style="font-size:calc(var(--stage-code) * 1)">
-      <div class="code"><span class="dim"># Python, with NumPy</span></div><div class="note"></div>
-      <div class="code">p = [-4.9153, 4.7428, 3.4520 - 3.048]</div><div class="note">the coefficients of <i>f</i></div>
-      <div class="code">r = np.roots(p)</div><div class="note">both roots, <span class="v">1.0437</span> and <span class="v">&minus;0.07875</span></div>
-      <div class="code"><span class="k">r = r[np.polyval(np.polyder(p), r) &lt; 0]</span></div><div class="note">keep the root where <i>f</i>&prime; &lt; 0, <span class="v">1.0437</span></div>
-      <div class="code">&nbsp;</div><div class="note"></div>
-      <div class="code"><span class="dim">% MATLAB</span></div><div class="note"></div>
-      <div class="code">p = [-4.9153, 4.7428, 3.4520 - 3.048];</div><div class="note">the same coefficients</div>
-      <div class="code">r = roots(p);</div><div class="note">the same two roots</div>
-      <div class="code"><span class="k">r = r(polyval(polyder(p), r) &lt; 0);</span></div><div class="note">the same comparison</div>
+    <div class="panels" style="grid-template-columns:auto auto 1fr; font-size:calc(var(--stage-code) * .88)">
+      <div class="code"><span class="dim"># Python, with NumPy</span></div><div class="code"><span class="dim">% MATLAB</span></div><div class="note"></div>
+      <div class="code">import numpy as np</div><div class="code"></div><div class="note">NumPy has the polynomial tools</div>
+      <div class="code">p = [-4.905, 5.6075, -0.0257]</div><div class="code">p = [-4.905, 5.6075, -0.0257];</div><div class="note">the coefficients of <i>f</i>, highest power first</div>
+      <div class="code">r = np.roots(p)</div><div class="code">r = roots(p);</div><div class="note">both roots, <span class="v">1.1386</span> and <span class="v">0.0046</span></div>
+      <div class="code">v = np.polyder(p)</div><div class="code">v = polyder(p);</div><div class="note">the coefficients of <i>f</i>&prime;, <span class="v">&minus;9.81</span> and <span class="v">5.6075</span></div>
+      <div class="code">for t in r:</div><div class="code">for t = r'</div><div class="note">each root <i>t</i> in turn (r' is r as a row)</div>
+      <div class="code">    <span class="k">if np.polyval(v, t) &lt; 0:</span></div><div class="code">    <span class="k">if polyval(v, t) &lt; 0</span></div><div class="note">a negative velocity, so falling</div>
+      <div class="code">        print(t)</div><div class="code">        disp(t)</div><div class="note">show that root, <span class="v">1.1386</span></div>
+      <div class="code"></div><div class="code">    end<br>end</div><div class="note">MATLAB closes each block with <code>end</code></div>
     </div>
   </div>
 </section>
@@ -813,12 +933,12 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   <div class="stage">
     <div class="pcards c2">
       <div class="pcard"><span class="tag">1.0&nbsp;g &middot; moved 0.3&nbsp;cm</span>
-        <video src="data/img/lab-example-hold.mp4?v=20261102180601" poster="data/img/lab-example-hold.png?v=20261102180601"
+        <video src="data/img/lab-example-hold.mp4?v=20261109080753" poster="data/img/lab-example-hold.png?v=20261109080753"
                autoplay loop muted playsinline width="1280" height="358" style="width:100%; height:auto; display:block"
                aria-label="A simulated rock slope of grains in colored horizontal bands, shaken by an earthquake. The bands stay level and the slope stands."></video>
         <span>The bands stay level, and the slope stands.</span></div>
       <div class="pcard"><span class="tag">3.0&nbsp;g &middot; moved 922&nbsp;cm</span>
-        <video src="data/img/lab-example-fail.mp4?v=20261102180601" poster="data/img/lab-example-fail.png?v=20261102180601"
+        <video src="data/img/lab-example-fail.mp4?v=20261109080753" poster="data/img/lab-example-fail.png?v=20261109080753"
                autoplay loop muted playsinline width="1280" height="358" style="width:100%; height:auto; display:block"
                aria-label="The same slope shaken three times harder. A dark crack opens down from the crest and grains roll off the left toe."></video>
         <span>A crack opens down from the crest, and grains roll off the toe.</span></div>
@@ -833,6 +953,7 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
     <p class="sub">Each run reports moved, the largest permanent movement of the slope&rsquo;s surface in cm. <i>d</i>* is the movement counted as damage. That is a choice, and 5&nbsp;cm is one.</p>
   </div>
   <div class="stage">
+    <style>.deck-slide .work.spaced .katex-display{margin:.6em 0}</style>
     <div class="work spaced" style="font-size:calc(var(--stage-text) * .8)">
       $$\begin{aligned}
       \text{moved}(\text{PGA}) &= d^* && \text{the slope moves as far as the damage threshold} \\[4pt]
@@ -846,26 +967,16 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">The slope&rsquo;s <i>f</i> has no formula, so each value of it is <span class="def">one run of the simulation</span>.</p>
-    <p class="sub">There is no derivative either. Each dot is one run on a slope of bond strength 7.4&nbsp;MPa, with <i>d</i>* = 5&nbsp;cm, filled where <i>f</i> &lt; 0 and open where <i>f</i> &gt; 0.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide legible" data-fig="lec19-slope"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">In practice the function often has no formula, and <span class="def">each evaluation has a cost</span>.</p>
-    <p class="sub">The shot is where each method is easy to watch. Many real problems look like the slope.</p>
+    <p class="say">With no formula for the root, we guess, check <i>f</i>, and use the check to make the next guess. <span class="def">Each check has a cost</span>.</p>
+    <p class="sub">A check is one evaluation of <i>f</i>, and on the slope it is one run. The shot is where each method is easy to watch. Many real problems look like the slope.</p>
   </div>
   <div class="stage">
     <div class="pcards c3">
-      <div class="pcard"><span class="tag">the shot</span><b>Under a microsecond an evaluation</b>
+      <div class="pcard"><span class="tag">the shot</span><b>Under a microsecond a check</b>
         <span>A fitted formula, at any time, as often as you like, with a derivative.</span></div>
       <div class="pcard gold"><span class="tag">the slope</span><b>A minute or two a run</b>
         <span>A GPU simulation, 40 runs per student, and no derivative.</span></div>
-      <div class="pcard"><span class="tag">a crash test</span><b>One vehicle a value</b>
+      <div class="pcard"><span class="tag">a crash test</span><b>One vehicle a check</b>
         <span>A full-scale experiment for each value of <i>f</i>.</span></div>
     </div>
   </div>
@@ -878,6 +989,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <div class="deck-notes"></div>
 
 
-<script type="module" src="js/bundle/lecture-19.js?v=20261102180601"></script>
+<script type="module" src="js/bundle/lecture-19.js?v=20261109080753"></script>
 </body>
 </html>

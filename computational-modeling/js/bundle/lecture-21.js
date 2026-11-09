@@ -968,41 +968,23 @@ function realNoiseRaw(n, sd = 1) {
   return scaleTo(out, sd);
 }
 
-/* Two demos for the two problems on this page.
-   newton: Newton and the secant method stepped one iteration at a time on the
-   shot's fitted height, with the tangent or secant line drawn so the next
-   estimate is visibly its axis crossing. The fit is the one pages 19 and 20 use
-   (arc 79, its 24 free-flight frames, time from release). The measured
-   convergence order is computed from the errors, not quoted.
-   slope: the secant line through two of the example class's runs in the Slope
-   Stability Lab, and where it puts the next run. There is no formula, so there
-   is no derivative and no Newton step, and the line is all a secant step has. */
+/* Two demos for this page.
+   newton: Newton, the secant method and bisection stepped one iteration at a
+   time on f(x) = x^3 - 100, whose root is the cube root of 100. The tangent or
+   secant line is drawn so the next estimate is visibly its axis crossing, and
+   the view follows the estimates in. The measured order is computed from the
+   errors, not quoted.
+   shot: Newton on the fitted height of a three-pointer, which crosses the rim
+   twice, so the start decides which crossing comes back.
+   plane: Newton in two unknowns on F1 = x^2 + y^2 - 4 and F2 = e^x - 1 - y.
+   The linear part of each equation at the current point is drawn as a
+   straight line, and the next point is where the two lines cross. */
 
-const RIM = 3.048;
+const ROOT = Math.cbrt(100);
+const f  = x => x * x * x - 100;
+const df = x => 3 * x * x;
 
-function polyfit(xs, ys, deg) {
-  const n = deg + 1;
-  const A = Array.from({length: n}, (_, i) => {
-    const row = new Float64Array(n + 1);
-    for (let j = 0; j < n; j++) { let q = 0; for (let k = 0; k < xs.length; k++) q += Math.pow(xs[k], i + j); row[j] = q; }
-    let q = 0; for (let k = 0; k < xs.length; k++) q += ys[k] * Math.pow(xs[k], i);
-    row[n] = q; return row;
-  });
-  for (let k = 0; k < n; k++) {
-    let p = k;
-    for (let i = k + 1; i < n; i++) if (Math.abs(A[i][k]) > Math.abs(A[p][k])) p = i;
-    [A[k], A[p]] = [A[p], A[k]];
-    if (Math.abs(A[k][k]) < 1e-300) return null;
-    for (let i = 0; i < n; i++) {
-      if (i === k) continue;
-      const f = A[i][k] / A[k][k];
-      for (let c = k; c <= n; c++) A[i][c] -= f * A[k][c];
-    }
-  }
-  return Array.from({length: n}, (_, i) => A[i][n] / A[i][i]);
-}
-
-function newtonPath(F, DF, x0, n) {
+function newtonPath(x0, n, F = f, DF = df) {
   const p = [{x: x0, evals: 0}];
   let x = x0, evals = 0;
   for (let k = 0; k < n; k++) {
@@ -1016,174 +998,241 @@ function newtonPath(F, DF, x0, n) {
 }
 /* evals counts the evaluations of f used to produce each estimate, as
    newtonPath does, so the two starts cost nothing until a step uses them */
-function secantPath(F, x0, x1, n) {
+function secantPath(x0, x1, n) {
   const p = [{x: x0, evals: 0}, {x: x1, evals: 0}];
-  let a = x0, b = x1, fa = F(a), fb = F(b), evals = 2;
+  let a = x0, b = x1, fa = f(a), fb = f(b), evals = 2;
   for (let k = 0; k < n; k++) {
     if (fb === fa) break;
     const x = b - fb * (b - a) / (fb - fa);
     if (!isFinite(x)) break;
     p.push({x, evals});
-    a = b; fa = fb; b = x; fb = F(x); evals++;
+    a = b; fa = fb; b = x; fb = f(x); evals++;
+  }
+  return p;
+}
+/* the estimate is the bracket's midpoint; after the two ends and k midpoint
+   evaluations the bracket has been halved k times */
+function bisectPath(a, b, n) {
+  if (f(a) * f(b) > 0) return null;
+  const p = [];
+  for (let k = 0; k <= n; k++) {
+    const m = (a + b) / 2;
+    p.push({x: m, evals: k + 2, a, b});
+    if (f(m) * f(a) <= 0) b = m; else a = m;
+  }
+  return p;
+}
+/* leading significant digits that agree with the root, to 15 */
+function correctDigits(x) {
+  const s = x.toPrecision(15).replace('.', ''), r = ROOT.toPrecision(15).replace('.', '');
+  let n = 0;
+  while (n < 15 && s[n] === r[n]) n++;
+  return n;
+}
+
+/* arc 79's height, a least-squares parabola through its 24 free-flight frames
+   in data/arcs.json (t in seconds after release), less the rim height */
+const SC = 3.4519539999999975, SB = 4.742841600790515, SQ = -4.9152791501976285;
+const fs  = t => SC + SB * t + SQ * t * t - 3.048;
+const dfs = t => SB + 2 * SQ * t;
+const SHOT_ROOTS = [-0.0787450721323109, 1.043663127823984];
+
+/* the two-unknown problem */
+const F1 = (x, y) => x * x + y * y - 4, F2 = (x, y) => Math.exp(x) - 1 - y;
+const ROOT2 = [1.0041687384746592, 1.72963728702587];
+function planePath(x0, y0, n) {
+  const p = [{x: x0, y: y0}];
+  let x = x0, y = y0;
+  for (let k = 0; k < n; k++) {
+    /* J d = -F, solved by elimination */
+    const a = 2 * x, b = 2 * y, c = Math.exp(x), d = -1, r1 = -F1(x, y), r2 = -F2(x, y);
+    const det = a * d - b * c;
+    if (det === 0) break;
+    x += (r1 * d - b * r2) / det;
+    y += (a * r2 - c * r1) / det;
+    if (!isFinite(x) || !isFinite(y)) break;
+    p.push({x, y});
   }
   return p;
 }
 
-/* the slope pairs the page walks through, by bond strength and PGA */
-const PAIRS = {
-  a: {mpa: 5.8, g: [2.72, 2.8]},
-  b: {mpa: 5.8, g: [2.75, 2.8]},
-  c: {mpa: 7.4, g: [2.875, 2.9375]},
-  d: {mpa: 7.4, g: [2.88672, 2.88867]}
-};
-
 mountDemo({
   newton: {
-    async data() {
-      const d = await (await fetch('data/arcs.json')).json();
-      const a = d.arcs.find(x => x.role === 'clean');
-      const k = a.rel, nf = a.key.nf;
-      const T = [], Z = [];
-      for (let i = k; i < k + nf; i++) { T.push(a.t[i] - a.t[k]); Z.push(a.z[i]); }
-      const [c0, b0, a0] = polyfit(T, Z, 2);
-      const F  = t => c0 + b0 * t + a0 * t * t - RIM;
-      const DF = t => b0 + 2 * a0 * t;
-      /* both crossings in closed form, for the error readout */
-      const C = c0 - RIM, q = Math.sqrt(b0 * b0 - 4 * a0 * C);
-      const roots = [(-b0 + q) / (2 * a0), (-b0 - q) / (2 * a0)].sort((p, r) => p - r);
-      const XS = linspace(-0.3, 1.6, 400);
-      return {F, DF, roots, XS, YS: Float64Array.from(XS, F)};
-    },
-    setting: 'When does the shot fall through the rim? <em>f</em>(<em>t</em>)&nbsp;=&nbsp;' +
-             '<em>z</em>(<em>t</em>)&nbsp;&minus;&nbsp;3.048&nbsp;m on the parabola fitted to the ' +
-             'shot&rsquo;s 24 free-flight frames, the last of them at 0.92&nbsp;s. Bisection on ' +
-             '[0.5,&nbsp;1.5]&nbsp;s needs 40 midpoint evaluations to bring the bracket under 10⁻¹²&nbsp;s.',
-    source: {kind: 'measured', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz, arc 79. The same fit as the bisection page, so the evaluation counts can be compared directly.'},
-    caption: 'The dotted line is the tangent (Newton) or the secant through the last two ' +
-             'estimates. The next estimate is where that line crosses zero. The secant ' +
-             'method also starts from the frame before, 0.04&nbsp;s earlier. The shaded strip ' +
-             'is before release.',
+    setting: 'The cube root of 100 is the root of <em>f</em>(<em>x</em>)&nbsp;=&nbsp;<em>x</em><sup>3</sup>&nbsp;&minus;&nbsp;100, ' +
+             '4.64158883361278 to 15 digits. Newton&rsquo;s slope is <em>f</em>&prime;(<em>x</em>)&nbsp;=&nbsp;3<em>x</em><sup>2</sup>.',
+    source: {kind: 'constructed', text: 'A formula with a known root, so every error is exact.'},
+    caption: 'The dotted line is the tangent (Newton) or the line through the last two estimates ' +
+             '(secant), and the next estimate is where it crosses zero. The secant method starts ' +
+             'from the starting guess and 1 below it, so its steps count from its second estimate. ' +
+             'Bisection ignores the starting guess and halves the bracket [4,&nbsp;5], shaded. ' +
+             'Evaluations count those used to make the estimate shown. The view follows the estimates in.',
     controls: [
-      {key: 'x0', label: 'start', min: 0.3, max: 1.5, step: 'any', value: 0.92, dp: 2, unit: 's'},
-      {key: 'k',  label: 'steps taken', min: 0, max: 8, step: 1, value: 0, dp: 0}
+      {key: 'x0', label: 'starting guess', min: 0.5, max: 8, step: 'any', value: 5, dp: 2},
+      {key: 'k',  label: 'steps taken', min: 0, max: 16, step: 1, value: 0, dp: 0}
     ],
     segments: [{key: 'm', label: 'method', value: 'newton', options: [
-      {value: 'newton', label: 'Newton'}, {value: 'secant', label: 'Secant'}]}],
-    panels: [{label: 'f = z − 3.048', unit: 'm', height: 250, xAxis: true,
-              xLabel: 'time since release', xUnit: 's', xScale: 1,
-              lens: true, lensZoom: 30}],
+      {value: 'newton', label: 'Newton'}, {value: 'secant', label: 'Secant'},
+      {value: 'bisect', label: 'Bisection'}]}],
+    panels: [{label: 'f = x³ − 100', height: 250, xAxis: true, xLabel: 'x', xUnit: '', xScale: 1}],
     readouts: [
-      {key: 'est',   label: 'estimate'},
-      {key: 'near',  label: 'nearest crossing'},
-      {key: 'err',   label: 'error'},
-      {key: 'prev',  label: 'error last step'},
-      {key: 'evals', label: 'evaluations'},
-      {key: 'order', label: 'order, measured'}
+      {key: 'est',    label: 'estimate'},
+      {key: 'digits', label: 'correct digits'},
+      {key: 'err',    label: 'error'},
+      {key: 'res',    label: 'residual f(x)'},
+      {key: 'evals',  label: 'evaluations of f and f′'},
+      {key: 'order',  label: 'measured order'}
     ],
     compute(s) {
-      const {F, DF, roots} = this;
-      const k = Math.round(s.k);
-      const path = s.m === 'newton' ? newtonPath(F, DF, s.x0, 8)
-                                    : secantPath(F, s.x0 - 0.04, s.x0, 8);
-      const i = Math.min(k, path.length - 1);
-      const cur = path[i], prev = path[Math.max(0, i - 1)];
-      /* the error is measured against whichever crossing the estimate is
-         nearer, since a start before the apex converges on the rising one */
-      const r = Math.abs(cur.x - roots[0]) < Math.abs(cur.x - roots[1]) ? roots[0] : roots[1];
-      const e = Math.abs(cur.x - r), ep = Math.abs(prev.x - r);
+      const k = Math.round(s.k), m = s.m;
+      const path = m === 'newton' ? newtonPath(s.x0, 16)
+                 : m === 'secant' ? secantPath(s.x0 - 1, s.x0, 16)
+                 : bisectPath(4, 5, 16);
+      /* the secant's two starts are estimates 0 and 1, so its step k is estimate k + 1 */
+      const i = Math.min(m === 'secant' ? k + 1 : k, path.length - 1);
+      const cur = path[i];
+      const e = Math.abs(cur.x - ROOT);
       /* order from the last three errors: e_{k+1} ~ C e_k^p, only once the
-         errors are actually falling, since an early transient gives numbers
-         like -15 that say nothing about the method */
+         errors are falling and under 0.1, since an early transient says
+         nothing about the method */
       let order = null;
-      if (i >= 2) {
-        const e2 = Math.abs(path[i].x - r), e1 = Math.abs(path[i-1].x - r),
-              e0 = Math.abs(path[i-2].x - r);
-        if (e2 > 1e-15 && e1 > 1e-15 && e0 > 1e-15 && e2 < e1 && e1 < e0)
+      if (i >= 2 && m !== 'bisect') {
+        const e2 = Math.abs(path[i].x - ROOT), e1 = Math.abs(path[i-1].x - ROOT), e0 = Math.abs(path[i-2].x - ROOT);
+        if (e2 > 1e-14 && e1 > 1e-14 && e0 < 0.1 && e2 < e1 && e1 < e0)
           order = Math.log(e2 / e1) / Math.log(e1 / e0);
       }
       /* the line whose axis crossing is the next estimate */
-      let pred = null;
+      let pred = null, next = null;
       if (i < path.length - 1) {
-        if (s.m === 'newton') {
-          const x = cur.x, fx = F(x), d = DF(x);
+        next = path[i + 1].x;
+        if (m === 'newton') {
+          const x = cur.x, fx = f(x), d = df(x);
           pred = v => fx + d * (v - x);
-        } else if (i >= 1) {
-          const xa = prev.x, xb = cur.x, fa = F(xa), fb = F(xb);
+        } else if (m === 'secant' && i >= 1) {
+          const xa = path[i - 1].x, xb = cur.x, fa = f(xa), fb = f(xb);
           pred = v => fa + (fb - fa) / (xb - xa) * (v - xa);
         }
       }
+      /* the view holds the current estimate, the next one and the root, so it
+         narrows as the steps close in */
+      const pts = [cur.x, ROOT];
+      if (next !== null) pts.push(next);
+      if (m === 'secant' && i >= 1) pts.push(path[i - 1].x);
+      if (m === 'bisect') pts.push(cur.a, cur.b);
+      let lo = Math.min(...pts), hi = Math.max(...pts);
+      const w = Math.max(hi - lo, 2e-3) * 0.3;
+      lo -= w; hi += w;
+      const XS = linspace(lo, hi, 300);
       return {
-        panels: [{x: this.XS, y: this.YS, range: [-0.3, 1.6],
-          opts: {pred,
-                 bands: [{x0: -0.3, x1: 0}],
-                 rings: [{x: roots[0], y: 0, text: 'rising'}, {x: roots[1], y: 0, text: 'falling'}],
-                 iterates: path.slice(0, i + 1).map(p => ({x: p.x, y: F(p.x)}))}}],
+        panels: [{x: XS, y: Float64Array.from(XS, f), range: [lo, hi], opts: {
+          pred,
+          bands: m === 'bisect' ? [{x0: cur.a, x1: cur.b}] : [],
+          rings: [{x: ROOT, y: 0, text: 'root'}],
+          iterates: path.slice(0, i + 1).map(p => ({x: p.x, y: f(p.x)}))}}],
         readouts: {
-          est: cur.x.toFixed(9) + ' s',
-          near: (r === roots[1] ? 'falling, ' : 'rising, ') + r.toFixed(4) + ' s',
-          err: e === 0 ? 'exact' : e.toExponential(2) + ' s',
-          prev: i === 0 ? '—' : ep.toExponential(2) + ' s',
+          est: cur.x.toPrecision(15),
+          digits: String(correctDigits(cur.x)),
+          err: e < 1e-15 ? 'below 10⁻¹⁵' : e.toExponential(2),
+          res: f(cur.x).toPrecision(3),
           evals: String(cur.evals),
-          order: order === null ? '—' : order.toFixed(2)
+          order: m === 'bisect' ? '1, halving' : order === null ? '—' : order.toFixed(2)
         }
       };
     }
   },
 
-  slope: {
-    async data() {
-      const d = await (await fetch('data/slope-example-runs.json')).json();
-      return {runs: d.runs};
-    },
-    setting: 'A rock slope in the Slope Stability Lab&rsquo;s example class. Each dot is one run of ' +
-             'the simulation, a minute or two on a GPU, and <em>f</em>&nbsp;=&nbsp;moved&nbsp;&minus;&nbsp;' +
-             '<em>d</em>*. The line through two runs is the secant, and where it reaches ' +
-             '<em>d</em>* is where a secant step would put the next run.',
-    source: {kind: 'measured', text: 'Slope Stability Lab example class (the test round), fetched 2026-11-02. Repeated runs at one setting are averaged. The lab leaves the definition of damage to each student, so <em>d</em>* is a slider.'},
-    caption: 'The horizontal line is <em>d</em>*. The ring on it is the next run the secant ' +
-             'proposes, and the two rings on dots are the runs the line goes through. Nothing ' +
-             'between two dots is known until a run is made there.',
-    controls: [{key: 'd', label: 'damage threshold d*', min: 1, max: 30, step: 'any', value: 5, dp: 1, unit: 'cm'}],
-    segments: [{key: 'pair', label: 'two runs', value: 'a', options: [
-      {value: 'a', label: '2.72 and 2.8 g, 5.8 MPa'}, {value: 'b', label: '2.75 and 2.8 g, 5.8 MPa'},
-      {value: 'c', label: '2.875 and 2.9375 g, 7.4 MPa'}, {value: 'd', label: '2.88672 and 2.88867 g, 7.4 MPa'}]}],
-    panels: [{label: 'slope moved', unit: 'cm', height: 260, xAxis: true,
-              xLabel: 'PGA', xUnit: 'g', xScale: 1}],
+  shot: {
+    setting: 'The fitted height of a missed three-pointer less the rim height, <em>f</em>(<em>t</em>)&nbsp;=&nbsp;<em>z</em>(<em>t</em>)&nbsp;&minus;&nbsp;3.048&nbsp;m. ' +
+             'It crosses zero rising at &minus;0.0787&nbsp;s, with the ball still in the hand, and falling at 1.0437&nbsp;s. The apex is at 0.482&nbsp;s.',
+    source: {kind: 'measured', text: 'Arc 79, tracked at 25 frames a second (SportVU, 2015&ndash;16 NBA season), with a parabola fitted to its 24 free-flight frames.'},
+    caption: 'The dotted line is the tangent at the current estimate, and the next estimate is where it crosses zero. ' +
+             'The two rings are the roots. Start near the apex to see a nearly flat tangent throw the step far away.',
+    controls: [
+      {key: 't0', label: 'starting guess', min: -0.3, max: 1.4, step: 'any', value: 0.5, dp: 2},
+      {key: 'k',  label: 'steps taken', min: 0, max: 10, step: 1, value: 0, dp: 0}
+    ],
+    panels: [{label: 'f (m)', height: 250, xAxis: true, xLabel: 't', xUnit: 's', xScale: 1}],
     readouts: [
-      {key: 'two',  label: 'the two runs'},
-      {key: 'next', label: 'secant step, next run'},
-      {key: 'side', label: 'it lands'},
-      {key: 'near', label: 'nearest run the class made'}
+      {key: 'est',   label: 'estimate'},
+      {key: 'slope', label: 'slope f′ there'},
+      {key: 'res',   label: 'residual f(t)'},
+      {key: 'near',  label: 'nearest root'}
     ],
     compute(s) {
-      const P = PAIRS[s.pair];
-      const runs = this.runs.filter(r => r.strength_mpa === P.mpa).sort((p, q) => p.pga_g - q.pga_g);
-      const at = new Map();
-      for (const r of runs) { if (!at.has(r.pga_g)) at.set(r.pga_g, []); at.get(r.pga_g).push(r.slope_moved_cm); }
-      const mean = g => { const v = at.get(g); return v.reduce((p, q) => p + q, 0) / v.length; };
-      const [ga, gb] = P.g, ya = mean(ga), yb = mean(gb);
-      const slope = (yb - ya) / (gb - ga);
-      const next = gb + (s.d - yb) / slope;
-      /* the class's nearest run to the proposed one, for comparison */
-      let near = runs[0];
-      for (const r of runs) if (Math.abs(r.pga_g - next) < Math.abs(near.pga_g - next)) near = r;
-      const lo = Math.min(ga, next), hi = Math.max(gb, next), w = Math.max(0.004, (hi - lo) * 0.25);
-      const range = [Math.max(0, lo - w), Math.min(4.2, hi + w)];
-      const g = v => String(+v.toFixed(5)) + ' g';
-      const inside = next > ga && next < gb;
+      const path = newtonPath(s.t0, 10, fs, dfs);
+      const i = Math.min(Math.round(s.k), path.length - 1);
+      const t = path[i].x;
+      const next = i < path.length - 1 ? path[i + 1].x : null;
+      const ft = fs(t), d = dfs(t);
+      const pred = next === null ? null : v => ft + d * (v - t);
+      /* the view holds both roots, the current estimate and the next one */
+      const pts = [...SHOT_ROOTS, t];
+      if (next !== null) pts.push(next);
+      let lo = Math.min(...pts), hi = Math.max(...pts);
+      const w = (hi - lo) * 0.12;
+      lo -= w; hi += w;
+      const XS = linspace(lo, hi, 400);
+      const near = Math.abs(t - SHOT_ROOTS[0]) < Math.abs(t - SHOT_ROOTS[1]) ? 0 : 1;
+      const gap = Math.abs(t - SHOT_ROOTS[near]);
       return {
-        panels: [{x: runs.map(r => r.pga_g), y: runs.map(r => r.slope_moved_cm), range, opts: {
-          label: 'slope moved, one dot a run', dots: true, dotR: 4,
-          pred: v => ya + slope * (v - ga),
-          hlines: [{y: s.d, text: 'd* = ' + s.d.toFixed(1) + ' cm'}],
-          rings: next >= range[0] && next <= range[1] ? [{x: next, y: s.d}] : [],
-          marks: [{t: ga, y: ya, ring: true}, {t: gb, y: yb, ring: true}]
-        }}],
+        panels: [{x: XS, y: Float64Array.from(XS, fs), range: [lo, hi], opts: {
+          pred,
+          rings: [{x: SHOT_ROOTS[0], y: 0, text: 'rising'}, {x: SHOT_ROOTS[1], y: 0, text: 'falling'}],
+          iterates: path.slice(0, i + 1).map(p => ({x: p.x, y: fs(p.x)}))}}],
         readouts: {
-          two: g(ga) + ' moved ' + ya.toFixed(2) + ' cm, ' + g(gb) + ' moved ' + yb.toFixed(2) + ' cm',
-          next: g(next),
-          side: inside ? 'between the two runs' : (next > gb ? 'above both runs' : 'below both runs'),
-          near: g(near.pga_g) + ', moved ' + near.slope_moved_cm.toFixed(2) + ' cm'
+          est: t.toFixed(4) + ' s',
+          slope: d.toFixed(2) + ' m/s',
+          res: ft.toPrecision(3) + ' m',
+          near: (near ? 'falling' : 'rising') + ', ' + (gap < 1e-12 ? 'reached' : gap.toExponential(1) + ' s away')
+        }
+      };
+    }
+  },
+
+  plane: {
+    setting: 'Two equations in two unknowns, a circle of radius 2, <em>F</em><sub>1</sub>&nbsp;=&nbsp;' +
+             '<em>x</em><sup>2</sup>&nbsp;+&nbsp;<em>y</em><sup>2</sup>&nbsp;&minus;&nbsp;4&nbsp;=&nbsp;0, and a curve, ' +
+             '<em>F</em><sub>2</sub>&nbsp;=&nbsp;<em>e</em><sup><em>x</em></sup>&nbsp;&minus;&nbsp;1&nbsp;&minus;&nbsp;<em>y</em>&nbsp;=&nbsp;0. ' +
+             'They cross at (1.004169,&nbsp;1.729637).',
+    source: {kind: 'constructed', text: 'Two formulas chosen so the root can be checked.'},
+    caption: 'The two straight dotted lines are each equation&rsquo;s linear part at the current point, ' +
+             'set to zero. Newton&rsquo;s next point is where they cross. The ring is the root.',
+    controls: [
+      {key: 'x0', label: 'start x', min: 0.2, max: 1.8, step: 'any', value: 1, dp: 2},
+      {key: 'y0', label: 'start y', min: 0.4, max: 2.4, step: 'any', value: 1, dp: 2},
+      {key: 'k',  label: 'steps taken', min: 0, max: 6, step: 1, value: 0, dp: 0}
+    ],
+    panels: [{label: 'y', height: 300, xAxis: true, xLabel: 'x', xUnit: '', xScale: 1}],
+    readouts: [
+      {key: 'pt',   label: 'current point (x, y)'},
+      {key: 'res',  label: 'residuals F₁, F₂'},
+      {key: 'big',  label: 'max(|F₁|, |F₂|)'},
+      {key: 'err',  label: 'distance to root'}
+    ],
+    compute(s) {
+      const path = planePath(s.x0, s.y0, 6);
+      const i = Math.min(Math.round(s.k), path.length - 1);
+      const {x, y} = path[i];
+      const XS = linspace(0, 2, 300);
+      const circle = Float64Array.from(XS, v => Math.sqrt(Math.max(0, 4 - v * v)));
+      const curves = [{x: XS, y: Float64Array.from(XS, v => Math.exp(v) - 1), cls: 'trace'}];
+      if (i < path.length - 1) {
+        /* F1 + 2x(X - x) + 2y(Y - y) = 0 and F2 + e^x(X - x) - (Y - y) = 0 */
+        const f1 = F1(x, y), f2 = F2(x, y), ex = Math.exp(x);
+        curves.push({x: XS, y: Float64Array.from(XS, v => y + (-f1 - 2 * x * (v - x)) / (2 * y)), cls: 'pred'});
+        curves.push({x: XS, y: Float64Array.from(XS, v => y + f2 + ex * (v - x)), cls: 'pred'});
+      }
+      const r1 = F1(x, y), r2 = F2(x, y);
+      const d = Math.hypot(x - ROOT2[0], y - ROOT2[1]);
+      return {
+        panels: [{x: XS, y: circle, range: [0, 2], opts: {
+          yRange: [0, 2.6], curves,
+          rings: [{x: ROOT2[0], y: ROOT2[1]}],
+          iterates: path.slice(0, i + 1)}}],
+        readouts: {
+          pt: '(' + x.toFixed(6) + ', ' + y.toFixed(6) + ')',
+          res: r1.toPrecision(3) + ', ' + r2.toPrecision(3),
+          big: Math.max(Math.abs(r1), Math.abs(r2)).toPrecision(2),
+          err: d < 1e-15 ? 'below 10⁻¹⁵' : d.toExponential(2)
         }
       };
     }
@@ -1378,179 +1427,196 @@ setTimeout(() => {
   });
 }, 0);
 
-/* Lecture 21's own figures, on two problems.
-   The shot: data/arcs.json, the 'clean' arc (shot 79). The height is the
-   parabola fitted to its 24 free-flight frames, t from release (the same fit as
-   pages 19 and 20), and f = z - 3.048 m has its falling root at 1.043663 s.
-   Newton starts at 0.92 s, the last frame fitted; the secant method at 0.88
-   and 0.92 s, the last two.
-   lec21-tangent: the first Newton step.  lec21-digits: Newton's errors.
-   lec21-secant:  the first secant step.  lec21-steps: both, per step.
-   lec21-evals:   both, per evaluation of f (Newton's f' counted as one).
-   The slope: data/slope-example-runs.json, the example class's runs, repeats
-   averaged, with an illustrative damage threshold of 5 cm.
-   lec21-slope: the 5.8 MPa runs, no curve.  lec21-jump: the secant line
-   across the 5.8 MPa jump.  lec21-flat: the secant step from the last two
-   7.4 MPa runs.
-   Hosts are found by data-fig. polyfit comes from the notes page's demo. */
+/* Lecture 21's own figures, on two dead-simple problems.
+   One unknown: f(x) = x^3 - 100, root the cube root of 100, 4.641588833612779.
+   Newton starts at 5, the secant method at 4 and 5, bisection on [4, 5].
+   lec21-tangent: the first Newton step.  lec21-secant: the first secant step.
+   lec21-cubic:   the curve, its root and the guess 5.
+   lec21-step:    the tangent's triangle, height f, base p, slope f'.
+   lec21-flat:    the flat tangent at 0.5 landing at 133.67, and the steps back.
+   lec21-brent:   brentq's first four evaluations on [4, 5].
+   lec21-evals:   error against evaluations of f for all three (Newton's f'
+                  counted as one, bisection's two ends counted).
+   Two unknowns: F1 = x^2 + y^2 - 4, F2 = e^x - 1 - y, from (1, 1), root
+   (1.004169, 1.729637).
+   lec21-plane:   both curves, the linear part of each at (1, 1) set to zero,
+                  and the first two Newton steps.
+   Hosts are found by data-fig. */
 (() => {
-  const RIM = 3.048, DSTAR = 5;
   const axis = (xr, yr, xt, yt, xl, yl, fy = v => String(v)) => [
     ...xt.map(v => ({x: v, y: yr[0], dy: 13, anchor: 'middle', text: String(v)})),
     ...yt.map(v => ({x: xr[0], y: v, dx: 4, dy: 4, anchor: 'start', text: fy(v)})),
     {x: xr[1], y: yr[0], dy: -5, anchor: 'end', text: xl},
     {x: xr[0], y: yr[1], dx: 4, dy: 10, anchor: 'start', text: yl}];
-  const box = (a, b, y0, y1) => [{x: a, y: y0}, {x: b, y: y0}, {x: b, y: y1}, {x: a, y: y1}];
   const SUP = {'-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹'};
   const pow10 = v => '10' + String(v).split('').map(c => SUP[c]).join('');
-  const sci = e => e >= 1e-3 ? +e.toPrecision(2) + ' s'
-    : e.toExponential(1).replace(/e(-?\d+)/, (_, p) => '×' + pow10(+p)) + ' s';
   const each = (name, draw) => document.querySelectorAll('[data-fig="' + name + '"] .fig-body').forEach(draw);
 
-  fetch('data/arcs.json').then(r => r.json()).then(d => {
-    const a = d.arcs.find(x => x.role === 'clean');
-    const k = a.rel, nf = a.key.nf;
-    const ft = [], fz = [];
-    for (let i = k; i < k + nf; i++) { ft.push(a.t[i] - a.t[k]); fz.push(a.z[i]); }
-    const [c0, c1, c2] = polyfit(ft, fz, 2);
-    const F = t => c0 + c1 * t + c2 * t * t - RIM, DF = t => c1 + 2 * c2 * t;
-    const ROOT = (-c1 - Math.sqrt(c1 * c1 - 4 * c2 * (c0 - RIM))) / (2 * c2);
+  const F = x => x ** 3 - 100, DF = x => 3 * x * x, ROOT = Math.cbrt(100);
+  const newton = [5];
+  while (newton.length < 5) { const x = newton[newton.length - 1]; newton.push(x - F(x) / DF(x)); }
+  const secant = [4, 5];
+  while (secant.length < 8) {
+    const [p, q] = secant.slice(-2);
+    if (F(q) === F(p)) break;
+    secant.push(q - F(q) * (q - p) / (F(q) - F(p)));
+  }
+  /* bisection's estimate is the bracket's midpoint; after the two ends and n
+     midpoint evaluations the bracket has been halved n times */
+  const bisect = [];
+  for (let a = 4, b = 5, n = 0; n <= 40; n++) {
+    const m = (a + b) / 2;
+    bisect.push({evals: n + 2, x: m});
+    if (F(m) < 0) a = m; else b = m;
+  }
 
-    const newton = [0.92];
-    while (newton.length < 6) { const t = newton[newton.length - 1]; newton.push(t - F(t) / DF(t)); }
-    const secant = [0.88, 0.92];
-    while (secant.length < 9) {
-      const [p, q] = secant.slice(-2);
-      if (F(q) === F(p)) break;
-      secant.push(q - F(q) * (q - p) / (F(q) - F(p)));
-    }
-
-    each('lec21-tangent', host => {
-      const xr = [0.7, 1.2], yr = [-0.95, 1.75], X = linspace(0.72, 1.18, 200);
-      const t0 = newton[0], t1 = newton[1];
-      diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr, zero: true,
-        alt: 'f against time since release with the tangent at 0.92 s drawn down to where it crosses zero at 1.061 s.',
-        curves: [{x: X, y: [...X].map(F)}],
-        leads: [{from: [0.8, F(t0) + DF(t0) * (0.8 - t0)], to: [t1 + 0.06, DF(t0) * 0.06], cls: 'alt', over: true}],
-        points: [{x: t0, y: F(t0), r: 4.4}, {x: t1, y: 0, r: 4.4}, {x: ROOT, y: 0, r: 5.5, cls: 'miss'}],
-        notes: [...axis(xr, yr, [0.8, 0.9, 1, 1.1], [-0.5, 0.5, 1, 1.5], 'time since release, t (s) →', '↑ f = z − 3.048 (m)'),
-          {x: t0, y: F(t0), dx: 4, dy: -24, anchor: 'start', tex: 't_0 = 0.92'},
-          {x: t0, y: F(t0), dx: 4, dy: -10, anchor: 'start', text: 'f = ' + F(t0).toFixed(3) + ' m'},
-          {x: t1, y: 0, dx: 6, dy: -9, anchor: 'start', tex: 't_1 = ' + t1.toFixed(4)},
-          {x: ROOT, y: 0, dx: -8, dy: 16, anchor: 'end', text: 'root ' + ROOT.toFixed(4)},
-          {x: 0.82, y: F(t0) + DF(t0) * (0.82 - t0), dx: 6, dy: -4, anchor: 'start', cls: 'hi', text: 'tangent'}]});
-    });
-
-    each('lec21-digits', host => {
-      const xr = [-0.4, 5.4], yr = [-16, 2.6];
-      const pts = newton.slice(0, 5).map((t, j) => ({x: j, y: Math.log10(Math.abs(t - ROOT)), e: Math.abs(t - ROOT)}));
-      diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr,
-        alt: 'Newton’s error on a log scale at steps 0 to 4, falling faster and faster, from 0.12 s to 3 times 10 to the minus 15 s.',
-        curves: [{x: pts.map(p => p.x), y: pts.map(p => p.y), cls: 'ghost'}],
-        points: pts.map(p => ({x: p.x, y: p.y, r: 4.4})),
-        notes: [...axis(xr, yr, [0, 1, 2, 3, 4], [-12, -8, -4], 'Newton step →', '↑ error, log scale', pow10),
-          ...pts.map((p, j) => ({x: p.x, y: p.y, dx: j === 4 ? -8 : 8, dy: -6, anchor: j === 4 ? 'end' : 'start', cls: 'hi', text: sci(p.e)}))]});
-    });
-
-    each('lec21-secant', host => {
-      const xr = [0.8, 1.12], yr = [-0.35, 1.25], X = linspace(0.82, 1.1, 200);
-      const [p, q, c] = secant, s = (F(q) - F(p)) / (q - p);
-      diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr, zero: true,
-        alt: 'The secant line through f at 0.88 and 0.92 s, extended to where it crosses zero at 1.068 s.',
-        curves: [{x: X, y: [...X].map(F)}],
-        leads: [{from: [0.84, F(p) + s * (0.84 - p)], to: [c + 0.03, s * 0.03], cls: 'alt', over: true}],
-        points: [{x: p, y: F(p), r: 4.4}, {x: q, y: F(q), r: 4.4}, {x: c, y: 0, r: 4.4}, {x: ROOT, y: 0, r: 5.5, cls: 'miss'}],
-        notes: [...axis(xr, yr, [0.85, 0.9, 0.95, 1, 1.05, 1.1], [0.25, 0.5, 0.75], 'time since release, t (s) →', '↑ f = z − 3.048 (m)'),
-          {x: p, y: F(p), dx: 7, dy: 2, anchor: 'start', tex: 't_0 = 0.88'},
-          {x: q, y: F(q), dx: 7, dy: 2, anchor: 'start', tex: 't_1 = 0.92'},
-          {x: c, y: 0, dx: 6, dy: -9, anchor: 'start', tex: 't_2 = ' + c.toFixed(4)},
-          {x: ROOT, y: 0, dx: -8, dy: 16, anchor: 'end', text: 'root ' + ROOT.toFixed(4)},
-          {x: 1.02, y: F(p) + s * (1.02 - p), dx: 4, dy: -8, anchor: 'start', cls: 'hi', text: 'secant'}]});
-    });
-
-    each('lec21-steps', host => {
-      const xr = [-0.4, 7.4], yr = [-15.5, 1.2];
-      const pts = (ts, off) => ts.map((t, j) => ({x: j - off, e: Math.abs(t - ROOT)}))
-        .filter(p => p.x >= 0 && p.e > 1e-15).map(p => ({x: p.x, y: Math.log10(p.e)}));
-      const pn = pts(newton, 0), ps = pts(secant, 0);
-      diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr,
-        alt: 'Error per step for Newton and the secant method. Newton reaches 3 times 10 to the minus 15 s at step 4 and the secant method 9 times 10 to the minus 12 s at step 6.',
-        curves: [{x: pn.map(p => p.x), y: pn.map(p => p.y)}, {x: ps.map(p => p.x), y: ps.map(p => p.y), cls: 'alt'}],
-        points: [...pn.map(p => ({x: p.x, y: p.y, r: 3.6})), ...ps.map(p => ({x: p.x, y: p.y, r: 3.6, cls: 'miss'}))],
-        notes: [...axis(xr, yr, [0, 1, 2, 3, 4, 5, 6, 7], [-12, -8, -4], 'steps →', '↑ error, log scale', pow10),
-          {x: pn[pn.length - 1].x, y: pn[pn.length - 1].y, dx: -8, dy: 4, anchor: 'end', text: 'Newton, order 2'},
-          {x: ps[ps.length - 1].x, y: ps[ps.length - 1].y, dx: -8, dy: 16, anchor: 'end', cls: 'hi', text: 'secant, order 1.618'}]});
-    });
-
-    each('lec21-evals', host => {
-      /* evaluations used to produce each estimate: Newton 2 a step (f and f'),
-         the secant method none for its two starts, then 2, 3, 4, ... */
-      const xr = [-0.4, 10.4], yr = [-15.5, 1.2];
-      const pn = newton.map((t, j) => ({x: 2 * j, e: Math.abs(t - ROOT)}));
-      const ps = secant.map((t, j) => ({x: j < 2 ? 0 : j, e: Math.abs(t - ROOT)})).slice(1);
-      const lg = q => q.filter(p => p.e > 1e-15).map(p => ({x: p.x, y: Math.log10(p.e)}));
-      const ln = lg(pn), ls = lg(ps).filter(p => p.x <= 9);
-      diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr,
-        alt: 'Error against evaluations of f. After 6 evaluations the secant method is at 9 times 10 to the minus 12 s and Newton at 6 times 10 to the minus 8 s.',
-        curves: [{x: ln.map(p => p.x), y: ln.map(p => p.y)}, {x: ls.map(p => p.x), y: ls.map(p => p.y), cls: 'alt'}],
-        points: [...ln.map(p => ({x: p.x, y: p.y, r: 3.6})), ...ls.map(p => ({x: p.x, y: p.y, r: 3.6, cls: 'miss'}))],
-        notes: [...axis(xr, yr, [0, 2, 4, 6, 8], [-12, -8, -4], 'evaluations →', '↑ error, log scale', pow10),
-          {x: 6, y: Math.log10(Math.abs(newton[3] - ROOT)), dx: 8, dy: 4, anchor: 'start', text: 'Newton, 3 steps'},
-          {x: 6, y: Math.log10(Math.abs(secant[6] - ROOT)), dx: -8, dy: 4, anchor: 'end', cls: 'hi', text: 'secant, 5 steps'}]});
-    });
+  each('lec21-tangent', host => {
+    const xr = [4.4, 5.2], yr = [-20, 45], X = linspace(4.42, 5.18, 200);
+    const x0 = newton[0], x1 = newton[1], s = DF(x0);
+    diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr, zero: true,
+      alt: 'f of x equals x cubed minus 100, with the tangent at x = 5 drawn down to where it crosses zero at 4.6667, just short of the root at 4.6416.',
+      curves: [{x: X, y: [...X].map(F)}],
+      leads: [{from: [5.15, F(x0) + s * 0.15], to: [x1 - 0.12, -s * 0.12], cls: 'alt', over: true}],
+      points: [{x: x0, y: F(x0), r: 4.4}, {x: x1, y: 0, r: 4.4}, {x: ROOT, y: 0, r: 5.5, cls: 'miss'}],
+      notes: [...axis(xr, yr, [4.5, 4.75, 5], [-10, 10, 20, 30], 'x →', '↑ f = x³ − 100'),
+        {x: x0, y: F(x0), dx: 8, dy: 4, anchor: 'start', tex: 'x_0 = 5'},
+        {x: x1, y: 0, dx: 10, dy: 16, anchor: 'start', tex: 'x_1 = ' + x1.toFixed(4)},
+        {x: ROOT, y: 0, dx: -8, dy: -8, anchor: 'end', text: 'root ' + ROOT.toFixed(4)},
+        {x: 4.95, y: F(x0) - s * 0.05, dx: -8, dy: -4, anchor: 'end', cls: 'hi', text: 'tangent, slope 75'}]});
   });
 
-  fetch('data/slope-example-runs.json').then(r => r.json()).then(d => {
-    const on = mpa => d.runs.filter(r => r.strength_mpa === mpa);
-    const mean = (mpa, g) => { const v = on(mpa).filter(r => r.pga_g === g).map(r => r.slope_moved_cm); return v.reduce((p, q) => p + q, 0) / v.length; };
-    const L = v => Math.log10(v);
-    const cm = v => String(10 ** v);
-    const g = v => String(+v.toFixed(5));
+  each('lec21-cubic', host => {
+    const xr = [0, 6], yr = [-115, 125], X = linspace(0, Math.cbrt(220), 200);
+    diagram(host, {w: 440, h: 260, xRange: xr, yRange: yr, zero: true,
+      alt: 'f of x equals x cubed minus 100 from 0 to 6. It starts at minus 100, stays nearly flat to about 2, then rises steeply through zero at 4.6416. At the guess x = 5, f is 25.',
+      curves: [{x: X, y: [...X].map(F)}],
+      points: [{x: 5, y: F(5), r: 4.4}, {x: ROOT, y: 0, r: 5.5, cls: 'miss'}],
+      notes: [...axis(xr, yr, [1, 2, 3, 4, 5], [-50, 50, 100], 'x →', '↑ f = x³ − 100'),
+        {x: 5, y: F(5), dx: -10, dy: -6, anchor: 'end', text: 'guess 5, f = 25'},
+        {x: ROOT, y: 0, dx: 10, dy: 18, anchor: 'start', cls: 'hi', text: 'root 4.6416'}]});
+  });
 
-    each('lec21-slope', host => {
-      const xr = [0, 4.2], yr = [-1, 3];
-      diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr,
-        alt: 'The 5.8 MPa slope’s 19 runs, distance moved against PGA on a log scale, as dots with no curve, and the 5 cm threshold.',
-        leads: [{from: [xr[0], L(DSTAR)], to: [xr[1], L(DSTAR)], cls: 'level'}],
-        points: on(5.8).map(r => ({x: r.pga_g, y: L(r.slope_moved_cm), r: 3.6})),
-        notes: [...axis(xr, yr, [0, 1, 2, 3, 4], [0, 1, 2], 'PGA (g) →', '↑ slope moved (cm), log scale', cm),
-          {x: 1.0, y: L(DSTAR), dy: -5, anchor: 'middle', text: 'd* = 5 cm'}]});
-    });
+  each('lec21-step', host => {
+    const xr = [4.4, 5.2], yr = [-12, 38], X = linspace(4.42, 5.18, 200);
+    const x0 = newton[0], x1 = newton[1], s = DF(x0);
+    diagram(host, {w: 440, h: 260, xRange: xr, yRange: yr, zero: true,
+      alt: 'The tangent at x_k forms a right triangle with the axis. Its height is f of x_k, its base is the correction p, and its slope is f prime of x_k, so p is minus f over f prime.',
+      curves: [{x: X, y: [...X].map(F)}],
+      leads: [{from: [5.12, F(x0) + s * 0.12], to: [x1 - 0.08, -s * 0.08], cls: 'alt', over: true},
+              {from: [x0, 0], to: [x0, F(x0)], cls: 'level', over: true},
+              {from: [x1, 0], to: [x0, 0], cls: 'level', over: true}],
+      points: [{x: x0, y: F(x0), r: 4.4}, {x: x1, y: 0, r: 4.4}],
+      notes: [...axis(xr, yr, [4.5, 4.75, 5], [10, 20, 30], 'x →', '↑ f'),
+        {x: x0, y: F(x0) / 2, dx: 8, dy: 4, anchor: 'start', tex: 'f(x_k)'},
+        {x: (x0 + x1) / 2, y: 0, dy: 18, anchor: 'middle', tex: 'p'},
+        {x: x0, y: 0, dy: 18, anchor: 'middle', tex: 'x_k'},
+        {x: x1, y: 0, dx: -6, dy: -8, anchor: 'end', tex: 'x_{k+1}'},
+        {x: 4.9, y: F(x0) - s * 0.1, dx: -8, dy: -4, anchor: 'end', cls: 'hi', text: 'slope f′(xₖ) = f(xₖ) / (−p)'}]});
+  });
 
-    each('lec21-jump', host => {
-      const xr = [2.68, 2.83], yr = [-25, 340];
-      const ga = 2.72, gb = 2.8, ya = mean(5.8, ga), yb = mean(5.8, gb), s = (yb - ya) / (gb - ga);
-      const line = v => ya + s * (v - ga), mid = 2.75;
-      diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr, zero: true,
-        alt: 'The 5.8 MPa runs from 2.7 to 2.8 g. The line through 2.72 and 2.8 g passes 10 cm at 2.75 g, where the run moved 307 cm.',
-        leads: [{from: [xr[0], DSTAR], to: [xr[1], DSTAR], cls: 'level'},
-                {from: [2.69, line(2.69)], to: [xr[1], line(xr[1])], cls: 'alt', over: true}],
-        points: [...on(5.8).filter(r => r.pga_g >= xr[0] && r.pga_g <= xr[1]).map(r => ({x: r.pga_g, y: r.slope_moved_cm, r: 3.6})),
-          {x: mid, y: line(mid), r: 5, cls: 'miss'}],
-        notes: [...axis(xr, yr, [2.7, 2.72, 2.75, 2.8], [100, 200, 300], 'PGA (g) →', '↑ slope moved (cm)'),
-          {x: mid, y: mean(5.8, mid), dx: 8, dy: 4, anchor: 'start', text: 'run: ' + mean(5.8, mid).toFixed(0) + ' cm'},
-          {x: mid, y: line(mid), dx: -2, dy: -12, anchor: 'end', cls: 'hi', text: 'line: ' + line(mid).toFixed(1) + ' cm'},
-          {x: ga, y: ya, dx: -6, dy: -8, anchor: 'end', text: ya.toFixed(1) + ' cm'},
-          {x: gb, y: yb, dx: -6, dy: -8, anchor: 'end', text: yb.toFixed(1) + ' cm'}]});
-    });
+  each('lec21-flat', host => {
+    const xr = [0, 145], yr = [-125, 45], X = linspace(0, Math.cbrt(145), 200);
+    const path = [0.5];
+    while (path.length < 15) { const x = path[path.length - 1]; path.push(x - F(x) / DF(x)); }
+    const x0 = path[0], x1 = path[1], s = DF(x0);
+    diagram(host, {w: 440, h: 260, xRange: xr, yRange: yr, zero: true,
+      alt: 'f of x equals x cubed minus 100 rises steeply near the root at 4.64. The tangent at x = 0.5 has slope 0.75 and crosses zero at 133.67. The next steps come back along the axis through 89.1, 59.4, 39.6 and so on to the root.',
+      curves: [{x: X, y: [...X].map(F)}],
+      leads: [{from: [0, F(x0) - s * x0], to: [x1, 0], cls: 'alt', over: true}],
+      points: [{x: x0, y: F(x0), r: 4.4}, ...path.slice(1, 9).map(x => ({x, y: 0, r: 3.6})),
+               {x: ROOT, y: 0, r: 5.5, cls: 'miss'}],
+      notes: [...axis(xr, yr, [20, 40, 60, 80, 100, 120], [-50], 'x →', '↑ f = x³ − 100'),
+        {x: x0, y: F(x0), dx: 10, dy: 4, anchor: 'start', text: 'x₀ = 0.5, f = −99.9'},
+        {x: 70, y: F(x0) + s * (70 - x0), dx: 0, dy: -10, anchor: 'middle', cls: 'hi', text: 'tangent at 0.5, slope 0.75'},
+        {x: x1, y: 0, dx: 4, dy: -12, anchor: 'end', tex: 'x_1 = 133.67'},
+        {x: path[2], y: 0, dy: 18, anchor: 'middle', tex: 'x_2'},
+        {x: path[3], y: 0, dy: 18, anchor: 'middle', tex: 'x_3'},
+        {x: path[4], y: 0, dy: 18, anchor: 'middle', tex: 'x_4'},
+        {x: ROOT, y: 0, dx: 6, dy: -10, anchor: 'start', text: 'root'}]});
+  });
 
-    each('lec21-flat', host => {
-      const xr = [2.85, 3.25], yr = [-12, 190];
-      const ga = 2.88672, gb = 2.88867, ya = mean(7.4, ga), yb = mean(7.4, gb), s = (yb - ya) / (gb - ga);
-      const next = gb + (DSTAR - yb) / s;
-      diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr, zero: true,
-        alt: 'The 7.4 MPa runs from 2.85 to 3.25 g. The line through the last two runs, both under 0.3 cm, reaches 5 cm at 3.19 g, outside the bracket from 2.88867 to 2.89062 g.',
-        areas: [{pts: box(2.88867, 2.89062, yr[0], yr[1]), cls: 'pos'}],
-        leads: [{from: [xr[0], DSTAR], to: [xr[1], DSTAR], cls: 'level'},
-                {from: [ga, ya], to: [next + 0.03, ya + s * (next + 0.03 - ga)], cls: 'alt', over: true}],
-        points: [...on(7.4).filter(r => r.pga_g >= xr[0] && r.pga_g <= xr[1]).map(r => ({x: r.pga_g, y: r.slope_moved_cm, r: 3.6})),
-          {x: next, y: DSTAR, r: 5, cls: 'miss'}],
-        notes: [...axis(xr, yr, [2.9, 3, 3.1, 3.2], [50, 100, 150], 'PGA (g) →', '↑ slope moved (cm)'),
-          {x: 2.8897, y: 120, dx: 6, anchor: 'start', cls: 'hi', text: 'bracket [2.88867, 2.89062] g'},
-          {x: next, y: DSTAR, dx: 0, dy: -12, anchor: 'middle', cls: 'hi', text: 'next run ' + next.toFixed(2) + ' g'},
-          {x: 3.0, y: mean(7.4, 3.0), dx: 8, dy: -6, anchor: 'start', text: '3.0 g: ' + mean(7.4, 3.0).toFixed(0) + ' cm'},
-          {x: gb, y: yb, dx: 9, dy: -7, anchor: 'start', text: '← last two runs, ' + g(ga) + ' and ' + g(gb) + ' g'}]});
-    });
+  each('lec21-brent', host => {
+    const xr = [3.95, 5.05], yr = [-42, 32], X = linspace(3.97, 5.03, 200);
+    const E = [4, 5, 4.590163934426229, 4.637788377299717];
+    diagram(host, {w: 440, h: 250, xRange: xr, yRange: yr, zero: true,
+      alt: "Brent's method on 4 to 5. The ends are evaluations 1 and 2, the secant step 4.5902 is 3, the next secant step 4.6378 is 4, and evaluations 5 to 8 sit on the root at 4.6416.",
+      curves: [{x: X, y: [...X].map(F)}],
+      leads: [{from: [E[0], F(E[0])], to: [E[1], F(E[1])], cls: 'alt', over: true}],
+      points: [...E.map(x => ({x, y: F(x), r: 4.4})), {x: ROOT, y: 0, r: 5.5, cls: 'miss'}],
+      notes: [...axis(xr, yr, [4, 4.25, 4.5, 4.75, 5], [-30, -15, 15], 'x →', '↑ f = x³ − 100'),
+        {x: E[0], y: F(E[0]), dx: 8, dy: 4, anchor: 'start', text: '1'},
+        {x: E[1], y: F(E[1]), dx: -8, dy: 4, anchor: 'end', text: '2'},
+        {x: E[2], y: F(E[2]), dx: -2, dy: 18, anchor: 'end', text: '3'},
+        {x: E[3], y: F(E[3]), dx: 4, dy: 20, anchor: 'start', text: '4'},
+        {x: ROOT, y: 0, dx: -10, dy: -10, anchor: 'end', cls: 'hi', text: '5 to 8, on the root'}]});
+  });
+
+  each('lec21-secant', host => {
+    const xr = [3.8, 5.2], yr = [-45, 45], X = linspace(3.82, 5.18, 200);
+    const [p, q, c] = secant, s = (F(q) - F(p)) / (q - p);
+    diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr, zero: true,
+      alt: 'The line through f at x = 4 and x = 5, crossing zero at 4.5902, just below the root at 4.6416.',
+      curves: [{x: X, y: [...X].map(F)}],
+      leads: [{from: [3.85, F(p) + s * (3.85 - p)], to: [5.12, F(p) + s * (5.12 - p)], cls: 'alt', over: true}],
+      points: [{x: p, y: F(p), r: 4.4}, {x: q, y: F(q), r: 4.4}, {x: c, y: 0, r: 4.4}, {x: ROOT, y: 0, r: 5.5, cls: 'miss'}],
+      notes: [...axis(xr, yr, [4, 4.5, 5], [-30, -15, 15, 30], 'x →', '↑ f = x³ − 100'),
+        {x: p, y: F(p), dx: 10, dy: 14, anchor: 'start', tex: 'x_0 = 4'},
+        {x: q, y: F(q), dx: 8, dy: 4, anchor: 'start', tex: 'x_1 = 5'},
+        {x: c, y: 0, dx: -6, dy: -10, anchor: 'end', tex: 'x_2 = ' + c.toFixed(4)},
+        {x: ROOT, y: 0, dx: 8, dy: 16, anchor: 'start', text: 'root ' + ROOT.toFixed(4)},
+        {x: 4.25, y: F(p) + s * 0.25, dx: 8, dy: 6, anchor: 'start', cls: 'hi', text: 'slope 61, from the two points'}]});
+  });
+
+  each('lec21-evals', host => {
+    const xr = [-1.5, 44], yr = [-18, 0.8];
+    const lg = q => q.map(p => ({x: p.x, y: Math.log10(Math.max(Math.abs(p.v - ROOT), 1e-16))}));
+    const pb = lg(bisect.map(b => ({x: b.evals, v: b.x})));
+    const pn = lg(newton.map((x, j) => ({x: 2 * j, v: x})));
+    const ps = lg(secant.map((x, j) => ({x: j < 2 ? 0 : j, v: x})).slice(1));
+    const last = q => q[q.length - 1];
+    diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr,
+      alt: 'Error against evaluations of f on a log scale. Newton reaches 9 times 10 to the minus 16 after 8 evaluations, the secant method after 7, and bisection 8 times 10 to the minus 15 after 42, guaranteed only to 5 times 10 to the minus 13.',
+      curves: [{x: pb.map(p => p.x), y: pb.map(p => p.y), cls: 'ghost'},
+               {x: pn.map(p => p.x), y: pn.map(p => p.y)},
+               {x: ps.map(p => p.x), y: ps.map(p => p.y), cls: 'alt'}],
+      points: [...pb.map(p => ({x: p.x, y: p.y, r: 2.6})),
+               ...pn.map(p => ({x: p.x, y: p.y, r: 3.6})),
+               ...ps.map(p => ({x: p.x, y: p.y, r: 3.6, cls: 'miss'}))],
+      notes: [...axis(xr, yr, [0, 10, 20, 30, 40], [-15, -10, -5], 'evaluations of f →', '↑ |x − root|, log scale', pow10),
+        {x: last(pn).x, y: last(pn).y, dx: 8, dy: 4, anchor: 'start', text: 'Newton, 8'},
+        {x: last(ps).x, y: last(ps).y, dx: -6, dy: -8, anchor: 'end', cls: 'hi', text: 'secant, 7'},
+        {x: last(pb).x, y: -8, anchor: 'end', text: 'bisection, 42'}]});
+  });
+
+  each('lec21-plane', host => {
+    const xr = [0.3, 1.8], yr = [0.6, 2.5];
+    const circ = linspace(xr[0], 1.8, 160), expo = linspace(Math.log(1 + yr[0]), Math.log(1 + yr[1]), 160);
+    const E = Math.E;
+    /* linear parts at (1, 1) set to zero: 2(x-1) + 2(y-1) = 2, i.e. x + y = 3,
+       and (e - 1 - 1) + e(x-1) - (y-1) = 0, i.e. y = e x - 1 */
+    const l1 = [[0.5, 2.5], [1.8, 1.2]];
+    const l2 = [[(yr[0] + 1) / E, yr[0]], [(yr[1] + 1) / E, yr[1]]];
+    const v = [[1, 1]];
+    for (let k = 0; k < 3; k++) {
+      const [x, y] = v[k], f1 = x * x + y * y - 4, f2 = Math.exp(x) - 1 - y;
+      const a = 2 * x, b = 2 * y, c = Math.exp(x), d = -1, det = a * d - b * c;
+      v.push([x + (-f1 * d + b * f2) / det, y + (-a * f2 + c * f1) / det]);
+    }
+    const [r0, r1, r2] = v;
+    diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr,
+      alt: 'The circle x squared plus y squared equals 4 and the curve y equals e to the x minus 1, crossing at (1.0042, 1.7296). From (1, 1) the two straight lines, the linear part of each equation, cross at (1.0758, 1.9242), and the next step lands at (1.0095, 1.7378).',
+      curves: [{x: circ, y: [...circ].map(x => Math.sqrt(4 - x * x))}, {x: expo, y: [...expo].map(x => Math.exp(x) - 1)}],
+      leads: [{from: l1[0], to: l1[1], cls: 'alt'}, {from: l2[0], to: l2[1], cls: 'alt'},
+              {from: r0, to: r1, cls: 'level', over: true}, {from: r1, to: r2, cls: 'level', over: true}],
+      points: [{x: r0[0], y: r0[1], r: 4.4}, {x: r1[0], y: r1[1], r: 4.4}, {x: r2[0], y: r2[1], r: 4.4},
+               {x: 1.004169, y: 1.729637, r: 6.5, cls: 'miss'}],
+      notes: [...axis(xr, yr, [0.5, 1, 1.5], [1, 1.5, 2], 'x →', '↑ y'),
+        {x: r0[0], y: r0[1], dx: 8, dy: 4, anchor: 'start', text: 'start (1, 1)'},
+        {x: r1[0], y: r1[1], dx: 8, dy: -4, anchor: 'start', cls: 'hi', text: 'step 1 (' + r1[0].toFixed(4) + ', ' + r1[1].toFixed(4) + ')'},
+        {x: r2[0], y: r2[1], dx: -24, dy: 26, anchor: 'end', text: 'step 2, near the root'},
+        {x: 1.62, y: Math.sqrt(4 - 1.62 * 1.62), dx: 0, dy: 22, anchor: 'start', tex: 'F_1 = 0'},
+        {x: 1.2, y: Math.exp(1.2) - 1, dx: 8, dy: 10, anchor: 'start', tex: 'F_2 = 0'},
+        {x: 0.62, y: 2.38, dx: 8, dy: 4, anchor: 'start', cls: 'hi', text: 'linear parts at (1, 1)'}]});
   });
 })();
 

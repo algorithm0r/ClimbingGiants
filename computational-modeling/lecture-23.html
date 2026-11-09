@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lecture 23 — Evaluation cost</title>
+<title>Lecture 23 — A constrained optimum over a window</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261102180601">
-<link rel="stylesheet" href="css/demos.css?v=20261102180601">
+<link rel="stylesheet" href="css/blocks.css?v=20261109080753">
+<link rel="stylesheet" href="css/demos.css?v=20261109080753">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -690,58 +690,115 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <section class="deck-slide part">
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
-    <p class="say">Root finders compared by their evaluations of <i>f</i></p>
+    <p class="say">The head injury criterion, a search over windows</p>
   </div>
 </section>
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">Newton evaluates <i>f</i> and <i>f</i>&prime; at each step, and the other two <span class="def">evaluate <i>f</i> once</span>.</p>
-    <p class="sub">An <span class="term">evaluation</span> is one computation of <i>f</i> or <i>f</i>&prime;. The bookkeeping in between costs almost nothing.</p>
+    <p class="say">The driver&rsquo;s head in a barrier test <span class="def">peaks at 48.6&nbsp;g at 78.5&nbsp;ms</span>.</p>
+    <p class="sub">A 2019 BMW X5 into a barrier, at 12&nbsp;500 samples a second. Each of the three head accelerometer axes is baseline corrected and passed through the CFC&nbsp;1000 filter, then combined into the resultant.</p>
   </div>
   <div class="stage">
-    <div class="pcards c3">
-      <div class="pcard"><span class="tag">bisection</span><b>1 per step</b>
-        <span><i>f</i> at the midpoint of the bracket.</span></div>
-      <div class="pcard"><span class="tag">secant</span><b>1 per step</b>
-        <span><i>f</i> at the new estimate. The previous value is reused.</span></div>
-      <div class="pcard"><span class="tag">Newton</span><b>2 per step</b>
-        <span><i>f</i> and <i>f</i>&prime; at the current estimate.</span></div>
+    <figure class="figure wide" data-fig="lec23-trace"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">The <span class="term">head injury criterion</span> is the <span class="def">largest score over every window</span> no longer than a limit.</p>
+    <p class="sub"><i>a</i> is the acceleration in g, <i>t</i><sub>1</sub> and <i>t</i><sub>2</sub> are the ends of a window in seconds, and <i>w</i> is the length limit. FMVSS&nbsp;208 uses 15&nbsp;ms and requires HIC<sub>15</sub> of 700 or less.</p>
+  </div>
+  <div class="stage">
+    <style>.deck-slide .work.spaced .katex-display{margin:.6em 0}</style>
+    <div class="work spaced" style="font-size:calc(var(--stage-text) * .9)">
+      $$\mathrm{HIC} \;=\; \max_{\substack{t_1 < t_2 \\ t_2 - t_1 \,\le\, w}}\;
+      (t_2 - t_1)\,\Big[\,\underbrace{\frac{1}{t_2 - t_1}\int_{t_1}^{t_2} a\,\mathrm{d}t}_{\text{mean of } a \text{ over the window}}\,\Big]^{2.5}$$
     </div>
   </div>
 </section>
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">Counted in steps, <span class="def">Newton reaches the root first</span>.</p>
-    <p class="sub"><i>f</i>(<i>t</i>)&nbsp;=&nbsp;<i>z</i>(<i>t</i>)&nbsp;&minus;&nbsp;3.048&nbsp;m, the shot&rsquo;s fitted height minus the rim height. Newton starts from the last frame fitted, 0.92&nbsp;s, the secant method from 0.88 and 0.92&nbsp;s, and bisection from [0.5,&nbsp;1.5]&nbsp;s.</p>
+    <p class="say">A 15&nbsp;ms window centered on the peak <span class="def">scores 207.2</span>.</p>
+    <p class="sub">The window runs from 70.96 to 85.92&nbsp;ms. Its score is its length in seconds times its mean to the power 2.5.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="lec23-steps"><div class="fig-body"></div></figure>
+    <figure class="figure wide" data-fig="lec23-peak"><div class="fig-body"></div></figure>
+    <style>.deck-slide .work.spaced .katex-display{margin:.6em 0}</style>
+    <div class="work spaced" style="font-size:calc(var(--stage-text) * .72)">
+      $$0.01496\ \text{s} \times 45.349^{\,2.5} = 0.01496 \times 13\,849 = \textcolor{#8A6508}{207.2}$$
+    </div>
   </div>
 </section>
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">Counted in evaluations, <span class="def">the secant method reaches it first</span>.</p>
-    <p class="sub">The same three searches, plotted against evaluations of <i>f</i> and <i>f</i>&prime;. Each label is the evaluations used to get within 10<sup>&minus;12</sup>&nbsp;s, for bisection a bracket narrower than that.</p>
+    <p class="say">The best 15&nbsp;ms window <span class="def">starts 1.0&nbsp;ms earlier and scores 208.2</span>.</p>
+    <p class="sub">The score rewards a high mean held over the window. On this record the best window sits a little before the tallest point, where the trace is broad.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="lec23-evals"><div class="fig-body"></div></figure>
+    <figure class="figure wide" data-fig="lec23-best"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So how does the search find that window? It slides a window along the record, scores it at every start, and keeps the best. Then it does it again with a longer window.</p><p>Here we're showing fifteen of those passes, one millisecond longer each time. The top is the trace with the current window shaded, and the dashed lines are the best window so far. The bottom is the score for every start on that pass.</p><p>Each pass sits higher than the one before, because a longer window over the same high stretch scores more. So the best of all of them comes on the last pass, the 15 millisecond one, at 208.2, starting at 69.92.</p><p>The program does every length in samples, 187 of them, not just these fifteen. And starts out past this stretch never score more than about 10.</p>">
+  <div class="head">
+    <p class="say">The search slides each window length along the record and <span class="def">keeps the best score</span>.</p>
+    <p class="sub">Fifteen of the 187 lengths, one a millisecond.</p>
+  </div>
+  <div class="stage">
+    <style>.deck-slide .sweep-replay{align-self:center; margin-top:.6vh; font:inherit; font-size:.8rem; color:var(--warm-gray); background:none; border:1px solid #d9d3c7; border-radius:4px; padding:.2em .8em; cursor:pointer}</style>
+    <figure class="figure wide" data-fig="lec23-sweep"><div class="fig-body"></div></figure>
   </div>
 </section>
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">Near the root, the secant method <span class="def">gains more digits per evaluation than Newton</span>.</p>
-    <p class="sub"><i>e</i><sub><i>k</i></sub> is the error at step <i>k</i> and <i>C</i> a constant. The order <i>p</i> is the power in <i>e</i><sub><i>k</i>+1</sub>&nbsp;&asymp;&nbsp;<i>C</i>&thinsp;<i>e</i><sub><i>k</i></sub><sup><i>p</i></sup>, so the number of correct digits is multiplied by about <i>p</i> at each step.</p>
+    <p class="say">A window is a start and a length, so <span class="def">the candidates fill a plane</span>.</p>
+    <p class="sub">Each cell is a window, shaded by its score. 824&nbsp;109 windows are 15&nbsp;ms or shorter, and the search scores all of them.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec23-map"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">The best 15&nbsp;ms and 36&nbsp;ms windows are <span class="def">as long as their limits allow</span>.</p>
+    <p class="sub">The curve is the best score among windows no longer than the limit, so the limit sets the number. Without a limit the best window is 39.44&nbsp;ms long, where adding low samples starts to lower the score.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec23-limit"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">A running integral built once turns <span class="def">each window&rsquo;s integral into one subtraction</span>.</p>
+    <p class="sub"><i>S</i><sub><i>k</i></sub> is the trapezoid integral of <i>a</i> from the start of the record to sample <i>k</i>, a <span class="term">prefix sum</span>.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide legible" data-fig="lec23-prefix"><div class="fig-body"></div></figure>
+    <style>.deck-slide .work.spaced .katex-display{margin:.6em 0}</style>
+    <div class="work spaced" style="font-size:calc(var(--stage-text) * .72)">
+      $$S_k = \sum_{i=1}^{k} \frac{a_i + a_{i-1}}{2}\,\Delta t, \qquad \int_{t_i}^{t_j} a\,\mathrm{d}t = \textcolor{#8A6508}{S_j - S_i}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">The subtraction costs one operation <span class="def">whatever the window&rsquo;s length</span>.</p>
+    <p class="sub">A 15&nbsp;ms window holds up to 187 sample intervals. Summing each window&rsquo;s own samples repeats work its neighbors already did.</p>
   </div>
   <div class="stage">
     <style>.deck-slide .work.spaced .katex-display{margin:.6em 0}</style>
     <div class="work spaced" style="font-size:calc(var(--stage-text) * .8)">
       $$\begin{aligned}
-      \text{Newton:}\quad & 2 \text{ per step, at 2 evaluations a step} && 2^{1/2} = \textcolor{#8A6508}{1.414} \text{ per evaluation} \\[6pt]
-      \text{secant:}\quad & 1.618 \text{ per step, at 1 evaluation a step} && 1.618^{1} = \textcolor{#8A6508}{1.618} \text{ per evaluation}
+      \text{each window summed from its own samples:}\quad & 76\,921\,328 \text{ additions} \\[4pt]
+      \text{one prefix sum, then one subtraction a window:}\quad & 824\,109 \text{ subtractions} \\[4pt]
+      76\,921\,328 \,/\, 824\,109 &= \textcolor{#8A6508}{93}
     \end{aligned}$$
     </div>
   </div>
@@ -749,137 +806,40 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">On the shot, bisection&rsquo;s 42 evaluations <span class="def">take about 2.7 microseconds</span>.</p>
-    <p class="sub">One evaluation of the fitted parabola is three multiplications and three additions, timed in Python.</p>
+    <p class="say">The search is two loops, and the inner one <span class="def">stops at the length limit</span>.</p>
+    <p class="sub">The same loops find a minimum with the comparison reversed.</p>
   </div>
   <div class="stage">
-    <div class="work spaced" style="font-size:calc(var(--stage-text) * .8)">
-      $$\begin{aligned}
-      1 \times 64\ \text{ns} &= 64\ \text{ns} && \text{one evaluation of } f \\[4pt]
-      7 \times 64\ \text{ns} &= \textcolor{#8A6508}{0.45\ \mu\text{s}} && \text{the secant method} \\[4pt]
-      8 \times 64\ \text{ns} &= \textcolor{#8A6508}{0.51\ \mu\text{s}} && \text{Newton} \\[4pt]
-      42 \times 64\ \text{ns} &= \textcolor{#8A6508}{2.7\ \mu\text{s}} && \text{bisection}
-    \end{aligned}$$
+    <div class="panels" style="font-size:calc(var(--stage-code) * .86)">
+      <div class="code">panels = (a[1:] + a[:-1]) * 0.5 * np.diff(t)</div><div class="note">trapezoid areas between samples</div>
+      <div class="code"><span class="k">S = np.concatenate([[0.0], np.cumsum(panels)])</span></div><div class="note">the prefix sum, built once</div>
+      <div class="code">best = (-np.inf, None, None)</div><div class="note">score, start, end</div>
+      <div class="code">for i in range(len(t) - 1):</div><div class="note">every start</div>
+      <div class="code">    for j in range(i + 1, len(t)):</div><div class="note">every end after it</div>
+      <div class="code">        T = t[j] - t[i]</div><div class="note"></div>
+      <div class="code">        <span class="k">if T &gt; wmax: break</span></div><div class="note">longer than the limit, so the next start</div>
+      <div class="code">        <span class="k">mean = (S[j] - S[i]) / T</span></div><div class="note">one subtraction for the integral</div>
+      <div class="code">        score = mean ** 2.5 * T</div><div class="note"></div>
+      <div class="code">        if score &gt; best[0]: best = (score, t[i], t[j])</div><div class="note">keep the best window so far</div>
     </div>
   </div>
 </section>
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">One run of the slope takes as long as <span class="def">one to two billion evaluations of the shot</span>.</p>
-    <p class="sub"><i>f</i>(PGA)&nbsp;=&nbsp;slope moved&nbsp;&minus;&nbsp;<i>d</i>*, where PGA is the peak ground acceleration and <i>d</i>* the movement taken as damage. Each value of <i>f</i> is one GPU simulation.</p>
+    <p class="say">Report the number of windows searched and <span class="def">the time the search took</span>.</p>
+    <p class="sub">The time per window depends on the machine and the language, and the count does not. Two hundred records at 0.27&nbsp;s each take about a minute.</p>
   </div>
   <div class="stage">
-    <div class="work spaced" style="font-size:calc(var(--stage-text) * .8)">
-      $$\begin{aligned}
-      1\ \text{run} &= 60\ \text{to}\ 120\ \text{s} && \text{a minute or two of GPU time} \\[4pt]
-      60\ \text{s} \,/\, 64\ \text{ns} &= \textcolor{#8A6508}{0.94 \times 10^{9}} && \text{evaluations of the shot in a one-minute run} \\[4pt]
-      120\ \text{s} \,/\, 64\ \text{ns} &= \textcolor{#8A6508}{1.9 \times 10^{9}} && \text{in a two-minute run}
-    \end{aligned}$$
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">What <i>f</i>&prime; costs <span class="def">usually decides between Newton and the secant method</span>.</p>
-    <p class="sub">The comparison of digits per evaluation assumes <i>f</i>&prime; costs about what <i>f</i> costs.</p>
-  </div>
-  <div class="stage">
-    <div class="pcards c3">
-      <div class="pcard"><span class="tag">analytic</span><b>The shot: one line</b>
-        <span>With <i>c</i><sub>1</sub> and <i>c</i><sub>2</sub> the fitted coefficients, <i>f</i>&prime;(<i>t</i>)&nbsp;=&nbsp;<i>c</i><sub>1</sub>&nbsp;+&nbsp;2<i>c</i><sub>2</sub><i>t</i> costs about what <i>f</i> costs.</span></div>
-      <div class="pcard"><span class="tag">numerical</span><b>One or two more evaluations</b>
-        <span>With a finite difference of <i>f</i>, Newton typically gains less per evaluation than the secant method.</span></div>
-      <div class="pcard gold"><span class="tag">no derivative</span><b>The slope: not available</b>
-        <span>Each value of <i>f</i> is a run of the simulation, and no formula exists to differentiate.</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">On the 7.4&nbsp;MPa slope, 14 runs <span class="def">narrowed the bracket from 2&nbsp;g to 0.002&nbsp;g</span>.</p>
-    <p class="sub">The first 3 runs found the 2&nbsp;g bracket. Damage is taken as more than 5&nbsp;cm of movement, which is one choice. Each new setting halved the bracket, and the four repeats left it where it was.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="lec23-trail"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">Each digit of PGA took <span class="def">about 3.3 halvings, or 3 to 7 minutes</span>.</p>
-    <p class="sub">A digit is a factor of 10 in the width of the bracket.</p>
-  </div>
-  <div class="stage">
-    <div class="work spaced" style="font-size:calc(var(--stage-text) * .8)">
-      $$\begin{aligned}
-      2\ \text{g} \,/\, 2^{10} &= 0.00195\ \text{g} && \text{ten halvings} \\[4pt]
-      \log_{10} 2^{10} &= 3.0 && \text{digits gained} \\[4pt]
-      10 \,/\, 3.0 &= \textcolor{#8A6508}{3.3} && \text{halvings a digit} \\[4pt]
-      3.3 \times (1\ \text{to}\ 2\ \text{min}) &= \textcolor{#8A6508}{3.3\ \text{to}\ 6.6\ \text{min}} && \text{machine time a digit} \\[4pt]
-      (10 + 4) \,/\, 3.0 &= 4.7 && \text{runs a digit, counting the four repeats}
-    \end{aligned}$$
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">From a 2&nbsp;g bracket, <span class="def">18 halvings reach the finest setting the lab accepts</span>.</p>
-    <p class="sub">The lab takes a PGA to six significant figures, so near 2.9&nbsp;g the finest step is 0.00001&nbsp;g.</p>
-  </div>
-  <div class="stage">
-    <div class="work spaced" style="font-size:calc(var(--stage-text) * .8)">
-      $$\begin{aligned}
-      2\ \text{g} \,/\, 0.00001\ \text{g} &= 2 \times 10^{5} && \text{the factor to shrink the bracket by} \\[4pt]
-      \log_2 (2 \times 10^{5}) &= 17.6 && \text{halvings, so 18 runs} \\[4pt]
-      3 + 18 &= \textcolor{#8A6508}{21} && \text{runs, of the 40 in the budget}
-    \end{aligned}$$
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">The 7.4&nbsp;MPa slope&rsquo;s 17 runs <span class="def">shared one queue with 61 runs on the other four slopes</span>.</p>
-    <p class="sub">The lab runs one simulation at a time. Each row is one slope and each mark one run, in the order the class made them. At a minute or two a run, the 78 runs are 78 to 156 minutes of machine time.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide legible" data-fig="lec23-queue"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">One run at a time, eight scan points <span class="def">take the machine time of eight halvings</span>.</p>
-    <p class="sub">Both start from the same bracket. The scan spaces its points evenly inside it, and bisection places each point at the midpoint of what is left.</p>
-  </div>
-  <div class="stage">
-    <div class="work spaced" style="font-size:calc(var(--stage-text) * .8)">
-      $$\begin{aligned}
-      \text{8 halvings:}\quad & 8\ \text{runs},\ 8\ \text{to}\ 16\ \text{min} && \text{bracket} \div 2^{8} = \textcolor{#8A6508}{256} \\[6pt]
-      \text{8 scan points:}\quad & 8\ \text{runs},\ 8\ \text{to}\ 16\ \text{min} && \text{bracket} \div 9,\ \text{and} \ \textcolor{#8A6508}{\text{every sign change}} \text{ at that spacing}
-    \end{aligned}$$
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">When <i>f</i> is a simulation, <span class="def">plan the search around the number of runs</span>.</p>
-  </div>
-  <div class="stage">
-    <div class="pcards c4">
-      <div class="pcard"><span class="tag">evaluation budget</span><b>Count the runs</b>
-        <span>Decide how many runs are available, then pick a method that is useful within that number.</span></div>
-      <div class="pcard"><span class="tag">existing runs</span><b>Fetch before running</b>
-        <span>A run anyone in the class has made is free to fetch, and a new run costs one from the 40.</span></div>
-      <div class="pcard"><span class="tag">reuse</span><b>Keep every value</b>
-        <span>Each run is a data point. The secant method reuses its last value, and bisection keeps only the sign.</span></div>
-      <div class="pcard gold"><span class="tag">evaluation count</span><b>State the count</b>
-        <span>Report it with the answer, since an answer from 6 runs and one from 40 are different results.</span></div>
+    <div class="panels" style="font-size:calc(var(--stage-code) * .86)">
+      <div class="code">import time</div><div class="note"></div>
+      <div class="code"><span class="k">t0 = time.perf_counter()</span></div><div class="note">read a fine-grained clock before the call</div>
+      <div class="code">hic, t1, t2 = windowed_optimum(t, a, 0.015 + 1e-9)</div><div class="note">differences of floating-point times can land a hair over 0.015</div>
+      <div class="code"><span class="k">elapsed = time.perf_counter() - t0</span></div><div class="note">and again after it</div>
+      <div class="code">&nbsp;</div><div class="note"></div>
+      <div class="code"><span class="dim"># on this record</span></div><div class="note"></div>
+      <div class="code"><span class="dim"># hic = 208.2, 69.92 to 84.88 ms</span></div><div class="note">824&nbsp;109 windows</div>
+      <div class="code"><span class="dim"># elapsed = 0.27 s</span></div><div class="note">Python 3.11 on one desktop machine</div>
     </div>
   </div>
 </section>
@@ -891,6 +851,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <div class="deck-notes"></div>
 
 
-<script type="module" src="js/bundle/lecture-23.js?v=20261102180601"></script>
+<script type="module" src="js/bundle/lecture-23.js?v=20261109080753"></script>
 </body>
 </html>

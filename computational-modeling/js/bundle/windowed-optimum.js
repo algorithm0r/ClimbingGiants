@@ -1004,10 +1004,10 @@ class CgDemo extends HTMLElement {
       <div class="cgd-caption">The shaded strip is the window you have placed; the amber strip is
       the best window found by the search. The score is the quantity inside the maximum in the
       definition, evaluated for one window.</div>
-      <div class="source measured"><span class="tag">Measured</span><span>Channels 001, 002 and 003 &mdash; driver head center of gravity, three axes &mdash; baseline corrected and combined into a resultant. NHTSA test 10642, 2019 BMW&nbsp;X5 into a rigid barrier at 15.65&nbsp;m/s, TRC of Ohio, 7 January 2019.</span></div>`;
+      <div class="source measured"><span class="tag">Measured</span><span>Channels 001, 002 and 003 &mdash; driver head center of gravity, three axes &mdash; baseline corrected, passed through the CFC&nbsp;1000 filter and combined into a resultant. NHTSA test 10642, 2019 BMW&nbsp;X5 into a rigid barrier at 15.65&nbsp;m/s, TRC of Ohio, 7 January 2019.</span></div>`;
     this.appendChild(root);
 
-    const d = await (await fetch('data/test10642-head-resultant.json')).json();
+    const d = await (await fetch('data/test10642-head-resultant-cfc1000.json')).json();
     const n = d.n, dt = d.dt, a = Float64Array.from(d.a);
     const t = new Float64Array(n);
     for (let i = 0; i < n; i++) t[i] = d.t0 + i * dt;
@@ -1138,11 +1138,11 @@ async function prefixDemo(host) {
       integral, with the two values being subtracted marked and the gap between them drawn. Widen
       the window and the direct sum needs more terms; the subtraction still needs one.</div>
     <div class="source measured"><span class="tag">Measured</span><span>Driver head resultant,
-      channels 001, 002 and 003 combined, baseline corrected. NHTSA test 10642, 2019 BMW&nbsp;X5
+      channels 001, 002 and 003, baseline corrected, CFC&nbsp;1000 filtered and combined. NHTSA test 10642, 2019 BMW&nbsp;X5
       into a rigid barrier, TRC of Ohio, 7 January 2019.</span></div>`;
   host.appendChild(root);
 
-  const d = await (await fetch('data/test10642-head-resultant.json')).json();
+  const d = await (await fetch('data/test10642-head-resultant-cfc1000.json')).json();
   const n = d.n, dt = d.dt, a = Float64Array.from(d.a);
   const t = new Float64Array(n);
   for (let i = 0; i < n; i++) t[i] = d.t0 + i * dt;

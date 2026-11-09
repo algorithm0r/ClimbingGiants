@@ -1,4 +1,4 @@
-/* Generated bundle: kit, the root-finding-fails demo, this deck's
+/* Generated bundle: kit, the evaluations-are-the-currency demo, this deck's
    figures, the slide runtime, the presenter tools, page.js.
    Do not edit. */
 
@@ -968,34 +968,12 @@ function realNoiseRaw(n, sd = 1) {
   return scaleTo(out, sd);
 }
 
-/* Root-finding failures. Four cases on real data and three on constructed
-   functions.
+/* Two demos. The first runs three methods on the shot's fitted height under a
+   shared evaluation budget, with evaluations on the x axis so the curves are
+   comparable. The second is the example class's 7.4 MPa slope, where each
+   evaluation is a run of the lab, plotted as the bracket width each run left. */
 
-   The shot is arc 79 from data/arcs.json, the arc the other week 7 pages use:
-   a least-squares parabola in z over its free-flight frames, time measured from
-   release. All 24 frames give z = 3.4520 + 4.7428 t - 4.9153 t^2 and fitted
-   gravity 9.831 m/s^2. The first six give z = 3.4675 + 4.3250 t - 3.1473 t^2
-   and 6.295 m/s^2.
-
-   The slope is data/slope-example-runs.json, the Slope Stability Lab's example
-   class. Bisection is walked through the runs the class actually made, and it
-   stops where the next midpoint has no run.
-
-   The constructed cases are the overhanging beam (pole), the 6 m beam's
-   deflection (a root off the structure) and a shot that only just reaches the
-   rim (a touching root). */
-
-const RIM = 3.048;
-const G = 9.81;
-const VY_B = Math.sqrt(2 * G * (3.05 - 2.00));             // 4.5388 m/s
-const W_C = 10, RA_C = 15, MSTAR = 8;                      // kN/m, kN, kN.m
-const W_D = 10e3, L_D = 6.0, EI_D = 200e9 * 8.5e-5;        // N/m, m, N.m^2
-
-const M_C  = x => RA_C * x - W_C * x * x / 2;              // kN.m, 0 <= x <= 4
-const dM_C = x => RA_C - W_C * x;
-const DFL  = x => W_D * x * (L_D ** 3 - 2 * L_D * x * x + x ** 3) / (24 * EI_D);
-const dDFL = x => W_D * (L_D ** 3 - 6 * L_D * x * x + 4 * x ** 3) / (24 * EI_D);
-
+const RIM = 3.048, DSTAR = 5;
 function polyfit(xs, ys, deg) {
   const n = deg + 1;
   const A = Array.from({length: n}, (_, i) => {
@@ -1018,273 +996,180 @@ function polyfit(xs, ys, deg) {
   return Array.from({length: n}, (_, i) => A[i][n] / A[i][i]);
 }
 
-/* arc 79, time from release, and a fit to its first n free-flight frames */
-async function loadShot() {
-  const d = await (await fetch('data/arcs.json')).json();
-  const a = d.arcs.find(x => x.id === 79);
-  const k = a.rel, t0 = a.t[k];
-  const T = a.t.map(v => v - t0);
-  const fitN = n => {
-    const ts = T.slice(k, k + n);
-    const [c, b, q] = polyfit(ts, a.z.slice(k, k + n), 2);
-    const [x0, x1] = polyfit(ts, a.x.slice(k, k + n), 1);
-    const [y0, y1] = polyfit(ts, a.y.slice(k, k + n), 1);
-    /* the falling crossing: the larger root, since q < 0 */
-    const disc = b * b - 4 * q * (c - RIM);
-    const tc = disc >= 0 ? (-b - Math.sqrt(disc)) / (2 * q) : NaN;
-    const miss = Math.hypot(x0 + x1 * tc - a.hoop_x, y0 + y1 * tc - a.hoop_y);
-    return {c, b, q, g: -2 * q, tc, miss, last: ts[ts.length - 1]};
-  };
-  return {arc: a, T, rel: k, nf: a.key.nf, fitN, inR: d.in_radius_m, outR: d.out_radius_m};
-}
+const FLOOR = 1e-16;
 
-function bisect(f, a, b, tol) {
-  let ev = 0;
-  const F = x => { ev++; const v = f(x); return isFinite(v) ? v : NaN; };
-  let fa = F(a), fb = F(b);
-  if (!(fa * fb <= 0)) return {status: 'refused', ev};
-  for (let k = 0; k < 200 && (b - a) > tol; k++) {
-    const x = (a + b) / 2, fm = F(x);
-    if (fa * fm <= 0) { b = x; fb = fm; } else { a = x; fa = fm; }
+/* each returns [{evals, err}]: an estimate's error against the evaluations used
+   to compute it, the count page 21 uses. Bisection reports its bracket width,
+   the bound it guarantees, as pages 20 and 21 do. */
+function runBisection(F, err, budget) {
+  let a = 0.5, b = 1.5, fa = F(a), evals = 2;
+  const out = [{evals, err: b - a}];
+  while (evals < budget) {
+    const m = 0.5 * (a + b), fm = F(m); evals++;
+    if (fa * fm <= 0) b = m; else { a = m; fa = fm; }
+    out.push({evals, err: b - a});
   }
-  return {status: 'stopped', x: (a + b) / 2, ev};
+  return out;
 }
-
-function newton(f, df, x0, tol, maxIt = 30) {
-  let ev = 0, x = x0;
-  const iter = [x];
-  let fx = f(x); ev++;
-  for (let k = 0; k < maxIt; k++) {
-    if (Math.abs(fx) < tol) return {status: 'stopped', x, ev, iter};
-    const d = df(x); ev++;
-    if (d === 0 || !isFinite(d)) return {status: 'stalled', x, ev, iter};
+function runNewton(F, DF, err, budget, x0) {
+  let x = x0, evals = 0;
+  const out = [{evals, err: err(x)}];
+  while (evals + 2 <= budget) {
+    const d = DF(x), fx = F(x); evals += 2;
+    if (d === 0 || !isFinite(d)) break;
     x = x - fx / d;
-    iter.push(x);
-    if (!isFinite(x)) return {status: 'diverged', x, ev, iter};
-    fx = f(x); ev++;
+    if (!isFinite(x)) break;
+    out.push({evals, err: err(x)});
   }
-  return {status: 'budget', x, ev, iter};
+  return out;
+}
+function runSecant(F, err, budget, x0, x1) {
+  let a = x0, b = x1, fa = F(a), evals = 1;
+  const out = [{evals: 0, err: err(b)}];
+  while (evals < budget) {
+    const fb = F(b); evals++;
+    if (fb === fa) break;
+    const x = b - fb * (b - a) / (fb - fa);
+    if (!isFinite(x)) break;
+    out.push({evals, err: err(x)});
+    a = b; fa = fb; b = x;
+  }
+  return out;
 }
 
-/* the verdict on a returned value: is it in the domain, is it a root, and
-   which way does f cross there */
-function judge(c, x, tol) {
-  if (!isFinite(x)) return 'no value returned';
-  if (c.domain && (x < c.domain[0] || x > c.domain[1])) return 'outside ' + c.domainNote;
-  const fx = Math.abs(c.f(x));
-  if (!(fx < tol)) return 'not a root, |f| is ' + MINUS(fx.toPrecision(3));
-  const h = 1e-4, before = c.f(x - h), after = c.f(x + h);
-  if (before * after >= 0) return 'a root, with no sign change either side';
-  return 'a root, f ' + (after > before ? 'rising' : 'falling') + ' through zero';
+/* redraw each run on a common evaluation axis, holding the last value */
+function onAxis(run, budget) {
+  const y = new Float64Array(budget + 1);
+  let j = 0;
+  for (let e = 0; e <= budget; e++) {
+    while (j + 1 < run.length && run[j + 1].evals <= e) j++;
+    y[e] = run[j].err;
+  }
+  return y;
 }
-
-/* Newton and bisection on one function: the start is a slider, the tolerance
-   and (where there is a choice) the bracket are segments */
-function explorer(c) {
-  const segs = [{key: 'tol', label: 'tolerance', value: '1e-6', options: [
-    {value: '1e-4', label: '10⁻⁴'}, {value: '1e-6', label: '10⁻⁶'}, {value: '1e-8', label: '10⁻⁸'}]}];
-  if (c.brackets.length > 1)
-    segs.unshift({key: 'br', label: 'bisection bracket', value: '0', options:
-      c.brackets.map((b, i) => ({value: String(i), label: '[' + MINUS(String(b[0])) + ', ' + b[1] + ']'}))});
-  return {
-    async data() {
-      const extra = c.load ? await c.load() : {};
-      const XS = linspace(c.x[0], c.x[1], 1400);
-      return {...extra, XS, YS: Float64Array.from(XS, c.f)};
-    },
-    setting: c.setting, caption: c.caption, source: c.source,
-    controls: [{key: 'x0', label: 'Newton starts at', min: c.x[0], max: c.x[1], step: 'any',
-                value: c.start, unit: c.xUnit, dp: 3}],
-    segments: segs,
-    panels: [{label: c.yLabel, unit: c.yUnit, height: 240, xAxis: true,
-              xLabel: c.xLabel, xUnit: c.xUnit, xScale: 1, yClamp: c.yClamp || null}],
-    readouts: [
-      {key: 'bi', label: 'bisection returns'}, {key: 'biv', label: 'bisection, checked'},
-      {key: 'nw', label: 'Newton returns'}, {key: 'nwv', label: 'Newton, checked'}],
-    compute(s) {
-      const tol = +s.tol, br = c.brackets[+(s.br || 0)];
-      const bi = bisect(c.f, br[0], br[1], tol);
-      const nw = newton(c.f, c.df, s.x0, tol);
-      const marks = [];
-      if (bi.status !== 'refused' && bi.x >= c.x[0] && bi.x <= c.x[1])
-        marks.push({t: bi.x, y: 0, square: true, text: 'bisection', dx: 8, dy: 30});
-      const val = x => MINUS(x.toPrecision(6)) + ' ' + c.xUnit;
-      const opts = {rings: c.rings, marks, bands: [{x0: br[0], x1: br[1]}],
-        iterates: nw.iter.slice(0, 8).map(x => ({x, y: c.f(x)}))};
-      if (c.frames) opts.scatter = [c.frames(this)];
-      return {
-        panels: [{x: this.XS, y: this.YS, range: c.x, opts}],
-        readouts: {
-          bi: bi.status === 'refused' ? 'nothing, after ' + bi.ev + ' evaluations'
-                                      : val(bi.x) + ' after ' + bi.ev + ' evaluations',
-          biv: bi.status === 'refused' ? 'refused, f has the same sign at both ends' : judge(c, bi.x, tol),
-          nw: val(nw.x) + ' after ' + nw.ev + ' evaluations',
-          nwv: nw.status === 'stopped' ? judge(c, nw.x, tol)
-             : nw.status === 'stalled' ? 'stopped, the derivative is zero there'
-             : 'stopped without converging'
-        }
-      };
-    }
-  };
-}
-
-const SHOT_SOURCE = {kind: 'measured', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz, one three-pointer (arc 79). The height is a least-squares parabola through its free-flight frames, so its roots are also available from the quadratic formula.'};
-const SLOPE_SOURCE = {kind: 'simulated', text: 'The Slope Stability Lab&rsquo;s public example class, fetched 2026-11-02. Each run is one GPU simulation of a rock slope shaken by a recorded earthquake scaled to a peak ground acceleration (PGA), a minute or two of machine time. The threshold is one choice, since the lab leaves the definition of damage to you.'};
-const MADE = {kind: 'constructed', text: 'Constructed with ordinary numbers. Neither the tracked shots nor the slope runs show this failure, so it is shown on a function with a known answer.'};
-
-const ZF = [3.4520, 4.7428, -4.9153];                      // arc 79, all 24 frames
-
-const SLOPE_SETUPS = [
-  {strength: 2.6, bracket: [1, 2]},
-  {strength: 5.8, bracket: [2, 4]},
-  {strength: 5.8, bracket: [2.7, 2.9]}
-];
 
 mountDemo({
-  'two-roots': explorer({
-    setting: 'When does the shot fall through the rim? <em>f</em>(<em>t</em>)&nbsp;=&nbsp;<em>z</em>(<em>t</em>)&nbsp;&minus;&nbsp;3.048&nbsp;m, with <em>z</em>(<em>t</em>)&nbsp;=&nbsp;3.4520&nbsp;+&nbsp;4.7428<em>t</em>&nbsp;&minus;&nbsp;4.9153<em>t</em>&sup2; fitted to the shot&rsquo;s 24 free-flight frames.',
-    caption: 'Dots are the tracked frames, as height minus 3.048&nbsp;m, and the curve is the fitted parabola. Rings mark both of its roots. Amber numbered dots are Newton&rsquo;s estimates in order, the red square is what bisection returned, and the shaded band is the bracket bisection was given. Drag Newton&rsquo;s start across the apex at 0.482&nbsp;s.',
-    source: SHOT_SOURCE,
-    load: loadShot,
-    frames: s => ({x: s.T, y: s.arc.z.map(v => v - RIM), cls: 'scatter', r: 2.6}),
-    f:  t => ZF[0] + ZF[1] * t + ZF[2] * t * t - RIM,
-    df: t => ZF[1] + 2 * ZF[2] * t,
-    x: [-0.4, 1.5], xLabel: 'time since release', xUnit: 's',
-    yLabel: 'f = z − 3.048', yUnit: 'm', yClamp: [-4, 1.9],
-    rings: [{x: -0.07875, y: 0, text: '−0.0787 s'}, {x: 1.04366, y: 0, text: '1.0437 s'}],
-    brackets: [[-0.4, 1.5], [0, 1.5], [-0.3, 0.4]],
-    start: 0.20
-  }),
-
-  'few-frames': {
-    async data() { return loadShot(); },
-    setting: 'The same shot, predicted from its first frames only. Each fit is a parabola in height and a line in each of <em>x</em> and <em>y</em>, and the crossing is the falling root of <em>f</em>(<em>t</em>)&nbsp;=&nbsp;<em>z</em>(<em>t</em>)&nbsp;&minus;&nbsp;3.048&nbsp;m.',
-    caption: 'Red dots are the frames the fit used and green dots are the rest of the record. The solid curve is the fit to the frames used, the dashed curve is the fit to all 24 free-flight frames, and the dashed line is the rim. The ring is the predicted crossing.',
-    source: SHOT_SOURCE,
-    controls: [{key: 'n', label: 'frames used', min: 5, max: 24, step: 1, value: 6, dp: 0}],
-    panels: [{label: 'height', unit: 'm', height: 250, xAxis: true,
-              xLabel: 'time since release', xUnit: 's', xScale: 1, yClamp: [1.5, 5]}],
+  budget: {
+    /* the same fit as pages 19 and 20: arc 79's free-flight frames, time from release */
+    async data() {
+      const d = await (await fetch('data/arcs.json')).json();
+      const a = d.arcs.find(x => x.role === 'clean');
+      const k = a.rel, nf = a.key.nf;
+      const T = [], Z = [];
+      for (let i = k; i < k + nf; i++) { T.push(a.t[i] - a.t[k]); Z.push(a.z[i]); }
+      const [c0, c1, c2] = polyfit(T, Z, 2);
+      const F = t => c0 + c1 * t + c2 * t * t - RIM;
+      const DF = t => c1 + 2 * c2 * t;
+      /* the falling root in closed form, so the error axis measures the methods */
+      const C = c0 - RIM, root = (-c1 - Math.sqrt(c1 * c1 - 4 * c2 * C)) / (2 * c2);
+      return {F, DF, err: t => Math.max(FLOOR, Math.abs(t - root))};
+    },
+    setting: 'When does the shot fall through the rim? The root of <em>f</em>(<em>t</em>)&nbsp;=&nbsp;<em>z</em>(<em>t</em>)&nbsp;&minus;&nbsp;3.048&nbsp;m answers it, ' +
+             'with <em>z</em>(<em>t</em>) the parabola fitted to the shot. Bisection starts from the bracket [0.5,&nbsp;1.5]&nbsp;s, Newton from ' +
+             'the last frame fitted, 0.92&nbsp;s, and the secant method from the last two, 0.88 and 0.92&nbsp;s. The horizontal axis is ' +
+             'the evaluations used to compute each estimate.',
+    source: {kind: 'measured', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz. The height is a least-squares parabola through the 24 free-flight frames of one shot (arc 79). Its falling root is also available from the quadratic formula, so the error is the actual error.'},
+    caption: 'Bisection is the dashed straight line, the width of its bracket, which halves with each evaluation whatever the function does. ' +
+             'The width is the bound bisection guarantees. The other two keep no bracket, so they are shown by their actual error. ' +
+             'The secant curve and the Newton dots bend down because they use the values of <em>f</em> as well as their signs. ' +
+             'Errors below 10⁻¹⁶&nbsp;s are drawn at 10⁻¹⁶&nbsp;s, about the spacing of double-precision numbers near 1&nbsp;s. ' +
+             'The last readout gives the machine time if each evaluation were a run of the Slope Stability Lab.',
+    controls: [{key: 'budget', label: 'evaluation budget', min: 6, max: 44, step: 1, value: 24, dp: 0}],
+    panels: [{label: 'error in the crossing time', unit: 's', height: 250, xAxis: true,
+              xLabel: 'evaluations of f spent', xUnit: '', xScale: 1, yLog: true}],
     readouts: [
-      {key: 'used', label: 'frames used'}, {key: 'g', label: 'fitted gravity'},
-      {key: 'tc', label: 'predicted crossing'}, {key: 'miss', label: 'distance from hoop center'},
-      {key: 'all', label: 'from all 24 frames'}],
+      {key: 'b',  label: 'budget'},
+      {key: 'eb', label: 'bisection bracket'},
+      {key: 'en', label: 'Newton reaches'},
+      {key: 'es', label: 'secant reaches'},
+      {key: 'run', label: 'as slope runs'}
+    ],
     compute(s) {
-      const n = Math.round(s.n), F = this.fitN(n), A = this.fitN(this.nf), k = this.rel;
-      const XS = linspace(-0.3, 1.7, 400);
-      const z = (P, t) => P.c + P.b * t + P.q * t * t;
-      const used = {x: this.T.slice(k, k + n), y: this.arc.z.slice(k, k + n), cls: 'scatter-hi', r: 3.4};
-      const rest = {x: [...this.T.slice(0, k), ...this.T.slice(k + n)],
-                    y: [...this.arc.z.slice(0, k), ...this.arc.z.slice(k + n)], cls: 'scatter', r: 2.6};
-      const verdict = m => m < this.inR ? 'in' : m > this.outR ? 'out' : 'on the rim';
+      const {F, DF, err} = this, B = Math.round(s.budget);
+      const runs = {
+        bisection: runBisection(F, err, B),
+        newton: runNewton(F, DF, err, B, 0.92),
+        secant: runSecant(F, err, B, 0.88, 0.92)
+      };
+      const X = linspace(0, B, B + 1);
+      const yb = onAxis(runs.bisection, B);
+      const ys = onAxis(runs.secant, B);
+      const final = k => runs[k][runs[k].length - 1].err;
+      const show = v => v <= FLOOR ? 'below 10⁻¹⁶ s' : v.toExponential(1) + ' s';
       return {
-        panels: [{x: XS, y: Float64Array.from(XS, t => z(F, t)), ghost: Float64Array.from(XS, t => z(A, t)),
-          range: [-0.3, 1.7],
-          opts: {scatter: [rest, used], hlines: [{y: RIM, text: 'rim, 3.048 m'}],
-                 rings: isFinite(F.tc) ? [{x: F.tc, y: RIM, text: F.tc.toFixed(3) + ' s'}] : []}}],
+        panels: [{x: X, y: ys, ghost: yb, range: [0, B],
+          opts: {
+            label: 'error (secant solid, Newton dots) and bracket width (bisection dashed)',
+            pred: null,
+            marks: runs.newton.map(p => ({t: p.evals, y: p.err}))
+          }}],
         readouts: {
-          used: n + ', up to ' + F.last.toFixed(2) + ' s after release',
-          g: F.g.toFixed(2) + ' m/s²',
-          tc: isFinite(F.tc) ? F.tc.toFixed(3) + ' s' : 'never reaches the rim',
-          miss: isFinite(F.tc) ? F.miss.toFixed(3) + ' m, ' + verdict(F.miss) : '—',
-          all: A.tc.toFixed(3) + ' s, ' + A.miss.toFixed(3) + ' m, gravity ' + A.g.toFixed(2) + ' m/s²'
+          b: B + ' evaluations',
+          eb: show(final('bisection')),
+          en: show(final('newton')),
+          es: show(final('secant')),
+          run: B + ' to ' + 2 * B + ' minutes, ' + (B <= 40 ? 'within' : 'over') + ' the 40-run budget'
         }
       };
     }
   },
 
-  'slope-bracket': {
+  /* Second demo: what each run bought on the example class's 7.4 MPa slope.
+     The bracket is the strongest shaking still under the threshold and the
+     weakest over it, among the runs made so far. */
+  cost: {
     async data() {
       const d = await (await fetch('data/slope-example-runs.json')).json();
-      return {runs: d.runs};
-    },
-    setting: 'The largest shaking a slope survives, with damage taken as moving more than a threshold <em>d</em>*, so <em>f</em>(PGA)&nbsp;=&nbsp;slope moved&nbsp;&minus;&nbsp;<em>d</em>*. Bisection is walked through the runs the example class made, and it stops where its next midpoint has no run.',
-    caption: 'Green dots are every run the class made on this slope. Amber numbered dots are the runs bisection uses, in its order, starting with the two ends. The dashed line is the threshold and the shaded band is the bracket bisection is left with.',
-    source: SLOPE_SOURCE,
-    segments: [
-      {key: 'setup', label: 'slope and bracket', value: '0', options: SLOPE_SETUPS.map((q, i) =>
-        ({value: String(i), label: q.strength + ' MPa, [' + q.bracket[0] + ', ' + q.bracket[1] + '] g'}))},
-      {key: 'dstar', label: 'threshold', value: '5', options: [
-        {value: '5', label: '5 cm'}, {value: '15', label: '15 cm'}]}],
-    panels: [{label: 'slope moved', unit: 'cm', height: 250, xAxis: true,
-              xLabel: 'peak ground acceleration', xUnit: 'g', xScale: 1, yLog: true}],
-    readouts: [
-      {key: 'path', label: 'runs bisection uses'}, {key: 'brack', label: 'bracket left'},
-      {key: 'next', label: 'next run needed'}, {key: 'below', label: 'over the threshold below the bracket'}],
-    compute(s) {
-      const q = SLOPE_SETUPS[+s.setup], dstar = +s.dstar;
-      const runs = this.runs.filter(r => r.strength_mpa === q.strength);
-      const at = x => runs.filter(r => Math.abs(r.pga_g - x) < 1e-6).sort((p, v) => p.run_id - v.run_id);
-      const F = r => r.slope_moved_cm - dstar;
-      let [a, b] = q.bracket;
-      const used = [at(a)[0], at(b)[0]];
-      const fa0 = F(used[0]), fb0 = F(used[1]);
-      const refused = fa0 * fb0 > 0;
-      let next = null, fa = fa0;
-      if (!refused) {
-        for (;;) {
-          const m = (a + b) / 2, hit = at(m);
-          if (!hit.length) { next = m; break; }
-          used.push(hit[0]);
-          if (fa * F(hit[0]) <= 0) b = m; else { a = m; fa = F(hit[0]); }
-        }
+      const runs = d.runs.filter(r => r.strength_mpa === 7.4).sort((p, q) => p.run_id - q.run_id);
+      const width = [];
+      for (let n = 1; n <= runs.length; n++) {
+        const made = runs.slice(0, n);
+        const under = made.filter(r => r.slope_moved_cm < DSTAR).map(r => r.pga_g);
+        const over = made.filter(r => r.slope_moved_cm >= DSTAR).map(r => r.pga_g);
+        width.push(under.length && over.length ? Math.min(...over) - Math.max(...under) : NaN);
       }
-      const g = v => String(+v.toFixed(5));
-      const lo = Math.min(...runs.map(r => r.pga_g)), hi = Math.max(...runs.map(r => r.pga_g));
-      const over = runs.filter(r => r.pga_g < a && r.slope_moved_cm > dstar).map(r => r.pga_g);
+      const repeat = runs.map((r, i) => runs.slice(0, i).some(q => q.pga_g === r.pga_g));
+      return {runs, width, repeat};
+    },
+    setting: 'The 7.4&nbsp;MPa slope, with damage taken as more than 5&nbsp;cm of movement. ' +
+             'Each point is one run of the lab, and its height is the width of the bracket left by the runs so far.',
+    source: {kind: 'simulated', text: 'The Slope Stability Lab&rsquo;s public example class, fetched 2026-11-02. Each run is one GPU simulation of the slope, a minute or two of machine time. The 5&nbsp;cm threshold is one choice, since the lab leaves the definition of damage to you.'},
+    caption: 'The first two runs leave no bracket, and the third leaves one 2&nbsp;g wide. Each halving after that lowers the width by a factor of 2, ' +
+             'and a factor of 10 (one more digit of PGA) takes about 3.3 halvings. Rings mark repeats of a setting already run. ' +
+             'Each repeat is a new run that costs one from the budget and leaves the width where it was.',
+    controls: [{key: 'n', label: 'runs made', min: 3, max: 17, step: 1, value: 17, dp: 0}],
+    panels: [{label: 'bracket width', unit: 'g', height: 250, xAxis: true,
+              xLabel: 'runs on this slope', xUnit: '', xScale: 1, yLog: true}],
+    readouts: [
+      {key: 'n',     label: 'runs made'},
+      {key: 'rep',   label: 'of them repeats'},
+      {key: 'width', label: 'bracket width'},
+      {key: 'dig',   label: 'digits since the first bracket'},
+      {key: 'time',  label: 'machine time'}
+    ],
+    compute(s) {
+      const n = Math.round(s.n), {width, repeat} = this;
+      const X = [], Y = [], R = [];
+      for (let i = 0; i < n; i++) {
+        if (!isFinite(width[i])) continue;
+        X.push(i + 1); Y.push(width[i]);
+        if (repeat[i]) R.push({x: i + 1, y: width[i]});
+      }
+      const reps = repeat.slice(0, n).filter(Boolean).length;
+      const w = width[n - 1], w0 = width.find(isFinite);
       return {
-        panels: [{x: runs.map(r => r.pga_g), y: runs.map(r => r.slope_moved_cm),
-          range: [Math.max(0, lo - 0.1), hi + 0.1],
-          opts: {dots: true, yRange: [0.1, 1000],
-                 hlines: [{y: dstar, text: dstar + ' cm'}],
-                 bands: refused ? [] : [{x0: a, x1: b}],
-                 iterates: used.map(r => ({x: r.pga_g, y: r.slope_moved_cm}))}}],
+        panels: [{x: X, y: Y, range: [0, 18],
+          opts: {dots: true, dotR: 3.6, yRange: [0.001, 3], rings: R}}],
         readouts: {
-          path: used.map(r => g(r.pga_g) + ' g (' + +r.slope_moved_cm.toPrecision(3) + ' cm)').join(', '),
-          brack: refused ? 'none, both ends ' + (fa0 < 0 ? 'under' : 'over') + ' the threshold, so bisection refuses'
-                         : '[' + g(a) + ', ' + g(b) + '] g',
-          next: refused ? '—' : g(next) + ' g, which the class has not run',
-          below: refused ? '—' : over.length ? [...new Set(over)].sort((p, v) => p - v).map(g).join(', ') + ' g' : 'none'
+          n: String(n),
+          rep: String(reps),
+          width: +w.toPrecision(3) + ' g',
+          dig: Math.log10(w0 / w).toFixed(1),
+          time: n + ' to ' + 2 * n + ' minutes'
         }
       };
     }
-  },
-
-  'pole': explorer({
-    setting: 'Overhanging beam, 10&nbsp;kN/m over 6&nbsp;m, supports at 0 and 4&nbsp;m. The condition <em>M</em>(<em>x</em>)&nbsp;=&nbsp;8&nbsp;kN&middot;m written as a ratio, <em>g</em>(<em>x</em>)&nbsp;=&nbsp;8/<em>M</em>(<em>x</em>)&nbsp;&minus;&nbsp;1.',
-    caption: 'The trace breaks where <em>g</em> passes through its pole at <em>x</em>&nbsp;=&nbsp;3&nbsp;m. Rings mark the two true roots of the condition, and the red square is what bisection returned.',
-    source: MADE,
-    f:  x => MSTAR / M_C(x) - 1,
-    df: x => -MSTAR * dM_C(x) / (M_C(x) * M_C(x)),
-    x: [0.3, 3.9], xLabel: 'position along the beam', xUnit: 'm',
-    yLabel: 'g = 8/M − 1', yUnit: '', yClamp: [-6, 6],
-    rings: [{x: 0.69377, y: 0, text: '0.694 m'}, {x: 2.30623, y: 0, text: '2.306 m'}],
-    brackets: [[2.4, 3.7]], start: 2.60
-  }),
-
-  'off-beam': explorer({
-    setting: 'Simply supported beam, 6&nbsp;m, 10&nbsp;kN/m, <em>EI</em>&nbsp;=&nbsp;1.7&times;10&#8311;&nbsp;N&middot;m&sup2;. Where does the deflection reach 8&nbsp;mm? <em>f</em>(<em>x</em>)&nbsp;=&nbsp;&delta;(<em>x</em>)&nbsp;&minus;&nbsp;0.008&nbsp;m.',
-    caption: 'The shaded band is bisection&rsquo;s bracket, on the left half of a beam that runs from 0 to 6&nbsp;m. Rings mark the two positions on the beam where the deflection is 8&nbsp;mm. Move Newton&rsquo;s start toward midspan at 3&nbsp;m and watch the estimates leave the beam.',
-    source: MADE,
-    f:  x => DFL(x) - 0.008,
-    df: x => dDFL(x),
-    x: [-6, 6], xLabel: 'position', xUnit: 'm',
-    yLabel: 'f = δ − 0.008', yUnit: 'm', yClamp: [-0.05, 0.05],
-    rings: [{x: 1.77650, y: 0, text: '1.777 m'}, {x: 4.22350, y: 0, text: '4.224 m'}],
-    brackets: [[0.5, 3.0]], start: 2.90,
-    domain: [0, 6], domainNote: 'the beam'
-  }),
-
-  'double': explorer({
-    setting: 'A shot thrown to only just reach the rim: released at 2.00&nbsp;m with 4.5388&nbsp;m/s upward, so the apex is exactly 3.05&nbsp;m. <em>f</em>(<em>t</em>)&nbsp;=&nbsp;height&nbsp;&minus;&nbsp;3.05&nbsp;m touches zero without crossing.',
-    caption: 'The curve touches zero at 0.4627&nbsp;s without crossing it, so bisection has no bracket to work with anywhere. Change the tolerance and watch Newton&rsquo;s returned value move.',
-    source: MADE,
-    f:  t => 2.00 + VY_B * t - G * t * t / 2 - 3.05,
-    df: t => VY_B - G * t,
-    x: [0, 0.95], xLabel: 'time', xUnit: 's',
-    yLabel: 'f = height − 3.05', yUnit: 'm',
-    rings: [{x: 0.46267, y: 0, text: '0.4627 s'}],
-    brackets: [[0, 0.93]], start: 0.00
-  })
+  }
 });
 
 /* Whiteboards: math worked out on a slide as if written by hand (the
@@ -1475,249 +1360,181 @@ setTimeout(() => {
   });
 }, 0);
 
-/* Lecture 22's own figures, on the notes page's real cases. The shot is arc 79
-   (data/arcs.json), time from release: all 24 free-flight frames give
-   z = 3.4520 + 4.7428 t - 4.9153 t^2, the first six give 3.4675 + 4.3250 t -
-   3.1473 t^2. The slope is the Slope Stability Lab's example class
-   (data/slope-example-runs.json): the 2.6 MPa slope bisected on [1, 2] g, the
-   5.8 MPa slope between 2.2 and 3.1 g, and the repeated settings.
-   Hosts are found by data-fig. polyfit comes from the notes page's demo. */
+/* Lecture 22's own figures, on the two problems of week 7.
+   The shot: f(t) = z(t) - 3.048 m on the parabola fitted to arc 79's 24
+   free-flight frames (the same fit as the notes page's demo).
+   lec22-sweep: f at 2,000 times, read for its root.
+   The slope: the example class's runs, data/slope-example-runs.json.
+   lec22-trail: the 7.4 MPa slope's bracket width after each of its runs.
+   lec22-queue: all 78 runs in the order the class made them, one row a slope.
+   Hosts are found by data-fig. */
 (() => {
-  const RIM = 3.048;
-  const axis = (xr, yr, xt, yt, xl, yl, fy = v => String(v), fx = v => String(v)) => [
-    ...xt.map(v => ({x: v, y: yr[0], dy: 13, anchor: 'middle', text: fx(v)})),
+  const hosts = f => document.querySelectorAll('[data-fig="' + f + '"] .fig-body');
+  const any = (...fs) => fs.some(f => hosts(f).length);
+  const axis = (xr, yr, xt, yt, xl, yl, fy = v => String(v)) => [
+    ...xt.map(v => ({x: v, y: yr[0], dy: 13, anchor: 'middle', text: String(v)})),
     ...yt.map(v => ({x: xr[0], y: v, dx: 4, dy: 4, anchor: 'start', text: fy(v)})),
     {x: xr[1], y: yr[0], dy: -5, anchor: 'end', text: xl},
     {x: xr[0], y: yr[1], dx: 4, dy: 10, anchor: 'start', text: yl}];
+  const SUP = {'-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹'};
+  const pow10 = v => '10' + String(v).split('').map(c => SUP[c]).join('');
   const box = (a, b, y0, y1) => [{x: a, y: y0}, {x: b, y: y0}, {x: b, y: y1}, {x: a, y: y1}];
-  const neg = (v, d) => (v < 0 ? '−' : '+') + Math.abs(v).toFixed(d);
-  const mns = s => String(s).replace('-', '−');
-  const newtonPath = (f, df, x, n) => {
-    const p = [x];
-    for (let k = 0; k < n; k++) { x = x - f(x) / df(x); p.push(x); }
-    return p;
-  };
-  const level = (xr, y) => ({from: [xr[0], y], to: [xr[1], y], cls: 'level'});
 
-  /* the shot: arc 79's frames and the two fits */
-  const fs = t => 3.4520 + 4.7428 * t - 4.9153 * t * t - RIM;
-  const dfs = t => 4.7428 - 2 * 4.9153 * t;
-  const SR = [-0.0787, 1.0437], TS = linspace(-0.4, 1.5, 300), xrS = [-0.42, 1.52], yrS = [-4, 1.9];
-  const shotBase = extra => ({w: 440, h: 220, xRange: xrS, yRange: yrS, zero: true,
-    curves: [{x: TS, y: [...TS].map(fs)}],
-    notes: axis(xrS, yrS, [0, 0.5, 1, 1.5], [-3, -2, -1, 1], 'time since release (s) →', '↑ f = z − 3.048 (m)'), ...extra});
-
-  fetch('data/arcs.json').then(r => r.json()).then(d => {
-    const a = d.arcs.find(x => x.id === 79), k = a.rel;
-    const T = a.t.map(v => v - a.t[k]), Z = a.z;
-    const fitN = n => {
-      const [c, b, q] = polyfit(T.slice(k, k + n), Z.slice(k, k + n), 2);
-      return {z: t => c + b * t + q * t * t, g: -2 * q,
-              tc: (-b - Math.sqrt(b * b - 4 * q * (c - RIM))) / (2 * q)};
-    };
-    const F24 = fitN(24), F6 = fitN(6);
-    /* the tracked crossings, by linear interpolation between frames */
-    const cross = [];
-    for (let i = 0; i + 1 < Z.length; i++)
-      if ((Z[i] - RIM) * (Z[i + 1] - RIM) < 0)
-        cross.push(T[i] + (T[i + 1] - T[i]) * (Z[i] - RIM) / (Z[i] - Z[i + 1]));
-
-    document.querySelectorAll('[data-fig="lec22-frames"] .fig-body').forEach(host => {
-      const xr = [-0.9, 1.72], yr = [0.9, 5.1], X = linspace(0, 0.92, 120);
-      diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr,
-        alt: 'Every tracked frame of the shot, with the rim at 3.048 m. The ball rises through the rim height at -0.072 s, before release, and falls through it at 1.055 s.',
-        leads: [level(xr, RIM), {from: [0, yr[0]], to: [0, yr[1]], cls: 'cast'}],
-        curves: [{x: X, y: [...X].map(F24.z)}],
-        points: [...T.map((t, i) => ({x: t, y: Z[i], r: 2.4})),
-                 ...cross.slice(0, 2).map(t => ({x: t, y: RIM, r: 6, cls: 'miss'}))],
-        notes: [...axis(xr, yr, [-0.5, 0, 0.5, 1, 1.5], [2, 3, 4, 5], 'time since release (s) →', '↑ height (m)', v => v, mns),
-          {x: xr[0], y: RIM, dx: 4, dy: -5, anchor: 'start', text: 'rim, 3.048 m'},
-          {x: 0, y: yr[1], dx: 4, dy: 22, anchor: 'start', text: 'release'},
-          {x: cross[0], y: RIM, dx: -9, dy: 16, anchor: 'end', cls: 'hi', text: 'rising, ' + mns(cross[0].toFixed(3)) + ' s'},
-          {x: cross[1], y: RIM, dx: 9, dy: -8, anchor: 'start', cls: 'hi', text: 'falling, ' + cross[1].toFixed(3) + ' s'}]});
-    });
-
-    document.querySelectorAll('[data-fig="lec22-six"] .fig-body').forEach(host => {
-      const xr = [-0.3, 1.72], yr = [1.4, 5.1], X = linspace(-0.25, 1.68, 300), X24 = linspace(-0.25, 1.2, 200);
-      const pts = T.map((t, i) => ({t, z: Z[i], i})).filter(p => p.t >= xr[0] && p.t <= xr[1]);
-      diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr,
-        alt: 'The parabola fitted to the first six frames rises too high and crosses the rim at 1.465 s. The parabola fitted to all 24 free-flight frames crosses at 1.044 s.',
-        leads: [level(xr, RIM)],
-        curves: [{x: X24, y: [...X24].map(F24.z), cls: 'ghost'},
-                 {x: X, y: [...X].map(F6.z).map(v => Math.max(yr[0], v))}],
-        points: [...pts.map(p => (p.i >= k && p.i < k + 6) ? {x: p.t, y: p.z, r: 3.6} : {x: p.t, y: p.z, r: 2.4, cls: 'ghost'}),
-                 {x: F6.tc, y: RIM, r: 6, cls: 'miss'}, {x: F24.tc, y: RIM, r: 6, cls: 'miss'}],
-        notes: [...axis(xr, yr, [0, 0.5, 1, 1.5], [2, 3, 4, 5], 'time since release (s) →', '↑ height (m)'),
-          {x: 0.1, y: 4.25, dx: -4, anchor: 'end', text: 'the six frames'},
-          {x: 1.25, y: 4.45, anchor: 'start', text: 'fitted to six frames'},
-          {x: F6.tc, y: RIM, dx: 9, dy: -8, anchor: 'start', cls: 'hi', text: F6.tc.toFixed(3) + ' s'},
-          {x: F24.tc, y: RIM, dx: -9, dy: 16, anchor: 'end', text: 'all 24 frames, ' + F24.tc.toFixed(3) + ' s'}]});
-    });
-
-    document.querySelectorAll('[data-fig="lec22-gravity"] .fig-body').forEach(host => {
-      const [l, r] = diagramRow(host, 2), N = [];
-      for (let n = 6; n <= 24; n++) N.push(n);
-      const fits = N.map(fitN), xr = [3.5, 25];
-      diagram(l, {w: 300, h: 210, xRange: xr, yRange: [4, 11], title: 'fitted gravity (m/s²)',
-        alt: 'Fitted gravity against the number of frames used, 6.29 at six frames, 7.63 at nine and 9.83 at 24, settling as frames arrive.',
-        leads: [level(xr, 9.81)],
-        points: fits.map((f, i) => ({x: N[i], y: f.g, r: 3.4})),
-        notes: [...axis(xr, [4, 11], [6, 10, 14, 18, 22], [5, 7, 9], 'frames used →', ''),
-          {x: 24.5, y: 9.81, dy: -5, anchor: 'end', text: '9.81'},
-          {x: 6, y: fits[0].g, dx: 7, dy: 4, anchor: 'start', cls: 'hi', text: fits[0].g.toFixed(2)}]});
-      diagram(r, {w: 300, h: 210, xRange: xr, yRange: [0.9, 1.6], title: 'predicted crossing (s)',
-        alt: 'The predicted crossing against the number of frames used, falling from 1.465 s at six frames to 1.044 s at 24.',
-        leads: [level(xr, F24.tc)],
-        points: fits.map((f, i) => ({x: N[i], y: f.tc, r: 3.4})),
-        notes: [...axis(xr, [0.9, 1.6], [6, 10, 14, 18, 22], [1.0, 1.2, 1.4], 'frames used →', ''),
-          {x: 24.5, y: F24.tc, dy: -5, anchor: 'end', text: F24.tc.toFixed(3)},
-          {x: 6, y: fits[0].tc, dx: 7, dy: 4, anchor: 'start', cls: 'hi', text: fits[0].tc.toFixed(3)}]});
+  if (any('lec22-sweep')) fetch('data/arcs.json').then(r => r.json()).then(d => {
+    const a = d.arcs.find(x => x.role === 'clean');
+    const k = a.rel, nf = a.key.nf, T = [], Z = [];
+    for (let i = k; i < k + nf; i++) { T.push(a.t[i] - a.t[k]); Z.push(a.z[i]); }
+    const [c0, c1, c2] = polyfit(T, Z, 2);
+    const F = t => c0 + c1 * t + c2 * t * t - 3.048;
+    const C = c0 - 3.048, ROOT = (-c1 - Math.sqrt(c1 * c1 - 4 * c2 * C)) / (2 * c2);
+    /* the sweep: f at 2,000 times, which costs about 0.13 ms at 64 ns each */
+    hosts('lec22-sweep').forEach(host => {
+      const xr = [-0.06, 1.36], yr = [-2.1, 1.95], ts = linspace(0, 1.3, 2000);
+      diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr, zero: true,
+        alt: 'The shot\'s f(t), height minus rim height, evaluated at 2,000 times from 0 to 1.3 s. It rises to about 1.5 m and falls through zero at 1.0437 s.',
+        curves: [{x: ts, y: ts.map(F)}],
+        points: [{x: ROOT, y: 0, r: 4.4, cls: 'dot'}],
+        notes: [...axis(xr, yr, [0, 0.5, 1], [], 't (s) →', '↑ f(t) = z(t) − 3.048 (m)'),
+          {x: ROOT, y: 0, dx: 8, dy: -8, anchor: 'start', cls: 'hi', text: '1.0437 s'},
+          {x: 0.62, y: -1.2, anchor: 'middle', text: '2,000 evaluations, about 0.13 ms'}]});
     });
   });
 
-  document.querySelectorAll('[data-fig="lec22-roots"] .fig-body').forEach(host => {
-    const b = shotBase({alt: 'f over -0.4 to 1.5 s, crossing zero rising at -0.0787 s and falling at 1.0437 s.'});
-    b.points = SR.map(x => ({x, y: 0, r: 5.5, cls: 'miss'}));
-    b.notes.push({x: SR[0], y: 0, dx: -8, dy: -9, anchor: 'end', cls: 'hi', text: 'rising, −0.0787 s'},
-                 {x: SR[1], y: 0, dx: 8, dy: -9, anchor: 'start', cls: 'hi', text: 'falling, 1.0437 s'});
-    diagram(host, b);
+  /* Schematics for the costly cases. Nothing on these was measured, so they
+     carry no tick values (the kit's diagram convention). */
+
+  /* lec22-crash: a few cars crashed at different speeds, a fitted line, and the
+     speed read off the line at the allowed crush (Campbell's linear model) */
+  hosts('lec22-crash').forEach(host => {
+    const xr = [0, 10.4], yr = [-0.4, 7.6], vs = 7.4, cs = 4.4;
+    diagram(host, {w: 440, h: 200, xRange: xr, yRange: yr,
+      alt: 'Sketch: crush against impact speed for three crashed cars, a straight line fitted through them, and the speed where the line meets the allowed crush.',
+      curves: [{x: [3, 9.9], y: [0, 6.9]}],
+      leads: [{from: [0, cs], to: [vs, cs], cls: 'level'}],
+      drops: [{x: vs, y: cs}],
+      points: [{x: 4.8, y: 1.95}, {x: 6.6, y: 3.45}, {x: 8.4, y: 5.55}].map(p => ({...p, r: 5, cls: 'miss'})),
+      notes: [{x: xr[1], y: yr[0], dy: -5, anchor: 'end', text: 'impact speed →'},
+        {x: xr[0], y: yr[1], dx: 4, dy: 10, anchor: 'start', text: '↑ crush'},
+        {x: 8.4, y: 5.55, dx: -10, dy: 2, anchor: 'end', text: 'crashed cars'},
+        {x: 9.9, y: 6.9, dx: -8, dy: -4, anchor: 'end', text: 'fitted line'},
+        {x: 0.2, y: cs, dy: -5, anchor: 'start', text: 'allowed crush'},
+        {x: vs, y: 1.4, dx: 6, anchor: 'start', cls: 'hi', text: 'speed read\nfrom the line'},
+        {x: 2.8, y: 0.55, anchor: 'end', text: 'no lasting crush\nbelow this speed'}]});
   });
 
-  document.querySelectorAll('[data-fig="lec22-shot-newton"] .fig-body').forEach(host => {
-    const p = newtonPath(fs, dfs, 0.20, 4);
-    const b = shotBase({alt: 'Newton from 0.20 s steps backwards along the tangents and converges on -0.0787 s.'});
-    b.areas = [{pts: box(xrS[0], 0, yrS[0], yrS[1]), cls: 'neg'}];
-    b.leads = p.slice(0, -1).map((x, k) => ({from: [x, fs(x)], to: [p[k + 1], 0], cls: 'alt', over: true}));
-    b.drops = [{x: 0.4825, y: fs(0.4825)}];
-    b.points = [...p.map(x => ({x, y: fs(x), r: 3.8})), {x: SR[0], y: 0, r: 5.5, cls: 'miss'}];
-    b.notes.push(...p.slice(0, 3).map((x, k) => ({x, y: fs(x), dx: k ? -6 : 7, dy: k ? 4 : -6, anchor: k ? 'end' : 'start', tex: 'x_' + k})),
-                 {x: 0.4825, y: fs(0.4825), dy: -8, anchor: 'middle', text: 'apex, 0.482 s'},
-                 {x: -0.21, y: -3.4, anchor: 'middle', text: 'in the hand'},
-                 {x: SR[0], y: 0, dx: 8, dy: 17, anchor: 'start', cls: 'hi', text: 'returns −0.0787 s'});
-    diagram(host, b);
+  /* lec22-fatigue: the machine, and the load it applies. The upper grip is
+     fixed; the actuator drives the lower grip up and down, so the specimen is
+     stretched at each peak of the load and squeezed at each trough. */
+  hosts('lec22-fatigue').forEach(host => {
+    const xr = [0, 20], yr = [0, 10], P = 2.2, T0 = 11;
+    const rect = (a, b, c, e, cls) => ({pts: box(a, b, c, e), cls});
+    const ts = linspace(T0, 18.7, 400), L = t => 5 + 2.6 * Math.sin(2 * Math.PI * (t - T0) / P);
+    const pk = T0 + 1.25 * P, tr = T0 + 1.75 * P, c0 = T0 + 2.25 * P, c1 = c0 + P;
+    diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr, axes: false,
+      alt: 'Sketch of a fatigue machine: a specimen held between a fixed upper grip and a lower grip that an actuator drives up and down. Beside it, the load on the specimen against time: a wave that stretches the specimen at each peak and squeezes it at each trough, one cycle every 1/20 s, repeated 10 million times.',
+      areas: [rect(1, 1.4, 1, 9.3, 'fill'), rect(6, 6.4, 1, 9.3, 'fill'), rect(1, 6.4, 8.6, 9.3, 'fill'),
+        rect(0.6, 6.8, 0.4, 1.1, 'fill'), rect(3, 4.4, 7.3, 8.6, 'fill'), rect(3, 4.4, 2.7, 3.8, 'fill'),
+        rect(3.5, 3.9, 1.1, 2.7, 'fill'),
+        {cls: 'tri', pts: [[3.2, 7.3], [4.2, 7.3], [4.2, 6.5], [3.9, 6.1], [3.9, 4.9], [4.2, 4.5], [4.2, 3.8],
+          [3.2, 3.8], [3.2, 4.5], [3.5, 4.9], [3.5, 6.1], [3.2, 6.5]].map(([x, y]) => ({x, y}))}],
+      leads: [{from: [5.2, 1.7], to: [5.2, 3.3], cls: 'chord'},
+        {from: [4.4, 7.95], to: [6.9, 7.95]}, {from: [4.0, 5.5], to: [6.9, 5.5]}, {from: [4.4, 3.25], to: [6.9, 3.25]}, {from: [3.9, 1.9], to: [6.9, 1.9]},
+        {from: [T0, 5], to: [19.6, 5], cls: 'zeroline'}, {from: [T0, 1.6], to: [T0, 8.6], cls: 'axis'},
+        {from: [c0, 8.25], to: [c1, 8.25], cls: 'axis'}, {from: [c0, 8.0], to: [c0, 8.5], cls: 'axis'}, {from: [c1, 8.0], to: [c1, 8.5], cls: 'axis'}],
+      curves: [{x: ts, y: ts.map(L)}],
+      points: [{x: pk, y: L(pk), r: 4, cls: 'dot'}, {x: tr, y: L(tr), r: 4, cls: 'dot'}],
+      notes: [{x: 5.2, y: 3.3, dy: 4, anchor: 'middle', cls: 'hi', text: '▲'},
+        {x: 5.2, y: 1.7, dy: 4, anchor: 'middle', cls: 'hi', text: '▼'},
+        {x: 7, y: 7.95, dy: 4, anchor: 'start', text: 'fixed grip'},
+        {x: 7, y: 5.5, dy: 4, anchor: 'start', text: 'specimen'},
+        {x: 7, y: 3.25, dy: 4, anchor: 'start', text: 'moving grip'},
+        {x: 7, y: 1.9, dy: 4, anchor: 'start', text: 'actuator'},
+        {x: T0, y: 8.6, dx: 4, dy: 4, anchor: 'start', text: '↑ pull'},
+        {x: T0, y: 1.6, dx: 4, dy: 4, anchor: 'start', text: '↓ push'},
+        {x: pk, y: L(pk), dy: -9, anchor: 'middle', text: 'stretched'},
+        {x: tr, y: L(tr), dy: 16, anchor: 'middle', text: 'squeezed'},
+        {x: (c0 + c1) / 2, y: 8.25, dy: -5, anchor: 'middle', text: 'one cycle, 1/20 s'},
+        {x: 19.6, y: 5, dy: 13, anchor: 'end', text: 'time →'},
+        {x: 15.3, y: 0.5, anchor: 'middle', cls: 'hi', text: 'repeated 10,000,000 times'}]});
   });
 
-  document.querySelectorAll('[data-fig="lec22-shot-wide"] .fig-body').forEach(host => {
-    const b = shotBase({alt: 'On -0.4 to 1.5 s both ends of f are negative, though two roots lie between them.'});
-    b.areas = [{pts: box(-0.4, 1.5, yrS[0], yrS[1]), cls: 'fill'}];
-    b.points = [{x: -0.4, y: fs(-0.4)}, {x: 1.5, y: fs(1.5)}, ...SR.map(x => ({x, y: 0, r: 5.5, cls: 'miss'}))];
-    b.notes.push({x: -0.4, y: fs(-0.4), dx: 7, dy: 4, anchor: 'start', text: 'f(−0.4) = ' + neg(fs(-0.4), 3)},
-                 {x: 1.5, y: fs(1.5), dx: -7, dy: -6, anchor: 'end', text: 'f(1.5) = ' + neg(fs(1.5), 3)},
-                 {x: 0.48, y: 1.55, anchor: 'middle', cls: 'hi', text: 'two roots inside'});
-    diagram(host, b);
+  /* lec22-stair: the staircase (up-and-down) method on twelve specimens. An
+     example sequence that follows the rule, not a measured campaign. */
+  hosts('lec22-stair').forEach(host => {
+    const lv = [3, 4, 3, 2, 3, 4, 3, 4, 3, 2, 3, 2];
+    const ok = [1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1];
+    const xr = [-0.6, 13.4], yr = [0.6, 5.6], n = lv.map((_, i) => i + 1);
+    diagram(host, {w: 440, h: 210, xRange: xr, yRange: yr,
+      alt: 'Twelve specimens in order. Each is tested one stress step above the last if the last survived 10 million cycles, and one step below if it broke. The stress steps between levels 2 and 4.',
+      curves: [{x: n, y: lv, cls: 'ghost'}],
+      points: n.map((x, i) => ({x, y: lv[i], r: 5, cls: ok[i] ? 'dot' : 'miss'})),
+      notes: [{x: xr[1], y: yr[0], dy: -5, anchor: 'end', text: 'specimen, in the order tested →'},
+        {x: xr[0], y: yr[1], dx: 4, dy: 10, anchor: 'start', text: '↑ stress, in equal steps'},
+        ...n.filter(x => x % 2).map(x => ({x, y: yr[0], dy: 13, anchor: 'middle', text: String(x)})),
+        {x: 6.5, y: 5.05, anchor: 'start', text: '● survived 10⁷ cycles: next one step up'},
+        {x: 6.5, y: 4.6, anchor: 'start', cls: 'hi', text: '○ broke: next one step down'}]});
   });
 
-  /* the sign of f either side of each root, drawn wide enough to see */
-  document.querySelectorAll('[data-fig="lec22-direction"] .fig-body').forEach(host => {
-    const cells = diagramRow(host, 2), w = 0.08;
-    [[cells[0], SR[0], 'at −0.0787 s', 'rising'], [cells[1], SR[1], 'at 1.0437 s', 'falling']].forEach(([cell, r, title, way]) => {
-      const xr = [r - 0.12, r + 0.12], yr = [-0.75, 0.75], X = linspace(xr[0], xr[1], 120);
-      const L = r - w, R = r + w;
-      diagram(cell, {w: 300, h: 210, xRange: xr, yRange: yr, zero: true, title: title + ', ' + way,
-        alt: 'f near the root ' + title + ': ' + (way === 'rising' ? 'negative before it and positive after' : 'positive before it and negative after') + '.',
-        curves: [{x: X, y: [...X].map(fs)}],
-        drops: [],
-        points: [{x: L, y: fs(L), r: 4}, {x: R, y: fs(R), r: 4}, {x: r, y: 0, r: 5.5, cls: 'miss'}],
-        notes: [{x: L, y: fs(L), dx: fs(L) > 0 ? 0 : 9, dy: fs(L) > 0 ? -10 : 4, anchor: fs(L) > 0 ? 'middle' : 'start', cls: 'hi', text: 'f ' + (fs(L) > 0 ? '> 0' : '< 0')},
-                {x: R, y: fs(R), dx: fs(R) > 0 ? 0 : -9, dy: fs(R) > 0 ? -10 : 4, anchor: fs(R) > 0 ? 'middle' : 'end', cls: 'hi', text: 'f ' + (fs(R) > 0 ? '> 0' : '< 0')},
-                {x: L, y: -0.75, dy: -5, anchor: 'middle', text: 'before'},
-                {x: R, y: -0.75, dy: -5, anchor: 'middle', text: 'after'}]});
-    });
+  /* lec22-creep: short tests, a fitted line on log time, and its extension to
+     the 100,000 h a design needs. The band widens as the line leaves the data. */
+  hosts('lec22-creep').forEach(host => {
+    const xr = [0.55, 5.7], yr = [0, 10], s = lt => 9 - 1.35 * (lt - 1);
+    const pts = [[1.4, 0.3], [1.8, -0.4], [2.2, 0.2], [2.6, -0.2], [2.9, 0.4], [3.2, -0.3], [3.5, 0.1], [3.8, -0.4], [4.0, 0.3]];
+    const band = lt => 0.55 + 0.9 * Math.max(0, lt - 4);
+    const ext = Array.from(linspace(1.2, 5.1, 40));
+    diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr,
+      alt: 'Sketch: rupture stress against rupture time on a log scale. Test points run from about 10 to 10,000 hours. A line fitted to them is extended to 100,000 hours, and the band around it widens beyond the data.',
+      areas: [{cls: 'tri', pts: [...ext.map(lt => ({x: lt, y: s(lt) + band(lt)})), ...ext.slice().reverse().map(lt => ({x: lt, y: s(lt) - band(lt)}))]}],
+      curves: [{x: [1.2, 4.1], y: [s(1.2), s(4.1)]}, {x: [4.1, 5.1], y: [s(4.1), s(5.1)], cls: 'ghost'}],
+      drops: [{x: 4, y: s(4) + 1.4}, {x: 5, y: s(5) - band(5)}],
+      points: [...pts.map(([lt, e]) => ({x: lt, y: s(lt) + e, r: 3.8})), {x: 5, y: s(5), r: 5, cls: 'miss'}],
+      notes: [{x: xr[1], y: yr[0], dy: -5, anchor: 'end', text: 'time to rupture, log scale →'},
+        {x: xr[0], y: yr[1], dx: 4, dy: 10, anchor: 'start', text: '↑ stress'},
+        ...[1, 2, 3, 4, 5].map(k => ({x: k, y: yr[0], dy: 13, anchor: 'middle', text: ['10 h', '100 h', '1,000 h', '10,000 h', '100,000 h'][k - 1]})),
+        {x: 4, y: s(4) + 1.4, dy: -6, anchor: 'middle', text: 'tests seldom run longer'},
+        {x: 5, y: s(5), dx: 9, dy: -10, anchor: 'middle', cls: 'hi', text: 'read at 100,000 h'},
+        {x: 2.2, y: s(2.2) + 0.2, dx: -6, dy: -10, anchor: 'end', text: 'tests'}]});
   });
 
-  /* the slope, on a log axis drawn by hand: y is log10 of centimeters */
-  const LG = v => Math.log10(v);
-  const cmTick = v => v >= 1 ? String(v) : String(v);
-  fetch('data/slope-example-runs.json').then(r => r.json()).then(d => {
-    const runs = s => d.runs.filter(r => r.strength_mpa === s);
-    const at = (s, x) => runs(s).filter(r => Math.abs(r.pga_g - x) < 1e-6).sort((p, q) => p.run_id - q.run_id);
-    const yrL = [LG(0.1), LG(6000)];
-    const logAxis = (xr, xt, yr = yrL) => axis(xr, yr, xt, [0, 1, 2, 3].filter(v => v >= yr[0] && v <= yr[1]),
-      'peak ground acceleration (g) →', '↑ slope moved (cm)', v => cmTick(Math.pow(10, v)));
-    /* bisection through the class's runs, stopping where the next midpoint has none */
-    const walk = (s, a, b, dstar) => {
-      const used = [at(s, a)[0], at(s, b)[0]];
-      const F = r => r.slope_moved_cm - dstar;
-      let fa = F(used[0]);
-      if (fa * F(used[1]) > 0) return {used, a, b, refused: true};
-      for (;;) {
-        const m = (a + b) / 2, hit = at(s, m);
-        if (!hit.length) return {used, a, b, next: m};
-        used.push(hit[0]);
-        if (fa * F(hit[0]) <= 0) b = m; else { a = m; fa = F(hit[0]); }
-      }
-    };
-    const numbered = used => used.map((r, i) => ({x: r.pga_g, y: LG(r.slope_moved_cm), dx: 7, dy: -6, anchor: 'start', text: String(i)}));
+  if (any('lec22-trail', 'lec22-queue')) fetch('data/slope-example-runs.json').then(r => r.json()).then(d => {
+    const runs = d.runs.slice().sort((p, q) => p.run_id - q.run_id);
 
-    document.querySelectorAll('[data-fig="lec22-slope-runs"] .fig-body').forEach(host => {
-      const xr = [0.9, 3.1], R = runs(2.6);
-      diagram(host, {w: 440, h: 220, xRange: xr, yRange: yrL,
-        alt: 'The 2.6 MPa slope: every run the example class made, distance moved on a log scale against PGA, with thresholds at 5 and 15 cm.',
-        leads: [level(xr, LG(5)), level(xr, LG(15))],
-        points: R.map(r => ({x: r.pga_g, y: LG(r.slope_moved_cm), r: 3.6})),
-        notes: [...logAxis(xr, [1, 1.5, 2, 2.5, 3]),
-          {x: xr[1], y: LG(5), dx: -2, dy: 13, anchor: 'end', text: 'd* = 5 cm'},
-          {x: xr[1], y: LG(15), dx: -2, dy: -5, anchor: 'end', text: 'd* = 15 cm'}]});
-    });
-
-    [['lec22-bis5', 5], ['lec22-bis15', 15]].forEach(([fig, dstar]) => {
-      document.querySelectorAll('[data-fig="' + fig + '"] .fig-body').forEach(host => {
-        const xr = [0.9, 2.1], R = runs(2.6).filter(r => r.pga_g <= 2.05), w = walk(2.6, 1, 2, dstar);
-        const over = dstar === 15 ? R.filter(r => r.pga_g < w.a && r.slope_moved_cm > dstar) : [];
-        diagram(host, {w: 440, h: 220, xRange: xr, yRange: yrL,
-          alt: 'Bisection on the 2.6 MPa slope on 1 to 2 g with a ' + dstar + ' cm threshold, through the runs the class made. It is left with ' + w.a + ' to ' + w.b + ' g.',
-          areas: [{pts: box(w.a, w.b, yrL[0], yrL[1]), cls: 'fill'}],
-          leads: [level(xr, LG(dstar))],
-          points: [...w.used.map(r => ({x: r.pga_g, y: LG(r.slope_moved_cm), r: 3.8})),
-                   ...over.map(r => ({x: r.pga_g, y: LG(r.slope_moved_cm), r: 6.5, cls: 'miss'}))],
-          notes: [...logAxis(xr, [1, 1.25, 1.5, 1.75, 2]), ...numbered(w.used),
-            {x: xr[1], y: LG(dstar), dx: -2, dy: -5, anchor: 'end', text: 'd* = ' + dstar + ' cm'},
-            ...(over.length ? [{x: 1.33, y: LG(600), anchor: 'middle', cls: 'hi', text: 'over 15 cm, below the bracket'}] : [])]});
+    hosts('lec22-trail').forEach(host => {
+      const mine = runs.filter(r => r.strength_mpa === 7.4);
+      const pts = [];
+      mine.forEach((r, i) => {
+        const made = mine.slice(0, i + 1);
+        const under = made.filter(q => q.slope_moved_cm < 5).map(q => q.pga_g);
+        const over = made.filter(q => q.slope_moved_cm >= 5).map(q => q.pga_g);
+        if (!under.length || !over.length) return;
+        const rep = mine.slice(0, i).some(q => q.pga_g === r.pga_g);
+        pts.push({n: i + 1, w: Math.min(...over) - Math.max(...under), rep});
       });
-    });
-
-    document.querySelectorAll('[data-fig="lec22-58"] .fig-body').forEach(host => {
-      const xr = [2.25, 3.08], R = runs(5.8).filter(r => r.pga_g >= 2.3 && r.pga_g <= 3.05);
-      const inside = R.filter(r => r.pga_g > 2.7 && r.pga_g < 2.9 && r.slope_moved_cm > 15);
-      diagram(host, {w: 440, h: 220, xRange: xr, yRange: yrL,
-        alt: 'The 5.8 MPa slope from 2.3 to 3.0 g. At 2.7 and 2.9 g it moved less than 15 cm, and at 2.75 and 2.8 g, between them, more.',
-        areas: [{pts: box(2.7, 2.9, yrL[0], yrL[1]), cls: 'fill'}],
-        leads: [level(xr, LG(15))],
-        points: [...R.map(r => ({x: r.pga_g, y: LG(r.slope_moved_cm), r: 3.6})),
-                 ...inside.map(r => ({x: r.pga_g, y: LG(r.slope_moved_cm), r: 6.5, cls: 'miss'}))],
-        notes: [...logAxis(xr, [2.3, 2.5, 2.7, 2.9]),
-          {x: 2.5, y: LG(15), dy: -5, anchor: 'middle', text: 'd* = 15 cm'},
-          {x: 2.7, y: LG(1.851), dx: -6, dy: 4, anchor: 'end', text: '1.85 cm'},
-          {x: 2.9, y: LG(13.479), dx: 7, dy: 14, anchor: 'start', text: '13.5 cm'},
-          {x: 2.75, y: LG(307.2), dx: 8, dy: 4, anchor: 'start', cls: 'hi', text: '307 cm'},
-          {x: 2.8, y: LG(23.4), dx: 8, dy: -6, anchor: 'start', cls: 'hi', text: '23 cm'}]});
-    });
-
-    /* the largest spread between repeats: the 2.6 MPa slope at 1.28125 g */
-    document.querySelectorAll('[data-fig="lec22-repeats"] .fig-body').forEach(host => {
-      const R = at(2.6, 1.28125), xr = [0.4, R.length + 0.6], yr = [0, 250];
+      const xr = [0.3, 19.5], yr = [-3.2, 0.75], L = v => Math.log10(v);
+      const w0 = pts[0], wn = pts[pts.length - 1];
       diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr,
-        alt: 'Two runs of the 2.6 MPa slope at 1.28125 g moved 206.8 and 140.4 cm.',
-        leads: R.map((r, i) => ({from: [i + 1, 0], to: [i + 1, r.slope_moved_cm], cls: 'cast'})),
-        points: R.map((r, i) => ({x: i + 1, y: r.slope_moved_cm, r: 5})),
-        notes: [...axis(xr, yr, [], [50, 100, 150, 200], 'run, in the order the class made them →', '↑ slope moved (cm)'),
-          ...R.map((r, i) => ({x: i + 1, y: yr[0], dy: 13, anchor: 'middle', text: 'run ' + r.run_id})),
-          ...R.map((r, i) => ({x: i + 1, y: r.slope_moved_cm, dx: 10, dy: 4, anchor: 'start', cls: 'hi',
-            text: r.slope_moved_cm.toFixed(1) + ' cm'}))]});
+        alt: 'Bracket width on a log scale after each of the 7.4 MPa slope\'s 17 runs: 2 g after the third run, halving with each new setting, flat at each of the four repeats, 0.00195 g after the seventeenth.',
+        curves: [{x: pts.map(p => p.n), y: pts.map(p => L(p.w)), cls: 'ghost'}],
+        points: pts.map(p => ({x: p.n, y: L(p.w), r: p.rep ? 4.6 : 4, cls: p.rep ? 'miss' : 'dot'})),
+        notes: [...axis(xr, yr, [1, 3, 5, 7, 9, 11, 13, 15, 17], [-3, -2, -1, 0], 'runs on this slope →', '↑ bracket width (g), log scale', pow10),
+          {x: w0.n, y: L(w0.w), dx: -8, dy: 4, anchor: 'end', text: '2 g'},
+          {x: wn.n, y: L(wn.w), dx: 8, dy: 4, anchor: 'start', text: '0.002 g'},
+          {x: 11.5, y: L(0.015625), dy: -12, anchor: 'middle', cls: 'hi', text: 'rings: repeats'}]});
     });
 
-    document.querySelectorAll('[data-fig="lec22-flip"] .fig-body').forEach(host => {
-      const R = at(1.0, 0.4375), xr = [0.4, R.length + 0.6], yr = [5.3, 6.7];
-      diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr,
-        alt: 'Three runs of the 1.0 MPa slope at 0.4375 g moved 6.33, 5.68 and 6.33 cm. A threshold at 6 cm puts them over, under and over.',
-        areas: [{pts: box(xr[0], xr[1], 5.68, 6.33), cls: 'fill'}],
-        leads: [level(xr, 6.0)],
-        points: R.map((r, i) => ({x: i + 1, y: r.slope_moved_cm, r: 5})),
-        notes: [...axis(xr, yr, [], [5.5, 6, 6.5], 'run, in the order the class made them →', '↑ slope moved (cm)', v => v.toFixed(1)),
-          ...R.map((r, i) => ({x: i + 1, y: yr[0], dy: 13, anchor: 'middle', text: 'run ' + r.run_id})),
-          ...R.map((r, i) => ({x: i + 1, y: r.slope_moved_cm, dx: 10, dy: 4, anchor: 'start', cls: 'hi',
-            text: r.slope_moved_cm.toFixed(2) + ' cm, ' + (r.slope_moved_cm > 6 ? 'fails' : 'survives')})),
-          {x: xr[1], y: 6.0, dx: -4, dy: -5, anchor: 'end', text: 'd* = 6 cm'}]});
+    hosts('lec22-queue').forEach(host => {
+      const S = [7.4, 5.8, 4.2, 2.6, 1.0], N = runs.length;
+      const xr = [-15, N + 1], yr = [-0.9, 5.2];
+      const areas = runs.map((r, i) => {
+        const row = 4 - S.indexOf(r.strength_mpa);
+        return {pts: box(i + 0.12, i + 0.88, row + 0.18, row + 0.82), cls: r.strength_mpa === 7.4 ? 'tri' : 'fill'};
+      });
+      diagram(host, {w: 440, h: 200, xRange: xr, yRange: yr, axes: false,
+        alt: 'The class\'s 78 runs in the order they were made, one row for each slope. The 7.4 MPa slope\'s 17 runs are spread from the 6th place to the 78th.',
+        areas,
+        notes: [...S.map((s, j) => ({x: -1, y: 4 - j + 0.5, dy: 4, anchor: 'end', cls: s === 7.4 ? 'hi' : '', text: s.toFixed(1) + ' MPa'})),
+          ...[1, 20, 40, 60, 78].map(v => ({x: v - 0.5, y: -0.1, dy: 4, anchor: 'middle', text: String(v)})),
+          {x: N, y: -0.1, dy: 18, anchor: 'end', text: 'place in the queue →'}]});
     });
   });
 })();

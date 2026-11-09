@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Program shape II, branching and encapsulation — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
-  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
+  <link rel="stylesheet" href="css/blocks.css?v=20261109080753">
+  <link rel="stylesheet" href="css/demos.css?v=20261109080753">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -920,7 +920,7 @@ three kinds:</p>
 
 <ul class="plain">
   <li><strong>Against a tolerance.</strong> <code>if abs(f(x)) &lt; tol:</code>, close enough, stop. Every iterative method in <a href="week-07.html">week 7</a> and <a href="week-08.html">week 8</a> ends on one of these, starting with <a href="bisection.html">bisection</a>.</li>
-  <li><strong>Against a bound.</strong> <code>if x &lt; lo or x &gt; hi:</code>, which catches a value outside the region the model is valid in. <a href="root-finding-fails.html">A root outside the structure</a>, the third of the four failures in week 7, is what happens when nobody writes this one.</li>
+  <li><strong>Against a bound.</strong> <code>if x &lt; lo or x &gt; hi:</code>, which catches a value outside the region the model is valid in. A root outside the structure is what happens when nobody writes this one, and the <a href="newton-and-secant.html#verify-in-code">check in week 7</a> writes it.</li>
   <li><strong>Against a budget.</strong> <code>if evaluations &gt; budget:</code>, which gives up.
   Without
   it, a method that fails to converge runs forever.</li>
@@ -941,7 +941,7 @@ three kinds:</p>
   <em>EI</em> = 1.7&times;10<sup>7</sup>&nbsp;N&middot;m&sup2;. The curve is the formula evaluated
   outside the beam as well as on it, which is the whole point. Newton from
   <em>x</em><sub>0</sub> = 2.90&nbsp;m gives &minus;4.3305, &minus;4.2483, &minus;4.2459. The same
-  beam is worked in <a href="root-finding-fails.html">week&nbsp;7</a>.</span></div>
+  beam is worked in <a href="bisection.html#pole">week&nbsp;7</a>.</span></div>
 </figure>
 
 <p>All three compare a computed quantity against a number chosen in advance. That number is a modeling decision sitting in the middle of the code, so it deserves a name and a comment, because a bare <dfn data-g="literal">literal</dfn> hides it from everyone including you. This is the same problem as the six facts on <a href="anatomy-of-a-measured-signal.html">the first page of the course</a>, arriving in the code instead of in the file.</p>
@@ -1132,11 +1132,11 @@ page is listed here.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/program-shape-branching.js?v=20261102180601"></script>
+  <script type="module" src="js/bundle/program-shape-branching.js?v=20261109080753"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-07">November 7, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

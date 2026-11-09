@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>A constrained optimum over a window — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
-  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
+  <link rel="stylesheet" href="css/blocks.css?v=20261109080753">
+  <link rel="stylesheet" href="css/demos.css?v=20261109080753">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -846,9 +846,6 @@
           <a href="newton-and-secant.html">Newton and secant</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="root-finding-fails.html">Root-finding failures</a>
-        
-          <span class="site-nav-sep">·</span>
           <a href="evaluations-are-the-currency.html">Evaluation cost</a>
         
           <span class="site-nav-sep">·</span>
@@ -913,6 +910,8 @@
     <div class="eyebrow">Week 7 · Root Finding and Search</div>
 <h1>A constrained optimum over a window</h1>
 
+<p>Video: <a href="https://www.youtube.com/watch?v=64OWWnutqi0">The crash test Head Injury Criterion computed over a window</a> (0:06:48). <a href="lecture-23.html">Slides</a></p>
+
 <div class="claim">
   <span class="label">Claim</span>
   <p class="exact">Some quantities are defined as the extremum a functional attains over every admissible stretch of it, subject to a constraint on the length of
@@ -974,13 +973,14 @@ over all of them.</p>
 
 <div class="aside">
   <span class="label">Prior processing of the record</span>
-  <p>The three head accelerometer axes were baseline-corrected on the pre-impact window, then
-combined into a resultant and divided by 9.80665 to put the trace in <em>g</em>. Both steps come
-from earlier weeks, and both of them change the answer.</p>
-  <p>One step has been skipped, though. SAE J211 requires head acceleration to pass a <dfn
-data-g="cfc">CFC 1000</dfn> filter before HIC is computed, and this record carries only the
-laboratory's 2000 Hz anti-alias prefilter. The numbers below are correct for the
-record as stored, though they are not the numbers that would be submitted to a regulator.</p>
+  <p>Each of the three head accelerometer axes was baseline-corrected on the pre-impact window
+and passed through the <dfn data-g="cfc">CFC 1000</dfn> filter, which SAE J211 requires for head
+acceleration before HIC is computed. The three axes were then combined into a resultant and
+divided by 9.80665 to put the trace in <em>g</em>. All three steps come from earlier weeks.</p>
+  <p>The filter goes on each axis before the axes are combined. A filter adds and scales samples,
+and the resultant squares them, so filtering the resultant afterwards gives a different trace. On
+this record the filter changes HIC<sub>15</sub> by less than 0.05 and the peak by 0.03
+<em>g</em>.</p>
 </div>
 
 <h2 id="manual-and-automatic-search">Manual and Automatic Search</h2>
@@ -991,7 +991,7 @@ the maximum, evaluated for the window you have placed, and then you run the sear
 <cg-demo case="hic"></cg-demo>
 
 <p>Placing the window by eye over the peak gets close, though it falls short of the optimum. The peak resultant
-is 48.7 <em>g</em> at 78.6 ms, though the optimal window does not center on it, because the
+is 48.6 <em>g</em> at 78.5 ms, though the optimal window does not center on it, because the
 score rewards a sustained high average and so settles slightly earlier where the trace is broad,
 and not where it is tallest.</p>
 
@@ -1254,12 +1254,12 @@ Smoothness, shape and the particular numbers 389.4 and 208.2 are all irrelevant.
 about constrained optimization. This also means the pair carries information. HIC36 = HIC15
 says the best window is shorter than 15&nbsp;ms and the looser limit bought nothing. Here HIC36 is
 larger, so the best window is longer than 15&nbsp;ms.</p></div></details></li>
-    <li>The optimal 15 ms window is 69.92 to 84.88 ms, and the peak acceleration is at 78.6 ms.
+    <li>The optimal 15 ms window is 69.92 to 84.88 ms, and the peak acceleration is at 78.5 ms.
     Why is the peak not at the center of the window?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Because the window is positioned to maximize a functional of the <em>average</em> over its
 length, and the record is not symmetric about its peak.</p>
-     <p>The window runs 69.92 to 84.88&nbsp;ms, so its center is 77.40&nbsp;ms and the peak is at 78.60,
-1.2&nbsp;ms late. The optimum is where the marginal contributions at the two ends balance.
+     <p>The window runs 69.92 to 84.88&nbsp;ms, so its center is 77.40&nbsp;ms and the peak is at 78.48,
+1.1&nbsp;ms late. The optimum is where the marginal contributions at the two ends balance.
 Extending the leading edge adds whatever acceleration is there, and the trailing edge likewise,
 and the window settles where those are equal. If the record rises more slowly than it falls, the
 balance point sits to one side of the maximum. For this reason the window has to be found by searching.
@@ -1310,11 +1310,11 @@ constrained windowed optimum with the exponent and the window limit both free.</
   </script>
   
 
-  <script type="module" src="js/bundle/windowed-optimum.js?v=20261102180601"></script>
+  <script type="module" src="js/bundle/windowed-optimum.js?v=20261109080753"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-09">November 9, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

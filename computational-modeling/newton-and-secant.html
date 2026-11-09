@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Newton and the secant method — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
-  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
+  <link rel="stylesheet" href="css/blocks.css?v=20261109080753">
+  <link rel="stylesheet" href="css/demos.css?v=20261109080753">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -846,9 +846,6 @@
           <strong>Newton and secant</strong>
         
           <span class="site-nav-sep">·</span>
-          <a href="root-finding-fails.html">Root-finding failures</a>
-        
-          <span class="site-nav-sep">·</span>
           <a href="evaluations-are-the-currency.html">Evaluation cost</a>
         
           <span class="site-nav-sep">·</span>
@@ -913,217 +910,585 @@
     <div class="eyebrow">Week 7 · Root Finding and Search</div>
 <h1>Newton and the secant method</h1>
 
+<p>Video: <a href="https://www.youtube.com/watch?v=bZpPzK6yIJU">The Newton and the Secant Method for Finding Roots</a> (0:15:33). <a href="lecture-21.html">Slides</a></p>
+
 <div class="claim">
   <span class="label">Claim</span>
-  <p class="exact"><dfn data-g="newtons-method">Newton's method</dfn> follows the tangent at the
-  current estimate to where it crosses the axis and takes that crossing as the next estimate.
-  Near a simple root the number of correct digits roughly doubles each step. It requires the
-  derivative, which is simplest to get when $f$ is a formula, and it maintains no <dfn data-g="bracket">bracket</dfn>,
-  so it offers no guarantee of convergence. The <dfn data-g="secant-method">secant method</dfn>
-  replaces the tangent with the line through the two most recent estimates, requiring no
-  derivative and converging almost as fast on a smooth $f$.</p>
-  <p class="plain">  Follow the slope down to the axis and start again from there. It is usually much faster than
-  bisection, though it can fail, and it needs a function smooth enough for a straight line to
-  follow.</p>
+  <p class="exact"><dfn data-g="newtons-method">Newton's method</dfn> replaces $f$ near the
+  current estimate by its linear part, the tangent line, and takes the tangent's zero as the next
+  estimate. Near a simple root (one where $f$ crosses zero with a slope that is not zero) the
+  number of correct digits roughly doubles each step. The
+  <dfn data-g="secant-method">secant method</dfn> takes the same step with the slope estimated
+  from the last two estimates, so it needs no derivative. Neither keeps a bracket, so the
+  starting guess decides which root comes back, and a nearly flat slope can throw a step far away.
+  In one unknown both finish in
+  microseconds on a cheap $f$, and <dfn data-g="bisection">bisection</dfn> is usually fast enough.
+  The same step works for $n$ equations in $n$ unknowns, and in practice it runs on systems of
+  thousands to millions of unknowns, where solving the linear part is a job for linear algebra.</p>
+  <p class="plain">Pretend the function is a straight line, find where that line crosses zero, and
+  start again from there. In one unknown this is a faster way to do what bisection already does
+  well. It is most useful with many unknowns at once, where bisection does not apply.</p>
 </div>
 
-<h2 id="the-tangent-step">The Tangent Step</h2>
+<h2 id="keep-the-linear-part">Newton's Step on the Cube Root of 100</h2>
 
-<p>The <a href="conditions-become-roots.html" title="Conditions as roots">prediction on page
-19</a> fits a parabola to the 24 free-flight frames of one tracked three-pointer, the last of them
-at 0.92&nbsp;s after release. With $t$ in seconds since release and $z$ the ball's height in
-meters, the fit is</p>
+<p>The cube root of 100 is the root of $f(x) = x^3 - 100$, and a calculator gives it as
+4.641588833612779. That makes it a good test problem, because every error can be checked exactly.
+Since $5^3 = 125$, 5 is a reasonable first guess.</p>
 
-$$z(t) = -4.9153\,t^2 + 4.7428\,t + 3.4520$$
-
-<p>and the ball falls back through rim height where $f(t) = z(t) - 3.048 = 0$. Because $f$ is a formula,
-its derivative is a formula too. Differentiating each term with the power rule gives</p>
-
-$$f'(t) = -9.8306\,t + 4.7428 \quad \text{m/s}$$
-
-<p>which is the ball's vertical velocity on the fitted path. (The 9.83 is the fitted gravity, twice
-the 4.915.)</p>
-
-<p>At an estimate $t_k$ the tangent to $f$ is the straight line with slope $f'(t_k)$ through the
-point $(t_k, f(t_k))$. Newton's method takes the next estimate $t_{k+1}$ to be where that line
-crosses zero:</p>
+<p>Write the root as $x = 5 + p$, where $p$ is the correction still needed, and expand the cube.</p>
 
 $$\begin{aligned}
-y &= f(t_k) + f'(t_k)\,(t - t_k) && \text{the tangent line at } t_k \\
-0 &= f(t_k) + f'(t_k)\,(t_{k+1} - t_k) && \text{it crosses zero at } t_{k+1} \\
-t_{k+1} - t_k &= -\frac{f(t_k)}{f'(t_k)} && \text{divide both sides by } f'(t_k) \\
-t_{k+1} &= t_k - \frac{f(t_k)}{f'(t_k)} && \text{add } t_k \text{ to both sides}
+(5 + p)^3 - 100 &= 125 + 75\,p + 15\,p^2 + p^3 - 100 && \text{expand the cube} \\
+&= 25 + 75\,p + 15\,p^2 + p^3 && \text{collect the constants}
 \end{aligned}$$
 
-<p>Starting from the last frame fitted, $t_0 = 0.92$&nbsp;s, where the fitted ball is 0.607&nbsp;m
-above the rim and falling at 4.30&nbsp;m/s, the first step is
-$t_1 = 0.92 - 0.60708 / (-4.30127) = 0.92 + 0.14114 = 1.06114$&nbsp;s. The error is the distance
-from the estimate to the falling root, 1.0436631&nbsp;s, which the quadratic formula gives
-exactly:</p>
+<p>If the guess is close, $p$ is small, and $p^2$ and $p^3$ are smaller still. Keeping only the
+linear part gives an equation you can solve in one line.</p>
 
-<table class="data">
-  <tr><th>Step $k$</th><th>$t_k$ (s)</th><th>$f(t_k)$ (m)</th><th>$f'(t_k)$ (m/s)</th><th>Error (s)</th></tr>
-  <tr><td>0</td><td class="num">0.92</td><td class="num">0.60708</td><td class="num">&minus;4.3013</td><td class="num">1.2&times;10⁻¹</td></tr>
-  <tr><td>1</td><td class="num">1.061139</td><td class="num">&minus;0.097913</td><td class="num">&minus;5.6887</td><td class="num">1.7&times;10⁻²</td></tr>
-  <tr><td>2</td><td class="num">1.043927</td><td class="num">&minus;0.0014561</td><td class="num">&minus;5.5195</td><td class="num">2.6&times;10⁻⁴</td></tr>
-  <tr><td>3</td><td class="num">1.04366319</td><td class="num">&minus;3.4&times;10⁻⁷</td><td class="num">&minus;5.5169</td><td class="num">6.2&times;10⁻⁸</td></tr>
-  <tr><td>4</td><td class="num">1.043663128</td><td class="num">&minus;1.8&times;10⁻¹⁴</td><td class="num">&minus;5.5169</td><td class="num">3.3&times;10⁻¹⁵</td></tr>
-</table>
+$$25 + 75\,p = 0 \quad\Longrightarrow\quad p = -\tfrac{1}{3}, \qquad x_1 = 5 - \tfrac{1}{3} = 4.6667$$
 
-<p>Four steps take the error from 0.12&nbsp;s to 3&times;10⁻¹⁵&nbsp;s. At that crossing the fitted
-ball is 0.356&nbsp;m from the hoop's center, beyond the 0.348&nbsp;m at which the ball misses the rim
-entirely, so the formula calls the shot out.</p>
+<p>The next guess, $x_1 = 4.6667$, is already right to two digits. Repeating the same move from
+$x_1$ gives a better guess again. Newton's method repeats this move (keep the linear part, solve
+it, take the step) until the correction is small.</p>
 
-<h2 id="the-secant-step">The Secant Step</h2>
+<p>Newton worked this way on $x^3 - 2x - 5 = 0$, in a manuscript circulated in 1669 and printed in
+1711. From the guess 2 he wrote $x = 2 + p$, and the equation became
+$p^3 + 6p^2 + 10p - 1 = 0$. Keeping $10p - 1 = 0$ gave $p = 0.1$. He then set $p = 0.1 + q$, which
+is the same as starting again from 2.1, and $q^3 + 6.3q^2 + 11.23q + 0.061 = 0$ gave
+$q = -0.0054$. The guess became 2.0946 (the root is 2.0945515). He used no derivative and no
+tangent, only the expansion.</p>
 
-<p>The secant method uses the same step with the derivative replaced by the slope of the line
-through the last two estimates:</p>
+<h2 id="the-tangent-step">The Tangent Line and the Newton Step</h2>
+
+<p>The linear part of $f$ at a guess $x_k$ is its tangent line there, the straight line through
+$(x_k, f(x_k))$ with slope $f'(x_k)$. Here $f'(x) = 3x^2$, and at 5 the slope is 75, the
+coefficient of $p$ above. In general the step is</p>
 
 $$\begin{aligned}
-f'(t_k) &\approx \frac{f(t_k) - f(t_{k-1})}{t_k - t_{k-1}} && \text{the slope through the last two points} \\
-t_{k+1} &= t_k - f(t_k)\,\frac{t_k - t_{k-1}}{f(t_k) - f(t_{k-1})} && \text{put it into Newton's step}
+f(x_k + p) &\approx f(x_k) + f'(x_k)\,p && \text{the linear part, with } p \text{ the correction} \\
+0 &= f(x_k) + f'(x_k)\,p && \text{set it to zero} \\
+p &= -\frac{f(x_k)}{f'(x_k)} && \text{solve it, if } f'(x_k) \neq 0 \\
+x_{k+1} &= x_k - \frac{f(x_k)}{f'(x_k)} && \text{take the step}
 \end{aligned}$$
 
-<p>The slope is a finite difference, namely week 4's backward difference, with the step set by the
-last two estimates. Starting from the last two frames fitted, 0.88 and 0.92&nbsp;s, the
-slope is $(0.60708 - 0.77126)/0.04 = -4.1045$&nbsp;m/s and the first step lands at 1.06790&nbsp;s.
-Each step after that costs one new evaluation of $f$ and no derivative:</p>
+<p>Each step evaluates $f$ and $f'$ once. The first two steps from 5 are</p>
+
+$$\begin{aligned}
+x_1 &= 5 - \frac{25}{75} = 5 - 0.3333333 = 4.6666667 \\
+x_2 &= 4.6666667 - \frac{1.6296296}{65.333333} = 4.6666667 - 0.0249433 = 4.6417234
+\end{aligned}$$
+
+<p>and the error, the distance from the estimate to the root, falls as the table shows.</p>
 
 <table class="data">
-  <tr><th>Step $k$</th><th>$t_k$ (s)</th><th>$f(t_k)$ (m)</th><th>Error (s)</th></tr>
-  <tr><td>0</td><td class="num">0.88</td><td class="num">0.77126</td><td class="num">1.6&times;10⁻¹</td></tr>
-  <tr><td>1</td><td class="num">0.92</td><td class="num">0.60708</td><td class="num">1.2&times;10⁻¹</td></tr>
-  <tr><td>2</td><td class="num">1.067899</td><td class="num">&minus;0.13660</td><td class="num">2.4&times;10⁻²</td></tr>
-  <tr><td>3</td><td class="num">1.040733</td><td class="num">0.016121</td><td class="num">2.9&times;10⁻³</td></tr>
-  <tr><td>4</td><td class="num">1.043601</td><td class="num">3.4&times;10⁻⁴</td><td class="num">6.2&times;10⁻⁵</td></tr>
-  <tr><td>5</td><td class="num">1.04366329</td><td class="num">&minus;9.0&times;10⁻⁷</td><td class="num">1.6&times;10⁻⁷</td></tr>
-  <tr><td>6</td><td class="num">1.043663128</td><td class="num">5.0&times;10⁻¹¹</td><td class="num">9.0&times;10⁻¹²</td></tr>
+  <tr><th>Step $k$</th><th>$x_k$</th><th>$f(x_k)$</th><th>$f'(x_k)$</th><th>Error</th></tr>
+  <tr><td>0</td><td class="num">5</td><td class="num">25</td><td class="num">75</td><td class="num">3.6&times;10⁻¹</td></tr>
+  <tr><td>1</td><td class="num">4.6666666667</td><td class="num">1.63</td><td class="num">65.33</td><td class="num">2.5&times;10⁻²</td></tr>
+  <tr><td>2</td><td class="num">4.6417233560</td><td class="num">8.7&times;10⁻³</td><td class="num">64.64</td><td class="num">1.3&times;10⁻⁴</td></tr>
+  <tr><td>3</td><td class="num">4.6415888375</td><td class="num">2.5&times;10⁻⁷</td><td class="num">64.63</td><td class="num">3.9&times;10⁻⁹</td></tr>
+  <tr><td>4</td><td class="num">4.6415888336</td><td class="num">&minus;2.8&times;10⁻¹⁴</td><td class="num">64.63</td><td class="num">below 10⁻¹⁵</td></tr>
 </table>
 
-<h2 id="correct-digits-double-each-step">Digits Gained Per Step</h2>
-
-<details class="ans"><summary><span>Optional, open to read</span></summary><div class="body">
-<p>Near a simple root Newton's error obeys $e_{k+1} \approx C e_k^2$, where $e_k$ is the error at
-step $k$ and $C = f''/(2f')$ at the root. (It comes from a Taylor expansion of $f$ about the root
-to second order.) The error is roughly squared each step, so the number of
-correct digits roughly doubles. On the shot $f'' = -9.8306$ and $f' = -5.5169$&nbsp;m/s at the
-root, so $C = 0.89$, and the Newton table follows the law closely: $0.89 \times
-(1.75\times10^{-2})^2 = 2.7\times10^{-4}$ against a measured $2.6\times10^{-4}$, and $0.89 \times
-(2.64\times10^{-4})^2 = 6.2\times10^{-8}$ against a measured $6.2\times10^{-8}$. The powers of ten
-in the error go &minus;1, &minus;2, &minus;4, &minus;8, &minus;15.</p>
-
-<p>Compare with bisection, which gains one bit, about a third of a digit, per evaluation. On the
-same $f$, bisection from [0.5,&nbsp;1.5]&nbsp;s needs 40 midpoint evaluations to bring the bracket's
-width under 10⁻¹²&nbsp;s. Newton reaches 3&times;10⁻¹⁵&nbsp;s in four steps, which is eight
-evaluations, since each step evaluates $f$ and $f'$. The secant method reaches
-9&times;10⁻¹²&nbsp;s in six evaluations of $f$.</p>
-
-<table class="data">
-  <tr><th>Method</th><th>Needs to Start</th><th>Evaluations per Step</th><th><dfn data-g="convergence-order">Convergence Order</dfn></th>
-      <th>Guaranteed to Converge</th></tr>
-  <tr><td>bisection</td><td>a bracket</td><td>1</td><td>linear, factor 2</td><td>yes</td></tr>
-  <tr><td>Newton</td><td>$f'$ and a start</td><td>2, being $f$ and $f'$</td><td>quadratic</td><td>no</td></tr>
-  <tr><td>secant</td><td>two starts</td><td>1, being $f$ only</td><td>1.618</td><td>no</td></tr>
-</table>
-
-<p>The secant method's order is 1.618, the golden ratio. It converges a little more slowly per
-step, though each step costs half as much when $f'$ costs about as much as $f$, so per evaluation
-it is usually the faster of the two. It is also the only one of the
-three that needs neither a derivative nor a bracket.</p>
-</div></details>
+<p>The $f(x_k)$ column is the <dfn data-g="residual">residual</dfn>, which is zero at the root.
+After step 4 it is $-2.8\times10^{-14}$, about as small as $f$ gets in double precision. No
+double makes $x^3$ exactly 100. The nearest double to the root, 4.641588833612779, leaves
+$+2.8\times10^{-14}$, and Newton lands on its neighbor below, 4.641588833612778, which leaves
+$-2.8\times10^{-14}$.</p>
 
 <cg-demo case="newton"></cg-demo>
 
-<h2 id="newton-keeps-no-bracket">Steps Without a Bracket</h2>
+<h3 id="newton-in-code">Newton's Method in Code</h3>
 
-<p>Bisection's bracket is what makes its guarantee possible, because the root is inside and stays
-inside. Newton and the secant method keep no such interval, so at every step the estimate may land
-anywhere. On the shot:</p>
+<p>Your own Newton's method is a short loop. It stops when the correction is smaller than a
+<dfn data-g="tolerance">tolerance</dfn>, so the last step it takes only confirms the step before
+it. On the cube root of 100 it takes 5 steps (10 evaluations) where the table needed 4.</p>
 
-<ul class="plain">
-  <li><strong>A small derivative gives a huge step.</strong> At the apex, 0.482&nbsp;s, the fitted
-  ball is neither rising nor falling and $f' = 0$. From 0.50&nbsp;s, just after it, $f' =
-  -0.17$&nbsp;m/s, the tangent is nearly flat, and the first step lands at 9.47&nbsp;s. (Set the
-  demo above to start at 0.50&nbsp;s and take one step to see it.)</li>
-  <li><strong>The step can leave the domain.</strong> Nothing in the formula knows that the free
-  flight starts at release and ends at the rim. A step to 9.47&nbsp;s is long after the ball has
-  come down.</li>
-  <li><strong>It can converge to a different root</strong> than the one the question asks for. From
-  0.40&nbsp;s, before the apex, Newton converges on the rising crossing at &minus;0.079&nbsp;s,
-  before release. On a parabola Newton converges on the root on the same side of the apex as the
-  start.</li>
-  <li><strong>It can cycle.</strong> On some functions Newton moves back and forth between two
-  points forever, converging to neither. A parabola with two real roots is not one of them.</li>
-</ul>
+<div class="codetabs" id="code1">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+    <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
+  </div>
+  <pre data-lang="python" data-notes="1|tol and max_steps have defaults, so a call can leave them out ([Functions](py-functions.html)).;3|One evaluation of the derivative per step.;4|A flat tangent never crosses zero, so there is no next estimate.;6|The correction, minus f divided by its slope. One evaluation of f.;8|Stop when the correction is smaller than tol. The step that passes this test confirms the one before it.;10|Newton keeps no bracket, so it can run out of steps without converging.;12|lambda makes a one-line function. This returns 4.641588833612778 after 5 steps.">def newton(f, df, x, tol=1e-12, max_steps=50):
+    for step in range(max_steps):
+        slope = df(x)
+        if slope == 0:
+            raise ZeroDivisionError(f'flat tangent at x = {x:g}')
+        dx = -f(x) / slope
+        x = x + dx
+        if abs(dx) &lt; tol:
+            return x, step + 1
+    raise RuntimeError(f'no convergence in {max_steps} steps')
 
-<p>Library root finders still take steps of this kind, though they keep a bracket around them, as
-the last section shows.</p>
+x, steps = newton(lambda x: x**3 - 100, lambda x: 3 * x**2, 5.0)</pre>
+  <pre data-lang="matlab" hidden data-notes="1|MATLAB has no default values in a function line, so a call gives tol and max_steps. Save the function as newton.m, or in a MATLAB script put it at the end.;3|One evaluation of the derivative per step.;7|The correction, minus f divided by its slope.;10|return leaves the function with x and steps as they are.;13|Newton keeps no bracket, so it can run out of steps without converging.;16|@(x) makes a one-line function. This returns 4.641588833612778 after 5 steps.">function [x, steps] = newton(f, df, x, tol, max_steps)
+  for steps = 1:max_steps
+    slope = df(x);
+    if slope == 0
+      error('flat tangent at x = %g', x);
+    end
+    dx = -f(x) / slope;
+    x = x + dx;
+    if abs(dx) &lt; tol
+      return
+    end
+  end
+  error('no convergence in %d steps', max_steps);
+end
 
-<h2 id="no-formula">A Slope With No Formula</h2>
+[x, steps] = newton(@(x) x^3 - 100, @(x) 3*x^2, 5, 1e-12, 50)</pre>
+  <pre data-lang="js" hidden data-notes="3|One evaluation of the derivative per step.;5|The correction, minus f divided by its slope.;7|Stop when the correction is smaller than tol.;9|Newton keeps no bracket, so it can run out of steps without converging.;12|This returns {x: 4.641588833612778, steps: 5}.">function newton(f, df, x, tol = 1e-12, maxSteps = 50) {
+  for (let step = 0; step &lt; maxSteps; step++) {
+    const slope = df(x);
+    if (slope === 0) throw new Error(`flat tangent at x = ${x}`);
+    const dx = -f(x) / slope;
+    x = x + dx;
+    if (Math.abs(dx) &lt; tol) return {x: x, steps: step + 1};
+  }
+  throw new Error(`no convergence in ${maxSteps} steps`);
+}
 
-<p>The Slope Stability Lab asks for the largest earthquake shaking a simulated rock slope survives.
-Each slope is shaken by one recorded earthquake scaled to a peak ground acceleration (PGA), and the
-simulation reports how far the slope moved. The condition is $f(\text{PGA}) =
-\text{moved}(\text{PGA}) - d^*$, where $d^*$ is a damage threshold. The lab leaves the definition
-of damage to you, and this page uses $d^* = 5$&nbsp;cm as one choice. Each evaluation of $f$ is a
-run of the simulation on a GPU, a minute or two of machine time.</p>
+newton(x =&gt; x ** 3 - 100, x =&gt; 3 * x ** 2, 5);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
+</div>
 
-<p>There is no formula for moved(PGA), so there is no $f'$ to evaluate, and Newton's method would
-need a finite-difference one. That would cost a second run every step, and on this simulation two runs
-at one setting do not always agree (at 1.28125&nbsp;g the 2.6&nbsp;MPa slope moved 206.8&nbsp;cm
-and then 140.4&nbsp;cm), so a difference of two close runs can be mostly the spread between runs.
-The secant method needs only the runs already made, at one new run per step. Its line assumes
-that the response between two runs is close to straight, and the example class's runs show what
-happens where it is not. Repeated runs are averaged in the numbers below.</p>
+<h2 id="correct-digits-double-each-step">Correct Digits per Step, Newton and Bisection</h2>
 
-<ul class="plain">
-  <li><strong>Between two runs either side of the jump the step lands inside.</strong> On the
-  7.4&nbsp;MPa slope 2.875&nbsp;g moved 0.32&nbsp;cm and 2.9375&nbsp;g moved 48.8&nbsp;cm. The line
-  through them reaches 5&nbsp;cm at 2.881&nbsp;g, inside the pair and 0.008&nbsp;g below 2.88867&nbsp;g,
-  the highest run on this slope that stayed under 5&nbsp;cm. The line is still wrong about the
-  runs between, since it puts 2.88281&nbsp;g at 6.4&nbsp;cm and that run moved 0.23&nbsp;cm.</li>
-  <li><strong>Across a jump the line misses the runs between.</strong> On the 5.8&nbsp;MPa slope
-  2.72&nbsp;g moved 2.9&nbsp;cm and 2.8&nbsp;g moved 23.0&nbsp;cm (22.7 and 23.4 in two runs). The line
-  through them reaches 5&nbsp;cm at 2.728&nbsp;g and puts 2.75&nbsp;g at 10.4&nbsp;cm. The run at
-  2.75&nbsp;g moved 307&nbsp;cm.</li>
-  <li><strong>Past a jump the line points the wrong way.</strong> Through 2.75&nbsp;g (307&nbsp;cm)
-  and 2.8&nbsp;g (23.0&nbsp;cm) the line slopes down, and it reaches 5&nbsp;cm at 2.803&nbsp;g, beyond
-  a run that already moved 23&nbsp;cm.</li>
-  <li><strong>Below a jump the line is nearly flat.</strong> The class's last two settings on the
-  7.4&nbsp;MPa slope, 2.88672&nbsp;g (0.23&nbsp;cm) and 2.88867&nbsp;g (0.26&nbsp;cm), give a line rising
-  15.9&nbsp;cm per g. It reaches 5&nbsp;cm at 3.187&nbsp;g, far outside the bracket
-  [2.88867,&nbsp;2.89062]&nbsp;g that the class's bisection had reached, and past 3.0&nbsp;g, which
-  moved 31&nbsp;cm.</li>
-</ul>
+<p>Counting the digits that agree with the root, Newton's estimates have 2, 4, 9 and 15 correct
+after steps 1 to 4 (a little more than double each step, for a reason given below). Bisection on
+the bracket [4,&nbsp;5] halves the bracket each step, and since $2^{3.3} \approx 10$ it gains one
+digit about every 3.3 steps. A Newton step costs two evaluations to bisection's one, which the
+evaluation counts further down take into account.</p>
 
-<cg-demo case="slope"></cg-demo>
+<table class="data">
+  <tr><th>Step $k$</th><th>Newton $x_k$</th><th>Correct Digits</th><th>Bisection Midpoint</th><th>Correct Digits</th></tr>
+  <tr><td>0</td><td class="num">5</td><td class="num">0</td><td class="num">4.5</td><td class="num">1</td></tr>
+  <tr><td>1</td><td class="num">4.66666666666667</td><td class="num">2</td><td class="num">4.75</td><td class="num">1</td></tr>
+  <tr><td>2</td><td class="num">4.64172335600907</td><td class="num">4</td><td class="num">4.625</td><td class="num">2</td></tr>
+  <tr><td>3</td><td class="num">4.64158883751135</td><td class="num">9</td><td class="num">4.6875</td><td class="num">2</td></tr>
+  <tr><td>4</td><td class="num">4.64158883361278</td><td class="num">15</td><td class="num">4.65625</td><td class="num">2</td></tr>
+</table>
 
-<p>Each secant step goes wherever the line through two runs reaches $d^*$, and on both slopes
-the jump in the response decides where that is. The flat case is Newton's small-derivative failure
-in another form, with the line's rise per g in place of $f'$. Keeping the bisection bracket and
-taking a secant step only when it lands inside would hold every step within
-[2.88867,&nbsp;2.89062]&nbsp;g.</p>
+<p>Near a simple root Newton's error obeys $e_{k+1} \approx C e_k^2$. Here $e_k$ is the error after
+$k$ steps and $C = f''/(2f')$ at the root, where $f''$ is the second derivative. For the cube root
+$f'' = 6x$, so $C = 1/x = 0.215$, and the table follows the law closely. For instance,
+$0.215 \times (2.51\times10^{-2})^2 = 1.355\times10^{-4}$ against a measured
+$1.345\times10^{-4}$, and $0.215 \times (1.35\times10^{-4})^2 = 3.9\times10^{-9}$ against a
+measured $3.9\times10^{-9}$. That is, squaring an error near $10^{-d}$ gives one near
+$10^{-2d}$, and a $C$ below 1 adds a little more.</p>
 
-<h2 id="secant-steps-inside-a-bracket">Secant Steps Inside a Bracket</h2>
+<details class="ans"><summary><span>Optional, the derivation of the squared error</span></summary><div class="body">
+<p>Let $r$ be the root and $e_k = x_k - r$. A Taylor expansion of $f$ and $f'$ about $r$, with
+$f(r) = 0$, gives</p>
 
-<details class="ans"><summary><span>Optional, open to read</span></summary><div class="body">
-<p>In practice the methods are usually combined, and a good library does it in three steps:</p>
+$$\begin{aligned}
+f(x_k) &\approx f'(r)\,e_k + \tfrac{1}{2} f''(r)\,e_k^2 && \text{to second order} \\
+f'(x_k) &\approx f'(r) + f''(r)\,e_k && \text{to first order} \\
+e_{k+1} = e_k - \frac{f(x_k)}{f'(x_k)} &\approx \frac{f''(r)}{2 f'(r)}\,e_k^2 && \text{subtract and keep the lowest power}
+\end{aligned}$$
 
-<ol class="plain">
-  <li>Find a bracket by plotting or scanning.</li>
-  <li>Take fast steps from inside it.</li>
-  <li>If a step leaves the bracket, or shrinks it too little, discard it and bisect instead. The bracket is
-  maintained, so the guarantee is kept, and the fast steps are taken whenever they are safe.</li>
-</ol>
+<p>The constant $C = f''(r)/(2f'(r))$ needs $f'(r) \neq 0$, which is what a simple root means. At a
+<dfn data-g="double-root">double root</dfn> $f'(r) = 0$, and Newton slows to a fixed fraction of
+the error per step (half, at a double root).</p>
+</div></details>
 
-<p>This is Brent's method, near enough, and it is what <code>scipy.optimize.brentq</code> and
-MATLAB's <code>fzero</code> are. Brent's fast steps are secant steps and steps through a parabola
-fitted to the last three points (a parabola giving $t$ as a function of $f$, called inverse
-quadratic interpolation), so it needs no derivative and takes no Newton steps. On the
-7.4&nbsp;MPa slope it would discard the secant step to 3.187&nbsp;g, which leaves the bracket
-[2.88867,&nbsp;2.89062]&nbsp;g, and run the midpoint, 2.88965&nbsp;g, instead. In practice the first
-decision is usually whether the problem has a bracket, since <code>brentq</code> and
-<code>fzero</code> with an interval need one to start.</p>
+<h2 id="the-secant-step">The Secant Step from the Last Two Estimates</h2>
+
+<p>The secant method takes Newton's step with $f'(x_k)$ replaced by the slope of the line through
+the last two estimates.</p>
+
+$$\begin{aligned}
+f'(x_k) &\approx \frac{f(x_k) - f(x_{k-1})}{x_k - x_{k-1}} && \text{backward difference, } h = x_k - x_{k-1} \\
+x_{k+1} &= x_k - f(x_k)\,\frac{x_k - x_{k-1}}{f(x_k) - f(x_{k-1})} && \text{put it into Newton's step}
+\end{aligned}$$
+
+<p>It needs two starting guesses. From $x_0 = 4$ and $x_1 = 5$, where $f$ is $-36$ and 25, the
+slope is $(25 - (-36))/(5 - 4) = 61$, and the first step is $x_2 = 5 - 25/61 = 5 - 0.4098 = 4.5902$.
+In the table, $x_k$ comes after $k - 1$ steps.</p>
+
+<p>The slope is the backward difference from
+<a href="finite-differences.html" title="Finite differences">the page on finite differences</a>,
+with $h = x_k - x_{k-1}$. It reuses $f(x_{k-1})$, which the previous step already evaluated, so
+each step costs one new evaluation of $f$ and no derivative. In exchange, $h$ is not a choice. It
+is whatever the last step happened to be, large at the start and shrinking only as the estimates
+close in, which is one way to see why the secant method's order (below) is lower than Newton's.</p>
+
+<table class="data">
+  <tr><th>Estimate $k$</th><th>$x_k$</th><th>$f(x_k)$</th><th>Error</th></tr>
+  <tr><td>0</td><td class="num">4</td><td class="num">&minus;36</td><td class="num">6.4&times;10⁻¹</td></tr>
+  <tr><td>1</td><td class="num">5</td><td class="num">25</td><td class="num">3.6&times;10⁻¹</td></tr>
+  <tr><td>2</td><td class="num">4.5901639344</td><td class="num">&minus;3.29</td><td class="num">5.1&times;10⁻²</td></tr>
+  <tr><td>3</td><td class="num">4.6377883773</td><td class="num">&minus;0.245</td><td class="num">3.8&times;10⁻³</td></tr>
+  <tr><td>4</td><td class="num">4.6416312756</td><td class="num">2.7&times;10⁻³</td><td class="num">4.2&times;10⁻⁵</td></tr>
+  <tr><td>5</td><td class="num">4.6415887988</td><td class="num">&minus;2.2&times;10⁻⁶</td><td class="num">3.5&times;10⁻⁸</td></tr>
+  <tr><td>6</td><td class="num">4.6415888336</td><td class="num">&minus;2.1&times;10⁻¹¹</td><td class="num">3.2&times;10⁻¹³</td></tr>
+  <tr><td>7</td><td class="num">4.6415888336</td><td class="num">&minus;2.8&times;10⁻¹⁴</td><td class="num">below 10⁻¹⁵</td></tr>
+</table>
+
+<p>The <dfn data-g="convergence-order">convergence order</dfn> of the secant method is 1.618 (near
+a simple root), the golden ratio, lower than Newton's 2. That is, its error obeys
+$e_{k+1} \approx C e_k^{1.618}$, for a different constant $C$. You can measure the order from three
+errors in a row as $p \approx \log(e_{k+1}/e_k) / \log(e_k/e_{k-1})$. On this table it runs 1.73,
+1.58 and 1.63 for the last three triples (the earlier triples give 3.3 and 1.34, before the errors
+settle).</p>
+
+<p>Without a formula that delivers the root, as the quadratic formula does, each method on this
+page and on <a href="bisection.html" title="Bisection">the page on bisection</a> tries a guess,
+checks $f$ there, and makes the next guess from the check. They differ in what they take from it.
+A scan takes nothing, since its guesses are fixed in advance and the check says only where the
+sign changed. Bisection takes the sign at the midpoint, the secant method the values at the last
+two guesses, and Newton's method the value and the slope at the guess.</p>
+
+<h2 id="the-start-picks-the-root">The Starting Guess Decides Where Newton Lands</h2>
+
+<p>Newton keeps no bracket. Each step goes wherever the tangent crosses zero, so the result depends
+on where the steps start, and nothing in the method knows which root you wanted.</p>
+
+<h3 id="flat-slope">A Nearly Flat Slope Throws the Step Far Away</h3>
+
+<p>The step divides by the slope, so where the slope is close to zero the step is large. On
+$x^3 - 100$ from $x_0 = 0.5$, $f = -99.875$ and the slope is $3 \times 0.5^2 = 0.75$, so the
+correction is $99.875 / 0.75 = 133.2$ and $x_1 = 133.67$. Far from the root the tangent of a cube
+crosses zero about two-thirds of the way to the origin, so each step then takes off about a third
+of $x$.</p>
+
+<table class="data">
+  <tr><th>Step $k$</th><th>$x_k$</th><th>Step $k$</th><th>$x_k$</th></tr>
+  <tr><td>0</td><td class="num">0.5</td><td>8</td><td class="num">8.1604</td></tr>
+  <tr><td>1</td><td class="num">133.67</td><td>9</td><td class="num">5.9408</td></tr>
+  <tr><td>2</td><td class="num">89.113</td><td>10</td><td class="num">4.9050</td></tr>
+  <tr><td>3</td><td class="num">59.413</td><td>11</td><td class="num">4.6555</td></tr>
+  <tr><td>4</td><td class="num">39.618</td><td>12</td><td class="num">4.64163025</td></tr>
+  <tr><td>5</td><td class="num">26.433</td><td>13</td><td class="num">4.64158883398</td></tr>
+  <tr><td>6</td><td class="num">17.670</td><td>14</td><td class="num">4.64158883361278</td></tr>
+  <tr><td>7</td><td class="num">11.887</td><td></td><td></td></tr>
+</table>
+
+<p>Newton reaches full precision after 14 steps, against 4 from $x_0 = 5$, and the first ten mostly
+undo the first one. The cube has one real root, so the steps always come back to it. Set the
+starting guess in the demo above to 0.5 to watch it.</p>
+
+<h3 id="start-picks-the-crossing">On the Shot, the Start Picks the Crossing</h3>
+
+<p>A function with two roots can send Newton to either. The fitted height of arc&nbsp;79, from
+<a href="conditions-become-roots.html#which-root-actually-happened" title="Conditions as roots">the
+page on conditions as roots</a>, gives $f(t) = z(t) - 3.048$ with</p>
+
+$$z(t) = 3.4520 + 4.7428\,t - 4.9153\,t^2 \qquad (t \text{ in seconds after frame 20})$$
+
+<p>Frame 20 is the release this data set marks, two frames after the one <a href="conditions-become-roots.html#finding-the-release" title="Conditions as roots">page 19</a> finds, so each
+time here is 0.08&nbsp;s less than the same moment there. $f$ crosses zero rising at
+$-0.0787$&nbsp;s, just after the ball leaves the shooter's hands, and
+falling at 1.0437&nbsp;s, the crossing the question (did the shot go in) asks about. The apex, where
+$f' = 0$, is at 0.482&nbsp;s. Newton from three starts, run until $|f| < 10^{-6}$&nbsp;m, gives the
+table below.</p>
+
+<table class="data">
+  <tr><th>Start $t_0$</th><th>Slope $f'(t_0)$</th><th>Estimates, s</th><th>Steps</th><th>Root Returned</th></tr>
+  <tr><td class="num">0.20 s</td><td class="num">2.78 m/s</td><td>0.20, &minus;0.216, &minus;0.092, &minus;0.0789, &minus;0.0787</td><td class="num">4</td><td>rising, &minus;0.0787 s</td></tr>
+  <tr><td class="num">0.50 s</td><td class="num">&minus;0.17 m/s</td><td>0.50, 9.47, 4.99, 2.77, 1.70, 1.22, 1.065, 1.044, 1.0437</td><td class="num">8</td><td>falling, 1.0437 s</td></tr>
+  <tr><td class="num">0.92 s</td><td class="num">&minus;4.30 m/s</td><td>0.92, 1.061, 1.0439, 1.0437</td><td class="num">3</td><td>falling, 1.0437 s</td></tr>
+</table>
+
+<p>Before the apex the tangent slopes up, and its zero lies back toward the rising root. After the
+apex it slopes down toward the falling one. From 0.50&nbsp;s, just past the apex, the slope is
+only $-0.17$&nbsp;m/s, and the first step lands at 9.47&nbsp;s, more than eight seconds after the
+ball reached the rim. The steps after it happen to come back to the falling root. All three runs
+stop with $|f|$ below the tolerance and report success, so the value of $f$ cannot tell the rising
+root from the falling one. A bracket around the falling crossing alone removes the choice. On
+$[0.5,\,1.5]$&nbsp;s, $f$ is $+1.55$ and $-3.54$&nbsp;m at the ends, and bisection or
+<code>brentq</code> can only return 1.0437&nbsp;s.</p>
+
+<cg-demo case="shot"></cg-demo>
+
+<h3 id="verify-in-code">Checking a Returned Root in Code</h3>
+
+<p>A check run after the solver catches the wrong crossing. Given whatever a routine returned,
+<code>verify</code> reports the residual, whether the value lies in the problem's domain, and
+which way $f$ crosses zero there.</p>
+
+<div class="codetabs" id="code3">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+    <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
+  </div>
+  <pre data-lang="python" data-notes="1|domain is the interval the problem is defined on, for instance (-0.81, 1.64) for the seconds the shot's tracking covers. tol and h are choices, with defaults.;4|An empty dictionary that collects the checks under their names ([Dictionaries](py-dicts.html)).;6|The residual test the routine already applied. Repeat it yourself, since the routine may have used a different f.;9|This compares x against the problem, which a solver does not know about.;11|One evaluation a small step h before x and one after it.;13|f goes from negative to positive, the way the ball rises through the rim.;15|f goes from positive to negative, the way the ball falls through the rim.;18|No sign change either side suggests a touching root, or no root within h, and then the error is likely much larger than the residual.">def verify(f, x, domain, tol=1e-8, h=1e-4):
+    lo = domain[0]
+    hi = domain[1]
+    report = {}
+
+    report['residual'] = abs(f(x))
+    report['is_root'] = report['residual'] &lt; tol
+
+    report['in_domain'] = lo &lt;= x and x &lt;= hi
+
+    before = f(x - h)
+    after = f(x + h)
+    if before &lt; 0 and after &gt; 0:
+        report['crossing'] = 'rising'
+    elif before &gt; 0 and after &lt; 0:
+        report['crossing'] = 'falling'
+    else:
+        report['crossing'] = 'none'
+
+    return report</pre>
+  <pre data-lang="matlab" hidden data-notes="1|domain is a two-element vector, for instance [-0.81 1.64] for the seconds the shot's tracking covers.;2|nargin is the number of inputs the call passed, so a call that leaves tol out gets 1e-8.;9|Repeat the residual test on the f you care about.;11|This compares x against the problem, which a solver does not know about.;12|One evaluation a small step h before x and one after it.;14|f goes from negative to positive, the way the ball rises through the rim.;16|f goes from positive to negative, the way the ball falls through the rim.;19|No sign change either side suggests a touching root, or no root within h.">function r = verify(f, x, domain, tol, h)
+    if nargin &lt; 4
+        tol = 1e-8;
+    end
+    if nargin &lt; 5
+        h = 1e-4;
+    end
+
+    r.residual  = abs(f(x));
+    r.is_root   = r.residual &lt; tol;
+    r.in_domain = x &gt;= domain(1) &amp;&amp; x &lt;= domain(2);
+    before = f(x - h);
+    after  = f(x + h);
+    if before &lt; 0 &amp;&amp; after &gt; 0
+        r.crossing = 'rising';
+    elseif before &gt; 0 &amp;&amp; after &lt; 0
+        r.crossing = 'falling';
+    else
+        r.crossing = 'none';
+    end
+end</pre>
+  <pre data-lang="js" hidden data-notes="1|domain is [lo, hi], the interval the problem is defined on.;4|Repeat the residual test yourself.;5|One evaluation a small step h before x and one after it.;8|f goes from negative to positive, the way the ball rises through the rim.;9|f goes from positive to negative, the way the ball falls through the rim.;7|No sign change either side, which suggests a touching root, or no root within h.">function verify(f, x, domain, tol = 1e-8, h = 1e-4) {
+  const lo = domain[0];
+  const hi = domain[1];
+  const residual = Math.abs(f(x));
+  const before = f(x - h);
+  const after = f(x + h);
+  let crossing = 'none';
+  if (before &lt; 0 &amp;&amp; after &gt; 0) crossing = 'rising';
+  if (before &gt; 0 &amp;&amp; after &lt; 0) crossing = 'falling';
+  return {
+    residual: residual,
+    isRoot: residual &lt; tol,
+    inDomain: x &gt;= lo &amp;&amp; x &lt;= hi,
+    crossing: crossing
+  };
+}</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
+</div>
+
+<p>Applied to Newton's answers run to $|f| < 10^{-8}$, with the shot checked on the times its
+tracking covers ($-0.81$ to 1.64&nbsp;s) and the cube root on $[4,\,5]$, <code>verify</code>
+returns the following.</p>
+
+<table class="data">
+  <tr><th>Run</th><th>Returned $x$</th><th>is_root</th><th>in_domain</th><th>crossing</th></tr>
+  <tr><td>shot, Newton from 0.20 s</td><td class="num">&minus;0.0787 s</td><td>true</td><td>true</td><td>rising</td></tr>
+  <tr><td>shot, Newton from 0.92 s</td><td class="num">1.0437 s</td><td>true</td><td>true</td><td>falling</td></tr>
+  <tr><td>cube root, Newton from 5</td><td class="num">4.641588833612778</td><td>true</td><td>true</td><td>rising</td></tr>
+</table>
+
+<p>The rising crossing passes the residual and the domain checks, and only its direction rules it
+out, since the question asks for the ball coming down. The domain check catches a root that lies
+outside the problem, such as a time outside the tracked flight.</p>
+
+<h2 id="bisection-is-usually-fast-enough">In One Unknown, Bisection Is Usually Fast Enough</h2>
+
+<p>Counting every evaluation of $f$ and $f'$, the three methods reach the cube root of 100 as the
+table shows.</p>
+
+<table class="data">
+  <tr><th>Method</th><th>Starting Information</th><th>Evaluations per Step</th><th>Convergence Order</th>
+      <th>Guaranteed to Converge</th><th>Evaluations on $x^3 - 100$</th></tr>
+  <tr><td>bisection</td><td>a <dfn data-g="bracket">bracket</dfn>, [4,&nbsp;5]</td><td class="num">1</td><td>1, halving</td><td>yes</td><td class="num">42, for 12 digits</td></tr>
+  <tr><td>Newton</td><td>$f'$ and a guess, 5</td><td class="num">2 ($f$ and $f'$)</td><td class="num">2</td><td>no (yes from close enough to a simple root)</td><td class="num">8, for 15 digits</td></tr>
+  <tr><td>secant</td><td>two guesses, 4 and 5</td><td class="num">1</td><td class="num">1.618</td><td>no (yes from close enough to a simple root)</td><td class="num">7, for 15 digits</td></tr>
+</table>
+
+<p>Bisection evaluates both ends to check the sign change, then 40 midpoints, after which the
+bracket is $9.1\times10^{-13}$ wide. That guarantees 12 digits (the midpoint is within
+$4.5\times10^{-13}$ of the root). Newton and the secant method reach the full 15 to 16 digits of
+double precision in fewer evaluations, though neither guarantees anything in advance.</p>
+
+<p>On a desktop, in Python, bisection's 42 evaluations take a few microseconds and Newton's 8 take
+under 1 (both far below anything a person notices). When $f$ is a formula like this one, the count
+of evaluations rarely matters, and bisection's guarantee is often worth more than Newton's speed.
+The count matters when each evaluation is expensive, such as one run of a simulation, and then the
+secant method's single evaluation per step is usually the better trade.
+(<a href="evaluations-are-the-currency.html" title="Evaluation cost">Page 22</a> counts evaluations
+in detail.)</p>
+
+<p>Library root finders in one unknown combine the two ideas. SciPy's
+<code>scipy.optimize.brentq</code> and MATLAB's <code>fzero</code> use Brent's method. It keeps
+bisection's bracket and proposes secant steps, or steps through a sideways parabola ($x$ as a
+quadratic in $f$) through the last three points, inside it. It falls back to a bisection step
+whenever a proposal would leave the bracket or shrink it too little. On [4,&nbsp;5],
+<code>brentq</code> returns 4.641588833612774 after 8 evaluations of $f$ (at its default tolerance
+of $2\times10^{-12}$), with a bracket kept at every step. SciPy's
+<code>scipy.optimize.newton</code> is plain Newton when given <code>fprime</code> and the secant
+method when not, with no bracket in either case.</p>
+
+<h2 id="n-unknowns">Newton's Step on Thousands to Millions of Unknowns</h2>
+
+<p>Bisection needs a sign change, and $n$ equations in $n$ unknowns have no single sign to change.
+Newton's step needs only the linear part, and the linear part exists in any number of unknowns.
+Each equation has a slope in every unknown, so a step uses $n^2$ slopes, and solving the linear
+part means solving all $n$ equations together. That generalization is the work of linear algebra.
+In practice Newton's method does most of its work on systems like those in the table.</p>
+
+<table class="data">
+  <tr><th>System Solved</th><th>Its Unknowns</th><th>Number of Unknowns</th></tr>
+  <tr><td>the cube root of 100</td><td>$x$</td><td>1</td></tr>
+  <tr><td>a power grid, how the power flows</td><td>the voltage and its phase at each junction</td><td>two at each of up to 100,000 junctions</td></tr>
+  <tr><td>a structure that bends and yields</td><td>how far each point of the mesh moves</td><td>100,000 to about a million</td></tr>
+  <tr><td>a circuit simulator</td><td>the voltage at each node</td><td>one per node, solved again at every time step</td></tr>
+</table>
+
+<p>Codes this size usually build the slopes from their own models (the derivatives in a circuit's
+device models, or a structure's stiffness) and hand the linear part to a linear-algebra library.</p>
+
+<details class="ans"><summary><span>Optional, Newton's step in many unknowns, worked through on two</span></summary><div class="body">
+<p>Write the unknowns as a list $\mathbf{x} = (u_1, \ldots, u_n)$ and the equations as a list
+$F(\mathbf{x}) = (F_1(\mathbf{x}), \ldots, F_n(\mathbf{x}))$, each equal to zero at the root.
+Each equation has a slope in each unknown, so there are $n^2$ slopes. They form the <dfn data-g="jacobian">Jacobian</dfn>, the
+$n \times n$ matrix with</p>
+
+$$J_{ij} = \frac{\partial F_i}{\partial u_j} \qquad \text{the slope of equation } i \text{ in unknown } j$$
+
+<p>With $\Delta$ the list of corrections and $\mathbf{x}_k$ the estimate after $k$ steps, the step
+is the same three moves as before.</p>
+
+$$\begin{aligned}
+F(\mathbf{x}_k + \Delta) &\approx F(\mathbf{x}_k) + J(\mathbf{x}_k)\,\Delta && \text{the linear part} \\
+J(\mathbf{x}_k)\,\Delta &= -F(\mathbf{x}_k) && \text{set it to zero, a linear system} \\
+\mathbf{x}_{k+1} &= \mathbf{x}_k + \Delta && \text{take the step}
+\end{aligned}$$
+
+<p>In one unknown, $J$ is $f'$ and solving the system is dividing by it. In $n$ unknowns each step
+solves an $n \times n$ linear system, the same kind of problem as the
+<a href="solving-the-normal-equations.html" title="Solving the normal equations">normal
+equations</a>.</p>
+
+<h3 id="two-unknowns-worked">A Circle and the Curve $y = e^x - 1$</h3>
+
+<p>Take a circle of radius 2 and the curve $y = e^x - 1$, written as two equations equal to zero.</p>
+
+$$F_1(x, y) = x^2 + y^2 - 4 = 0, \qquad F_2(x, y) = e^x - 1 - y = 0$$
+
+<p>They cross once with $x > 0$, at (1.004169,&nbsp;1.729637). Start from the guess (1,&nbsp;1).
+The slopes and the residuals there are</p>
+
+$$\begin{aligned}
+J &= \begin{bmatrix} \partial F_1/\partial x & \partial F_1/\partial y \\ \partial F_2/\partial x & \partial F_2/\partial y \end{bmatrix}
+   = \begin{bmatrix} 2x & 2y \\ e^x & -1 \end{bmatrix}
+   = \begin{bmatrix} 2 & 2 \\ 2.718 & -1 \end{bmatrix} && \text{at } (1, 1) \\
+F &= \begin{bmatrix} 1 + 1 - 4 \\ e - 1 - 1 \end{bmatrix} = \begin{bmatrix} -2 \\ 0.718 \end{bmatrix},
+   \quad -F = \begin{bmatrix} 2 \\ -0.718 \end{bmatrix} && \text{at } (1, 1)
+\end{aligned}$$
+
+<p>so $J\Delta = -F$ is two linear equations in the corrections $\Delta x$ and $\Delta y$. Each row
+of $J$ times $\Delta$ equals the matching entry of $-F$, and elimination solves them.</p>
+
+$$\begin{aligned}
+2\,\Delta x + 2\,\Delta y &= 2 && \text{first row} \\
+2.718\,\Delta x - \Delta y &= -0.718 && \text{second row} \\
+\Delta y &= 1 - \Delta x && \text{from the first row} \\
+2.718\,\Delta x - (1 - \Delta x) &= -0.718 && \text{put it into the second} \\
+3.718\,\Delta x &= 0.282, \quad \Delta x = 0.0758, \quad \Delta y = 0.9242 && \text{solve} \\
+(x_1, y_1) &= (1.0758,\ 1.9242) && \text{take the step}
+\end{aligned}$$
+
+<p>Each row of $J\Delta = -F$ sets one equation's linear part to zero, and each of those is a
+straight line in the plane. The step lands where the two lines cross, as the demo below shows.
+Repeating the step gives the table below, and the residuals fall as they did in one unknown, with
+the exponent roughly doubling each step once the guess is close.</p>
+
+<table class="data">
+  <tr><th>Step $k$</th><th>$x_k$</th><th>$y_k$</th><th>$F_1$</th><th>$F_2$</th><th>max(|$F_1$|, |$F_2$|)</th></tr>
+  <tr><td>0</td><td class="num">1</td><td class="num">1</td><td class="num">&minus;2</td><td class="num">0.718</td><td class="num">2</td></tr>
+  <tr><td>1</td><td class="num">1.0757657</td><td class="num">1.9242343</td><td class="num">0.860</td><td class="num">0.0080</td><td class="num">0.86</td></tr>
+  <tr><td>2</td><td class="num">1.0094708</td><td class="num">1.7378449</td><td class="num">0.0391</td><td class="num">0.0063</td><td class="num">0.039</td></tr>
+  <tr><td>3</td><td class="num">1.0041886</td><td class="num">1.7296532</td><td class="num">9.5&times;10⁻⁵</td><td class="num">3.8&times;10⁻⁵</td><td class="num">9.5&times;10⁻⁵</td></tr>
+  <tr><td>4</td><td class="num">1.0041687</td><td class="num">1.7296373</td><td class="num">6.5&times;10⁻¹⁰</td><td class="num">5.4&times;10⁻¹⁰</td><td class="num">6.5&times;10⁻¹⁰</td></tr>
+</table>
+
+<cg-demo case="plane"></cg-demo>
+
+<p>The code is the one-unknown loop with the division replaced by a linear solve.</p>
+
+<div class="codetabs" id="code2">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+    <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
+  </div>
+  <pre data-lang="python" data-notes="4|A float array, so the updates are not rounded to integers ([numpy arrays](py-numpy.html)).;6|Solve J times dx equals minus F, a linear system, in place of dividing by the slope. One evaluation of F and one of J.;8|Stop when every correction is smaller than tol.;14|One entry per equation.;18|Row i holds the slopes of equation i, and column j the slopes in unknown j.;20|This returns array([1.00416874, 1.72963729]) after 6 steps.">import numpy as np
+
+def newton_system(F, J, x, tol=1e-12, max_steps=50):
+    x = np.array(x, dtype=float)
+    for step in range(max_steps):
+        dx = np.linalg.solve(J(x), -F(x))
+        x = x + dx
+        if np.max(np.abs(dx)) &lt; tol:
+            return x, step + 1
+    raise RuntimeError(f'no convergence in {max_steps} steps')
+
+def F(v):
+    x, y = v
+    return np.array([x**2 + y**2 - 4, np.exp(x) - 1 - y])
+
+def J(v):
+    x, y = v
+    return np.array([[2 * x, 2 * y], [np.exp(x), -1.0]])
+
+x, steps = newton_system(F, J, [1, 1])</pre>
+  <pre data-lang="matlab" hidden data-notes="1|Save the function as newton_system.m, or in a MATLAB script put it at the end.;3|The backslash solves J times dx equals minus F, in place of dividing by the slope.;5|Stop when every correction is smaller than tol.;12|A column, one entry per equation.;13|Row i holds the slopes of equation i, and column j the slopes in unknown j.;14|This returns 1.004168738474659 and 1.729637287025870 after 6 steps.">function [x, steps] = newton_system(F, J, x, tol, max_steps)
+  for steps = 1:max_steps
+    dx = -(J(x) \ F(x));
+    x = x + dx;
+    if max(abs(dx)) &lt; tol
+      return
+    end
+  end
+  error('no convergence in %d steps', max_steps);
+end
+
+F = @(v) [v(1)^2 + v(2)^2 - 4; exp(v(1)) - 1 - v(2)];
+J = @(v) [2*v(1), 2*v(2); exp(v(1)), -1];
+[x, steps] = newton_system(F, J, [1; 1], 1e-12, 50)</pre>
+  <pre data-lang="js" hidden data-notes="3|The four slopes, row by row.;6|JavaScript has no built-in linear solver, so this solves the 2 by 2 system by Cramer's rule, which is elimination written out. More unknowns need a linear-algebra library.;8|Stop when every correction is smaller than tol.;15|This returns x = [1.0041687384746592, 1.72963728702587] after 6 steps.">function newtonSystem(F, J, x, tol = 1e-12, maxSteps = 50) {
+  for (let step = 0; step &lt; maxSteps; step++) {
+    const [[a, b], [c, d]] = J(x);
+    const [r1, r2] = F(x).map(v =&gt; -v);
+    const det = a * d - b * c;
+    const dx = [(r1 * d - b * r2) / det, (a * r2 - c * r1) / det];
+    x = [x[0] + dx[0], x[1] + dx[1]];
+    if (Math.max(Math.abs(dx[0]), Math.abs(dx[1])) &lt; tol) return {x: x, steps: step + 1};
+  }
+  throw new Error(`no convergence in ${maxSteps} steps`);
+}
+
+const F = ([x, y]) =&gt; [x ** 2 + y ** 2 - 4, Math.exp(x) - 1 - y];
+const J = ([x, y]) =&gt; [[2 * x, 2 * y], [Math.exp(x), -1]];
+newtonSystem(F, J, [1, 1]);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
+</div>
+
+<h3 id="library-solvers">Library Solvers and Estimated Jacobians</h3>
+
+<p>General-purpose library solvers, given only $F$, estimate $J$.</p>
+
+<p>SciPy's <code>scipy.optimize.fsolve</code> and MATLAB's <code>fsolve</code> (in the
+Optimization Toolbox, and built into Octave) take only $F$ and a starting guess. Given no
+Jacobian, they estimate one from finite differences of $F$, one small step in each unknown, which
+are secant slopes in each direction. SciPy's version then updates the estimate from each step it
+takes (Broyden's update), the secant idea in $n$ unknowns, so it rarely pays for a fresh estimate
+(on the example, one estimate at the start). Both also shorten or bend a step that would not
+reduce the residuals, which is a safeguard plain Newton lacks.</p>
+
+<p>On the example, <code>fsolve(F, [1, 1])</code> returns
+<code>array([1.00416874, 1.72963729])</code> after about a dozen evaluations of $F$, with no $J$
+supplied. In MATLAB or Octave, <code>fsolve(F, [1; 1])</code> returns the same root to about 9
+digits (its default tolerance stops sooner). Brent's method has no standard version in $n$
+unknowns, since it rests on a bracket, so these solvers keep no guarantee. For this reason you will
+need a starting guess near the root, and a plot of the curves is one way to find one.</p>
 </div></details>
 
 <div class="check">
@@ -1131,47 +1496,47 @@ decision is usually whether the problem has a bracket, since <code>brentq</code>
   <ol>
     <li>Newton's error is 10⁻³ at one step. Estimate it after two more, and say what assumptions
     you used.
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>About 10<sup>&minus;12</sup></strong>, via 10<sup>&minus;6</sup>. Newton converges
-quadratically, at <em>e</em><sub><em>n</em>+1</sub> &asymp;
-<em>Ce</em><sub><em>n</em></sub>&sup2;. Taking <em>C</em>&nbsp;&asymp;&nbsp;1, the errors go
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>About 10<sup>&minus;12</sup>, via 10<sup>&minus;6</sup>. Newton converges
+quadratically, at <em>e</em><sub><em>k</em>+1</sub> &asymp;
+<em>Ce</em><sub><em>k</em></sub>&sup2;. Taking <em>C</em>&nbsp;&asymp;&nbsp;1, the errors go
 10<sup>&minus;3</sup> &rarr; 10<sup>&minus;6</sup> &rarr; 10<sup>&minus;12</sup>, so the number
 of correct digits doubles each step.</p>
-     <p>The estimate rests on three assumptions. The root is <strong>simple</strong>, since at a double
-root Newton is only linear and the errors would go 10<sup>&minus;3</sup>, 5&times;
-10<sup>&minus;4</sup>, 2.5&times;10<sup>&minus;4</sup>. The iteration is already <strong>in the
-asymptotic regime</strong>, meaning close enough for the quadratic law to hold. The third is that <em>C</em>,
-which is <em>f</em>&Prime;/2<em>f</em>&prime; at the root, is of order 1, when it may be a good
-deal larger. On the shot it is 0.89. In addition, the step after these would not deliver
-10<sup>&minus;24</sup>, because for values of order 1 double precision bottoms out near
+     <p>The estimate rests on three assumptions. The root is simple, since at a double root
+Newton is only linear and the errors would go 10<sup>&minus;3</sup>, 5&times;10<sup>&minus;4</sup>,
+2.5&times;10<sup>&minus;4</sup>. The iteration is already close enough for the quadratic law to
+hold. In addition, <em>C</em>, which is <em>f</em>&Prime;/2<em>f</em>&prime; at the root, is of order 1,
+when it may be a good deal larger. For the cube root of 100 it is 0.215, so the errors would go
+10<sup>&minus;3</sup>, 2&times;10<sup>&minus;7</sup>, 10<sup>&minus;14</sup>. The step after these
+would not deliver much more, because for values of order 1 double precision bottoms out near
 10<sup>&minus;16</sup>.</p></div></details></li>
-    <li>On the slope each evaluation of <em>f</em> is a run of a minute or two, and there is no
-    derivative. Which method, and how many runs per step?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>The secant method, at one run per step, inside a bracket.</strong> It reuses the previous
-run, so each step costs a single new run and no derivative, at an order of 1.618 (the golden
-ratio) where the response is smooth.</p>
-     <p>The alternative is Newton with a finite-difference derivative, which costs <strong>two</strong>
-runs per step for an order close to 2 while the error is large next to the difference step.
-Compare them per evaluation. Secant gains a factor of 1.618 per evaluation, Newton
-&radic;2&nbsp;=&nbsp;1.414, so the secant method is faster when each evaluation is a simulation
-run. The difference quotient also brings back the step-size problem from week 4, and on this
-simulation two runs at 1.28125&nbsp;g differ by 66&nbsp;cm.</p>
-     <p>The order assumes a smooth response, and this one jumps (2.72&nbsp;g moved 2.9&nbsp;cm and
-2.75&nbsp;g moved 307&nbsp;cm on the 5.8&nbsp;MPa slope). Secant steps across a jump can land
-anywhere, so keep the bracket from bisection and take a secant step only when it lands inside
-it.</p></div></details></li>
-    <li>Why can a hybrid method keep bisection's guarantee while taking fast steps most of the
-    time?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>The hybrid keeps an interval known to contain a root at every step. Each step it
-<em>proposes</em> a fast step (Newton, secant or interpolation) and then checks it. Does the proposal land inside the
-current bracket, and does it shrink the interval by enough? If yes, take it and update the
-bracket. If no, discard it and take a bisection step instead.</p>
-     <p>The guarantee comes from the bracket, and the bracket is kept at every step. The worst case is that every proposal is
-rejected, and then the method <em>is</em> bisection, with its bound intact.</p>
-     <p>The speed survives because near a simple root the fast proposals land close to the root and
-are almost always accepted. The guarantee costs one comparison per step, which is small next to an
-evaluation of <em>f</em>. Brent's method is this kind of hybrid, with secant and interpolation
-steps and no Newton steps, and many libraries use it as their default root finder on a
-bracket.</p></div></details></li>
+    <li>Evaluating <em>f</em>&prime; costs about as much as evaluating <em>f</em>. Per evaluation,
+    which converges faster, Newton or the secant method?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>The secant method, usually. A Newton step raises the error to the power 2 and costs
+two evaluations (<em>f</em> and <em>f</em>&prime;), so each evaluation raises it to about the power
+&radic;2&nbsp;=&nbsp;1.414. A secant step raises it to the power 1.618 for one evaluation.</p>
+     <p>On the cube root of 100 Newton needs 8 evaluations and the secant method 7, which is the
+same ordering. With a formula this cheap the difference is a fraction of a microsecond. It matters
+when each evaluation of <em>f</em> is expensive.</p></div></details></li>
+    <li>Why can Brent's method keep a bracket while taking fast steps most of the time?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>It keeps an interval known to contain a root at every step. Each step it proposes
+a fast step (a secant step, or one through a sideways parabola through the last three points) and
+then checks it. Does the proposal land inside the current bracket, and does it shrink the bracket
+by enough? If yes, it takes the step and updates the bracket. If no, it takes a bisection step
+instead.</p>
+     <p>Because the bracket is kept, Brent always converges. Its worst case is slower than
+bisection (about the square of bisection's step count), though in practice it is rarely worse.
+Near a simple root the fast proposals land close to the root and are almost always accepted, so
+Brent is usually about as fast as the secant method.</p></div></details></li>
+    <li>A structural model has 1000 unknowns. How many slopes does one Newton step use, and how
+    many extra evaluations of <em>F</em> does estimating them from small changes in each unknown cost?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>10<sup>6</sup> slopes, one for each pair of equation and unknown. A forward
+difference moves one unknown at a time and evaluates all of <em>F</em> once per move. For this
+reason the estimate costs 1000 extra evaluations of <em>F</em>, on top of the one at the current
+point.</p>
+     <p>A solver that re-estimated <em>J</em> every step would spend almost all its time on the
+estimate. Broyden's update reuses the step just taken to correct the old estimate, at no extra
+evaluations, which is how SciPy's <code>fsolve</code> avoids most of that cost. Large structural
+codes usually avoid it another way, by building <em>J</em> from the model's own derivatives.</p></div></details></li>
   </ol>
 </div>
 
@@ -1200,11 +1565,11 @@ bisection, secant and Newton on any signal, counting evaluations.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/newton-and-secant.js?v=20261102180601"></script>
+  <script type="module" src="js/bundle/newton-and-secant.js?v=20261109080753"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-09">November 9, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

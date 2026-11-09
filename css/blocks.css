@@ -244,6 +244,24 @@ dfn[data-g]:hover::after,dfn[data-g]:focus::after{opacity:1;visibility:visible}
 dl.glossary{display:grid;grid-template-columns:auto 1fr;gap:.45rem 1.2rem;margin:1.1rem 0 0;font-size:.94rem}
 dl.glossary dt{font-weight:600;color:var(--course-accent-dark);white-space:nowrap}
 dl.glossary dd{margin:0;color:#3f3b36}
+/* cheatsheet.html: four columns on a wide screen, one card per row on a phone */
+table.cheatsheet td:first-child{width:27%}
+table.cheatsheet td:nth-child(3){width:20%}
+table.cheatsheet td:last-child{width:17%;font-size:.88rem}
+table.cheatsheet code{overflow-wrap:anywhere}
+.cs-out{display:inline-block;white-space:pre;vertical-align:top}
+.cs-note,.cs-none{font-size:.85rem;color:var(--warm-gray)}
+@media (max-width:640px){
+  table.data.cheatsheet,table.cheatsheet tbody,table.cheatsheet tr,table.cheatsheet td{
+    display:block;width:auto;overflow:visible}
+  table.cheatsheet tr:first-child{display:none}
+  table.cheatsheet tr{padding:.55rem 0;border-bottom:1px solid #e6e0d4}
+  table.cheatsheet td,table.cheatsheet td:first-child,table.cheatsheet td:nth-child(3),
+  table.cheatsheet td:last-child{width:auto;border:0;padding:.12rem 0}
+  table.cheatsheet td:first-child{font-weight:600}
+  table.cheatsheet td[data-label]::before{content:attr(data-label);display:block;font-size:.7rem;
+    letter-spacing:.07em;text-transform:uppercase;color:var(--warm-gray);margin-top:.3rem}
+}
 @media print{
   .figure .fig-body video{display:none}
   .figure .fig-body img.fig-print-only{display:block}

@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Function cheat sheet — Computational Physical Modeling</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="css/blocks.css?v=20261109080753">
+  <link rel="stylesheet" href="css/demos.css?v=20261109080753">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (olive). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #5F7038;
+      --course-accent-dark: #47542A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    /* ── Week page video and class cards (media-cards.js) ── */
+    .media-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+      gap: 0.9rem;
+      margin: 1rem 0;
+    }
+    .media-card {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-top: 4px solid var(--course-accent);
+      border-radius: 4px;
+      padding: 0.75rem 0.9rem 0.85rem;
+    }
+    .media-card.class { border-top-color: #C8860A; }
+    .media-card p { margin: 0; }
+    .mc-kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .mc-title { font-weight: 600; line-height: 1.3; margin: 0.25rem 0 0.35rem !important; }
+    .mc-sub { font-size: 0.85rem; color: #5A5550; line-height: 1.4; }
+    .mc-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.7rem; }
+    .mc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--course-accent);
+      border-radius: 3px;
+      text-decoration: none;
+      color: var(--course-accent-dark);
+    }
+    a.mc-btn:visited { color: var(--course-accent-dark); }
+    a.mc-btn:hover { background: #F0EDE7; }
+    .mc-btn svg { width: 1em; height: 1em; flex: none; }
+    .mc-btn.primary, a.mc-btn.primary:visited { background: var(--course-accent); color: #fff; }
+    a.mc-btn.primary:hover { background: var(--course-accent-dark); }
+    .mc-btn.pending { border-style: dashed; border-color: #b8b2a8; color: #5A5550; }
+    .mc-total { font-size: 0.9rem; color: #5A5550; }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+    /* the remembered data phrase; filled in by page.js */
+    .cg-phrase { display: inline-flex; align-items: center; gap: .3rem; margin-right: .6rem;
+      font-size: .82rem; flex-shrink: 0; }
+    /* The header row is a fixed 780px. The title, the toggle, "Your data", Search and
+       "Report a problem" only just fit in it, so the chip shows the label alone (the
+       phrase is in the link's title and on the data page) and Search shows its icon.
+       An earlier chip that held the phrase and was allowed to shrink squeezed the
+       label down to "Yo" on a classroom projector. */
+    .cg-phrase a { color: rgba(230,238,222,.92); text-decoration: none; white-space: nowrap; }
+    .header-links .search-btn .sb-label { display: none; }
+    .header-links button.report-btn { white-space: nowrap; }
+    /* the title keeps its own width */
+    .site-header-top .site-title { white-space: nowrap; flex-shrink: 0; }
+    .site-header-top .header-links { min-width: 0; margin-left: 1rem; }
+    @media (max-width: 780px) {
+      /* below the 780px row: the report button's short form, as on phones */
+      .header-links .report-btn .rb-full { display: none; }
+      .header-links .report-btn .rb-short { display: inline; }
+      .cg-phrase { margin-right: .2rem; }
+    }
+    .cg-phrase a:hover { color: #fff; text-decoration: underline; }
+    .cg-phrase button { background: none; border: none; cursor: pointer; padding: 0 .2rem;
+      color: rgba(230,238,222,.7); font: inherit; font-size: 1rem; line-height: 1; }
+    .cg-phrase button:hover { color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* Two rules the other course sites do not define. The header's top
+       row carries a report button beside the title, and a page with a
+       wide demo in it needs more than the reading measure. */
+    .site-header-top { border-bottom: 1px solid rgba(200,222,180,0.15); }
+    main.wide { max-width: 1180px; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Computational Physical Modeling</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <span class="cg-phrase" id="cg-phrase"></span>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        
+          <a href="syllabus.html">Syllabus</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="notes.html">Notes</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reports.html">Examples</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reflection.html">Reflection</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="meeting.html">Meeting</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="ai-use.html">AI Use</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="tools.html">Tools</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="python.html">Python</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="workbench.html">Workbench</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="extra-labor.html">Extra Labor</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="canvas-grades.html">Canvas Grades</a>
+          
+        
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+          
+          
+          
+          <a href="week-01.html">1</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-02.html">2</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-03.html">3</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-04.html">4</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          <span class="week-gap" title="Week 5 is a break week">5<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <a href="week-06.html">6</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-07.html">7</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-08.html">8</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-09.html">9</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-10.html">10</a>
+          
+        
+      </div>
+    </nav>
+
+    
+    
+    <nav class="page-family">
+      <div class="nav-inner">
+        Reading Python,
+        <a href="python.html">Overview</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="py-names.html">Names</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="py-values.html">Numbers and text</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="py-lists.html">Lists</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="py-dicts.html">Dictionaries</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="py-loops.html">Loops</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="py-conditions.html">Conditions</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="py-functions.html">Functions</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="py-comprehensions.html">Comprehensions</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="py-files.html">Files</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="py-numpy.html">numpy</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="py-plots.html">Figures</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="py-errors.html">Errors</a>
+        
+      </div>
+    </nav>
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+
+  <main data-pagefind-body class="wide">
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <div class="eyebrow"><a href="python.html">Reading Python</a> · every function the course calls</div>
+<h1>Function cheat sheet</h1>
+
+<p>This page lists every function and method that the course's Python code calls, from <code>print</code>
+to <code>np.linalg.lstsq</code>. Each row gives what the call does, a small example with what it
+gives back, the MATLAB that does the same work, and the page where the course first uses it. The
+examples were run in Python, and each MATLAB example was run in Octave and checked against it, so
+each value shown is what the code gives.</p>
+
+<p>The functions a program defines for itself, such as <code>peak</code> or <code>running_integral</code>,
+are not here. They are explained on the page that shows the program. The <a href="python.html">Reading Python</a>
+pages explain the rest of the language (names, lists, loops and so on), and <a href="terms.html">Every term</a>
+defines the words the course uses.</p>
+
+<h2 id="builtin">Built into Python</h2>
+
+<p>These need no import. <a href="py-functions.html">Functions</a> has a table of the ones used most.</p>
+
+<table class="data cheatsheet">
+  <tr><th>Python</th><th>What it does, with an example</th><th>MATLAB</th><th>First used</th></tr>
+  <tr><td><code>print(a, b)</code></td><td>Shows its values on one line, with a space between each. <code>print('peak', 41.5, 'g')</code> shows <code>peak 41.5 g</code>.</td><td data-label="MATLAB"><code>fprintf('peak %g g\n', 41.5)</code></td><td data-label="First used"><a href="tools-colab.html">Google Colab</a></td></tr>
+  <tr><td><code>len(y)</code></td><td>The number of items in a list, array, text or dictionary. <code>len([4, 7, 9])</code> gives <code>3</code>.</td><td data-label="MATLAB"><code>numel(y)</code><br><span class="cs-note">For a 2-D array, len gives the number of rows, which is size(y, 1) in MATLAB.</span></td><td data-label="First used">Week 1, <a href="program-shape-state-and-flow.html">Program shape I, state and flow</a></td></tr>
+  <tr><td><code>range(n)</code></td><td>The whole numbers 0, 1, ..., n-1, which is what a <code>for</code> loop counts over. <code>range(a, b)</code> starts at a and stops before b. <code>list(range(4))</code> gives <code>[0, 1, 2, 3]</code>.</td><td data-label="MATLAB"><code>0:n-1</code><br><span class="cs-note">A MATLAB loop over positions runs over 1:n instead.</span></td><td data-label="First used">Week 1, <a href="program-shape-state-and-flow.html">Program shape I, state and flow</a></td></tr>
+  <tr><td><code>round(x, 2)</code></td><td>The number rounded to 2 decimal places, or to a whole number when the 2 is left off. An exact half goes to the even neighbor, so <code>round(2.5)</code> is 2. <code>round(3.14159, 2)</code> gives <code>3.14</code>.</td><td data-label="MATLAB"><code>round(x, 2)</code><br><span class="cs-note">MATLAB rounds an exact half away from zero, so its round(2.5) is 3.</span></td><td data-label="First used">Week 2, <a href="walk-02.html">Reading the assignment 2 program</a></td></tr>
+  <tr><td><code>abs(x)</code></td><td>The size of a number without its sign. <code>abs(-2.5)</code> gives <code>2.5</code>.</td><td data-label="MATLAB"><code>abs(x)</code></td><td data-label="First used">Week 1, <a href="walk-01.html">Reading the assignment 1 program</a></td></tr>
+  <tr><td><code>max(y), min(y)</code></td><td>The largest or smallest item. Given two or more numbers, <code>max(1, n)</code> is the larger of them. <code>max([4, 7, 9])</code> gives <code>9</code>.</td><td data-label="MATLAB"><code>max(y), min(y)</code></td><td data-label="First used">Week 2, <a href="walk-02.html">Reading the assignment 2 program</a></td></tr>
+  <tr><td><code>sum(y)</code></td><td>The total of the items. <code>sum([1, 2, 3])</code> gives <code>6</code>.</td><td data-label="MATLAB"><code>sum(y)</code></td><td data-label="First used">Week 3, <a href="area-under-a-curve.html">Area under a curve</a></td></tr>
+  <tr><td><code>sorted(y)</code></td><td>A new list of the same items, smallest first. The original is left as it was. <code>sorted([3, 1, 2])</code> gives <code>[1, 2, 3]</code>.</td><td data-label="MATLAB"><code>sort(y)</code></td><td data-label="First used">Week 9, <a href="coverage.html">Coverage</a></td></tr>
+  <tr><td><code>int(x)</code></td><td>A number with its fractional part dropped, so 2.9 becomes 2 and -2.9 becomes -2. <code>int(2.9)</code> gives <code>2</code>.</td><td data-label="MATLAB"><code>fix(x)</code></td><td data-label="First used">Week 4, <a href="walk-04.html">Reading the assignment 4 program</a></td></tr>
+  <tr><td><code>str(x)</code></td><td>The text form of a value, for joining onto other text. <code>str(10642)</code> gives <code>'10642'</code>.</td><td data-label="MATLAB"><code>num2str(x)</code><br><span class="cs-note">num2str keeps about 5 significant digits, so num2str(pi) is 3.1416.</span></td><td data-label="First used">Week 7, <a href="walk-07.html">Reading the assignment 6 program</a></td></tr>
+  <tr><td><code>list(d)</code></td><td>A list of the keys of a dictionary, or of the items in anything a loop can run over. After <code>d = {'head_x': 1, 'chest_x': 2}</code>, <code>list(d)</code> is <code>['head_x', 'chest_x']</code>.</td><td data-label="MATLAB"><code>fieldnames(s)</code></td><td data-label="First used">Week 6, <a href="walk-06.html">Reading the assignment 5 program</a></td></tr>
+  <tr><td><code>set()</code></td><td><code>set()</code> is an empty set, and <code>set(y)</code> holds each different value of y once. Adding a value a set already has changes nothing. <code>set([2, 1, 2])</code> gives <code>{1, 2}</code>.</td><td data-label="MATLAB"><code>unique(y)</code><br><span class="cs-note">unique gives a sorted array of the different values.</span></td><td data-label="First used">Week 2, <a href="walk-02.html">Reading the assignment 2 program</a></td></tr>
+  <tr><td><code>enumerate(y)</code></td><td>Each item with its position, as pairs, for a loop that needs both. <code>list(enumerate(['a', 'b']))</code> gives <code>[(0, 'a'), (1, 'b')]</code>.</td><td data-label="MATLAB"><code>for i = 1:numel(y)</code><br><span class="cs-note">MATLAB loops over the positions and indexes with them.</span></td><td data-label="First used">Week 9, <a href="walk-09.html">Reading the assignment 8 program</a></td></tr>
+  <tr><td><code>zip(a, b)</code></td><td>The items of two lists side by side, as pairs, for a loop over both at once. <code>list(zip([1, 2], [3, 4]))</code> gives <code>[(1, 3), (2, 4)]</code>.</td><td data-label="MATLAB"><code>for i = 1:numel(a)</code><br><span class="cs-note">MATLAB uses one position i in both arrays.</span></td><td data-label="First used">Week 9, <a href="walk-09.html">Reading the assignment 8 program</a></td></tr>
+  <tr><td><code>slice(a, b)</code></td><td>A slice kept under a name, so <code>y[shown]</code> picks the same samples as <code>y[a:b]</code>. After <code>y = [10, 20, 30, 40]</code> and <code>shown = slice(1, 3)</code>, <code>y[shown]</code> is <code>[20, 30]</code>.</td><td data-label="MATLAB"><code>shown = a+1:b</code></td><td data-label="First used">Week 6, <a href="reports-06.html">Example reports · Assignment 5</a></td></tr>
+  <tr><td><code>next(c for c in y if ...)</code></td><td>The first item that passes the test after <code>if</code>. If no item passes, it stops with a StopIteration error. <a href="py-comprehensions.html">Comprehensions</a> shows the loop it stands for. <code>next(v for v in [3, 8, 12] if v &gt; 5)</code> gives <code>8</code>.</td><td data-label="MATLAB"><code>y(find(y &gt; 5, 1))</code><br><span class="cs-note">find gives an empty result when no value passes.</span></td><td data-label="First used">only on <a href="py-comprehensions.html">Comprehensions</a></td></tr>
+  <tr><td><code>type(x)</code></td><td>What kind of value x is: a whole number (<code>int</code>), a float (<code>float</code>), text (<code>str</code>) and so on. <code>type(2026)</code> gives <code>&lt;class 'int'&gt;</code>.</td><td data-label="MATLAB"><code>class(x)</code></td><td data-label="First used">only on <a href="py-values.html">Numbers and text</a></td></tr>
+  <tr><td><code>raise ValueError('...')</code></td><td>Stops the program with this error and message. The course's methods raise <code>ValueError</code> for a bad input and <code>RuntimeError</code> when a search does not settle.</td><td data-label="MATLAB"><code>error('...')</code></td><td data-label="First used">Week 7, <a href="bisection.html">Bisection</a></td></tr>
+</table>
+
+<h2 id="methods">Methods on text, lists, sets and dictionaries</h2>
+
+<p>A method is a function that belongs to a value. It is written after the value and a dot, so <code>y.append(3)</code> adds 3 to the list y. <a href="py-lists.html">Lists, indexes and slices</a> and <a href="py-dicts.html">Dictionaries and the data file</a> show them in use.</p>
+
+<table class="data cheatsheet">
+  <tr><th>Python</th><th>What it does, with an example</th><th>MATLAB</th><th>First used</th></tr>
+  <tr><td><code>y.append(v)</code></td><td>Adds v to the end of the list y. After <code>y = [1, 2]</code> and <code>y.append(3)</code>, <code>y</code> is <code>[1, 2, 3]</code>.</td><td data-label="MATLAB"><code>y(end+1) = v</code></td><td data-label="First used">Week 1, <a href="walk-01.html">Reading the assignment 1 program</a></td></tr>
+  <tr><td><code>y.index(v)</code></td><td>The position of the first v in the list y, counting from 0. It stops with a ValueError when v is not in the list. <code>[4, 7, 9].index(7)</code> gives <code>1</code>.</td><td data-label="MATLAB"><code>find(y == v, 1)</code><br><span class="cs-note">MATLAB counts from 1, so its version of the example gives <code>2</code>.</span></td><td data-label="First used">Week 2, <a href="walk-02.html">Reading the assignment 2 program</a></td></tr>
+  <tr><td><code>s.add(v)</code></td><td>Puts v in the set s, unless s already has it. After <code>s = {1, 2}</code> and <code>s.add(2)</code> and <code>s.add(5)</code>, <code>s</code> is <code>{1, 2, 5}</code>.</td><td data-label="MATLAB"><code>s = union(s, v)</code></td><td data-label="First used">Week 2, <a href="walk-02.html">Reading the assignment 2 program</a></td></tr>
+  <tr><td><code>d.items(), d.keys(), d.values()</code></td><td>The key and value pairs of a dictionary, its keys, or its values, for a loop over them. After <code>d = {'head_x': 1, 'chest_x': 2}</code>, <code>list(d.items())</code> is <code>[('head_x', 1), ('chest_x', 2)]</code>.</td><td data-label="MATLAB"><code>fieldnames(s), struct2cell(s)</code></td><td data-label="First used"><a href="tools-colab.html">Google Colab</a></td></tr>
+  <tr><td><code>', '.join(words)</code></td><td>One piece of text made of the words, with the text before the dot between each pair. <code>', '.join(['a', 'b', 'c'])</code> gives <code>'a, b, c'</code>.</td><td data-label="MATLAB"><code>strjoin(words, ', ')</code></td><td data-label="First used">Week 2, <a href="walk-02.html">Reading the assignment 2 program</a></td></tr>
+  <tr><td><code>text.title(), text.upper()</code></td><td>The text with each word capitalized, or all of it in capitals. <code>'left rear seat'.title()</code> gives <code>'Left Rear Seat'</code>.</td><td data-label="MATLAB"><code>upper(text)</code><br><span class="cs-note">MATLAB has no single call for title().</span></td><td data-label="First used">Week 2, <a href="walk-02.html">Reading the assignment 2 program</a></td></tr>
+  <tr><td><code>code.startswith('10')</code></td><td>True when the text begins with the given text. <code>'10SEATLERE00ACXP'.startswith('10')</code> gives <code>True</code>.</td><td data-label="MATLAB"><code>startsWith(code, '10')</code></td><td data-label="First used"><a href="class-05.html">Class 5, Abstraction layers and known-answer checks</a></td></tr>
+</table>
+
+<h2 id="files">Files, folders, the clock and math</h2>
+
+<p><code>json</code>, <code>glob</code>, <code>os</code>, <code>time</code> and <code>math</code> come with Python and need only an <code>import</code> line. <a href="py-files.html">Files and libraries</a> explains import and the folder a program runs in.</p>
+
+<table class="data cheatsheet">
+  <tr><th>Python</th><th>What it does, with an example</th><th>MATLAB</th><th>First used</th></tr>
+  <tr><td><code>with open(name) as f:</code></td><td>Opens the file so the indented lines can read it, and closes it after them.</td><td data-label="MATLAB"><code>fileread(name)</code><br><span class="cs-note">fileread reads the whole file in one call.</span></td><td data-label="First used"><a href="tools-colab.html">Google Colab</a></td></tr>
+  <tr><td><code>json.load(f)</code></td><td>Reads a JSON file into dictionaries and lists. A test file becomes one dictionary.</td><td data-label="MATLAB"><code>jsondecode(fileread(name))</code></td><td data-label="First used"><a href="tools-colab.html">Google Colab</a></td></tr>
+  <tr><td><code>glob.glob('crash/*.json')</code></td><td>A list of the paths that match the pattern, folder included, in no fixed order. <code>*</code> stands for any characters.</td><td data-label="MATLAB"><code>dir('crash/*.json')</code><br><span class="cs-note">The names are in the .name field of each result, without the folder, so fullfile(folder, d(k).name) gives the path.</span></td><td data-label="First used">Week 1, <a href="walk-01.html">Reading the assignment 1 program</a></td></tr>
+  <tr><td><code>os.path.join('pack', 'crash')</code></td><td>A path made from folder and file names, with the separator your computer uses (<code>/</code> or <code>\</code>).</td><td data-label="MATLAB"><code>fullfile('pack', 'crash')</code></td><td data-label="First used">Week 1, <a href="walk-01.html">Reading the assignment 1 program</a></td></tr>
+  <tr><td><code>os.listdir('crash')</code></td><td>A list of the names in a folder, in no fixed order. <code>sorted(...)</code> puts them in order.</td><td data-label="MATLAB"><code>dir('crash')</code><br><span class="cs-note">dir also lists . and .., and the names are in the .name field of each result.</span></td><td data-label="First used">Week 1, <a href="reports-01.html">Example reports · Assignment 1</a></td></tr>
+  <tr><td><code>time.perf_counter()</code></td><td>A reading of a fine clock in seconds. The difference between two readings is the time taken between them.</td><td data-label="MATLAB"><code>tic, toc</code></td><td data-label="First used">Week 7, <a href="windowed-optimum.html">A constrained optimum over a window</a></td></tr>
+  <tr><td><code>files.upload()</code></td><td>In Colab only, opens a window for choosing files to copy into the notebook's folder. It needs <code>from google.colab import files</code> first.</td><td data-label="MATLAB"><span class="cs-none">no single call</span></td><td data-label="First used"><a href="tools-colab.html">Google Colab</a></td></tr>
+  <tr><td><code>math.sqrt(x), math.tan(x)</code></td><td>The square root or tangent of one number. <code>np.sqrt</code> and <code>np.tan</code> do the same to a whole array. <code>math.sqrt(2)</code> gives <code>1.4142135623730951</code>.</td><td data-label="MATLAB"><code>sqrt(x), tan(x)</code></td><td data-label="First used">Week 1, <a href="program-shape-state-and-flow.html">Program shape I, state and flow</a></td></tr>
+</table>
+
+<h2 id="make">Making numpy arrays</h2>
+
+<p>The numpy rows need <code>import numpy as np</code> at the top of the program. <a href="py-numpy.html">numpy arrays</a> explains what an array is.</p>
+
+<table class="data cheatsheet">
+  <tr><th>Python</th><th>What it does, with an example</th><th>MATLAB</th><th>First used</th></tr>
+  <tr><td><code>np.array(y)</code></td><td>An array of the list's values, so arithmetic works on every value at once. <code>np.array([1, 2, 3]) * 2</code> gives <code>[2 4 6]</code>.</td><td data-label="MATLAB"><code>y</code><br><span class="cs-note">MATLAB arrays already work this way.</span></td><td data-label="First used"><a href="tools-colab.html">Google Colab</a></td></tr>
+  <tr><td><code>np.arange(n)</code></td><td>The array 0, 1, ..., n-1. Times are built as <code>t0 + dt * np.arange(n)</code>. <code>np.arange(4)</code> gives <code>[0 1 2 3]</code>.</td><td data-label="MATLAB"><code>(0:n-1)'</code></td><td data-label="First used"><a href="tools-colab.html">Google Colab</a></td></tr>
+  <tr><td><code>np.linspace(a, b, n)</code></td><td>n evenly spaced values from a to b, both ends included. <code>np.linspace(0, 1, 5)</code> gives <code>[0.   0.25 0.5  0.75 1.  ]</code>.</td><td data-label="MATLAB"><code>linspace(a, b, n)</code></td><td data-label="First used">Week 7, <a href="walk-07.html">Reading the assignment 6 program</a></td></tr>
+  <tr><td><code>np.zeros(n), np.ones(n)</code></td><td>An array of n zeros or n ones. <code>np.zeros(3)</code> gives <code>[0. 0. 0.]</code>.</td><td data-label="MATLAB"><code>zeros(n, 1), ones(n, 1)</code></td><td data-label="First used">Week 4, <a href="walk-04.html">Reading the assignment 4 program</a></td></tr>
+  <tr><td><code>np.full(n, np.nan)</code></td><td>An array of n copies of one value. Filled with <code>np.nan</code> (not a number), it marks every value as not yet worked out. <code>np.full(3, np.nan)</code> gives <code>[nan nan nan]</code>.</td><td data-label="MATLAB"><code>nan(n, 1)</code></td><td data-label="First used">Week 6, <a href="model-form-and-parameters.html">Model form and free parameters</a></td></tr>
+  <tr><td><code>np.empty(n)</code></td><td>Room for n values that are not set to anything yet. The program fills every one before it reads it.</td><td data-label="MATLAB"><code>zeros(n, 1)</code></td><td data-label="First used">Week 8, <a href="from-a-rate-to-a-trajectory.html">Euler's method</a></td></tr>
+  <tr><td><code>np.zeros_like(y), np.ones_like(t), np.empty_like(y)</code></td><td>An array of zeros, ones or unset values with the same size and type as the array given. If y holds whole numbers, so does <code>np.zeros_like(y)</code>, and a 0.5 stored in it becomes 0. <code>np.ones_like(np.array([0.1, 0.2, 0.3]))</code> gives <code>[1. 1. 1.]</code>.</td><td data-label="MATLAB"><code>ones(size(t))</code></td><td data-label="First used">Week 4, <a href="finite-differences.html">Finite differences</a></td></tr>
+  <tr><td><code>np.column_stack([a, b])</code></td><td>A table with the arrays as its columns. A least squares fit builds its matrix this way. <code>np.column_stack([[1, 2], [3, 4]])</code> gives <code class="cs-out">[[1 3]
+ [2 4]]</code>.</td><td data-label="MATLAB"><code>[a(:), b(:)]</code></td><td data-label="First used">Week 6, <a href="linearity-in-the-parameters.html">Linearity in the parameters</a></td></tr>
+  <tr><td><code>np.concatenate([a, b])</code></td><td>One array with the values of a followed by the values of b. <code>np.concatenate([[0.0], [1, 3]])</code> gives <code>[0. 1. 3.]</code>.</td><td data-label="MATLAB"><code>[a(:); b(:)]</code></td><td data-label="First used">Week 3, <a href="cumulative-integration.html">Cumulative integration</a></td></tr>
+</table>
+
+<h2 id="each">numpy math on every value</h2>
+
+<p>Each of these works on one number, or on every value of an array at once.</p>
+
+<table class="data cheatsheet">
+  <tr><th>Python</th><th>What it does, with an example</th><th>MATLAB</th><th>First used</th></tr>
+  <tr><td><code>np.abs(y)</code></td><td>Each value without its sign. <code>np.abs(np.array([-3, 2]))</code> gives <code>[3 2]</code>.</td><td data-label="MATLAB"><code>abs(y)</code></td><td data-label="First used">Week 4, <a href="walk-04.html">Reading the assignment 4 program</a></td></tr>
+  <tr><td><code>np.sqrt(y)</code></td><td>The square root of each value. <code>np.sqrt(np.array([4, 9]))</code> gives <code>[2. 3.]</code>.</td><td data-label="MATLAB"><code>sqrt(y)</code></td><td data-label="First used">Week 4, <a href="smoothing.html">Smoothing and phase lag</a></td></tr>
+  <tr><td><code>np.exp(x)</code></td><td>e raised to each value. <code>np.exp(1)</code> gives <code>2.718281828459045</code>.</td><td data-label="MATLAB"><code>exp(x)</code></td><td data-label="First used">Week 7, <a href="newton-and-secant.html">Newton and the secant method</a></td></tr>
+  <tr><td><code>np.sin(a), np.cos(a), np.tan(a)</code></td><td>The sine, cosine or tangent, with the angle in radians. <code>np.pi</code> is π. <code>np.cos(np.pi)</code> gives <code>-1.0</code>.</td><td data-label="MATLAB"><code>sin(a), cos(a), tan(a)</code></td><td data-label="First used">Week 4, <a href="smoothing.html">Smoothing and phase lag</a></td></tr>
+  <tr><td><code>np.hypot(x, y)</code></td><td>The distance from (0, 0) to (x, y), that is, the square root of x² + y². <code>np.hypot(3, 4)</code> gives <code>5.0</code>.</td><td data-label="MATLAB"><code>hypot(x, y)</code></td><td data-label="First used">Week 7, <a href="walk-07.html">Reading the assignment 6 program</a></td></tr>
+  <tr><td><code>np.floor(x)</code></td><td>Each value rounded down, so -2.5 becomes -3. <code>np.floor(np.array([2.5, -2.5]))</code> gives <code>[ 2. -3.]</code>.</td><td data-label="MATLAB"><code>floor(x)</code></td><td data-label="First used">Week 8, <a href="walk-08.html">Reading the assignment 7 program</a></td></tr>
+</table>
+
+<h2 id="reduce">numpy sums, averages and other single numbers</h2>
+
+<p>Each of these turns an array into one number, or into one number per column when given <code>axis=0</code>. MATLAB's <code>sum(M)</code> and the others already give one number per column of a matrix, the same as <code>np.sum(M, axis=0)</code>.</p>
+
+<table class="data cheatsheet">
+  <tr><th>Python</th><th>What it does, with an example</th><th>MATLAB</th><th>First used</th></tr>
+  <tr><td><code>np.sum(y)</code></td><td>The total. <code>np.sum(np.array([1, 2, 3]))</code> gives <code>6</code>.</td><td data-label="MATLAB"><code>sum(y)</code></td><td data-label="First used">Week 4, <a href="walk-04.html">Reading the assignment 4 program</a></td></tr>
+  <tr><td><code>np.mean(y)</code></td><td>The average. <code>np.mean(np.array([1, 2, 6]))</code> gives <code>3.0</code>.</td><td data-label="MATLAB"><code>mean(y)</code></td><td data-label="First used">Week 3, <a href="bias-and-noise.html">Bias and noise accumulate at different rates</a></td></tr>
+  <tr><td><code>np.median(y)</code></td><td>The middle value once the values are sorted, or the average of the middle two. <code>np.median(np.array([1, 2, 6, 9]))</code> gives <code>4.0</code>.</td><td data-label="MATLAB"><code>median(y)</code></td><td data-label="First used">Week 6, <a href="walk-06.html">Reading the assignment 5 program</a></td></tr>
+  <tr><td><code>np.std(y)</code></td><td>The standard deviation, dividing by n. MATLAB's <code>std(y)</code> divides by n-1, so the course's MATLAB writes <code>std(y, 1)</code>. <code>np.std(np.array([1, 2, 3, 4]))</code> gives <code>1.118033988749895</code>.</td><td data-label="MATLAB"><code>std(y, 1)</code></td><td data-label="First used">Week 3, <a href="walk-03.html">Reading the assignment 3 program</a></td></tr>
+  <tr><td><code>np.min(y), np.max(y)</code></td><td>The smallest or largest value. <code>np.max(np.array([4, 9, 7]))</code> gives <code>9</code>.</td><td data-label="MATLAB"><code>min(y), max(y)</code></td><td data-label="First used">Week 6, <a href="walk-06.html">Reading the assignment 5 program</a></td></tr>
+  <tr><td><code>np.percentile(d, [5, 95])</code></td><td>The values below which 5% and 95% of the data fall, found by sorting and reading between neighbors. <code>np.percentile(np.arange(1, 101), [5, 95])</code> gives <code>[ 5.95 95.05]</code>.</td><td data-label="MATLAB"><code>prctile(d, [5 95])</code><br><span class="cs-note">prctile reads between neighbors differently, so prctile(1:100, [5 95]) gives 5.5 and 95.5. np.percentile(d, [5, 95], method='hazen') matches it.</span></td><td data-label="First used">Week 9, <a href="propagating-by-resampling.html">Propagating uncertainty by resampling</a></td></tr>
+  <tr><td><code>np.all(y &gt; 0), np.any(y &gt; 0)</code></td><td>True when every value passes the test, or when at least one does. <code>np.all(np.array([3, 5, -1]) &gt; 0)</code> gives <code>False</code>.</td><td data-label="MATLAB"><code>all(y &gt; 0), any(y &gt; 0)</code></td><td data-label="First used">Week 6, <a href="walk-06.html">Reading the assignment 5 program</a></td></tr>
+  <tr><td><code>y.min(), y.max(), y.mean()</code></td><td>The same as <code>np.min(y)</code>, <code>np.max(y)</code> and <code>np.mean(y)</code>, written as a method of the array y. After <code>y = np.array([4.0, -2.0, 9.0])</code>, <code>y.min()</code> is <code>-2.0</code>.</td><td data-label="MATLAB"><code>min(y)</code></td><td data-label="First used"><a href="class-05.html">Class 5, Abstraction layers and known-answer checks</a></td></tr>
+</table>
+
+<h2 id="find">Finding and sorting in numpy</h2>
+
+<table class="data cheatsheet">
+  <tr><th>Python</th><th>What it does, with an example</th><th>MATLAB</th><th>First used</th></tr>
+  <tr><td><code>np.argmax(y), np.argmin(y)</code></td><td>The position of the largest or smallest value, counting from 0. <code>y[np.argmax(y)]</code> is the value itself. <code>np.argmax(np.array([4, 9, 7]))</code> gives <code>1</code>.</td><td data-label="MATLAB"><code>[~, i] = max(y)</code><br><span class="cs-note">MATLAB counts from 1, so its version of the example gives <code>2</code>.</span></td><td data-label="First used">Week 3, <a href="walk-03.html">Reading the assignment 3 program</a></td></tr>
+  <tr><td><code>np.sort(y)</code></td><td>A sorted copy, smallest first. With <code>axis=0</code> each column is sorted on its own. <code>np.sort(np.array([3, 1, 2]))</code> gives <code>[1 2 3]</code>.</td><td data-label="MATLAB"><code>sort(y)</code></td><td data-label="First used">Week 9, <a href="walk-09.html">Reading the assignment 8 program</a></td></tr>
+  <tr><td><code>np.argsort(y)</code></td><td>The positions that would put the values in order, smallest first. <code>np.argsort(np.array([30, 10, 20]))</code> gives <code>[1 2 0]</code>.</td><td data-label="MATLAB"><code>[~, order] = sort(y)</code><br><span class="cs-note">MATLAB counts from 1, so its version of the example gives <code>[2 3 1]</code>.</span></td><td data-label="First used">Week 6, <a href="reports-06.html">Example reports · Assignment 5</a></td></tr>
+</table>
+
+<h2 id="running">numpy running totals, differences and slopes</h2>
+
+<table class="data cheatsheet">
+  <tr><th>Python</th><th>What it does, with an example</th><th>MATLAB</th><th>First used</th></tr>
+  <tr><td><code>np.cumsum(y)</code></td><td>The running total, one value per sample. Times <code>dt</code>, it approximates the running integral. <code>np.cumsum(np.array([1, 2, 3]))</code> gives <code>[1 3 6]</code>.</td><td data-label="MATLAB"><code>cumsum(y)</code></td><td data-label="First used">Week 3, <a href="cumulative-integration.html">Cumulative integration</a></td></tr>
+  <tr><td><code>np.diff(y)</code></td><td>Each value minus the one before it, so the result is one shorter. <code>np.diff(np.array([1, 4, 9]))</code> gives <code>[3 5]</code>.</td><td data-label="MATLAB"><code>diff(y)</code></td><td data-label="First used">Week 6, <a href="walk-06.html">Reading the assignment 5 program</a></td></tr>
+  <tr><td><code>np.gradient(y, dt)</code></td><td>The slope at every sample: centered differences inside, one-sided at the two ends. <code>np.gradient(np.array([1.0, 4.0, 9.0]), 1.0)</code> gives <code>[3. 4. 5.]</code>.</td><td data-label="MATLAB"><code>gradient(y, dt)</code></td><td data-label="First used">Week 4, <a href="finite-differences.html">Finite differences</a></td></tr>
+</table>
+
+<h2 id="fit">Polynomial fits and linear algebra in numpy</h2>
+
+<table class="data cheatsheet">
+  <tr><th>Python</th><th>What it does, with an example</th><th>MATLAB</th><th>First used</th></tr>
+  <tr><td><code>np.polyfit(t, z, 2)</code></td><td>The least squares coefficients of a polynomial of degree 2, highest power first. <code>np.polyfit([0, 1, 2, 3], [1, 3, 7, 13], 2)</code> gives <code>[1. 1. 1.]</code>.</td><td data-label="MATLAB"><code>polyfit(t, z, 2)</code></td><td data-label="First used">Week 6, <a href="walk-06.html">Reading the assignment 5 program</a></td></tr>
+  <tr><td><code>np.polyval(p, t)</code></td><td>The polynomial with coefficients p, highest power first, worked out at t. <code>np.polyval([1, 1, 1], 2)</code> gives <code>7</code>.</td><td data-label="MATLAB"><code>polyval(p, t)</code></td><td data-label="First used">Week 7, <a href="conditions-become-roots.html">Conditions as roots</a></td></tr>
+  <tr><td><code>np.roots(p)</code></td><td>Every root of the polynomial with coefficients p, highest power first. <code>np.roots([1, -3, 2])</code> gives <code>[2. 1.]</code>.</td><td data-label="MATLAB"><code>roots(p)</code></td><td data-label="First used">Week 7, <a href="conditions-become-roots.html">Conditions as roots</a></td></tr>
+  <tr><td><code>np.polyder(p)</code></td><td>The coefficients of the derivative of the polynomial with coefficients p, highest power first. <code>np.polyder([1, -3, 2])</code> gives <code>[ 2 -3]</code>.</td><td data-label="MATLAB"><code>polyder(p)</code></td><td data-label="First used">Week 7, <a href="conditions-become-roots.html">Conditions as roots</a></td></tr>
+  <tr><td><code>np.linalg.lstsq(A, z, rcond=None)[0]</code></td><td>The weights on the columns of A that fit z best in the least squares sense. <code>[0]</code> keeps the weights and drops the three other results. <code>np.linalg.lstsq(np.array([[1, 0], [1, 1], [1, 2]]), np.array([1, 3, 5]), rcond=None)[0]</code> gives <code>[1. 2.]</code>.</td><td data-label="MATLAB"><code>A \ z</code></td><td data-label="First used">Week 6, <a href="linearity-in-the-parameters.html">Linearity in the parameters</a></td></tr>
+  <tr><td><code>np.linalg.solve(A, b)</code></td><td>The x that makes <code>A @ x</code> equal b, for a square A. <code>np.linalg.solve(np.array([[2, 0], [0, 4]]), np.array([2, 8]))</code> gives <code>[1. 2.]</code>.</td><td data-label="MATLAB"><code>A \ b</code></td><td data-label="First used">Week 7, <a href="newton-and-secant.html">Newton and the secant method</a></td></tr>
+  <tr><td><code>np.linalg.norm(v)</code></td><td>The length of a vector, the square root of the sum of its squares. <code>np.linalg.norm(np.array([3, 4]))</code> gives <code>5.0</code>.</td><td data-label="MATLAB"><code>norm(v)</code></td><td data-label="First used">Week 8, <a href="order-of-accuracy-measured.html">Order of accuracy</a></td></tr>
+</table>
+
+<h2 id="random">numpy random numbers</h2>
+
+<table class="data cheatsheet">
+  <tr><th>Python</th><th>What it does, with an example</th><th>MATLAB</th><th>First used</th></tr>
+  <tr><td><code>rng = np.random.default_rng(2026)</code></td><td>A random number generator. The same seed (2026 here) gives the same draws on every run, and no seed gives new draws each time.</td><td data-label="MATLAB"><code>rng(2026)</code><br><span class="cs-note">MATLAB draws different numbers from the same seed. Without rng, MATLAB repeats the same draws in each session, and rng('shuffle') gives new ones.</span></td><td data-label="First used">Week 9, <a href="propagating-by-resampling.html">Propagating uncertainty by resampling</a></td></tr>
+  <tr><td><code>rng.normal(mu, sd, n)</code></td><td>n draws from a normal distribution with mean mu and standard deviation sd.</td><td data-label="MATLAB"><code>mu + sd * randn(n, 1)</code></td><td data-label="First used">Week 9, <a href="propagating-by-resampling.html">Propagating uncertainty by resampling</a></td></tr>
+  <tr><td><code>rng.standard_normal(n)</code></td><td>n draws from a normal distribution with mean 0 and standard deviation 1.</td><td data-label="MATLAB"><code>randn(n, 1)</code></td><td data-label="First used">Week 9, <a href="walk-09.html">Reading the assignment 8 program</a></td></tr>
+</table>
+
+<h2 id="plt">Building a figure with plt</h2>
+
+<p>These need <code>import matplotlib.pyplot as plt</code>, and each one acts on the current figure. <a href="py-plots.html">Figures</a> builds one from start to finish.</p>
+
+<table class="data cheatsheet">
+  <tr><th>Python</th><th>What it does, with an example</th><th>MATLAB</th><th>First used</th></tr>
+  <tr><td><code>plt.figure(figsize=(8, 4))</code></td><td>Starts a new figure, 8 by 4 inches.</td><td data-label="MATLAB"><code>figure</code></td><td data-label="First used">Week 1, <a href="walk-01.html">Reading the assignment 1 program</a></td></tr>
+  <tr><td><code>plt.plot(t, y, label='...')</code></td><td>Draws y against t as a line. A third text argument such as <code>'.-'</code> or <code>'--'</code> sets the marker and line style.</td><td data-label="MATLAB"><code>plot(t, y, 'DisplayName', '...')</code></td><td data-label="First used"><a href="tools-colab.html">Google Colab</a></td></tr>
+  <tr><td><code>plt.semilogx(x, y), plt.loglog(x, y)</code></td><td>The same as <code>plot</code>, with a logarithmic x axis, or with both axes logarithmic.</td><td data-label="MATLAB"><code>semilogx(x, y), loglog(x, y)</code></td><td data-label="First used">Week 2, <a href="walk-02.html">Reading the assignment 2 program</a></td></tr>
+  <tr><td><code>plt.yscale('log')</code></td><td>Makes the y axis logarithmic after the lines are drawn.</td><td data-label="MATLAB"><code>set(gca, 'YScale', 'log')</code></td><td data-label="First used">Week 6, <a href="reports-06.html">Example reports · Assignment 5</a></td></tr>
+  <tr><td><code>plt.axhline(y0), plt.axvline(x0)</code></td><td>A horizontal line across the plot at height y0, or a vertical line at x0.</td><td data-label="MATLAB"><code>yline(y0), xline(x0)</code></td><td data-label="First used">Week 1, <a href="walk-01.html">Reading the assignment 1 program</a></td></tr>
+  <tr><td><code>plt.text(x, y, 'words')</code></td><td>Writes text on the plot with its corner at (x, y).</td><td data-label="MATLAB"><code>text(x, y, 'words')</code></td><td data-label="First used">Week 3, <a href="walk-03.html">Reading the assignment 3 program</a></td></tr>
+  <tr><td><code>plt.annotate('words', (x, y), xytext=(12, -6), ...)</code></td><td>Writes text that labels the point (x, y). <code>xytext</code> moves the text away from the point.</td><td data-label="MATLAB"><code>text(x, y, 'words')</code></td><td data-label="First used">Week 4, <a href="walk-04.html">Reading the assignment 4 program</a></td></tr>
+  <tr><td><code>plt.xlabel('...'), plt.ylabel('...'), plt.title('...')</code></td><td>The axis labels and the title.</td><td data-label="MATLAB"><code>xlabel('...'), ylabel('...'), title('...')</code></td><td data-label="First used"><a href="tools-colab.html">Google Colab</a></td></tr>
+  <tr><td><code>plt.xlim(a, b), plt.ylim(a, b)</code></td><td>The range each axis shows.</td><td data-label="MATLAB"><code>xlim([a b]), ylim([a b])</code></td><td data-label="First used">Week 3, <a href="walk-03.html">Reading the assignment 3 program</a></td></tr>
+  <tr><td><code>plt.xticks(values, labels), plt.yticks(...)</code></td><td>Where the tick marks go on an axis, and the labels written at them.</td><td data-label="MATLAB"><code>xticks(values), xticklabels(labels)</code></td><td data-label="First used">Week 2, <a href="walk-02.html">Reading the assignment 2 program</a></td></tr>
+  <tr><td><code>plt.axis('equal')</code></td><td>Makes one unit the same length on both axes, so a circle looks round.</td><td data-label="MATLAB"><code>axis equal</code></td><td data-label="First used">Week 9, <a href="walk-09.html">Reading the assignment 8 program</a></td></tr>
+  <tr><td><code>plt.legend()</code></td><td>A key to the lines, made from their <code>label=</code> text.</td><td data-label="MATLAB"><code>legend</code></td><td data-label="First used">Week 2, <a href="walk-02.html">Reading the assignment 2 program</a></td></tr>
+  <tr><td><code>plt.tight_layout()</code></td><td>Moves the parts of the figure so labels do not overlap or run off the edge.</td><td data-label="MATLAB"><span class="cs-none">no single call</span><br><span class="cs-note">MATLAB usually keeps the labels inside the figure without it.</span></td><td data-label="First used">Week 1, <a href="walk-01.html">Reading the assignment 1 program</a></td></tr>
+  <tr><td><code>plt.savefig('name.png')</code></td><td>Saves the figure to a file in the folder the program runs in.</td><td data-label="MATLAB"><code>saveas(gcf, 'name.png')</code></td><td data-label="First used"><a href="tools-colab.html">Google Colab</a></td></tr>
+  <tr><td><code>plt.show()</code></td><td>Shows the figure on screen. In Colab and VS Code notebooks, figures show without it.</td><td data-label="MATLAB"><span class="cs-none">no single call</span><br><span class="cs-note">MATLAB shows each figure as it is made.</span></td><td data-label="First used"><a href="tools-colab.html">Google Colab</a></td></tr>
+  <tr><td><code>plt.close()</code></td><td>Closes the figure, which frees its memory before the next one.</td><td data-label="MATLAB"><code>close</code></td><td data-label="First used">Week 1, <a href="walk-01.html">Reading the assignment 1 program</a></td></tr>
+  <tr><td><code>plt.gca()</code></td><td>The current panel (its axes), for the panel methods below.</td><td data-label="MATLAB"><code>gca</code></td><td data-label="First used">Week 7, <a href="walk-07.html">Reading the assignment 6 program</a></td></tr>
+</table>
+
+<h2 id="ax">Figures with several panels (fig and ax)</h2>
+
+<p><code>fig, ax = plt.subplots()</code> makes a figure (<code>fig</code>) and a panel (<code>ax</code>), and <code>plt.subplots(2, 1)</code> makes two panels, one above the other. A panel's methods do what the <code>plt</code> functions above do, and the label and range methods start with <code>set_</code>. <a href="py-plots.html">Figures</a> has a table of the pairs.</p>
+
+<table class="data cheatsheet">
+  <tr><th>Python</th><th>What it does, with an example</th><th>MATLAB</th><th>First used</th></tr>
+  <tr><td><code>fig, (top, bot) = plt.subplots(2, 1, sharex=True)</code></td><td>A figure with panels in 2 rows and 1 column, sharing one time axis.</td><td data-label="MATLAB"><code>subplot(2, 1, k)</code><br><span class="cs-note">subplot(2, 1, k) makes panel k the current one, and linkaxes(..., 'x') shares the x axis.</span></td><td data-label="First used">Week 1, <a href="walk-01.html">Reading the assignment 1 program</a></td></tr>
+  <tr><td><code>ax.plot(t, y), ax.hist(values, bins=10)</code></td><td>A line on this panel, or a histogram of the values in 10 bins.</td><td data-label="MATLAB"><code>plot(t, y), histogram(values, 10)</code></td><td data-label="First used">Week 1, <a href="walk-01.html">Reading the assignment 1 program</a></td></tr>
+  <tr><td><code>ax.set_xlabel('...'), ax.set_ylabel('...'), ax.set_title('...')</code></td><td>The axis labels and title of this panel.</td><td data-label="MATLAB"><code>xlabel('...'), ylabel('...'), title('...')</code></td><td data-label="First used">Week 1, <a href="walk-01.html">Reading the assignment 1 program</a></td></tr>
+  <tr><td><code>ax.set_xlim(a, b), ax.set_ylim(a, b)</code></td><td>The range each axis of this panel shows.</td><td data-label="MATLAB"><code>xlim([a b]), ylim([a b])</code></td><td data-label="First used">Week 3, <a href="walk-03.html">Reading the assignment 3 program</a></td></tr>
+  <tr><td><code>ax.set_xticks(values), ax.set_yticks(values), ax.set_yticklabels(labels)</code></td><td>Where the ticks go on this panel, and the labels written at them.</td><td data-label="MATLAB"><code>xticks(values), yticklabels(labels)</code></td><td data-label="First used">Week 6, <a href="walk-06.html">Reading the assignment 5 program</a></td></tr>
+  <tr><td><code>ax.axhline(y0), ax.axvline(x0), ax.axhspan(lo, hi)</code></td><td>A horizontal or vertical line across this panel, or a shaded band from height lo to hi.</td><td data-label="MATLAB"><code>yline(y0), xline(x0), yregion(lo, hi)</code><br><span class="cs-note">yregion is in MATLAB R2023a and later.</span></td><td data-label="First used">Week 3, <a href="walk-03.html">Reading the assignment 3 program</a></td></tr>
+  <tr><td><code>ax.text(x, y, 'words'), ax.legend()</code></td><td>Text on this panel, and its key to the lines.</td><td data-label="MATLAB"><code>text(x, y, 'words'), legend</code></td><td data-label="First used">Week 3, <a href="walk-03.html">Reading the assignment 3 program</a></td></tr>
+  <tr><td><code>ax.set_aspect('equal'), ax.invert_xaxis()</code></td><td>One unit the same length on both axes, or the x axis running from right to left.</td><td data-label="MATLAB"><code>axis equal, set(gca, 'XDir', 'reverse')</code></td><td data-label="First used">Week 7, <a href="walk-07.html">Reading the assignment 6 program</a></td></tr>
+  <tr><td><code>fig.suptitle('...'), fig.tight_layout(), fig.savefig('name.png')</code></td><td>A title over all the panels, the layout fix, and saving, for the whole figure.</td><td data-label="MATLAB"><code>sgtitle('...'), saveas(gcf, 'name.png')</code></td><td data-label="First used">Week 1, <a href="walk-01.html">Reading the assignment 1 program</a></td></tr>
+  <tr><td><code>fig.set_size_inches(8, 8)</code></td><td>Changes the size of a figure that already exists.</td><td data-label="MATLAB"><code>set(gcf, 'Units', 'inches', 'Position', [1 1 8 8])</code></td><td data-label="First used"><a href="class-05.html">Class 5, Abstraction layers and known-answer checks</a></td></tr>
+</table>
+
+<h2 id="scipy">SciPy root finders and solvers</h2>
+
+<p>The course's programs write these methods out by hand, so that you can see each step. The notes name the SciPy functions that do the same work. Each needs an import line first, such as <code>from scipy.optimize import brentq</code> or <code>from scipy.integrate import solve_ivp</code>.</p>
+
+<table class="data cheatsheet">
+  <tr><th>Python</th><th>What it does, with an example</th><th>MATLAB</th><th>First used</th></tr>
+  <tr><td><code>brentq(f, a, b)</code></td><td>A root of f between a and b, where f(a) and f(b) have opposite signs. It mixes bisection with faster steps. <code>brentq(lambda x: x**3 - 100, 4, 5)</code> gives <code>4.641588833612774</code>.</td><td data-label="MATLAB"><code>fzero(f, [a b])</code></td><td data-label="First used">Week 7, <a href="newton-and-secant.html">Newton and the secant method</a></td></tr>
+  <tr><td><code>bisect(f, a, b)</code></td><td>A root of f between a and b by bisection, the method on <a href="bisection.html">Bisection</a>.</td><td data-label="MATLAB"><code>fzero(f, [a b])</code><br><span class="cs-note">MATLAB has no bisection function. fzero uses Brent's method, like brentq, and finds the same root in fewer steps.</span></td><td data-label="First used">Week 7, <a href="bisection.html">Bisection</a></td></tr>
+  <tr><td><code>newton(f, x0, fprime=df)</code></td><td>A root of f by Newton's method from the guess x0. Without <code>fprime</code> it uses the secant method.</td><td data-label="MATLAB"><code>fzero(f, x0)</code><br><span class="cs-note">fzero uses no derivative. It looks for a sign change near x0 and then uses Brent's method.</span></td><td data-label="First used">Week 7, <a href="newton-and-secant.html">Newton and the secant method</a></td></tr>
+  <tr><td><code>fsolve(F, x0)</code></td><td>A solution of several equations at once, starting from the guess x0.</td><td data-label="MATLAB"><code>fsolve(F, x0)</code><br><span class="cs-note">fsolve is in the Optimization Toolbox.</span></td><td data-label="First used">Week 7, <a href="newton-and-secant.html">Newton and the secant method</a></td></tr>
+  <tr><td><code>solve_ivp(f, (t0, t1), s0)</code></td><td>Steps the state s0 forward from t0 to t1 by the rate function f, choosing the step size itself.</td><td data-label="MATLAB"><code>ode45(f, [t0 t1], s0)</code></td><td data-label="First used">Week 8, <a href="state-as-a-vector.html">State as a vector</a></td></tr>
+</table>
+
+  </main>
+
+  
+
+  <script src="js/page.js?v=20261109080753"></script>
+
+  <footer class="site-footer">
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-05">November 5, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Algorithms');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  
+  
+  
+    
+  
+  
+  <script src="https://uwt-tutor-backend.onrender.com/widget.js"
+          data-key="wk_bcb80c4ee2d5718131d24548528577c3"
+          data-content-selector="main"
+          data-color="#5F7038"></script>
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Conditions as roots — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261102180601">
-  <link rel="stylesheet" href="css/demos.css?v=20261102180601">
+  <link rel="stylesheet" href="css/blocks.css?v=20261109080753">
+  <link rel="stylesheet" href="css/demos.css?v=20261109080753">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -846,9 +846,6 @@
           <a href="newton-and-secant.html">Newton and secant</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="root-finding-fails.html">Root-finding failures</a>
-        
-          <span class="site-nav-sep">·</span>
           <a href="evaluations-are-the-currency.html">Evaluation cost</a>
         
           <span class="site-nav-sep">·</span>
@@ -913,6 +910,8 @@
     <div class="eyebrow">Week 7 · Root Finding and Search</div>
 <h1>Conditions as roots</h1>
 
+<p>Video: <a href="https://www.youtube.com/watch?v=Ar-or17foG8">Translating events into roots for root finding</a> (0:26:59). <a href="lecture-19.html">Slides</a></p>
+
 <div class="claim">
   <span class="label">Claim</span>
   <p class="exact">Engineering questions usually ask where a quantity $g$ reaches a target $c$.
@@ -938,46 +937,106 @@ arrives at an angle (this one at about 40&deg;), so these two numbers sort shots
 
 <p>The question "did it go in?" then becomes two smaller ones: the time the ball came down through
 3.048&nbsp;m, and where it was at that time. The first is a condition on the tracked height,
-$z(t) = 3.048$, where $t$ is the time in seconds since release. Once it is answered, the second
+$z(t) = 3.048$, where $t$ is the time in seconds since the ball left the shooter's hand
+(<a href="#finding-the-release">finding the release</a> is below). Once it is answered, the second
 is a lookup in the two horizontal channels, $x$ and $y$.</p>
 
 <h2 id="interpolating-between-frames">Interpolating Between Frames</h2>
 
 <p>With every frame of the shot in hand, the crossing sits between two frames, the last one above
-the rim and the first one below it on the way down. For the shot on this page those are
-1.04&nbsp;s at 3.1405&nbsp;m and 1.08&nbsp;s at 2.8986&nbsp;m. Joining them with a straight line,
+the rim and the first one below it on the way down. For the shot on this page, arc&nbsp;79 in the course's data, those are
+1.12&nbsp;s at 3.1405&nbsp;m and 1.16&nbsp;s at 2.8986&nbsp;m. Joining them with a straight line,
 the line reaches 3.048&nbsp;m a fraction $p$ of the way along, where $z_k$ is the height in the
 frame above and $z_{k+1}$ the height in the frame below:</p>
 
 $$p \;=\; \frac{3.048 - z_k}{z_{k+1} - z_k} \;=\; \frac{3.048 - 3.1405}{2.8986 - 3.1405} \;=\; 0.38$$
 
-<p>That puts the crossing at 1.055&nbsp;s. Moving the same fraction along the $x$ and $y$ channels
+<p>That puts the crossing at 1.135&nbsp;s. Moving the same fraction along the $x$ and $y$ channels
 puts the ball's center 0.339&nbsp;m from the hoop's center, inside the band where it touches the
 rim. The frames after it show the ball bouncing back, and the play-by-play records a miss.</p>
 
 <p>Interpolation is root finding on the straight line through two samples, and it needs no formula.
 However, it needs the frame below the rim, so it can only answer once the ball has arrived.</p>
 
+<h2 id="finding-the-release">Finding the Release</h2>
+
+<p>A parabola describes the ball only once it has left the hand, so a prediction starts by finding
+the release, the first frame in free flight. Five simple rules each scan the frames forward as
+they arrive and stop at the first frame that passes a test. Each test is a sign change of some
+$f$, made by subtracting a level:</p>
+
+<table class="data">
+  <tr><th>release test</th><th>$f_i$</th><th>sign change</th><th class="num">frame picked</th></tr>
+  <tr><td>the height passes 2.75&nbsp;m, a typical jump-shot release</td><td>$z_i - 2.75$</td><td>$-$ to $+$</td><td class="num">17</td></tr>
+  <tr><td>the ball is inside 7.24&nbsp;m of the hoop, the three-point line</td><td>$7.24 - d_i$</td><td>$-$ to $+$</td><td class="num">18</td></tr>
+  <tr><td>the vertical speed peaks, once the ball is above 2&nbsp;m</td><td>$v_{i+1} - v_i$</td><td>$+$ to $-$</td><td class="num">18</td></tr>
+  <tr><td>the height passes the rim, 3.048&nbsp;m</td><td>$z_i - 3.048$</td><td>$-$ to $+$</td><td class="num">19</td></tr>
+  <tr><td>the speed toward the hoop peaks, once it is over 3&nbsp;m/s</td><td>$s_{i+1} - s_i$</td><td>$+$ to $-$</td><td class="num">21</td></tr>
+</table>
+
+<p>Here $d_i$ is the horizontal distance from the ball's center to the hoop's in frame $i$. The
+speeds are differences over four frames, $v_i = (z_{i+2} - z_{i-2})/(t_{i+2} - t_{i-2})$ for the
+vertical speed, and $s_i$ is the same difference of $d$ with its sign flipped. A speed is known only
+two frames after its own, so the vertical-speed rule names frame 18 once frame 21 has arrived,
+0.12&nbsp;s later. Each speed rule also waits for a level crossing of its own before it starts,
+because the dribble has peaks too. Without that guard the vertical-speed scan stops at frame 6.</p>
+
+<p>The picks spread over four frames, from 17 to 21. Two rules agree on frame 18, and it is also
+the median of the five, which one stray rule cannot move. The release on this page is frame 18,
+and $t = 0$ there. The ball's center is then at 3.005&nbsp;m, just under the rim.</p>
+
 <h2 id="predicting-from-a-fitted-parabola">Predicting From a Fitted Parabola</h2>
 
 <p>To call the shot while it is still in the air, fit the free-flight frames you have so far (a
 parabola in height, a straight line in each of $x$ and $y$) and evaluate the fitted formulas past
-the last frame. Writing $z(t)$ from here on for the fitted parabola, the crossing is a root of</p>
+the last frame. A ball in free flight falls at $g = 9.81$&nbsp;m/s&sup2;, so the $t^2$ coefficient
+of the parabola is known, $-g/2 = -4.905$, and only the other two need fitting. Writing $z(t)$ from
+here on for the fitted parabola, the crossing is a root of</p>
 
 $$f(t) \;=\; z(t) - 3.048$$
 
-<p>Fitted to all 24 free-flight frames of this shot,</p>
+<p>Fitted with $g$ known to the first eight frames after release, frames 18 to 25, which end at
+0.28&nbsp;s with the ball still rising,</p>
 
-$$z(t) \;=\; 3.4520 + 4.7428\,t - 4.9153\,t^2 \qquad \text{(meters, } t \text{ in seconds after release)}$$
+$$z(t) \;=\; 3.0223 + 5.6075\,t - 4.905\,t^2 \qquad \text{(meters, } t \text{ in seconds after release)}$$
 
-<p>and the falling root is 1.0437&nbsp;s, with the center 0.356&nbsp;m from the hoop's. That is
-0.008&nbsp;m past the edge of the rim band, and the interpolated crossing was 0.009&nbsp;m inside
-it. Both differences are well under the tracking noise of about 0.03&nbsp;m, so neither method
-can say whether this ball touched the rim or cleared it. Fits from fewer frames sort the shot just
-as roughly. A fit to the first 10 frames, which end at 0.36&nbsp;s with the ball still rising,
-puts the crossing at 1.107&nbsp;s and the center 0.406&nbsp;m from the hoop's. Every fit from 10
-frames up puts the center between 0.29 and 0.41&nbsp;m from the hoop's, so from 0.36&nbsp;s on the
-formula rules out a clean make, about 0.7&nbsp;s before the ball got there.</p>
+<p>and the falling root is 1.1386&nbsp;s, with the center 0.208&nbsp;m from the hoop's. That is
+inside the band where the ball touches the rim, the band the interpolated crossing fell in. The fits
+with $g$ known from eight frames up put the center between 0.13 and 0.34&nbsp;m from the hoop's,
+all in that band. From 0.28&nbsp;s on, the formula says the ball will touch the rim, more than
+0.8&nbsp;s before it got there.</p>
+
+<p id="six-frames">With fewer frames, or with $g$ fitted as well, the root can be exact and
+still far from the real crossing. Fitting all three coefficients to the first six frames after release,
+frames 18 to 23, the first 0.20&nbsp;s of flight, the parabola is</p>
+
+$$z_6(t) \;=\; 3.0078 + 6.0411\,t - 6.7321\,t^2$$
+
+<p>and its falling root is 0.8906&nbsp;s, against 1.1386&nbsp;s from the eight-frame fit. A root
+finder returns it with a residual below $10^{-10}$&nbsp;m, and the fit is close to its own frames,
+with a root-mean-square residual of 14.7&nbsp;mm, less than the 19.2&nbsp;mm of the same fit to all
+26 free-flight frames. At 1.12&nbsp;s the six-frame parabola has the ball at 1.33&nbsp;m, where the
+tracked frame reads 3.14&nbsp;m, and it puts the center 1.25&nbsp;m from the hoop's when it reaches
+the rim. The root is 0.69&nbsp;s past the last frame the fit used, so it comes from
+<dfn data-g="extrapolation">extrapolation</dfn>, which the root finder has no way to detect.</p>
+
+<p>The $t^2$ coefficient of a parabola in free flight is $-g/2$, so the fit itself can be checked.
+The six-frame fit corresponds to $g = 13.46$&nbsp;m/s&sup2;, where a ball in flight falls
+at about 9.8. Fixing $g$ at 9.81 puts that knowledge into the fit. The table follows both fits as
+frames arrive. With all three coefficients fitted, the center stays in the rim band only from 15
+frames on, 0.56&nbsp;s after release.</p>
+
+<table class="data">
+  <tr><th class="num" rowspan="2">frames used</th><th class="num" rowspan="2">last frame (s)</th>
+      <th colspan="2">$g$ fixed at 9.81</th><th colspan="3">all three coefficients fitted</th></tr>
+  <tr><th class="num">crossing (s)</th><th class="num">from hoop center (m)</th>
+      <th class="num">fitted g (m/s&sup2;)</th><th class="num">crossing (s)</th><th class="num">from hoop center (m)</th></tr>
+  <tr><td class="num">6</td><td class="num">0.20</td><td class="num">1.152</td><td class="num">0.469</td><td class="num">13.46</td><td class="num">0.891</td><td class="num">1.25</td></tr>
+  <tr><td class="num">8</td><td class="num">0.28</td><td class="num">1.139</td><td class="num">0.208</td><td class="num">11.75</td><td class="num">0.995</td><td class="num">0.768</td></tr>
+  <tr><td class="num">10</td><td class="num">0.36</td><td class="num">1.130</td><td class="num">0.155</td><td class="num">11.08</td><td class="num">1.039</td><td class="num">0.530</td></tr>
+  <tr><td class="num">14</td><td class="num">0.52</td><td class="num">1.125</td><td class="num">0.269</td><td class="num">10.60</td><td class="num">1.077</td><td class="num">0.416</td></tr>
+  <tr><td class="num">26</td><td class="num">1.00</td><td class="num">1.125</td><td class="num">0.341</td><td class="num">9.93</td><td class="num">1.122</td><td class="num">0.346</td></tr>
+</table>
 
 <p>Because $f$ is a formula, it can be evaluated at any $t$, as often as you like, in
 well under a microsecond each, and its derivative is available too. The root finders on the next pages are
@@ -986,19 +1045,17 @@ easy to watch on it for that reason.</p>
 <cg-demo case="predict"></cg-demo>
 <div class="source measured"><span class="tag">Measured</span><span>Eight three-point arcs, drawn from a curated, outcome-balanced set of 1,016 shots from 508 games. SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz, via <a href="https://github.com/linouk23/NBA-Player-Movements" target="_blank" rel="noopener">linouk23/NBA-Player-Movements</a>, with play-by-play joined from <a href="https://github.com/shufinskiy/nba_data" target="_blank" rel="noopener">shufinskiy/nba_data</a>. The selection, windowing and unit conversion are this course&rsquo;s own.</span></div>
 
-<h2 id="which-root-actually-happened">Two Crossings, One Asked For</h2>
+<h2 id="which-root-actually-happened">Choosing the Falling Crossing</h2>
 
-<p>$f$ has roots wherever the algebra puts them, including outside the region the model describes.
+<p>$f$ may have roots outside the region the model describes, because the algebra does not know
+that region.
 The parabola crosses 3.048&nbsp;m twice, and both crossings happened, but only one is the crossing
-the question asks about. This shot leaves the hand at 3.48&nbsp;m, above the rim, as all eight
-arcs here do (and 99% of three-pointers in the full set). The earlier root is at
-&minus;0.079&nbsp;s, before the ball left the hand. The tracked ball did rise through 3.048&nbsp;m
-then, at &minus;0.072&nbsp;s, in the shooter&rsquo;s hands, though the fitted parabola is an
-extrapolation backwards into a region it was never fitted to, where the ball was not yet in free
-flight. The root satisfies $f(t) = 0$ to machine precision, and a routine handed a bracket reaching
-back past $t = 0$ can return it and report success. Here the question rules it out, because it
-asks when the ball came down to the rim, and the earlier crossing was on the way up. In general,
-three questions filter the roots:</p>
+the question asks about. The eight-frame fit has roots at 0.0046&nbsp;s and 1.1386&nbsp;s. The ball
+left the hand at 3.005&nbsp;m, just under the rim, and the tracked ball rose through 3.048&nbsp;m
+0.008&nbsp;s later. Both roots satisfy $f(t) = 0$ to machine precision, and a routine handed a
+bracket around the earlier one returns it and reports success. Here the question rules it out,
+because it asks when the ball came down to the rim, and the earlier crossing was on the way up. In
+general, three questions filter the roots:</p>
 
 <ol class="plain">
   <li><strong>Is it in the domain?</strong> A slope cannot be shaken by a negative acceleration,
@@ -1014,6 +1071,42 @@ three questions filter the roots:</p>
 <p>None of the three is available to the routine, because all three are properties of the problem
 it was pointed at. The first is a property of the physical situation, the second of the model, and
 the third of the question you asked.</p>
+
+<p id="rising-or-falling">The third question can be put to $f$ itself. At the falling crossing $f$
+goes from positive to negative, and at the rising one from negative to positive, so the sign of $f$
+a little before and a little after a returned root says which crossing it is. For the eight-frame
+fit, 0.05&nbsp;s either side of 1.1386&nbsp;s gives $f(1.0886) = +0.266$ and $f(1.1886) = -0.290$,
+falling. Either side of 0.0046&nbsp;s gives $f(-0.0454) = -0.290$ and $f(0.0546) = +0.266$, rising.
+The value at $-0.0454$&nbsp;s reads the formula before the release, which is enough to tell the
+direction. The check needs only two more values of $f$, so it works on a root from any routine.</p>
+
+<p>When $f$ is a polynomial, a polynomial solver returns all of its roots at once, and the
+derivative gives the direction directly. $f'(t)$ is the fitted vertical velocity, $5.6075 - 9.81t$,
+which is $+5.56$&nbsp;m/s at the first root, on the way up, and $-5.56$&nbsp;m/s at the second, on
+the way down.</p>
+
+<div class="codetabs" id="code1">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|NumPy has the polynomial tools.;2|The coefficients of f, highest power first. The constant is 3.0223 &minus; 3.048.;3|Both roots, 1.1386 and 0.0046.;4|The coefficients of f&prime;, &minus;9.81 and 5.6075.;6|A negative velocity, so the ball is falling.;7|This prints 1.1386.">import numpy as np
+p = [-4.905, 5.6075, -0.0257]
+r = np.roots(p)
+v = np.polyder(p)
+for t in r:
+    if np.polyval(v, t) &lt; 0:
+        print(t)</pre>
+  <pre data-lang="matlab" hidden data-notes="1|The coefficients of f, highest power first. The constant is 3.0223 &minus; 3.048.;2|Both roots, 1.1386 and 0.0046.;3|The coefficients of f&prime;, &minus;9.81 and 5.6075.;4|r' is r as a row, so the loop takes each root in turn.;5|A negative velocity, so the ball is falling.;6|This shows 1.1386.">p = [-4.905, 5.6075, -0.0257];
+r = roots(p);
+v = polyder(p);
+for t = r'
+    if polyval(v, t) &lt; 0
+        disp(t)
+    end
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
+</div>
 
 <h2 id="a-slope-with-no-formula">A Slope With No Formula</h2>
 
@@ -1047,10 +1140,11 @@ ways:</p>
 
 <p>In engineering practice, root finding often looks more like the slope than the shot. The
 function is a simulation or an experiment, it cannot be written down, and each evaluation has a
-cost. A crash test is the same kind of evaluation, one vehicle per value of $f$. The shot is where
+cost. A crash test is the same kind of evaluation, one vehicle per value of $f$. With no formula for the root, a method guesses, checks $f$ at the
+guess, and uses the check to make the next guess, so on the slope every check is one run. The shot is where
 each method is easy to watch, because its formula can be evaluated as often as you like. The slope
 is where the number of evaluations a method spends starts to matter, which <a
-href="evaluations-are-the-currency.html" title="Evaluation cost">page 23</a> takes up.</p>
+href="evaluations-are-the-currency.html" title="Evaluation cost">page 22</a> takes up.</p>
 
 <h2 id="limits-on-deflection-moment-and-stress">Limits on Deflection, Moment and Stress</h2>
 
@@ -1070,11 +1164,10 @@ subtraction.</p>
 <p id="subtraction-not-a-ratio">The same condition can also be written as a ratio, $c/g(x) - 1$,
 which is tempting when comparing a demand against a capacity. It has the same roots. It also has a
 <dfn data-g="pole">pole</dfn> wherever $g(x) = 0$, and a function may change sign across a pole
-without having a root there. <a href="root-finding-fails.html#pole" title="Root-finding
-failures">Page 22</a> shows a bracket that closes on such a pole, and it is a good reason to
-prefer the subtraction.</p>
+without having a root there. A bracketing method handed an interval around such a pole sees
+the sign change and closes on the pole, which is a good reason to prefer the subtraction.</p>
 
-<h2 id="plotting-first">Plotting f</h2>
+<h2 id="plotting-first">Plotting f First, Substituting the Root Back</h2>
 
 <p>When $f$ is a formula, a few hundred evaluations across the domain cost almost nothing, and it
 is a good idea to plot $f$ before calling a root finder. Here is what the plot shows that a
@@ -1086,6 +1179,10 @@ returned number does not:</p>
   <li><strong>Whether any are near a pole or a flat spot.</strong> Both show up on a plot, and a
   returned number shows neither.</li>
 </ul>
+
+<p id="substituting-back">After the routine returns, substitute its value back. $|f|$ there should
+be small next to the values of $f$ on the plot, the value should pass the three questions above,
+and the sign of $f$ either side should match the direction the question asks for.</p>
 
 <p>When each evaluation is a simulation run, the plot is only the runs you have paid for, and
 nothing between them is known. Deciding where those runs go is the subject of the next four
@@ -1169,11 +1266,11 @@ bisection, secant and Newton on any signal, counting evaluations.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/conditions-become-roots.js?v=20261102180601"></script>
+  <script type="module" src="js/bundle/conditions-become-roots.js?v=20261109080753"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-02">November 2, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-09">November 9, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

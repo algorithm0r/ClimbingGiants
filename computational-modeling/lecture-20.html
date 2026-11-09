@@ -6,8 +6,8 @@
 <title>Lecture 20 — Bisection</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261102180601">
-<link rel="stylesheet" href="css/demos.css?v=20261102180601">
+<link rel="stylesheet" href="css/blocks.css?v=20261109080753">
+<link rel="stylesheet" href="css/demos.css?v=20261109080753">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -694,24 +694,41 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
   </div>
 </section>
 
+<!-- The clips are runs of the Slope Stability Lab's public example class
+     (the test round) on its 7.4 MPa slope, the runs this deck plots. They
+     play at twice their speed. No student's slope is shown. -->
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">A parabola fitted to the shot gives <span class="def">a height we can evaluate at any time</span>.</p>
-    <p class="sub">A tracked three-pointer at 25 frames a second, with <i>t</i> the time since release. The fit uses the 24 free-flight frames, and the ball falls through the rim where <i>f</i> is zero.</p>
+    <p class="say">On a simulated rock slope, <span class="def">each value of <i>f</i> is one run</span>, a minute or two of machine time.</p>
+    <p class="sub">A run shakes the slope with a recorded earthquake scaled to a peak ground acceleration (PGA). Slope moved is the largest permanent movement of the surface, and no formula gives it. The slope here has a bond strength of 7.4&nbsp;MPa.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="lec20-shot"><div class="fig-body"></div></figure>
     <style>.deck-slide .work.spaced .katex-display{margin:.6em 0}</style>
-    <div class="work spaced" style="font-size:calc(var(--stage-text) * .72)">
-      $$z(t) = 3.45195 + 4.74284\,t - 4.91528\,t^2\ \text{m}, \qquad f(t) = z(t) - 3.048\ \text{m}$$
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">2.0&nbsp;g &middot; moved 0.37&nbsp;cm</span>
+        <video src="data/img/lab-example-r11.mp4?v=20261109080753" poster="data/img/lab-example-r11.png?v=20261109080753" data-rate="2"
+               autoplay loop muted playsinline width="1280" height="358" style="width:100%; height:auto; display:block"
+               aria-label="The simulated slope of grains in colored bands, shaken at 2.0 g. Nothing visible moves."></video>
+        <span>Nothing visible moves, so <i>f</i>&nbsp;&lt;&nbsp;0.</span></div>
+      <div class="pcard"><span class="tag">4.0&nbsp;g &middot; moved 156&nbsp;cm</span>
+        <video src="data/img/lab-example-r16.mp4?v=20261109080753" poster="data/img/lab-example-r16.png?v=20261109080753" data-rate="2"
+               autoplay loop muted playsinline width="1280" height="358" style="width:100%; height:auto; display:block"
+               aria-label="The same slope shaken at 4.0 g. The crest opens, the left face moves, and grains leave the slope."></video>
+        <span>The crest opens and seven grains leave the slope, so <i>f</i>&nbsp;&gt;&nbsp;0.</span></div>
+    </div>
+    <div class="work spaced" style="font-size:calc(var(--stage-text) * .7)">
+      $$\begin{aligned}
+      f(\text{PGA}) &= \text{slope moved}(\text{PGA}) - d^* && \text{zero where the slope moves exactly } d^* \\[6pt]
+      d^* &= 5\ \text{cm} && \text{the movement counted as damage, one choice of many}
+    \end{aligned}$$
     </div>
   </div>
 </section>
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">Two points where <i>f</i> has <span class="def">opposite signs</span> trap a root between them.</p>
-    <p class="sub">If <i>f</i> is continuous it cannot change sign without passing through zero (the intermediate value theorem). The pair [<i>a</i>,&nbsp;<i>b</i>] is a <span class="term">bracket</span>.</p>
+    <p class="say">If <i>f</i> is continuous, two runs where <i>f</i> has <span class="def">opposite signs</span> have a root between them.</p>
+    <p class="sub">A first scan ran 0.6, 2.0 and 4.0&nbsp;g. Runs above the <i>d</i>* line have <i>f</i>&nbsp;&gt;&nbsp;0, and the axis is logarithmic because movement runs from 0.2 to 156&nbsp;cm. The pair [<i>a</i>,&nbsp;<i>b</i>] is a <span class="term">bracket</span>.</p>
   </div>
   <div class="stage">
     <figure class="figure wide" data-fig="lec20-bracket"><div class="fig-body"></div></figure>
@@ -720,8 +737,8 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">Each step evaluates the midpoint and <span class="def">keeps the half that still changes sign</span>.</p>
-    <p class="sub">The shaded band is the bracket before the step. The circle is the new midpoint <i>m</i>, the dots are every earlier evaluation, and dashed lines join them.</p>
+    <p class="say">Each guess is the midpoint, and its check <span class="def">keeps the half where <i>f</i> still changes sign</span>.</p>
+    <p class="sub">The top row spans 2 to 4&nbsp;g and the bottom row 2.865 to 2.945&nbsp;g. The outer band is the bracket before the guess, the circle is the run that checks the guess <i>m</i>, and the inner band is the half kept.</p>
   </div>
   <div class="stage">
     <figure class="figure wide legible" data-fig="lec20-steps"><div class="fig-body"></div></figure>
@@ -730,11 +747,47 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">The bracket <span class="def">halves at every step</span>, whatever <i>f</i> does inside it.</p>
-    <p class="sub">The root is somewhere in the bracket, so half its width is a guaranteed bound on the error. The true error is drawn below it.</p>
+    <p class="say">Near the root, a run fails when <span class="def">one cluster on the shoulder slides</span> and the rest stands.</p>
+    <p class="sub">The fourth and fifth guesses, 0.06&nbsp;g apart, cropped to the upper right shoulder. Slope moved is the largest movement anywhere on the surface, so one cluster is enough to make <i>f</i>&nbsp;&gt;&nbsp;0.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="lec20-halve"><div class="fig-body"></div></figure>
+    <style>.lec20-crop{position:relative;overflow:hidden;aspect-ratio:300/180;width:min(100%,54vh);margin:0 auto;background:#11131a}</style>
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">2.875&nbsp;g &middot; moved 0.32&nbsp;cm</span>
+        <div class="lec20-crop">
+        <video src="data/img/lab-example-r36.mp4?v=20261109080753" poster="data/img/lab-example-r36.png?v=20261109080753" data-rate="2"
+               autoplay loop muted playsinline width="1280" height="358" style="position:absolute; width:426.67%; height:auto; left:-226.67%; top:-16.67%"
+               aria-label="The upper right shoulder of the slope shaken at 2.875 g. The grains stay in place."></video>
+        </div>
+        <span>The shoulder holds, so <i>f</i>&nbsp;&lt;&nbsp;0.</span></div>
+      <div class="pcard"><span class="tag">2.9375&nbsp;g &middot; moved 49&nbsp;cm</span>
+        <div class="lec20-crop">
+        <video src="data/img/lab-example-r41.mp4?v=20261109080753" poster="data/img/lab-example-r41.png?v=20261109080753" data-rate="2"
+               autoplay loop muted playsinline width="1280" height="358" style="position:absolute; width:426.67%; height:auto; left:-226.67%; top:-16.67%"
+               aria-label="The same shoulder shaken at 2.9375 g. A small cluster of grains below the marker slides down the face."></video>
+        </div>
+        <span>The cluster below the marker slides down the face, so <i>f</i>&nbsp;&gt;&nbsp;0.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">Ten midpoint runs narrow the bracket <span class="def">from 2&nbsp;g to 0.002&nbsp;g</span>.</p>
+    <p class="sub">Four settings were run twice, and each repeat moved exactly as far as the first, so a repeat adds nothing to the bracket. Every run moved at most 0.37&nbsp;cm or at least 31&nbsp;cm, so any <i>d</i>* in between gives the same midpoints. If the movement jumps past 5&nbsp;cm near 2.89&nbsp;g, bisection closes on the jump.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide legible" data-fig="lec20-slope"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full">
+  <div class="head">
+    <p class="say">Each run writes <span class="def">one binary digit</span> of the answer, and a decimal digit takes 3.3 runs.</p>
+    <p class="sub">Keeping the left half writes 0 and keeping the right half writes 1. The ten bits give 2&nbsp;+&nbsp;2&nbsp;&times;&nbsp;0.0111000111 in binary, or 2.888671875&nbsp;g, the bottom of the last bracket. A run adds one bit whether the slope moved 0.2&nbsp;cm or 156&nbsp;cm.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec20-bits"><div class="fig-body"></div></figure>
   </div>
 </section>
 
@@ -758,18 +811,17 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">On the shot, a tenth of a millisecond from the bracket [0.5,&nbsp;1.5] takes <span class="def">16 evaluations</span>.</p>
-    <p class="sub">In 0.1&nbsp;ms the ball moves 0.6&nbsp;mm sideways, at 6.2&nbsp;m/s. Each evaluation of the formula takes well under a microsecond.</p>
+    <p class="say">From the bracket [2,&nbsp;4]&nbsp;g, a width of 0.002&nbsp;g takes <span class="def">10 halvings</span>.</p>
+    <p class="sub">Each halving is one run, so ten runs are 10 to 20 minutes of machine time. Each decimal digit costs log<sub>2</sub>&nbsp;10&nbsp;=&nbsp;3.3 runs.</p>
   </div>
   <div class="stage">
     <div class="work spaced" style="font-size:calc(var(--stage-text) * .8)">
       $$\begin{aligned}
-      W &= 1.5 - 0.5 = 1.0\ \text{s} && \text{the starting width} \\[6pt]
-      \tau &= 10^{-4}\ \text{s} && \text{a tenth of a millisecond} \\[6pt]
-      \frac{W}{\tau} &= 10^{4} && \text{divide} \\[6pt]
-      \log_2 10^{4} &= 13.29 && \text{take the base-2 logarithm} \\[6pt]
-      k &= \textcolor{#8A6508}{14} && \text{round up} \\[6pt]
-      k + 2 &= \textcolor{#8A6508}{16} && \text{add the two ends}
+      W &= 4 - 2 = 2\ \text{g} && \text{the starting width} \\[6pt]
+      \tau &= 0.002\ \text{g} && \text{the width we want} \\[6pt]
+      \frac{W}{\tau} &= 1000 && \text{divide} \\[6pt]
+      \log_2 1000 &= 9.97 && \text{take the base-2 logarithm} \\[6pt]
+      k &= \textcolor{#8A6508}{10} && \text{round up}
     \end{aligned}$$
     </div>
   </div>
@@ -777,84 +829,32 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">On a simulated rock slope, <span class="def">each value of <i>f</i> is one run</span>, a minute or two of machine time.</p>
-    <p class="sub">A run shakes the slope with a recorded earthquake scaled to a peak ground acceleration (PGA). Slope moved is the largest permanent movement of the surface, and no formula gives it.</p>
+    <p class="say">A <span class="term">bracket</span> can come from <span class="def">a scan, or the physics of the problem</span>.</p>
   </div>
   <div class="stage">
-    <div class="work spaced" style="font-size:calc(var(--stage-text) * .8)">
-      $$\begin{aligned}
-      f(\text{PGA}) &= \text{slope moved}(\text{PGA}) - d^* && \text{zero where the slope moves exactly } d^* \\[6pt]
-      d^* &= 5\ \text{cm} && \text{the movement counted as damage, one choice of many}
-    \end{aligned}$$
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">three runs at 0.6, 2.0, 4.0&nbsp;g</span><b>Run a few settings across the range</b>
+        <span>Neighboring runs with opposite signs are a bracket. The scan at 0.6, 2.0 and 4.0&nbsp;g changed sign between 2.0 and 4.0&nbsp;g.</span></div>
+      <div class="pcard"><span class="tag">no shaking, no movement</span><b>Use what the problem says</b>
+        <span>With no shaking the slope does not move, so <i>f</i>(0&nbsp;g)&nbsp;=&nbsp;&minus;5&nbsp;cm without a run. The bracket [0,&nbsp;4]&nbsp;g then needs one end run and one more halving than [2,&nbsp;4]&nbsp;g.</span></div>
     </div>
   </div>
 </section>
 
 <section class="deck-slide full">
   <div class="head">
-    <p class="say">On the 7.4&nbsp;MPa slope, ten runs halve the bracket <span class="def">from 2&nbsp;g to 0.002&nbsp;g</span>.</p>
-    <p class="sub">7.4&nbsp;MPa is the slope&rsquo;s bond strength. The runs began with a scan at 0.6, 2.0 and 4.0&nbsp;g and then ran each new midpoint. Every run moved at most 0.37&nbsp;cm or at least 31&nbsp;cm, so any <i>d</i>* in between gives the same midpoints.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide legible" data-fig="lec20-slope"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">Each decimal digit of the PGA <span class="def">costs about 3.3 runs</span>.</p>
-    <p class="sub">At a minute or two a run, a digit is 3 to 7 minutes of machine time. The dots are the class&rsquo;s brackets, and the hollow dot is an eleventh run, which would reach 0.001&nbsp;g.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="lec20-cost"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">A <span class="term">bracket</span> can come from <span class="def">a plot, a scan, or the physics of the problem</span>.</p>
-  </div>
-  <div class="stage">
-    <div class="pcards c3">
-      <div class="pcard"><span class="tag">plot</span><b>Plot <i>f</i> over the domain</b>
-        <span>Cheap when <i>f</i> is a formula like the shot&rsquo;s height, and it shows how many roots there are.</span></div>
-      <div class="pcard"><span class="tag">scan</span><b>Evaluate <i>f</i> on a grid</b>
-        <span>Neighboring points with opposite signs are a bracket. On the slope each point is a run.</span></div>
-      <div class="pcard"><span class="tag">physics</span><b>Use what the problem says</b>
-        <span>The falling crossing lies after the apex at 0.48&nbsp;s and before the fitted ball reaches the floor at 1.45&nbsp;s.</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">Two roots inside a bracket <span class="def">leave no sign change</span> to find.</p>
-    <p class="sub">A sign change means an odd number of roots. The second bracket starts before release, so it holds both crossings of the rim and <i>f</i> is negative at both ends.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide legible" data-fig="lec20-tworoots"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full">
-  <div class="head">
-    <p class="say">The loop keeps two ends and the value of <i>f</i> at one of them, and <span class="def">returns its own uncertainty</span>.</p>
-    <p class="sub">On the shot, <code>bisect(f, 0.5, 1.5, 1e-4)</code> returns 1.04367&nbsp;s, &plusmn;3.1&times;10<sup>&minus;5</sup>&nbsp;s, in 16 evaluations.</p>
+    <p class="say">SciPy&rsquo;s <code>bisect</code> takes the same bracket and <span class="def">makes the same twelve runs</span>.</p>
+    <p class="sub">Here <i>f</i> would start one run of the lab and return slope moved minus 5&nbsp;cm. SciPy&rsquo;s <code>brentq</code> takes the same bracket and usually needs fewer evaluations. It comes after Newton and the secant method.</p>
   </div>
   <div class="stage">
     <div class="panels" style="font-size:calc(var(--stage-code) * .92)">
-      <div class="code">def bisect(f, a, b, tol):</div><div class="note"></div>
-      <div class="code">    fa = f(a)</div><div class="note">two evaluations set up the bracket</div>
-      <div class="code">    if fa * f(b) &gt; 0:</div><div class="note"></div>
-      <div class="code">        raise ValueError('no sign change')</div><div class="note">refuse a bracket with no sign change</div>
-      <div class="code">    while b - a &gt; tol:</div><div class="note">stop when the bracket is narrow enough</div>
-      <div class="code">        m = 0.5 * (a + b)</div><div class="note"></div>
-      <div class="code">        <span class="k">fm = f(m)</span></div><div class="note">one evaluation per step</div>
-      <div class="code">        if fa * fm &lt;= 0:</div><div class="note">the sign changes in the left half</div>
-      <div class="code">            b = m</div><div class="note"></div>
-      <div class="code">        else:</div><div class="note">the sign changes in the right half</div>
-      <div class="code">            a, fa = m, fm</div><div class="note"></div>
-      <div class="code">    <span class="k">return 0.5 * (a + b), (b - a) / 2</span></div><div class="note">the midpoint, and half the width as its bound</div>
+      <div class="code">from scipy.optimize import bisect</div><div class="note"></div>
+      <div class="code">root, info = bisect(f, 2.0, 4.0, xtol=0.002,</div><div class="note">the bracket [2, 4] g and the width we want</div>
+      <div class="code">                    full_output=True)</div><div class="note">also return a record of the work</div>
+      <div class="code">&nbsp;</div><div class="note"></div>
+      <div class="code"><span class="k">root</span>                 # 2.888671875</div><div class="note">the last midpoint, an end of the final bracket</div>
+      <div class="code"><span class="k">info.iterations</span>      # 10</div><div class="note">the midpoint runs</div>
+      <div class="code"><span class="k">info.function_calls</span>  # 12</div><div class="note">the two ends and the ten midpoints</div>
     </div>
   </div>
 </section>
@@ -866,6 +866,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <div class="deck-notes"></div>
 
 
-<script type="module" src="js/bundle/lecture-20.js?v=20261102180601"></script>
+<script type="module" src="js/bundle/lecture-20.js?v=20261109080753"></script>
 </body>
 </html>
