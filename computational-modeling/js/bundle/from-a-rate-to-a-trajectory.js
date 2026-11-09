@@ -967,81 +967,123 @@ function realNoiseRaw(n, sd = 1) {
   return scaleTo(out, sd);
 }
 
-/* Euler on a projectile, against the exact parabola. The steps are drawn as
-   marked points so the method's shape — straight segments following the tangent
-   at the left of each step — is visible rather than described. */
+/* Euler on a tracked shot with quadratic drag, where no formula gives the
+   path. The starting state is page 25's: arc 79, an 11-frame fit (lines in
+   x and y, a parabola in z with g held), taken at frame 5. The comparison is
+   the same Euler program at 0.1 ms, so every number here can be reproduced
+   with page 24's code alone. */
 
-const G = 9.81, Y0 = 2.00, V0 = 8.00, TH = 51 * Math.PI / 180;
-const VY = V0 * Math.sin(TH);
-const T_END = 1.0;
-const exact = t => Y0 + VY * t - G * t * t / 2;
-const EXACT_END = exact(T_END);
+const G = 9.81, K = 0.016;              // K per meter, page 25's value
+const FINE_H = 0.0001;                  // the comparison run's step, s
 
-const deriv = (t, s) => [s[1], -G];            // [y, v]
-const TF = linspace(0, T_END, 300);
-const YT = TF.map(exact);
+/* the six-component rate: position changes by the velocity, velocity by
+   gravity and by drag along the velocity */
+const shotRate = (t, s) => {
+  const vx = s[3], vy = s[4], vz = s[5];
+  const sp = Math.hypot(vx, vy, vz);
+  return [vx, vy, vz, -K * sp * vx, -K * sp * vy, -G - K * sp * vz];
+};
+
+/* least-squares intercept and slope of a straight line */
+function line(T, Y) {
+  const n = T.length;
+  let st = 0, sy = 0, stt = 0, sty = 0;
+  for (let i = 0; i < n; i++) { st += T[i]; sy += Y[i]; stt += T[i] * T[i]; sty += T[i] * Y[i]; }
+  const b = (n * sty - st * sy) / (n * stt - st * st);
+  return [(sy - b * st) / n, b];
+}
+
+/* Euler from s0 over span seconds with step h, keeping every state */
+function eulerRun(s0, h, span) {
+  const n = Math.round(span / h);
+  const ss = [s0.slice()];
+  let s = s0.slice();
+  for (let k = 0; k < n; k++) {
+    const r = shotRate(k * h, s);
+    s = s.map((v, i) => v + h * r[i]);
+    ss.push(s);
+  }
+  return ss;
+}
+
+/* height at time tau after the start, read off a run with step h. The
+   straight segment between two Euler states is what the method produced. */
+function heightAt(ss, h, tau) {
+  const j = Math.max(0, Math.min(Math.floor(tau / h + 1e-9), ss.length - 2));
+  const f = (tau - j * h) / h;
+  return ss[j][2] + f * (ss[j + 1][2] - ss[j][2]);
+}
 
 mountDemo({
   euler: {
-    setting: 'A projectile released 2.00&nbsp;m up at 8.00&nbsp;m/s, 51°, no drag. The exact ' +
-             'height at <em>t</em>&nbsp;=&nbsp;1&nbsp;s is 3.3121676917&nbsp;m, so every error ' +
-             'below is measured rather than estimated.',
-    source: {kind: 'constructed', text: 'A projectile with no drag, whose exact solution is a parabola, so the error at <em>t</em>&nbsp;=&nbsp;1&nbsp;s is known to ten figures.'},
-    caption: 'The ghost is the exact parabola. Each amber dot is one Euler step; between them the ' +
-             'method follows a straight line at the rate it found at the left-hand end. Because ' +
-             'the true curve bends downwards, every one of those tangents sits above it.',
-    /* exact halvings, so the demo reproduces the page's table digit for digit
-       and the halving the page is about is what the control does */
-    controls: [{key: 'k', label: 'halvings of h', min: 0, max: 8, step: 1, value: 0,
-                fmt: v => (0.1 / Math.pow(2, Math.round(v))).toPrecision(4) + ' s'}],
+    async data() {
+      const d = await (await fetch('data/arcs.json')).json();
+      const a = d.arcs.find(x => x.id === 79);
+      const r = a.rel, nf = a.key.nf;
+      const T = [], X = [], Y = [], Z = [];
+      for (let i = r; i < r + nf; i++) {
+        T.push(a.t[i] - a.t[r]); X.push(a.x[i]); Y.push(a.y[i]); Z.push(a.z[i]);
+      }
+      /* the fit: first 11 frames, time measured from frame 5 */
+      const J = 5, N = 11;
+      const tf = T.slice(0, N).map(t => t - T[J]);
+      const cx = line(tf, X.slice(0, N)), cy = line(tf, Y.slice(0, N));
+      const cz = line(tf, Z.slice(0, N).map((z, i) => z + 0.5 * G * tf[i] * tf[i]));
+      const S0 = [cx[0], cy[0], cz[0], cx[1], cy[1], cz[1]];
+      const T0 = T[J], SPAN = T[nf - 1] - T0;
+      const fine = eulerRun(S0, FINE_H, SPAN);
+      const TF = linspace(0, SPAN, 361);
+      return {
+        S0, T0, SPAN, fine, TF,
+        TX: Float64Array.from(TF, t => t + T0),
+        FINE: Float64Array.from(TF, t => heightAt(fine, FINE_H, t)),
+        FRAMES: T.slice(J).map((t, i) => ({t, y: Z[J + i], ring: true})),
+        FINE_END: fine[fine.length - 1][2]
+      };
+    },
+    setting: 'A tracked three-pointer stepped forward from frame 5 to frame 23, the last frame ' +
+             'before it nears the hoop, with gravity and quadratic drag (<em>k</em>&nbsp;=&nbsp;0.016 ' +
+             'per meter). Time is measured from frame 20 of the record, the release the data set marks.',
+    source: {kind: 'mixed', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz, arc 79. The starting state is a least-squares fit to the first 11 free-flight frames, and the open circles are the measured frames. The drag constant is a modeling choice from the range on page 25, not a measurement.'},
+    caption: 'The ghost is the same program with 0.1&nbsp;ms steps. Each amber dot is one Euler ' +
+             'step, and between dots the method follows a straight line at the rate it found at ' +
+             'the start of the step. The height bends downward, so each of those lines runs above it.',
+    /* halvings of one step per frame, so the control does what the page's
+       numbers do */
+    controls: [{key: 'k', label: 'halvings of h', min: 0, max: 6, step: 1, value: 0,
+                fmt: v => (40 / Math.pow(2, Math.round(v))).toPrecision(3) + ' ms'}],
     panels: [{label: 'height', unit: 'm', height: 250, xAxis: true,
-              xLabel: 'time', xUnit: 's', xScale: 1, lens: true, lensZoom: 16}],
+              xLabel: 'time from release', xUnit: 's', xScale: 1, lens: true, lensZoom: 12}],
     readouts: [
-      {key: 'h',     label: 'step size'},
-      {key: 'n',     label: 'steps'},
-      {key: 'end',   label: 'Euler at t = 1 s'},
-      {key: 'exact', label: 'exact'},
-      {key: 'err',   label: 'error'},
-      {key: 'sign',  label: 'direction'}
+      {key: 'h',    label: 'step size'},
+      {key: 'n',    label: 'steps'},
+      {key: 'end',  label: 'height at frame 23'},
+      {key: 'fine', label: '0.1 ms run'},
+      {key: 'gap',  label: 'gap'},
+      {key: 'per',  label: 'first step high by'}
     ],
     compute(s) {
-      const h = 0.1 / Math.pow(2, Math.round(s.k));
-      const r = stepTo(deriv, [Y0, VY], h, T_END, 'euler');
-      const ys = column(r.ss, 0);
-      const end = ys[ys.length - 1];
-      const err = end - EXACT_END;
-      /* Redraw Euler on the dense grid the exact curve uses, so the two share an
-         x axis. Interpolating linearly between steps is not a convenience: the
-         straight segment between two Euler points is what the method actually
-         produced there. */
-      const yE = new Float64Array(TF.length);
-      let j = 0;
-      for (let i = 0; i < TF.length; i++) {
-        while (j + 1 < r.ts.length && r.ts[j + 1] < TF[i]) j++;
-        const t0 = r.ts[j], y0 = ys[j];
-        if (j + 1 < r.ts.length) {
-          const f = (TF[i] - t0) / (r.ts[j + 1] - t0);
-          yE[i] = y0 + f * (ys[j + 1] - y0);
-        } else {
-          yE[i] = y0 + (TF[i] - t0) * r.ss[j][1];   // past the last step, same rate
-        }
-      }
+      const h = 0.04 / Math.pow(2, Math.round(s.k));
+      const run = eulerRun(this.S0, h, this.SPAN);
+      const yE = Float64Array.from(this.TF, t => heightAt(run, h, t));
+      const end = run[run.length - 1][2];
+      const gap = end - this.FINE_END;
+      const first = run[1][2] - heightAt(this.fine, FINE_H, h);
       /* mark the steps, but only while there are few enough to see */
-      const marks = r.ts.length <= 40
-        ? r.ts.map((t, i) => ({t, y: ys[i]})) : [];
+      const marks = run.length <= 40
+        ? run.map((st, i) => ({t: this.T0 + i * h, y: st[2]})) : [];
       return {
-        panels: [{x: TF, y: yE, ghost: Float64Array.from(YT), range: [0, T_END],
-          opts: {label: 'Euler with h = ' + h.toPrecision(4) + ' s, against the exact parabola',
-                 marks,
-                 pred: null,
-                 rings: []}}],
+        panels: [{x: this.TX, y: yE, ghost: this.FINE,
+          range: [this.T0, this.T0 + this.SPAN],
+          opts: {label: 'Euler with h = ' + (h * 1000).toPrecision(3) + ' ms, the 0.1 ms run, and the measured frames',
+                 marks: this.FRAMES.concat(marks), pred: null, rings: []}}],
         readouts: {
-          h: h.toPrecision(4) + ' s',
-          n: String(r.ts.length - 1),
-          end: end.toFixed(6) + ' m',
-          exact: EXACT_END.toFixed(6) + ' m',
-          err: (err >= 0 ? '+' : '−') + Math.abs(err).toExponential(3) + ' m',
-          sign: err > 0 ? 'too high, always' : 'too low'
+          h: (h * 1000).toPrecision(3) + ' ms',
+          n: String(run.length - 1),
+          end: end.toFixed(4) + ' m',
+          fine: this.FINE_END.toFixed(4) + ' m',
+          gap: (gap >= 0 ? '+' : '−') + (Math.abs(gap) * 1000).toFixed(1) + ' mm',
+          per: (first * 1000).toFixed(1) + ' mm'
         }
       };
     }

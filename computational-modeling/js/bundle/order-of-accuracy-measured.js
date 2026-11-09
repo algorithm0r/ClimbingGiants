@@ -967,107 +967,132 @@ function realNoiseRaw(n, sd = 1) {
   return scaleTo(out, sd);
 }
 
-/* Error against step size for three methods, on log-log axes, with the slopes
-   measured from the data. Switch drag off and RK4's line collapses to the
-   rounding floor — the trap the page describes, made available. */
+/* The convergence study on the tracked shot, counted in evaluations. Each
+   stepper's step is halved from one step per frame, and each point is the
+   distance between a run's predicted position at the last free-flight frame and
+   the previous run's, plotted against the evaluations every run so far has
+   used. The precision slider moves the line two runs must agree within. */
 
 const G = 9.81;
-/* Release state measured, not chosen: the least-squares fit to the free-flight
-   frames of one tracked three-pointer (shot 79, SportVU 2015-16, 25 Hz) gives a
-   release 3.4520 m up, moving 6.1708 m/s horizontally and 4.7428 m/s vertically
-   -- 7.78 m/s at 37.6 degrees. The arc passes the free-flight screen, and its
-   fitted gravity is 9.831 m/s^2. */
-const Z0 = 3.4520, VH0 = 6.1708, VZ0 = 4.7428;
-const S0 = [0, Z0, VH0, VZ0];
-const T_END = 1.0;
+const K = 0.016;          /* per meter, the value the notes pages use */
+const FRAME = 0.04, FRAMES = 18;
 
-const makeDeriv = kd => (t, s) => {
-  const [, , vx, vy] = s;
-  const sp = kd ? Math.hypot(vx, vy) : 0;
-  return [vx, vy, -kd * sp * vx, -G - kd * sp * vy];
+const shot = (t, s) => {
+  const [, , , vx, vy, vz] = s;
+  const sp = Math.sqrt(vx * vx + vy * vy + vz * vz);
+  return [vx, vy, vz, -K * sp * vx, -K * sp * vy, -G - K * sp * vz];
 };
 
-const HS = [];
-for (let k = 0; k < 6; k++) HS.push(0.1 / Math.pow(2, k));
+/* least-squares intercept and slope, as on page 25 */
+function line(tf, v) {
+  const n = tf.length;
+  let st = 0, sv = 0, stt = 0, stv = 0;
+  for (let i = 0; i < n; i++) { st += tf[i]; sv += v[i]; stt += tf[i] * tf[i]; stv += tf[i] * v[i]; }
+  const slope = (n * stv - st * sv) / (n * stt - st * st);
+  return [(sv - slope * st) / n, slope];
+}
+
+/* the main trace is RK4; the other two are drawn as extra curves */
 const METHODS = [
-  {key: 'euler', label: 'Euler', order: 1},
-  {key: 'heun',  label: 'Heun',  order: 2},
-  {key: 'rk4',   label: 'RK4',   order: 4}
+  {key: 'euler', label: 'Euler', per: 1, levels: 15, cls: 'ghost'},
+  {key: 'heun',  label: 'Heun',  per: 2, levels: 11, cls: 'pred'},
+  {key: 'rk4',   label: 'RK4',   per: 4, levels: 8,  cls: 'trace'}
 ];
 
-function errors(kd) {
-  const f = makeDeriv(kd);
-  const ref = stepTo(f, S0, 1e-5, T_END, 'rk4').ss.slice(-1)[0][1];
-  const out = {};
-  for (const m of METHODS)
-    out[m.key] = HS.map(h => Math.max(1e-17,
-      Math.abs(stepTo(f, S0, h, T_END, m.key).ss.slice(-1)[0][1] - ref)));
+/* the position at the last frame after 18m steps, without storing the states */
+function lastPosition(step, s0, m) {
+  const h = FRAME / m;
+  let s = s0.slice();
+  for (let k = 0; k < FRAMES * m; k++) s = step(shot, 0.20 + k * h, s, h);
+  return s.slice(0, 3);
+}
+
+function study(meth, s0) {
+  const out = [];
+  let prev = null, evals = 0;
+  for (let i = 0; i < meth.levels; i++) {
+    const m = Math.pow(2, i);
+    const p = lastPosition(STEPPERS[meth.key], s0, m);
+    evals += meth.per * FRAMES * m;
+    if (prev) out.push({halvings: i, steps: FRAMES * m, evals,
+      change: Math.hypot(p[0] - prev[0], p[1] - prev[1], p[2] - prev[2])});
+    prev = p;
+  }
   return out;
 }
-const WITH = errors(0.012);
-const WITHOUT = errors(0);
+
+const fmtLen = v => v >= 1e-3 ? (v * 1e3).toFixed(v >= 1e-2 ? 0 : 1) + ' mm'
+                  : (v * 1e6).toFixed(v >= 1e-4 ? 0 : 1) + ' µm';
+const fmtN = n => n.toLocaleString('en-US').replace(/,/g, ' ');
 
 mountDemo({
   order: {
-    setting: 'A real three-pointer, integrated from its measured release state to ' +
-             '<em>t</em>&nbsp;=&nbsp;1&nbsp;s by three methods, at six step sizes each a halving of ' +
-             'the last. The reference is RK4 at <em>h</em>&nbsp;=&nbsp;10⁻⁵.',
-    source: {kind: 'mixed', text: 'The release state is measured &mdash; a least-squares fit to the free-flight frames of one tracked three-pointer, SportVU 2015&ndash;16, 25&nbsp;Hz &mdash; and the drag model is a choice. With drag the solution is not a polynomial; without it the solution is a quadratic, which every method here integrates exactly, and which is why the drag-free option shows no order at all.'},
-    caption: 'On log-log axes a power law is a straight line and its slope is the order. The dotted ' +
-             'red line is the slope the method promises, drawn through the coarsest point — not ' +
-             'fitted to the data, so agreement with it means something.',
-    segments: [
-      {key: 'm', label: 'method', value: 'rk4', options: METHODS.map(m =>
-        ({value: m.key, label: m.label}))},
-      {key: 'drag', label: 'drag', value: 'on', options: [
-        {value: 'on', label: 'With drag'}, {value: 'off', label: 'No drag'}]}
-    ],
-    panels: [{label: 'error at t = 1 s', unit: 'm', height: 260, xAxis: true,
-              xLabel: 'step size h', xUnit: 's', xScale: 1, xLog: true, yLog: true}],
+    /* arc 79, time from frame 20, the starting state from an 11-frame fit taken
+       at frame 5, as on page 25 */
+    async data() {
+      const d = await (await fetch('data/arcs.json')).json();
+      const a = d.arcs.find(x => x.role === 'clean');
+      const r = a.rel, j = 5, n = 11;
+      const tf = [], X = [], Y = [], Zg = [];
+      for (let i = 0; i < n; i++) {
+        const tt = a.t[r + i] - a.t[r + j];
+        tf.push(tt); X.push(a.x[r + i]); Y.push(a.y[r + i]);
+        Zg.push(a.z[r + i] + 0.5 * G * tt * tt);
+      }
+      const cx = line(tf, X), cy = line(tf, Y), cz = line(tf, Zg);
+      const s0 = [cx[0], cy[0], cz[0], cx[1], cy[1], cz[1]];
+      const runs = {};
+      for (const meth of METHODS) runs[meth.key] = study(meth, s0);
+      return {runs};
+    },
+    setting: 'The tracked shot (arc 79) stepped from frame 5 to the last free-flight frame, 0.72&nbsp;s later, ' +
+             'with <em>k</em>&nbsp;=&nbsp;0.016 per meter. Each stepper starts at one step per frame and halves the step. ' +
+             'Each point is how far the predicted position at the last frame moved from the run before, ' +
+             'against the evaluations of the rate used by every run so far.',
+    source: {kind: 'measured', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz. The starting state is a least-squares fit to the first 11 free-flight frames of one shot (arc 79), taken at frame 5. The drag constant is a choice from the range on page 25.'},
+    caption: 'Euler is the dashed gray line, Heun the dotted red line and RK4 the solid line. ' +
+             'A study is done at the first point under the precision line. ' +
+             'RK4 levels off near 10⁻¹⁴&nbsp;m, where the change is rounding error.',
+    controls: [{key: 'lt', label: 'precision needed', min: -5, max: -1.5, step: 0.05,
+                value: Math.log10(0.003), fmt: v => fmtLen(Math.pow(10, v))}],
+    panels: [{label: 'change on halving', unit: 'm', height: 340, xAxis: true,
+              xLabel: 'evaluations in all runs so far', xUnit: '', xScale: 1, xLog: true, yLog: true}],
     readouts: [
-      {key: 'm',    label: 'method'},
-      {key: 'want', label: 'order promised'},
-      {key: 'got',  label: 'order measured'},
-      {key: 'ratio',label: 'last error ratio'},
-      {key: 'fine', label: 'error at h = 0.003125'},
-      {key: 'note', label: ''}
+      {key: 'euler', label: 'Euler'},
+      {key: 'heun',  label: 'Heun'},
+      {key: 'rk4',   label: 'RK4'},
+      {key: 'best',  label: 'fewest evaluations'}
     ],
     compute(s) {
-      const set = s.drag === 'on' ? WITH : WITHOUT;
-      const meth = METHODS.find(m => m.key === s.m);
-      const e = set[s.m];
-      /* order from the last three points, only if the errors are still falling */
-      const ratios = [];
-      for (let i = 1; i < e.length; i++) ratios.push(e[i - 1] / e[i]);
-      const usable = ratios.filter((r, i) => e[i + 1] > 1e-15 && r > 1.1);
-      const p = usable.length
-        ? Math.log2(usable.slice(-3).reduce((a, b) => a * b, 1)) / Math.min(3, usable.length)
-        : null;
-      /* The floor is not an absolute size but a shape: the error stops falling
-         when the step is halved. Detect it that way, so the case where a method
-         solves the problem exactly is named rather than reported as a failure to
-         match its own order. */
-      const flat = ratios.length && ratios.every(rr => rr < 1.3);
-      const tiny = e[e.length - 1] < 1e-9;
-      const atFloor = flat && tiny;
-      return {
-        panels: [{x: Float64Array.from(HS), y: Float64Array.from(e),
-          range: [HS[HS.length - 1], HS[0]],
-          opts: {
-            label: meth.label + (s.drag === 'on' ? '' : ', no drag'),
-            pred: h => e[0] * Math.pow(h / HS[0], meth.order),
-            marks: HS.map((h, i) => ({t: h, y: e[i]}))
-          }}],
-        readouts: {
-          m: meth.label,
-          want: String(meth.order),
-          got: p === null ? '—' : p.toFixed(2),
-          ratio: ratios.length ? ratios[ratios.length - 1].toFixed(2) : '—',
-          fine: e[e.length - 1].toExponential(2) + ' m',
-          note: atFloor
-            ? 'solved exactly — the error is rounding, not the method'
-            : (p !== null && Math.abs(p - meth.order) < 0.2 ? 'matches' : 'does not match')
+      const tol = Math.pow(10, s.lt);
+      const rd = {};
+      let best = null;
+      for (const meth of METHODS) {
+        const hit = this.runs[meth.key].find(p => p.change < tol);
+        if (hit) {
+          rd[meth.key] = hit.halvings + (hit.halvings === 1 ? ' halving, ' : ' halvings, ') +
+                         fmtN(hit.evals) + ' evaluations';
+          if (!best || hit.evals < best.evals) best = {evals: hit.evals, label: meth.label};
+        } else {
+          const last = this.runs[meth.key].slice(-1)[0];
+          rd[meth.key] = 'not within ' + fmtN(last.evals) + ' evaluations';
         }
+      }
+      rd.best = best ? best.label : '—';
+      const curve = meth => ({
+        x: Float64Array.from(this.runs[meth.key], p => p.evals),
+        y: Float64Array.from(this.runs[meth.key], p => p.change), cls: meth.cls});
+      const rk = curve(METHODS[2]);
+      return {
+        panels: [{x: rk.x, y: rk.y, range: [30, 1e6],
+          opts: {
+            label: 'change on halving',
+            yRange: [1e-15, 1e-1],
+            curves: [curve(METHODS[0]), curve(METHODS[1])],
+            scatter: METHODS.map(m => ({...curve(m), cls: 'scatter', r: 2.5})),
+            hlines: [{y: tol, text: 'precision needed'}]
+          }}],
+        readouts: rd
       };
     }
   }

@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Week 9, Uncertainty Propagation — Computational Physical Modeling</title>
+  <title>Week 9, Time Stepping — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261109080753">
-  <link rel="stylesheet" href="css/demos.css?v=20261109080753">
+  <link rel="stylesheet" href="css/blocks.css?v=20261109124015">
+  <link rel="stylesheet" href="css/demos.css?v=20261109124015">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -738,6 +738,9 @@
           <a href="notes.html">Notes</a>
           <span class="site-nav-sep">·</span>
         
+          <a href="python.html">Python</a>
+          <span class="site-nav-sep">·</span>
+        
           <a href="reports.html">Examples</a>
           <span class="site-nav-sep">·</span>
         
@@ -751,9 +754,6 @@
           <span class="site-nav-sep">·</span>
         
           <a href="tools.html">Tools</a>
-          <span class="site-nav-sep">·</span>
-        
-          <a href="python.html">Python</a>
           <span class="site-nav-sep">·</span>
         
           <a href="workbench.html">Workbench</a>
@@ -810,13 +810,7 @@
         
           
           
-          
-          <a href="week-08.html">8</a>
-          <span class="week-strip-sep">·</span>
-        
-          
-          
-          
+          <span class="week-gap" title="Week 8 is a break week">8<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
           <span class="week-current">9</span>
           
           <span class="week-strip-sep">·</span>
@@ -837,19 +831,20 @@
         <strong>Overview</strong>
         
           <span class="site-nav-sep">·</span>
-          <a href="propagating-by-resampling.html">Resampling</a>
+          <a href="from-a-rate-to-a-trajectory.html">Euler&#39;s method</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="reporting-an-interval.html">Reporting an interval</a>
+          <a href="state-as-a-vector.html">State as a vector</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="coverage.html">Coverage</a>
+          <a href="order-of-accuracy-measured.html">Halving the step</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="extrapolation-amplifies.html">Extrapolation</a>
+          <a href="stability-and-accuracy.html">Energy checks</a>
         
         <span class="site-nav-sep">·</span>
-        <a href="assign-09.html">Assignment</a>
+        
+        <a href="assign-08.html">Assignment</a>
       </div>
     </nav>
     
@@ -904,18 +899,18 @@
 
   <main data-pagefind-body>
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
-    <div class="eyebrow">Week 9 · Uncertainty Propagation</div>
-<h1>Week 9, Uncertainty Propagation</h1>
+    <div class="eyebrow">Week 9 · Time Stepping</div>
+<h1>Week 9, Time Stepping</h1>
 
-<p>Most numbers this course has produced so far have been reported without saying how well they are known, and this week covers how to report that. Resampling propagates the scatter in the inputs through the whole analysis, an interval is reported with the level it claims, and coverage measures whether that claim is true. The last of the three is the step usually left out. Without it there is no evidence that an interval contains the truth as often as its level claims.</p>
+<p>When the rate of change of a quantity depends on the quantity itself, there is usually no formula to evaluate and the trajectory has to be built one step at a time. This week covers stepping, how to write a second-order equation so a stepper can advance it, how to tell when the answer has settled, and why a smooth, plausible solution can be wrong. A stepper that has lost accuracy does not commonly announce it, so the last of those is the hardest to catch. The output often looks like a reasonable curve, and the problem only shows when you halve the step and the answer changes.</p>
 
 <h2 id="learning-objectives">Learning Objectives</h2>
 
 <ul>
-  <li>Propagate input uncertainty through a whole analysis by resampling.</li>
-  <li>Report a value, an interval and the level the interval claims.</li>
-  <li>Measure the coverage of an interval where the truth is known.</li>
-  <li>Say how far a prediction can be extrapolated before its interval stops being useful.</li>
+  <li>Advance a state with Euler's method, and write the stepper so it does not know the problem.</li>
+  <li>Rewrite a second-order equation as a first-order system.</li>
+  <li>Halve the step until the answer stops changing, and count what that costs in evaluations.</li>
+  <li>Watch a quantity the physics fixes, such as energy, to catch an answer that looks right and is not.</li>
 </ul>
 
 <h2 id="content">Content</h2>
@@ -924,22 +919,22 @@
 
 <table class="data">
   <tr><th>#</th><th>Page</th><th>Summary</th></tr>
-  <tr><td>28</td><td><a href="propagating-by-resampling.html">Propagating uncertainty by resampling</a></td><td>Resampling the inputs and re-running the analysis</td></tr>
-  <tr><td>29</td><td><a href="reporting-an-interval.html">Reporting an interval</a></td><td>The value, interval and confidence level of a result</td></tr>
-  <tr><td>30</td><td><a href="coverage.html">Coverage</a> <span title="the week's anchor">&#9733;</span></td><td>Checking a confidence level against known cases</td></tr>
-  <tr><td>31</td><td><a href="extrapolation-amplifies.html">Extrapolation and uncertainty</a></td><td>Uncertainty growth beyond the fitted data</td></tr>
+  <tr><td>24</td><td><a href="from-a-rate-to-a-trajectory.html">Euler's method</a></td><td>Euler's method and the choice of step</td></tr>
+  <tr><td>25</td><td><a href="state-as-a-vector.html">State as a vector</a></td><td>Second-order equations as first-order systems</td></tr>
+  <tr><td>26</td><td><a href="order-of-accuracy-measured.html">Halving the step</a></td><td>Halving the step until the answer settles, counted in evaluations</td></tr>
+  <tr><td>27</td><td><a href="stability-and-accuracy.html">Energy checks</a> <span title="the week's anchor">&#9733;</span></td><td>Energy as a check on a stepped answer</td></tr>
 </table>
 
 <h2 id="assignment">Assignment</h2>
 
-<p>Assignment 8, <a href="assign-09.html">Uncertainty Intervals</a>, is due at the end of the week. Both problems use your shots. The main problem puts a 90% interval on where the ball comes down through rim height on each short record, and then counts how often that interval holds on your whole arcs cut to the same length. The extra problem puts the same interval on the medium and long records and asks how much narrower it gets for each frame you wait.</p>
+<p>Assignment 7, <a href="assign-08.html">Quadratic Drag</a>, is due at the end of the week. The main problem uses your shots and the extra problem uses your crash test.</p>
 
-<p>Please see the <a href="reports-09.html">example reports</a> for three finished reports on an
+<p>Please see the <a href="reports-08.html">example reports</a> for three finished reports on an
 example pack, each in a different style.</p>
 
 <h2 id="quiz">Quiz</h2>
 
-<p>Quiz 8 is on Canvas, and it asks four questions on the terms and facts from the pages above. You have unlimited time and unlimited attempts, because the purpose of the quiz is to let you check your own reading (it is not there to rank you).</p>
+<p>Quiz 7 is on Canvas, and it asks four questions on the terms and facts from the pages above. You have unlimited time and unlimited attempts, because the purpose of the quiz is to let you check your own reading (it is not there to rank you).</p>
 
 <h2 id="meta-labors">Meta-Labors</h2>
 
@@ -949,10 +944,10 @@ example pack, each in a different style.</p>
 
   
 
-  <script src="js/page.js?v=20261109080753"></script>
+  <script src="js/page.js?v=20261109124015"></script>
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-08">November 8, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-09">November 9, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

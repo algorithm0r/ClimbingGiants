@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>State as a vector — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261109080753">
-  <link rel="stylesheet" href="css/demos.css?v=20261109080753">
+  <link rel="stylesheet" href="css/blocks.css?v=20261109124015">
+  <link rel="stylesheet" href="css/demos.css?v=20261109124015">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -738,6 +738,9 @@
           <a href="notes.html">Notes</a>
           <span class="site-nav-sep">·</span>
         
+          <a href="python.html">Python</a>
+          <span class="site-nav-sep">·</span>
+        
           <a href="reports.html">Examples</a>
           <span class="site-nav-sep">·</span>
         
@@ -751,9 +754,6 @@
           <span class="site-nav-sep">·</span>
         
           <a href="tools.html">Tools</a>
-          <span class="site-nav-sep">·</span>
-        
-          <a href="python.html">Python</a>
           <span class="site-nav-sep">·</span>
         
           <a href="workbench.html">Workbench</a>
@@ -810,15 +810,9 @@
         
           
           
+          <span class="week-gap" title="Week 8 is a break week">8<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <span class="week-current">9</span>
           
-          <span class="week-current">8</span>
-          
-          <span class="week-strip-sep">·</span>
-        
-          
-          
-          
-          <a href="week-09.html">9</a>
           <span class="week-strip-sep">·</span>
         
           
@@ -833,8 +827,8 @@
     
     <nav class="page-family">
       <div class="nav-inner">
-        Week 8,
-        <a href="week-08.html">Overview</a>
+        Week 9,
+        <a href="week-09.html">Overview</a>
         
           <span class="site-nav-sep">·</span>
           <a href="from-a-rate-to-a-trajectory.html">Euler&#39;s method</a>
@@ -843,12 +837,13 @@
           <strong>State as a vector</strong>
         
           <span class="site-nav-sep">·</span>
-          <a href="order-of-accuracy-measured.html">Order of accuracy</a>
+          <a href="order-of-accuracy-measured.html">Halving the step</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="stability-and-accuracy.html">Stability and accuracy</a>
+          <a href="stability-and-accuracy.html">Energy checks</a>
         
         <span class="site-nav-sep">·</span>
+        
         <a href="assign-08.html">Assignment</a>
       </div>
     </nav>
@@ -904,19 +899,19 @@
 
   <main data-pagefind-body class="wide">
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
-    <div class="eyebrow">Week 8 · Time Stepping</div>
+    <div class="eyebrow">Week 9 · Time Stepping</div>
 <h1>State as a vector</h1>
 
 <div class="claim">
   <span class="label">Claim</span>
-  <p class="exact">A stepping method advances a state whose rate depends only on the state itself.
+  <p class="exact">A stepping method advances a state whose rate depends only on the state and the time.
   A second-order equation is put into that form by making the first derivative part of the state. The pair (position, velocity) advances as one object, and its rate is (velocity, acceleration).
   Every method in this week then applies unchanged to a state of any size.</p>
   <p class="plain">Carry the velocity along as part of what you are tracking, and a second-order
   problem becomes a first-order one with two numbers in it instead of one.</p>
 </div>
 
-<h2 id="the-problem-with-second-order">Second-Order Equations</h2>
+<h2 id="the-problem-with-second-order">Euler Has No Update for Velocity</h2>
 
 <p>Newton's second law gives an acceleration, so mechanics produces equations like</p>
 
@@ -938,87 +933,85 @@ $$\dot{\mathbf{s}} \;=\; \begin{bmatrix} \dot x \\ \dot v \end{bmatrix}
   \;=\; \begin{bmatrix} v \\ \dfrac{-c v - k x}{m} \end{bmatrix}$$
 
 <p>The right-hand side depends only on $x$ and $v$. That is, it depends only on the state, which is
-the one requirement. The equation is now first order in a two-component state. Euler applied
+what a stepping method needs. The equation is now first order in a two-component state. Euler applied
 to it is the same one line as before, done to both components at once:</p>
 
 $$\mathbf{s}_{k+1} \;=\; \mathbf{s}_k + h\,\dot{\mathbf{s}}(\mathbf{s}_k)$$
 
-<h2 id="driven-systems">Driven Systems</h2>
+<h2 id="an-occupant-driven-by-the-car">An Occupant Driven by the Car</h2>
 
 <p>Mechanics usually hands you a spring with something pushing on it, and in a crash test the
 something is the car. An occupant is held to the car by a belt. The car hits the barrier and stops, the occupant keeps
 going, and the belt stretches. What it pulls back with depends on how far the occupant has moved
 <em>relative to the car</em> and how fast they are still moving relative to it. That is a spring
 and a damper again, measured between two things that are both moving. Write $u$ for the
-occupant's displacement relative to the car. Newton's second law in the car's frame adds one
+occupant's displacement relative to the car and $w$ for their velocity relative to it. Newton's second law in the car's frame adds one
 term to the equation above:</p>
 
 $$m\ddot{u} + c\dot{u} + k u \;=\; -m\,a_{\text{car}}(t)$$
 
-<p>and the rewrite is the one already done. The state is still the pair, still of size two:</p>
+<p>and the rewrite is the one already done. The forcing adds a term to the acceleration, so the
+state is still the pair, still of size two:</p>
 
 $$\dot{\mathbf{s}} \;=\; \begin{bmatrix} \dot u \\ \dot w \end{bmatrix}
   \;=\; \begin{bmatrix} w \\ \dfrac{-c w - k u}{m} - a_{\text{car}}(t) \end{bmatrix}$$
 
-<p class="plain">Forcing adds a term to the acceleration and leaves the size of the state unchanged.</p>
-
-<p>On a real barrier test, a 75&nbsp;kg occupant on a belt of 296&nbsp;kN/m with
-2.8&nbsp;kN&middot;s/m of damping travels about 105&nbsp;mm relative to the car before coming
-back. The restraint has to keep that travel inside the space available.</p>
+<p>Driven by the deceleration of a 2019 BMW X5 in a barrier test (measured on a rear
+crossmember), a 75&nbsp;kg occupant on a belt of 296&nbsp;kN/m with 2.8&nbsp;kN&middot;s/m of
+damping travels about 105&nbsp;mm relative to the car before coming back. That travel has to fit
+in the space between the occupant and the car's interior.</p>
 
 <h3 id="a-time-dependent-rate">A Time-Dependent Rate</h3>
 
-<p>One thing has changed that the equation does not show. Every rate so far has been a function of
+<p>The rate now depends on time as well as on the state. Every rate so far has been a function of
 the state alone, so that handing it $x$ and $v$ returns the derivative, while this one needs
-$a_{\text{car}}(t)$, and that is a recorded array, sampled every 0.1&nbsp;ms or every
-0.05&nbsp;ms (depending on how the lab's logger was set). So the rate function has to be given the
+$a_{\text{car}}(t)$, and that is a recorded array sampled at a fixed interval. So the rate function has to be given the
 time as well as the state, and it has to answer for times that fall between samples. If you take
 a step equal to the record's own sample interval the question never comes up. If you halve the
-step (which showing an answer has settled requires) every second evaluation lands between two
+step (as you must to show the answer has settled) every second evaluation lands between two
 recorded values.</p>
 
 <div class="check"><p><strong>Check.</strong> A stepper is run on the occupant at half the
-record's sample interval. The driving acceleration is looked up by rounding the time to the
-nearest recorded sample. What does the run produce, and would you notice?
+record's sample interval. The driving acceleration is looked up by taking the most recent
+recorded sample. What does the run produce, and would you notice?
 
     <details class="ans"><summary><span>Answer</span></summary><div class="body">
-    <p>It produces a trajectory driven by a staircase and not by the recorded pulse. Each pair of
+    <p>It produces a trajectory driven by a staircase version of the recorded pulse. Each pair of
 half-steps sees the same acceleration value, so the effective input is the record held constant
 across each sample interval.</p>
-    <p><strong>You would not notice from the output.</strong> The trajectory is smooth, the travel is
+    <p>You would not notice from the output. The trajectory is smooth, the travel is
 the right order of magnitude, and halving the step again changes the answer only slightly, so a
-convergence check of the kind this week asks for is passed. The run does converge, though it
-converges on the solution to a slightly different problem, which is the failure <a href="order-of-accuracy-measured.html" title="Order of accuracy">page 26</a> warns
-about when it says a reference may share the bug it is meant to catch. Interpolating between the
-two nearest samples instead removes it, and which interpolation you use matters a good deal less
-than using one.</p>
+convergence check of the kind <a href="order-of-accuracy-measured.html" title="Order of accuracy">page 26</a> asks for is passed. The run does converge, though it
+converges on the solution to a slightly different problem, since the check shows only that the
+answer stopped moving. Interpolating linearly between the two nearest samples removes the
+staircase.</p>
     </div></details></p></div>
 
-<h2 id="the-definition-of-state">The Definition of State</h2>
+<h2 id="the-state-holds-everything-the-rate-needs">The State Holds Everything the Rate Needs</h2>
 
-<p>The rule is mechanical. <strong>The state must contain everything the rate depends on.</strong>
-Anything the rate needs and the state lacks has to be added, and anything the rate never uses
-does not belong.</p>
+<p>The state must contain everything the rate depends on (other than the time). Anything the rate
+needs and the state lacks has to be added. The state also carries whatever you want to follow,
+such as the positions, which the rate itself may never use.</p>
 
 <table class="data">
-  <tr><th>System</th><th>State</th><th>Size</th></tr>
+  <tr><th>System</th><th>Entries in the state</th><th>Number of entries</th></tr>
   <tr><td>falling object, no drag</td><td>height, velocity</td><td>2</td></tr>
   <tr><td>projectile in a plane, with drag</td><td>x, y, v<sub>x</sub>, v<sub>y</sub></td><td>4</td></tr>
   <tr><td>tracked shot, with drag</td><td>x, y, z, v<sub>x</sub>, v<sub>y</sub>, v<sub>z</sub></td><td>6</td></tr>
   <tr><td>mass-spring-damper</td><td>x, v</td><td>2</td></tr>
-  <tr><td>two masses on a shared spring</td><td>x₁, v₁, x₂, v₂</td><td>4</td></tr>
+  <tr><td>two masses on a shared spring</td><td>x₁, x₂, v₁, v₂</td><td>4</td></tr>
   <tr><td>cooling body</td><td>temperature</td><td>1</td></tr>
 </table>
 
-<p>The drag case is the one that shows why the state has to be a vector and not two independent
-scalars. Quadratic drag gives</p>
+<p>The drag case shows why the components of the state cannot be stepped as separate scalars.
+Quadratic drag gives</p>
 
 $$a_x = -k\,|\mathbf{v}|\,v_x, \qquad a_y = -g - k\,|\mathbf{v}|\,v_y$$
 
 <p>and $|\mathbf{v}| = \sqrt{v_x^2 + v_y^2}$. The horizontal acceleration depends on the vertical
 velocity. The two directions cannot be integrated separately, because neither one's rate is a
-function of that direction alone. This is what "the rate depends on the state" means
-when the state has more than one entry.</p>
+function of that direction alone. That is, each component's rate can use any entry of the
+state.</p>
 
 <div class="aside">
   <span class="label">A value for k</span>
@@ -1033,13 +1026,13 @@ shots file (0.1195&nbsp;m, so $A$ = 0.0449&nbsp;m²), and FIBA's equipment rules
 between 580 and 620&nbsp;g (Official Basketball Rules 2026, Basketball Equipment, Table 1). Air at
 20&nbsp;°C and sea-level pressure has a density of 1.20&nbsp;kg/m³. Together these give $k$
 between 0.013 and 0.019 per meter (0.016 for $C_D$ = 0.35 and 600&nbsp;g), so at 9&nbsp;m/s
-drag decelerates the ball at about 1.3&nbsp;m/s², or 13% of $g$. The demos on these pages use
-$k$ = 0.012 (a $C_D$ of about 0.27 for a 600&nbsp;g ball), a little below that range.</p>
+drag decelerates the ball at about 1.3&nbsp;m/s², or 13% of $g$. The examples and demos on
+these pages use 0.016.</p>
 </div>
 
 <cg-demo case="state"></cg-demo>
 
-<h2 id="in-code">In Code</h2>
+<h2 id="one-function-for-the-system-one-for-the-step">One Function for the System, One for the Step</h2>
 
 <p>In practice the code splits in two, with one function that defines the system and another that
 advances any system it is given.</p>
@@ -1050,7 +1043,7 @@ advances any system it is given.</p>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="3|The whole physics: unpack the state, return its rate, in the same order. m, c and k have defaults, the oscillator's mass, damping and stiffness ([Functions](py-functions.html)).;4|Unpacks the two components of the state into their own names.;5|The first component's rate is the second component. This is the second-order equation rewritten as two first-order ones.;7|The whole method. It never mentions x, v, mass or springs.;8|Works on a state of any length, because + and * are elementwise on an array.;10|The starting state: 5 cm out, at rest.;11|200 steps of size h, which is set earlier on the page. The step size is the choice ([Loops](py-loops.html)).;12|Swap oscillator for projectile and step() is untouched.">import numpy as np
+  <pre data-lang="python" data-notes="3|The whole physics: unpack the state, return its rate, in the same order. m, c and k have defaults, the oscillator's mass, damping and stiffness ([Functions](py-functions.html)).;4|Unpacks the two components of the state into their own names.;5|The first component's rate is the second component. This is the second-order equation rewritten as two first-order ones.;7|The whole method. It never mentions x, v, mass or springs.;8|Works on a state of any length, because + and * are elementwise on an array.;10|The starting state: 5 cm out, at rest.;11|The step size, 10 ms. Halving it means doubling the number of steps.;12|200 steps of 10 ms, 2 seconds of motion ([Loops](py-loops.html)).;13|Swap oscillator for projectile and step() is untouched.">import numpy as np
 
 def oscillator(t, s, m=1.0, c=0.30, k=40.0):
     x, v = s
@@ -1060,6 +1053,7 @@ def step(f, t, s, h):
     return s + h * f(t, s)
 
 s = np.array([0.05, 0.0])
+h = 0.01
 for i in range(200):
     s = step(oscillator, i*h, s, h)</pre>
   <pre data-lang="matlab" hidden data-notes="2|ode45 takes exactly this shape of function.;8|Unpack, return the rate, same order.;13|The method, independent of the system.">% the library solver takes the same function:
@@ -1094,8 +1088,7 @@ function step(f, t, s, h) {
   <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
 </div>
 
-<p>That separation is why library solvers all take the same argument, which is a function returning
-the rate of a state. <code>scipy.integrate.solve_ivp</code> and MATLAB's <code>ode45</code> take
+<p>Library solvers take the same kind of argument, a function returning the rate of a state. <code>scipy.integrate.solve_ivp</code> and MATLAB's <code>ode45</code> take
 a function of the same shape, and putting a problem into this form is usually most of the work of
 using them.</p>
 
@@ -1111,9 +1104,10 @@ $$\frac{\mathrm{d}}{\mathrm{d}t}\begin{bmatrix} x \\ y \\ z \\ v_x \\ v_y \\ v_z
 
 <p>The example in this section steps the shot from <a href="conditions-become-roots.html" title="Conditions as roots">page 19</a>, arc 79 of
 the public arcs of the course. That arc is in no student's data. The example uses its 24
-free-flight frames, with time measured from frame 20, the release this data set marks (page 19
-finds it 0.08&nbsp;s earlier), and $k$ = 0.016 per meter from the aside
-above.</p>
+free-flight frames (to the last frame at least 1&nbsp;m from the hoop's center), with time
+measured from frame 20, the release this data set marks (<a href="conditions-become-roots.html#finding-the-release" title="Conditions as roots">page 19
+finds it</a> 0.08&nbsp;s earlier), and $k$ = 0.016 per meter from the aside above. Frames are
+counted from there, so frame 0 below is frame 20 of the record.</p>
 
 <h3 id="a-starting-state-from-a-fit">A Starting State From a Fit</h3>
 
@@ -1123,14 +1117,14 @@ straight line in each of $x$ and $y$ and a parabola in $z$ with $g$ held at 9.81
 held model from assignment 5. If time is measured from the frame where you want the state, the
 intercepts are the position at that frame and the slopes are the velocity there.</p>
 
-<p>Once drag is in the model, the fitted velocity depends on which frame it is taken at. A straight line has one slope, so the
+<p>Once drag is in the model, the frame where the state is taken matters, since the ball's
+velocity is changing and a straight line has one slope, so the
 fit gives the same horizontal velocity at every frame (the table below shows it at two). That slope
 is roughly the average horizontal velocity over the 11 frames, which is likely to be close to the
 velocity at their middle. If drag is slowing the ball, it was moving faster than that at release,
-by about the drag deceleration times half the window (0.67&nbsp;m/s² from the drag term at
+by about the horizontal drag deceleration times half the window (0.67&nbsp;m/s² from the drag term at
 frame 5, times 0.2&nbsp;s, gives 0.13&nbsp;m/s on this shot). For this reason the example takes
-the state at frame 5 (0.20&nbsp;s), the middle of the 11 fitted frames. (An odd number of frames
-puts one of them at the middle.)</p>
+the state at frame 5 (0.20&nbsp;s), the middle of the 11 fitted frames.</p>
 
 <table class="data">
   <tr><th>State taken at</th><th class="num">x, y, z (m)</th><th class="num">v<sub>x</sub>, v<sub>y</sub>, v<sub>z</sub> (m/s)</th><th class="num">speed (m/s)</th></tr>
@@ -1293,26 +1287,28 @@ would still miss the measured frames by about
 $\sqrt{2.84^2 + 2.84^2 + 3.07^2}$ = 5.1&nbsp;cm RMS (taking 2.84&nbsp;cm for each of $x$ and $y$),
 because the frames themselves are about that far from the ball.</p>
 
-<p>The same program on all eight public arcs, each started from the middle of an 11-frame fit and
-compared over the frames the fit did not use:</p>
+<p>The same program on all eight public arcs, each started from the middle of an 11-frame fit, run
+to its last frame at least 1&nbsp;m from the hoop's center, and compared over the frames the fit
+did not use:</p>
 
 <table class="data">
   <tr><th>Arc</th><th class="num">RMS distance, no drag (cm)</th><th class="num">RMS distance, drag (cm)</th>
       <th class="num">change (cm), + is further from the ball</th><th class="num">drag moves the last frame by (cm)</th></tr>
   <tr><td>79</td><td class="num">5.8</td><td class="num">10.4</td><td class="num">+4.6</td><td class="num">15.7</td></tr>
-  <tr><td>818</td><td class="num">6.3</td><td class="num">8.0</td><td class="num">+1.7</td><td class="num">6.0</td></tr>
-  <tr><td>1226</td><td class="num">7.5</td><td class="num">5.9</td><td class="num">&minus;1.7</td><td class="num">6.3</td></tr>
-  <tr><td>48</td><td class="num">14.4</td><td class="num">9.6</td><td class="num">&minus;4.8</td><td class="num">22.5</td></tr>
-  <tr><td>431</td><td class="num">17.1</td><td class="num">11.6</td><td class="num">&minus;5.5</td><td class="num">10.8</td></tr>
-  <tr><td>289</td><td class="num">21.0</td><td class="num">17.2</td><td class="num">&minus;3.8</td><td class="num">22.7</td></tr>
+  <tr><td>818</td><td class="num">10.1</td><td class="num">9.5</td><td class="num">&minus;0.6</td><td class="num">18.8</td></tr>
+  <tr><td>1226</td><td class="num">11.3</td><td class="num">6.0</td><td class="num">&minus;5.3</td><td class="num">16.1</td></tr>
+  <tr><td>48</td><td class="num">6.8</td><td class="num">6.6</td><td class="num">&minus;0.2</td><td class="num">12.9</td></tr>
+  <tr><td>431</td><td class="num">20.1</td><td class="num">10.8</td><td class="num">&minus;9.3</td><td class="num">21.0</td></tr>
+  <tr><td>289</td><td class="num">16.8</td><td class="num">14.4</td><td class="num">&minus;2.4</td><td class="num">17.1</td></tr>
   <tr><td>517</td><td class="num">9.9</td><td class="num">9.0</td><td class="num">&minus;0.9</td><td class="num">20.0</td></tr>
-  <tr><td>939</td><td class="num">17.7</td><td class="num">15.0</td><td class="num">&minus;2.6</td><td class="num">19.2</td></tr>
+  <tr><td>939</td><td class="num">9.8</td><td class="num">11.2</td><td class="num">+1.4</td><td class="num">10.7</td></tr>
 </table>
 
-<p>On every arc drag moves the last-frame prediction by between 6.0 and 22.7&nbsp;cm, about one
-to four and a half times that 5.1&nbsp;cm floor. It brings the prediction closer on six of the eight, by more than 3&nbsp;cm (a threshold about the size of the noise
-on one axis) on three of them (48, 431 and 289), and it moves it further away by more than that on
-one (79). The other four change by less than 3&nbsp;cm. Started from release instead, drag comes
+<p>On every arc drag moves the last-frame prediction by between 10.7 and 21.0&nbsp;cm, about two
+to four times that 5.1&nbsp;cm floor. It brings the prediction closer on six of the eight, by more
+than 3&nbsp;cm (a threshold about the size of the noise on one axis) on two of them (1226 and
+431), and it moves it further away by more than that on one (79). The other five change by less
+than 3&nbsp;cm. Started from release instead, drag comes
 out further from the ball on seven of the eight, so the choice of starting state may decide the
 verdict. These eight arcs were picked to show particular behaviors on earlier pages (arc 79 is the
 clean one), so they are not a sample of shots, and they do not settle whether drag is worth adding
@@ -1324,44 +1320,46 @@ in general.</p>
     <li>Write the state and its rate for a pendulum, <em>θ̈</em> = −(<em>g</em>/<em>L</em>)
     sin <em>θ</em>.
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>The equation is second order, so the state is the pair of the angle and its rate:</p>
-     <p><strong>s</strong> = (&theta;, &omega;), where &omega; = &theta;&#775;. and the rate of the
+     <p><strong>s</strong> = (&theta;, &omega;), where &omega; = &theta;&#775;, and the rate of the
 state is d<strong>s</strong>/d<em>t</em> = (&omega;, &minus;(<em>g</em>/<em>L</em>)
 sin&thinsp;&theta;).</p>
-     <p>The first component is the definition of &omega; and the second is the physics, and that is
-the rewrite. A second-order equation in one variable becomes a first-order system in two, at
+     <p>The first component is the definition of &omega;, and the second comes from the equation of
+motion. A second-order equation in one variable becomes a first-order system in two, at
 the cost of carrying the derivative as a variable in its own right. Nothing about the stepping
-method changes. The same <code>step</code> that advanced a scalar advances this, because it only
-ever asked for a state and a rate.</p></div></details></li>
+method changes. The same <code>step</code> function advances this state, since it uses only the
+state and its rate.</p></div></details></li>
     <li>A colleague integrates the x and y motion of a projectile with quadratic drag in two
     separate loops. What will go wrong, and at what point in the flight will it be worst?
     <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Quadratic drag is &minus;<em>k</em>|<strong>v</strong>|<strong>v</strong>, and
 |<strong>v</strong>| = &radic;(<em>v<sub>x</sub></em>&sup2; + <em>v<sub>y</sub></em>&sup2;)
 couples the two directions. Two separate loops can only use each component's own speed, so each
 axis is decelerated as though the other were stationary. Since |<strong>v</strong>| is never
-smaller than either component, the decoupled version <strong>always underestimates the
-drag</strong>. The ball flies too far and too high, and the error is one-signed, so it
+smaller than either component, the decoupled version always underestimates the
+drag. The ball flies too far and too high, and the error is one-signed, so it
 accumulates.</p>
-     <p>Worst <strong>near the apex, for the vertical equation</strong>. There
+     <p>Worst, relative to the true drag, near the apex for the vertical equation. There
 <em>v<sub>y</sub></em> passes through zero while the ball is still moving fast horizontally, so
 the decoupled vertical drag (proportional to <em>v<sub>y</sub></em>&sup2;) shrinks much faster
 than the true one (proportional to |<strong>v</strong>|<em>v<sub>y</sub></em>), and the ratio
 between them grows without bound. For the horizontal equation the worst points are typically
-launch and landing, where the vertical component is largest. The tell in a result. Fitted drag that comes out different on the
-way up and the way down, for a coefficient that is a property of the ball.</p></div></details></li>
+launch and landing, where the vertical component is largest. The tell in a result is a fitted
+drag coefficient that differs between the way up and the way down, though the coefficient
+belongs to the ball.</p></div></details></li>
     <li>Two masses connected by a spring, each free to move in one direction. How large is the
     state, and what is the rate of each component?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Four components:</strong> <strong>s</strong> = (<em>x</em>&#8321;, <em>x</em>&#8322;,
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Four components: <strong>s</strong> = (<em>x</em>&#8321;, <em>x</em>&#8322;,
 <em>v</em>&#8321;, <em>v</em>&#8322;), two positions and two velocities. Two masses, one degree
 of freedom each, second order in each, so 2 &times; 2. With extension <em>e</em> =
 <em>x</em>&#8322; &minus; <em>x</em>&#8321; &minus; <em>L</em>&#8320; and stiffness <em>k</em>:</p>
      <p>d<em>x</em>&#8321;/d<em>t</em> = <em>v</em>&#8321;<br> d<em>x</em>&#8322;/d<em>t</em> =
 <em>v</em>&#8322;<br> d<em>v</em>&#8321;/d<em>t</em> = +<em>ke</em>/<em>m</em>&#8321;<br>
-d<em>v</em>&#8322;/d<em>t</em> = &minus;<em>ke</em>/<em>m</em>&#8322; The signs are the third
-law. The spring pulls the two masses towards each other when stretched, so the forces are equal
+d<em>v</em>&#8322;/d<em>t</em> = &minus;<em>ke</em>/<em>m</em>&#8322;</p>
+     <p>The signs are the third
+law. The spring pulls the two masses toward each other when stretched, so the forces are equal
 and opposite, and the accelerations differ by the mass ratio.</p>
-     <p>The rule generalizes: <strong>two components per degree of freedom</strong> for a second-order
+     <p>The rule generalizes: two components per degree of freedom for a second-order
 system. Six masses in three dimensions is a state of 36, and the stepping code is unchanged.
-This is the reason for writing it against a state vector and not against named variables.</p></div></details></li>
+Writing the step against a state vector is what lets the same code handle all 36.</p></div></details></li>
   </ol>
 </div>
 
@@ -1373,7 +1371,7 @@ page is listed here.</p>
 <dl class="glossary"></dl>
 
 <p class="deeper">Go deeper: <a href="workbench.html?tool=step">the workbench</a>. Euler, Heun
-and RK4 on an equation you write, with the order measured from the run and not quoted.</p>
+and RK4 on an equation you write, with the order measured from the run.</p>
 
   </main>
 
@@ -1390,7 +1388,7 @@ and RK4 on an equation you write, with the order measured from the run and not q
   </script>
   
 
-  <script type="module" src="js/bundle/state-as-a-vector.js?v=20261109080753"></script>
+  <script type="module" src="js/bundle/state-as-a-vector.js?v=20261109124015"></script>
   
 
   <footer class="site-footer">

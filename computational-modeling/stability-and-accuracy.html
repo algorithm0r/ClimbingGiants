@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stability and accuracy — Computational Physical Modeling</title>
+  <title>Energy checks on a stepped answer — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261109080753">
-  <link rel="stylesheet" href="css/demos.css?v=20261109080753">
+  <link rel="stylesheet" href="css/blocks.css?v=20261109124015">
+  <link rel="stylesheet" href="css/demos.css?v=20261109124015">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -738,6 +738,9 @@
           <a href="notes.html">Notes</a>
           <span class="site-nav-sep">·</span>
         
+          <a href="python.html">Python</a>
+          <span class="site-nav-sep">·</span>
+        
           <a href="reports.html">Examples</a>
           <span class="site-nav-sep">·</span>
         
@@ -751,9 +754,6 @@
           <span class="site-nav-sep">·</span>
         
           <a href="tools.html">Tools</a>
-          <span class="site-nav-sep">·</span>
-        
-          <a href="python.html">Python</a>
           <span class="site-nav-sep">·</span>
         
           <a href="workbench.html">Workbench</a>
@@ -810,15 +810,9 @@
         
           
           
+          <span class="week-gap" title="Week 8 is a break week">8<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <span class="week-current">9</span>
           
-          <span class="week-current">8</span>
-          
-          <span class="week-strip-sep">·</span>
-        
-          
-          
-          
-          <a href="week-09.html">9</a>
           <span class="week-strip-sep">·</span>
         
           
@@ -833,8 +827,8 @@
     
     <nav class="page-family">
       <div class="nav-inner">
-        Week 8,
-        <a href="week-08.html">Overview</a>
+        Week 9,
+        <a href="week-09.html">Overview</a>
         
           <span class="site-nav-sep">·</span>
           <a href="from-a-rate-to-a-trajectory.html">Euler&#39;s method</a>
@@ -843,12 +837,13 @@
           <a href="state-as-a-vector.html">State as a vector</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="order-of-accuracy-measured.html">Order of accuracy</a>
+          <a href="order-of-accuracy-measured.html">Halving the step</a>
         
           <span class="site-nav-sep">·</span>
-          <strong>Stability and accuracy</strong>
+          <strong>Energy checks</strong>
         
         <span class="site-nav-sep">·</span>
+        
         <a href="assign-08.html">Assignment</a>
       </div>
     </nav>
@@ -904,197 +899,197 @@
 
   <main data-pagefind-body class="wide">
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
-    <div class="eyebrow">Week 8 · Time Stepping</div>
-<h1>Stability and accuracy</h1>
+    <div class="eyebrow">Week 9 · Time Stepping</div>
+<h1>Energy checks on a stepped answer</h1>
 
 <div class="claim">
   <span class="label">Claim</span>
-  <p class="exact">A method becomes inaccurate at one step size and
-  <dfn data-g="stability">unstable at a larger one</dfn>, and
-  the gap between them is wide. Between the two, a solution is substantially wrong while remaining
-  smooth, bounded and plausible. A quantity the physics constrains, such as energy, momentum or mass,
-  usually
-  detects the error long before the trajectory looks wrong.</p>
-  <p class="plain">  The answer stops being right well before it starts looking wrong, so watch something the
-  physics fixes, and not the curve.</p>
+  <p class="exact">A stepped answer can be smooth and plausible and still wrong by several times the
+  noise in the data it is compared with. A quantity the physics fixes, such as energy, momentum or
+  mass, can often show that error without a reference answer. On a tracked shot, Euler at one step per frame
+  adds 1.39&nbsp;J/kg of energy the ball cannot gain, and with drag switched on the same gain hides
+  inside a loss that has the right sign.</p>
+  <p class="plain">A stepped answer is often wrong before it looks wrong, so plot a quantity the physics
+  fixes alongside it.</p>
 </div>
 
-<h2 id="a-damped-mass-on-a-spring">A Damped Mass on a Spring</h2>
+<h2 id="energy-on-the-tracked-shot">Euler Adds Energy to the Tracked Shot</h2>
 
-<p>A mass on a spring with light damping, which is the standard second-order system, put into state
-form on the previous pages:</p>
+<p>The shot stepped on <a href="state-as-a-vector.html" title="State as a vector">page 25</a> is arc
+79 of the public arcs (the course's shared tracking data, in no student's set). Its frames and its
+time are counted from frame 20 of the arc, the release this data set marks (<a
+href="conditions-become-roots.html#finding-the-release" title="Conditions as roots">page 19</a> finds
+it 0.08&nbsp;s earlier). A fit to the first 11 frames (lines in $x$ and $y$, a parabola in $z$ with $g$
+held at 9.81&nbsp;m/s²) gives a position and a velocity at frame 5 (0.20&nbsp;s), the middle of the
+fit, and the run starts there. It ends at frame 23 (0.92&nbsp;s), the last frame at least 1&nbsp;m from
+the hoop's center. The energy per kilogram of the ball is</p>
+
+$$e \;=\; \tfrac12|\mathbf{v}|^2 \;+\; gz$$
+
+<p>which is 64.10&nbsp;J/kg at frame 5. Without drag the ball keeps that value for the whole flight,
+because gravity trades height for speed and nothing else acts on it. With drag the energy can only
+fall, since drag always takes energy out.
+Neither statement needs the answer to the flight, so both can be checked on any run. Over the
+0.72&nbsp;s from frame 5 to frame 23, with RK4 from <a href="order-of-accuracy-measured.html"
+title="Order of accuracy">page 26</a> beside Euler:</p>
+
+<table class="data">
+  <tr><th>Integrator, drag on or off</th><th class="num">energy change over 0.72&nbsp;s, 40&nbsp;ms step (one per frame)</th>
+      <th class="num">energy change over 0.72&nbsp;s, 1&nbsp;ms step</th></tr>
+  <tr><td>Euler, no drag</td><td class="num">+1.39&nbsp;J/kg</td><td class="num">+0.03&nbsp;J/kg</td></tr>
+  <tr><td>RK4, no drag</td><td class="num">0.00&nbsp;J/kg</td><td class="num">0.00&nbsp;J/kg</td></tr>
+  <tr><td>Euler, drag</td><td class="num">&minus;1.57&nbsp;J/kg</td><td class="num">&minus;2.92&nbsp;J/kg</td></tr>
+  <tr><td>RK4, drag</td><td class="num">&minus;2.96&nbsp;J/kg</td><td class="num">&minus;2.96&nbsp;J/kg</td></tr>
+</table>
+
+<p>Euler without drag adds energy the ball cannot gain. Its path is a smooth arc, and it ends
+14.1&nbsp;cm higher than the parabola that gravity alone gives, which is about four and a half times
+the 3.07&nbsp;cm vertical tracking noise. Each Euler step moves the height with the vertical velocity
+from the start of the step, before gravity has slowed it, so every step climbs a little too far.
+Without drag the horizontal velocity does not change, and one step of size $h$ changes the energy
+by</p>
+
+$$\Delta e \;=\; \underbrace{\tfrac12(v_z - gh)^2 - \tfrac12 v_z^2}_{\text{speed}} \;+\;
+  \underbrace{g\,h\,v_z}_{\text{height}} \;=\; \tfrac12 g^2 h^2$$
+
+<p>There are $T/h$ steps in a flight of length $T$, so the gain is $\tfrac12 g^2 h T$, which is
+1.39&nbsp;J/kg (2.2%) over this flight at 40&nbsp;ms. The formula also gives a second check, since a
+drag-free Euler run that gains a different amount most likely has something other than its step
+size wrong.</p>
+
+<h3 id="the-same-gain-with-drag">Euler's Gain Hidden Inside the Drag Loss</h3>
+
+<p>With drag the Euler run loses 1.57&nbsp;J/kg, and losing energy is what drag does. The path is
+smooth and the sign of the change is right, so nothing in the run itself looks wrong. RK4 on the
+same flight loses 2.96&nbsp;J/kg. The difference between the two (1.39&nbsp;J/kg) matches the
+drag-free gain, so the Euler run adds about the same energy with drag as without it, and drag takes
+out nearly twice what that run shows. The drag-free run measured that gain without a reference
+answer, and the RK4 run gives the same value.</p>
+
+<p>At a step of 1&nbsp;ms the Euler gain falls to 0.03&nbsp;J/kg, and the Euler run with drag loses
+2.92&nbsp;J/kg, close to the RK4 value. Finding a step at which the answer stops changing is the
+convergence study on <a href="order-of-accuracy-measured.html" title="Order of accuracy">page
+26</a>. The energy check can show that the step is too large before that study is run.</p>
+
+<cg-demo case="shot-energy"></cg-demo>
+
+<h2 id="euler-on-a-damped-spring">Euler on a Damped Spring Spirals Outward</h2>
+
+<p>A constructed system shows where Euler's extra energy comes from in a picture. A mass on a spring
+with light damping, in the state form of <a href="state-as-a-vector.html" title="State as a vector">page 25</a>:</p>
 
 $$m\ddot{x} + c\dot{x} + kx = 0, \qquad m = 1,\; c = 0.30,\; k = 40$$
 
 <p>giving a natural frequency $\omega_n = 6.325$ rad/s, a damping ratio $\zeta = 0.0237$, and a
-period of 0.9935 s. It is released from $x_0 = 0.05$ m at rest, and its exact solution is a
-decaying sinusoid, so every number below is compared against the exact answer. The
-quantity to watch is the energy:</p>
+period of 0.994&nbsp;s. It is released from $x_0 = 0.05$ m at rest. Its energy is</p>
 
 $$E \;=\; \tfrac{1}{2}mv^2 \;+\; \tfrac{1}{2}kx^2$$
 
-<p>The damper removes energy, so the true $E$ never increases. Over one second the exact solution
-has $E/E_0 = 0.7422$, so any other value comes from the integrator.</p>
-
-<h2 id="two-ways-explicit-euler-fails">Explicit Euler on the Oscillator</h2>
-
-<p>Explicit Euler, at step sizes from tiny to too large:</p>
+<p>and the damper removes energy, so the true $E$ never increases. This system is constructed, so its
+exact solution is known, and that is the only reason the table below can state its errors. Over one
+second the exact solution has $E/E_0 = 0.742$. Explicit Euler, at five step sizes:</p>
 
 <table class="data">
-  <tr><th class="num">h</th><th class="num">h·ω<sub>n</sub></th>
-      <th class="num">error in x at 1 s</th><th class="num">as % of amplitude</th>
-      <th class="num">E/E₀, truth is 0.742</th></tr>
-  <tr><td class="num">0.002</td><td class="num">0.013</td><td class="num">1.75×10⁻³</td>
-      <td class="num">3.5%</td><td class="num">0.80</td></tr>
-  <tr><td class="num">0.005</td><td class="num">0.032</td><td class="num">4.52×10⁻³</td>
-      <td class="num">9.0%</td><td class="num">0.91</td></tr>
-  <tr><td class="num">0.010</td><td class="num">0.063</td><td class="num">9.53×10⁻³</td>
-      <td class="num">19%</td><td class="num"><strong>1.11</strong></td></tr>
-  <tr><td class="num">0.020</td><td class="num">0.126</td><td class="num">2.11×10⁻²</td>
-      <td class="num">42%</td><td class="num">1.65</td></tr>
-  <tr><td class="num">0.050</td><td class="num">0.316</td><td class="num">6.89×10⁻²</td>
-      <td class="num">138%</td><td class="num">5.08</td></tr>
-  <tr><td class="num">0.100</td><td class="num">0.632</td><td class="num">1.56×10⁻¹</td>
-      <td class="num">312%</td><td class="num">22.8</td></tr>
-  <tr><td class="num">0.200</td><td class="num">1.265</td><td class="num">1.22×10⁻¹</td>
-      <td class="num">244%</td><td class="num">106</td></tr>
+  <tr><th class="num">step h (s)</th><th class="num">error in x at 1&nbsp;s (m)</th>
+      <th class="num">error as % of the 0.05&nbsp;m release</th>
+      <th class="num">E/E₀ at 1&nbsp;s (exact 0.742)</th></tr>
+  <tr><td class="num">0.002</td><td class="num">1.75×10⁻³</td><td class="num">3.5%</td><td class="num">0.80</td></tr>
+  <tr><td class="num">0.005</td><td class="num">4.52×10⁻³</td><td class="num">9.0%</td><td class="num">0.91</td></tr>
+  <tr><td class="num">0.010</td><td class="num">9.53×10⁻³</td><td class="num">19%</td><td class="num"><strong>1.11</strong></td></tr>
+  <tr><td class="num">0.020</td><td class="num">2.11×10⁻²</td><td class="num">42%</td><td class="num">1.65</td></tr>
+  <tr><td class="num">0.050</td><td class="num">6.89×10⁻²</td><td class="num">138%</td><td class="num">5.08</td></tr>
 </table>
 
-<p>At $h = 0.010$ the energy ratio has passed 1. <strong>The simulation is adding energy to a
-system that can only lose energy, through its damper.</strong> There is no mechanism in the physics that
-can do that, so the excess comes from the integrator, and it is 49% above the truth while the
-displacement is still within 19%. At $h = 0.002$, a step of two milliseconds on a one-second
-period and 500 steps per cycle, the trajectory is within 3.5% and looks convincing,
-while the energy is already 8% too high.</p>
+<p>At $h = 0.010$ the energy ratio has passed 1. The simulation is adding energy to a system that
+can only lose it, through its damper. The energy is 49% above the exact energy while the
+displacement error is 19% of the 0.05&nbsp;m release. At $h = 0.002$, which is about 500 steps per cycle, the trajectory is within 3.5% and
+looks convincing, while the energy is already 8% too high.</p>
+
+<p>Switch the demo below to the plane view, which plots velocity against position. The exact
+solution spirals inward. The states of equal energy form an ellipse in this plane. Each Euler step
+moves along the tangent to the ellipse the state is on, and a tangent leaves an ellipse on its
+outside, so every step adds a little energy while the damper takes some out. On this spring the two balance at $h = 2\zeta/\omega_n = 0.0075$&nbsp;s. Below that step
+the Euler run spirals in more slowly than it should, and above it the run spirals out. The shot
+gains energy for the same reason, since its height is stepped with the velocity from the start of
+the step.</p>
 
 <cg-demo case="stability"></cg-demo>
 
-<h2 id="energy-as-the-diagnostic">Energy as a Diagnostic</h2>
-
-<p>Explicit Euler on an oscillator has a specific defect, in that at every step it moves along the
-tangent, and for a curving trajectory the tangent always points slightly outward. In the plane
-of position against velocity the exact solution is a spiral winding inwards, and Euler's steps
-push it outwards at every one of them.</p>
-
-<p>Switch the demo to the plane view. The exact solution spirals in, while Euler spirals out, or in
-more slowly than it should. That outward push is what the energy number is counting, and it is
-present at every step size, so the only question is whether it is larger or smaller than the
-damping. Three properties make energy the right thing to watch:</p>
-
-<ul class="plain">
-  <li><strong>It has a known behavior.</strong> A known direction, which is weaker than a known value and enough.
-  Monotonically down. Any increase is diagnostic without needing the exact solution.</li>
-  <li><strong>It is available when the answer is not.</strong> We usually integrate because there is
-  no exact solution. Energy can be computed from the state at every step
-  regardless.</li>
-  <li><strong>It responds earlier.</strong> Displacement error and energy error grow together, but
-  the energy has a threshold, crossing 1, that the displacement does not.</li>
-</ul>
-
-<h2 id="the-limit-of-stability">The Limit of Stability</h2>
-
-<p>Accuracy degrades gradually and stability does not. Past a threshold the solution grows without
-limit, and the threshold depends on the method and the system through the product $h\omega_n$.</p>
-
-<table class="data">
-  <tr><th>Method</th><th class="num">stable while</th><th class="num">for this system</th>
-      <th class="num">rate evaluations per step</th></tr>
-  <tr><td>explicit Euler</td><td class="num">never, on an undamped oscillator</td>
-      <td class="num">h &lt; 0.0075 s, only because of the damping</td><td class="num">1</td></tr>
-  <tr><td>Heun</td><td class="num">never, on an undamped oscillator</td><td class="num">h &lt; 0.096 s, only because of the damping</td><td class="num">2</td></tr>
-  <tr><td>RK4</td><td class="num">hω<sub>n</sub> &lt; 2.83</td><td class="num">h &lt; 0.45 s</td><td class="num">4</td></tr>
-</table>
-
-<p>RK4 stays <em>stable</em> up to a step of about 0.45 s (about two steps per cycle), while an <em>accurate</em> answer needs something
-nearer 0.005 s. The stability limit is roughly a hundred times the useful step, so by the time
-you reach it the answer has long been unusable. Instability announces itself, and it sets in at
-step sizes far larger than those where accuracy is lost.</p>
-
 <div class="aside">
-  <span class="label">Structure-preserving methods</span>
+  <span class="label">Symplectic Euler keeps the energy bounded</span>
   <p>Euler's outward push follows from taking the position step with the old
-velocity. Taking it with the <em>new</em> velocity instead, one character's difference in the
+velocity. Taking it with the new velocity instead, one character's difference in the
 code, gives the <dfn data-g="symplectic">symplectic Euler method</dfn>, which is still first
 order and still inaccurate, but has no steady energy gain. Over a long run it stays bounded
 where explicit Euler on an undamped oscillator spirals out indefinitely. Symplectic Euler belongs
 to a family of methods that give up some accuracy to preserve a structural property of the
-equations exactly. For a long orbital integration, staying bounded often matters more than the
-local error, and the more accurate method may be the wrong choice.</p>
+equations exactly. For a long orbital integration a bounded energy may matter more than the local
+error, so symplectic Euler may be the better choice there.</p>
 </div>
 
-<h2 id="checking-for-manufactured-energy">Energy Checks</h2>
+<div class="aside" id="stiff-problems">
+  <span class="label">Stiff problems and implicit solvers (optional)</span>
+  <p>Some systems carry a fast process next to the slow one you care about (a very stiff contact
+spring under a slowly moving load, or a fast reaction feeding a slow one). Euler and RK4 then have to
+take steps short enough to follow the fast process, even long after it has died away. With a longer
+step the run loses its <dfn data-g="stability">stability</dfn> and its values grow without limit,
+which is easy to see. A loss of accuracy is harder to see, and the energy check is one way to find
+it. Such a system is called stiff. Implicit solvers, which solve an equation for the new state at
+each step, are built for it. The names you will meet are
+MATLAB's <code>ode15s</code> and <code>scipy.integrate.solve_ivp</code> with
+<code>method='Radau'</code> or <code>method='BDF'</code>. Each takes the same rate function as
+MATLAB's <code>ode45</code> and the default <code>solve_ivp</code> (<a href="state-as-a-vector.html" title="State as a vector">page 25</a>).</p>
+</div>
+
+
+<h2 id="energy-check-steps">Four Steps for an Energy Check</h2>
 
 <ol class="plain">
-  <li><strong>Find the <dfn data-g="conserved-quantity">conserved or monotone
-  quantity</dfn></strong> and plot it alongside the answer.
-  This may be energy, momentum, mass or charge, depending on what the physics fixes.</li>
-  <li><strong>Halve the step until the answer stops moving</strong>, not until it looks smooth. It
-  usually looks smooth at a much larger step than the one where it stops moving.</li>
-  <li><strong>Report the step and the check.</strong> "RK4, h = 2 ms, energy drift under 0.1% over
-  the run" is a defensible result, while "RK4" on its own is not.</li>
+  <li><strong>Find the <dfn data-g="conserved-quantity">conserved quantity</dfn>, or one that only
+  moves one way,</strong> and plot it alongside the answer. This may be energy, momentum, mass or
+  charge, depending on what the physics fixes. Its direction is known even when its value is not,
+  and it can be computed from the state at every step.</li>
+  <li><strong>Run once with the drag or damping switched off.</strong> Where the quantity should then
+  stay constant, any change is the integrator's. On the shot this is the drag-free run, which measured
+  Euler's gain with no reference answer.</li>
+  <li><strong>Find a step at which the answer stops changing</strong>, as on <a
+  href="order-of-accuracy-measured.html" title="Order of accuracy">page 26</a>. The check quantity's
+  error should shrink with the step as well.</li>
+  <li><strong>Report the step and the check.</strong> "Euler, <em>h</em> = 1&nbsp;ms, drag-free
+  energy gain 0.03&nbsp;J/kg (0.05%) over the 0.72&nbsp;s flight" gives someone else what they need
+  to check the result.</li>
 </ol>
-
-<h3 id="energy-on-the-tracked-shot">Energy on the Tracked Shot</h3>
-
-<p>The shot stepped on <a href="state-as-a-vector.html" title="State as a vector">page 25</a> has the same kind of check. Its energy per kilogram is
-$\tfrac12|\mathbf{v}|^2 + gz$, which is 64.10&nbsp;J/kg at frame 5. Without drag it should stay at
-that value for the whole flight, and with drag it can only fall. Over the 0.72&nbsp;s to the last
-frame, with one step per frame (40&nbsp;ms):</p>
-
-<table class="data">
-  <tr><th>Method and drag</th><th class="num">change in energy (J/kg)</th></tr>
-  <tr><td>Euler, no drag</td><td class="num">+1.39</td></tr>
-  <tr><td>RK4, no drag</td><td class="num">0.00</td></tr>
-  <tr><td>Euler, drag</td><td class="num">&minus;1.57</td></tr>
-  <tr><td>RK4, drag</td><td class="num">&minus;2.96</td></tr>
-</table>
-
-<p>Euler without drag adds energy the ball cannot gain, $\tfrac12 g^2 h$ per second of flight
-(2.2% over this one). With drag the same gain is still there, so the Euler run shows the ball losing
-only about half of the 2.96&nbsp;J/kg that drag takes from it in the RK4 run. The Euler trajectory
-with drag is smooth and loses energy, as it should, so the error does not show in the curve or in the sign of the change.
-It shows in the drag-free run, where the change should be zero. At a step of
-1&nbsp;ms the Euler gain is 0.03&nbsp;J/kg, and the Euler drag run loses 2.92&nbsp;J/kg, which is
-close to the RK4 value.</p>
 
 <div class="check">
   <span class="label">Check</span>
   <ol>
-    <li>Your simulated damped oscillator ends the run with 3% more energy than it started with.
-    What
-    do you conclude, and what do you not yet know?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>The integration is <strong>manufacturing energy</strong>. A damped oscillator can only lose energy,
-so although the result may look like a slightly inaccurate solution of the right problem, it is
-qualitatively wrong, and no refinement of the reading will fix it. What you do not know is
-<strong>why</strong>, and there are two quite different possibilities. The step may be
-too large for a method that would behave at a smaller one. The method may also be structurally
-unsuited. For instance, forward Euler injects energy into an oscillator at <em>every</em> step size, and
-shrinking <em>h</em> slows the growth without ever removing it.</p>
-     <p>Halving the step distinguishes them. If the surplus falls by about half, it is a step-size
-problem. If it falls by half and is still there, and halving again leaves it still there, the
-method is the problem and the answer is a different method. Energy is also a scalar summary of a
-trajectory, and a solution can get it right and still have the phase badly wrong.</p></div></details></li>
+    <li>Your drag-free run of a shot gains 0.69&nbsp;J/kg over 0.72&nbsp;s at a step of 20&nbsp;ms.
+    What do you conclude, and what do you not yet know?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>The integration
+is adding energy, since without drag nothing can change the ball's energy.
+The gain matches $\tfrac12 g^2 h T = 0.5 \times 9.81^2 \times 0.02 \times 0.72 = 0.69$&nbsp;J/kg, so
+it is most likely Euler's step error, with the rest of the program working as intended. What you do
+not yet know is how large the error is in the answer you report, such as the position at the hoop or
+the energy that drag removes. Halving the step halves the gain of a first-order method (0.35&nbsp;J/kg at 10&nbsp;ms), and
+the reported answer is rerun until it stops changing, as on <a href="order-of-accuracy-measured.html" title="Order of accuracy">page 26</a>. Energy is also one number for the
+whole state, so a run can hold it close and still put the ball in the wrong place.</p></div></details></li>
     <li>Why does halving the step until the plot looks smooth fail as a criterion?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Because smoothness is a property of the picture and accuracy is a property of the answer, and
-the two come apart over a wide range of step sizes. Between the accuracy limit and the stability
-limit there is a wide band in which the solution is smooth, bounded, plausibly shaped, and
-substantially wrong. It looks like a converged solution because the thing that makes an
-unconverged solution <em>look</em> wrong, whether oscillation or blow-up, belongs to
-instability, which is a different and much later failure. "Looks smooth" is also a test against
-the rendering. A curve drawn at 900 pixels hides everything smaller than a pixel, and a 5% error
-on this plot is about ten pixels while a 0.5% error is one.</p>
-     <p>The criterion that works is the convergence study. Halve the step and compare the
-<em>answer</em> and not the picture, and stop when the change is smaller than what you need. Each
-halving costs one extra run, and it measures the answer itself.</p></div></details></li>
-    <li>RK4 is stable on this system up to about <em>h</em> = 0.45 s and useful up to about 0.005 s. In
-    one sentence, why is the stability limit almost never the constraint that matters?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Because accuracy demands a step almost a hundred times smaller than stability does, so by the
-time the answer is good enough to use you are far inside the stable region and the stability
-limit has never come near to binding. The exception is
-<strong>stiff</strong> problems, where the accuracy requirement is set by the slow behavior you
-care about and the stability requirement by a fast transient you do not. There the two separate
-in the other direction, you are forced to take tiny steps to keep a component that has long
-since decayed from exploding, and that is the case implicit methods exist for.</p></div></details></li>
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>A smooth plot shows
+only that the curve has no sudden jumps, and a smooth curve can still be wrong by centimeters. The
+Euler run of the shot at one step per frame is a smooth arc, and it
+ends 14.1&nbsp;cm higher than the parabola gravity gives. An error in a step changes the curve
+gradually, so the curve keeps its shape. A curve drawn on a screen also hides everything smaller
+than a pixel.</p>
+     <p>The criterion that works is the convergence study on <a href="order-of-accuracy-measured.html" title="Order of accuracy">page 26</a>. Halve the step, compare the
+reported answer between runs, and stop when the change is smaller than what you need.</p></div></details></li>
+    <li>Euler on the damped spring at <em>h</em> = 0.005&nbsp;s ends one second with
+    <em>E</em>/<em>E</em>₀ = 0.91. The energy fell, as it should. How would you find out whether the
+    run is right without the exact solution?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Switch the damper
+off (<em>c</em> = 0) and run again at the same step. An undamped spring keeps its energy, and the
+Euler run gains 22% in the one second. That gain is inside the damped run as well, so the damped
+run's loss is too small, which is the same thing the drag run of the shot shows. The exact answer
+(0.742) confirms this, though the check was made without it.</p></div></details></li>
   </ol>
 </div>
 
@@ -1106,7 +1101,7 @@ page is listed here.</p>
 <dl class="glossary"></dl>
 
 <p class="deeper">Go deeper: <a href="workbench.html?tool=step">the workbench</a>. Euler, Heun
-and RK4 on an equation you write, with the order measured from the run and not quoted.</p>
+and RK4 on an equation you write, with the order of each method measured from your run.</p>
 
   </main>
 
@@ -1123,11 +1118,11 @@ and RK4 on an equation you write, with the order measured from the run and not q
   </script>
   
 
-  <script type="module" src="js/bundle/stability-and-accuracy.js?v=20261109080753"></script>
+  <script type="module" src="js/bundle/stability-and-accuracy.js?v=20261109124015"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-08">November 8, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-09">November 9, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

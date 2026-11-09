@@ -967,9 +967,24 @@ function realNoiseRaw(n, sd = 1) {
   return scaleTo(out, sd);
 }
 
-/* A damped oscillator, integrated four ways, viewed as a trajectory, as an
-   energy history, or in the plane of position against velocity. The exact
-   solution is available, so every error here is measured. */
+/* Two demos. The first steps a tracked shot (arc 79) with and without drag and
+   plots its energy per kilogram, which the physics fixes: constant without
+   drag, falling with it. The second is a damped oscillator, integrated four
+   ways, viewed as a trajectory, as an energy history, or in the plane of
+   position against velocity. The oscillator is constructed, so its exact
+   solution is available and every error there is measured. */
+
+/* Arc 79's state at frame 5 (0.20 s on the frame-20 clock), from the 11-frame
+   fit on page 25: lines in x and y, a parabola in z with g held at 9.81. */
+const G = 9.81, KD = 0.016;
+const SHOT0 = [5.4796, 3.9957, 4.2018, -4.7333, 3.9732, 2.7508];
+const FRAME = 0.04, FLIGHT = 0.72;        /* 18 frames to the last free-flight frame */
+const shotRate = k => (t, s) => {
+  const sp = Math.hypot(s[3], s[4], s[5]);
+  return [s[3], s[4], s[5], -k * sp * s[3], -k * sp * s[4], -G - k * sp * s[5]];
+};
+const shotEnergy = s => 0.5 * (s[3] * s[3] + s[4] * s[4] + s[5] * s[5]) + G * s[2];
+const SHOT_E0 = shotEnergy(SHOT0);
 
 const M = 1.0, C = 0.30, K = 40.0;
 const WN = Math.sqrt(K / M);
@@ -1001,15 +1016,56 @@ const METHODS = [
 ];
 
 mountDemo({
+  'shot-energy': {
+    setting: 'Arc 79, stepped from frame 5 to its last free-flight frame, 0.72&nbsp;s later, ' +
+             'with drag (<em>k</em>&nbsp;=&nbsp;0.016 per meter) and without. Energy per kilogram ' +
+             'is &frac12;|<strong>v</strong>|&sup2;&nbsp;+&nbsp;<em>gz</em>. Without drag it stays at its ' +
+             'starting value, and with drag it can only fall.',
+    source: {kind: 'measured', text: 'The starting state is a least-squares fit to the first 11 free-flight frames of arc 79 of the public arcs, SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz. The drag value is a modeling choice from page 25.'},
+    caption: 'The trace is the run with drag and the ghost is the run without. The flat line is ' +
+             'the starting energy, where the run without drag should stay.',
+    controls: [{key: 'm', label: 'steps per frame', min: 1, max: 40, step: 1, value: 1,
+                fmt: v => String(v)}],
+    segments: [{key: 'm2', label: 'method', value: 'euler',
+                options: [{value: 'euler', label: 'Euler'}, {value: 'rk4', label: 'RK4'}]}],
+    panels: [{label: 'energy', unit: 'J/kg', height: 260, xAxis: true,
+              xLabel: 'time after frame 5', xUnit: 's', xScale: 1}],
+    readouts: [
+      {key: 'h',    label: 'step size'},
+      {key: 'gain', label: 'change without drag'},
+      {key: 'loss', label: 'change with drag'}
+    ],
+    compute(s) {
+      const h = FRAME / s.m;
+      const a = stepTo(shotRate(KD), SHOT0, h, FLIGHT, s.m2);
+      const b = stepTo(shotRate(0), SHOT0, h, FLIGHT, s.m2);
+      const ts = Float64Array.from(a.ts);
+      const ea = Float64Array.from(a.ss, shotEnergy);
+      const eb = Float64Array.from(b.ss, shotEnergy);
+      const dA = ea[ea.length - 1] - SHOT_E0, dB = eb[eb.length - 1] - SHOT_E0;
+      const sgn = v => (v < 0 ? '−' : '+') + Math.abs(v).toFixed(2) + ' J/kg';
+      return {
+        panels: [{x: ts, y: ea, ghost: eb, range: [0, FLIGHT],
+          opts: {label: 'energy per kilogram, with drag (ghost: without)',
+                 yRange: [60.5, 66],
+                 hlines: [{y: SHOT_E0, text: 'start ' + SHOT_E0.toFixed(2)}]}}],
+        readouts: {
+          h: (1000 * h).toPrecision(3) + ' ms',
+          gain: sgn(dB),
+          loss: sgn(dA)
+        }
+      };
+    }
+  },
   stability: {
     setting: 'Mass-spring-damper: <em>m</em>&nbsp;=&nbsp;1, <em>c</em>&nbsp;=&nbsp;0.30, ' +
              '<em>k</em>&nbsp;=&nbsp;40, released from 0.05&nbsp;m at rest. ' +
-             '&omega;<sub>n</sub>&nbsp;=&nbsp;6.325&nbsp;rad/s, period 0.9935&nbsp;s. The damper ' +
+             '&omega;<sub>n</sub>&nbsp;=&nbsp;6.325&nbsp;rad/s, period 0.994&nbsp;s. The damper ' +
              'removes energy, so the truth is that E only ever falls.',
     source: {kind: 'constructed', text: 'A mass-spring-damper with an exact closed-form solution, so both the trajectory error and the energy are measured against truth rather than against a finer run.'},
     caption: 'The ghost is the exact solution in every view. In the plane view the exact solution ' +
              'spirals inwards; watch which methods spiral outwards instead, and at what step size ' +
-             'that starts — it is smaller than the step at which the trajectory looks wrong.',
+             'that starts. It is a smaller step than the one at which the trajectory looks wrong.',
     controls: [{key: 'lh', label: 'step size h', min: -3.3, max: -0.5, step: 'any', value: -2.7,
                 fmt: v => Math.pow(10, v).toPrecision(3) + ' s'}],
     segments: [
@@ -1068,11 +1124,11 @@ mountDemo({
         readouts: {
           h: h.toPrecision(3) + ' s',
           hw: (h * WN).toFixed(3),
-          spc: (0.9935 / h).toFixed(0),
+          spc: (0.9937 / h).toFixed(0),
           xerr: r.diverged ? 'diverged' : xerr.toExponential(2) + ' m',
           ee: r.diverged ? 'diverged' : eRatio.toFixed(3) + '  (true ' + eTrue.toFixed(3) + ')',
           verdict: r.diverged ? 'unbounded'
-                 : eRatio > 1 ? 'GAINED — impossible'
+                 : eRatio > 1 ? 'gained, which the damper cannot do'
                  : eRatio > eTrue * 1.02 ? 'decaying too slowly'
                  : 'decaying about right'
         }

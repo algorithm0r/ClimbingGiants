@@ -1,4 +1,4 @@
-/* Generated bundle: kit, the windowed-optimum demo, this deck's
+/* Generated bundle: kit, the from-a-rate-to-a-trajectory demo, this deck's
    figures, the slide runtime, the presenter tools, page.js.
    Do not edit. */
 
@@ -968,225 +968,128 @@ function realNoiseRaw(n, sd = 1) {
   return scaleTo(out, sd);
 }
 
-/* ---------- the windowed optimum ---------- */
-class CgDemo extends HTMLElement {
-  async connectedCallback() {
-    if (this._done) return; this._done = true;
-    if (this.getAttribute('case') === 'prefix') { await prefixDemo(this); return; }
-    const root = document.createElement('div'); root.className = 'cgd';
-    root.innerHTML = `<div class="cgd-setting">Driver head resultant acceleration, 2019 BMW X5 into
-      a rigid barrier, first 160 ms of the record. Place a window by hand, or run the search over
-      every admissible window.</div>
-      <div class="cgd-plots"></div>
-      <div class="cgd-controls">
-        <label>Window starts at
-          <input type="range" data-c="start" step="any">
-          <span class="cgd-val" data-v="start"></span></label>
-        <label>Length
-          <input type="range" data-c="len" min="1" step="any">
-          <span class="cgd-val" data-v="len"></span></label>
-        <label>Limit <span class="cgd-seg" data-role="wmax">
-          <button type="button" data-w="15" aria-pressed="true">15 ms</button>
-          <button type="button" data-w="36">36 ms</button>
-          <button type="button" data-w="0">none</button>
-        </span></label>
-        <span class="cgd-seg">
-          <button type="button" data-search>Run the search</button>
-        </span>
-      </div>
-      <div class="cgd-readouts">
-        <div><span class="k">your window</span><span class="v" data-r="win"></span></div>
-        <div><span class="k">mean over it</span><span class="v" data-r="mean"></span></div>
-        <div><span class="k">your score</span><span class="v" data-r="score"></span></div>
-        <div><span class="k">best found</span><span class="v" data-r="best">—</span></div>
-        <div><span class="k">its window</span><span class="v" data-r="bwin">—</span></div>
-        <div><span class="k">windows searched</span><span class="v" data-r="nwin">—</span></div>
-      </div>
-      <div class="cgd-caption">The shaded strip is the window you have placed; the amber strip is
-      the best window found by the search. The score is the quantity inside the maximum in the
-      definition, evaluated for one window.</div>
-      <div class="source measured"><span class="tag">Measured</span><span>Channels 001, 002 and 003 &mdash; driver head center of gravity, three axes &mdash; baseline corrected and combined into a resultant. NHTSA test 10642, 2019 BMW&nbsp;X5 into a rigid barrier at 15.65&nbsp;m/s, TRC of Ohio, 7 January 2019.</span></div>`;
-    this.appendChild(root);
+/* Euler on a tracked shot with quadratic drag, where no formula gives the
+   path. The starting state is page 25's: arc 79, an 11-frame fit (lines in
+   x and y, a parabola in z with g held), taken at frame 5. The comparison is
+   the same Euler program at 0.1 ms, so every number here can be reproduced
+   with page 24's code alone. */
 
-    const d = await (await fetch('data/test10642-head-resultant.json')).json();
-    const n = d.n, dt = d.dt, a = Float64Array.from(d.a);
-    const t = new Float64Array(n);
-    for (let i = 0; i < n; i++) t[i] = d.t0 + i * dt;
-    /* the prefix sum, built once */
-    const S = new Float64Array(n);
-    for (let i = 1; i < n; i++) S[i] = S[i-1] + (a[i] + a[i-1]) * 0.5 * dt;
+const G = 9.81, K = 0.016;              // K per meter, page 25's value
+const FINE_H = 0.0001;                  // the comparison run's step, s
 
-    const plots = $('.cgd-plots', root);
-    const p = panel(plots, {label: 'head resultant', unit: 'g', height: 250, xAxis: true,
-      xLabel: 'time', xUnit: 'ms', xScale: 1000});
-    const C = k => $(`[data-c="${k}"]`, root), V = k => $(`[data-v="${k}"]`, root),
-          R = k => $(`[data-r="${k}"]`, root);
-    const idx = tv => Math.max(0, Math.min(n - 1, Math.round((tv - d.t0) / dt)));
-    let wmax = 0.015, best = null;
+/* the six-component rate: position changes by the velocity, velocity by
+   gravity and by drag along the velocity */
+const shotRate = (t, s) => {
+  const vx = s[3], vy = s[4], vz = s[5];
+  const sp = Math.hypot(vx, vy, vz);
+  return [vx, vy, vz, -K * sp * vx, -K * sp * vy, -G - K * sp * vz];
+};
 
-    /* score of one window, from the prefix sum: one subtraction */
-    const score = (i, j) => {
-      const T = t[j] - t[i];
-      if (!(T > 0)) return 0;
-      const mean = (S[j] - S[i]) / T;
-      return mean <= 0 ? 0 : Math.pow(mean, 2.5) * T;
-    };
+/* least-squares intercept and slope of a straight line */
+function line(T, Y) {
+  const n = T.length;
+  let st = 0, sy = 0, stt = 0, sty = 0;
+  for (let i = 0; i < n; i++) { st += T[i]; sy += Y[i]; stt += T[i] * T[i]; sty += T[i] * Y[i]; }
+  const b = (n * sty - st * sy) / (n * stt - st * st);
+  return [(sy - b * st) / n, b];
+}
 
-    const search = () => {
-      const cap = wmax > 0 ? wmax : Infinity;
-      let bv = -Infinity, bi = 0, bj = 0, count = 0;
-      for (let i = 0; i < n - 1; i++) {
-        for (let j = i + 1; j < n; j++) {
-          if (t[j] - t[i] > cap) break;
-          count++;
-          const s = score(i, j);
-          if (s > bv) { bv = s; bi = i; bj = j; }
-        }
-      }
-      best = {v: bv, i: bi, j: bj, count};
-    };
-
-    const render = () => {
-      const t0 = parseFloat(C('start').value) / 1000;
-      const L = parseFloat(C('len').value) / 1000;
-      /* snap the end down, never up: a hand-placed window must obey the same
-         length limit the search obeys, or it can outscore the optimum */
-      const kmax = wmax > 0 ? Math.floor(wmax / dt + 1e-9) : n - 1;
-      const i = idx(t0);
-      const j = Math.min(n - 1, i + Math.min(kmax, Math.floor(L / dt + 1e-9)));
-      const s = score(i, j);
-      const T = t[j] - t[i];
-      const bands = [];
-      const marks = [];
-      if (best) {
-        bands.push({x0: t[best.i], x1: t[best.j], cls: 'bestband'});
-        const bT = t[best.j] - t[best.i];
-        marks.push({t: (t[best.i] + t[best.j]) / 2, y: (S[best.j] - S[best.i]) / bT,
-          square: true, text: 'best ' + best.v.toFixed(1), dx: 0, dy: -12, anchor: 'middle'});
-      }
-      bands.push({x0: t[i], x1: t[j]});
-      p(t, a, null, [0, 0.16], {bands, marks});
-      V('start').textContent = (t[i] * 1000).toFixed(2) + ' ms';
-      V('len').textContent = (T * 1000).toFixed(2) + ' ms';
-      R('win').textContent = (t[i]*1000).toFixed(1) + '–' + (t[j]*1000).toFixed(1) + ' ms';
-      R('mean').textContent = (T > 0 ? ((S[j]-S[i])/T).toFixed(1) : '—') + ' g';
-      R('score').textContent = s.toFixed(1);
-      if (best) {
-        R('best').textContent = best.v.toFixed(1);
-        R('bwin').textContent = (t[best.i]*1000).toFixed(2) + '–' + (t[best.j]*1000).toFixed(2) + ' ms';
-        R('nwin').textContent = best.count.toLocaleString();
-      }
-    };
-
-    const setLimit = () => {
-      const c = C('len');
-      c.max = ((wmax > 0 ? wmax : 0.060) * 1000).toFixed(0);
-      if (parseFloat(c.value) > parseFloat(c.max)) c.value = c.max;
-      best = null;
-      R('best').textContent = R('bwin').textContent = R('nwin').textContent = '—';
-    };
-
-    C('start').min = 0; C('start').max = 140; C('start').value = 35;
-    C('len').value = 15;
-    setLimit();
-
-    $('[data-role="wmax"]', root).addEventListener('click', e => {
-      const b = e.target.closest('button'); if (!b) return;
-      wmax = (+b.dataset.w) / 1000;
-      [...e.currentTarget.children].forEach(x => x.setAttribute('aria-pressed', x === b));
-      setLimit(); render();
-    });
-    $('[data-search]', root).addEventListener('click', () => { search(); render(); });
-    root.querySelectorAll('input[type=range]').forEach(el =>
-      el.addEventListener('input', render));
-
-    render();
+/* Euler from s0 over span seconds with step h, keeping every state */
+function eulerRun(s0, h, span) {
+  const n = Math.round(span / h);
+  const ss = [s0.slice()];
+  let s = s0.slice();
+  for (let k = 0; k < n; k++) {
+    const r = shotRate(k * h, s);
+    s = s.map((v, i) => v + h * r[i]);
+    ss.push(s);
   }
+  return ss;
 }
-customElements.define('cg-demo', CgDemo);
 
-/* ---------------------------------------------------------------------------
-   Second demo: the prefix sum itself.
-
-   The page states that any window's integral is a difference of two stored
-   values and that this saves a factor of about ninety. Neither is visible in the
-   search demo, where the prefix sum is machinery the reader never sees. Here it
-   is the subject: S is drawn, the two values being subtracted are marked on it,
-   and the gap between them is the window's integral.
---------------------------------------------------------------------------- */
-async function prefixDemo(host) {
-  const root = document.createElement('div');
-  root.className = 'cgd';
-  root.innerHTML = `<div class="cgd-setting">The same head resultant, and its cumulative integral
-      <em>S</em>. Any window's integral is the vertical gap between two points on <em>S</em> — one
-      subtraction, whatever the window's length.</div>
-    <div class="cgd-plots"></div>
-    <div class="cgd-controls">
-      <label>Window starts at <input type="range" data-c="t0" min="0" max="140" step="any" value="70">
-        <span class="cgd-val" data-v="t0"></span></label>
-      <label>Length <input type="range" data-c="len" min="1" max="60" step="any" value="15">
-        <span class="cgd-val" data-v="len"></span></label>
-    </div>
-    <div class="cgd-readouts">
-      <div><span class="k">S at the end</span><span class="v" data-r="sj"></span></div>
-      <div><span class="k">S at the start</span><span class="v" data-r="si"></span></div>
-      <div><span class="k">difference</span><span class="v" data-r="diff"></span></div>
-      <div><span class="k">same, summed directly</span><span class="v" data-r="direct"></span></div>
-      <div><span class="k">samples that would take</span><span class="v" data-r="cost"></span></div>
-      <div><span class="k">operations either way</span><span class="v" data-r="ops"></span></div>
-    </div>
-    <div class="cgd-caption">Above: the acceleration, with the window shaded. Below: its cumulative
-      integral, with the two values being subtracted marked and the gap between them drawn. Widen
-      the window and the direct sum needs more terms; the subtraction still needs one.</div>
-    <div class="source measured"><span class="tag">Measured</span><span>Driver head resultant,
-      channels 001, 002 and 003 combined, baseline corrected. NHTSA test 10642, 2019 BMW&nbsp;X5
-      into a rigid barrier, TRC of Ohio, 7 January 2019.</span></div>`;
-  host.appendChild(root);
-
-  const d = await (await fetch('data/test10642-head-resultant.json')).json();
-  const n = d.n, dt = d.dt, a = Float64Array.from(d.a);
-  const t = new Float64Array(n);
-  for (let i = 0; i < n; i++) t[i] = d.t0 + i * dt;
-  const S = new Float64Array(n);
-  for (let i = 1; i < n; i++) S[i] = S[i-1] + (a[i] + a[i-1]) * 0.5 * dt;
-
-  const box = root.querySelector('.cgd-plots');
-  const pA = panel(box, {label: 'head resultant', unit: 'g', height: 150});
-  const pS = panel(box, {label: 'S — the cumulative integral', unit: 'g·s', height: 175,
-    xAxis: true, xLabel: 'time', xUnit: 'ms', xScale: 1000});
-  const C = k => root.querySelector(`[data-c="${k}"]`);
-  const R = k => root.querySelector(`[data-r="${k}"]`);
-  const idx = tv => Math.max(0, Math.min(n - 1, Math.round((tv - d.t0) / dt)));
-
-  const render = () => {
-    const t0 = parseFloat(C('t0').value) / 1000, L = parseFloat(C('len').value) / 1000;
-    const i = idx(t0), j = Math.min(n - 1, idx(t0 + L));
-    root.querySelector('[data-v="t0"]').textContent = (t[i] * 1000).toFixed(1) + ' ms';
-    root.querySelector('[data-v="len"]').textContent = ((t[j] - t[i]) * 1000).toFixed(1) + ' ms';
-
-    /* the same integral, summed from the samples, to show the two agree */
-    let direct = 0;
-    for (let k = i + 1; k <= j; k++) direct += (a[k] + a[k-1]) * 0.5 * dt;
-
-    pA(t, a, null, [0, 0.16], {bands: [{x0: t[i], x1: t[j]}]});
-    pS(t, S, null, [0, 0.16], {
-      bands: [{x0: t[i], x1: t[j]}],
-      marks: [
-        {t: t[i], y: S[i], cast: 'y', text: 'S(' + (t[i]*1000).toFixed(1) + ')', dx: 8, dy: 14},
-        {t: t[j], y: S[j], cast: 'y', text: 'S(' + (t[j]*1000).toFixed(1) + ')', dx: 8, dy: -10}
-      ],
-      curves: [{x: Float64Array.from([t[j], t[j]]), y: Float64Array.from([S[i], S[j]]), cls: 'cast'}]
-    });
-    R('sj').textContent = S[j].toFixed(5) + ' g·s';
-    R('si').textContent = S[i].toFixed(5) + ' g·s';
-    R('diff').textContent = (S[j] - S[i]).toFixed(5) + ' g·s';
-    R('direct').textContent = direct.toFixed(5) + ' g·s';
-    R('cost').textContent = (j - i).toLocaleString() + ' samples';
-    R('ops').textContent = '1 vs ' + (j - i).toLocaleString();
-  };
-  root.querySelectorAll('input[type=range]').forEach(el => el.addEventListener('input', render));
-  render();
+/* height at time tau after the start, read off a run with step h. The
+   straight segment between two Euler states is what the method produced. */
+function heightAt(ss, h, tau) {
+  const j = Math.max(0, Math.min(Math.floor(tau / h + 1e-9), ss.length - 2));
+  const f = (tau - j * h) / h;
+  return ss[j][2] + f * (ss[j + 1][2] - ss[j][2]);
 }
+
+mountDemo({
+  euler: {
+    async data() {
+      const d = await (await fetch('data/arcs.json')).json();
+      const a = d.arcs.find(x => x.id === 79);
+      const r = a.rel, nf = a.key.nf;
+      const T = [], X = [], Y = [], Z = [];
+      for (let i = r; i < r + nf; i++) {
+        T.push(a.t[i] - a.t[r]); X.push(a.x[i]); Y.push(a.y[i]); Z.push(a.z[i]);
+      }
+      /* the fit: first 11 frames, time measured from frame 5 */
+      const J = 5, N = 11;
+      const tf = T.slice(0, N).map(t => t - T[J]);
+      const cx = line(tf, X.slice(0, N)), cy = line(tf, Y.slice(0, N));
+      const cz = line(tf, Z.slice(0, N).map((z, i) => z + 0.5 * G * tf[i] * tf[i]));
+      const S0 = [cx[0], cy[0], cz[0], cx[1], cy[1], cz[1]];
+      const T0 = T[J], SPAN = T[nf - 1] - T0;
+      const fine = eulerRun(S0, FINE_H, SPAN);
+      const TF = linspace(0, SPAN, 361);
+      return {
+        S0, T0, SPAN, fine, TF,
+        TX: Float64Array.from(TF, t => t + T0),
+        FINE: Float64Array.from(TF, t => heightAt(fine, FINE_H, t)),
+        FRAMES: T.slice(J).map((t, i) => ({t, y: Z[J + i], ring: true})),
+        FINE_END: fine[fine.length - 1][2]
+      };
+    },
+    setting: 'A tracked three-pointer stepped forward from frame 5 to frame 23, the last frame ' +
+             'before it nears the hoop, with gravity and quadratic drag (<em>k</em>&nbsp;=&nbsp;0.016 ' +
+             'per meter). Time is measured from frame 20 of the record, the release the data set marks.',
+    source: {kind: 'mixed', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz, arc 79. The starting state is a least-squares fit to the first 11 free-flight frames, and the open circles are the measured frames. The drag constant is a modeling choice from the range on page 25, not a measurement.'},
+    caption: 'The ghost is the same program with 0.1&nbsp;ms steps. Each amber dot is one Euler ' +
+             'step, and between dots the method follows a straight line at the rate it found at ' +
+             'the start of the step. The height bends downward, so each of those lines runs above it.',
+    /* halvings of one step per frame, so the control does what the page's
+       numbers do */
+    controls: [{key: 'k', label: 'halvings of h', min: 0, max: 6, step: 1, value: 0,
+                fmt: v => (40 / Math.pow(2, Math.round(v))).toPrecision(3) + ' ms'}],
+    panels: [{label: 'height', unit: 'm', height: 250, xAxis: true,
+              xLabel: 'time from release', xUnit: 's', xScale: 1, lens: true, lensZoom: 12}],
+    readouts: [
+      {key: 'h',    label: 'step size'},
+      {key: 'n',    label: 'steps'},
+      {key: 'end',  label: 'height at frame 23'},
+      {key: 'fine', label: '0.1 ms run'},
+      {key: 'gap',  label: 'gap'},
+      {key: 'per',  label: 'first step high by'}
+    ],
+    compute(s) {
+      const h = 0.04 / Math.pow(2, Math.round(s.k));
+      const run = eulerRun(this.S0, h, this.SPAN);
+      const yE = Float64Array.from(this.TF, t => heightAt(run, h, t));
+      const end = run[run.length - 1][2];
+      const gap = end - this.FINE_END;
+      const first = run[1][2] - heightAt(this.fine, FINE_H, h);
+      /* mark the steps, but only while there are few enough to see */
+      const marks = run.length <= 40
+        ? run.map((st, i) => ({t: this.T0 + i * h, y: st[2]})) : [];
+      return {
+        panels: [{x: this.TX, y: yE, ghost: this.FINE,
+          range: [this.T0, this.T0 + this.SPAN],
+          opts: {label: 'Euler with h = ' + (h * 1000).toPrecision(3) + ' ms, the 0.1 ms run, and the measured frames',
+                 marks: this.FRAMES.concat(marks), pred: null, rings: []}}],
+        readouts: {
+          h: (h * 1000).toPrecision(3) + ' ms',
+          n: String(run.length - 1),
+          end: end.toFixed(4) + ' m',
+          fine: this.FINE_END.toFixed(4) + ' m',
+          gap: (gap >= 0 ? '+' : '−') + (Math.abs(gap) * 1000).toFixed(1) + ' mm',
+          per: (first * 1000).toFixed(1) + ' mm'
+        }
+      };
+    }
+  }
+});
 
 /* Whiteboards: math worked out on a slide as if written by hand (the
    handwriting, the wipes, circles, strikes and moves), with presenter controls.
@@ -1376,157 +1279,105 @@ setTimeout(() => {
   });
 }, 0);
 
-/* Lecture 24's own figures, on the driver head resultant of NHTSA test 10642
-   (2019 BMW X5 into a barrier), data/test10642-head-resultant.json: 4501
-   samples at 12 500 Hz from -50 ms, in g, baseline corrected, not CFC 1000
-   filtered. HIC15 = 208.2 on 69.92-84.88 ms, HIC36 = 389.4, no limit 394.0.
-   lec24-trace: the record.        lec24-peak / lec24-best: two 15 ms windows.
-   lec24-map: score by start and length.   lec24-limit: best score by limit.
-   lec24-prefix: the trace and its running integral.
+/* Lecture 24's own figures, on arc 79 of data/arcs.json, the shot page 24
+   steps. Time from frame 20 of the record (the data set's release); frames
+   counted from there, free flight to frame 23. Starting state from page 25's
+   11-frame fit at frame 5; k = 0.016 per meter. shotRate, line, eulerRun,
+   heightAt, G and FINE_H come from the notes page's demo.
+   lec24-shot: the 24 frames, the fit window, frame 5.
+   lec24-run:  Euler at 40 ms against the 0.1 ms run and the frames.
+   lec24-one:  the first step, close up.
+   lec24-gap:  the gap to the 0.1 ms run after each step.
    Hosts are found by data-fig. */
 (() => {
-  const axis = (xr, yr, xt, yt, xl, yl) => [
-    ...xt.map(v => ({x: v, y: yr[0], dy: 13, anchor: 'middle', text: String(v)})),
+  const axis = (xr, yr, xt, yt, xl, yl, fx = v => String(v)) => [
+    ...xt.map(v => ({x: v, y: yr[0], dy: 13, anchor: 'middle', text: fx(v)})),
     ...yt.map(v => ({x: xr[0], y: v, dx: 4, dy: 4, anchor: 'start', text: String(v)})),
     {x: xr[1], y: yr[0], dy: -5, anchor: 'end', text: xl},
     {x: xr[0], y: yr[1], dx: 4, dy: 10, anchor: 'start', text: yl}];
 
-  fetch('data/test10642-head-resultant.json').then(r => r.json()).then(d => {
-    const a = d.a, n = a.length, dt = d.dt;
-    const ms = Float64Array.from(a, (_, i) => (d.t0 + i * dt) * 1e3);
-    const S = new Float64Array(n);
-    for (let i = 1; i < n; i++) S[i] = S[i - 1] + 0.5 * (a[i] + a[i - 1]) * dt;
-    const at = v => Math.round((v / 1e3 - d.t0) / dt);
-    const score = (i, j) => { const T = (j - i) * dt, m = (S[j] - S[i]) / T; return m > 0 ? T * m ** 2.5 : 0; };
-    let pk = 0; for (let i = 1; i < n; i++) if (a[i] > a[pk]) pk = i;
-
-    /* the best score for every window length, in samples, up to 60 ms */
-    const KMAX = Math.round(0.060 / dt), byLen = new Float64Array(KMAX + 1), argLen = new Int32Array(KMAX + 1);
-    for (let k = 1; k <= KMAX; k++)
-      for (let i = 0; i + k < n; i++) { const s = score(i, i + k); if (s > byLen[k]) { byLen[k] = s; argLen[k] = i; } }
-    const bestUpTo = k => { let b = 0, bi = 0, bk = 1; for (let q = 1; q <= k; q++) if (byLen[q] > b) { b = byLen[q]; bi = argLen[q]; bk = q; } return {s: b, i: bi, k: bk}; };
-    const H15 = bestUpTo(Math.floor(0.015 / dt + 1e-6));
-
-    const trace = (i0, i1) => {
+  fetch('data/arcs.json').then(r => r.json()).then(d => {
+    const a = d.arcs.find(x => x.id === 79);
+    const r = a.rel, nf = a.key.nf;
+    const T = [], X = [], Y = [], Z = [];
+    for (let i = r; i < r + nf; i++) {
+      T.push(a.t[i] - a.t[r]); X.push(a.x[i]); Y.push(a.y[i]); Z.push(a.z[i]);
+    }
+    const J = 5, N = 11, H = 0.04;
+    const tf = T.slice(0, N).map(t => t - T[J]);
+    const cx = line(tf, X.slice(0, N)), cy = line(tf, Y.slice(0, N));
+    const cz = line(tf, Z.slice(0, N).map((z, i) => z + 0.5 * G * tf[i] * tf[i]));
+    const S0 = [cx[0], cy[0], cz[0], cx[1], cy[1], cz[1]];
+    const T0 = T[J], SPAN = T[nf - 1] - T0, NS = Math.round(SPAN / H);
+    const fine = eulerRun(S0, FINE_H, SPAN);
+    const run = eulerRun(S0, H, SPAN);
+    const per = Math.round(H / FINE_H);
+    const fineAt = i => fine[i * per];                 // fine state at step i
+    const gap = run.map((s, i) => (s[2] - fineAt(i)[2]) * 1000);
+    const fineCurve = (t0, t1) => {
       const x = [], y = [];
-      for (let i = i0; i <= i1; i++) { x.push(ms[i]); y.push(a[i]); }
-      return {x, y};
+      for (let k = Math.round((t0 - T0) / FINE_H); k <= Math.round((t1 - T0) / FINE_H); k += 10) {
+        x.push(T0 + k * FINE_H); y.push(fine[k][2]);
+      }
+      return {x, y, cls: 'ghost'};
     };
-    const under = (i, j) => {
-      const p = [{x: ms[i], y: 0}];
-      for (let q = i; q <= j; q++) p.push({x: ms[q], y: a[q]});
-      p.push({x: ms[j], y: 0});
+    const frames = (i0, i1) => {
+      const p = [];
+      for (let i = i0; i <= i1; i++) p.push({x: T[i], y: Z[i], r: 3.2, cls: 'frame'});
       return p;
     };
 
-    document.querySelectorAll('[data-fig="lec24-trace"] .fig-body').forEach(host => {
-      const xr = [-10, 170], yr = [0, 55];
+    document.querySelectorAll('[data-fig="lec24-shot"] .fig-body').forEach(host => {
+      const xr = [-0.03, 0.95], yr = [3.25, 4.8];
+      diagram(host, {w: 440, h: 150, xRange: xr, yRange: yr,
+        alt: 'Height of the ball at the 24 free-flight frames, rising from 3.45 m to about 4.6 m and falling to 3.64 m at 0.92 s. The first 11 frames are shaded as the fit window, and frame 5 is marked.',
+        areas: [{pts: [{x: T[0] - 0.015, y: yr[0]}, {x: T[0] - 0.015, y: yr[1] - 0.08},
+                       {x: T[N - 1] + 0.015, y: yr[1] - 0.08}, {x: T[N - 1] + 0.015, y: yr[0]}], cls: 'fitwin'}],
+        points: [...frames(0, nf - 1), {x: T0, y: S0[2], r: 4.6}],
+        notes: [...axis(xr, yr, [0, 0.2, 0.4, 0.6, 0.8], [4, 4.5], 'time from release (s) →', '↑ height (m)'),
+          {x: T[N - 1] / 2 + 0.03, y: 3.33, anchor: 'middle', text: 'fitted frames 0 to 10'},
+          {x: T0, y: S0[2], dx: 6, dy: 16, anchor: 'start', cls: 'hi', text: 'frame 5, ' + S0[2].toFixed(4) + ' m'},
+          {x: T[nf - 1], y: Z[nf - 1], dx: -6, dy: 4, anchor: 'end', text: 'frame 23'}]});
+    });
+
+    document.querySelectorAll('[data-fig="lec24-run"] .fig-body').forEach(host => {
+      const xr = [0.17, 0.95], yr = [3.5, 4.75];
+      const ex = run.map((_, i) => T0 + i * H), ey = run.map(s => s[2]);
       diagram(host, {w: 440, h: 195, xRange: xr, yRange: yr,
-        alt: 'Head resultant acceleration against time, rising from about 30 ms to a peak of 48.7 g at 78.6 ms and falling by about 130 ms.',
-        curves: [trace(at(-10), at(170))],
-        points: [{x: ms[pk], y: a[pk], r: 3.6}],
-        notes: [...axis(xr, yr, [0, 40, 80, 120, 160], [10, 20, 30, 40, 50], 'time from impact (ms) →', '↑ acceleration (g)'),
-          {x: ms[pk], y: a[pk], dx: 7, dy: 2, anchor: 'start', cls: 'hi', text: a[pk].toFixed(1) + ' g at ' + ms[pk].toFixed(1) + ' ms'}]});
+        alt: 'Height from frame 5 to frame 23. Euler with 40 ms steps runs above the dashed 0.1 ms run and ends 134.7 mm higher. Open circles are the measured frames.',
+        curves: [fineCurve(T0, T0 + SPAN), {x: ex, y: ey}],
+        points: [...frames(J, nf - 1), ...ex.map((x, i) => ({x, y: ey[i], r: 3.2}))],
+        leads: [{from: [T0 + SPAN, fine[fine.length - 1][2]], to: [T0 + SPAN, ey[NS]], cls: 'chord'}],
+        notes: [...axis(xr, yr, [0.2, 0.4, 0.6, 0.8], [4, 4.5], 'time from release (s) →', '↑ height (m)'),
+          {x: T0 + SPAN, y: (ey[NS] + fine[fine.length - 1][2]) / 2, dx: -6, dy: 4, anchor: 'end', cls: 'hi', text: gap[NS].toFixed(1) + ' mm'}]});
     });
 
-    const windowFig = (host, wins, alt) => {
-      const xr = [40, 125], yr = [0, 55];
-      const areas = [], leads = [], notes = [...axis(xr, yr, [40, 60, 80, 100, 120], [10, 20, 30, 40, 50], 'time from impact (ms) →', '↑ acceleration (g)')];
-      for (const w of wins) {
-        const m = (S[w.j] - S[w.i]) / ((w.j - w.i) * dt);
-        if (w.fill) areas.push({pts: under(w.i, w.j), cls: 'fill'});
-        else leads.push({from: [ms[w.i], 0], to: [ms[w.i], 52], cls: 'cast'}, {from: [ms[w.j], 0], to: [ms[w.j], 52], cls: 'cast'});
-        leads.push({from: [ms[w.i], m], to: [ms[w.j], m], cls: w.fill ? 'level' : 'ghost'});
-        notes.push(w.fill ? {x: (ms[w.i] + ms[w.j]) / 2, y: 4, anchor: 'middle', cls: 'hi', text: w.label + ', ' + score(w.i, w.j).toFixed(1)}
-                          : {x: ms[w.j], y: 51, dx: 5, anchor: 'start', text: w.label + ', ' + score(w.i, w.j).toFixed(1)});
-        if (w.fill) notes.push({x: ms[w.i], y: m, dx: -5, dy: 4, anchor: 'end', text: 'mean ' + m.toFixed(1) + ' g'});
-      }
-      diagram(host, {w: 440, h: 190, xRange: xr, yRange: yr, alt,
-        areas, leads, curves: [trace(at(40), at(125))],
-        points: [{x: ms[pk], y: a[pk], r: 3.4}], notes});
-    };
-    const half = Math.round(0.0075 / dt);
-    const peakWin = {i: pk - half, j: pk - half + 187};
-
-    document.querySelectorAll('[data-fig="lec24-peak"] .fig-body').forEach(host =>
-      windowFig(host, [{...peakWin, fill: true, label: 'centered on the peak', ly: 20}],
-        'A 15 ms window centered on the peak, shaded under the trace, with its mean as a dotted line.'));
-
-    document.querySelectorAll('[data-fig="lec24-best"] .fig-body').forEach(host =>
-      windowFig(host, [{i: H15.i, j: H15.i + H15.k, fill: true, label: 'best', ly: 20},
-                       {...peakWin, fill: false, label: 'centered on the peak', ly: 12}],
-        'The best 15 ms window, shaded, starting a little before the peak-centered window, drawn as dashed lines.'));
-
-    document.querySelectorAll('[data-fig="lec24-map"] .fig-body').forEach(host => {
-      const xr = [40, 100], yr = [0, 45], w = 440, h = 230;
-      const svg = diagram(host, {w, h, xRange: xr, yRange: yr,
-        alt: 'Window score by start time and length, brightest near a start of 55 to 70 ms; the 15 and 36 ms limits are drawn as lines and the best window under each sits on its line.',
-        leads: [{from: [40, 15], to: [100, 15], cls: 'alt'}, {from: [40, 36], to: [100, 36], cls: 'alt'}],
-        points: [{x: 69.92, y: 14.96, r: 4}, {x: 56.64, y: 36.0, r: 4}, {x: 55.52, y: 39.44, r: 4, cls: 'miss'}],
-        notes: [...axis(xr, yr, [40, 50, 60, 70, 80, 90, 100], [10, 20, 30, 40], 'window start (ms) →', '↑ window length (ms)'),
-          {x: 100, y: 15, dy: -5, anchor: 'end', cls: 'hi', text: '15 ms limit'},
-          {x: 100, y: 36, dy: -5, anchor: 'end', cls: 'hi', text: '36 ms limit'},
-          {x: 69.92, y: 14.96, dx: 6, dy: 14, anchor: 'start', text: 'HIC15, 208.2'},
-          {x: 56.64, y: 36.0, dx: 7, dy: 12, anchor: 'start', text: 'HIC36, 389.4'},
-          {x: 55.52, y: 39.44, dx: 7, dy: -3, anchor: 'start', text: 'no limit, 394.0'}]});
-      /* the cells go under the axis and the marks, in diagram()'s own mapping */
-      const PADL = 10, PADR = 10, PADT = 10, PADB = 16;
-      const X = v => PADL + (v - xr[0]) / (xr[1] - xr[0]) * (w - PADL - PADR);
-      const Y = v => h - PADB - (v - yr[0]) / (yr[1] - yr[0]) * (h - PADT - PADB);
-      const first = svg.querySelector('.axis');
-      const ds = 5, dk = 12, top = 394.0;
-      for (let i = at(40); i < at(100); i += ds)
-        for (let k = dk; k * dt * 1e3 <= 45; k += dk) {
-          const s = score(i, i + k);
-          if (s <= 0) continue;
-          const r = svgEl('rect', {x: X(ms[i]), y: Y((k + dk / 2) * dt * 1e3), width: X(ms[i + ds]) - X(ms[i]) + 0.3,
-                                   height: Y(0) - Y(dk * dt * 1e3) + 0.3});
-          r.setAttribute('style', 'fill:#5F7038;fill-opacity:' + (0.92 * s / top).toFixed(3));
-          svg.insertBefore(r, first);
-        }
-    });
-
-    document.querySelectorAll('[data-fig="lec24-limit"] .fig-body').forEach(host => {
-      const xs = [], ys = [];
-      let b = 0;
-      for (let k = 1; k <= KMAX; k++) { b = Math.max(b, byLen[k]); xs.push(k * dt * 1e3); ys.push(b); }
-      const xr = [0, 61], yr = [0, 450];
-      const mark = (lim, label, dx, dy, anchor) => {
-        const r = bestUpTo(Math.floor(lim / 1e3 / dt + 1e-6));
-        return [{x: lim, y: r.s, r: 4.2}, {x: lim, y: r.s, dx, dy, anchor, cls: 'hi', text: label + ' ' + r.s.toFixed(1)}];
-      };
-      const m15 = mark(15, 'HIC15', 7, 12, 'start'), m36 = mark(36, 'HIC36', 7, 16, 'start');
-      const all = bestUpTo(KMAX);
+    document.querySelectorAll('[data-fig="lec24-one"] .fig-body').forEach(host => {
+      const xr = [0.195, 0.268], yr = [4.195, 4.318];
+      const s1 = run[1];
       diagram(host, {w: 440, h: 190, xRange: xr, yRange: yr,
-        alt: 'Best score against the length limit, rising steeply to 208.2 at 15 ms and 389.4 at 36 ms, then flat at 394.0 from 39.44 ms.',
-        curves: [{x: xs, y: ys}],
-        drops: [{x: 15, y: m15[0].y}, {x: 36, y: m36[0].y}],
-        points: [m15[0], m36[0], {x: all.k * dt * 1e3, y: all.s, r: 4.2, cls: 'miss'}],
-        notes: [...axis(xr, yr, [0, 15, 30, 36, 45, 60], [100, 200, 300, 400], 'length limit w (ms) →', '↑ best score'),
-          m15[1], m36[1],
-          {x: all.k * dt * 1e3, y: all.s, dx: 4, dy: -9, anchor: 'start', text: 'no limit: ' + all.s.toFixed(1) + ' at ' + (all.k * dt * 1e3).toFixed(2) + ' ms'}]});
+        alt: 'Close up of the first step. The dashed 0.1 ms run bends downward from 4.2018 m, and the straight Euler step leaves along its starting slope and ends at 4.3118 m, about 8 mm above the curve at 0.24 s.',
+        curves: [fineCurve(T0, T0 + H), {x: [T0, T0 + H], y: [S0[2], s1[2]]}],
+        points: [{x: T0, y: S0[2], r: 4}, {x: T0 + H, y: s1[2], r: 4}, {x: T0 + H, y: fineAt(1)[2], r: 3.4, cls: 'frame'}],
+        leads: [{from: [T0 + H, fineAt(1)[2]], to: [T0 + H, s1[2]], cls: 'chord'}],
+        notes: [...axis(xr, yr, [0.20, 0.22, 0.24], [4.2, 4.25, 4.3], 'time from release (s) →', '↑ height (m)', v => v.toFixed(2)),
+          {x: T0 + H, y: s1[2], dx: 8, dy: 0, anchor: 'start', text: 'Euler ' + s1[2].toFixed(5) + ' m'},
+          {x: T0 + H, y: fineAt(1)[2], dx: 8, dy: 10, anchor: 'start', text: '0.1 ms run ' + fineAt(1)[2].toFixed(5) + ' m'},
+          {x: T0 + H, y: fineAt(1)[2], dx: 8, dy: 26, anchor: 'start', cls: 'hi', text: 'gap ' + gap[1].toFixed(1) + ' mm'}]});
     });
 
-    document.querySelectorAll('[data-fig="lec24-prefix"] .fig-body').forEach(host => {
-      const [l, r] = diagramRow(host, 2), xr = [40, 125];
-      const i = H15.i, j = H15.i + H15.k;
-      diagram(l, {w: 300, h: 200, xRange: xr, yRange: [0, 55], title: 'a (g)',
-        alt: 'The trace with the best 15 ms window shaded.',
-        areas: [{pts: under(i, j), cls: 'fill'}],
-        curves: [trace(at(40), at(125))],
-        notes: [...axis(xr, [0, 55], [40, 80, 120], [20, 40], 'ms →', ''),
-          {x: (ms[i] + ms[j]) / 2, y: 8, anchor: 'middle', cls: 'hi', text: 'the integral'}]});
-      const SS = trace(at(40), at(125)); SS.y = SS.x.map((_, q) => S[at(40) + q]);
-      const top = S[at(125)] * 1.05;
-      diagram(r, {w: 300, h: 200, xRange: xr, yRange: [0, top], title: 'S, the running integral (g·s)',
-        alt: 'The running integral of the trace, with the window’s integral as the vertical gap between its values at the two ends.',
-        curves: [SS],
-        leads: [{from: [ms[i], S[i]], to: [ms[j], S[i]], cls: 'cast'}, {from: [ms[j], S[i]], to: [ms[j], S[j]], cls: 'alt', over: true}],
-        points: [{x: ms[i], y: S[i], r: 3.8}, {x: ms[j], y: S[j], r: 3.8}],
-        notes: [...axis(xr, [0, top], [40, 80, 120], [], 'ms →', ''),
-          {x: ms[i], y: S[i], dx: -6, dy: -4, anchor: 'end', tex: 'S_i'},
-          {x: ms[j], y: S[j], dx: -6, dy: -4, anchor: 'end', tex: 'S_j'},
-          {x: ms[j], y: (S[i] + S[j]) / 2, dx: 6, dy: 4, anchor: 'start', cls: 'hi', tex: 'S_j - S_i'}]});
+    document.querySelectorAll('[data-fig="lec24-gap"] .fig-body').forEach(host => {
+      const xr = [4, 25.5], yr = [0, 155];
+      const fr = gap.map((_, i) => J + i);
+      const curves = [{x: fr, y: gap}];
+      const notes = [...axis(xr, yr, [5, 8, 11, 14, 17, 20, 23], [50, 100], 'frame →', '↑ height above the 0.1 ms run (mm)'),
+        {x: J + 1, y: gap[1], dx: -5, dy: -6, anchor: 'end', text: gap[1].toFixed(1)},
+        {x: J + 2, y: gap[2], dx: -5, dy: -6, anchor: 'end', text: gap[2].toFixed(1)},
+        {x: J + 3, y: gap[3], dx: -5, dy: -6, anchor: 'end', text: gap[3].toFixed(1)},
+        {x: J + NS, y: gap[NS], dx: 7, dy: 8, anchor: 'start', cls: 'hi', text: gap[NS].toFixed(1)}];
+      diagram(host, {w: 440, h: 190, xRange: xr, yRange: yr,
+        alt: 'The gap to the 0.1 ms run after each 40 ms step: 8.1, 16.0 and 23.9 mm after the first three steps, rising almost in a straight line to 134.7 mm at frame 23.',
+        curves, points: gap.map((g, i) => ({x: J + i, y: g, r: 3})), notes});
     });
   });
 })();

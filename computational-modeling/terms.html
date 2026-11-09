@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Every term — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261109080753">
-  <link rel="stylesheet" href="css/demos.css?v=20261109080753">
+  <link rel="stylesheet" href="css/blocks.css?v=20261109124015">
+  <link rel="stylesheet" href="css/demos.css?v=20261109124015">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -738,6 +738,9 @@
           <a href="notes.html">Notes</a>
           <span class="site-nav-sep">·</span>
         
+          <a href="python.html">Python</a>
+          <span class="site-nav-sep">·</span>
+        
           <a href="reports.html">Examples</a>
           <span class="site-nav-sep">·</span>
         
@@ -751,9 +754,6 @@
           <span class="site-nav-sep">·</span>
         
           <a href="tools.html">Tools</a>
-          <span class="site-nav-sep">·</span>
-        
-          <a href="python.html">Python</a>
           <span class="site-nav-sep">·</span>
         
           <a href="workbench.html">Workbench</a>
@@ -810,13 +810,7 @@
         
           
           
-          
-          <a href="week-08.html">8</a>
-          <span class="week-strip-sep">·</span>
-        
-          
-          
-          
+          <span class="week-gap" title="Week 8 is a break week">8<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
           <a href="week-09.html">9</a>
           <span class="week-strip-sep">·</span>
         
@@ -1029,7 +1023,7 @@ functions the course's programs call.</p>
   <dt id="restitution">coefficient of restitution</dt>
   <dd>The ratio of separation speed to approach speed in an impact. Zero means the bodies stay together; one means no kinetic energy is lost. Used on <a href="bias-and-noise.html">Bias and noise accumulate at different rates</a>.</dd>
   <dt id="conserved-quantity">conserved quantity</dt>
-  <dd>Something the physics fixes: energy, momentum, mass. Its known behavior makes it a check on an integrator that needs no exact solution to compare against. Taught on <a href="stability-and-accuracy.html">Stability and accuracy</a>.</dd>
+  <dd>Something the physics fixes: energy, momentum, mass. Its known behavior makes it a check on an integrator that needs no exact solution to compare against. Taught on <a href="stability-and-accuracy.html">Energy checks on a stepped answer</a>.</dd>
   <dt id="deflection">deflection</dt>
   <dd>The transverse displacement of a beam from its unloaded position, measured perpendicular to its axis.</dd>
   <dt id="contraflexure">point of contraflexure</dt>
@@ -1065,7 +1059,7 @@ functions the course's programs call.</p>
   <dt id="constant-of-integration">constant of integration</dt>
   <dd>The additive constant an integral does not determine. Integration fixes the shape of the curve; an initial condition fixes where it sits. Taught on <a href="the-constant-of-integration.html">The constant of integration</a>.</dd>
   <dt id="convergence-study">convergence study</dt>
-  <dd>Halving a step or refining a grid until the answer stops moving, as a way of defending a resolution when no exact answer is available. Taught on <a href="order-of-accuracy-measured.html">Order of accuracy</a>.</dd>
+  <dd>Halving a step or refining a grid until the answer stops moving, as a way of defending a resolution when no exact answer is available. Taught on <a href="order-of-accuracy-measured.html">Halving the step, in evaluations</a>.</dd>
   <dt id="convex">convex</dt>
   <dd>Bending upward, so that a chord joining two points on the curve lies above the curve between them. A function is convex wherever its second derivative is positive. Taught on <a href="area-under-a-curve.html">Area under a curve</a>.</dd>
   <dt id="cumulative-integral">cumulative integral</dt>
@@ -1084,12 +1078,8 @@ functions the course's programs call.</p>
   <dd>The number of times a method may compute f. The unit that matters whenever f is expensive, and the one that makes methods with different per-iteration costs comparable. Taught on <a href="evaluations-are-the-currency.html">Evaluation cost</a>.</dd>
   <dt id="extrapolation">extrapolation</dt>
   <dd>Evaluating a fitted model outside the range of the data used to fit it. Parameter uncertainty is multiplied by the distance beyond that range. Taught on <a href="extrapolation-amplifies.html">Extrapolation and uncertainty</a>.</dd>
-  <dt id="fit-error">fit error</dt>
-  <dd>Error measured on the data the model was fitted to. Adding parameters always reduces it. Taught on <a href="fit-error-and-prediction-error.html">Fit error and prediction error</a>.</dd>
   <dt id="forward-difference">forward difference</dt>
   <dd>Estimating a derivative from a point and the one after it: (f(x+h) − f(x)) / h. Its truncation error is proportional to h. Taught on <a href="finite-differences.html">Finite differences</a>.</dd>
-  <dt id="held-out-data">held-out data</dt>
-  <dd>Data kept out of the fit and used afterwards to measure prediction error. The only direct way to find out how a model does on something it was not fitted to. Taught on <a href="fit-error-and-prediction-error.html">Fit error and prediction error</a>.</dd>
   <dt id="initial-condition">initial condition</dt>
   <dd>A known value of the integrated quantity at one instant, which supplies the constant of integration. Taught on <a href="the-constant-of-integration.html">The constant of integration</a>.</dd>
   <dt id="interpolation">interpolation</dt>
@@ -1109,15 +1099,13 @@ functions the course's programs call.</p>
   <dt id="newtons-method">Newton&#x27;s method</dt>
   <dd>A root-finding method that follows the tangent at the current estimate down to the axis and takes the crossing as the next estimate. It needs the derivative and keeps no interval. In n unknowns the derivative becomes the Jacobian, and each step solves a linear system. Taught on <a href="newton-and-secant.html">Newton and the secant method</a>.</dd>
   <dt id="order-of-accuracy">order of accuracy</dt>
-  <dd>The exponent p in error ∝ h^p, relating a method's error to its step size. It is measured by halving the step and taking the ratio of successive errors: a ratio of 2 is order 1, of 4 order 2, of 16 order 4. Taught on <a href="order-of-accuracy-measured.html">Order of accuracy</a>.</dd>
+  <dd>The exponent p in error ∝ h^p, relating a method's error to its step size. It is measured by halving the step and taking the ratio of successive errors, or of successive changes when there is no exact answer: a ratio of 2 is order 1, of 4 order 2, of 16 order 4. Taught on <a href="order-of-accuracy-measured.html">Halving the step, in evaluations</a>.</dd>
   <dt id="convergence-order">order of convergence</dt>
   <dd>The exponent p in e(k+1) ≈ C·e(k)^p. Bisection has p = 1, the secant method p ≈ 1.618, Newton p = 2 near a simple root. Taught on <a href="newton-and-secant.html">Newton and the secant method</a>.</dd>
   <dt id="overfitting">overfitting</dt>
   <dd>Using enough free parameters that the model follows the noise in the data as well as the signal. The residual falls; the error against the truth rises. Taught on <a href="model-form-and-parameters.html">Model form and free parameters</a>.</dd>
   <dt id="pole">pole</dt>
   <dd>A point where a function grows without bound because its denominator goes to zero. A function can change sign across a pole without having a root there. Taught on <a href="bisection.html">Bisection</a>.</dd>
-  <dt id="prediction-error">prediction error</dt>
-  <dd>Error measured on data the model was not fitted to. Adding parameters reduces it only up to a point, after which it rises. Taught on <a href="fit-error-and-prediction-error.html">Fit error and prediction error</a>.</dd>
   <dt id="prefix-sum">prefix sum</dt>
   <dd>An array whose entry i holds the running total of the input up to i. Once built, the total over any range is the difference of two of its entries. Taught on <a href="windowed-optimum.html">A constrained optimum over a window</a>.</dd>
   <dt id="regression">regression</dt>
@@ -1126,24 +1114,22 @@ functions the course's programs call.</p>
   <dd>Estimating the spread of a result by perturbing the inputs within their known scatter, re-running the whole analysis, and collecting the distribution of answers. Taught on <a href="propagating-by-resampling.html">Propagating uncertainty by resampling</a>.</dd>
   <dt id="residual">residual</dt>
   <dd>The value of f at an estimate: how far the equation is from being satisfied there. Distinct from the error, which is how far the estimate is from the true root. Taught on <a href="residual-and-error.html">Residual and error</a>.</dd>
-  <dt id="residual-structure">residual structure</dt>
-  <dd>Pattern in the residuals — runs of the same sign, a trend, a shape — as opposed to random scatter. Structure says the model form is wrong, whatever the residuals' size. Taught on <a href="residual-structure.html">Residual structure</a>.</dd>
   <dt id="rk4">RK4</dt>
-  <dd>The classical fourth-order Runge-Kutta method: four rate evaluations per step, combined so the errors of orders 1 through 4 cancel. Taught on <a href="order-of-accuracy-measured.html">Order of accuracy</a>.</dd>
+  <dd>The classical fourth-order Runge-Kutta method: four rate evaluations per step, combined so the errors of orders 1 through 4 cancel. Taught on <a href="order-of-accuracy-measured.html">Halving the step, in evaluations</a>.</dd>
   <dt id="rounding-error">rounding error</dt>
-  <dd>The error introduced by storing numbers to finite precision. In a difference formula it does not shrink with the step, so dividing by the step magnifies it. Taught on <a href="order-of-accuracy-measured.html">Order of accuracy</a>.</dd>
+  <dd>The error introduced by storing numbers to finite precision. In a difference formula it does not shrink with the step, so dividing by the step magnifies it. Taught on <a href="order-of-accuracy-measured.html">Halving the step, in evaluations</a>.</dd>
   <dt id="secant-method">secant method</dt>
   <dd>A root finder that replaces Newton's tangent with the line through the two most recent estimates. It needs no derivative and costs one evaluation per step. Taught on <a href="newton-and-secant.html">Newton and the secant method</a>.</dd>
   <dt id="spline">spline</dt>
   <dd>A curve built from low-degree polynomials on each interval, joined smoothly. Interpolates without the oscillation a single high-degree polynomial suffers. Taught on <a href="interpolation-and-regression.html">Interpolation and regression</a>.</dd>
   <dt id="stability">stability</dt>
-  <dd>Whether a method's solution stays bounded. It fails abruptly past a threshold set by the step size and the system, and far past the step at which the answer stopped being accurate. Taught on <a href="stability-and-accuracy.html">Stability and accuracy</a>.</dd>
+  <dd>Whether a method's solution stays bounded. A run that loses it grows without limit, which is easy to see. Taught on <a href="stability-and-accuracy.html">Energy checks on a stepped answer</a>.</dd>
   <dt id="stencil">stencil</dt>
   <dd>The set of sample points a difference formula uses. A wider stencil can cancel more Taylor terms, or average away more noise, but reaches further from the point of interest. Taught on <a href="finite-differences.html">Finite differences</a>.</dd>
   <dt id="sweep">sweep</dt>
   <dd>Evaluating a quantity at a chosen set of input values and collecting the results, in order to see how one depends on the other. Taught on <a href="discrete-evaluation.html">Discrete evaluation and resolution</a>.</dd>
   <dt id="symplectic">symplectic method</dt>
-  <dd>A stepping rule that preserves a structural property of the equations — for mechanics, that it does not manufacture energy — usually at the cost of accuracy. Taught on <a href="stability-and-accuracy.html">Stability and accuracy</a>.</dd>
+  <dd>A stepping rule that preserves a structural property of the equations — for mechanics, that it does not manufacture energy — usually at the cost of accuracy. Taught on <a href="stability-and-accuracy.html">Energy checks on a stepped answer</a>.</dd>
   <dt id="tolerance">tolerance</dt>
   <dd>The threshold a routine tests against to decide it has finished. Usually a bound on the size of f at the current estimate, which is not the same as a bound on the error in the estimate. Taught on <a href="bisection.html">Bisection</a>.</dd>
   <dt id="trapezoid-rule">trapezoid rule</dt>
@@ -1189,10 +1175,10 @@ functions the course's programs call.</p>
 
   
 
-  <script src="js/page.js?v=20261109080753"></script>
+  <script src="js/page.js?v=20261109124015"></script>
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-08">November 8, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-09">November 9, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

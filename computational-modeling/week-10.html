@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Week 10, Validation and Reporting — Computational Physical Modeling</title>
+  <title>Week 10, Uncertainty Propagation — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261109080753">
-  <link rel="stylesheet" href="css/demos.css?v=20261109080753">
+  <link rel="stylesheet" href="css/blocks.css?v=20261109124015">
+  <link rel="stylesheet" href="css/demos.css?v=20261109124015">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -738,6 +738,9 @@
           <a href="notes.html">Notes</a>
           <span class="site-nav-sep">·</span>
         
+          <a href="python.html">Python</a>
+          <span class="site-nav-sep">·</span>
+        
           <a href="reports.html">Examples</a>
           <span class="site-nav-sep">·</span>
         
@@ -751,9 +754,6 @@
           <span class="site-nav-sep">·</span>
         
           <a href="tools.html">Tools</a>
-          <span class="site-nav-sep">·</span>
-        
-          <a href="python.html">Python</a>
           <span class="site-nav-sep">·</span>
         
           <a href="workbench.html">Workbench</a>
@@ -810,13 +810,7 @@
         
           
           
-          
-          <a href="week-08.html">8</a>
-          <span class="week-strip-sep">·</span>
-        
-          
-          
-          
+          <span class="week-gap" title="Week 8 is a break week">8<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
           <a href="week-09.html">9</a>
           <span class="week-strip-sep">·</span>
         
@@ -837,13 +831,20 @@
         <strong>Overview</strong>
         
           <span class="site-nav-sep">·</span>
-          <a href="residual-structure.html">Residual structure</a>
+          <a href="propagating-by-resampling.html">Resampling</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="fit-error-and-prediction-error.html">Fit and prediction error</a>
+          <a href="reporting-an-interval.html">Reporting an interval</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="coverage.html">Coverage</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="extrapolation-amplifies.html">Extrapolation</a>
         
         <span class="site-nav-sep">·</span>
-        <a href="assign-10.html">Assignment</a>
+        
+        <a href="assign-09.html">Assignment</a>
       </div>
     </nav>
     
@@ -898,37 +899,42 @@
 
   <main data-pagefind-body>
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
-    <div class="eyebrow">Week 10 · Validation and Reporting</div>
-<h1>Week 10, Validation and Reporting</h1>
+    <div class="eyebrow">Week 10 · Uncertainty Propagation</div>
+<h1>Week 10, Uncertainty Propagation</h1>
 
-<p>The last week is about deciding whether a model is good enough, and saying so in a way someone else can check. Residuals are read for their shape and not for their size, because a model of the wrong form can still leave small residuals. The error that matters for prediction is measured on data the model never saw, and it is usually larger than the error you measured while fitting (sometimes a good deal larger).</p>
+<p>Most numbers this course has produced so far have been reported without saying how well they are known, and this week covers how to report that. Resampling propagates the scatter in the inputs through the whole analysis, an interval is reported with the level it claims, and coverage measures whether that claim is true. The last of the three is the step usually left out. Without it there is no evidence that an interval contains the truth as often as its level claims.</p>
 
 <h2 id="learning-objectives">Learning Objectives</h2>
 
 <ul>
-  <li>Read residuals for structure, and name what a pattern in them is telling you.</li>
-  <li>Hold data back from a fit and measure prediction error against it.</li>
-  <li>Say why adding parameters never raises the fit error and, past some point, usually raises the prediction error.</li>
-  <li>Write up an analysis so that someone else can reproduce it and disagree with it.</li>
+  <li>Propagate input uncertainty through a whole analysis by resampling.</li>
+  <li>Report a value, an interval and the level the interval claims.</li>
+  <li>Measure the coverage of an interval where the truth is known.</li>
+  <li>Say how far a prediction can be extrapolated before its interval stops being useful.</li>
 </ul>
 
 <h2 id="content">Content</h2>
 
-<p>Read them in order. The starred page is the one the week is built around, and the other leads up to it.</p>
+<p>Read them in order. The starred page is the one the week is built around, and the others lead up to it or follow from it.</p>
 
 <table class="data">
   <tr><th>#</th><th>Page</th><th>Summary</th></tr>
-  <tr><td>32</td><td><a href="residual-structure.html">Residual structure</a></td><td>Reading patterns in residuals</td></tr>
-  <tr><td>33</td><td><a href="fit-error-and-prediction-error.html">Fit error and prediction error</a> <span title="the week's anchor">&#9733;</span></td><td>Held-out testing and model selection</td></tr>
+  <tr><td>28</td><td><a href="propagating-by-resampling.html">Propagating uncertainty by resampling</a></td><td>Resampling the inputs and re-running the analysis</td></tr>
+  <tr><td>29</td><td><a href="reporting-an-interval.html">Reporting an interval</a></td><td>The value, interval and confidence level of a result</td></tr>
+  <tr><td>30</td><td><a href="coverage.html">Coverage</a> <span title="the week's anchor">&#9733;</span></td><td>Checking a confidence level against known cases</td></tr>
+  <tr><td>31</td><td><a href="extrapolation-amplifies.html">Extrapolation and uncertainty</a></td><td>Uncertainty growth beyond the fitted data</td></tr>
 </table>
 
 <h2 id="assignment">Assignment</h2>
 
-<p>Week 10 has no assignment. There is one extra problem, <a href="assign-10.html">Predicting Unseen Shots</a>, on your shots. It can be submitted any time before the end of the quarter without penalty.</p>
+<p>Assignment 8, <a href="assign-09.html">Uncertainty Intervals</a>, is an <a href="extra-labor.html">extra labor</a> this week, so it is not required. It adds +0.3 and can be submitted any time before the end of the quarter without penalty. Both problems use your shots. The main problem puts a 90% interval on where the ball comes down through rim height on each short record, and then counts how often that interval holds on your whole arcs cut to the same length. The extra problem puts the same interval on the medium and long records and asks how much narrower it gets for each frame you wait.</p>
+
+<p>Please see the <a href="reports-09.html">example reports</a> for three finished reports on an
+example pack, each in a different style.</p>
 
 <h2 id="quiz">Quiz</h2>
 
-<p>Quiz 9 is on Canvas, and it asks four questions on the terms and facts from the pages above. You have unlimited time and unlimited attempts, because the purpose of the quiz is to let you check your own reading (it is not there to rank you).</p>
+<p>Quiz 8 is on Canvas, and it asks four questions on the terms and facts from the pages above. You have unlimited time and unlimited attempts, because the purpose of the quiz is to let you check your own reading (it is not there to rank you).</p>
 
 <h2 id="meta-labors">Meta-Labors</h2>
 
@@ -938,10 +944,10 @@
 
   
 
-  <script src="js/page.js?v=20261109080753"></script>
+  <script src="js/page.js?v=20261109124015"></script>
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-08">November 8, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-09">November 9, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

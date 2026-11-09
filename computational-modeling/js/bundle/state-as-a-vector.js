@@ -972,7 +972,9 @@ function realNoiseRaw(n, sd = 1) {
    second is what happens when the coupling through |v| is ignored. */
 
 const G = 9.81;
-const KD = 0.012;
+/* k = rho C_D A / (2m) per meter: C_D 0.35, 600 g, r 0.1195 m, air 1.20 kg/m^3,
+   the value the page's aside derives */
+const KD = 0.016;
 /* Release state measured, not chosen: the least-squares fit to the free-flight
    frames of one tracked three-pointer (shot 79, SportVU 2015-16, 25 Hz) gives a
    release 3.4520 m up, moving 6.1708 m/s horizontally and 4.7428 m/s vertically
@@ -998,10 +1000,10 @@ mountDemo({
     setting: 'A real three-pointer, carried forward with quadratic drag from its measured release ' +
              'state: 3.452&nbsp;m up, 7.78&nbsp;m/s at 37.6°. The drag on each axis depends on the ' +
              'total speed, so the two axes are coupled.',
-    source: {kind: 'mixed', text: 'The release state is measured: a least-squares fit to the free-flight frames of one tracked three-pointer, SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz. The drag coefficient is a modeling choice, not a measurement. Both the coupled and the decoupled version are integrated, so the difference between them is computed rather than argued.'},
+    source: {kind: 'mixed', text: 'The release state is measured: a least-squares fit to the free-flight frames of one tracked three-pointer, SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz. The drag constant, 0.016 per meter, comes from a wind-tunnel drag coefficient and the ball&rsquo;s size and mass, as in the aside above. Both the coupled and the decoupled version are integrated, so the difference between them is computed rather than argued.'},
     caption: 'The trajectory in the plane: height against horizontal distance, not against time. ' +
              'The ghost is the same flight integrated as two separate one-dimensional problems, ' +
-             'each using only its own velocity component — the coupling through |v| dropped.',
+             'each using only its own velocity component, with the coupling through |v| dropped.',
     controls: [{key: 'lh', label: 'step size', min: -4, max: -1.3, step: 'any', value: -3,
                 fmt: v => Math.pow(10, v).toPrecision(2) + ' s'}],
     panels: [{label: 'height', unit: 'm', height: 260, xAxis: true,
@@ -1047,7 +1049,7 @@ mountDemo({
       }
       return {
         panels: [{x: xa, y: ya, ghost: yg, range: [0, Math.max(...xa)],
-          opts: {label: 'height, coupled state — decoupled as the ghost',
+          opts: {label: 'height, coupled state, with decoupled as the ghost',
                  rings: [{x: ra, y: Z0, text: 'range ' + ra.toFixed(3) + ' m'}]}}],
         readouts: {
           h: h.toPrecision(2) + ' s',

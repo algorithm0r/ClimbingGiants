@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Euler&#39;s method — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261109080753">
-  <link rel="stylesheet" href="css/demos.css?v=20261109080753">
+  <link rel="stylesheet" href="css/blocks.css?v=20261109124015">
+  <link rel="stylesheet" href="css/demos.css?v=20261109124015">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -738,6 +738,9 @@
           <a href="notes.html">Notes</a>
           <span class="site-nav-sep">·</span>
         
+          <a href="python.html">Python</a>
+          <span class="site-nav-sep">·</span>
+        
           <a href="reports.html">Examples</a>
           <span class="site-nav-sep">·</span>
         
@@ -751,9 +754,6 @@
           <span class="site-nav-sep">·</span>
         
           <a href="tools.html">Tools</a>
-          <span class="site-nav-sep">·</span>
-        
-          <a href="python.html">Python</a>
           <span class="site-nav-sep">·</span>
         
           <a href="workbench.html">Workbench</a>
@@ -810,15 +810,9 @@
         
           
           
+          <span class="week-gap" title="Week 8 is a break week">8<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <span class="week-current">9</span>
           
-          <span class="week-current">8</span>
-          
-          <span class="week-strip-sep">·</span>
-        
-          
-          
-          
-          <a href="week-09.html">9</a>
           <span class="week-strip-sep">·</span>
         
           
@@ -833,8 +827,8 @@
     
     <nav class="page-family">
       <div class="nav-inner">
-        Week 8,
-        <a href="week-08.html">Overview</a>
+        Week 9,
+        <a href="week-09.html">Overview</a>
         
           <span class="site-nav-sep">·</span>
           <strong>Euler&#39;s method</strong>
@@ -843,12 +837,13 @@
           <a href="state-as-a-vector.html">State as a vector</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="order-of-accuracy-measured.html">Order of accuracy</a>
+          <a href="order-of-accuracy-measured.html">Halving the step</a>
         
           <span class="site-nav-sep">·</span>
-          <a href="stability-and-accuracy.html">Stability and accuracy</a>
+          <a href="stability-and-accuracy.html">Energy checks</a>
         
         <span class="site-nav-sep">·</span>
+        
         <a href="assign-08.html">Assignment</a>
       </div>
     </nav>
@@ -904,138 +899,175 @@
 
   <main data-pagefind-body class="wide">
     <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
-    <div class="eyebrow">Week 8 · Time Stepping</div>
+    <div class="eyebrow">Week 9 · Time Stepping</div>
 <h1>Euler's method</h1>
 
 <div class="claim">
   <span class="label">Claim</span>
-  <p class="exact">When the rate of change of a quantity is known as a function of the quantity
-  itself, the trajectory is obtained by stepping: evaluate the rate at the current state, advance
-  by
-  the rate times a small step, and repeat. That is <dfn data-g="eulers-method">Euler's
-  method</dfn>, and it is the cumulative integral
-  of week 3 with the integrand recomputed at every step and not read from a record.</p>
-  <p class="plain">Now the rate comes from a rule that uses the current state, so you have to
-  reach a state before you can compute the rate there.</p>
+  <p class="exact">When the rate of change of a state is known as a function of the state itself,
+  the trajectory is obtained by stepping: evaluate the rate at the current state, advance by the
+  rate times a small step, and repeat. That is <dfn data-g="eulers-method">Euler's method</dfn>.
+  Each step starts where the last one ended, so an error made in one step is carried into every
+  later step.</p>
+  <p class="plain">The rate comes from a rule that uses the current state, so you have to reach a
+  state before you can compute the rate there.</p>
 </div>
 
-<h2 id="the-difference-from-week-3">Comparison with Week 3</h2>
+<h2 id="a-shot-with-drag">A Tracked Shot With Drag</h2>
+
+<p>The shot is arc 79 of the tracked shots (SportVU optical tracking, 25 frames a second), a
+three-pointer that missed. Time is measured from frame 20 of the record, the release this data set
+marks (<a href="conditions-become-roots.html#finding-the-release" title="Conditions as roots">page
+19</a> finds the release 0.08&nbsp;s earlier). Frames on this page are counted from that release,
+so frame 5 is frame 25 of the record. A fit to the first 11 free-flight frames gives the ball's
+position and velocity at frame 5, 0.20&nbsp;s after release (<a href="state-as-a-vector.html"
+title="State as a vector">page 25</a> builds that fit).</p>
+
+<table class="data">
+  <tr><th>At frame 5</th><th class="num"><em>x</em></th><th class="num"><em>y</em></th><th class="num"><em>z</em></th></tr>
+  <tr><td>position (m)</td><td class="num">5.4796</td><td class="num">3.9957</td><td class="num">4.2018</td></tr>
+  <tr><td>velocity (m/s)</td><td class="num">&minus;4.7333</td><td class="num">3.9732</td><td class="num">2.7508</td></tr>
+</table>
+
+<p>The position changes at the rate set by the velocity. The velocity changes at the rate set by
+gravity and by air drag:</p>
+
+$$\frac{\mathrm{d}\mathbf{r}}{\mathrm{d}t} \;=\; \mathbf{v}, \qquad
+\frac{\mathrm{d}\mathbf{v}}{\mathrm{d}t} \;=\; -g\,\hat{\mathbf{z}} \;-\; k\,|\mathbf{v}|\,\mathbf{v}$$
+
+<p>Here $\mathbf{r}$ is the position $(x, y, z)$, $\mathbf{v}$ is the velocity, $|\mathbf{v}|$ is
+the speed, $g$ is 9.81&nbsp;m/s², and $\hat{\mathbf{z}}$ points up. Drag acts against the velocity
+and grows with the square of the speed. The constant $k$ is 0.016 per meter (<a href="state-as-a-vector.html" title="State as a vector">page 25</a> gives its
+source). Without drag the height is a parabola in time, the model fitted on <a href="conditions-become-roots.html" title="Conditions as roots">page 19</a>. With drag the
+acceleration depends on the velocity, which is one of the unknowns being solved for. No formula is
+known for this path, so we find it by stepping.</p>
+
+<h2 id="the-difference-from-week-3">A Rate That Depends on the State</h2>
 
 <p>In week 3 the acceleration was a recorded array, so every value was available before any
 integration started and the whole cumulative sum could be formed in one pass. Here the rate is a
-function of the state:</p>
+function of the state $s$, which for the shot is the six numbers $(x, y, z, v_x, v_y, v_z)$:</p>
 
-$$\frac{\mathrm{d}y}{\mathrm{d}t} \;=\; f(t, y)$$
+$$\frac{\mathrm{d}s}{\mathrm{d}t} \;=\; f(t, s)$$
 
-<p>The rate at $t_1$ cannot be computed until $y(t_1)$ is known, and $y(t_1)$ cannot be computed
-without the rate. The resolution is to alternate between the two: use the rate where you are to
-get where you go next, and then ask again.</p>
+<p>The rate at a later time needs the state at that time, and the state needs the rate that
+carried it there, and the two are found in turns. Each step uses the rate at the current state to
+find the next state, and the loop repeats from there. ($f$ takes the time as well, for rates that
+depend on a recorded signal. The shot's rate does not use it.)</p>
 
-<h2 id="euler-s-method">Euler's Method</h2>
+<h2 id="one-euler-step-from-frame-5-to-frame-6">One Euler Step From Frame 5 to Frame 6</h2>
 
-$$y_{k+1} \;=\; y_k \;+\; h\, f(t_k, y_k)$$
+$$s_{i+1} \;=\; s_i \;+\; h\, f(t_i, s_i)$$
 
-<p>Read it as the rectangle rule from week 3, where the change over one step is the rate times the
-step width, with the rate taken at the left-hand end. It is the same approximation and it has
-the same weakness, because the rate is treated as constant across the step when it is not. The
-difference is that the error now compounds. In week 3 a bad panel affected only the total, while
-a bad step here moves the state, so the <em>next</em> rate is evaluated in the wrong place and
-every subsequent step inherits the mistake.</p>
+<p>Here $s_i$ is the state at time $t_i$ and $h$ is the step. Read it as the rectangle rule from
+<a href="cumulative-integration.html" title="Cumulative integration">week 3</a>, where the change
+over one step is the rate times the step width, with the rate taken at the start of the step.
+Euler treats the rate as constant across the step, though the rate changes during it.</p>
+
+<p>On the shot, the speed at frame 5 is 6.76&nbsp;m/s. The vertical part of drag is
+$k\,|\mathbf{v}|\,v_z$ = 0.016&nbsp;&times;&nbsp;6.76&nbsp;&times;&nbsp;2.7508 = 0.298&nbsp;m/s²,
+so the vertical acceleration is &minus;9.81&nbsp;&minus;&nbsp;0.298 = &minus;10.108&nbsp;m/s². One
+step of 40&nbsp;ms (one frame) moves the height and the vertical velocity by the rate times the
+step:</p>
+
+$$\begin{aligned}
+z &= 4.2018 + 0.04 \times 2.7508 = 4.3118\ \text{m} \\
+v_z &= 2.7508 + 0.04 \times (-10.108) = 2.3465\ \text{m/s}
+\end{aligned}$$
+
+<p>The other four components step the same way. The new state is the start of the next step, and
+18 steps reach frame 23, the last frame before the ball nears the hoop.</p>
 
 <cg-demo case="euler"></cg-demo>
 
-<h2 id="measured-error-by-step-size">Measured Error by Step Size</h2>
+<h2 id="errors-carry-forward">An 8&nbsp;mm Overshoot Carried Through 18 Steps</h2>
 
-<p>A projectile with no drag, integrated to $t = 1$ s, where the exact answer is 3.3121676917 m:</p>
+<p>The comparison here is the same program (the <code>euler</code> function at the end of this
+page) run with 0.1&nbsp;ms steps. It puts the ball at 4.3038&nbsp;m at frame 6, so the single
+40&nbsp;ms step lands about 8&nbsp;mm high. The height is <dfn data-g="concave">concave</dfn> (it
+bends downward), and Euler follows a straight line at the slope it found at the start of the step.
+A tangent line to a concave curve lies above the curve on both sides of the point it touches. The
+overshoot is about half the vertical acceleration times the step squared.</p>
+
+$$\tfrac{1}{2} \times 10.108 \times 0.04^2 = 0.0081\ \text{m}$$
+
+<p>The next step starts from the high point, so its own overshoot adds to the first. The table
+gives the gap to the 0.1&nbsp;ms run after each step.</p>
 
 <table class="data">
-  <tr><th class="num">step h</th><th class="num">Euler error</th><th class="num">ratio</th></tr>
-  <tr><td class="num">0.1000</td><td class="num">4.91×10⁻¹</td><td class="num"></td></tr>
-  <tr><td class="num">0.0500</td><td class="num">2.45×10⁻¹</td><td class="num">2.00</td></tr>
-  <tr><td class="num">0.0250</td><td class="num">1.23×10⁻¹</td><td class="num">2.00</td></tr>
-  <tr><td class="num">0.0125</td><td class="num">6.13×10⁻²</td><td class="num">2.00</td></tr>
+  <tr><th class="num">frame</th><th class="num">steps</th><th class="num">height above the 0.1&nbsp;ms run</th></tr>
+  <tr><td class="num">6</td><td class="num">1</td><td class="num">8.1&nbsp;mm</td></tr>
+  <tr><td class="num">7</td><td class="num">2</td><td class="num">16.0&nbsp;mm</td></tr>
+  <tr><td class="num">8</td><td class="num">3</td><td class="num">23.9&nbsp;mm</td></tr>
+  <tr><td class="num">14</td><td class="num">9</td><td class="num">69.9&nbsp;mm</td></tr>
+  <tr><td class="num">23</td><td class="num">18</td><td class="num">134.7&nbsp;mm</td></tr>
 </table>
 
-<p>The table quotes three figures because an independent Python implementation of the same method
-agrees with the demo to three and differs in the fourth (the two accumulate the same sum in a
-different order). Quoting a digit that two correct implementations disagree about would be claiming
-precision that is not there. Halving the step halves the error, so Euler is first order, which is
-a slow rate of improvement. An error of 0.49 m at $h = 0.1$ on a flight that peaks at 3.97 m is not a small
-correction, and reaching a millimeter would need a step of about 200 microseconds, which is about
-5 000 steps for one second of flight. A smaller step does reduce the error, though a better rule
-usually reduces it at much lower cost. Week 8's later pages are about what "better" costs and how to check that
-you have it.</p>
+<p>If each 40&nbsp;ms step started from the 0.1&nbsp;ms run's state, its overshoot would fall from
+8.1 to 7.5&nbsp;mm over the flight, and the 18 of them add to 139.8&nbsp;mm. The gap at frame 23 is
+5.1&nbsp;mm less, and that difference comes from the vertical velocity. The size of the downward
+acceleration falls from 10.11 to 9.32&nbsp;m/s² over the flight (drag adds to gravity on the way up
+and works against it on the way down). Euler uses the value at the start of each step, so it makes
+the vertical velocity a little too low each step. Every later step moves with that velocity. By
+frame 23 the vertical velocity is about 15&nbsp;mm/s low, and that has pulled the height down by
+about 5&nbsp;mm. The height error and the velocity error both stay in the state and carry into
+every later step.</p>
 
-<div class="aside">
-  <span class="label">The sign of Euler's error</span>
-  <p>The projectile's height is <dfn data-g="concave">concave</dfn>, so the curve bends downwards everywhere. Euler follows the
-tangent at the left of each step, and a tangent to a concave curve lies above it, so every step
-overshoots the height and the accumulated result is too high. The error has a consistent sign,
-so it does not average out the way noise does. A hundred noise samples partly cancel, which gave
-week 3's √n, while a hundred Euler steps add up in the same direction.</p>
-</div>
+<p>A drag-free run is a check on the program, because without drag the height has a formula. With
+$k$ = 0 the vertical acceleration is exactly $-g$, the velocity steps exactly, and every 40&nbsp;ms
+step overshoots by &frac12;&nbsp;&times;&nbsp;9.81&nbsp;&times;&nbsp;0.04² = 7.85&nbsp;mm. Eighteen
+of them make 141.3&nbsp;mm, and the program's drag-free run at 40&nbsp;ms ends 141.3&nbsp;mm above
+the parabola.</p>
 
-<h2 id="choosing-the-step">Choosing the Step</h2>
+<h2 id="step-size-against-the-tracking-noise">Step Size Against the Tracking Noise</h2>
 
-<p>In week 3 the instrument fixed the interval, while here you choose the step, and the choice
-has a cost either way:</p>
+<p>In week 3 the instrument fixed the interval. Here you choose the step, and the choice has a cost
+either way:</p>
 
 <ul class="plain">
-  <li>Too large and the answer is wrong, possibly wildly.</li>
-  <li>Too small and the run is slow, and eventually less accurate once rounding
-  dominates.</li>
-  <li>There is no formula that gives the right value, because it depends on how fast the solution
-  is
-  changing, which is what you are trying to find out.</li>
+  <li>Too large - the answer is wrong, possibly wildly.</li>
+  <li>Too small - the run is slow, and eventually less accurate once rounding dominates.</li>
+  <li>No formula - the right step depends on how fast the solution changes, and that is not known
+  before the run.</li>
 </ul>
 
-<p>What can be done is measure: halve the step, see whether the answer moves, and stop when halving
-it again changes nothing you care about. That is a <dfn data-g="convergence-study">convergence
-study</dfn>, and it is the usual way to defend a step size when there is no exact answer to
-compare against.</p>
+<p>On the shot, one step per frame ends 13.5&nbsp;cm high at frame 23. That is more than four times
+the 3.07&nbsp;cm vertical tracking noise in the header of the shots file, so the stepping error
+alone would likely be visible in the data. Steps of 20&nbsp;ms end 6.7&nbsp;cm high. The 0.1&nbsp;ms run is
+a fair comparison only if it is itself close enough. Checking that, by halving the step until the
+answer stops moving, is the <dfn data-g="convergence-study">convergence study</dfn> on <a
+href="order-of-accuracy-measured.html" title="Order of accuracy">page 26</a>.</p>
 
 <div class="check">
   <span class="label">Check</span>
   <ol>
-    <li>Euler with <em>h</em> = 0.02 gives 3.41 m and with <em>h</em> = 0.01 gives 3.36 m.
-    Estimate
-    the answer at <em>h</em> = 0, and say what property of the method you used.
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>3.31&nbsp;m.</strong></p>
-     <p>Euler is first order, so the error is proportional to <em>h</em>. Writing <em>I</em>(<em>h</em>)
-= <em>I</em> + <em>Ch</em>, the two runs give <em>I</em> + 0.02<em>C</em> = 3.41 and <em>I</em>
-+ 0.01<em>C</em> = 3.36. Subtracting, 0.01<em>C</em> = 0.05, and <em>I</em> =
-2&thinsp;&times;&thinsp;3.36 &minus; 3.41 = <strong>3.31&nbsp;m</strong>.</p>
-     <p>The property used is <strong>first-order convergence</strong>. The extrapolation lies
-<em>outside</em> the two values. Both runs are on
-the same side of the answer, so the estimate is further out than either. Averaging them, the
-instinct when two runs disagree, gives 3.39 and is worse than the finer run alone. The same
-maneuver with a factor of 4 in place of 2 is the trapezoid extrapolation on <a href="area-under-a-curve.html" title="Area under a curve">page 5</a>.</p></div></details></li>
-    <li>Why does an error in one Euler step affect every later step, when an error in one panel
-    of a
-    week-3 integral does not?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Because of what each step is computed <em>from</em>.</p>
-     <p>A quadrature panel is computed from the data. The area of panel 40 depends on the samples at
-panel 40 and on nothing else. The panels are independent terms in a sum, so an error in one is
-an error in one, and the total is off by that amount and no more.</p>
+    <li>Why does an error in one Euler step affect every later step, when an error in one panel of
+    a week-3 integral does not?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>A quadrature panel is computed from the data. The area of panel 40 depends on the samples at
+panel 40 and on nothing else. The panels are independent terms in a sum, so an error in one panel
+changes the total by that amount only.</p>
      <p>An Euler step is computed from <strong>the result of the previous step</strong>. The state at
-step 40 is the starting point for step 41, so an error made at step 40 displaces the trajectory,
-and every subsequent step is taken from the wrong place, evaluating the rate at a state the
-system never occupied. The errors propagate, and they can grow. This is the structural difference between
-quadrature and time stepping, and it is why an ODE solver can be unstable and a quadrature rule
-cannot. It is also why the global error of an order-<em>p</em> method is
-<em>h</em><sup><em>p</em></sup> and not <em>h</em><sup><em>p</em>+1</sup>: the local error per
-step is one order better, and accumulating over 1/<em>h</em> steps gives back the order that was
-won.</p></div></details></li>
-    <li>Your solution is convex and not concave. Which way does Euler err, and why?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>It underestimates.</strong> Euler steps along the tangent at the current point. For a
-<dfn data-g="convex">convex</dfn> solution, meaning one curving upward with <em>y</em>&Prime;&nbsp;&gt;&nbsp;0, the tangent
-lies <em>below</em> the curve everywhere except where it touches, so each step lands low, and
-the errors are of one sign, so they accumulate and do not cancel. For a concave solution the
-tangent lies above and Euler overestimates. The rule is that <strong>Euler errs on the side away
-from the curvature</strong>, and while <em>y</em>&Prime; keeps one sign the sign of the error is
-knowable in advance without running anything. A method whose error has a consistent sign can be
-bracketed. If you run it and a method that errs the other way, the answer is between them, and
-that is often a stronger statement than an error estimate.</p></div></details></li>
+step 40 is the starting point for step 41, so an error made at step 40 displaces the trajectory.
+Every later step is taken from the wrong place, and the rate is evaluated at a state the system
+never occupied. On the shot the rate depends on the velocity and not on the height. For this reason the first
+step's 8&nbsp;mm height error is carried along unchanged, while the velocity error changes every
+later position step (by about 5&nbsp;mm at frame 23).</p></div></details></li>
+    <li>A run with 20&nbsp;ms steps ends 67.1&nbsp;mm above the 0.1&nbsp;ms run at frame 23, about
+    half of the 40&nbsp;ms run's 134.7&nbsp;mm. Explain the half from the overshoot of one step.
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>One step overshoots by about &frac12;&nbsp;|<em>a</em><sub><em>z</em></sub>|&nbsp;<em>h</em>².
+Halving <em>h</em> makes each overshoot a quarter as large (about 2.0&nbsp;mm in place of
+8.1&nbsp;mm). It also doubles the number of steps, from 18 to 36, so the total is about half. That
+is why Euler's error at a fixed time is roughly
+proportional to the step. <a href="order-of-accuracy-measured.html" title="Order of accuracy">Page
+26</a> measures this on the shot and compares it with steppers that do better.</p></div></details></li>
+    <li>Your solution is <dfn data-g="convex">convex</dfn> and not concave. Which way does Euler
+    err, and why?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Euler underestimates a convex solution. Euler steps along the tangent at the current point. For a
+convex solution, meaning one curving upward with a positive second derivative, the tangent
+lies <em>below</em> the curve everywhere except where it touches, so each step lands low. The
+errors have one sign, so they add up and do not cancel. For a concave solution like the shot's
+height, the tangent lies above and Euler overestimates. If the second derivative keeps one sign
+over the run, you can predict the sign of the error before running the program.</p></div></details></li>
   </ol>
 </div>
 
@@ -1047,31 +1079,31 @@ that is often a stronger statement than an error estimate.</p></div></details></
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="1|f is the system and euler is the method. Neither mentions the other's details, which is what lets either be swapped.;2|The starting state as an array of floats, whatever form it was passed in ([numpy arrays](py-numpy.html)).;3|One row per time, filled in as the loop goes. dt and n, the step and the number of steps, are the choices.;6|The whole method is this line, and the other lines store the results. f is handed the time as well as the state, because a rate can depend on a recorded signal and not only on the state.">def euler(f, s0, t0, dt, n):
+  <pre data-lang="python" data-notes="1|f is the system and euler is the method. Neither uses the other's details, so either one can be replaced without changing the other.;2|The starting state as an array of floats, whatever form it was passed in ([numpy arrays](py-numpy.html)).;3|One row per time, filled in as the loop goes. dt and n, the step and the number of steps, are the choices.;6|The whole method is this line, and the other lines store the results. f is handed the time as well as the state, because a rate can depend on a recorded signal and not only on the state.">def euler(f, s0, t0, dt, n):
     s = np.array(s0, dtype=float)
     out = np.empty((n + 1, s.size))
     out[0] = s
-    for k in range(n):
-        s = s + dt * f(t0 + k*dt, s)
-        out[k + 1] = s
+    for i in range(n):
+        s = s + dt * f(t0 + i*dt, s)
+        out[i + 1] = s
     return out</pre>
-  <pre data-lang="matlab" hidden data-notes="2|s0(:).' forces a row vector, so a scalar problem and a two-component one behave the same.;6|The whole method is this line." data-notes="2|s0(:) makes the state a column, the shape the rate functions on these pages return, so a scalar problem and a two-component one behave the same.;4|Each row of out is one time. .' turns the column into a row to store it.">function out = euler(f, s0, t0, dt, n)
+  <pre data-lang="matlab" hidden data-notes="2|s0(:) makes the state a column, the shape the rate functions on these pages return, so a scalar problem and a six-component one behave the same.;4|Each row of out is one time. .' turns the column into a row to store it.;6|The whole method is this line.">function out = euler(f, s0, t0, dt, n)
     s = s0(:);
     out = zeros(n+1, numel(s));
     out(1,:) = s.';
-    for k = 0:n-1
-        s = s + dt * f(t0 + k*dt, s);
-        out(k+2,:) = s.';
+    for i = 0:n-1
+        s = s + dt * f(t0 + i*dt, s);
+        out(i+2,:) = s.';
     end
 end</pre>
   <pre data-lang="js" hidden data-notes="5|The rate of every component at this time and state.;8|Each component advances by its own rate, so the same code advances a state of any length.">function euler(f, s0, t0, dt, n) {
   let s = s0.slice();
   const out = [s.slice()];
-  for (let k = 0; k &lt; n; k++) {
-    const ds = f(t0 + k * dt, s);
+  for (let i = 0; i &lt; n; i++) {
+    const ds = f(t0 + i * dt, s);
     const next = [];
-    for (let i = 0; i &lt; s.length; i++) {
-      next.push(s[i] + dt * ds[i]);
+    for (let j = 0; j &lt; s.length; j++) {
+      next.push(s[j] + dt * ds[j]);
     }
     s = next;
     out.push(s.slice());
@@ -1081,6 +1113,11 @@ end</pre>
   <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
 </div>
 
+<p>For the shot, <code>f</code> is the rate above written as a function of the six-component
+state, and <code>euler(f, s0, 0.20, 0.04, 18)</code> is the run at one step per frame. <a
+href="state-as-a-vector.html" title="State as a vector">Page 25</a> writes that rate and the fit
+that gives <code>s0</code>.</p>
+
 <h2 id="terms-used-on-this-page">Terms Used on This Page</h2>
 
 <p>Hover or tab to a highlighted term in the text to see its definition. Every term marked on this
@@ -1089,7 +1126,7 @@ page is listed here.</p>
 <dl class="glossary"></dl>
 
 <p class="deeper">Go deeper: <a href="workbench.html?tool=step">the workbench</a>. Euler, Heun
-and RK4 on an equation you write, with the order measured from the run and not quoted.</p>
+and RK4 on an equation you write, with the order measured from the run itself.</p>
 
   </main>
 
@@ -1106,11 +1143,11 @@ and RK4 on an equation you write, with the order measured from the run and not q
   </script>
   
 
-  <script type="module" src="js/bundle/from-a-rate-to-a-trajectory.js?v=20261109080753"></script>
+  <script type="module" src="js/bundle/from-a-rate-to-a-trajectory.js?v=20261109124015"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-10-28">October 28, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-09">November 9, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
