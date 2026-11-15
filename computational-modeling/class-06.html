@@ -696,6 +696,8 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 body.inclass .deck-slide.point.c6mid{justify-content:center}
 .deck-slide.point.c6mid .stage{flex:0 0 auto; margin-top:5vh; align-items:center}
 .deck-slide.point.c6mid .stage:has(> .pcards){height:36vh}
+/* c6vc: the stage content sits in the middle of the space below the head; data-fill 0.95 keeps the fit script from shrinking it */
+.deck-slide.point.c6vc .stage{display:flex; flex-direction:column; justify-content:center}
 .deck-slide .c6stack{display:flex; flex-direction:column; gap:.6vh; width:97%; margin:0 auto;
   font-size:calc(var(--stage-code) * .74)}
 .deck-slide .c6layer{display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.4fr) minmax(0,1.3fr);
@@ -741,16 +743,20 @@ body.inclass .deck-slide.point.c6mid{justify-content:center}
      read from data/example/test_short.json, no fitting), anchors three end points on the line
      through the hoop centre, chooses T = 1.3 s, and runs the example notebook's A6 code
      (pipeline/examples/a07.py) on the records it builds. -->
-<section class="deck-slide point c6mid" data-nofit>
+<section class="deck-slide point compact c6vc" data-fill="0.95">
   <div class="head">
     <p class="say">We invent an arc to test our method on a shot whose <span class="term">truth we know</span>, the way 2&nbsp;+&nbsp;2&nbsp;=&nbsp;4 tests a calculator.</p>
+  </div>
+  <div class="stage tight">
+    <img style="display:block; margin:0 auto; max-width:96%; max-height:56vh" src="data/img/class06/c6-s-arc.svg?v=20261113083220"
+         alt="The invented in shot from the side, drawn to scale: an arc from frame 10 of record 158, 2.154 m up and 7.6 m from the hoop, rising to about 4.7 m and coming down through the middle of the rim at 3.048 m, circled and labelled the truth we choose: the hoop centre at 1.3 s. A short vertical line behind the rim marks the backboard.">
   </div>
 </section>
 
 <!-- synth_a6.py, step 1: record 158, frame 10 (t = 0.40 s in the file): x -7.319, y -2.024 m from the
      hoop centre, 7.594 m away (the three-point line is 7.24 m), height 2.154 m, in the hands and
      rising. The record's own crossing is about 1.34 s later. -->
-<section class="deck-slide point compact" data-fill="0.95">
+<section class="deck-slide point compact c6vc" data-fill="0.95">
   <div class="head">
     <p class="say">We start from <span class="term">frame 10</span> of record 158, before the shot and outside the three-point line.</p>
     <p class="sub">A shot we build &middot; Frame 10 of record 158</p>
@@ -764,21 +770,23 @@ body.inclass .deck-slide.point.c6mid{justify-content:center}
 
 <!-- synth_a6.py, step 2: direction (0.9638, 0.2665); end points at rim height: in (0, 0); on the rim
      0.2286 m short, (-0.2203, -0.0609); out 0.50 m short, (-0.4819, -0.1332). -->
-<section class="deck-slide point compact">
+<section class="deck-slide point compact c6vc" data-fill="0.95">
   <div class="head">
     <p class="say">From that frame we draw a line through the hoop centre and put <span class="term">three end points</span> on it.</p>
-    <p class="sub">A shot we build &middot; Three end points at rim height</p>
+    <p class="sub">A shot we build &middot; (x, y, height) in metres from the hoop centre</p>
   </div>
   <div class="stage tight">
     <img style="display:block; margin:0 auto; max-width:96%; max-height:36vh" src="data/img/class06/c6-s-line.svg?v=20261113083220"
          alt="Left, from above: a dashed line from frame 10 through the hoop centre, 7.594 m long, with three dots near the hoop. Right, a close-up of the hoop with dotted circles at 0.109 m and 0.348 m: the in point at the centre, the on-the-rim point on the rim 0.2286 m short of the centre, and the out point 0.50 m short, each with a circle the size of the ball drawn around it.">
-    <div class="pcards c3">
-      <div class="pcard"><span class="tag">in</span><b>The hoop centre</b>
-        <span>The ball&rsquo;s centre comes down through the middle of the hoop.</span></div>
-      <div class="pcard"><span class="tag">on the rim</span><b>0.2286&nbsp;m short of the centre</b>
-        <span>The hoop&rsquo;s radius, so the ball&rsquo;s centre comes down directly over the near rim.</span></div>
-      <div class="pcard"><span class="tag">out</span><b>0.50&nbsp;m short of the centre</b>
-        <span>Farther than 0.348&nbsp;m (the hoop&rsquo;s radius plus the ball&rsquo;s radius of 0.1195&nbsp;m), so no part of the ball reaches the rim.</span></div>
+    <div class="pcards c4">
+      <div class="pcard"><span class="tag">start</span><b>(&minus;7.319, &minus;2.024, 2.154)</b>
+        <span>Frame 10, 7.594&nbsp;m out</span></div>
+      <div class="pcard"><span class="tag">in</span><b>(0, 0, 3.048)</b>
+        <span>The hoop centre</span></div>
+      <div class="pcard"><span class="tag">on the rim</span><b>(&minus;0.220, &minus;0.061, 3.048)</b>
+        <span>0.2286&nbsp;m short, over the near rim</span></div>
+      <div class="pcard"><span class="tag">out</span><b>(&minus;0.482, &minus;0.133, 3.048)</b>
+        <span>0.50&nbsp;m short, clear of the rim</span></div>
     </div>
   </div>
 </section>
