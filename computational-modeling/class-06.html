@@ -698,6 +698,14 @@ body.inclass .deck-slide.point.c6mid{justify-content:center}
 .deck-slide.point.c6mid .stage:has(> .pcards){height:36vh}
 /* c6vc: the stage content sits in the middle of the space below the head; data-fill 0.95 keeps the fit script from shrinking it */
 .deck-slide.point.c6vc .stage{display:flex; flex-direction:column; justify-content:center}
+.deck-slide pre.c6code{margin:1.4vh auto 0; padding:.7em 1.1em; background:#f4f1ea; border-radius:6px;
+  font-size:.86em; line-height:1.45; white-space:pre; width:max-content; max-width:96%}
+.deck-slide .c6grid{display:grid; grid-template-columns:auto repeat(9, minmax(0,1fr)); gap:.35em .2em;
+  width:96%; margin:2vh auto 0; text-align:center; font-variant-numeric:tabular-nums}
+.deck-slide .c6grid .h{font-weight:700; color:var(--ink-soft, #6b645c)}
+.deck-slide .c6grid .r{text-align:left; font-weight:700; padding-right:.6em}
+.deck-slide .c6grid .n{color:#a3341f}
+.deck-slide .c6grid .sum{border-top:2px solid #3f3b36; padding-top:.25em; font-weight:700}
 .deck-slide .c6stack{display:flex; flex-direction:column; gap:.6vh; width:97%; margin:0 auto;
   font-size:calc(var(--stage-code) * .74)}
 .deck-slide .c6layer{display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.4fr) minmax(0,1.3fr);
@@ -753,7 +761,7 @@ body.inclass .deck-slide.point.c6mid{justify-content:center}
   </div>
 </section>
 
-<!-- synth_a6.py, step 1: record 158, frame 10 (t = 0.40 s in the file): x -7.319, y -2.024 m from the
+<!-- synth_a6.py, step 1: record 158, frame 10 (t = 0.40 s in the file): x 19.732, y 5.596 on the court (hoop at 27.051, 7.62), x -7.319, y -2.024 m from the
      hoop centre, 7.594 m away (the three-point line is 7.24 m), height 2.154 m, in the hands and
      rising. The record's own crossing is about 1.34 s later. -->
 <section class="deck-slide point compact c6vc" data-fill="0.95">
@@ -763,35 +771,35 @@ body.inclass .deck-slide.point.c6mid{justify-content:center}
   </div>
   <div class="stage tight">
     <img style="display:block; margin:0 auto; max-width:96%; max-height:46vh" src="data/img/class06/c6-s-pick.svg?v=20261113083220"
-         alt="Record 158 in two views. Left, from above: the frames run from about 7.7 m out toward the hoop at the origin, and frame 10 is circled at (-7.319, -2.024). Right, height against time: the frames climb from under 1 m, and frame 10 is circled at 2.154 m, below the dashed rim line.">
-    <p class="c6hint">From the file: x = &minus;7.319&nbsp;m, y = &minus;2.024&nbsp;m and 2.154&nbsp;m up. That puts the ball 7.594&nbsp;m from the hoop centre, outside the three-point line at 7.24&nbsp;m, still in the shooter&rsquo;s hands.</p>
+         alt="Record 158 in two views. Left, from above: the frames run from about 7.7 m out toward the hoop at (27.051, 7.62), and frame 10 is circled at (19.732, 5.596). Right, height against time: the frames climb from under 1 m, and frame 10 is circled at 2.154 m, below the dashed rim line.">
+    <p class="c6hint">From the file: x = 19.732&nbsp;m, y = 5.596&nbsp;m and 2.154&nbsp;m up. The hoop centre is at (27.051, 7.620), so the ball is 7.594&nbsp;m from it, outside the three-point line at 7.24&nbsp;m.</p>
   </div>
 </section>
 
-<!-- synth_a6.py, step 2: direction (0.9638, 0.2665); end points at rim height: in (0, 0); on the rim
-     0.2286 m short, (-0.2203, -0.0609); out 0.50 m short, (-0.4819, -0.1332). -->
+<!-- synth_a6.py, step 2: direction (0.9638, 0.2665); end points at rim height, in court coordinates: in (27.051, 7.620);
+     on the rim 0.2286 m short, (26.831, 7.559); out 0.50 m short, (26.569, 7.487). -->
 <section class="deck-slide point compact c6vc" data-fill="0.95">
   <div class="head">
     <p class="say">From that frame we draw a line through the hoop centre and put <span class="term">three end points</span> on it.</p>
-    <p class="sub">A shot we build &middot; (x, y, height) in metres from the hoop centre</p>
+    <p class="sub">A shot we build &middot; (x, y, height) in metres, as in the file</p>
   </div>
   <div class="stage tight">
     <img style="display:block; margin:0 auto; max-width:96%; max-height:36vh" src="data/img/class06/c6-s-line.svg?v=20261113083220"
          alt="Left, from above: a dashed line from frame 10 through the hoop centre, 7.594 m long, with three dots near the hoop. Right, a close-up of the hoop with dotted circles at 0.109 m and 0.348 m: the in point at the centre, the on-the-rim point on the rim 0.2286 m short of the centre, and the out point 0.50 m short, each with a circle the size of the ball drawn around it.">
     <div class="pcards c4">
-      <div class="pcard"><span class="tag">start</span><b>(&minus;7.319, &minus;2.024, 2.154)</b>
+      <div class="pcard"><span class="tag">start</span><b>(19.732, 5.596, 2.154)</b>
         <span>Frame 10, 7.594&nbsp;m out</span></div>
-      <div class="pcard"><span class="tag">in</span><b>(0, 0, 3.048)</b>
+      <div class="pcard"><span class="tag">in</span><b>(27.051, 7.620, 3.048)</b>
         <span>The hoop centre</span></div>
-      <div class="pcard"><span class="tag">on the rim</span><b>(&minus;0.220, &minus;0.061, 3.048)</b>
+      <div class="pcard"><span class="tag">on the rim</span><b>(26.831, 7.559, 3.048)</b>
         <span>0.2286&nbsp;m short, over the near rim</span></div>
-      <div class="pcard"><span class="tag">out</span><b>(&minus;0.482, &minus;0.133, 3.048)</b>
+      <div class="pcard"><span class="tag">out</span><b>(26.569, 7.487, 3.048)</b>
         <span>0.50&nbsp;m short, clear of the rim</span></div>
     </div>
   </div>
 </section>
 
-<!-- synth_a6.py, step 3: T = 1.3 s for all three; in: x(t) = -7.319 + 5.6304 t, y(t) = -2.024 + 1.5568 t,
+<!-- synth_a6.py, step 3: T = 1.3 s for all three; in: x(t) = 19.732 + 5.6304 t, y(t) = 5.596 + 1.5568 t,
      5.8416 m/s; on the rim 5.6658 m/s; out 5.4570 m/s. The in shot's dots every 0.1 s are
      0.5842 m apart. -->
 <section class="deck-slide point compact c6vc" data-fill="0.95">
@@ -803,7 +811,7 @@ body.inclass .deck-slide.point.c6mid{justify-content:center}
     <img style="display:block; margin:0 auto; max-width:96%; max-height:38vh" src="data/img/class06/c6-s-floor.svg?v=20261113083220"
          alt="From above: the in shot every 0.1 s, fourteen dots evenly spaced 0.5842 m apart on the line from frame 10, at t = 0, to the hoop centre, at t = 1.3 s.">
     <div class="work" style="font-size:1.05em">$$\text{position} = \textcolor{#8A6508}{\text{start}} + \frac{\textcolor{#5F7038}{\text{in}} - \textcolor{#8A6508}{\text{start}}}{1.3}\,t$$</div>
-    <div class="work" style="font-size:1.05em">$$x(t) = \textcolor{#8A6508}{-7.319} + \frac{\textcolor{#5F7038}{0} - (\textcolor{#8A6508}{-7.319})}{1.3}\,t = -7.319 + 5.630\,t \qquad y(t) = \textcolor{#8A6508}{-2.024} + \frac{\textcolor{#5F7038}{0} - (\textcolor{#8A6508}{-2.024})}{1.3}\,t = -2.024 + 1.557\,t$$</div>
+    <div class="work" style="font-size:1.05em">$$x(t) = \textcolor{#8A6508}{19.732} + \frac{\textcolor{#5F7038}{27.051} - \textcolor{#8A6508}{19.732}}{1.3}\,t = 19.732 + 5.630\,t \qquad y(t) = \textcolor{#8A6508}{5.596} + \frac{\textcolor{#5F7038}{7.620} - \textcolor{#8A6508}{5.596}}{1.3}\,t = 5.596 + 1.557\,t$$</div>
     <p class="c6hint">Start and in are the points on the last slide, and 1.3&nbsp;s is our choice. The real ball took about 1.34&nbsp;s.</p>
   </div>
 </section>
@@ -826,8 +834,8 @@ body.inclass .deck-slide.point.c6mid{justify-content:center}
 </section>
 
 <!-- synth_a6.py, step 4: the in shot's 9 frames, t = 0 to 0.32 s; heights 2.154 2.428 2.687 2.931 3.158
-     3.370 3.567 3.747 3.912 m; x from -7.319 to -5.518 m; the crossing is 0.98 s after the last frame. -->
-<section class="deck-slide point compact">
+     3.370 3.567 3.747 3.912 m; x from 19.732 to 21.533 m on the court; the crossing is 0.98 s after the last frame. -->
+<section class="deck-slide point compact c6vc" data-fill="0.95">
   <div class="head">
     <p class="say">Sampling the in shot at 25 frames a second for 9 frames gives a <span class="term">synthetic short record</span>.</p>
     <p class="sub">A shot we build &middot; Nine frames of the in shot</p>
@@ -842,19 +850,56 @@ body.inclass .deck-slide.point.c6mid{justify-content:center}
 <!-- synth_a6.py, step 4: the walk back stops at frame 3 (no push in a parabola), so the fit uses frames
      3 to 8. All three return t = 1.299999999999999 s (off 1.1e-15 s); place off 8.9e-15 (in),
      4.8e-15 (on the rim), 5.1e-15 m (out); calls in, on the rim, out. -->
-<section class="deck-slide point">
+<section class="deck-slide point compact c6vc" data-fill="0.95">
   <div class="head">
     <p class="say">With no noise, the A6 program returns the time, place and call we chose, to within <span class="term">float rounding</span>.</p>
     <p class="sub">A shot we build &middot; A6 returns the chosen crossing</p>
   </div>
   <div class="stage tight">
-    <div class="c6newton c6meth" style="margin-top:2vh">
-      <span class="h">shot</span><span class="h">time returned (we chose 1.3&nbsp;s)</span><span class="h">distance from its end point</span><span class="h">call</span>
-      <span>in</span><span>1.299999999999999 s</span><span>9 &times; 10&#8315;&sup1;&#8309;&nbsp;m</span><span class="c6ok">in</span>
-      <span>on the rim</span><span>1.299999999999999 s</span><span>5 &times; 10&#8315;&sup1;&#8309;&nbsp;m</span><span class="c6ok">on the rim</span>
-      <span>out</span><span>1.299999999999999 s</span><span>5 &times; 10&#8315;&sup1;&#8309;&nbsp;m</span><span class="c6ok">out</span>
+    <img style="display:block; margin:0 auto; max-width:96%; max-height:50vh" src="data/img/class06/c6-s-exact.svg?v=20261113083220"
+         alt="Two close-ups of the hoop from above, side by side and almost identical. Left, what we chose, 1.3 s: the in, on-the-rim and out points on the line through the hoop centre. Right, what A6 returns, 1.299999999999999 s: the same three points in the same places, labelled in, off 9 times 10 to the minus 15 m; on the rim, off 5 times 10 to the minus 15 m; out, off 5 times 10 to the minus 15 m.">
+    <p class="c6hint">Each miss is the size of last week&rsquo;s float rounding.</p>
+  </div>
+</section>
+
+<!-- synth_a6.py, step 5: the header's tracking_noise (vertical_m 0.0307, horizontal_m 0.0284, "mildly
+     correlated frame to frame"). We read each as the spread (standard deviation) of a bell curve, use the
+     horizontal one for x and y separately, and draw every frame on its own. Copy A is seed 132; its draws
+     in cm: height 0.84 0.68 -5.11 -0.51 3.46 -3.91 1.94 -2.97 -3.53; along 2.22 -5.19 -1.96 3.61 -1.53
+     -5.75 -3.42 -0.31 3.22; across -4.58 -0.09 0.29 3.59 1.40 -0.61 -1.19 2.06 0.26. -->
+<section class="deck-slide point compact c6vc" data-fill="0.95">
+  <div class="head">
+    <p class="say">The header gives the tracker&rsquo;s <span class="term">scatter</span>, and we draw each frame&rsquo;s error from a bell curve that wide.</p>
+    <p class="sub">A shot we build &middot; From the header to random errors</p>
+  </div>
+  <div class="stage tight">
+    <img style="display:block; margin:0 auto; max-width:96%; max-height:31vh" src="data/img/class06/c6-s-draw.svg?v=20261113083220"
+         alt="Two bell curves of the error added to a frame, in cm. Left, height, with a spread of plus or minus 3.07 cm shaded and copy A's nine height draws as dots on the curve, from about minus 5 to plus 3.5 cm. Right, along and across the floor, spread plus or minus 2.84 cm, with copy A's nine along draws as dots and nine across draws as squares.">
+    <pre class="c6code">"tracking_noise": {"vertical_m": 0.0307, "horizontal_m": 0.0284}
+
+rng = np.random.default_rng(132)
+nz = rng.normal(0, 0.0307, 9)    # a height error for each of the 9 frames
+nx = rng.normal(0, 0.0284, 9)    # along the court
+ny = rng.normal(0, 0.0284, 9)    # across the court</pre>
+    <p class="c6hint">We draw every frame on its own, though the header says the real errors are mildly correlated frame to frame.</p>
+  </div>
+</section>
+
+<!-- synth_a6.py, step 5: copy A's heights, clean + draw = noisy: 2.154 2.428 2.687 2.931 3.158 3.370
+     3.567 3.747 3.912 -> 2.162 2.435 2.636 2.926 3.193 3.331 3.586 3.717 3.877. -->
+<section class="deck-slide point compact c6vc" data-fill="0.95">
+  <div class="head">
+    <p class="say">Adding one draw to each frame turns the clean record into a <span class="term">noisy copy</span>.</p>
+    <p class="sub">A shot we build &middot; Copy A&rsquo;s heights, in metres</p>
+  </div>
+  <div class="stage tight">
+    <div class="c6grid">
+      <span class="h r">frame</span><span class="h">0</span><span class="h">1</span><span class="h">2</span><span class="h">3</span><span class="h">4</span><span class="h">5</span><span class="h">6</span><span class="h">7</span><span class="h">8</span>
+      <span class="r">clean</span><span>2.154</span><span>2.428</span><span>2.687</span><span>2.931</span><span>3.158</span><span>3.370</span><span>3.567</span><span>3.747</span><span>3.912</span>
+      <span class="r n">+ draw</span><span class="n">+0.008</span><span class="n">+0.007</span><span class="n">&minus;0.051</span><span class="n">&minus;0.005</span><span class="n">+0.035</span><span class="n">&minus;0.039</span><span class="n">+0.019</span><span class="n">&minus;0.030</span><span class="n">&minus;0.035</span>
+      <span class="r sum">noisy</span><span class="sum">2.162</span><span class="sum">2.435</span><span class="sum">2.636</span><span class="sum">2.926</span><span class="sum">3.193</span><span class="sum">3.331</span><span class="sum">3.586</span><span class="sum">3.717</span><span class="sum">3.877</span>
     </div>
-    <p class="c6hint" style="margin-top:3vh">The time is off by 10&#8315;&sup1;&#8309;&nbsp;s and each place by under 10&#8315;&sup1;&#8308;&nbsp;m, the size of last week&rsquo;s float rounding. The walk back finds no push in a pure parabola, so the fit uses frames 3 to 8.</p>
+    <p class="c6hint" style="margin-top:3vh">x and y get their own draws the same way. A new seed gives a new copy.</p>
   </div>
 </section>
 
@@ -864,7 +909,7 @@ body.inclass .deck-slide.point.c6mid{justify-content:center}
      rim 25.7 cm off, d 0.474 (out); out 24.9 cm off, d 0.733 (out). Copy B (seed 176, the 88th
      percentile): -45 ms; in 51.3 cm off, d 0.513 (out); on the rim 50.9 cm, d 0.663 (out); out
      50.4 cm, d 0.881 (out). -->
-<section class="deck-slide point compact">
+<section class="deck-slide point compact c6vc" data-fill="0.95">
   <div class="head">
     <p class="say">With the tracker&rsquo;s noise, two copies of the in shot come back <span class="term">26&nbsp;cm and 51&nbsp;cm</span> from the truth.</p>
     <p class="sub">A shot we build &middot; Two noisy copies of the in shot</p>
@@ -872,7 +917,7 @@ body.inclass .deck-slide.point.c6mid{justify-content:center}
   <div class="stage tight">
     <img style="display:block; margin:0 auto; max-width:96%; max-height:46vh" src="data/img/class06/c6-s-noise.svg?v=20261113083220"
          alt="Left: the in shot&rsquo;s curve with two sets of noisy frames, copy A as dots and copy B as squares, and the parabola fitted to each; both fits peak lower and come down before the true curve. Right, from above: the three true end points as hollow circles and each copy&rsquo;s answer joined to them by a gray line, about 0.25 m away for copy A and about 0.5 m for copy B.">
-    <p class="c6hint">Random noise at the header&rsquo;s 3.07&nbsp;cm in height and 2.84&nbsp;cm along the floor, added to every frame. We picked copy A as a typical draw and copy B as an unlucky one. A calls the in shot on the rim and B calls it out. In week 10 we draw a thousand copies to see how far a typical copy lands.</p>
+    <p class="c6hint">We picked copy A as a typical draw and copy B as an unlucky one. A calls the in shot on the rim and B calls it out. In week 10 we draw a thousand copies to see how far a typical copy lands.</p>
   </div>
 </section>
 
