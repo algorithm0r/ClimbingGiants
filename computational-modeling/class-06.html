@@ -696,7 +696,7 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 body.inclass .deck-slide.point.c6mid{justify-content:center}
 .deck-slide.point.c6mid .stage{flex:0 0 auto; margin-top:5vh; align-items:center}
 .deck-slide.point.c6mid .stage:has(> .pcards){height:36vh}
-/* c6vc: the head sits inside the stage, so headline and content centre together on the slide;
+/* c6vc: the head sits inside the stage, so headline and content center together on the slide;
    data-fill 0.95 keeps the fit script from shrinking the text */
 .deck-slide.point.c6vc .stage{display:flex; flex-direction:column; justify-content:center}
 .deck-slide.point.c6vc .stage > .head{margin-bottom:2vh}
@@ -714,6 +714,7 @@ body.inclass .deck-slide.point.c6mid{justify-content:center}
   gap:1.4vw; align-items:center; background:var(--subtle); border-left:4px solid var(--course-accent);
   border-radius:4px; padding:1vh 1.2vw; text-align:left; line-height:1.25}
 .deck-slide .c6layer .lay{font-weight:700; color:var(--course-accent-dark)}
+.deck-slide .c6layer .term{font-weight:700; color:var(--course-accent-dark)}
 .deck-slide .c6layer.c6cols{background:none; border-left-color:transparent; padding-top:0; padding-bottom:0}
 .deck-slide .c6layer.c6cols span{font-size:.8em; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
   color:var(--warm-gray); white-space:nowrap}
@@ -733,6 +734,43 @@ body.inclass .deck-slide.point.c6mid{justify-content:center}
 .deck-slide .c6bad{color:#a3341f; font-weight:700}
 .deck-slide .c6newton.c6meth{font-size:calc(var(--stage-code) * .8); gap:.7vh 2.4vw}
 .deck-slide .c6newton.c6meth > span:nth-child(4n+1){font-family:var(--font-body, sans-serif)}
+.deck-slide table.c6tab{border-collapse:collapse; margin:1vh auto 0; font-size:.95em; line-height:1.3; max-width:96%}
+.deck-slide table.c6tab th{font-size:.78em; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+  color:var(--warm-gray); text-align:left; padding:0 1.1em .5em 0; border-bottom:2px solid #3f3b36}
+.deck-slide table.c6tab td{padding:.42em 1.1em .42em 0; text-align:left; vertical-align:top; border-bottom:1px solid #e6e0d6}
+.deck-slide table.c6tab td:first-child{font-weight:700; white-space:nowrap}
+.deck-slide table.c6tab tr.grp td{font-size:.8em; letter-spacing:.06em; text-transform:uppercase; padding-top:.8em; border-bottom:none}
+.deck-slide table.c6tab tr.simple td:first-child, .deck-slide table.c6tab tr.grp.simple td{color:#2f6690}
+.deck-slide table.c6tab tr.complex td:first-child, .deck-slide table.c6tab tr.grp.complex td{color:#8A6508}
+.deck-slide table.c6tab.nums td:nth-child(n+2){font-variant-numeric:tabular-nums; text-align:center}
+.deck-slide table.c6tab.nums th:nth-child(n+2){text-align:center; padding-left:1.1em}
+.deck-slide table.c6tab tr.key td{background:#f3eff8}
+.deck-slide ol.c6road{columns:2; column-gap:4vw; width:max-content; max-width:94%; margin:1vh auto 0; text-align:left;
+  font-size:1.15em; line-height:1.55; padding-left:1.6em}
+.deck-slide ol.c6road li{break-inside:avoid; padding-left:.3em}
+.deck-slide ul.c6pts{list-style:none; padding:0; width:max-content; max-width:94%; margin:1.6vh auto 0; align-self:center; text-align:left; line-height:1.5}
+.deck-slide ul.c6pts b{display:inline-block; min-width:5.2em}
+.deck-slide ul.c6pts span{color:var(--warm-gray)}
+/* c6even: slides 3-12, built for a laptop projecting full screen. Every text block on the slide is
+   sized from the stage font the fit script sets, so headline, equations, tables and notes come out
+   about the same size; only figure labels run smaller. */
+body.inclass .deck-slide.point.compact.c6even:not(.part) .say{font-size:1.15em; line-height:1.2}
+.deck-slide.c6even .sub{font-size:1em; margin-top:.6vh}
+.deck-slide.c6even .c6hint{font-size:1em; color:#57514a; max-width:94%}
+.deck-slide.c6even .work{font-size:1em !important}
+.deck-slide.c6even .work.c6eq{font-size:.8em !important; margin:1.6vh auto 0}
+.deck-slide.c6even .c6newton{font-size:1em}
+.deck-slide.c6even .c6newton.c6meth{font-size:.8em}
+.deck-slide.c6even .c6newton .h{font-size:.7em}
+.deck-slide.c6even table.c6tab{font-size:.95em}
+.deck-slide .c6grid.c6lined{gap:0; border:1px solid #cfc8bb}
+.deck-slide .c6grid.c6lined > span{padding:.28em .35em; border-bottom:1px solid #e0d9cc; border-left:1px solid #e0d9cc}
+.deck-slide .c6grid.c6lined > span.h{border-bottom:2px solid #3f3b36; background:#f4f1ea}
+.deck-slide .c6grid.c6lined > span.r{border-left:none; background:#f4f1ea}
+.deck-slide .c6grid.c6hl4 > span:nth-child(10n+6){background:#e3e8d4; font-weight:700; color:#3e4a24; border-left:2px solid #5F7038; border-right:2px solid #5F7038}
+.deck-slide.c6even .c6grid{font-size:1em}
+.deck-slide.c6even ul.c6pts span{color:#57514a}
+.deck-slide.c6even pre.c6code{font-size:.86em}
 </style>
 
 <section class="deck-slide arrive">
@@ -751,111 +789,130 @@ body.inclass .deck-slide.point.c6mid{justify-content:center}
      Every number in this part is printed by synth_a6.py (Teaching/TME 310 - Computational
      Modelling/in-class/class-06). It starts from one recorded frame of record 158 (frame 10,
      read from data/example/test_short.json, no fitting), anchors three end points on the line
-     through the hoop centre, chooses T = 1.3 s, and runs the example notebook's A6 code
+     through the hoop center, chooses T = 1.3 s, and runs the example notebook's A6 code
      (pipeline/examples/a07.py) on the records it builds. -->
-<section class="deck-slide point compact c6vc" data-fill="0.95">
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
   <div class="stage tight">
     <div class="head">
       <p class="say">We invent an arc to test our method on a shot whose <span class="term">truth we know</span>, the way 2&nbsp;+&nbsp;2&nbsp;=&nbsp;4 tests a calculator.</p>
     </div>
     <img style="display:block; margin:0 auto; max-width:96%; max-height:56vh" src="data/img/class06/c6-s-arc.svg?v=20261113083220"
-         alt="The invented in shot from the side, drawn to scale: an arc from frame 10 of record 158, 2.154 m up and 7.6 m from the hoop, rising to about 4.7 m and coming down through the middle of the rim at 3.048 m, circled and labelled the truth we choose: the hoop centre at 1.3 s. A short vertical line behind the rim marks the backboard.">
+         alt="The invented in shot from the side, drawn to scale: an arc from frame 10 of record 158, 2.154 m up and 7.6 m from the hoop, rising to about 4.7 m and coming down through the middle of the rim at 3.048 m, circled and labeled end: the hoop center at 1.3 s. A short vertical line behind the rim marks the backboard.">
   </div>
 </section>
 
 <!-- synth_a6.py, step 1: record 158, frame 10 (t = 0.40 s in the file): x 19.732, y 5.596 on the court (hoop at 27.051, 7.62), x -7.319, y -2.024 m from the
-     hoop centre, 7.594 m away (the three-point line is 7.24 m), height 2.154 m, in the hands and
+     hoop center, 7.594 m away (the three-point line is 7.24 m), height 2.154 m, in the hands and
      rising. The record's own crossing is about 1.34 s later. -->
-<section class="deck-slide point compact c6vc" data-fill="0.95">
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
   <div class="stage tight">
     <div class="head">
       <p class="say">We start from <span class="term">frame 10</span> of record 158, before the shot and outside the three-point line.</p>
     </div>
     <img style="display:block; margin:0 auto; max-width:96%; max-height:46vh" src="data/img/class06/c6-s-pick.svg?v=20261113083220"
          alt="Record 158 in two views. Left, from above: the frames run from about 7.7 m out toward the hoop at (27.051, 7.62), and frame 10 is circled at (19.732, 5.596). Right, height against time: the frames climb from under 1 m, and frame 10 is circled at 2.154 m, below the dashed rim line.">
-    <p class="c6hint">From the file: x = 19.732&nbsp;m, y = 5.596&nbsp;m and 2.154&nbsp;m up. The hoop centre is at (27.051, 7.620), so the ball is 7.594&nbsp;m from it, outside the three-point line at 7.24&nbsp;m.</p>
+    <p class="c6hint">From the file: x = 19.732&nbsp;m, y = 5.596&nbsp;m and 2.154&nbsp;m up. The hoop center is at (27.051, 7.620), so the ball is 7.594&nbsp;m from it, outside the three-point line at 7.24&nbsp;m.</p>
   </div>
 </section>
 
 <!-- synth_a6.py, step 2: direction (0.9638, 0.2665); end points at rim height, in court coordinates: in (27.051, 7.620);
      on the rim 0.2286 m short, (26.831, 7.559); out 0.50 m short, (26.569, 7.487). -->
-<section class="deck-slide point compact c6vc" data-fill="0.95">
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
   <div class="stage tight">
     <div class="head">
-      <p class="say">From that frame we draw a line through the hoop centre and put <span class="term">three end points</span> on it.</p>
-      <p class="sub">(x, y, height) in metres, as in the file</p>
+      <p class="say">From that frame we draw a line through the hoop center and put <span class="term">three end points</span> on it.</p>
+      <p class="sub">(x, y, height) in meters, as in the file</p>
     </div>
-    <img style="display:block; margin:0 auto; max-width:96%; max-height:36vh" src="data/img/class06/c6-s-line.svg?v=20261113083220"
-         alt="Left, from above: a dashed line from frame 10 through the hoop centre, 7.594 m long, with three dots near the hoop. Right, a close-up of the hoop with dotted circles at 0.109 m and 0.348 m: the in point at the centre, the on-the-rim point on the rim 0.2286 m short of the centre, and the out point 0.50 m short, each with a circle the size of the ball drawn around it.">
-    <div class="pcards c4">
-      <div class="pcard"><span class="tag">start</span><b>(19.732, 5.596, 2.154)</b>
-        <span>Frame 10, 7.594&nbsp;m out</span></div>
-      <div class="pcard"><span class="tag">in</span><b>(27.051, 7.620, 3.048)</b>
-        <span>The hoop centre</span></div>
-      <div class="pcard"><span class="tag">on the rim</span><b>(26.831, 7.559, 3.048)</b>
-        <span>0.2286&nbsp;m short, over the near rim</span></div>
-      <div class="pcard"><span class="tag">out</span><b>(26.569, 7.487, 3.048)</b>
-        <span>0.50&nbsp;m short, clear of the rim</span></div>
-    </div>
+    <img style="display:block; margin:0 auto; max-width:96%; max-height:42vh" src="data/img/class06/c6-s-line.svg?v=20261113083220"
+         alt="Left, from above: a dashed line from frame 10 through the hoop center, 7.594 m long, with three dots near the hoop. Right, a close-up of the hoop with dotted circles at 0.109 m and 0.348 m: the in point at the center, the on-the-rim point on the rim 0.2286 m short of the center, and the out point 0.50 m short, each with a circle the size of the ball drawn around it.">
+    <ul class="c6pts">
+      <li><b>start</b> (19.732, 5.596, 2.154) <span>frame 10, 7.594&nbsp;m out</span></li>
+      <li><b>in</b> (27.051, 7.620, 3.048) <span>the hoop center</span></li>
+      <li><b>on the rim</b> (26.831, 7.559, 3.048) <span>0.2286&nbsp;m short, over the near rim</span></li>
+      <li><b>out</b> (26.569, 7.487, 3.048) <span>0.50&nbsp;m short, clear of the rim</span></li>
+    </ul>
   </div>
 </section>
 
 <!-- synth_a6.py, step 3: T = 1.3 s for all three; in: x(t) = 19.732 + 5.6304 t, y(t) = 5.596 + 1.5568 t,
-     5.8416 m/s; on the rim 5.6658 m/s; out 5.4570 m/s. The in shot's dots every 0.1 s are
-     0.5842 m apart. -->
-<section class="deck-slide point compact c6vc" data-fill="0.95">
+     5.8416 m/s; on the rim: 5.4609, 1.5099, 5.6658 m/s; out: 5.2597, 1.4543, 5.4570 m/s.
+     Dots every 0.1 s are 0.584, 0.567 and 0.546 m apart. -->
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
   <div class="stage tight">
     <div class="head">
       <p class="say">We choose <span class="term">1.3 seconds</span> from frame 10 to the rim, and the motion across the floor follows.</p>
     </div>
-    <img style="display:block; margin:0 auto; max-width:96%; max-height:38vh" src="data/img/class06/c6-s-floor.svg?v=20261113083220"
-         alt="From above: the in shot every 0.1 s, fourteen dots evenly spaced 0.5842 m apart on the line from frame 10, at t = 0, to the hoop centre, at t = 1.3 s.">
-    <div class="work" style="font-size:1.05em">$$\text{position} = \textcolor{#8A6508}{\text{start}} + \frac{\textcolor{#5F7038}{\text{in}} - \textcolor{#8A6508}{\text{start}}}{1.3}\,t$$</div>
-    <div class="work" style="font-size:1.05em">$$x(t) = \textcolor{#8A6508}{19.732} + \frac{\textcolor{#5F7038}{27.051} - \textcolor{#8A6508}{19.732}}{1.3}\,t = 19.732 + 5.630\,t \qquad y(t) = \textcolor{#8A6508}{5.596} + \frac{\textcolor{#5F7038}{7.620} - \textcolor{#8A6508}{5.596}}{1.3}\,t = 5.596 + 1.557\,t$$</div>
-    <p class="c6hint">Start and in are the points on the last slide, and 1.3&nbsp;s is our choice. The real ball took about 1.34&nbsp;s.</p>
+    <img style="display:block; margin:0 auto; max-width:98%; max-height:36vh" src="data/img/class06/c6-s-floor.svg?v=20261113083220"
+         alt="Three panels from above, one per shot, each a line from frame 10 at (19.732, 5.596) toward the hoop at (27.051, 7.620). In: x(t) = 19.732 + 5.630 t, y(t) = 5.596 + 1.557 t, ending at the hoop center. On the rim: x(t) = 19.732 + 5.461 t, y(t) = 5.596 + 1.510 t, ending on the near rim. Out: x(t) = 19.732 + 5.260 t, y(t) = 5.596 + 1.454 t, ending short of the hoop.">
+    <div class="work c6eq">$$\text{position} = \textcolor{#8A6508}{\text{start}} + \frac{\textcolor{#5F7038}{\text{end}} - \textcolor{#8A6508}{\text{start}}}{1.3}\,t$$</div>
+    <div class="work c6eq">$$x(t) = \textcolor{#8A6508}{19.732} + \frac{\textcolor{#5F7038}{27.051} - \textcolor{#8A6508}{19.732}}{1.3}\,t = 19.732 + 5.630\,t$$</div>
+    <div class="work c6eq">$$y(t) =\textcolor{#8A6508}{5.596} + \frac{\textcolor{#5F7038}{7.620} - \textcolor{#8A6508}{5.596}}{1.3}\,t = 5.596 + 1.557\,t$$</div>
   </div>
 </section>
 
 <!-- synth_a6.py, step 3: 4.905 x 1.3^2 = 8.2895; v = (3.048 - 2.154 + 8.2895) / 1.3 = 7.064 m/s;
      z(t) = 2.154 + 7.064 t - 4.905 t^2; top at 0.720 s and 4.697 m; the in shot comes down 44.2 degrees
      below level (45.1 on the rim, 46.2 out). -->
-<section class="deck-slide point compact c6vc" data-fill="0.95">
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
   <div class="stage tight">
     <div class="head">
       <p class="say">In height we fix <span class="term">two points</span>, and gravity sets the curve between them.</p>
     </div>
-    <img style="display:block; margin:0 auto; max-width:96%; max-height:40vh" src="data/img/class06/c6-s-height.svg?v=20261113083220"
-         alt="Height against time from frame 10. Left: only two points, the start at 2.154 m at t = 0 and the rim at 3.048 m at t = 1.3 s. Right: the parabola through them, with v = 7.064 m/s, peaking at 4.70 m at 0.72 s.">
-    <div class="work" style="font-size:1.05em">$$\textcolor{#5F7038}{\text{end height}} = \textcolor{#8A6508}{\text{start height}} + 1.3\,v - 4.905 \times 1.3^2$$</div>
-    <div class="work" style="font-size:1.05em">$$\textcolor{#5F7038}{3.048} = \textcolor{#8A6508}{2.154} + 1.3\,v - 4.905 \times 1.3^2 \quad\Longrightarrow\quad v = \frac{\textcolor{#5F7038}{3.048} - \textcolor{#8A6508}{2.154} + 8.289}{1.3} = 7.064\ \text{m/s}$$</div>
-    <p class="c6hint">The heights are the third numbers on the cards. All three shots share this curve, which tops out at 4.70&nbsp;m.</p>
+    <img style="display:block; margin:0 auto; max-width:96%; max-height:46vh" src="data/img/class06/c6-s-height.svg?v=20261113083220"
+         alt="Height against time from frame 10. Left: only two points, the start at 2.154 m at t = 0 and the rim at 3.048 m at t = 1.3 s. Right: the parabola through them, with v = 7.064 m/s, peaking at 4.70 m at 0.72 s, titled v = 7.064 m/s.">
+    <div class="work c6eq">$$\textcolor{#5F7038}{\text{end height}} = \textcolor{#8A6508}{\text{start height}} + 1.3\,v - 4.905 \times 1.3^2$$</div>
+    <div class="work c6eq">$$\textcolor{#5F7038}{3.048} = \textcolor{#8A6508}{2.154} + 1.3\,v - 4.905 \times 1.3^2 \quad\Longrightarrow\quad v = \frac{\textcolor{#5F7038}{3.048} - \textcolor{#8A6508}{2.154} + 8.289}{1.3} = 7.064\ \text{m/s}$$</div>
+  </div>
+</section>
+
+<!-- synth_a6.py, step 4: the header's sample_rate_hz 25; the in shot's frames on the court:
+     0: t 0.00, (19.732, 5.596, 2.154) ... 8: t 0.32, (21.533, 6.094, 3.912); frame 4 worked with the file's
+     four decimals (frame 10 of record 158 is 19.7315, 5.5962, 2.1536): x = 19.7315 + 5.6304 x 0.16 = 20.632,
+     y = 5.5962 + 1.5568 x 0.16 = 5.845, height = 2.1536 + 7.0645 x 0.16 - 4.905 x 0.16^2 = 3.158. -->
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
+  <div class="stage tight">
+    <div class="head">
+      <p class="say">We sample the in shot at the header&rsquo;s <span class="term">25 frames a second</span>, so frame k is at t = k / 25&nbsp;s.</p>
+    </div>
+    <div class="work c6eq">$$\text{frame 4: } t = \frac{4}{25} = 0.16\ \text{s}$$</div>
+    <div class="work c6eq">$$x = 19.7315 + 5.6304 \times 0.16 = 20.632 \qquad y = 5.5962 + 1.5568 \times 0.16 = 5.845$$</div>
+    <div class="work c6eq">$$\text{height} = 2.1536 + 7.0645 \times 0.16 - 4.905 \times 0.16^2 = 3.158$$</div>
+    <div class="c6grid c6lined c6hl4" style="margin-top:2.4vh">
+      <span class="h r">frame</span><span class="h">0</span><span class="h">1</span><span class="h">2</span><span class="h">3</span><span class="h">4</span><span class="h">5</span><span class="h">6</span><span class="h">7</span><span class="h">8</span>
+      <span class="r">t (s)</span><span>0.00</span><span>0.04</span><span>0.08</span><span>0.12</span><span>0.16</span><span>0.20</span><span>0.24</span><span>0.28</span><span>0.32</span>
+      <span class="r">x (m)</span><span>19.732</span><span>19.957</span><span>20.182</span><span>20.407</span><span>20.632</span><span>20.858</span><span>21.083</span><span>21.308</span><span>21.533</span>
+      <span class="r">y (m)</span><span>5.596</span><span>5.658</span><span>5.721</span><span>5.783</span><span>5.845</span><span>5.908</span><span>5.970</span><span>6.032</span><span>6.094</span>
+      <span class="r">height (m)</span><span>2.154</span><span>2.428</span><span>2.687</span><span>2.931</span><span>3.158</span><span>3.370</span><span>3.567</span><span>3.747</span><span>3.912</span>
+    </div>
+    <p class="c6hint" style="margin-top:2.5vh">Frame 0 is frame 10 of record 158. The worked lines use the file&rsquo;s four decimals, and the on-the-rim and out shots differ only in x and y.</p>
   </div>
 </section>
 
 <!-- synth_a6.py, step 4: the in shot's 9 frames, t = 0 to 0.32 s; heights 2.154 2.428 2.687 2.931 3.158
      3.370 3.567 3.747 3.912 m; x from 19.732 to 21.533 m on the court; the crossing is 0.98 s after the last frame. -->
-<section class="deck-slide point compact c6vc" data-fill="0.95">
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
   <div class="stage tight">
     <div class="head">
-      <p class="say">Sampling the in shot at 25 frames a second for 9 frames gives a <span class="term">synthetic short record</span>.</p>
+      <p class="say">These 9 frames are a <span class="term">synthetic short record</span>, and each point lands exactly on the constructed parabola.</p>
     </div>
-    <img style="display:block; margin:0 auto; max-width:96%; max-height:46vh" src="data/img/class06/c6-s-frames.svg?v=20261113083220"
-         alt="Left, height against time from frame 10: nine dots on the curve from 0 to 0.32 s, shaded, and the rest of the curve coming down through the rim at 1.3 s, circled and labelled the truth. Right, from above: the nine dots on the first part of the line toward the hoop.">
-    <p class="c6hint">The A6 program gets only these 9 frames, which stop 0.98&nbsp;s before the crossing. Write down the time and place you expect it to return before we run it.</p>
+    <img style="display:block; margin:0 auto; max-width:96%; max-height:50vh" src="data/img/class06/c6-s-frames.svg?v=20261113083220"
+         alt="Left, height against time from frame 10: nine dots on the curve from 0 to 0.32 s, shaded, and the rest of the curve coming down through the rim at 1.3 s, circled and labeled end: 1.3 s, the hoop center. Right, from above: the nine dots on the first part of the line toward the hoop.">
+    <p class="c6hint">The A6 program gets only these 9 frames. The fit picks the parabola closest to the points, and ours passes through every one, so the fit should give back our parabola and its crossing at 1.3&nbsp;s.</p>
   </div>
 </section>
 
-<!-- synth_a6.py, step 4: the walk back stops at frame 3 (no push in a parabola), so the fit uses frames
-     3 to 8. All three return t = 1.299999999999999 s (off 1.1e-15 s); place off 8.9e-15 (in),
+<!-- synth_a6.py, step 4: the clean records fit all 9 frames, with no start rule. All three return
+     t = 1.300000000000001 s (off 8.9e-16 s); place off 5.0e-15 (in), 3.5e-15 (on the rim), 3.1e-15 m (out);
+     calls in, on the rim, out. Before 2026-11-15 the fit started at the walk back's frame 3: t = 1.299999999999999 s, place off 8.9e-15 (in),
      4.8e-15 (on the rim), 5.1e-15 m (out); calls in, on the rim, out. -->
-<section class="deck-slide point compact c6vc" data-fill="0.95">
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
   <div class="stage tight">
     <div class="head">
-      <p class="say">With no noise, the A6 program returns the time, place and call we chose, to within <span class="term">float rounding</span>.</p>
+      <p class="say">The method adds no error here, so the A6 program should return the time, place and call we chose, up to <span class="term">float rounding</span>.</p>
     </div>
     <img style="display:block; margin:0 auto; max-width:96%; max-height:50vh" src="data/img/class06/c6-s-exact.svg?v=20261113083220"
-         alt="Two close-ups of the hoop from above, side by side and almost identical. Left, what we chose, 1.3 s: the in, on-the-rim and out points on the line through the hoop centre. Right, what A6 returns, 1.299999999999999 s: the same three points in the same places, labelled in, off 9 times 10 to the minus 15 m; on the rim, off 5 times 10 to the minus 15 m; out, off 5 times 10 to the minus 15 m.">
-    <p class="c6hint">Each miss is the size of last week&rsquo;s float rounding.</p>
+         alt="Two close-ups of the hoop from above, side by side and almost identical. Left, what we chose, 1.3 s: the in, on-the-rim and out points on the line through the hoop center. Right, what A6 returns, 1.300000000000001 s: the same three points in the same places, labeled in, off 5 times 10 to the minus 15 m; on the rim, off 3 times 10 to the minus 15 m; out, off 3 times 10 to the minus 15 m.">
+    <p class="c6hint">Each miss is the size of last week&rsquo;s float rounding. A pass here shows the program does what the math says, though it tells us nothing yet about noise.</p>
   </div>
 </section>
 
@@ -864,7 +921,7 @@ body.inclass .deck-slide.point.c6mid{justify-content:center}
      horizontal one for x and y separately, and draw every frame on its own. Copy A is seed 132; its draws
      in cm: height 0.84 0.68 -5.11 -0.51 3.46 -3.91 1.94 -2.97 -3.53; along 2.22 -5.19 -1.96 3.61 -1.53
      -5.75 -3.42 -0.31 3.22; across -4.58 -0.09 0.29 3.59 1.40 -0.61 -1.19 2.06 0.26. -->
-<section class="deck-slide point compact c6vc" data-fill="0.95">
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
   <div class="stage tight">
     <div class="head">
       <p class="say">The header gives the tracker&rsquo;s <span class="term">scatter</span>, and we draw each frame&rsquo;s error from a bell curve that wide.</p>
@@ -887,7 +944,7 @@ ny = rng.normal(0, 0.0284, 9)    # across the court</pre>
   <div class="stage tight">
     <div class="head">
       <p class="say">Adding one draw to each frame turns the clean record into a <span class="term">noisy copy</span>.</p>
-      <p class="sub">Copy A&rsquo;s heights, in metres</p>
+      <p class="sub">Copy A&rsquo;s heights, in meters</p>
     </div>
     <div class="c6grid">
       <span class="h r">frame</span><span class="h">0</span><span class="h">1</span><span class="h">2</span><span class="h">3</span><span class="h">4</span><span class="h">5</span><span class="h">6</span><span class="h">7</span><span class="h">8</span>
@@ -977,16 +1034,16 @@ ny = rng.normal(0, 0.0284, 9)    # across the court</pre>
       <div class="c6layer c6cols"><span>The request says</span><span>What it takes to read it</span><span>What he means</span></div>
       <div class="c6layer"><span class="lay">&ldquo;before it gets there&rdquo;</span>
         <span>The short records stop a few frames after the release, long before the hoop.</span>
-        <span>The crossing has to come from the fitted model, since no frame shows it.</span></div>
+        <span>The crossing has to come from the <span class="term">fitted model</span>, since no frame shows it.</span></div>
       <div class="c6layer"><span class="lay">&ldquo;comes down through the height of the rim&rdquo;</span>
         <span>An arc passes through every height below its top twice, once rising and once falling.</span>
-        <span>The falling crossing of 3.048&nbsp;m, the rim height in the header.</span></div>
+        <span>The <span class="term">falling crossing</span> of 3.048&nbsp;m, the rim height in the header.</span></div>
       <div class="c6layer"><span class="lay">&ldquo;when and where&rdquo;</span>
-        <span>The record gives the ball&rsquo;s centre along and across the court, and its height, at each frame.</span>
-        <span>The time of the crossing, and the ball&rsquo;s centre measured from the hoop&rsquo;s centre at that time.</span></div>
+        <span>The record gives the ball&rsquo;s center along and across the court, and its height, at each frame.</span>
+        <span>The <span class="term">time of the crossing</span>, and the <span class="term">ball&rsquo;s center</span> measured from the <span class="term">hoop&rsquo;s center</span> at that time.</span></div>
       <div class="c6layer"><span class="lay">&ldquo;whether it goes in&rdquo;</span>
         <span>The header gives the radius of the hoop and the radius of the ball.</span>
-        <span>In, out, or on the rim, decided by how far the ball&rsquo;s centre is from the hoop&rsquo;s centre.</span></div>
+        <span><span class="term">In</span>, <span class="term">out</span>, or on the <span class="term">rim</span>, decided by how far the ball&rsquo;s center is from the hoop&rsquo;s center.</span></div>
       <div class="c6layer"><span class="lay">&ldquo;too close to call from the frames you have&rdquo;</span>
         <span>A fit to a few frames can move when the frames change.</span>
         <span>Each call comes with how far its crossing could move.</span></div>
@@ -994,418 +1051,486 @@ ny = rng.normal(0, 0.0284, 9)    # across the court</pre>
   </div>
 </section>
 
-<section class="deck-slide point">
-  <div class="head">
-    <p class="say">Today we compare the ways to find where the <span class="term">flight starts</span>, then the ways to find where the ball <span class="term">comes down</span>.</p>
-    <p class="sub">Nine steps, in the order we take them today.</p>
-  </div>
+<section class="deck-slide point compact c6vc" data-fill="0.95">
   <div class="stage tight">
-    <div class="pcards c3">
+    <div class="head">
+      <p class="say">Today we keep <span class="term">every start</span>, follow one through the method, then come back and choose the rule.</p>
+    </div>
+    <div class="pcards c4">
       <div class="pcard"><span class="tag">step 1</span><b>What is in a short record?</b>
         <span>Plot it and read the header.</span></div>
-      <div class="pcard"><span class="tag">step 2</span><b>Which rules could find the release?</b>
-        <span>Lectures 13 and 19, the example reports, and two new ones.</span></div>
-      <div class="pcard"><span class="tag">step 3</span><b>Where does each rule start record 158?</b>
+      <div class="pcard"><span class="tag">step 2</span><b>Which rules could pick the first frame of the fit?</b>
+        <span>Three simple rules and three complex ones.</span></div>
+      <div class="pcard"><span class="tag">step 3</span><b>How does one program run any rule?</b>
+        <span>Each rule is a function that returns a frame.</span></div>
+      <div class="pcard"><span class="tag">step 4</span><b>Where does each rule start record 158?</b>
         <span><a href="conditions-become-roots.html#finding-the-release">Finding the release</a>.</span></div>
-      <div class="pcard"><span class="tag">step 4</span><b>Which rule predicts the crossing best?</b>
-        <span>Training arcs cut to the same length.</span></div>
-      <div class="pcard"><span class="tag">step 5</span><b>Should we fit gravity or hold it?</b>
-        <span>Assignment 5 chose on whole flights.</span></div>
-      <div class="pcard"><span class="tag">step 6</span><b>Which method finds the root?</b>
-        <span><a href="evaluations-are-the-currency.html">Evaluation cost</a>.</span></div>
-      <div class="pcard"><span class="tag">step 7</span><b>Which root is the crossing?</b>
-        <span><a href="conditions-become-roots.html#which-root-actually-happened">Choosing the falling crossing</a>.</span></div>
-      <div class="pcard"><span class="tag">step 8</span><b>Where on the floor does it come down?</b>
-        <span>Straight lines from above.</span></div>
-      <div class="pcard"><span class="tag">step 9</span><b>Does it go in, and how sure is the call?</b>
-        <span>The radii, then drop a frame.</span></div>
+      <div class="pcard"><span class="tag">step 5</span><b>When does the ball reach the rim?</b>
+        <span>Gravity held, then the quadratic formula.</span></div>
+      <div class="pcard"><span class="tag">step 6</span><b>Where is the ball at the crossing?</b>
+        <span>Put the time into x, y and height.</span></div>
+      <div class="pcard"><span class="tag">step 7</span><b>Does it go in?</b>
+        <span>The radii from the header.</span></div>
+      <div class="pcard"><span class="tag">step 8</span><b>How do we predict from any start?</b>
+        <span>One function, predict(r, s).</span></div>
+      <div class="pcard"><span class="tag">step 9</span><b>Does the function work?</b>
+        <span>Our invented shot, then training arcs.</span></div>
+      <div class="pcard"><span class="tag">step 10</span><b>Which rule should we use?</b>
+        <span>Training arcs cut like the test records.</span></div>
+      <div class="pcard"><span class="tag">step 11</span><b>What do we tell Bob?</b>
+        <span>All 12 short records, then mid and long.</span></div>
     </div>
   </div>
 </section>
 
 <!-- ============================================================ step 1
-     trace_a6.py, step 1: 26 frames each; first frame 0.58 to 1.43 m up; the highest frame is
-     the last on all 12; last frame 4.22 to 4.64 m up and 4.8 to 6.3 m from the hoop. -->
-<section class="deck-slide point compact">
-  <div class="head">
-    <p class="say">Every short record begins with the ball <span class="term">in the hand</span> and ends with it still rising.</p>
-    <p class="sub">Step 1 of 9 &middot; What is in a short record?</p>
-  </div>
+     trace_a6.py, step 1: the same 12 test shots come at three lengths, short 26 frames (to 0.99-1.01 s),
+     mid 30 (to 1.15-1.18 s), long 34 (to 1.31-1.34 s); all 12 short and mid records are still rising at
+     their last frame, 6 of 12 long ones. Training: 24 whole arcs, 45-76 frames, from before the release
+     to 15 frames past the rim crossing. Record 158 is 24.8 ft; training arc 662 is 24.7 ft at the same
+     hoop (27.051, 7.62), 56 frames. Short records: first frame 0.58 to 1.43 m up. -->
+<section class="deck-slide point compact c6vc" data-fill="0.95">
   <div class="stage tight">
-    <div class="figside" style="grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)">
-      <img src="data/img/class06/c6-a6-records.svg?v=20261113083220"
-           alt="Height against time for all 12 short records, 26 frames each, with record 158 drawn in green. Every record starts between about 0.6 and 1.4 m, climbs past the rim line near 0.7 s, and is still climbing at its last frame, between 4.2 and 4.6 m.">
-      <div class="pcol">
-        <div class="pcard"><span class="tag">what we found</span><b>26 frames, 0.58 to 1.43&nbsp;m at the start</b>
-          <span>The header says each record begins <em>partway into the flight</em>. The first frames sit well below the rim, and the upward speed rises, falls and rises again as the shooter gathers and pushes the ball. The last frame is the highest on all 12, 4.2 to 4.6&nbsp;m up and still 4.8 to 6.3&nbsp;m from the hoop.</span></div>
-        <div class="pcard"><span class="tag">what we learn</span><b>The header is wrong about the start</b>
-          <span>Only part of each record is free flight, and no record reaches the top of its arc.</span></div>
-        <div class="pcard gold"><span class="tag">next</span><b>Which frames are flight?</b>
-          <span>Compare the rules for the release.</span></div>
-      </div>
+    <div class="head">
+      <p class="say">Each test shot comes at <span class="term">three lengths</span>, and 24 whole training arcs show the rest of a flight.</p>
+      <p class="sub">Step 1 of 11 &middot; The records</p>
     </div>
+    <img style="display:block; margin:0 auto; max-width:96%; max-height:49vh" src="data/img/class06/c6-a6-sets.svg?v=20261113083220"
+         alt="Two panels of height against time. Left, the test sets: record 158 as dots, green for its 26 short-record frames to 1.00 s, gold for the 4 more in the mid record to 1.16 s, and red for the 4 more in the long record to 1.32 s, which has just passed the top; the other 11 test shots are faint grey lines. Right, the training set: arc 662, 56 frames, 24.7 ft, drawn whole from the hand up past 4.7 m and down through the rim line to below 1.5 m; the other 23 arcs are faint grey lines.">
+    <p class="c6hint">Assignment 6 asks about the 12 short records. The header says every test record begins partway into the flight, but the first frames are still in the hand.</p>
   </div>
 </section>
 
-<!-- ============================================================ step 2
-     The rules, as rules_a6.py (this deck's folder in Teaching) applies them. Lecture 19's five are
-     src/standalone/lecture-19-figs.js lines 46-59; the walk back is lecture 13 and the example
-     notebook; the last push is the technical report (a6_rim_crossing.py, last push + 1). -->
-<section class="deck-slide point compact">
-  <div class="head">
-    <p class="say">The lectures, the example reports and two new rules each pick the <span class="term">first frame</span> of free flight from the speed, the acceleration, the height or the distance.</p>
-    <p class="sub">Step 2 of 9 &middot; Which rules could find the release?</p>
-  </div>
+<!-- ============================================================ step 2: the start rules
+     Every number from here to step 4, and in steps 10 and 11, is printed by start_a6.py (this
+     deck's folder in Teaching) under "start |". The rule functions on the step 3 slides are the
+     functions in that script. Record 158 (26 frames): last 7 frames picks 19, first above the
+     rim 17, first inside the line 16, vertical speed peak (h = 3) 18, floor speed constant
+     (h = 3, tol 0.2) 22, acceleration near gravity (h = 3, tol 5) 20. -->
+<section class="deck-slide point compact c6vc" data-fill="0.95">
   <div class="stage tight">
-    <div class="pcards c3">
-      <div class="pcard"><span class="tag">walk back &middot; lecture 13</span><b>The speed stops growing</b>
-        <span>From the last frame with a speed, step back while the upward speed one or two frames earlier is higher.</span></div>
-      <div class="pcard"><span class="tag">last push &middot; technical report</span><b>The hand stops pushing up</b>
-        <span>One frame after the last frame whose acceleration, from a parabola through 9 frames, points up.</span></div>
-      <div class="pcard"><span class="tag">speed peak &middot; lecture 19</span><b>Scan for the top of the speed</b>
-        <span>Once the ball is above 2&nbsp;m, the first frame whose upward speed is higher than the next frame&rsquo;s.</span></div>
-      <div class="pcard"><span class="tag">hoop speed &middot; lecture 19</span><b>Scan for the top of the speed toward the hoop</b>
-        <span>Once the ball moves toward the hoop faster than 3&nbsp;m/s, the first frame whose speed toward the hoop is higher than the next one&rsquo;s.</span></div>
-      <div class="pcard"><span class="tag">levels &middot; lecture 19</span><b>2.75&nbsp;m, the rim, the three-point line</b>
-        <span>The first frame above 2.75&nbsp;m, the first above 3.048&nbsp;m, and the first inside 7.24&nbsp;m of the hoop.</span></div>
-      <div class="pcard"><span class="tag">median &middot; lecture 19</span><b>The middle of five picks</b>
-        <span>The two speed scans and the three levels each pick a frame, and the median takes the middle one.</span></div>
-      <div class="pcard gold"><span class="tag">new &middot; fixed count</span><b>The last 6 frames</b>
-        <span>A fixed count, the fewest frames of flight in any short record.</span></div>
-      <div class="pcard gold"><span class="tag">new &middot; noise test</span><b>Grow the fit until it breaks</b>
-        <span>Add earlier frames one at a time while the fit, gravity held, stays within 1.2 times the 3.07&nbsp;cm of vertical tracking noise.</span></div>
-      <div class="pcard"><span class="tag">pick a rule</span><b>Which rule would you trust?</b>
-        <span>With your group, pick one and say what could make it fail on these records.</span></div>
+    <div class="head">
+      <p class="say">We need a rule to pick the first frame of the fit, and there are many <span class="term">simple</span> and <span class="term">complex</span> candidates.</p>
+      <p class="sub">Step 2 of 11 &middot; The start rules</p>
     </div>
+    <table class="c6tab">
+      <thead><tr><th>start rule</th><th>operations</th><th>settings</th></tr></thead>
+      <tbody>
+        <tr class="grp simple"><td colspan="3">simple</td></tr>
+        <tr><td>last k frames</td><td>counting back from the end</td><td>k</td></tr>
+        <tr><td>first frame above z</td><td>a comparison</td><td>z</td></tr>
+        <tr><td>i-th frame inside the three-point line</td><td>a distance and a comparison</td><td>i</td></tr>
+        <tr class="grp complex"><td colspan="3">complex</td></tr>
+        <tr><td>vertical speed peak</td><td>a difference with step h, and a loop</td><td>h</td></tr>
+        <tr><td>floor speed constant</td><td>a difference with step h, a median, and a loop</td><td>h and a tolerance</td></tr>
+        <tr><td>acceleration near gravity</td><td>a second difference with step h, and a loop</td><td>h and a tolerance</td></tr>
+      </tbody>
+    </table>
+    <p class="c6hint">The gravity row also covers two variants we scored: one frame after the last upward push, and a fit that grows back from the end while it matches the tracking noise.</p>
   </div>
 </section>
 
-<!-- rules_a6.py, record 158: walk back 17 (0.26 m, rim), last push 18 (0.30, rim), speed peak 9
-     (2.48, out), hoop speed 3 (4.31, out), 2.75 m 16 (0.25), rim 17 (0.26), 3-pt line 16 (0.25),
-     median 16 (0.25), last 6 20 (0.25), fit grows 14 (0.44, out). Across the 12 records, rules
-     beyond 1 m: speed peak on 8, 3-pt line on 4, hoop speed on 1, the others on none. Among the
-     rules within 1 m the crossing spreads 0.05 to 0.40 m (median 0.17) and gives two calls on 9.
-     The walk back and the median differ by at most 2 frames on every record. -->
-<section class="deck-slide point compact">
-  <div class="head">
-    <p class="say">On record 158 the rules start the flight anywhere from <span class="term">frame 3 to frame 20</span>.</p>
-    <p class="sub">Step 3 of 9 &middot; Where does each rule start record 158?</p>
-  </div>
+<!-- ============================================================ step 3: one program, any rule
+     Record 158 from data/example/test_short.json: 26 frames; t 0.0 0.04 0.08 ... 1.0; x 19.3226 19.4105
+     19.5153 ... 22.4254; y 5.5894 5.637 5.5788 ... 6.4026; z 0.9291 0.8325 0.7713 ... 4.2765; frame 17:
+     t 0.68, z 3.1083; hoop (27.051, 7.62). The file has other keys (id, distance, game); the code uses these. -->
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
   <div class="stage tight">
-    <div class="figside" style="grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)">
-      <img style="max-height:66vh" src="data/img/class06/c6-r-picks.svg?v=20261113083220"
-           alt="Record 158 against frame. Top, the height, with lines at 2 m and at the rim. Middle, the vertical speed, which peaks near frame 6 in the gather, dips to about frame 11, and peaks again at frame 17. Bottom, one row per rule, each with a dot at the frame it picks and a bar to the last frame. Most dots sit between frames 14 and 20. The speed peak rule picks frame 9 and lands 2.48 m from the hoop, and the hoop speed rule picks frame 3 and lands 4.31 m away, both in red.">
-      <div class="pcol">
-        <div class="pcard"><span class="tag">what we found</span><b>Two scans stop in the gather</b>
-          <span>The ball passes 2&nbsp;m at frame 9 while its speed is still falling from the gather, so the speed peak passes its test at once. Across the 12 records the speed peak sends the ball more than 1&nbsp;m from the hoop on 8, the three-point line on 4 and hoop speed on 1.</span></div>
-        <div class="pcard"><span class="tag">what we learn</span><b>The median outvotes two stray rules</b>
-          <span>The median picks frame 16 on record 158 and stays within 1&nbsp;m on every record. The rules that work still spread the crossing by 0.17&nbsp;m (median), enough to change the call on 9 of the 12.</span></div>
-        <div class="pcard gold"><span class="tag">next</span><b>Which start is right?</b>
-          <span>The short records cannot say. Try the training arcs, where the frames show the crossing.</span></div>
-      </div>
+    <div class="head">
+      <p class="say">A record <span class="term">r</span> holds one array per coordinate, one value per frame, and the hoop&rsquo;s center.</p>
+      <p class="sub">Step 3 of 11 &middot; One program, any rule</p>
     </div>
+<pre class="c6code">r = {"t": [0.00, 0.04, 0.08, ..., 1.00],              # time (s)
+     "x": [19.3226, 19.4105, 19.5153, ..., 22.4254],  # along the court (m)
+     "y": [5.5894, 5.6370, 5.5788, ..., 6.4026],      # across the court (m)
+     "z": [0.9291, 0.8325, 0.7713, ..., 4.2765],      # height (m)
+     "hoop_x": 27.051, "hoop_y": 7.620}               # hoop center (m)
+
+r["z"][17]       # 3.1083, the height at frame 17
+len(r["t"])      # 26 frames in a short record</pre>
+    <p class="c6hint">This is record 158. The file holds a few more keys for each shot, and the code uses only these.</p>
   </div>
 </section>
 
-<!-- ============================================================ step 4
-     rules_a6.py, training check: 23 arcs (325 left out) cut 7 frames after the frame that first
-     rises past the rim; 13 come down clean. Median / worst distance from the crossing in the
-     frames: rim 22/103, hoop speed 28/95, 2.75 m 28/110, median 28/103, walk back 28/110, last 6
-     29/114, last push 29/103, fit grows 30/65, 3-pt line 73/492, speed peak 214/367 cm; time 23 to
-     47 ms for all but those two. The call from the prediction matches the call from the frames on
-     2 to 5 of 13. A fit to the whole flight lands 8 cm off (median), worst 83. -->
-<section class="deck-slide point c6mid" data-nofit>
-  <div class="head">
-    <p class="say">Which rule will put the crossing <span class="term">closest</span> to where the ball really came down?</p>
-    <p class="sub">Step 4 of 9 &middot; Which rule predicts the crossing best?</p>
-  </div>
-  <div class="stage">
-    <div class="pcards c2">
-      <div class="pcard"><span class="tag">the test</span><b>Training arcs, cut like the short records</b>
-        <span>Each arc stops 7 frames after it rises past the rim, as the short records do. On the 13 arcs that come down without touching the rim first, the frames show the true crossing.</span></div>
-      <div class="pcard gold"><span class="tag">predict &middot; vote</span><b>Closest to the crossing in the frames (median)</b>
-        <div class="vote">
-          <div><b>A</b>Walk back</div>
-          <div><b>B</b>Median of five</div>
-          <div><b>C</b>Grow the fit</div>
-          <div><b>D</b>About the same</div>
-        </div></div>
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide point compact">
-  <div class="head">
-    <p class="say">Every rule that works lands about <span class="term">22 to 30&nbsp;cm</span> from the true crossing.</p>
-    <p class="sub">Step 4 of 9 &middot; Which rule predicts the crossing best?</p>
-  </div>
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
   <div class="stage tight">
-    <div class="figside" style="grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)">
-      <img style="max-height:56vh" src="data/img/class06/c6-r-score.svg?v=20261113083220"
-           alt="One bar per rule, the median distance between its predicted crossing and the crossing in the frames over 13 arcs, with a tick at the worst. Rim height 22 cm, hoop speed, 2.75 m, median and walk back 28 cm, last 6 and last push 29 cm, grow the fit 30 cm. Their worst misses are 95 to 114 cm, except grow the fit at 65 cm. The three-point line, 73 cm, and the speed peak, 214 cm, are drawn in red. A dashed line at 8 cm marks a fit to the whole flight.">
-      <div class="pcol">
-        <div class="pcard"><span class="tag">what we found</span><b>22 to 30&nbsp;cm, and 8&nbsp;cm from the whole flight</b>
-          <span>The rim level is closest and growing the fit has the smallest worst miss, 65&nbsp;cm against 95 to 114. The crossing time is within 23 to 47&nbsp;ms (median).</span></div>
-        <div class="pcard"><span class="tag">what we learn</span><b>The whole flight lands closer than any start rule</b>
-          <span>Among the rules that work, the choice moves the median by 8&nbsp;cm, and a fit to the whole flight lands 8&nbsp;cm off. The calls from the cut arcs match the frames on only 2 to 5 of the 13.</span></div>
-        <p class="c6choice"><b>Our choice:</b> the walk back, as in the example notebook. It never sends a short record more than 1&nbsp;m out, and it is within 2 frames of the median on every record.</p>
-      </div>
+    <div class="head">
+      <p class="say"><span class="term">crossing</span> takes the rule as an argument, so the same code runs any rule.</p>
     </div>
+<pre class="c6code">def crossing(r, rule):
+    s = rule(r)              # the rule picks the first frame of the fit
+    return predict(r, s)     # the crossing, fitted from frame s
+
+crossing(r, above)           # pass the function itself, with no ()
+crossing(r, last_k)</pre>
+    <p class="c6hint"><code>predict(r, s)</code> is not written yet. It takes a record and a first frame and returns the crossing time and place, and we write it in step 8.</p>
   </div>
 </section>
 
-<!-- ============================================================ step 5
-     trace_a6.py, step 3: gravity fitted to the 12 short flights 0.41 to 13.52 m/s^2 (median
-     9.38), 7 of 12 more than 1 away from 9.81; fitted to the 23 whole flights 8.92 to 10.43. -->
-
-<section class="deck-slide point compact">
-  <div class="head">
-    <p class="say">Fitted to a short flight, gravity comes out anywhere from <span class="term">0.41 to 13.52</span>&nbsp;m/s&sup2;.</p>
-    <p class="sub">Step 5 of 9 &middot; Should we fit gravity or hold it?</p>
-  </div>
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
   <div class="stage tight">
-    <div class="figside" style="grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)">
-      <img src="data/img/class06/c6-a6-gravity.svg?v=20261113083220"
-           alt="Two rows of dots on a scale of fitted gravity, with a dashed line at 9.81. The top row, 23 whole flights of 23 to 31 frames, clusters between about 9 and 10.4. The bottom row, 12 short records of 6 to 10 frames, spreads from about 0.4 to 13.5.">
-      <div class="pcol">
-        <div class="pcard"><span class="tag">what we found</span><b>7 of 12 off by more than 1&nbsp;m/s&sup2;</b>
-          <span>On whole flights last week the fitted gravity ran from 8.92 to 10.43. On these short flights it runs from 0.41 to 13.52.</span></div>
-        <div class="pcard"><span class="tag">what we learn</span><b>Hold gravity at 9.81</b>
-          <span>With so few frames the fit most likely bends to the tracking noise. Gravity is the same for every shot, so holding it leaves the frames to fix only the starting height and upward speed.</span></div>
-        <div class="pcard gold"><span class="tag">next</span><b>When does the fitted ball reach the rim?</b>
-          <span>Write the condition as a root.</span></div>
-      </div>
+    <div class="head">
+      <p class="say">Each simple rule is a short <span class="term">function</span> that takes r and returns a frame.</p>
     </div>
+<pre class="c6code">def last_k(r, k=7):             # the last k frames
+    return len(r["t"]) - k
+
+def above(r, z0=3.048):         # the first frame above z0
+    return np.argmax(r["z"] &gt; z0)
+
+def inside_line(r, i=1):        # i-th frame inside the line
+    dx = r["x"] - r["hoop_x"]
+    dy = r["y"] - r["hoop_y"]
+    d = np.sqrt(dx**2 + dy**2)  # distance to the hoop center
+    return np.argmax(d &lt; 7.24) + i - 1</pre>
+    <p class="c6hint">On record 158 these return frames 19, 17 and 16. <code>np.argmax</code> of an array of True and False returns the index of the first True, or 0 if none is True.</p>
   </div>
 </section>
 
-<!-- ============================================================ step 6
-     trace_a6.py, step 4: record 158, z = -2.643 + 11.811 t - 4.905 t^2 (t in s from the first
-     frame), top at 1.204 s and 4.47 m, last frame at 1.00 s; across the 12 the falling crossing
-     comes 0.74 to 1.05 s after the last frame. -->
-<section class="deck-slide point compact">
-  <div class="head">
-    <p class="say">Subtracting the rim height turns &ldquo;when is the ball at the rim&rdquo; into a <span class="term">root</span>, and the quadratic formula gives it exactly.</p>
-    <p class="sub">Step 6 of 9 &middot; Which method finds the root?</p>
-  </div>
+<section class="deck-slide point compact c6vc" data-fill="0.95">
   <div class="stage tight">
-    <div class="figside" style="grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)">
-      <img src="data/img/class06/c6-a6-root.svg?v=20261113083220"
-           alt="Record 158, height minus rim height against time. The frames in the hand, shaded, rise from about -2.2 m. The gold parabola fitted to the flight frames crosses zero twice, at 0.666 s on the way up, marked with a square, and at 1.742 s on the way down, marked with a red dot.">
-      <div class="pcol">
-        <div class="pcard"><span class="tag">record 158, gravity held</span><b>z = &minus;2.643 + 11.811&nbsp;t &minus; 4.905&nbsp;t&sup2;</b>
-          <span>The fit to its 9 flight frames. The top of the arc comes at 1.20&nbsp;s and 4.47&nbsp;m.</span></div>
-        <div class="pcard"><span class="tag">height above the rim</span><b>&minus;4.905&nbsp;t&sup2; + 11.811&nbsp;t &minus; 5.691 = 0</b>
-          <span>Subtract 3.048 from z. This is a quadratic with a = &minus;4.905, b = 11.811 and c = &minus;5.691, so the formula gives both roots with no starting guess.</span>
-          <div class="work" style="font-size:1.05em">$$t = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$</div></div>
-        <div class="pcard gold"><span class="tag">what we found</span><b>Two roots, 0.666&nbsp;s and 1.742&nbsp;s</b>
-          <span>The later one is 0.74&nbsp;s after the last frame. Across the 12 records the falling crossing comes 0.74 to 1.05&nbsp;s after the last frame.</span></div>
-      </div>
+    <div class="head">
+      <p class="say">The complex rules first estimate a <span class="term">speed or an acceleration</span> from the frames, then walk back from the end to where it changes.</p>
     </div>
+<pre class="c6code">def speed_peak(r, h=3):
+    t, z = r["t"], r["z"]
+    v = (z[2*h:] - z[:-2*h]) / (t[2*h:] - t[:-2*h])     # v[j] belongs to frame j + h
+    j = len(v) - 1
+    while j &gt; 0 and v[j-1] &gt; v[j]:
+        j = j - 1
+    return j + h
+
+def near_gravity(r, h=3, tol=5):
+    t, z = r["t"], r["z"]
+    dt = t[1] - t[0]
+    a = (z[2*h:] - 2*z[h:-h] + z[:-2*h]) / (h*dt)**2    # a[j] belongs to frame j + h
+    j = len(a) - 1
+    while j &gt; 0 and abs(a[j-1] + 9.81) &lt; tol:
+        j = j - 1
+    return j + h</pre>
+    <p class="c6hint">Each needs a step h, and the gravity rule a tolerance as well. With h = 1, a second difference combines three heights, each off by about 3&nbsp;cm. If those errors were independent, the acceleration would be off by about &radic;6 &times; 3&nbsp;cm / (0.04&nbsp;s)&sup2; &asymp; 46&nbsp;m/s&sup2;, nearly five times gravity.</p>
   </div>
 </section>
 
-<!-- rules_a6.py, crossing methods on record 158 (walk-back start, frame 17): quadratic formula
-     1.7416904 s; np.roots 1.7416904; scan every 0.05 s from the last frame plus a straight line
-     between the samples 1.7413580 (40 evaluations, 0.33 ms early, 2 mm on the floor at 6.16 m/s);
-     bisection from the top to 2 s later, to 1e-6 s, 1.7416905 (23 evaluations); Newton from
-     1.704 s 1.7416904 (8, counting f' as one); secant from top + 0.4 and + 0.6 s 1.7416904 (8);
-     Newton from 0.704 s 0.6662063 (8), the rising crossing. One evaluation of f takes about
-     0.2 microseconds here. -->
-<section class="deck-slide point c6mid" data-nofit>
-  <div class="head">
-    <p class="say">Which method puts the falling crossing <span class="term">furthest</span> from the exact root?</p>
-    <p class="sub">Step 6 of 9 &middot; Which method finds the root?</p>
-  </div>
-  <div class="stage">
-    <div class="pcards c2">
-      <div class="pcard"><span class="tag">record 158</span><b>f(t) = &minus;4.905&nbsp;t&sup2; + 11.811&nbsp;t &minus; 5.691</b>
-        <span>The quadratic formula gives the exact root. The others are the methods from lectures 19 to 21. All but one start on the falling side.</span></div>
-      <div class="pcard gold"><span class="tag">predict &middot; vote</span><b>Furthest from the exact root</b>
-        <div class="vote">
-          <div><b>A</b>Bisection</div>
-          <div><b>B</b>Newton&rsquo;s method</div>
-          <div><b>C</b>A scan every 0.05&nbsp;s, then a straight line</div>
-          <div><b>D</b>They all agree</div>
-        </div></div>
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide point">
-  <div class="head">
-    <p class="say">Every method finds the falling crossing to within <span class="term">2&nbsp;mm</span>, and Newton started before the top finds the rising root.</p>
-    <p class="sub">Step 6 of 9 &middot; Which method finds the root?</p>
-  </div>
+<!-- ============================================================ step 4: every start -->
+<section class="deck-slide point compact c6vc" data-fill="0.95">
   <div class="stage tight">
+    <div class="head">
+      <p class="say">On record 158 the six rules start the fit anywhere from <span class="term">frame 16 to frame 22</span>.</p>
+      <p class="sub">Step 4 of 11 &middot; Every start</p>
+    </div>
+    <img style="display:block; margin:0 auto; max-width:96%; max-height:48vh" src="data/img/class06/c6-st-picks.svg?v=20261113083220"
+         alt="Top, the height of record 158 against frame, rising from under 1 m through the rim line at 3.048 m near frame 17 to 4.3 m at frame 25. Below, one row per rule with a dot at the frame it picks and a bar to the last frame: last 7 frames 19, first above the rim 17, first inside the line 16 (the simple rules, in blue); vertical speed peak 18, floor speed constant 22, acceleration near gravity 20 (the complex rules, in gold).">
+    <p class="c6hint">A rule only picks a frame, so we run the method from every frame and keep every crossing. Steps 5 to 7 follow frame 17, the first frame above the rim, which fits the last 9 frames.</p>
+  </div>
+</section>
+
+<!-- ============================================================ step 5: the crossing time
+     Rebuilt 2026-11-15 on Chris's flow: hold gravity (last week's choice), the quadratic formula,
+     one slide on why not the other methods. predict_a6.py ("predict |"): record 158 from frame 17
+     (t = 0.68 s), height = -2.643395 + 11.810733 t - 4.905 t^2; minus the rim a = -4.905, b = 11.8107,
+     c = -5.6914; b^2 - 4ac = 27.827, sqrt 5.2752, 2a = -9.81; + sign -6.5355 / -9.81 = 0.6662 s,
+     - sign -17.0859 / -9.81 = 1.7417 s (worked with the 4-decimal numbers on the slide); top at 1.204 s. -->
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
+  <div class="stage tight">
+    <div class="head">
+      <p class="say">Holding gravity at 9.81, as we chose last week, the fit to record 158 from frame 17 makes the rim crossing a <span class="term">root</span>.</p>
+      <p class="sub">Step 5 of 11 &middot; When does the ball reach the rim?</p>
+    </div>
+    <img style="display:block; margin:0 auto; max-width:96%; max-height:40vh" src="data/img/class06/c6-a6-root.svg?v=20261113083220"
+         alt="Record 158, height minus rim height against time. The frames in the hand, shaded, rise from about -2.2 m. The gold parabola fitted from frame 17 crosses zero twice, at 0.666 s on the way up, marked with a square, and at 1.742 s on the way down, marked with a red dot.">
+    <div class="work c6eq">$$\text{height} = -2.6434 + 11.8107\,t - 4.905\,t^2$$</div>
+    <div class="work c6eq">$$\text{height} - 3.048 = -4.905\,t^2 + 11.8107\,t - 5.6914 = 0$$</div>
+  </div>
+</section>
+
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
+  <div class="stage tight">
+    <div class="head">
+      <p class="say">The quadratic formula gives both roots, and the <span class="term">minus sign</span> gives the later one, the falling crossing.</p>
+    </div>
+    <div class="work c6eq">$$t = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} = \frac{-11.8107 \pm \sqrt{27.827}}{-9.81}$$</div>
+    <div class="work c6eq">$$t = \frac{-11.8107 + 5.2752}{-9.81} = 0.666\ \text{s} \quad \text{rising}$$</div>
+    <div class="work c6eq">$$t = \frac{-11.8107 - 5.2752}{-9.81} = \textcolor{#5F7038}{\mathbf{1.742\ s}} \quad \textcolor{#5F7038}{\textbf{falling}}$$</div>
+    <p class="c6hint" style="margin-top:2.4vh">a is negative, so the minus sign gives the later time.</p>
+  </div>
+</section>
+
+<!-- rules_a6.py, crossing methods on record 158 (start at frame 17): quadratic formula 1.7416904 s;
+     bisection from the top to 2 s later, to 1e-6 s, 1.7416905 (23 evaluations); Newton from 1.704 s
+     1.7416904 (8, counting f' as one); secant from top + 0.4 and + 0.6 s 1.7416904 (8); scan every
+     0.05 s from the last frame plus a straight line 1.7413580 (40 evaluations, 2 mm on the floor);
+     Newton from 0.704 s 0.6662063 (8), the rising crossing. -->
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
+  <div class="stage tight">
+    <div class="head">
+      <p class="say">The other root methods reach the formula&rsquo;s answer <span class="term">by steps</span>, and each needs a bracket or a start past the top.</p>
+    </div>
     <div class="c6newton c6meth" style="margin-top:1vh">
-      <span class="h">method</span><span class="h">evaluations of f</span><span class="h">root</span><span class="h">error on the floor</span>
-      <span>quadratic formula</span><span>0</span><span>1.7416904 s</span><span class="c6ok">exact</span>
-      <span>np.roots, then the slope</span><span>0</span><span>1.7416904 s</span><span class="c6ok">0 mm</span>
-      <span>bisection, top to top + 2 s</span><span>23</span><span>1.7416905 s</span><span class="c6ok">0 mm</span>
-      <span>Newton from 1.704 s</span><span>8</span><span>1.7416904 s</span><span class="c6ok">0 mm</span>
-      <span>secant from 1.604, 1.804 s</span><span>8</span><span>1.7416904 s</span><span class="c6ok">0 mm</span>
-      <span>scan 2 s every 0.05 s, then a line</span><span>40</span><span>1.7413580 s</span><span>2 mm</span>
+      <span class="h">method</span><span class="h">evaluations</span><span class="h">root</span><span class="h">needs</span>
+      <span>quadratic formula</span><span>0</span><span>1.7416904 s</span><span class="c6ok">nothing</span>
+      <span>bisection</span><span>23</span><span>1.7416905 s</span><span>a bracket past the top</span>
+      <span>Newton from 1.704 s</span><span>8</span><span>1.7416904 s</span><span>a start past the top</span>
+      <span>secant from 1.604, 1.804 s</span><span>8</span><span>1.7416904 s</span><span>two starts past the top</span>
+      <span>scan every 0.05 s, then a line</span><span>40</span><span>1.7413580 s</span><span>a start and a step</span>
       <span>Newton from 0.704 s</span><span>8</span><span>0.6662063 s</span><span class="c6bad">the rising root</span>
     </div>
-    <div class="pcards c3" style="margin-top:2vh">
-      <div class="pcard"><span class="tag">what we found</span><b>The method moves it by millimetres</b>
-        <span>The start rule moved the crossing by 17&nbsp;cm (median) among the rules that work. The scan&rsquo;s straight line cuts across the curve, which costs 0.33&nbsp;ms, or 2&nbsp;mm at 6.16&nbsp;m/s.</span></div>
-      <div class="pcard"><span class="tag">what we learn</span><b>40 evaluations take about 8&nbsp;&mu;s</b>
-        <span>One evaluation of f takes about 0.2&nbsp;&mu;s. Newton and the secant need a start after the top, and bisection needs a bracket that holds only the falling root.</span></div>
-      <div class="pcard gold"><span class="tag">next</span><b>Which root does the formula give?</b>
-        <span>It gives both, from one &plusmn;.</span></div>
-    </div>
+    <p class="c6hint" style="margin-top:2vh">Assignment 7 adds drag, which takes away the formula, so we need these methods there.</p>
   </div>
 </section>
 
-<!-- ============================================================ step 7
-     trace_a6.py, step 5, quadratic formula on record 158: b^2 = 139.49, 4ac = 111.67,
-     b^2 - 4ac = 27.83, square root 5.275, 2a = -9.81; + sign (-6.535) / -9.81 = 0.6662 s,
-     - sign (-17.086) / -9.81 = 1.7417 s. -->
-<section class="deck-slide point c6mid" data-nofit>
-  <div class="head">
-    <p class="say">Which sign in the <span class="term">&plusmn;</span> gives the falling crossing?</p>
-    <p class="sub">Step 7 of 9 &middot; Which root is the crossing?</p>
-  </div>
-  <div class="stage">
-    <div class="pcards c2">
-      <div class="pcard"><span class="tag">record 158</span><b>$t = \dfrac{-11.811 \pm 5.275}{-9.81}$</b>
-        <span>b&sup2; &minus; 4ac = 27.83, whose square root is 5.275 (from the unrounded fit), and 2a = &minus;9.81.</span></div>
-      <div class="pcard gold"><span class="tag">predict &middot; vote</span><b>The falling crossing, the later root</b>
-        <div class="vote">
-          <div><b>A</b>The + sign</div>
-          <div><b>B</b>The &minus; sign</div>
-          <div><b>C</b>It depends on the shot</div>
-        </div></div>
-    </div>
-  </div>
-</section>
-
-<!-- trace_a6.py, step 5: rising roots 0.657 to 0.752 s; releases at 0.64 to 0.80 s; the rising
-     root comes before the release on 7 of 12. Record 158: rising root 0.666 s, release 0.68 s.
-     Newton from top - 0.5 = 0.704 s returns 0.6662 s; from top + 0.5 = 1.704 s returns 1.7417 s. -->
-<section class="deck-slide point">
-  <div class="head">
-    <p class="say">Because a is <span class="term">negative</span>, the minus sign gives the later root, which is the falling crossing.</p>
-    <p class="sub">Step 7 of 9 &middot; Which root is the crossing?</p>
-  </div>
+<!-- ============================================================ step 6: the crossing point
+     predict_a6.py: x = 16.551 + 5.8933 t, y = 4.637 + 1.7773 t (court); at t = 1.7417 s x 26.8154,
+     y 7.7325, height -2.6434 + 11.8107 t - 4.905 t^2 = 3.0479; from the hoop center (27.051, 7.62)
+     -0.236, +0.113, d = 0.261 m, on the rim; the crossing is 0.74 s after the last frame. -->
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
   <div class="stage tight">
-    <div class="c6newton" style="margin-top:2vh">
-      <span class="h">sign</span><span class="h">&minus;b &plusmn; 5.275</span><span class="h">&divide; 2a</span><span class="h">root</span>
-      <span>+</span><span>&minus;6.535</span><span>&divide; &minus;9.81</span><span class="c6bad">0.666 s</span>
-      <span>&minus;</span><span>&minus;17.086</span><span>&divide; &minus;9.81</span><span class="c6ok">1.742 s</span>
+    <div class="head">
+      <p class="say">Putting t = 1.742&nbsp;s into the x and y lines gives the <span class="term">crossing point</span>.</p>
+      <p class="sub">Step 6 of 11 &middot; Where is the ball at the crossing?</p>
     </div>
-    <div class="pcards c3" style="margin-top:3vh">
-      <div class="pcard"><span class="tag">what we found</span><b>On 7 of 12 the rising root is in the hand</b>
-        <span>Record 158 leaves the hand at 0.68&nbsp;s, after its rising root at 0.666&nbsp;s. On 7 of the 12 records the rising root comes before the release.</span></div>
-      <div class="pcard"><span class="tag">what we learn</span><b>Check the root you get</b>
-        <span>The falling crossing comes after the top (1.204&nbsp;s), and f goes from positive to negative through it. Each check is one comparison in the program.</span></div>
-      <div class="pcard gold"><span class="tag">next</span><b>Does the ball go in?</b>
-        <span>Find where the ball is at 1.742&nbsp;s.</span></div>
-    </div>
-    <p class="c6hint">The formula, <code>np.roots</code> and a bracket from the top find the falling root with no guess. Newton and the secant need a start after the top. Assignment 7 adds drag, which takes away the formula, so Newton, the secant or bisection does this job there.</p>
+    <div class="work c6eq">$$x = 16.551 + 5.8933 \times 1.7417 = 26.8154$$</div>
+    <div class="work c6eq">$$y = 4.637 + 1.7773 \times 1.7417 = 7.7325$$</div>
+    <div class="work c6eq">$$d = \sqrt{(26.8154 - 27.051)^2 + (7.7325 - 7.620)^2} = 0.261\ \text{m}$$</div>
+    <p class="c6hint" style="margin-top:2vh">d is the distance from the hoop center at (27.051, 7.620). The height at that time is the rim, 3.048&nbsp;m.</p>
   </div>
 </section>
 
-<!-- ============================================================ step 8
-     trace_a6.py, step 6: record 158, x = -10.500 + 5.893 t, y = -2.983 + 1.777 t (m from the hoop
-     centre), floor speed 6.16 m/s; frames 2.9 cm RMS from the lines (largest 5.4 cm; header
-     horizontal noise 2.84 cm); at t = 1.7417 s, x -0.236, y 0.113, d 0.261 m; last flight frame
-     4.78 m from the hoop centre, a 1 degree turn over that is 8.3 cm. -->
-<section class="deck-slide point compact" data-fill="0.95">
-  <div class="head">
-    <p class="say">With drag and spin left out, the ball moves in a <span class="term">straight line</span> across the floor at a steady speed, so x and y are each a straight line in time.</p>
-    <p class="sub">Step 8 of 9 &middot; Where on the floor does it come down?</p>
-  </div>
+<!-- ============================================================ step 7: the radii
+     Header: hoop inner radius 0.2286 m, ball radius 0.1195 m. trace_a6.py, step 6: record 158
+     at d = 0.261 m. -->
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
   <div class="stage tight">
-    <div class="figside" style="grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)">
-      <img style="max-height:54vh" src="data/img/class06/c6-a6-above.svg?v=20261113083220"
-           alt="Record 158. Above, from overhead, as distance along and across the court from the hoop centre: the frames in the hand cluster near 7.5 m out, the flight frames run in a straight line toward the hoop, and a dashed line carries them on to a red dot at (-0.236, 0.113), just short of the hoop circle. Below, x and y against time: each set of flight frames lies on a straight line, carried on dashed to a red dot at 1.742 s.">
-      <div class="pcol">
-        <div class="pcard"><span class="tag">record 158, the same 9 frames</span><b>x = &minus;10.500 + 5.893&nbsp;t &nbsp;&nbsp; y = &minus;2.983 + 1.777&nbsp;t</b>
-          <span>With drag and spin left out, nothing pushes the ball sideways or slows it across the floor. Each line is fitted by least squares, in metres from the hoop&rsquo;s centre, and the frames sit 2.9&nbsp;cm from them (RMS), about the 2.84&nbsp;cm of horizontal tracking noise in the header.</span></div>
-        <div class="pcard"><span class="tag">at the crossing, t = 1.742&nbsp;s</span><b>x = &minus;0.236, y = 0.113, d = 0.261&nbsp;m</b>
-          <span>Put the crossing time into both lines. The ball is 24&nbsp;cm from the centre along the court and 11&nbsp;cm across it, and d = &radic;(x&sup2; + y&sup2;).</span></div>
-        <div class="pcard gold"><span class="tag">what we learn</span><b>The lines run 4.8&nbsp;m past the data</b>
-          <span>The ball crosses the floor at 6.16&nbsp;m/s, so a crossing time off by 0.01&nbsp;s puts it 6&nbsp;cm long or short. A path turned by 1&deg; misses by 8&nbsp;cm at the hoop.</span></div>
-      </div>
+    <div class="head">
+      <p class="say">A ball coming straight down goes in cleanly when its center is within <span class="term">0.109&nbsp;m</span> of the hoop&rsquo;s center, and misses the rim beyond 0.348&nbsp;m.</p>
+      <p class="sub">Step 7 of 11 &middot; Does it go in?</p>
     </div>
-  </div>
-</section>
-
-<!-- step 6, the radii
-     Header: hoop inner radius 0.2286 m, ball radius 0.1195 m. trace_a6.py, step 6, by distance
-     alone: in 332, 872, 1326; on the rim 158, 503, 502, 490; out 685, 1299, 734, 1317, 838. -->
-<section class="deck-slide point compact">
-  <div class="head">
-    <p class="say">A ball coming straight down goes in cleanly when its centre is within <span class="term">0.109&nbsp;m</span> of the hoop&rsquo;s centre, and misses the rim beyond 0.348&nbsp;m.</p>
-    <p class="sub">Step 9 of 9 &middot; Does it go in, and how sure is the call?</p>
-  </div>
-  <div class="stage tight">
     <div class="figside" style="grid-template-columns:minmax(0,1fr); max-width:80%; margin:0 auto">
       <img style="max-height:36vh" src="data/img/class06/c6-a6-hoop.svg?v=20261113083220"
-           alt="Three views of the hoop from above, a dark circle of radius 0.229 m with a green dashed circle inside it at 0.109 m and a red dashed circle outside at 0.348 m. Left, a green ball with its centre on the inner circle just clears the rim. Middle, a gold ball centred on the rim. Right, a red ball with its centre on the outer circle just misses the rim on the outside.">
+           alt="Three views of the hoop from above, a dark circle of radius 0.229 m with a green dashed circle inside it at 0.109 m and a red dashed circle outside at 0.348 m. Left, a green ball with its center on the inner circle just clears the rim. Middle, a gold ball centered on the rim. Right, a red ball with its center on the outer circle just misses the rim on the outside.">
     </div>
     <div class="pcards c3">
       <div class="pcard"><span class="tag">in</span><b>0.2286 &minus; 0.1195 = 0.109&nbsp;m</b>
-        <span>Hoop radius minus ball radius. Inside this, no part of the ball reaches the rim.</span></div>
+        <span>This is the hoop radius minus the ball radius. Inside it, no part of the ball reaches the rim.</span></div>
       <div class="pcard"><span class="tag">out</span><b>0.2286 + 0.1195 = 0.348&nbsp;m</b>
-        <span>Hoop radius plus ball radius. Outside this, no part of the ball reaches the rim.</span></div>
-      <div class="pcard gold"><span class="tag">what we found</span><b>3 in, 4 on the rim, 5 out</b>
-        <span>The 12 crossings by distance alone. A ball on the rim may go either way.</span></div>
+        <span>This is the hoop radius plus the ball radius. Outside it, no part of the ball reaches the rim.</span></div>
+      <div class="pcard gold"><span class="tag">record 158</span><b>0.261&nbsp;m, on the rim</b>
+        <span>Between 0.109 and 0.348&nbsp;m, so the ball touches the rim and may go either way.</span></div>
     </div>
   </div>
 </section>
 
-<!-- trace_a6.py, step 7 (walk-back start): one frame fewer moves the crossing 0.020 to 0.417 m
-     (median 0.077); in 1326; out 1299, 734; too close the other nine; record 332, 0.108 m out,
-     moves 0.149 m; record 685 moves 0.417 m. -->
-
-<section class="deck-slide point compact">
-  <div class="head">
-    <p class="say">One frame fewer moves the crossing by <span class="term">2 to 42&nbsp;cm</span>, and that leaves 9 of the 12 shots too close to call.</p>
-    <p class="sub">Step 9 of 9 &middot; Does it go in, and how sure is the call?</p>
-  </div>
+<!-- ============================================================ step 8: one function -->
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
   <div class="stage tight">
-    <div class="figside" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
-      <img style="max-height:62vh" src="data/img/class06/c6-a6-calls.svg?v=20261113083220"
-           alt="The 12 predicted crossings seen from above, around the hoop with its in and out circles. A gray line runs from each dot to where the crossing lands with one frame fewer. Record 1326 sits in green at the centre. Records 1299 and 734 sit in red outside the out circle. The other nine, in gold, sit near the rim or have long gray lines that reach across a boundary, the longest about 0.4 m for record 685.">
-      <div class="pcol">
-        <div class="pcard"><span class="tag">what we found</span><b>1 in, 2 out, 9 too close</b>
-          <span>The median move is 7.7&nbsp;cm, and most of each move runs along the path, so the doubt is mostly long or short. Record 685 moves 42&nbsp;cm, and record 332, 0.108&nbsp;m from the centre, moves 15&nbsp;cm.</span></div>
-        <div class="pcard"><span class="tag">what we learn</span><b>A call holds only if one frame fewer keeps it on the same side</b>
-          <span>A shot is in only if it stays in after the move, and out only if it stays out.</span></div>
-        <div class="pcard gold"><span class="tag">next</span><b>What can Bob have this early?</b>
-          <span>Look back at the start, the method and the calls.</span></div>
-        <p class="c6choice"><b>Our choice:</b> the move from one frame fewer, as each shot&rsquo;s own margin. A record with a shaky fit gets a wide margin.</p>
-      </div>
+    <div class="head">
+      <p class="say">Steps 5 and 6 make one <span class="term">function</span>: give it a record and a first frame, and it predicts the crossing.</p>
+      <p class="sub">Step 8 of 11 &middot; predict(r, s)</p>
+    </div>
+<pre class="c6code">def predict(r, s):
+    t, x, y, z = r["t"][s:], r["x"][s:], r["y"][s:], r["z"][s:]
+    v, c0 = np.polyfit(t, z + 4.905*t**2, 1)    # z is the height; gravity held
+    a, b, c = -4.905, v, c0 - 3.048
+    tc = (-b - np.sqrt(b*b - 4*a*c)) / (2*a)    # the later root
+    vx, x0 = np.polyfit(t, x, 1)
+    vy, y0 = np.polyfit(t, y, 1)
+    return tc, x0 + vx*tc, y0 + vy*tc</pre>
+    <p class="c6hint"><code>predict(r158, 17)</code> returns 1.742&nbsp;s at (26.815, 7.733). Step 3&rsquo;s <code>crossing(r, rule)</code> is <code>predict(r, rule(r))</code>.</p>
+  </div>
+</section>
+
+<!-- ============================================================ step 9: test it
+     predict_a6.py: the invented shots of the first half (frame 10 of record 158, 9 clean frames,
+     1.3 s to the end point). predict(r, 0): in 1.3000000000000007 s at (27.051, 7.620), off 1.8e-14 m,
+     in; on the rim 1.3000000000000007 s at (26.831, 7.559), off 7.2e-15 m, on the rim; out
+     1.3000000000000007 s at (26.569, 7.487), off 1.1e-14 m, out. -->
+<section class="deck-slide point c6mid" data-nofit>
+  <div class="head">
+    <p class="say">What should <span class="term">predict</span> return for our invented in shot, starting at its first frame?</p>
+    <p class="sub">Step 9 of 11 &middot; Testing predict</p>
+  </div>
+  <div class="stage">
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">the in shot</span><b>Frame 10 of record 158 to the hoop center in 1.3&nbsp;s</b>
+        <span>9 clean frames, 25 a second, built with gravity 9.81.</span></div>
+      <div class="pcard gold"><span class="tag">predict &middot; vote</span><b>predict(in shot, 0)</b>
+        <div class="vote">
+          <div><b>A</b>1.3&nbsp;s at (27.051, 7.620), the hoop center</div>
+          <div><b>B</b>Within a few centimeters of the hoop center</div>
+          <div><b>C</b>About 26&nbsp;cm off, like a noisy copy</div>
+        </div></div>
     </div>
   </div>
 </section>
 
-<!-- The looking-back numbers are step 3's, step 4's and step 6's (rules_a6.py). -->
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
+  <div class="stage tight">
+    <div class="head">
+      <p class="say">It returns 1.3&nbsp;s at the end point we built, to within <span class="term">float rounding</span>, so the check passes.</p>
+    </div>
+    <table class="c6tab nums">
+      <thead><tr><th>invented shot</th><th>time (s)</th><th>crossing point</th><th>off by (m)</th><th>call</th></tr></thead>
+      <tbody>
+        <tr><td>in</td><td>1.3000000000000007</td><td>(27.051, 7.620)</td><td>2 &times; 10<sup>&minus;14</sup></td><td>in</td></tr>
+        <tr><td>on the rim</td><td>1.3000000000000007</td><td>(26.831, 7.559)</td><td>7 &times; 10<sup>&minus;15</sup></td><td>on the rim</td></tr>
+        <tr><td>out</td><td>1.3000000000000007</td><td>(26.569, 7.487)</td><td>1 &times; 10<sup>&minus;14</sup></td><td>out</td></tr>
+      </tbody>
+    </table>
+    <p class="c6hint" style="margin-top:2.4vh">The on-the-rim and out shots from before the break pass the same way. We built them with the same gravity and no noise, so a pass shows the code does what the math says.</p>
+  </div>
+</section>
+
+<!-- predict_a6.py, training: 39 cuts of 13 clean arcs (325 left out; arcs that meet the rim first have
+     no clean crossing), each cut 6, 7 and 8 frames past its first frame above the rim, like the short
+     records; predict from the first frame above the rim; true crossing read off the frames. Miss median
+     27 cm, middle half 18 to 47 cm, smallest 2, largest 127 cm; time off 23 ms (median); last frame
+     0.90 s before the crossing (median). -->
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
+  <div class="stage tight">
+    <div class="head">
+      <p class="say">On 13 training arcs cut like Bob&rsquo;s records, predict misses the true crossing by <span class="term">27&nbsp;cm</span> (median).</p>
+    </div>
+    <img style="display:block; margin:0 auto; max-width:96%; max-height:52vh" src="data/img/class06/c6-p-errors.svg?v=20261113083220"
+         alt="One row per training arc, 13 rows, each with three dots for the arc cut 6, 7 and 8 frames past the rim, against the miss from the predicted to the true crossing in cm. A dashed line marks the median, 27 cm. Most rows sit between about 10 and 50 cm; arc 794 sits near 60 to 73 cm and arc 83 near 103 to 127 cm.">
+    <p class="c6hint">Each fit starts at the first frame above the rim. The last frame comes 0.90&nbsp;s before the crossing (median), and half the misses fall between 18 and 47&nbsp;cm.</p>
+  </div>
+</section>
+
+<!-- ============================================================ step 10: back to the choice
+     start_a6.py: the 12 short records stop 6 to 8 frames after the first frame above the rim, so
+     each of the 13 clean training arcs (325 left out; arcs that meet the rim first have no clean
+     crossing) is cut 6, 7 and 8 frames after it, 39 cuts, last frame 0.90 s before the crossing
+     (median). Median / worst miss: last 7 frames 26/127, first above the rim 27/127, speed peak
+     h 3 29/131, floor speed h 3 29/122, near gravity h 3 28/127; best settings per family 26 to 29,
+     three-point line 71 to 80; h = 1 36 to 49; z = 2 and 2.25 m 237 and 125; from 13 frames back
+     111. A fit from the rim frame to 1 m out lands 8 cm off. -->
+<section class="deck-slide point compact c6vc" data-fill="0.95">
+  <div class="stage tight">
+    <div class="head">
+      <p class="say">On training arcs cut like Bob&rsquo;s records, does a <span class="term">simple</span> rule or a <span class="term">complex</span> rule land closer to the true crossing?</p>
+      <p class="sub">Step 10 of 11 &middot; Back to the choice</p>
+    </div>
+    <div class="pcards c2">
+      <div class="pcard"><span class="tag">the test</span><b>39 cuts of 13 training arcs</b>
+        <span>Bob&rsquo;s short records stop 6 to 8 frames after the ball first passes the rim. We cut each training arc that comes down clean the same three ways, and its later frames show the true crossing.</span></div>
+      <div class="pcard gold"><span class="tag">predict &middot; vote</span><b>Closest to the crossing in the frames (median)</b>
+        <div class="vote">
+          <div><b>A</b>A simple rule</div>
+          <div><b>B</b>A complex rule</div>
+          <div><b>C</b>About the same</div>
+        </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- start_a6.py ("by k figure"): median miss on the 39 short-like training cuts by "fit to the last k frames":
+     3:49 4:34 5:26 6:29 7:26 8:27 9:27 10:33 11:44 12:67 13:111 cm; the first frame above the rim fits the
+     last 7, 8 or 9 frames on these cuts (median 27 cm). Replaces the lookup grid (2026-11-16, too much to explain). -->
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
+  <div class="stage tight">
+    <div class="head">
+      <p class="say">Fitting the last 5 to 9 frames misses by about <span class="term">27&nbsp;cm</span>, and starting further back costs much more.</p>
+    </div>
+    <img style="display:block; margin:0 auto; max-width:96%; max-height:50vh" src="data/img/class06/c6-st-byk.svg?v=20261113083220"
+         alt="Median miss in cm against fit to the last k frames, k = 3 to 13, on the training arcs cut like Bob's records. The line starts at 49 cm for k = 3, falls to about 26 to 29 cm from k = 5 to 9, then climbs to 44 cm at k = 11, 67 at 12 and 111 at 13. A shaded band over k = 7 to 9 is labeled first frame above the rim.">
+    <p class="c6hint">The median over the 39 training cuts. On these cuts the first frame above the rim fits the last 7 to 9 frames.</p>
+  </div>
+</section>
+
+<section class="deck-slide point compact c6vc" data-fill="0.95">
+  <div class="stage tight">
+    <div class="head">
+      <p class="say">At its best setting every family except the three-point line lands <span class="term">26 to 29&nbsp;cm</span> from the true crossing (median).</p>
+    </div>
+    <img style="display:block; margin:0 auto; max-width:96%; max-height:46vh" src="data/img/class06/c6-st-families.svg?v=20261113083220"
+         alt="One row per rule family, the median miss on a log scale from 10 to 400 cm, one dot per setting and a ring at the setting in our code. Last k frames: 26 to 67 cm, ring at 26. First frame above z: 27 to 237 cm, ring at 27. I-th frame inside the line: 71 to 80 cm. Vertical speed peak: 29 to 46, ring at 29. Floor speed constant: 28 to 49, ring at 29. Acceleration near gravity: 27 to 50, ring at 28. A shaded band from 20 to 35 cm holds the best setting of every family but the three-point line.">
+    <p class="c6hint">Each dot is one setting scored on all 39 cuts, and the ring marks the setting in our code. Settings with h = 1 miss by 36 to 49&nbsp;cm, and starting above z = 2&nbsp;m by 2.4&nbsp;m. A fit to the whole flight lands 8&nbsp;cm off (median), so most of the 26&nbsp;cm likely comes from carrying the fit 0.9&nbsp;s past the last frame.</p>
+  </div>
+</section>
+
+<!-- start_a6.py ("median cm by length"), median miss (cm) at the code's settings on training arcs cut like each test length
+     (rim + 6..8, 10..12, 14..16): last 7 26/15/14; rim 27/19/14; speed peak 29/17/13; floor speed
+     29/16/13; near gravity 28/20/15. -->
+<section class="deck-slide point compact c6vc" data-fill="0.95">
+  <div class="stage tight">
+    <div class="head">
+      <p class="say">At every record length the simple rules land within a few centimeters of the complex ones, so we use a <span class="term">simple</span> one.</p>
+    </div>
+    <table class="c6tab nums">
+      <thead><tr><th>start rule</th><th>short</th><th>mid</th><th>long</th></tr></thead>
+      <tbody>
+        <tr class="simple"><td>last 7 frames</td><td>26</td><td>15</td><td>14</td></tr>
+        <tr class="simple key"><td>first frame above the rim</td><td>27</td><td>19</td><td>14</td></tr>
+        <tr class="complex"><td>vertical speed peak, h = 3</td><td>29</td><td>17</td><td>13</td></tr>
+        <tr class="complex"><td>floor speed constant, h = 3</td><td>29</td><td>16</td><td>13</td></tr>
+        <tr class="complex"><td>acceleration near gravity, h = 3</td><td>28</td><td>20</td><td>15</td></tr>
+      </tbody>
+    </table>
+    <p class="c6hint">Median miss in cm on the training arcs, cut like each test length.</p>
+    <p class="c6choice"><b>Our choice:</b> the first frame above the rim. It is within 1&nbsp;cm of the closest on records like Bob&rsquo;s, its one setting is the rim height in the header, and it starts every shot at the same height wherever the record stops. The last 7 frames may do as well, and better on the mid records (15&nbsp;cm against 19).</p>
+  </div>
+</section>
+
+<!-- ============================================================ step 11: Bob's answers
+     start_a6.py and trace_a6.py, step 7, first frame above the rim: one frame fewer moves the
+     crossing 2 to 42 cm (median 7.1); in 1326; out 1299, 734, 1317; too close the other eight;
+     685 moves 42 cm, 332 (0.097 m from the center) 18 cm. Mid records: 1 in (503), 1 out (734),
+     moves 1 to 15 cm; long: 2 in (503, 1326), 1 out (734), moves 1 to 7 cm. -->
+<section class="deck-slide point compact c6vc" data-fill="0.95">
+  <div class="stage tight">
+    <div class="head">
+      <p class="say">From the short records Bob gets <span class="term">1 in, 3 out</span>, and 8 too close to call.</p>
+      <p class="sub">Step 11 of 11 &middot; Bob&rsquo;s answers</p>
+    </div>
+    <img style="display:block; margin:0 auto; max-width:96%; max-height:47vh" src="data/img/class06/c6-st-bob.svg?v=20261113083220"
+         alt="The 12 predicted crossings seen from above, each measured from its own hoop's center with short to the left, around the hoop and its in and out circles. A gray line runs from each dot to where the crossing lands with one frame fewer. Record 1326 sits in green at the center. Records 1299, 734 and 1317 sit in red outside the out circle. The other eight, in gold, sit within their move of a circle, the longest move about 0.4 m for record 685.">
+    <p class="c6hint">Each gray line runs to where the crossing lands if the record had stopped one frame sooner, a move of 2 to 42&nbsp;cm (median 7&nbsp;cm). A call is in only if the crossing stays inside 0.109&nbsp;m when moved that far in any direction, and out only if it stays outside 0.348&nbsp;m.</p>
+  </div>
+</section>
+
+<section class="deck-slide point compact c6vc" data-fill="0.95">
+  <div class="stage tight">
+    <div class="head">
+      <p class="say">Each extra 4 frames cuts the median miss, from <span class="term">27 to 19 to 14&nbsp;cm</span>, and most calls stay too close.</p>
+    </div>
+    <img style="display:block; margin:0 auto; max-width:96%; max-height:46vh" src="data/img/class06/c6-st-lengths.svg?v=20261113083220"
+         alt="Median miss on the training arcs against a fit to the last k frames, k = 3 to 18, one line per cut length. Cut like the short records, the line sits between 26 and 34 cm from k = 4 to 10 and climbs past 100 cm at k = 13. Cut like the mid records, it sits between 15 and 21 cm from k = 6 to 14. Cut like the long records, it sits between 11 and 15 cm from k = 6 to 18. A star on each line marks the first frame above the rim: 27, 19 and 14 cm.">
+    <p class="c6hint">On Bob&rsquo;s 12 the same rule calls 1 in and 3 out from the short records, 1 in and 1 out from the mid, and 2 in and 1 out from the long. One frame fewer moves the crossing by up to 42, 15 and 7&nbsp;cm.</p>
+  </div>
+</section>
+
+<!-- The looking-back numbers are step 6's (trace_a6.py) and steps 10 and 11's (start_a6.py). -->
+<!-- predict_a6.py ("predict | hoop"): in 10.9 cm (hoop 22.86 - ball 11.95), out 34.8 cm, on-the-rim band 23.9 cm
+     wide. Median misses of the first-above-the-rim rule on training cuts like each length (start_a6.py): short 27,
+     mid 19, long 14 cm. Added 2026-11-16 on Chris's point that the error is too large for the hoop's size. -->
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
+  <div class="stage tight">
+    <div class="head">
+      <p class="say">Even at its best the prediction misses by more than the <span class="term">11&nbsp;cm</span> a ball can be off center and still go in cleanly.</p>
+    </div>
+    <img style="display:block; margin:0 auto; max-width:96%; max-height:44vh" src="data/img/class06/c6-p-hoopmiss.svg?v=20261113083220"
+         alt="Distance from the hoop center in cm, 0 to 50, shaded in three zones: in, up to 10.9 cm; on the rim, from 10.9 to 34.8 cm; out, beyond 34.8 cm. Three dots mark the median miss for each record length: long 14 cm, mid 19 cm and short 27 cm, all in the on-the-rim zone.">
+    <p class="c6hint">Each dot is where a shot through the dead center would be predicted to land on a typical record. The on-the-rim zone is 24&nbsp;cm wide, so only shots well clear of the rim get a call.</p>
+  </div>
+</section>
+
 <!-- ============================================================ looking back -->
-<section class="deck-slide point">
-  <div class="head">
-    <p class="say">From about 8 frames of flight, the start rule moves the crossing far more than the root method does, and most shots are too close to <span class="term">call</span>.</p>
-    <p class="sub">Looking back &middot; What can Bob have this early?</p>
-  </div>
+<section class="deck-slide point compact c6vc" data-fill="0.95">
   <div class="stage tight">
-    <div class="pcards c4">
-      <div class="pcard"><span class="tag">the start</span><b>22 to 30&nbsp;cm, or metres</b>
-        <span>The rules that work land 22 to 30&nbsp;cm from the true crossing (median). A scan that stops in the gather lands metres away.</span></div>
-      <div class="pcard"><span class="tag">the method</span><b>2&nbsp;mm at most</b>
-        <span>Every method agrees once it starts on the falling side. Newton started before the top returns the rising root.</span></div>
-      <div class="pcard"><span class="tag">the time</span><b>A few hundredths of a second</b>
-        <span>The crossing time from the cut arcs is within 23 to 47&nbsp;ms of the frames (median, by rule).</span></div>
-      <div class="pcard"><span class="tag">the call</span><b>2 to 5 of 13</b>
-        <span>On the training arcs, the call from the cut arcs matches the call from the frames on 2 to 5 of the 13.</span></div>
+    <div class="head">
+      <p class="say">A bad start setting costs meters, while on record 158 the root method changes the crossing by at most <span class="term">2&nbsp;mm</span>.</p>
+      <p class="sub">Looking back &middot; What can Bob have this early?</p>
     </div>
-    <div class="pcards c1 do">
-      <div class="pcard"><span class="tag">for Bob</span><b>A prediction this early gives the time to a few hundredths of a second, and a call only for shots far from the rim, which can still be wrong</b>
-        <span>The report should say which start rule it used and how often its calls were right on the training arcs.</span></div>
-    </div>
+    <table class="c6tab">
+      <thead><tr><th>what changes</th><th>effect on the crossing</th></tr></thead>
+      <tbody>
+        <tr><td>the start rule, at a good setting</td><td>misses by 26 to 29&nbsp;cm (median), for every family but the three-point line</td></tr>
+        <tr><td>the start rule, at a bad setting</td><td>misses by 2.4&nbsp;m (median) starting above 2&nbsp;m</td></tr>
+        <tr><td>the root method</td><td>moves by 2&nbsp;mm at most on record 158, once it starts on the falling side</td></tr>
+        <tr><td>one frame fewer</td><td>moves by 2 to 42&nbsp;cm on Bob&rsquo;s short records</td></tr>
+      </tbody>
+    </table>
+    <p class="c6choice"><b>For Bob:</b> a prediction this early gives a call only for shots far from the rim. The report should say which start rule it used and how far that rule missed on the training arcs.</p>
   </div>
 </section>
 
@@ -1417,17 +1542,19 @@ ny = rng.normal(0, 0.0284, 9)    # across the court</pre>
   </div>
   <div class="stage">
     <div class="pcards c2">
-      <div class="pcard"><span class="tag">Assignment 6</span><b>A choice to state at each of the nine steps</b>
+      <div class="pcard"><span class="tag">Assignment 6</span><b>A choice to state at each of the eleven steps</b>
         <ol>
-          <li><b>The records.</b> Where each one starts, and what the header says.</li>
-          <li><b>The rules.</b> Which start rules you tried.</li>
-          <li><b>The start.</b> Where each rule starts your records, and how far apart they land.</li>
-          <li><b>The test.</b> How you cut the training arcs, and what you scored against.</li>
-          <li><b>Gravity.</b> Fitted or held, and why on so few frames.</li>
-          <li><b>The method.</b> How you solved for the root.</li>
-          <li><b>Which root.</b> How you know it is the falling crossing.</li>
-          <li><b>Where.</b> The lines from above, and where they put the ball.</li>
-          <li><b>In or out.</b> The radii, and how far each crossing could move.</li>
+          <li><b>The records.</b> What each length holds, and what the header says.</li>
+          <li><b>The rules.</b> Which start rules you tried, and what each one takes.</li>
+          <li><b>The program.</b> How one function runs any rule.</li>
+          <li><b>Every start.</b> The crossing from every first frame.</li>
+          <li><b>The crossing time.</b> Gravity held, and which root of the formula is the falling crossing.</li>
+          <li><b>Where.</b> The ball&rsquo;s x, y and height at that time.</li>
+          <li><b>In or out.</b> The radii.</li>
+          <li><b>The function.</b> One function that predicts the crossing from any first frame.</li>
+          <li><b>The check.</b> The invented shot it must pass, and its miss on the training arcs.</li>
+          <li><b>The rule.</b> How you cut the training arcs, how each rule scored, and which you chose.</li>
+          <li><b>Bob&rsquo;s answers.</b> Each call, and how far its crossing could move.</li>
         </ol></div>
       <div class="pcard gold"><span class="tag">Assignment 6</span><b>Four limits of the evidence</b>
         <ul>
