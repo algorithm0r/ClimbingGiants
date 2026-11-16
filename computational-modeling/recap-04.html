@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Class 4, Filtering to a Standard and Working With the Tutor — Computational Physical Modeling</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="css/blocks.css?v=20261113083220">
+  <link rel="stylesheet" href="css/demos.css?v=20261113083220">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (olive). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #5F7038;
+      --course-accent-dark: #47542A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    /* ── Week page video and class cards (media-cards.js) ── */
+    .media-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+      gap: 0.9rem;
+      margin: 1rem 0;
+    }
+    .media-card {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-top: 4px solid var(--course-accent);
+      border-radius: 4px;
+      padding: 0.75rem 0.9rem 0.85rem;
+    }
+    .media-card.class { border-top-color: #C8860A; }
+    .media-card p { margin: 0; }
+    .mc-kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .mc-title { font-weight: 600; line-height: 1.3; margin: 0.25rem 0 0.35rem !important; }
+    .mc-sub { font-size: 0.85rem; color: #5A5550; line-height: 1.4; }
+    .mc-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.7rem; }
+    .mc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--course-accent);
+      border-radius: 3px;
+      text-decoration: none;
+      color: var(--course-accent-dark);
+    }
+    a.mc-btn:visited { color: var(--course-accent-dark); }
+    a.mc-btn:hover { background: #F0EDE7; }
+    .mc-btn svg { width: 1em; height: 1em; flex: none; }
+    .mc-btn.primary, a.mc-btn.primary:visited { background: var(--course-accent); color: #fff; }
+    a.mc-btn.primary:hover { background: var(--course-accent-dark); }
+    .mc-btn.pending { border-style: dashed; border-color: #b8b2a8; color: #5A5550; }
+    .mc-total { font-size: 0.9rem; color: #5A5550; }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+    /* the remembered data phrase; filled in by page.js */
+    .cg-phrase { display: inline-flex; align-items: center; gap: .3rem; margin-right: .6rem;
+      font-size: .82rem; flex-shrink: 0; }
+    /* The header row is a fixed 780px. The title, the toggle, "Your data", Search and
+       "Report a problem" only just fit in it, so the chip shows the label alone (the
+       phrase is in the link's title and on the data page) and Search shows its icon.
+       An earlier chip that held the phrase and was allowed to shrink squeezed the
+       label down to "Yo" on a classroom projector. */
+    .cg-phrase a { color: rgba(230,238,222,.92); text-decoration: none; white-space: nowrap; }
+    .header-links .search-btn .sb-label { display: none; }
+    .header-links button.report-btn { white-space: nowrap; }
+    /* the title keeps its own width */
+    .site-header-top .site-title { white-space: nowrap; flex-shrink: 0; }
+    .site-header-top .header-links { min-width: 0; margin-left: 1rem; }
+    @media (max-width: 780px) {
+      /* below the 780px row: the report button's short form, as on phones */
+      .header-links .report-btn .rb-full { display: none; }
+      .header-links .report-btn .rb-short { display: inline; }
+      .cg-phrase { margin-right: .2rem; }
+    }
+    .cg-phrase a:hover { color: #fff; text-decoration: underline; }
+    .cg-phrase button { background: none; border: none; cursor: pointer; padding: 0 .2rem;
+      color: rgba(230,238,222,.7); font: inherit; font-size: 1rem; line-height: 1; }
+    .cg-phrase button:hover { color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* Two rules the other course sites do not define. The header's top
+       row carries a report button beside the title, and a page with a
+       wide demo in it needs more than the reading measure. */
+    .site-header-top { border-bottom: 1px solid rgba(200,222,180,0.15); }
+    main.wide { max-width: 1180px; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Computational Physical Modeling</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <span class="cg-phrase" id="cg-phrase"></span>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        
+          <a href="syllabus.html">Syllabus</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="notes.html">Notes</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="python.html">Python</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reports.html">Examples</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reflection.html">Reflection</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="meeting.html">Meeting</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="ai-use.html">AI Use</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="tools.html">Tools</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="workbench.html">Workbench</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="extra-labor.html">Extra Labor</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="canvas-grades.html">Canvas Grades</a>
+          
+        
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+          
+          
+          
+          <a href="week-01.html">1</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-02.html">2</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-03.html">3</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <span class="week-current">4</span>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          <span class="week-gap" title="Week 5 is a break week">5<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <a href="week-06.html">6</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-07.html">7</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          <span class="week-gap" title="Week 8 is a break week">8<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <a href="week-09.html">9</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-10.html">10</a>
+          
+        
+      </div>
+    </nav>
+
+    
+    <nav class="page-family">
+      <div class="nav-inner">
+        Week 4,
+        <a href="week-04.html">Overview</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="finite-differences.html">Finite differences</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="differentiation-amplifies-noise.html">Amplified noise</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="smoothing.html">Smoothing and lag</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="why-a-standard-exists.html">Filter class</a>
+        
+        <span class="site-nav-sep">·</span>
+        
+        <a href="assign-04.html">Assignment</a>
+      </div>
+    </nav>
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+
+  <main data-pagefind-body>
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <div class="eyebrow">Week 4 · Class recap</div>
+<h1>Class 4, Filtering to a Standard and Working With the Tutor</h1>
+
+<p>Class 4 · Tuesday, October 27, 2026 · Chris Marriott</p>
+
+<div class="aside"><span class="label">About this recap</span>
+<p>This page summarizes a class in a University of Washington course. The recording links need a
+UW login and only work for students enrolled in that class.</p>
+<p><a href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb" target="_blank" rel="noopener">Watch the recording</a> (1:34:16). The
+<a href="class-04.html">slides</a> are on the site.</p>
+</div>
+
+<h2 id="lecture-preview-0-12">Lecture Preview <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=12" target="_blank" rel="noopener">0:12</a></h2>
+
+<p>This week the order switched. The first half worked through <a href="assign-04.html">Assignment
+4</a> itself, and the second half followed Chris's own conversation with the course tutor on the
+same assignment. The order was:</p>
+
+<ol>
+  <li>Admin notes, the mid-quarter survey and the break week.</li>
+  <li>Assignment 4, the request, and the questions to ask before starting.</li>
+  <li>The raw peak, and why it is probably not the car.</li>
+  <li>The Butterworth filter in SAE J211 and its coefficients.</li>
+  <li>Phase lag, and one pass or two.</li>
+  <li>Picking a filter class, and putting your assumption in the report.</li>
+  <li>The filtered peak, the sentence for the customer, and the checks.</li>
+  <li>Solving Assignment 4 with the course tutor, prompt by prompt.</li>
+</ol>
+
+<h2 id="admin-notes-0-51">Admin Notes <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=51" target="_blank" rel="noopener">0:51</a></h2>
+
+<p>Mid-quarter survey. The Canvas survey is anonymous and not graded, and it is how Chris decides
+what to adjust for the second half of the quarter. Please fill it out, and pass the word to anyone
+in your learning group who missed class.</p>
+
+<p>Break week. Week 5 has no class, no assignment and no quiz
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=106" target="_blank" rel="noopener">1:46</a>.
+It is there so you can study for midterms in other courses, and if you do not need that, you can
+work ahead, work on an extra labor or finish an incomplete. Your learning group can still meet,
+and Chris is still answering questions on Discord.</p>
+
+<p>Late work. Late work is always accepted, and an incomplete can be resubmitted (it then counts as
+late) <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=238" target="_blank" rel="noopener">3:58</a>.
+You have eight lates before anything happens to your grade. If you are getting close, please reach
+out to Chris.</p>
+
+<p>Last week integrated the acceleration twice (to velocity and then displacement), added the
+constant of integration, and looked at bias, the amount an instrument is off on every reading
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=188" target="_blank" rel="noopener">3:08</a>.
+This week is about the noise that is left over.</p>
+
+<h2 id="assignment-4-the-request-4-49">Assignment 4, the Request <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=289" target="_blank" rel="noopener">4:49</a></h2>
+
+<p>Alice writes that the peak acceleration on the crossmember channel goes to the customer this
+week, and their engineers will recompute it from the same file. She would rather not send a number
+that comes back different. Chris read it the way he recommends reading any request, by marking what
+you already know and listing what you do not.</p>
+
+<ul>
+  <li>Peak. A peak is the largest value, though if what matters is the magnitude, the largest
+  negative value counts too <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=329" target="_blank" rel="noopener">5:29</a>.
+  A car hitting a wall is decelerating, so the peak here is most likely a minimum. To find the
+  largest magnitude, find both the maximum and the minimum and compare their absolute values.</li>
+  <li>Crossmember. You found and integrated this channel last week.</li>
+  <li>The customer. The request says almost nothing about the customer
+  <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=500" target="_blank" rel="noopener">8:20</a>.
+  Who are they, and what will they use the number for? Those questions are not answered, and Chris
+  noted that he does not put details into an assignment that do not matter.</li>
+</ul>
+
+<p>The customer's engineers will run their own methods on the same file
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=568" target="_blank" rel="noopener">9:28</a>.
+If their peak differs from ours, the likely reason is a different method. Standards exist so that
+two labs apply the same techniques in the same order and get the same number, and this week you
+process the crossmember the way the standard says.</p>
+
+<p>This is still P&oacute;lya's first step, understanding the problem
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=707" target="_blank" rel="noopener">11:47</a>.
+The standard asks for a filter, which takes a channel and changes its values, usually without
+removing any of them. That is how it differs from decimation (which throws samples away).
+Subtracting last week's offset from every sample is a very simple filter, and this week's is a
+special kind that the standard specifies.</p>
+
+<p>Chris's list of questions for the week <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=842" target="_blank" rel="noopener">14:02</a>
+was:</p>
+
+<ol>
+  <li>What is the peak in the file as recorded?</li>
+  <li>What does the standard say, and how do you build its filter?</li>
+  <li>One pass or two? A forward pass makes features happen later in time (phase lag), and a
+  second, backward pass corrects that. The standard's filter is the two-pass one.</li>
+  <li>Which filter class? The standard has four classes, CFC 60, 180, 600 and 1000. Roughly, a
+  class lets slower content through and removes content faster than its number in hertz.</li>
+  <li>How much did the peak change from the raw peak? The plot for this week shows the raw data
+  with its peak and the filtered data with its peak.</li>
+  <li>What sentence goes to the customer with the number?</li>
+</ol>
+
+<h2 id="the-raw-peak-18-56">The Raw Peak <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=1136" target="_blank" rel="noopener">18:56</a></h2>
+
+<p>The class worked on the Civic (test 9808), which is held back from the phrase assignment. Its
+crossmember, recorded at 10,000 samples a second, peaks at &minus;964&nbsp;m/s&sup2; at 27.2&nbsp;ms.
+The positive peak nearby is about +512, so the negative one is larger, as the reasoning about
+deceleration predicted.</p>
+
+<p>Zoomed in, the record goes from &minus;964 to about +512 in under 1.5&nbsp;ms. Taken literally,
+the car went from its hardest deceleration to its hardest acceleration in about a millisecond,
+which the whole vehicle is very unlikely to be doing. More likely the structure is ringing from
+the impact, or the mount that holds the accelerometer on the crossmember is shaking, as last
+week's discussion of ringing suggested. These features are fast, and it is physically questionable
+that they describe the car. That is the reason the standard asks you to filter before you read a
+peak.</p>
+
+<h2 id="the-butterworth-filter-21-54">The Butterworth Filter <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=1314" target="_blank" rel="noopener">21:54</a></h2>
+
+<p>The standard's filter is a Butterworth filter, and Chris took its first line apart. The new,
+filtered value y<sub>i</sub> is a weighted sum. It takes the unfiltered value x<sub>i</sub> and the
+two before it, x<sub>i&minus;1</sub> and x<sub>i&minus;2</sub>, each with its own weight
+(a<sub>0</sub>, a<sub>1</sub>, a<sub>2</sub>).</p>
+
+<p>If every weight were one third, that would be a moving average, a simple smoothing technique
+that averages each value with the ones before it
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=1448" target="_blank" rel="noopener">24:08</a>.
+(You could average values after it too, but if the data is arriving as you filter, those do not
+exist yet.) The Butterworth filter borrows that idea with specially calculated weights, and it adds
+two more terms <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=1510" target="_blank" rel="noopener">25:10</a>.
+Those two are the previous two values the filter has just computed, y<sub>i&minus;1</sub> and
+y<sub>i&minus;2</sub>, weighted by b<sub>1</sub> and b<sub>2</sub>. That means the filter uses its
+own output to compute its next value.</p>
+
+<p>To build the filter you need two things
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=1591" target="_blank" rel="noopener">26:31</a>.
+The first is the filter class, which the standard sets by what the data will be used for (back to
+the question of the customer's purpose). The second is T, the time between samples, which is one
+over your sample rate. Packs were recorded at 10, 12.5 or 20&nbsp;kHz. The Civic is 10&nbsp;kHz, so
+T&nbsp;=&nbsp;0.0001&nbsp;s. The rest of the slide is formulas the standard gives you
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=1700" target="_blank" rel="noopener">28:20</a>.
+From the class and T you compute &omega;<sub>d</sub>, &omega;<sub>a</sub> and a denominator D, and
+from those the five weights. It is a short calculation by hand or a few lines of code.</p>
+
+<p>For CFC 60 at 10&nbsp;kHz the a weights are very small, b<sub>1</sub> is the one large positive
+weight (on the value just computed), and b<sub>2</sub> is negative. A good check on your
+coefficients is that (a<sub>0</sub>&nbsp;+&nbsp;a<sub>1</sub>&nbsp;+&nbsp;a<sub>2</sub>) divided by
+(1&nbsp;&minus;&nbsp;b<sub>1</sub>&nbsp;&minus;&nbsp;b<sub>2</sub>) comes out to 1
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=1842" target="_blank" rel="noopener">30:42</a>.
+In code it may come out very slightly off 1 from rounding, and very close to 1 is fine.</p>
+
+<p>When Chris wrote the solution code, he asked an AI to write the coefficient code. If you do not
+trust the code, ask for the check to be built in <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=1906" target="_blank" rel="noopener">31:46</a>.
+Then put the filter in a function and apply the y<sub>i</sub> line to every sample.</p>
+
+<h2 id="phase-lag-and-two-passes-32-47">Phase Lag and Two Passes <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=1967" target="_blank" rel="noopener">32:47</a></h2>
+
+<p>Chris drew a signal and a smoothed version of it. Smoothing makes the peaks smaller (which is
+partly the point), and a forward-only pass also makes them later. A second pass, run backward, lines the
+peaks back up and smooths a little more. Please see <a href="smoothing.html">Smoothing and phase
+lag</a>.</p>
+
+<p>The slide's question gives two smoothed curves and asks which is forward only
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=2094" target="_blank" rel="noopener">34:54</a>.
+The forward-and-backward curve has the more squashed peaks, and its peaks come earlier, so the
+other one is forward only. The standard's filter is the forward-and-backward one, so yours should
+be too. In code, you can run the same loop again from the last sample down to the first, or reverse
+the list, run the forward pass, and reverse it back
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=2173" target="_blank" rel="noopener">36:13</a>.</p>
+
+<h2 id="picking-a-filter-class-36-58">Picking a Filter Class <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=2218" target="_blank" rel="noopener">36:58</a></h2>
+
+<p>The slide reproduces a table from SAE J211, the standard for instrumentation in ground vehicle
+tests. The course uses its 1995 text, which is public. CFC 1000 is left off the slide because it
+is mostly for injury measurements, and Alice's question is not about injury. Please see
+<a href="standards.html">The standards behind the crash data</a>. For vehicle structure the table
+lists four uses.</p>
+
+<ul>
+  <li>Total vehicle comparison (CFC 60). The customer may be another lab comparing its cars to ours.</li>
+  <li>Collision simulation input (CFC 60) <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=2349" target="_blank" rel="noopener">39:09</a>.
+  Simulations are Chris's own area. A simulation of a car hitting a wall needs a pulse for the
+  force, and the people who write simulations asked for a smooth pulse and not the jagged one.</li>
+  <li>Component analysis (CFC 600) <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=2441" target="_blank" rel="noopener">40:41</a>.
+  The customer may care about the crossmember itself (it sits under the left rear seat) and not the
+  whole car.</li>
+  <li>Integration for velocity or displacement (CFC 180)
+  <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=2590" target="_blank" rel="noopener">43:10</a>.
+  That is what you did last week without filtering first. Filtering last week's data at CFC 180
+  barely changes the Δv, and CFC 60 changes it a little more.</li>
+</ul>
+
+<p>The class voted on which would be smoother, CFC 600 or CFC 60. CFC 60 smooths the most, then
+180, then 600, then 1000. Some uses are sensitive to fast content and keep more of it (injury
+measurements, for instance), and others want only the slow pulse.</p>
+
+<p>The class then voted on the customer's purpose
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=2674" target="_blank" rel="noopener">44:34</a>.
+Votes went to every row, with the most for component analysis. The request does not say, and there
+is no single right answer. Chris chose total vehicle comparison (CFC 60) for the slides, partly
+because two of the four rows use 60. If you chose component analysis, that is just as complete.
+Chris noted that the class's choice may fit the request better than his.</p>
+
+<p>Whatever you pick, put your assumption in the report
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=2786" target="_blank" rel="noopener">46:26</a>.
+For instance, "I don't know what the customer is using it for. I assumed component analysis, so I
+used CFC 600. If they are doing something else, let me know and I will rerun it." You may also
+report more than one class, though one is enough.</p>
+
+<h2 id="the-filtered-peak-47-36">The Filtered Peak <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=2856" target="_blank" rel="noopener">47:36</a></h2>
+
+<p>The class voted on what CFC 60 would do to the peak. Filtering will not make the peak larger, so
+the vote was on how much smaller it gets. With a light filter (600 or 1000) it might shrink a little, and with CFC 60 it
+might shrink a lot.</p>
+
+<p>Filtered at CFC 60, the jagged gray trace becomes a smooth red line that keeps only the slow
+motion <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=2922" target="_blank" rel="noopener">48:42</a>.
+The sharp value at 27.2&nbsp;ms is gone (going by the filtered data it was noise), and the peak is
+now &minus;355.5&nbsp;m/s&sup2; at 62.4&nbsp;ms. Whether a change from &minus;964 to &minus;355.5 is a
+lot or a little is your judgment.</p>
+
+<p>Is the later peak phase lag <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=3042" target="_blank" rel="noopener">50:42</a>?
+The filter ran forward and backward, so if it was done correctly it has no lag. The old peak was
+most likely a fast feature, which the filter removed, and the new peak is the slow pulse. It sits
+where the middle of the gray trace bottoms out. If the slow shape is what you care about, the red
+line captures the peak better.</p>
+
+<h2 id="the-sentence-for-the-customer-53-04">The Sentence for the Customer <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=3184" target="_blank" rel="noopener">53:04</a></h2>
+
+<p>A number alone does not say how it was found, so the sentence around it should let the other lab
+repeat every step. Chris's sentence is mostly details for that reason.</p>
+
+<p>"Peak X acceleration at the left rear seat crossmember (channel 10FORALERE00ACXP, NHTSA test
+9808): &minus;355.5&nbsp;m/s&sup2; at 62.4&nbsp;ms after contact, filtered at CFC&nbsp;60 per SAE
+J211-1, forward and then backward."</p>
+
+<p>It labels the number (X acceleration, the crossmember Alice asked for), gives the channel code and
+test so another lab can pull the same data in code, then gives the value and time, the class and
+the passes. If the other lab used CFC 600 or did not filter, the sentence shows where the
+difference came from. It could also say whether you removed the offset, since that is another
+place two labs might differ.</p>
+
+<h2 id="checks-and-where-your-evidence-runs-out-56-19">Checks and Where Your Evidence Runs Out <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=3379" target="_blank" rel="noopener">56:19</a></h2>
+
+<ul>
+  <li>The coefficients. They pass the check that a constant comes through unchanged.</li>
+  <li>The sample rate. The filter's formulas only work when the sample rate is above 4.155 times
+  the class, which is 249 samples a second for CFC 60, far below the Civic's 10,000. Every pack's
+  rate (10, 12.5 or 20&nbsp;kHz) is high enough for all four classes. That also connects to Week 2,
+  since a 1&nbsp;kHz logger could not use some of these filters at all.</li>
+  <li>The start <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=3478" target="_blank" rel="noopener">57:58</a>.
+  At the first sample there are no earlier x or y values. Chris's solution uses zeros for them,
+  and there are a couple of other good choices. The standard's answer is to have enough record
+  before and after the event that the start does not matter.</li>
+</ul>
+
+<p>The main assumption for your report is the customer's purpose
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=3561" target="_blank" rel="noopener">59:21</a>.
+You do not know it, so say what you assumed. The other choices along the way (how you started the
+filter, the two passes) belong in your assumptions too.</p>
+
+<h2 id="assignment-4-with-the-course-tutor-70-22">Assignment 4 With the Course Tutor <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=4222" target="_blank" rel="noopener">70:22</a></h2>
+
+<p>Over the weekend Chris solved Assignment 4 as a student would, with the course tutor on the
+assignment page. It took 13 prompts, and he then edited the report the tutor drafted. The whole
+conversation (including the tutor's reasoning), the report and the program are on
+<a href="tutor-chat-04.html">Assignment 4 with the course tutor</a>. The second half of class
+stepped through the highlights.</p>
+
+<h3 id="understanding-the-problem-72-11">Understanding the Problem <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=4331" target="_blank" rel="noopener">72:11</a></h3>
+
+<p>Chris opened by telling the tutor what he thought he understood (the crossmember again, a filter,
+and a standard he did not know yet). The tutor is built around P&oacute;lya's steps, and their
+first question is usually whether you understand the problem, so saying what you understand is a good
+start. The first four prompts were all spent on understanding.</p>
+
+<p>The tutor's replies usually hold several questions, and Chris answered one at a time. If a
+question matters, the tutor will usually bring it back later. The first one he took was why Alice mentions the
+customer's engineers <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=4472" target="_blank" rel="noopener">74:32</a>.
+A student in class answered that the customer's engineers may process the data a different way,
+which is why both labs should use the standard.</p>
+
+<p>The tutor then asked what else could make the two peaks differ even with the same standard
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=4562" target="_blank" rel="noopener">76:02</a>.
+Chris did not know, and said so <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=4617" target="_blank" rel="noopener">76:57</a>.
+It is fine to tell the tutor "I don't know, give me a hint." The answers were the sign of the peak
+(one lab reports a positive number and the other a negative one) and whether the offset is removed
+before filtering. When the tutor asked him to trace his program, he pointed out that he did not
+have a program yet.</p>
+
+<h3 id="the-plan-79-40">The Plan <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=4780" target="_blank" rel="noopener">79:40</a></h3>
+
+<p>The tutor asked for the program's steps in plain words. Chris still wanted to learn more about
+the standard first, but he went along and gave a sketch. Open the file and find the crossmember,
+filter it into a second channel, plot both to see that the filter worked, find the peak, and write
+the report. He also said he did not yet know what the standard's filter was.</p>
+
+<p>Asked where the standard was, he said he had read the course pages but could not find a clear
+source and asked for guidance <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=4937" target="_blank" rel="noopener">82:17</a>.
+(He has since made the course site clearer on this.) The tutor showed the same table as the slides
+and asked which row matched the customer, and for his sample rate, since the coefficients need the
+class and T.</p>
+
+<p>Chris reasoned that Alice asked for a peak and not a Δv or displacement, which ruled out CFC 180,
+and picked CFC 60 for total vehicle comparison
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=5060" target="_blank" rel="noopener">84:20</a>.
+The tutor pushed back, asking what made total vehicle comparison more likely than component
+analysis. That was a fair challenge, and the choice went into the report as an assumption.</p>
+
+<h3 id="carrying-out-the-plan-86-03">Carrying Out the Plan <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=5163" target="_blank" rel="noopener">86:03</a></h3>
+
+<p>Chris asked the tutor to look up the coefficient formulas and compute them for his own sample
+rate, so he could check them against his code. He then spent 19 minutes writing a first program that
+loads the data, finds the crossmember and plots it, without the filter
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=5226" target="_blank" rel="noopener">87:06</a>.
+The tutor would not finish the filter until he made the choices that were his to make (one pass or
+two, how to start the filter). He answered them, and he asked for the whole edited file back,
+and not pieces to paste in <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=5327" target="_blank" rel="noopener">88:47</a>.</p>
+
+<h3 id="looking-back-89-21">Looking Back <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=5361" target="_blank" rel="noopener">89:21</a></h3>
+
+<p>The tutor had started the filter from zeros. That makes little difference here, but Chris did
+not understand it and did not want to ship code he could not explain, so he asked. The tutor
+explained and suggested a test in the code, which reports the filtered values at the edges. Whether
+those are close to zero depends on the scale of the signal.</p>
+
+<p>In the final prompt Chris gave the tutor the numbers from his program's output and asked for a
+report that opens with a clean sentence (the filtered peak, the class, the double pass and the zero
+start), then the plot, then every choice listed as an assumption
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=5438" target="_blank" rel="noopener">90:38</a>.
+The tutor drafted it and listed what they could not fill in, such as units. Chris made those edits
+himself, and the result is the report on the site.</p>
+
+<p>Chris used 13 prompts, and he did not ask the tutor to solve the whole problem in one
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9acde836-7f5e-4139-8c8e-b4f1014063eb&amp;start=5539" target="_blank" rel="noopener">92:19</a>.
+That would probably have produced an answer, though Chris works with the AI to solve the problem
+and does not let the AI replace his work. Using the tutor is not
+required, and the walk-through shows one way to work with them.</p>
+
+  </main>
+
+  
+
+  <script src="js/page.js?v=20261113083220"></script>
+
+  <footer class="site-footer">
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-09">November 9, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Algorithms');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  
+  
+  
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

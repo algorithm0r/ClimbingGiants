@@ -1279,15 +1279,25 @@ setTimeout(() => {
   });
 }, 0);
 
-/* Lecture 24's own figures, on arc 79 of data/arcs.json, the shot page 24
-   steps. Time from frame 20 of the record (the data set's release); frames
-   counted from there, free flight to frame 23. Starting state from page 25's
-   11-frame fit at frame 5; k = 0.016 per meter. shotRate, line, eulerRun,
-   heightAt, G and FINE_H come from the notes page's demo.
-   lec24-shot: the 24 frames, the fit window, frame 5.
-   lec24-run:  Euler at 40 ms against the 0.1 ms run and the frames.
-   lec24-one:  the first step, close up.
-   lec24-gap:  the gap to the 0.1 ms run after each step.
+/* Lecture 24's own figures, on shot 1144 of data/example/train.json, the
+   week's ball. Free flight from the release (the A7 example rule: back
+   from the top while the vertical speed is still rising) to the last frame more
+   than 1 m from the hoop across the floor; time and frames count from the
+   release. The start is last week's fit of the first 11 flight frames (lines in
+   x and y, a parabola in z with g held), read at its middle, frame 5, 0.20 s.
+   k = 0.016 per meter. shotRate, line, eulerRun, G and FINE_H come from the
+   notes page's demo.
+   lec24-whole: every frame to the rim with the fit to all of them, from above,
+                from the side, and the crossing at the hoop against the tracked one.
+   lec24-predict: parabolas fitted to the first 6, 11 and 16 frames, and where
+                each comes down through the rim.
+   lec24-dragcall: the same three fits with drag stepped in, at the hoop.
+   lec24-shot:  the flight frames, the start and its climb.
+   lec24-form:  the frames across the floor and in height, with the gravity-only
+                line and parabola from the start.
+   lec24-step:  one 40 ms step of the height and of the vertical velocity.
+   lec24-arcs:  the height with gravity only, then stepped with drag in 40 ms
+                and then 0.1 ms steps, over the tracked frames (animated).
    Hosts are found by data-fig. */
 (() => {
   const axis = (xr, yr, xt, yt, xl, yl, fx = v => String(v)) => [
@@ -1296,11 +1306,50 @@ setTimeout(() => {
     {x: xr[1], y: yr[0], dy: -5, anchor: 'end', text: xl},
     {x: xr[0], y: yr[1], dx: 4, dy: 10, anchor: 'start', text: yl}];
 
-  fetch('data/arcs.json').then(r => r.json()).then(d => {
-    const a = d.arcs.find(x => x.id === 79);
-    const r = a.rel, nf = a.key.nf;
+  /* draw(k) redraws the figure at stage k of n; the still state is stage n. It
+     plays when its slide is shown, and a Replay button under it runs it again
+     (a button, because the deck reads a click anywhere else as "next slide"). */
+  const animate = (host, n, draw, ms) => {
+    draw(n);
+    const slide = host.closest('.deck-slide'), fig = host.closest('figure');
+    if (!slide || !fig) return;
+    let timer = null;
+    const play = () => {
+      clearTimeout(timer);
+      let k = 0;
+      const step = () => { draw(k); if (k++ < n) timer = setTimeout(step, typeof ms === 'function' ? ms(k) : ms); };
+      step();
+    };
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'anim-replay'; btn.textContent = 'Replay';
+    btn.addEventListener('click', play);
+    fig.after(btn);
+    let was = slide.classList.contains('on');
+    if (was) play();
+    new MutationObserver(() => {
+      const on = slide.classList.contains('on');
+      if (on && !was) play();
+      if (!on) clearTimeout(timer);
+      was = on;
+    }).observe(slide, {attributes: true, attributeFilter: ['class']});
+  };
+
+  /* the release: back from the top while the vertical speed (a centered
+     difference over four frames) is still rising toward it */
+  const release = (t, z) => {
+    const vz = z.map((_, i) => i >= 2 && i < z.length - 2 ? (z[i + 2] - z[i - 2]) / (t[i + 2] - t[i - 2]) : NaN);
+    let i = z.indexOf(Math.max(...z));
+    while (i > 3 && (vz[i - 1] > vz[i] || vz[i - 2] > vz[i])) i--;
+    return i;
+  };
+
+  fetch('data/example/train.json').then(r => r.json()).then(d => {
+    const a = d.shots.find(x => x.id === 1144);
+    const r = release(a.t, a.z);
+    let end = a.t.findIndex((_, i) => Math.hypot(a.x[i] - a.hoop_x, a.y[i] - a.hoop_y) < 1.0);
+    const nf = end - r, last = nf - 1;
     const T = [], X = [], Y = [], Z = [];
-    for (let i = r; i < r + nf; i++) {
+    for (let i = r; i < end; i++) {
       T.push(a.t[i] - a.t[r]); X.push(a.x[i]); Y.push(a.y[i]); Z.push(a.z[i]);
     }
     const J = 5, N = 11, H = 0.04;
@@ -1308,76 +1357,475 @@ setTimeout(() => {
     const cx = line(tf, X.slice(0, N)), cy = line(tf, Y.slice(0, N));
     const cz = line(tf, Z.slice(0, N).map((z, i) => z + 0.5 * G * tf[i] * tf[i]));
     const S0 = [cx[0], cy[0], cz[0], cx[1], cy[1], cz[1]];
-    const T0 = T[J], SPAN = T[nf - 1] - T0, NS = Math.round(SPAN / H);
+    const T0 = T[J], SPAN = T[last] - T0, NS = Math.round(SPAN / H);
+    const grav = u => [cx[0] + cx[1] * u, cy[0] + cy[1] * u, cz[0] + cz[1] * u - 0.5 * G * u * u];
     const fine = eulerRun(S0, FINE_H, SPAN);
     const run = eulerRun(S0, H, SPAN);
     const per = Math.round(H / FINE_H);
     const fineAt = i => fine[i * per];                 // fine state at step i
-    const gap = run.map((s, i) => (s[2] - fineAt(i)[2]) * 1000);
-    const fineCurve = (t0, t1) => {
-      const x = [], y = [];
-      for (let k = Math.round((t0 - T0) / FINE_H); k <= Math.round((t1 - T0) / FINE_H); k += 10) {
-        x.push(T0 + k * FINE_H); y.push(fine[k][2]);
-      }
-      return {x, y, cls: 'ghost'};
-    };
+    const dist3 = (p, i) => Math.hypot(p[0] - X[i], p[1] - Y[i], p[2] - Z[i]);
     const frames = (i0, i1) => {
       const p = [];
       for (let i = i0; i <= i1; i++) p.push({x: T[i], y: Z[i], r: 3.2, cls: 'frame'});
       return p;
     };
+    const gravCurve = (t0, t1, cls) => {
+      const x = [], y = [];
+      for (let t = t0; t <= t1 + 1e-9; t += (t1 - t0) / 80) { x.push(t); y.push(grav(t - T0)[2]); }
+      return {x, y, cls};
+    };
+    const xrShot = [-0.03, 1.0], yrShot = [2.75, 4.95];
+    const axShot = axis(xrShot, yrShot, [0, 0.2, 0.4, 0.6, 0.8], [3.5, 4, 4.5], 'time after release (s) →', '↑ height (m)');
+    const fmt = v => v.toFixed(2).replace('-', '−');
 
+    /* ---- the rim crossing, the question the opening slides ask ----
+       The whole record, timed from the release. The tracked crossing is the
+       straight line between the frames either side of the rim on the way down
+       (page 19). A fit of n frames from the release (lines in x and y, a
+       parabola in z with g held, centered on their middle time) crosses where
+       its parabola comes down through the rim; with drag, the same fitted
+       state is stepped in 0.1 ms steps until the height comes down through it. */
+    const RIM = 3.048, HX = a.hoop_x, HY = a.hoop_y, CLEAN = 0.109, OUT = 0.348;
+    const TR = a.t.map(v => v - a.t[r]);
+    const pk = a.z.indexOf(Math.max(...a.z));
+    let ic = pk; while (a.z[ic] >= RIM) ic++;
+    const pc = (RIM - a.z[ic - 1]) / (a.z[ic] - a.z[ic - 1]);
+    const actual = {t: TR[ic - 1] + pc * (TR[ic] - TR[ic - 1]),
+                    u: a.x[ic - 1] + pc * (a.x[ic] - a.x[ic - 1]) - HX,
+                    v: a.y[ic - 1] + pc * (a.y[ic] - a.y[ic - 1]) - HY};
+    const fitN = n => {
+      const tt = TR.slice(r, r + n), tm = tt.reduce((p, q) => p + q, 0) / n, uu = tt.map(t => t - tm);
+      const fx = line(uu, a.x.slice(r, r + n)), fy = line(uu, a.y.slice(r, r + n));
+      const fz = line(uu, a.z.slice(r, r + n).map((z, i) => z + 0.5 * G * uu[i] * uu[i]));
+      const at = t => { const u = t - tm; return [fx[0] + fx[1] * u, fy[0] + fy[1] * u, fz[0] + fz[1] * u - 0.5 * G * u * u]; };
+      const uc = (fz[1] + Math.sqrt(fz[1] * fz[1] + 2 * G * (fz[0] - RIM))) / G;      // the falling root
+      const g = at(tm + uc);
+      let s = [fx[0], fy[0], fz[0], fx[1], fy[1], fz[1]], t = tm, dr = null;
+      for (;;) {
+        const rt = shotRate(t, s), nx = s.map((q, j) => q + FINE_H * rt[j]);
+        if (nx[5] < 0 && nx[2] < RIM) {
+          const q = (RIM - s[2]) / (nx[2] - s[2]);
+          dr = {t: t + q * FINE_H, u: s[0] + q * (nx[0] - s[0]) - HX, v: s[1] + q * (nx[1] - s[1]) - HY};
+          break;
+        }
+        s = nx; t += FINE_H;
+      }
+      return {n, at, grav: {t: tm + uc, u: g[0] - HX, v: g[1] - HY}, drag: dr};
+    };
+    const dist0 = p => Math.hypot(p.u, p.v);
+    const band = dd => dd < CLEAN ? 'clean' : dd < OUT ? 'rim' : 'out';
+    const disk = (rad, n = 90) => Array.from({length: n}, (_, j) =>
+      ({x: rad * Math.cos(2 * Math.PI * j / n), y: rad * Math.sin(2 * Math.PI * j / n)}));
+    const ring = Array.from({length: 121}, (_, j) => 2 * Math.PI * j / 120);
+    const hoopBase = () => ({
+      areas: [{pts: disk(OUT), cls: 'tri'}, {pts: disk(CLEAN), cls: 'pos'}],
+      curves: [{x: ring.map(q => 0.2286 * Math.cos(q)), y: ring.map(q => 0.2286 * Math.sin(q)), cls: 'rim'}]});
+    const all = fitN(ic - r), picks = [6, 11, 16].map(fitN);
+    const recFrames = (i0, i1) => {
+      const p = [];
+      for (let j = i0; j <= i1; j++) p.push({x: TR[j], y: a.z[j], r: 3, cls: 'frame'});
+      return p;
+    };
+    const arcTo = (f, tEnd, cls) => {
+      const x = [], y = [];
+      for (let k = 0; k <= 80; k++) { const t = tEnd * k / 80; x.push(t); y.push(f.at(t)[2]); }
+      return {x, y, cls};
+    };
+    const xrArc = [-0.03, 1.32], yrArc = [2.75, 4.95];
+
+    /* the reminder: every frame to the rim, the fit to all of them, from above,
+       from the side, and at the hoop */
+    document.querySelectorAll('[data-fig="lec24-whole"] .fig-body').forEach(host => {
+      const [c1, c2, c3] = diagramRow(host, 3);
+      const xs = a.x.slice(r, ic + 1), ys = a.y.slice(r, ic + 1);
+      const tl = [0, all.grav.t].map(t => all.at(t));
+      diagram(c1, {w: 240, h: 210, xRange: [0.9, 7.4], yRange: [6.9, 12.0],
+        alt: 'The court from above: the tracked frames run from the shooter to the hoop along the fitted straight line.',
+        curves: [{x: tl.map(p => p[0]), y: tl.map(p => p[1])},
+                 {x: ring.map(q => HX + 0.2286 * Math.cos(q)), y: ring.map(q => HY + 0.2286 * Math.sin(q)), cls: 'rim'}],
+        points: xs.map((q, j) => ({x: q, y: ys[j], r: 1.8, cls: 'frame'})),
+        notes: [{x: 0.9, y: 12.0, dx: 4, dy: 10, anchor: 'start', text: 'from above'},
+                {x: HX, y: HY, dx: 6, dy: 16, anchor: 'start', text: 'hoop'},
+                {x: 7.4, y: 6.9, dy: -5, anchor: 'end', text: 'x, along the court →'}]});
+      diagram(c2, {w: 240, h: 210, xRange: xrArc, yRange: yrArc,
+        alt: 'Height against time: the tracked frames and the fitted parabola, coming down through the rim height at about 1.17 s.',
+        leads: [{from: [xrArc[0], RIM], to: [xrArc[1], RIM], cls: 'level'}],
+        curves: [arcTo(all, all.grav.t)],
+        points: recFrames(r, ic),
+        notes: [...axis(xrArc, yrArc, [0, 0.4, 0.8, 1.2], [3.5, 4.5], 'time after release (s) →', '↑ height (m)'),
+                {x: 0.6, y: RIM, dy: -5, anchor: 'middle', text: 'rim, 3.048 m'}]});
+      const ag = dist0(all.grav), aa = dist0(actual);
+      diagram(c3, {w: 240, h: 210, xRange: [-0.42, 0.42], yRange: [-0.4, 0.33], axes: false,
+        alt: 'The hoop from above, with the clean disk and the rim band. The fitted parabola comes down through the rim ' + ag.toFixed(2) + ' m from the center, on the rim. The tracked ball came through ' + aa.toFixed(2) + ' m from the center, clean.',
+        ...hoopBase(),
+        points: [{x: 0, y: 0, r: 2}, {x: all.grav.u, y: all.grav.v, r: 5, cls: 'miss'}, {x: actual.u, y: actual.v, r: 5, cls: 'dot'}],
+        notes: [{x: -0.42, y: 0.33, dx: 4, dy: 10, anchor: 'start', text: 'at the rim, from above'},
+                {x: 0, y: -0.4, dy: -4, anchor: 'middle', text: 'inner disk clean, gold band hits the rim'},
+                {x: actual.u, y: actual.v, dx: 8, dy: 4, anchor: 'start', text: 'tracked, ' + aa.toFixed(2) + ' m'},
+                {x: all.grav.u, y: all.grav.v, dx: -8, dy: 4, anchor: 'end', cls: 'hi', text: 'parabola, ' + ag.toFixed(2) + ' m'}]});
+    });
+
+    /* predictions from the first 6, 11 and 16 frames, parabolas only */
+    document.querySelectorAll('[data-fig="lec24-predict"] .fig-body').forEach(host => {
+      const [c1, c2] = diagramRow(host, 2);
+      const cls = ['p6', 'p11', 'p16'], rings = ['h6', 'h11', 'h16'], ink = ['t6', 'hi', 'acc'];
+      const arcs = diagram(c1, {w: 260, h: 210, xRange: xrArc, yRange: yrArc,
+        alt: 'Height against time with three parabolas, fitted to the first 6, 11 and 16 frames, each carried down to the rim height.',
+        leads: [{from: [xrArc[0], RIM], to: [xrArc[1], RIM], cls: 'level'}],
+        curves: picks.map((f, k) => arcTo(f, f.grav.t, cls[k])),
+        /* each frame in the color of the smallest fit that uses it */
+        points: recFrames(r, ic).map((p, j) => ({...p, cls: j < 6 ? 'f6' : j < 11 ? 'f11' : j < 16 ? 'f16' : 'fun'})),
+        notes: [...axis(xrArc, yrArc, [0, 0.4, 0.8, 1.2], [3.5, 4.5], 'time after release (s) →', '↑ height (m)'),
+                {x: 0.62, y: 3.95, anchor: 'middle', text: 'fitted to the first'},
+                {x: 0.62, y: 3.95, dy: 14, anchor: 'middle', cls: 't6', text: 'gray: 6 frames'},
+                {x: 0.62, y: 3.95, dy: 28, anchor: 'middle', cls: 'hi', text: 'red: 11 frames'},
+                {x: 0.62, y: 3.95, dy: 42, anchor: 'middle', cls: 'acc', text: 'green: 16 frames'},
+                {x: 0.62, y: 3.95, dy: 56, anchor: 'middle', text: 'faded: not fitted'},
+                {x: 1.02, y: RIM, dy: -5, anchor: 'end', text: 'rim'}]});
+      /* the frames go under the curves, so each fit's line reads over its frames */
+      const under = arcs.querySelector('path.p6');
+      arcs.querySelectorAll('circle').forEach(c => arcs.insertBefore(c, under));
+      diagram(c2, {w: 260, h: 210, xRange: [-0.95, 0.6], yRange: [-0.85, 0.4], axes: false,
+        alt: 'The hoop from above. The parabolas fitted to the first 6, 11 and 16 frames come down ' + picks.map(f => dist0(f.grav).toFixed(2)).join(', ') + ' m from the center. The tracked ball came through ' + dist0(actual).toFixed(2) + ' m from it.',
+        ...hoopBase(),
+        points: [{x: 0, y: 0, r: 2}, ...picks.map((f, k) => ({x: f.grav.u, y: f.grav.v, r: 5, cls: rings[k]})), {x: actual.u, y: actual.v, r: 5, cls: 'dot'}],
+        notes: [{x: -0.95, y: 0.4, dx: 4, dy: 10, anchor: 'start', text: 'at the rim, from above'},
+                ...picks.map((f, k) => ({x: f.grav.u, y: f.grav.v, dx: 8, dy: 4, anchor: 'start', cls: ink[k],
+                                    text: f.n + ' frames, ' + dist0(f.grav).toFixed(2) + ' m'})),
+                {x: actual.u, y: actual.v, dx: 8, dy: -6, anchor: 'start', text: 'tracked, ' + dist0(actual).toFixed(2) + ' m'}]});
+    });
+
+    /* the same three fits, gravity only and stepped with drag */
+    document.querySelectorAll('[data-fig="lec24-dragcall"] .fig-body').forEach(host => {
+      const rings = ['h6', 'h11', 'h16'], dots = ['d6', 'd11', 'd16'], ink = ['t6', 'hi', 'acc'];
+      diagram(host, {w: 440, h: 200, xRange: [-0.95, 2.35], yRange: [-0.85, 0.4], axes: false,
+        alt: 'The hoop from above. From the first 6, 11 and 16 frames, gravity only comes down ' + picks.map(f => dist0(f.grav).toFixed(2)).join(', ') + ' m from the center, and the same fits stepped with drag come down ' + picks.map(f => dist0(f.drag).toFixed(2)).join(', ') + ' m from it. The tracked ball came through ' + dist0(actual).toFixed(2) + ' m from the center.',
+        ...hoopBase(),
+        leads: picks.map(f => ({from: [f.grav.u, f.grav.v], to: [f.drag.u, f.drag.v], cls: 'cast'})),
+        points: [{x: 0, y: 0, r: 2}, ...picks.map((f, k) => ({x: f.grav.u, y: f.grav.v, r: 5, cls: rings[k]})),
+                 ...picks.map((f, k) => ({x: f.drag.u, y: f.drag.v, r: 5, cls: dots[k]})), {x: actual.u, y: actual.v, r: 5, cls: 'dot'}],
+        notes: [{x: -0.95, y: 0.4, dx: 4, dy: 10, anchor: 'start', text: 'at the rim, from above'},
+                {x: actual.u, y: actual.v, dx: -9, dy: -4, anchor: 'end', text: 'tracked'},
+                ...picks.map((f, k) => ({x: f.grav.u, y: f.grav.v, dx: -8, dy: 4, anchor: 'end', cls: ink[k], text: f.n + ' frames'})),
+                {x: 0.62, y: 0.3, anchor: 'start', text: 'from the first'},
+                {x: 0.62, y: 0.3, dx: 70, anchor: 'start', text: 'gravity (ring)'},
+                {x: 0.62, y: 0.3, dx: 150, anchor: 'start', text: 'drag (dot)'},
+                ...picks.flatMap((f, k) => [
+                  {x: 0.62, y: 0.16 - 0.14 * k, anchor: 'start', cls: ink[k], text: f.n + ' frames'},
+                  {x: 0.62, y: 0.16 - 0.14 * k, dx: 70, anchor: 'start', text: dist0(f.grav).toFixed(2) + ' m'},
+                  {x: 0.62, y: 0.16 - 0.14 * k, dx: 150, anchor: 'start', text: dist0(f.drag).toFixed(2) + ' m, ' + band(dist0(f.drag))}]),
+                {x: 0.62, y: -0.30, anchor: 'start', text: 'tracked'},
+                {x: 0.62, y: -0.30, dx: 150, anchor: 'start', text: dist0(actual).toFixed(2) + ' m, ' + band(dist0(actual))}]});
+    });
+
+    /* the 11-frame fit read at its middle: the fitted frames in the 11-frame
+       red of slide 3, the later ones faded, the fit's parabola over its frames,
+       the start as a small black point with v0 as an arrow along the fit, and
+       the middle marked, with fitted frames on both sides of it */
     document.querySelectorAll('[data-fig="lec24-shot"] .fig-body').forEach(host => {
-      const xr = [-0.03, 0.95], yr = [3.25, 4.8];
-      diagram(host, {w: 440, h: 150, xRange: xr, yRange: yr,
-        alt: 'Height of the ball at the 24 free-flight frames, rising from 3.45 m to about 4.6 m and falling to 3.64 m at 0.92 s. The first 11 frames are shaded as the fit window, and frame 5 is marked.',
-        areas: [{pts: [{x: T[0] - 0.015, y: yr[0]}, {x: T[0] - 0.015, y: yr[1] - 0.08},
-                       {x: T[N - 1] + 0.015, y: yr[1] - 0.08}, {x: T[N - 1] + 0.015, y: yr[0]}], cls: 'fitwin'}],
-        points: [...frames(0, nf - 1), {x: T0, y: S0[2], r: 4.6}],
-        notes: [...axis(xr, yr, [0, 0.2, 0.4, 0.6, 0.8], [4, 4.5], 'time from release (s) →', '↑ height (m)'),
-          {x: T[N - 1] / 2 + 0.03, y: 3.33, anchor: 'middle', text: 'fitted frames 0 to 10'},
-          {x: T0, y: S0[2], dx: 6, dy: 16, anchor: 'start', cls: 'hi', text: 'frame 5, ' + S0[2].toFixed(4) + ' m'},
-          {x: T[nf - 1], y: Z[nf - 1], dx: -6, dy: 4, anchor: 'end', text: 'frame 23'}]});
+      const u = 0.17, xr = [-0.03, 0.62], yr = [2.75, 4.95];
+      const svg = diagram(host, {w: 440, h: 190, xRange: xr, yRange: yr,
+        alt: 'Height of the ball at the first frames after release, the 11 fitted frames in red with the fitted parabola over them. At the middle of the fitted frames, 0.20 s after release, with five fitted frames on each side, a black point marks the start r0, ' + S0[2].toFixed(2) + ' m up, and an arrow along the parabola marks v0, climbing at ' + S0[5].toFixed(2) + ' m/s.',
+        curves: [gravCurve(T[0], T[N - 1], 'p11')],
+        leads: [{from: [T0, 3.15], to: [T0, S0[2] - 0.08], cls: 'cast'},
+                {from: [T0, S0[2]], to: [T0 + u, S0[2] + u * S0[5]], cls: 'vec', over: true}],
+        points: [...frames(0, 15).map((p, j) => ({...p, cls: j < N ? 'f11' : 'fun'})), {x: T0, y: S0[2], r: 2.8, cls: 'tail'}],
+        notes: [...axis(xr, yr, [0, 0.2, 0.4, 0.6], [3.5, 4, 4.5], 'time after release (s) →', '↑ height (m)'),
+          {x: T0, y: yr[0], dy: -18, anchor: 'middle', cls: 'hi', text: 'the middle of the 11 fitted frames,'},
+          {x: T0, y: yr[0], dy: -5, anchor: 'middle', cls: 'hi', text: 'five on each side'},
+          {x: T0, y: S0[2], dx: 6, dy: 14, anchor: 'start', tex: 'r_0'},
+          {x: T0 + u, y: S0[2] + u * S0[5], dx: -4, dy: -8, anchor: 'end', tex: 'v_0'},
+          {x: 0.6, y: 3.42, anchor: 'end', text: 'r\u2080 = (' + S0.slice(0, 3).map(fmt).join(', ') + ') m'},
+          {x: 0.6, y: 3.42, dy: 14, anchor: 'end', text: 'v\u2080 = (' + S0.slice(3).map(fmt).join(', ') + ') m/s'}]});
+      /* the frames under the curve, as on slide 3; an arrowhead on the vector */
+      const under = svg.querySelector('path.p11');
+      svg.querySelectorAll('circle').forEach(c => { if (!c.classList.contains('tail')) svg.insertBefore(c, under); });
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      defs.innerHTML = '<marker id="lec24-v0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto"><path d="M0 0L10 5L0 10z" fill="#2f2a24"/></marker>';
+      svg.prepend(defs);
+      svg.querySelector('line.vec').setAttribute('marker-end', 'url(#lec24-v0)');
     });
 
-    document.querySelectorAll('[data-fig="lec24-run"] .fig-body').forEach(host => {
-      const xr = [0.17, 0.95], yr = [3.5, 4.75];
-      const ex = run.map((_, i) => T0 + i * H), ey = run.map(s => s[2]);
-      diagram(host, {w: 440, h: 195, xRange: xr, yRange: yr,
-        alt: 'Height from frame 5 to frame 23. Euler with 40 ms steps runs above the dashed 0.1 ms run and ends 134.7 mm higher. Open circles are the measured frames.',
-        curves: [fineCurve(T0, T0 + SPAN), {x: ex, y: ey}],
-        points: [...frames(J, nf - 1), ...ex.map((x, i) => ({x, y: ey[i], r: 3.2}))],
-        leads: [{from: [T0 + SPAN, fine[fine.length - 1][2]], to: [T0 + SPAN, ey[NS]], cls: 'chord'}],
-        notes: [...axis(xr, yr, [0.2, 0.4, 0.6, 0.8], [4, 4.5], 'time from release (s) →', '↑ height (m)'),
-          {x: T0 + SPAN, y: (ey[NS] + fine[fine.length - 1][2]) / 2, dx: -6, dy: 4, anchor: 'end', cls: 'hi', text: gap[NS].toFixed(1) + ' mm'}]});
+    /* gravity only: a straight line across the floor and a parabola in height,
+       from the start, drawn on the frames. r = (x, y) is plotted as its
+       distance from the release frame. */
+    document.querySelectorAll('[data-fig="lec24-form"] .fig-body').forEach(host => {
+      /* from above: x along the court, y across, at equal scale, with the hoop.
+         The fitted frames in red, the later ones as the check; the fit's
+         straight line projected to the last frame, and its point there. */
+      const ge = grav(SPAN), ring = Array.from({length: 61}, (_, j) => 2 * Math.PI * j / 60);
+      const past = []; for (let j = r + nf; j <= ic; j++) past.push(j);     // record frames inside 1 m of the hoop, down to the rim
+      const gx = grav(TR[ic] - T0);     // the line and parabola run on through the faded frames
+      const xs0 = Math.min(...X, HX, gx[0]) - 0.25, xs1 = Math.max(...X) + 0.35;
+      const ys0 = Math.min(...Y, HY, gx[1]) - 0.25, ys1 = Math.max(...Y) + 0.55;
+      const wTop = 250, hTop = Math.round((ys1 - ys0) / (xs1 - xs0) * (wTop - 20) + 26);
+      const [left, right] = diagramRow(host, 2);
+      const top = diagram(left, {w: wTop, h: hTop, xRange: [xs0, xs1], yRange: [ys0, ys1],
+        alt: 'The court from above, x along the court and y across it. The fitted frames are red, the later frames gray, and the fit projects a straight line toward the hoop. At 0.96 s after release the line is ' + (100 * Math.hypot(ge[0] - X[last], ge[1] - Y[last])).toFixed(0) + ' cm from the tracked ball across the floor.',
+        curves: [{x: [grav(T[0] - T0)[0], gx[0]], y: [grav(T[0] - T0)[1], gx[1]], cls: 'p11'},
+                 {x: ring.map(q => HX + 0.2286 * Math.cos(q)), y: ring.map(q => HY + 0.2286 * Math.sin(q)), cls: 'rim'}],
+        points: [...X.map((x, i) => ({x, y: Y[i], r: 2.6, cls: i < N ? 'f11' : 'fg'})), ...past.map(j => ({x: a.x[j], y: a.y[j], r: 2.6, cls: 'fpast'})), {x: ge[0], y: ge[1], r: 3, cls: 'tail'}],
+        notes: [{x: xs0, y: ys1, dx: 4, dy: 10, anchor: 'start', text: '↑ y, across the court (m)'},
+                {x: xs1, y: ys0, dy: -5, anchor: 'end', text: 'x, along the court (m) →'},
+                {x: HX, y: HY, dx: 12, dy: 4, anchor: 'start', text: 'hoop'},
+                {x: xs1, y: ys0 + 0.6, dx: -4, anchor: 'end', text: 'black dot: the line at 0.96 s'}]});
+      const under = top.querySelector('path.p11');
+      top.querySelectorAll('circle').forEach(c => { if (!c.classList.contains('tail')) top.insertBefore(c, under); });
+
+      /* the height against time: the parabola projected to the last frame */
+      const xrSide = [-0.03, 1.27];
+      const side = diagram(right, {w: 250, h: hTop, xRange: xrSide, yRange: yrShot,
+        alt: 'Height against time: the fitted frames red, the later free-flight frames gray, and the frames inside 1 m of the hoop faded, down to the rim. The fit projects its parabola to 0.96 s after release, where it is ' + (100 * (ge[2] - Z[last])).toFixed(0) + ' cm above the tracked ball.',
+        curves: [gravCurve(T[0], TR[ic], 'p11')],
+        points: [...frames(0, last).map((q, j) => ({...q, cls: j < N ? 'f11' : 'fg'})), ...past.map(j => ({x: TR[j], y: a.z[j], r: 3.2, cls: 'fpast'})),
+                 {x: T[last], y: ge[2], r: 3, cls: 'tail'}],
+        notes: [...axis(xrSide, yrShot, [0, 0.4, 0.8, 1.2], [3.5, 4.5], 'time after release (s) →', '↑ height z (m)'),
+                {x: 0.62, y: 3.4, anchor: 'middle', text: 'black dot: the parabola at 0.96 s'},
+                {x: 0.62, y: 3.4, dy: 14, anchor: 'middle', text: 'faded: inside 1 m of the hoop'}]});
+      const under2 = side.querySelector('path.p11');
+      side.querySelectorAll('circle').forEach(c => { if (!c.classList.contains('tail')) side.insertBefore(c, under2); });
     });
 
-    document.querySelectorAll('[data-fig="lec24-one"] .fig-body').forEach(host => {
-      const xr = [0.195, 0.268], yr = [4.195, 4.318];
-      const s1 = run[1];
-      diagram(host, {w: 440, h: 190, xRange: xr, yRange: yr,
-        alt: 'Close up of the first step. The dashed 0.1 ms run bends downward from 4.2018 m, and the straight Euler step leaves along its starting slope and ends at 4.3118 m, about 8 mm above the curve at 0.24 s.',
-        curves: [fineCurve(T0, T0 + H), {x: [T0, T0 + H], y: [S0[2], s1[2]]}],
-        points: [{x: T0, y: S0[2], r: 4}, {x: T0 + H, y: s1[2], r: 4}, {x: T0 + H, y: fineAt(1)[2], r: 3.4, cls: 'frame'}],
-        leads: [{from: [T0 + H, fineAt(1)[2]], to: [T0 + H, s1[2]], cls: 'chord'}],
-        notes: [...axis(xr, yr, [0.20, 0.22, 0.24], [4.2, 4.25, 4.3], 'time from release (s) →', '↑ height (m)', v => v.toFixed(2)),
-          {x: T0 + H, y: s1[2], dx: 8, dy: 0, anchor: 'start', text: 'Euler ' + s1[2].toFixed(5) + ' m'},
-          {x: T0 + H, y: fineAt(1)[2], dx: 8, dy: 10, anchor: 'start', text: '0.1 ms run ' + fineAt(1)[2].toFixed(5) + ' m'},
-          {x: T0 + H, y: fineAt(1)[2], dx: 8, dy: 26, anchor: 'start', cls: 'hi', text: 'gap ' + gap[1].toFixed(1) + ' mm'}]});
+    /* the drag force against the speed, 1/2 rho C_D A v^2 with rho 1.20,
+       C_D 0.35 and A = pi 0.1195^2; the start's speed and half of it */
+    document.querySelectorAll('[data-fig="lec24-dragsize"] .fig-body').forEach(host => {
+      const c = 0.5 * 1.20 * 0.35 * Math.PI * 0.1195 ** 2, sp = Math.hypot(S0[3], S0[4], S0[5]);
+      const xr = [-0.3, 10.5], yr = [-0.05, 1.0], vs = linspace(0, 10, 81);
+      const F = v => c * v * v;
+      diagram(host, {w: 440, h: 130, xRange: xr, yRange: yr,
+        alt: 'The drag force on the ball against its speed, a curve that grows with the speed squared. At the start, 7.52 m/s, it is ' + F(sp).toFixed(2) + ' N. At half that speed it is ' + F(sp / 2).toFixed(2) + ' N, a quarter as much.',
+        curves: [{x: vs, y: vs.map(F), cls: 'dl'}],
+        leads: [{from: [sp, 0], to: [sp, F(sp)], cls: 'cast'}, {from: [sp / 2, 0], to: [sp / 2, F(sp / 2)], cls: 'cast'}],
+        points: [{x: sp, y: F(sp), r: 4, cls: 'dpt'}, {x: sp / 2, y: F(sp / 2), r: 4, cls: 'dpt'}],
+        notes: [...axis(xr, yr, [0, 2, 4, 6, 8, 10], [0.5], 'speed (m/s) →', '↑ drag force (N)'),
+          {x: sp, y: F(sp), dx: -8, dy: -6, anchor: 'end', cls: 'dt', text: 'the start, ' + sp.toFixed(2) + ' m/s: ' + F(sp).toFixed(2) + ' N'},
+          {x: sp / 2, y: F(sp / 2), dx: -8, dy: -8, anchor: 'end', cls: 'dt', text: 'half the speed: ' + F(sp / 2).toFixed(2) + ' N, a quarter'}]});
     });
 
-    document.querySelectorAll('[data-fig="lec24-gap"] .fig-body').forEach(host => {
-      const xr = [4, 25.5], yr = [0, 155];
-      const fr = gap.map((_, i) => J + i);
-      const curves = [{x: fr, y: gap}];
-      const notes = [...axis(xr, yr, [5, 8, 11, 14, 17, 20, 23], [50, 100], 'frame →', '↑ height above the 0.1 ms run (mm)'),
-        {x: J + 1, y: gap[1], dx: -5, dy: -6, anchor: 'end', text: gap[1].toFixed(1)},
-        {x: J + 2, y: gap[2], dx: -5, dy: -6, anchor: 'end', text: gap[2].toFixed(1)},
-        {x: J + 3, y: gap[3], dx: -5, dy: -6, anchor: 'end', text: gap[3].toFixed(1)},
-        {x: J + NS, y: gap[NS], dx: 7, dy: 8, anchor: 'start', cls: 'hi', text: gap[NS].toFixed(1)}];
-      diagram(host, {w: 440, h: 190, xRange: xr, yRange: yr,
-        alt: 'The gap to the 0.1 ms run after each 40 ms step: 8.1, 16.0 and 23.9 mm after the first three steps, rising almost in a straight line to 134.7 mm at frame 23.',
-        curves, points: gap.map((g, i) => ({x: J + i, y: g, r: 3})), notes});
+    /* the acceleration along the flight from the 0.1 ms run: across the floor
+       (drag only, against the motion) and in height, against gravity alone */
+    const fineT = [], fineS = [];
+    for (let i = 0; i < fine.length; i += 40) { fineT.push(T0 + i * FINE_H); fineS.push(fine[i]); }
+    document.querySelectorAll('[data-fig="lec24-accel"] .fig-body').forEach(host => {
+      const rt = fineS.map(s => shotRate(0, s)), back = rt.map(q => Math.hypot(q[3], q[4])), az = rt.map(q => q[5]);
+      const top = fineT[fineS.findIndex(s => s[5] < 0)];
+      const xr = [0.12, 1.0], [left, right] = diagramRow(host, 2);
+      const yr1 = [-0.12, 1.0];
+      diagram(left, {w: 250, h: 170, xRange: xr, yRange: yr1,
+        alt: 'Across the floor, gravity alone gives no acceleration. With drag the ball slows by ' + back[0].toFixed(2) + ' m/s squared at the start, ' + Math.min(...back).toFixed(2) + ' near the top and ' + back[back.length - 1].toFixed(2) + ' at 0.96 s.',
+        curves: [{x: [0.18, 0.98], y: [0, 0], cls: 'gl'}, {x: fineT, y: back, cls: 'dl'}],
+        notes: [...axis(xr, yr1, [0.2, 0.4, 0.6, 0.8], [0.5], 'time after release (s) →', '↑ slowing across the floor (m/s²)'),
+          {x: 0.97, y: 0, dy: -6, anchor: 'end', cls: 'gt', text: 'gravity alone, 0'},
+          {x: 0.97, y: back[back.length - 1], dy: -10, anchor: 'end', cls: 'dt', text: 'with drag'}]});
+      const yr2 = [-10.65, -9.15];
+      diagram(right, {w: 250, h: 170, xRange: xr, yRange: yr2,
+        alt: 'In height, gravity alone gives a flat minus 9.81 m/s squared. With drag the vertical acceleration is ' + az[0].toFixed(2) + ' at the start, minus 9.81 at the top of the flight, ' + top.toFixed(2) + ' s after release, and ' + az[az.length - 1].toFixed(2) + ' at 0.96 s.',
+        curves: [{x: [0.18, 0.98], y: [-G, -G], cls: 'gl'}, {x: fineT, y: az, cls: 'dl'}],
+        leads: [{from: [top, yr2[0]], to: [top, -G], cls: 'cast'}],
+        notes: [...axis(xr, yr2, [0.2, 0.4, 0.6, 0.8], [], 'time after release (s) →', '↑ vertical acceleration (m/s²)'),
+          {x: 0.97, y: -G, dy: 15, anchor: 'end', cls: 'gt', text: 'gravity alone, −9.81'},
+          {x: 0.22, y: az[0], dx: 4, dy: 4, anchor: 'start', cls: 'dt', text: 'with drag'},
+          {x: 0.12, y: -10, dx: 4, dy: 4, anchor: 'start', text: '−10'}, {x: 0.12, y: -9.5, dx: 4, dy: 4, anchor: 'start', text: '−9.5'},
+          {x: top, y: -10.3, dx: 5, anchor: 'start', text: 'the top'}]});
+    });
+
+    /* the rates as slopes: the height and the vertical velocity from the
+       0.1 ms run, each with its tangent at the start */
+    document.querySelectorAll('[data-fig="lec24-rates"] .fig-body').forEach(host => {
+      const r0 = shotRate(0, S0), [left, right] = diagramRow(host, 2), xr = [0.12, 1.0], u = 0.12;
+      const yr1 = [3.75, 4.85];
+      diagram(left, {w: 250, h: 160, xRange: xr, yRange: yr1,
+        alt: 'The height of the ball against time, with its tangent at 0.20 s after release. The tangent rises with slope v_z, ' + S0[5].toFixed(2) + ' m/s.',
+        curves: [{x: fineT, y: fineS.map(s => s[2])}],
+        leads: [{from: [T0 - 0.04, S0[2] - 0.04 * S0[5]], to: [T0 + u, S0[2] + u * S0[5]], cls: 'tan', over: true}],
+        points: [{x: T0, y: S0[2], r: 3.5, cls: 'tail'}],
+        notes: [...axis(xr, yr1, [0.2, 0.4, 0.6, 0.8], [4, 4.5], 'time after release (s) →', '↑ height z (m)'),
+          {x: T0 + u, y: S0[2] + u * S0[5], dx: 6, dy: 12, anchor: 'start', text: 'slope ' + S0[5].toFixed(2) + ' m/s,'},
+          {x: T0 + u, y: S0[2] + u * S0[5], dx: 6, dy: 26, anchor: 'start', text: 'the vertical velocity'}]});
+      const yr2 = [-4.2, 5.8], u2 = 0.08;
+      diagram(right, {w: 250, h: 160, xRange: xr, yRange: yr2, zero: true,
+        alt: 'The vertical velocity against time, with its tangent at 0.20 s after release. The tangent falls with slope a_z, ' + r0[5].toFixed(2) + ' m/s squared.',
+        curves: [{x: fineT, y: fineS.map(s => s[5])}],
+        leads: [{from: [T0 - 0.03, S0[5] - 0.03 * r0[5]], to: [T0 + u2, S0[5] + u2 * r0[5]], cls: 'tan', over: true}],
+        points: [{x: T0, y: S0[5], r: 3.5, cls: 'tail'}],
+        notes: [...axis(xr, yr2, [0.2, 0.4, 0.6, 0.8], [2], 'time after release (s) →', '↑ vertical velocity (m/s)'), {x: 0.12, y: -2, dx: 4, dy: 4, anchor: 'start', text: '−2'},
+          {x: 0.42, y: 3.9, anchor: 'start', text: 'slope ' + r0[5].toFixed(1).replace('-', '−') + ' m/s²,'},
+          {x: 0.42, y: 3.9, dy: 14, anchor: 'start', text: 'the vertical acceleration'}]});
+    });
+
+    /* why a small step: the height and its tangent at the start, followed
+       for 0.3 s (left) and for one 40 ms frame (right, zoomed) */
+    document.querySelectorAll('[data-fig="lec24-straight"] .fig-body').forEach(host => {
+      const zAt = t => fine[Math.round((t - T0) / FINE_H)][2];
+      const tan = t => S0[2] + S0[5] * (t - T0);
+      const L = 0.3, gL = tan(T0 + L) - zAt(T0 + L), gH = tan(T0 + H) - zAt(T0 + H);
+      const [left, right] = diagramRow(host, 2);
+      const xr1 = [0.12, 1.0], yr1 = [3.75, 5.3];
+      diagram(left, {w: 250, h: 170, xRange: xr1, yRange: yr1,
+        alt: 'The height of the ball against time with its tangent at 0.20 s after release. Followed for 0.3 s, the tangent ends ' + (100 * gL).toFixed(0) + ' cm above the path.',
+        curves: [{x: fineT, y: fineS.map(q => q[2])}],
+        areas: [{pts: [{x: T0 - 0.01, y: S0[2] - 0.04}, {x: T0 - 0.01, y: tan(T0 + H) + 0.04}, {x: T0 + H + 0.01, y: tan(T0 + H) + 0.04}, {x: T0 + H + 0.01, y: S0[2] - 0.04}], cls: 'zb'}],
+        leads: [{from: [T0, S0[2]], to: [T0 + L, tan(T0 + L)], cls: 'tan', over: true},
+                {from: [T0 + L, zAt(T0 + L)], to: [T0 + L, tan(T0 + L)], cls: 'chord', over: true}],
+        points: [{x: T0, y: S0[2], r: 3.5, cls: 'tail'}],
+        notes: [...axis(xr1, yr1, [0.2, 0.4, 0.6, 0.8], [4, 4.5, 5], 'time after release (s) →', '↑ height z (m)'),
+          {x: T0 + L, y: (tan(T0 + L) + zAt(T0 + L)) / 2, dx: 6, dy: 4, anchor: 'start', cls: 'hi', text: 'after 0.3 s: ' + (100 * gL).toFixed(0) + ' cm off'}]});
+      const xr2 = [T0 - 0.008, T0 + H + 0.016], yr2 = [S0[2] - 0.03, tan(T0 + H) + 0.05];
+      const zx = [], zy = [];
+      for (let k = 0; k * FINE_H <= H + 0.012; k += 4) { zx.push(T0 + k * FINE_H); zy.push(fine[k][2]); }
+      diagram(right, {w: 250, h: 170, xRange: xr2, yRange: yr2,
+        alt: 'Zoomed in on one 40 ms frame from the start: the tangent and the path nearly overlap, and after 40 ms the tangent is ' + (1000 * gH).toFixed(0) + ' mm above the path.',
+        curves: [{x: zx, y: zy}],
+        leads: [{from: [T0, S0[2]], to: [T0 + H, tan(T0 + H)], cls: 'tan', over: true},
+                {from: [T0 + H, zAt(T0 + H)], to: [T0 + H, tan(T0 + H)], cls: 'chord', over: true}],
+        points: [{x: T0, y: S0[2], r: 3.5, cls: 'tail'}],
+        notes: [...axis(xr2, yr2, [0.2, 0.22, 0.24], [4.0, 4.05], 'time after release (s) →', '↑ height z (m), zoomed in'),
+          {x: T0 + H, y: zAt(T0 + H), dx: 4, dy: 22, anchor: 'start', cls: 'hi', text: 'after 40 ms:'},
+          {x: T0 + H, y: zAt(T0 + H), dx: 4, dy: 36, anchor: 'start', cls: 'hi', text: (1000 * gH).toFixed(0) + ' mm off'}]});
+    });
+
+    /* one step holds the vertical velocity and the acceleration fixed for h */
+    document.querySelectorAll('[data-fig="lec24-step"] .fig-body').forEach(host => {
+      const r0 = shotRate(0, S0), z1 = S0[2] + H * S0[5], v1 = S0[5] + H * r0[5];
+      const xr = [0.185, 0.262];
+      diagram(host, {w: 440, h: 100, xRange: xr, yRange: [3.88, 4.13],
+        alt: 'Over one 40 ms step from the start at 0.20 s the height rises in a straight line from ' + S0[2].toFixed(2) + ' m to ' + z1.toFixed(2) + ' m, a rise of v_z times h.',
+        curves: [{x: [T0, T0 + H], y: [S0[2], z1]}],
+        leads: [{from: [T0, S0[2]], to: [T0 + H, S0[2]], cls: 'cast'},
+                {from: [T0 + H, S0[2]], to: [T0 + H, z1], cls: 'chord'}],
+        points: [{x: T0, y: S0[2], r: 4}, {x: T0 + H, y: z1, r: 4}],
+        notes: [{x: xr[0], y: 4.13, dx: 4, dy: 10, anchor: 'start', text: '↑ height (m)'},
+          {x: T0, y: S0[2], dx: -8, dy: 4, anchor: 'end', text: S0[2].toFixed(2)},
+          {x: T0 + H, y: z1, dx: 8, dy: 4, anchor: 'start', text: z1.toFixed(2)},
+          {x: T0 + H / 2, y: S0[2], dy: 14, anchor: 'middle', tex: 'h'},
+          {x: xr[0], y: 4.13, dx: 4, dy: 24, anchor: 'start', text: 'one 40 ms step, one frame,\nfrom 0.20 s after release'},
+          {x: T0 + H, y: (S0[2] + z1) / 2, dx: 8, dy: 4, anchor: 'start', cls: 'hi', tex: 'v_z h'}]});
+      diagram(host, {w: 440, h: 100, xRange: xr, yRange: [3.4, 4.2],
+        alt: 'Over the same step the vertical velocity falls in a straight line from ' + S0[5].toFixed(2) + ' m/s to ' + v1.toFixed(2) + ' m/s, a change of a_z times h.',
+        curves: [{x: [T0, T0 + H], y: [S0[5], v1]}],
+        leads: [{from: [T0, S0[5]], to: [T0 + H, S0[5]], cls: 'cast'},
+                {from: [T0 + H, S0[5]], to: [T0 + H, v1], cls: 'chord'}],
+        points: [{x: T0, y: S0[5], r: 4}, {x: T0 + H, y: v1, r: 4}],
+        notes: [{x: xr[0], y: 4.2, dx: 4, dy: 10, anchor: 'start', text: '↑ vertical velocity (m/s)'},
+          {x: T0, y: S0[5], dx: -8, dy: 4, anchor: 'end', text: S0[5].toFixed(2)},
+          {x: T0 + H, y: v1, dx: 8, dy: 4, anchor: 'start', text: v1.toFixed(2)},
+          {x: T0 + H, y: (S0[5] + v1) / 2, dx: 8, dy: 4, anchor: 'start', cls: 'hi', tex: 'a_z h'}]});
+    });
+
+    /* the gravity-only parabola and the two stepped arcs with drag, drawn in
+       three stages over the tracked frames from the start: the parabola
+       (dashed) all at once, then the 40 ms steps one a frame, then the 0.1 ms
+       steps as a smooth draw, since their thousands of steps are too many to
+       show. Left the flight from the start, middle zoomed in on the end, where
+       the gaps are labeled, right where each comes down through the rim.
+       data-n on the figure picks the fit, the first n frames (11 by default),
+       read at the frame at or just before their middle so the 40 ms steps land
+       on frames. */
+    document.querySelectorAll('[data-fig="lec24-arcs"] .fig-body').forEach(host => {
+      const n = +(host.closest('figure').dataset.n || 11), Jn = Math.floor((n - 1) / 2);
+      const tn = T.slice(0, n).map(q => q - T[Jn]);
+      const lx = line(tn, X.slice(0, n)), ly = line(tn, Y.slice(0, n));
+      const lz = line(tn, Z.slice(0, n).map((z, i) => z + 0.5 * G * tn[i] * tn[i]));
+      const Sn = [lx[0], ly[0], lz[0], lx[1], ly[1], lz[1]], T0n = T[Jn], SPANn = T[last] - T0n, NSn = Math.round(SPANn / H);
+      const gravN = u => [Sn[0] + Sn[3] * u, Sn[1] + Sn[4] * u, Sn[2] + Sn[5] * u - 0.5 * G * u * u];
+      const gc = (t0, t1, cls) => {
+        const x = [], y = [];
+        for (let q = t0; q <= t1 + 1e-9; q += (t1 - t0) / 80) { x.push(q); y.push(gravN(q - T0n)[2]); }
+        return {x, y, cls};
+      };
+      const fineN = eulerRun(Sn, FINE_H, SPANn), runN = eulerRun(Sn, H, SPANn);
+      const fineAtN = i => fineN[i * per];
+      const fineTN = [], fineSN = [];
+      for (let i = 0; i < fineN.length; i += 40) { fineTN.push(T0n + i * FINE_H); fineSN.push(fineN[i]); }
+      /* where each comes down through the rim: gravity as on slides 3 and 4 (the
+         fit itself), and each drag run stepped on from the same start until it
+         comes down through the rim height, its last straight step cut there */
+      const cross = h => {
+        for (let s = Sn.slice(), q = T0n; ; q += h) {
+          const rt = shotRate(q, s), nx = s.map((p, j) => p + h * rt[j]);
+          if (nx[5] < 0 && nx[2] < RIM) { const w = (RIM - s[2]) / (nx[2] - s[2]); return {u: s[0] + w * (nx[0] - s[0]) - HX, v: s[1] + w * (nx[1] - s[1]) - HY}; }
+          s = nx;
+        }
+      };
+      const fit = picks.find(p => p.n === n) || fitN(n);
+      const cG = fit.grav, cF = cross(FINE_H), cE = cross(H);
+      const tx = runN.map((_, i) => T0n + i * H), zs = runN.map(s => s[2]);
+      const fz = fineSN.map(s => s[2]), MF = 60;     // the 0.1 ms run is drawn smoothly in MF stages
+      const zE = zs[NSn], zF = fineAtN(NSn)[2], zG = gravN(NSn * H)[2], zT = Z[last];
+      const cmUp = v => { const d = 100 * (v - zT); return Math.abs(d).toFixed(1) + (d < 0 ? ' cm below' : ' cm above'); };
+      const flat = p => 100 * Math.hypot(p[0] - X[last], p[1] - Y[last]);
+      const hR = flat(runN[NSn]), hF = flat(fineAtN(NSn)), hG = flat(gravN(NSn * H));
+      const zAll = [...Z.slice(Jn, last + 1), ...zs, ...fz.filter((_, i) => fineTN[i] <= T[last] + 1e-9)];
+      const xl = [T0n - 0.09, T[last] + 0.03], yl = [Math.min(...zAll) - 0.16, Math.max(...zAll) + 0.10];
+      const xz = [0.70, 1.16];
+      const zTop = Math.max(...zs.filter((_, i) => tx[i] >= xz[0]), ...Z.slice(Jn, last + 1).filter((_, i) => T[Jn + i] >= xz[0]), gravN(xz[0] - T0n)[2]);
+      const yz = [zT - 0.22, zTop + 0.10];
+      const frms = frames(Jn, last);
+      const clip = (xs, ys, x0) => { const k = xs.findIndex(q => q >= x0); return k < 0 ? [[], []] : [xs.slice(k), ys.slice(k)]; };
+      const us = [cG.u, cF.u, cE.u, actual.u, -OUT, OUT], vs = [cG.v, cF.v, cE.v, actual.v, -OUT, OUT];
+      const HB = {x: [Math.min(...us) - 0.07, Math.max(...us) + 0.12], y: [Math.min(...vs) - 0.08, Math.max(...vs) + 0.16]};
+      const hW = 200, hH = Math.round((HB.y[1] - HB.y[0]) / (HB.x[1] - HB.x[0]) * (hW - 20) + 26);
+      /* label heights, spread top to bottom so no two are closer than a line */
+      const spread = (ys, gap) => {
+        const o = {}; let prev = Infinity;
+        Object.entries(ys).sort((p, q) => q[1] - p[1]).forEach(([k, y]) => { prev = Math.min(y, prev - gap); o[k] = prev; });
+        return o;
+      };
+      const zl = spread({E: zE, G: zG, F: zF}, 13 * (yz[1] - yz[0]) / 144);
+      const hl = spread({E: cE.v, G: cG.v, F: cF.v}, 13 * (HB.y[1] - HB.y[0]) / (hH - 26));
+      const [left, right, hoop] = diagramRow(host, 3);
+      left.parentNode.style.gridTemplateColumns = 'repeat(3, 1fr)';     // three across even on a narrow slide
+      const draw = k => {
+        left.textContent = ''; right.textContent = ''; hoop.textContent = '';
+        const kg = k >= 1 ? NSn : 0, kr = Math.max(0, Math.min(k - 1, NSn)), kf = Math.max(0, Math.min(k - 1 - NSn, MF));
+        const cl = [], cr = [], pl = [...frms], pr = frms.filter(q => q.x >= xz[0]);
+        if (kg > 0) {
+          cl.push(gc(T0n, T0n + kg * H, 'gl'));
+          if (T0n + kg * H > xz[0]) cr.push(gc(xz[0], T0n + kg * H, 'gl'));
+        }
+        if (kf > 0) {
+          const tE = T0n + SPANn * kf / MF, nF = fineTN.filter(q => q <= tE + 1e-9).length;
+          const fx = fineTN.slice(0, nF).concat([tE]), fy = fz.slice(0, nF).concat([fineN[Math.round((tE - T0n) / FINE_H)][2]]);
+          cl.push({x: fx, y: fy, cls: 'dl'});
+          const [wx, wy] = clip(fx, fy, xz[0]);
+          if (wx.length > 1) cr.push({x: wx, y: wy, cls: 'dl'});
+        }
+        if (kr > 0) {
+          const rx = tx.slice(0, kr + 1), ry = zs.slice(0, kr + 1);
+          cl.push({x: rx, y: ry, cls: 'rl'});
+          pl.push(...rx.map((q, i) => ({x: q, y: ry[i], r: 2.4, cls: 'tail'})));
+          const [wx, wy] = clip(rx, ry, xz[0]);
+          if (wx.length > 1) cr.push({x: wx, y: wy, cls: 'rl'});
+          pr.push(...wx.map((q, i) => ({x: q, y: wy[i], r: 3, cls: 'tail'})));
+        }
+        diagram(left, {w: 200, h: 170, xRange: xl, yRange: yl,
+          alt: 'Height against time over the tracked frames from ' + T0n.toFixed(2) + ' s after release, the start read from the fit of the first ' + n + ' frames: the gravity-only parabola dashed, then the height stepped with drag in 40 ms steps, then in 0.1 ms steps. A box marks the end, zoomed in on the right.',
+          curves: cl,
+          areas: [{pts: [{x: xz[0], y: yz[0]}, {x: xz[0], y: yz[1]}, {x: T[last] + 0.02, y: yz[1]}, {x: T[last] + 0.02, y: yz[0]}], cls: 'zb'}],
+          points: pl,
+          notes: [...axis(xl, yl, [0.2, 0.4, 0.6, 0.8].filter(v => v > xl[0] + 0.03), [4.2, 4.4, 4.6], 'time after release (s) →', '↑ height (m)').map(q => q.text === 'time after release (s) →' ? {...q, x: xz[0], dx: -6} : q),
+            {x: T0n + 0.20, y: yl[0] + 0.42, anchor: 'start', cls: 'gt', text: 'gravity only'},
+            {x: T0n + 0.20, y: yl[0] + 0.31, anchor: 'start', text: '40 ms steps'},
+            {x: T0n + 0.20, y: yl[0] + 0.20, anchor: 'start', cls: 'dt', text: '0.1 ms steps'}]});
+        const notes = [...axis(xz, yz, [0.7, 0.8, 0.9], [4.0, 4.2, 4.4].filter(v => v > yz[0] && v < yz[1] - 0.05), 'time (s) →', '↑ height (m), zoomed in'),
+          {x: T[last], y: zT, dx: -9, dy: 5, anchor: 'end', text: 'the tracked ball'}];
+        if (kr === NSn) notes.push({x: T[last], y: zl.E, dx: 8, dy: 4, anchor: 'start', text: cmUp(zE)});
+        if (kg === NSn) notes.push({x: T[last], y: zl.G, dx: 8, dy: 4, anchor: 'start', cls: 'gt', text: cmUp(zG)});
+        if (kf === MF) notes.push({x: T[last], y: zl.F, dx: 8, dy: 4, anchor: 'start', cls: 'dt', text: cmUp(zF)});
+        diagram(right, {w: 200, h: 170, xRange: xz, yRange: yz,
+          alt: 'Zoomed in on the end, 0.96 s after release. Gravity only ends ' + cmUp(zG) + ' the tracked ball, the 40 ms steps ' + cmUp(zE) + ', and the 0.1 ms steps ' + cmUp(zF) + '. Across the floor they are ' + hG.toFixed(1) + ', ' + hR.toFixed(1) + ' and ' + hF.toFixed(1) + ' cm from the ball.',
+          curves: cr, points: pr, notes});
+        const hp = [{x: 0, y: 0, r: 2}, {x: actual.u, y: actual.v, r: 5, cls: 'frame'}], hn = [
+          {x: HB.x[0], y: HB.y[1], dx: 4, dy: 10, anchor: 'start', text: 'at the rim, from above'},
+          {x: actual.u, y: actual.v, dx: -9, dy: 4, anchor: 'end', text: 'tracked, ' + band(dist0(actual))}];
+        if (kg === NSn) { hp.push({x: cG.u, y: cG.v, r: 5, cls: 'gring'}); hn.push({x: cG.u, y: hl.G, dx: 9, dy: 4, anchor: 'start', cls: 'gt', text: 'gravity, ' + band(dist0(cG))}); }
+        if (kr === NSn) { hp.push({x: cE.u, y: cE.v, r: 4.5, cls: 'tail'}); hn.push({x: cE.u, y: hl.E, dx: 9, dy: 4, anchor: 'start', text: '40 ms, ' + band(dist0(cE))}); }
+        if (kf === MF) { hp.push({x: cF.u, y: cF.v, r: 4.5, cls: 'dpt'}); hn.push({x: cF.u, y: hl.F, dx: 9, dy: -3, anchor: 'start', cls: 'dt', text: '0.1 ms, ' + band(dist0(cF))}); }
+        diagram(hoop, {w: hW, h: hH, xRange: HB.x, yRange: HB.y, axes: false,
+          alt: 'The hoop from above, with the clean disk and the rim band. Carried on to the rim, gravity only comes down ' + dist0(cG).toFixed(2) + ' m from the center, the 40 ms steps ' + dist0(cE).toFixed(2) + ' m and the 0.1 ms steps ' + dist0(cF).toFixed(2) + ' m. The tracked ball came through ' + dist0(actual).toFixed(2) + ' m from the center.',
+          ...hoopBase(), points: hp, notes: hn});
+      };
+      animate(host, 1 + NSn + MF, draw, k => k === 2 ? 900 : k <= 1 + NSn ? 260 : k === 2 + NSn ? 600 : 35);
     });
   });
 })();

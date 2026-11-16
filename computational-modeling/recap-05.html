@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Class 5, Trusting a Computed Number and Choosing a Flight Model — Computational Physical Modeling</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="css/blocks.css?v=20261113083220">
+  <link rel="stylesheet" href="css/demos.css?v=20261113083220">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ]
+    });"></script>
+  <style>
+    /* Per-course accent (olive). Only place these hexes appear;
+       every rule below references them. See GUIDELINES.md § Per-course accent colors. */
+    :root {
+      --course-accent:      #5F7038;
+      --course-accent-dark: #47542A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #F7F4EF;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Shared inner width ── */
+    .nav-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: #2D5016;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--course-accent);
+    }
+
+    .site-header a         { color: #C8DEB4; text-decoration: none; }
+    .site-header a:visited { color: #C8DEB4; }
+    .site-header a:hover   { color: #fff; text-decoration: underline; }
+
+    .site-header-top .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.65rem;
+      padding-bottom: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .site-title {
+      display: flex;
+      align-items: center;
+    }
+    /* ── Brand home link ── */
+    .brand-home {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-home span { color: #C8860A; }
+    .brand-home:hover { color: #fff; text-decoration: none; }
+
+    .title-sep {
+      color: rgba(200,222,180,0.35);
+      margin: 0 0.45rem;
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .course-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+
+    .site-title a, .site-title a:visited { color: #C8DEB4; text-decoration: none; }
+    .site-title a:hover { color: #fff; text-decoration: none; }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .header-links .btn-link {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .header-links .btn-link:hover {
+      border-color: #fff;
+    }
+
+    /* ── Week strip ── */
+    .week-strip {
+      background: #1E360E;
+    }
+
+    .week-strip .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .week-strip a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .week-strip a:visited { color: #C8DEB4; }
+    .week-strip a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+
+    .week-strip-label {
+      color: #C8DEB4;
+      margin-right: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .week-current {
+      color: #fff;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      background: var(--course-accent);
+      border-radius: 3px;
+    }
+
+    .week-strip-sep {
+      color: rgba(200,222,180,0.3);
+      padding: 0 0.05rem;
+      user-select: none;
+    }
+
+    /* ── Site nav ── */
+    .site-nav {
+      background: #243E11;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .site-nav .nav-inner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .site-nav a         { color: #C8DEB4; text-decoration: none; padding: 0.1rem 0.5rem; border-radius: 3px; }
+    .site-nav a:visited { color: #C8DEB4; }
+    .site-nav a:hover   { color: #fff; background: rgba(255,255,255,0.12); text-decoration: none; }
+    .site-nav strong    { color: #fff; font-weight: 600; padding: 0.1rem 0.5rem; background: var(--course-accent); border-radius: 3px; }
+    .site-nav-sep       { color: rgba(200,222,180,0.3); padding: 0 0.05rem; user-select: none; }
+
+    /* ── Page family nav ── */
+    .page-family {
+      background: #F0EDE7;
+      border-bottom: 1px solid rgba(45,80,22,0.12);
+    }
+
+    .page-family .nav-inner {
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+      font-size: 0.85rem;
+      color: #5A5550;
+    }
+
+    .page-family a         { color: #2D5016; text-decoration: none; }
+    .page-family a:visited { color: #2D5016; }
+    .page-family a:hover   { color: var(--course-accent); text-decoration: none; }
+    .page-family strong    { color: var(--course-accent); font-weight: 700; }
+
+    /* ── Main content card ── */
+    main {
+      max-width: 780px;
+      margin: 2.5rem auto;
+      padding: 2rem 2.5rem;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(45,80,22,0.1);
+      border-top: 4px solid var(--course-accent);
+    }
+
+    main.notes {
+      max-width: 960px;
+    }
+
+    h1 { font-size: 1.8rem; line-height: 1.2; margin-top: 0; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--course-accent-dark); padding-bottom: 0.25rem; color: var(--course-accent-dark); }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; margin-bottom: 0.4rem; }
+
+    /* ── Anchor links on headings (notes pages) ── */
+    .anchor-link {
+      font-size: 0.75em;
+      color: #C8DEB4;
+      text-decoration: none;
+      margin-left: 0.4em;
+      opacity: 0;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    h2:hover .anchor-link,
+    h3:hover .anchor-link { opacity: 1; }
+    .anchor-link:hover { color: var(--course-accent); }
+
+    p { margin: 0.75rem 0; }
+
+    a         { color: var(--course-accent); }
+    a:visited { color: var(--course-accent-dark); }
+
+    ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    li { margin: 0.3rem 0; }
+
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1E360E;
+      color: #fff;
+      border: 1px solid var(--course-accent-dark);
+      font-weight: 600;
+    }
+
+    td { padding: 0.4rem 0.75rem; border: 1px solid #ddd; vertical-align: top; }
+
+    tr:nth-child(even) td { background: #F7F4EF; }
+
+    small { font-size: 0.85em; }
+    td small { color: #666; }
+    td small a         { color: var(--course-accent); }
+    td small a:visited { color: var(--course-accent-dark); }
+
+    /* ── Week page video and class cards (media-cards.js) ── */
+    .media-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+      gap: 0.9rem;
+      margin: 1rem 0;
+    }
+    .media-card {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-top: 4px solid var(--course-accent);
+      border-radius: 4px;
+      padding: 0.75rem 0.9rem 0.85rem;
+    }
+    .media-card.class { border-top-color: #C8860A; }
+    .media-card p { margin: 0; }
+    .mc-kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .mc-title { font-weight: 600; line-height: 1.3; margin: 0.25rem 0 0.35rem !important; }
+    .mc-sub { font-size: 0.85rem; color: #5A5550; line-height: 1.4; }
+    .mc-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.7rem; }
+    .mc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--course-accent);
+      border-radius: 3px;
+      text-decoration: none;
+      color: var(--course-accent-dark);
+    }
+    a.mc-btn:visited { color: var(--course-accent-dark); }
+    a.mc-btn:hover { background: #F0EDE7; }
+    .mc-btn svg { width: 1em; height: 1em; flex: none; }
+    .mc-btn.primary, a.mc-btn.primary:visited { background: var(--course-accent); color: #fff; }
+    a.mc-btn.primary:hover { background: var(--course-accent-dark); }
+    .mc-btn.pending { border-style: dashed; border-color: #b8b2a8; color: #5A5550; }
+    .mc-total { font-size: 0.9rem; color: #5A5550; }
+
+    .print-btn {
+      float: right;
+      margin: 0 0 1rem 1rem;
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      color: var(--course-accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .print-btn:hover { background: #F7F4EF; border-color: var(--course-accent); }
+
+    blockquote {
+      border-left: 3px solid var(--course-accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: #555;
+    }
+
+    code {
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 0.875em;
+      background: #f0f0f0;
+      padding: 0.15em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: #f0f0f0;
+      padding: 1rem 1.25rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.875em;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .site-footer {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .site-footer a { color: #888; font-size: 0.85rem; }
+    .site-footer a:visited { color: #888; }
+    .site-footer a:hover { color: var(--course-accent); }
+
+    /* ── Report a problem modal ── */
+    button.report-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .header-links button.report-btn {
+      border: 1px solid rgba(200,222,180,0.5);
+      padding: 0.2rem 0.65rem;
+      border-radius: 3px;
+      color: #C8DEB4;
+      font-size: 0.85rem;
+    }
+    .header-links button.report-btn:hover { border-color: #fff; color: #fff; }
+    /* the remembered data phrase; filled in by page.js */
+    .cg-phrase { display: inline-flex; align-items: center; gap: .3rem; margin-right: .6rem;
+      font-size: .82rem; flex-shrink: 0; }
+    /* The header row is a fixed 780px. The title, the toggle, "Your data", Search and
+       "Report a problem" only just fit in it, so the chip shows the label alone (the
+       phrase is in the link's title and on the data page) and Search shows its icon.
+       An earlier chip that held the phrase and was allowed to shrink squeezed the
+       label down to "Yo" on a classroom projector. */
+    .cg-phrase a { color: rgba(230,238,222,.92); text-decoration: none; white-space: nowrap; }
+    .header-links .search-btn .sb-label { display: none; }
+    .header-links button.report-btn { white-space: nowrap; }
+    /* the title keeps its own width */
+    .site-header-top .site-title { white-space: nowrap; flex-shrink: 0; }
+    .site-header-top .header-links { min-width: 0; margin-left: 1rem; }
+    @media (max-width: 780px) {
+      /* below the 780px row: the report button's short form, as on phones */
+      .header-links .report-btn .rb-full { display: none; }
+      .header-links .report-btn .rb-short { display: inline; }
+      .cg-phrase { margin-right: .2rem; }
+    }
+    .cg-phrase a:hover { color: #fff; text-decoration: underline; }
+    .cg-phrase button { background: none; border: none; cursor: pointer; padding: 0 .2rem;
+      color: rgba(230,238,222,.7); font: inherit; font-size: 1rem; line-height: 1; }
+    .cg-phrase button:hover { color: #fff; }
+
+    .site-footer button.report-btn { color: #888; font-size: 0.85rem; }
+    .site-footer button.report-btn:hover { color: var(--course-accent); }
+
+    dialog.report-modal {
+      border: none;
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    dialog.report-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+    .report-modal h2 {
+      margin-top: 0;
+      border: none;
+      padding-bottom: 0;
+      font-size: 1.15rem;
+      color: var(--course-accent-dark);
+    }
+
+    .report-modal .field { margin-bottom: 0.85rem; }
+
+    .report-modal label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-modal input[type="text"],
+    .report-modal textarea {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .report-modal input[readonly] { background: #F7F4EF; color: #666; }
+    .report-modal textarea { height: 120px; resize: vertical; }
+
+    .report-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .report-modal .btn-cancel {
+      background: none;
+      border: 1px solid #ccc;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-cancel:hover { border-color: #999; }
+
+    .report-modal .btn-submit {
+      background: #2D5016;
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .report-modal .btn-submit:hover { background: #1E360E; }
+    .report-modal .btn-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .report-status {
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 3px;
+      display: none;
+    }
+    .report-status.success { background: #e6f4ea; color: #1e6633; display: block; }
+    .report-status.error   { background: #fce8e6; color: #b31412; display: block; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; font-size: 12pt; }
+      .site-header, .site-footer, .print-btn { display: none; }
+      main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      h2 { color: #000; border-bottom-color: #000; }
+      a { color: #000; }
+    }
+    /* Honeypot: hidden from humans; bots that tick it get the submission dropped by Web3Forms. */
+    .report-hp { position: absolute !important; left: -9999px !important; opacity: 0 !important; height: 0 !important; width: 0 !important; }
+
+
+    /* Two rules the other course sites do not define. The header's top
+       row carries a report button beside the title, and a page with a
+       wide demo in it needs more than the reading measure. */
+    .site-header-top { border-bottom: 1px solid rgba(200,222,180,0.15); }
+    main.wide { max-width: 1180px; }
+
+
+    /* ══ Site chrome, shared by every course layout ══════════════════════════
+       Nav fold, search, page contents. Added 2026-09-29. All seven course
+       layouts carry identical copies of this block; change them together. */
+
+    /* Fold the nav rows and keep the title bar. On a projector the rows are
+       about 90px nobody wants while a page is being talked over, and on a
+       phone they were a quarter of the screen. */
+    .site-nav-group {
+      overflow: hidden;
+      max-height: 14rem;
+      transition: max-height 0.22s ease;
+    }
+    html.nav-hidden .site-nav-group { max-height: 0; }
+
+    .header-links button.nav-toggle,
+    .header-links button.search-btn {
+      background: none;
+      border: 1px solid rgba(200,222,180,0.5);
+      border-radius: 3px;
+      color: #C8DEB4;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .header-links button.nav-toggle { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    .header-links button.search-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.65rem;
+    }
+    .header-links button.nav-toggle:hover,
+    .header-links button.search-btn:hover { border-color: #fff; color: #fff; }
+    .search-btn svg { width: 0.95em; height: 0.95em; flex: none; }
+    .nav-toggle .chev { display: inline-block; transition: transform 0.22s ease; }
+    html.nav-hidden .nav-toggle .chev { transform: rotate(180deg); }
+    .report-btn .rb-short { display: none; }
+    /* Without script neither button can do anything, so neither is shown. */
+    html:not(.js) .nav-toggle, html:not(.js) .search-btn { display: none; }
+
+    /* A week the strip skips, such as a break week: shown, not linked. */
+    .week-gap {
+      color: rgba(200,222,180,0.5);
+      padding: 0.1rem 0.4rem;
+      cursor: help;
+      text-decoration: underline dotted rgba(200,222,180,0.4);
+      text-underline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav-group, .nav-toggle .chev { transition: none; }
+    }
+
+    /* ── Phone ── */
+    @media (max-width: 640px) {
+      .nav-inner { padding-left: 1rem; padding-right: 1rem; }
+      .site-header-top .nav-inner { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+      .site-header-top .site-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+      .site-title .brand-home, .site-title .title-sep { flex: none; }
+      .site-title > a:not(.brand-home), .site-title .course-name {
+        min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .site-header-top .header-links { flex: none; gap: 0.4rem; margin-left: 0.6rem; }
+      .header-links button.nav-toggle,
+      .header-links button.search-btn,
+      .header-links button.report-btn {
+        min-width: 2.25rem; min-height: 2.25rem; padding: 0.3rem 0.5rem;
+        justify-content: center;
+      }
+      .search-btn .sb-label, .report-btn .rb-full, .cg-phrase { display: none; }
+      .report-btn .rb-short { display: inline; }
+      /* The week's own row (Overview, Notes, ...) stays in view: it is how a
+         student moves around inside a week. Only the site-wide rows fold. */
+      .site-nav-group, html.nav-hidden .site-nav-group { max-height: none; transition: none; }
+      html.nav-hidden .site-nav, html.nav-hidden .week-strip { display: none; }
+    }
+
+    /* ── Page contents ──
+       Built by script, on pages that are long on screen and have at least
+       three places to jump to (see the script for the rule). Beside the page
+       where there is room, otherwise folded above the first section. */
+    main h2, main h3 { scroll-margin-top: calc(var(--cg-header-h, 130px) + 0.75rem); }
+    .page-toc-inline {
+      margin: 0 0 1.75rem;
+      border: 1px solid rgba(45,80,22,0.15);
+      border-radius: 4px;
+      background: #F7F4EF;
+      font-size: 0.9rem;
+    }
+    .page-toc-inline summary { cursor: pointer; padding: 0.55rem 0.9rem; font-weight: 600; color: #2D5016; }
+    .page-toc-inline ol { list-style: none; margin: 0; padding: 0 0.9rem 0.7rem; }
+    .page-toc-side { display: none; }
+    .page-toc-side ol { list-style: none; margin: 0; padding: 0; }
+    .page-toc-inline li, .page-toc-side li { margin: 0.3rem 0; line-height: 1.35; }
+    .page-toc-inline li.toc-sub, .page-toc-side li.toc-sub { padding-left: 0.85rem; font-size: 0.95em; }
+    .page-toc-inline a, .page-toc-side a { color: #5A5550; text-decoration: none; }
+    .page-toc-inline a:hover, .page-toc-side a:hover { color: var(--course-accent); text-decoration: underline; }
+    html.toc-side .page-toc-inline { display: none; }
+    html.toc-side .page-toc-side {
+      display: block;
+      position: fixed;
+      top: calc(var(--cg-header-h, 130px) + 2.5rem);
+      left: var(--cg-toc-left, auto);
+      width: 13rem;
+      max-height: calc(100vh - var(--cg-header-h, 130px) - 4rem);
+      overflow-y: auto;
+      padding-left: 0.9rem;
+      border-left: 2px solid rgba(45,80,22,0.15);
+      font-size: 0.82rem;
+    }
+    .page-toc-side .toc-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5A5550;
+    }
+    .page-toc-side a.active { color: var(--course-accent); font-weight: 600; }
+    /* Set by script when the page has to move left to make room for the list. */
+    @media screen { html.toc-shift main { margin-left: var(--cg-main-left); } }
+
+    /* ── Search ── */
+    dialog.search-modal {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 6rem);
+      margin: 4rem auto auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      overflow: auto;
+      --pagefind-ui-scale: 0.85;
+      --pagefind-ui-primary: #2D5016;
+      --pagefind-ui-text: #1A1A1A;
+      --pagefind-ui-background: #FFFFFF;
+      --pagefind-ui-border: rgba(45,80,22,0.30);
+      --pagefind-ui-tag: #EEE9E0;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 4px;
+      --pagefind-ui-font: inherit;
+    }
+    dialog.search-modal::backdrop { background: rgba(30,54,14,0.55); }
+    .search-modal-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .search-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .search-modal-head h2 { margin: 0; padding: 0; border: none; font-size: 1rem; color: #2D5016; }
+    .search-modal-close { background: none; border: none; cursor: pointer; font: inherit; font-size: 0.85rem; color: #5A5550; }
+    .search-modal-close:hover { color: var(--course-accent); }
+    .search-fallback { margin: 0; font-size: 0.9rem; color: #5A5550; }
+    /* Pagefind reverts <mark> to the browser's yellow; pale gold is the palette's own tint. */
+    dialog.search-modal .pagefind-ui--reset mark { background: #F0D090; color: inherit; padding: 0 0.1em; border-radius: 2px; }
+    @media (max-width: 640px) {
+      dialog.search-modal { margin-top: 0.75rem; max-height: calc(100vh - 1.5rem); }
+    }
+
+    @media print {
+      .page-toc-inline, .page-toc-side, dialog.search-modal { display: none; }
+    }
+  </style>
+  <script>
+    /* Before first paint, so a folded nav never flashes into view on load.
+       A phone starts folded on every page, the way a menu does. A wider
+       screen folds only if it was folded last time (the lecturing case). */
+    document.documentElement.classList.add('js');
+    try {
+      if (window.matchMedia('(max-width: 640px)').matches ||
+          localStorage.getItem('cgNavHidden') === '1')
+        document.documentElement.classList.add('nav-hidden');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-top">
+      <div class="nav-inner">
+        <div class="site-title">
+          <a href="https://climbinggiants.com/" class="brand-home">Climbing <span>Giants</span></a>
+          <span class="title-sep">/</span>
+          
+            <a href="index.html">Computational Physical Modeling</a>
+          
+        </div>
+        <div class="header-links">
+          <button type="button" class="nav-toggle" id="nav-toggle"
+                  aria-controls="site-nav-group" aria-expanded="true"
+                  aria-label="Hide the navigation rows">
+            <span class="chev" aria-hidden="true">&#9650;</span>
+          </button>
+          <span class="cg-phrase" id="cg-phrase"></span>
+          <button type="button" class="search-btn" id="search-open" aria-label="Search this site" title="Search this site (/)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <span class="sb-label">Search</span>
+          </button>
+          <button type="button" class="report-btn" id="report-open-header" aria-label="Report a problem"><span class="rb-full">Report a problem</span><span class="rb-short" aria-hidden="true">&#9993;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-group" id="site-nav-group">
+    <nav class="site-nav">
+      <div class="nav-inner">
+        
+          <a href="syllabus.html">Syllabus</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="notes.html">Notes</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="python.html">Python</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reports.html">Examples</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="reflection.html">Reflection</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="meeting.html">Meeting</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="ai-use.html">AI Use</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="tools.html">Tools</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="workbench.html">Workbench</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="extra-labor.html">Extra Labor</a>
+          <span class="site-nav-sep">·</span>
+        
+          <a href="canvas-grades.html">Canvas Grades</a>
+          
+        
+      </div>
+    </nav>
+
+    <nav class="week-strip">
+      <div class="nav-inner">
+        <span class="week-strip-label">Week</span>
+        
+          
+          
+          
+          <a href="week-01.html">1</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-02.html">2</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-03.html">3</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-04.html">4</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          <span class="week-gap" title="Week 5 is a break week">5<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <span class="week-current">6</span>
+          
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-07.html">7</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          <span class="week-gap" title="Week 8 is a break week">8<span class="sr-only"> (break week)</span></span><span class="week-strip-sep">·</span>
+          <a href="week-09.html">9</a>
+          <span class="week-strip-sep">·</span>
+        
+          
+          
+          
+          <a href="week-10.html">10</a>
+          
+        
+      </div>
+    </nav>
+
+    
+    <nav class="page-family">
+      <div class="nav-inner">
+        Week 6,
+        <a href="week-06.html">Overview</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="model-form-and-parameters.html">Model form</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="least-squares-is-one-norm.html">Choice of norm</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="linearity-in-the-parameters.html">Linear in parameters</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="solving-the-normal-equations.html">Solving the system</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="interpolation-and-regression.html">Interpolation, regression</a>
+        
+          <span class="site-nav-sep">·</span>
+          <a href="residual-and-error.html">Residual and error</a>
+        
+        <span class="site-nav-sep">·</span>
+        
+        <a href="assign-06.html">Assignment</a>
+      </div>
+    </nav>
+    
+    </div>
+  </header>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('nav-toggle');
+      if (!btn) return;
+      const root = document.documentElement;
+      const phone = window.matchMedia('(max-width: 640px)');
+
+      const sync = () => {
+        const hidden = root.classList.contains('nav-hidden');
+        btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        btn.setAttribute('aria-label',
+          hidden ? 'Show the navigation rows' : 'Hide the navigation rows');
+        btn.title = (hidden ? 'Show' : 'Hide') + ' the navigation rows (n)';
+      };
+
+      const toggle = () => {
+        root.classList.toggle('nav-hidden');
+        /* Only a wide screen remembers the choice, so opening the menu on a
+           phone never overwrites the fold someone set for a projector. */
+        if (!phone.matches) {
+          try {
+            localStorage.setItem('cgNavHidden',
+              root.classList.contains('nav-hidden') ? '1' : '0');
+          } catch (e) {}
+        }
+        sync();
+      };
+
+      btn.addEventListener('click', toggle);
+
+      /* n toggles it, so the nav can go without reaching for the mouse
+         mid-sentence. Ignored while typing, and while a dialog is open. */
+      addEventListener('keydown', e => {
+        if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        toggle();
+      });
+
+      sync();
+    })();
+  </script>
+
+
+  <main data-pagefind-body>
+    <button class="print-btn" data-pagefind-ignore onclick="window.print()">Print / Save PDF</button>
+    <div class="eyebrow">Week 6 · Class recap</div>
+<h1>Class 5, Trusting a Computed Number and Choosing a Flight Model</h1>
+
+<p>Class 5 · Tuesday, November 10, 2026 · Chris Marriott</p>
+
+<div class="aside"><span class="label">About this recap</span>
+<p>This page summarizes a class in a University of Washington course. The recording links need a
+UW login and only work for students enrolled in that class.</p>
+<p><a href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196" target="_blank" rel="noopener">Watch the recording</a> (1:50:40). The
+<a href="class-05.html">slides</a> are on the site.</p>
+</div>
+
+<h2 id="lecture-preview-0-25">Lecture Preview <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=25" target="_blank" rel="noopener">0:25</a></h2>
+
+<p>The first half asked how you know a number a computer gives you is right, starting from the mean
+of four accelerations and then the square root of 2. The second half worked through
+<a href="assign-06.html">Assignment 5</a> on the 24 arcs in the example pack. The order was:</p>
+
+<ol>
+  <li>Admin notes, the changes from the survey.</li>
+  <li>The mean of four accelerations, and two answers that disagree.</li>
+  <li>Abstraction, and the tools we compute with.</li>
+  <li>Why the computer's answer was off, floats in binary.</li>
+  <li>The square root of 2, from a clay tablet to an AI.</li>
+  <li>Assignment 5, Bob's request and the questions it raises.</li>
+  <li>One arc, where free flight starts, and fitting each model.</li>
+  <li>Residuals and RMS, which model fits better, and which predicts better.</li>
+  <li>Looking back, the arcs left out and the checks.</li>
+</ol>
+
+<h2 id="admin-notes-1-10">Admin Notes <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=70" target="_blank" rel="noopener">1:10</a></h2>
+
+<p>Survey. Thank you for filling out the mid-quarter survey. The comment that came up most was that
+your other classes carry a heavy load. Chris cannot change those classes, so the second half of this
+one is lighter.</p>
+
+<ul>
+  <li>Required labors. They drop from 35 to 31. Your late and incomplete allowances keep the
+  same counts, so they go further.</li>
+  <li>Basketball shots <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=109" target="_blank" rel="noopener">1:49</a>.
+  The main problems now use your basketball shots, which fit the content better and are easier to
+  work with. The crash-test problems become optional extras.</li>
+  <li>Thanksgiving <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=134" target="_blank" rel="noopener">2:14</a>.
+  Week 8 (November 23 to 29) is a break week like week 5, with no assignment, quiz, reflection or
+  meeting.</li>
+  <li>Time stepping. Euler's method, Assignment 7 and Quiz 7 move to November 30 to December 6, all
+  due Sunday, December 6.</li>
+  <li>Uncertainty <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=188" target="_blank" rel="noopener">3:08</a>.
+  This is the last week of content (December 7 to 13). Chris does not like labors due in the final
+  week, since there is no time to revise them, so Assignment 8 becomes an optional extra labor. The
+  quiz, reflection and meeting are still required, due Sunday, December 13.</li>
+  <li>Old last week. Its content (residual structure, held-out testing and the
+  Predicting Unseen Shots extra problem) is gone.</li>
+</ul>
+
+<p>Programming pages <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=243" target="_blank" rel="noopener">4:03</a>.
+Programming backgrounds in the class vary a lot, and so does how much programming you want. If it has
+been a while, <a href="start.html">New to programming</a> starts Python from the beginning. The
+<a href="cheatsheet.html">Function cheat sheet</a> lists every library function the course uses, with
+an example of each. Those come from NumPy (numerical Python, ready-made methods such as integrating or
+a standard deviation) and SciPy (more advanced methods built on NumPy). A programmer usually looks a
+function up in its API, the application programming interface documentation, and the cheat sheet
+saves you that search <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=358" target="_blank" rel="noopener">5:58</a>.
+The programs on the site also carry more comments now, and the assignment programs have a
+line-by-line reading (for this week, <a href="walk-06.html">Reading the assignment 5 program</a>).</p>
+
+<h2 id="the-mean-of-four-accelerations-8-25">The Mean of Four Accelerations <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=505" target="_blank" rel="noopener">8:25</a></h2>
+
+<p>The slide asked you to find the mean of four accelerations (&minus;407.2, &minus;388.2,
+&minus;426.9 and &minus;394.9&nbsp;m/s&sup2;) with any tool you like. Chris used his phone's
+calculator, and the class got &minus;404.3 (Chris left the minus signs off while typing and put
+the sign back at the end). NumPy's <code>np.mean</code> gave
+&minus;404.29999999999995 <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=655" target="_blank" rel="noopener">10:55</a>.
+Both cannot be right, so you need a way to decide which one to trust.</p>
+
+<p>The class voted, and then checked by hand on the board
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=743" target="_blank" rel="noopener">12:23</a>. The sum is 1617.2,
+divided by 4 is 404.3, and multiplying 404.3 by 4 gives 1617.2 back. Chris made a carry error on the
+way and the class caught it. Your own head can make mistakes too, so working it out together is one
+more check.</p>
+
+<p>When two tools you normally trust disagree, you go back to a tool you trust more, here
+hand arithmetic, and test the answer against it
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=899" target="_blank" rel="noopener">14:59</a>. You will likely do this often in modeling, and in engineering generally. When a number looks a little off, it is usually worth testing it against something you already trust.</p>
+
+<h2 id="abstraction-and-the-tools-we-compute-with-16-04">Abstraction and the Tools We Compute With <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=964" target="_blank" rel="noopener">16:04</a></h2>
+
+<p>Abstraction is our ability to take real things and draw ideas out of them. Every chair in the room
+is a specific chair, soft or hard, good or broken, and the idea "chair" has none of those properties.
+Much of what we work with in this course lives on the idea side
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=1042" target="_blank" rel="noopener">17:22</a>.</p>
+
+<ul>
+  <li>Theories. Gravity pulls every shot down at 9.81&nbsp;m/s&sup2;. The experiments it comes from
+  are real, such as dropping a ball and timing its fall.</li>
+  <li>Functions. The parabola for a shot is an idealization. The real thing is a ball moving
+  through the air, and the data is our samples of where it was.</li>
+  <li>Plans <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=1125" target="_blank" rel="noopener">18:45</a>. On
+  a blueprint a wall is a rectangle. A friend of Chris's who was finishing his basement measured
+  both sides of every wall anyway, because nothing built is exactly a rectangle.</li>
+</ul>
+
+<p>The tools we compute with are abstractions too, and each layer hides more of the arithmetic than
+the one before it <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=1213" target="_blank" rel="noopener">20:13</a>.</p>
+
+<ul>
+  <li>Paper (common practice by the 1800s). The written digits are in some sense a technology too
+  <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=1265" target="_blank" rel="noopener">21:05</a>. Try averaging
+  17 numbers written as Roman numerals, and the first thing you will want is to convert them.</li>
+  <li>Calculator (on desks from the 1970s) <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=1373" target="_blank" rel="noopener">22:53</a>.
+  It saves the column addition, though you still press + for every number.</li>
+  <li>Spreadsheet, program and library <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=1426" target="_blank" rel="noopener">23:46</a>.
+  A spreadsheet's average gave &minus;404.3. A short loop and NumPy's <code>np.mean</code> both
+  gave &minus;404.29999999999995.</li>
+  <li>AI <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=1505" target="_blank" rel="noopener">25:05</a>. Chris
+  gave Claude Haiku, Sonnet and Opus the same prompt. Haiku and Sonnet added the numbers in their
+  head and gave &minus;404.3. Opus ran Python, saw &minus;404.29999999999995, recognized it was off
+  and reported &minus;404.3. That is close to the steps the class followed. AI is the newest layer
+  on our desks, and as with the calculator in the 1970s, it will likely take some years of use to learn how far to trust it.</li>
+</ul>
+
+<h2 id="rounding-error-in-binary-floats-26-44">Rounding Error in Binary Floats <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=1604" target="_blank" rel="noopener">26:44</a></h2>
+
+<p>In decimal, one third is 0.333&hellip; with the 3s going on forever. On paper you stop somewhere,
+and 0.333 &times; 3 = 0.999 is not quite 1. That is a rounding error, and rounding errors can add up
+as you compute.</p>
+
+<p>A computer stores numbers in binary (base 2), where the only digits are 0 and 1
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=1689" target="_blank" rel="noopener">28:09</a>. After the point the
+places are worth a half, a quarter, an eighth, a sixteenth and so on, so binary has no tenths place.
+One tenth becomes 0.0 followed by 0011 repeating forever
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=1729" target="_blank" rel="noopener">28:49</a>. 0.0001 is 1/16 =
+0.0625, 0.00011 is 3/32 = 0.09375, and each further 0011 gets closer to 0.1 without reaching it.</p>
+
+<p>A Python float stops after a fixed amount of memory
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=1876" target="_blank" rel="noopener">31:16</a>. For 0.1 it keeps 55
+places and rounds the last one up, so its 0.1 is very slightly too large. That is why
+<code>0.1 + 0.2</code> prints 0.30000000000000004, a favorite of programming forums.</p>
+
+<p>The error is tiny next to the number <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=1935" target="_blank" rel="noopener">32:15</a>.
+A float keeps about 16 significant digits, and it is rare to need more. However, there are ways for an
+error in the 16th digit to work its way up toward the first, so it is worth knowing when you lose
+digits. Adding 10 and 45 always comes out exact. A number whose binary expansion never ends will
+probably be rounded.</p>
+
+<p>The four accelerations each had four significant digits
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=2042" target="_blank" rel="noopener">34:02</a>. An answer with 17
+should make you suspicious. Round it back to the digits the data supports and you get exactly
+&minus;404.3.</p>
+
+<h2 id="the-square-root-of-2-34-42">The Square Root of 2 <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=2082" target="_blank" rel="noopener">34:42</a></h2>
+
+<p>Numbers such as &radic;2, &pi; and <i>e</i> are irrational
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=2330" target="_blank" rel="noopener">38:50</a>. In any base the digits
+after the point never end, so every way of writing one down has to stop and round.</p>
+
+<p>Squaring checks a root <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=2376" target="_blank" rel="noopener">39:36</a>.
+1.41 &times; 1.41 = 1.9881, so 1.41 is the square root of 1.9881 and not of 2. You can find more digits
+by guessing the next one and squaring again. There is no direct formula like the one for multiplying. The quadratic formula would solve x&sup2;&nbsp;&minus;&nbsp;2&nbsp;=&nbsp;0,
+but it needs a square root itself <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=2535" target="_blank" rel="noopener">42:15</a>.
+In practice you repeat the guess and the check until the digits stop changing.</p>
+
+<div class="aside"><span class="label">Technically</span>
+<p>In class Chris said there is no step-by-step method for square roots like the one for division.
+There is one, the digit-by-digit method, set out much like long division, and schools taught it well
+into the 1900s. Each digit in it is still a small guess and check, so a square root does come from
+repeating a step. A calculator runs a repeated step like this in its built-in firmware, and some chips
+use Heron's method below, which is Newton's method. Week 7 covers Newton's method.</p>
+</div>
+
+<p>Every tool gives an approximation, and each stops at a different digit
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=2617" target="_blank" rel="noopener">43:37</a>.</p>
+
+<ul>
+  <li>Clay tablet (1700s BCE) <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=2667" target="_blank" rel="noopener">44:27</a>.
+  The oldest value Chris found is on a Babylonian tablet (Yale, YBC 7289), written in base 60 as
+  1;24,51,10. In decimal that is 1.41421296, and the last three digits are its rounding error.</li>
+  <li>Paper (around 60 CE) <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=2830" target="_blank" rel="noopener">47:10</a>.
+  Heron of Alexandria wrote down this method. Start at 1 and replace the guess with the average of the
+  guess and 2&nbsp;&divide;&nbsp;guess. From 1, 2&nbsp;&divide;&nbsp;1 = 2, and their average is 1.5.
+  Three rounds give 577/408 = 1.4142157.</li>
+  <li>Log tables (1620s) <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=2917" target="_blank" rel="noopener">48:37</a>.
+  Repeating that by hand for every root anyone needed was tedious, so mathematicians published books of
+  computed values to look up. People computed them, so they had some errors.</li>
+  <li>Slide rule (1620s, in use into the 1970s) <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=2989" target="_blank" rel="noopener">49:49</a>.
+  Its precision is how finely you can read a mark on the scale, about 1.41.</li>
+  <li>Calculator (1970s) <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=3145" target="_blank" rel="noopener">52:25</a>.
+  Press &radic; and you get ten digits.</li>
+  <li>Program and library <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=3200" target="_blank" rel="noopener">53:20</a>.
+  A loop running Heron's method and NumPy's <code>np.sqrt(2)</code> both get as close as a float
+  allows. They land on the two floats on either side of &radic;2, so <code>np.sqrt</code> prints one
+  more digit (1.4142135623730951 against 1.414213562373095).</li>
+  <li>AI <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=3237" target="_blank" rel="noopener">53:57</a>. Claude
+  Haiku gave 16 decimal places from memory. Sonnet and Opus each ran Python to 50 digits, which Chris
+  did not know Python could do. When he asked how they knew it was right, Claude wrote a second,
+  independent program by a different method and got the same digits.</li>
+</ul>
+
+<div class="aside"><span class="label">Lecture correction</span>
+<p>In class Chris said a circle has 360 degrees because 60 &times; 60 = 360. It is 6 &times; 60 = 360
+(60 &times; 60 is 3,600, the number of seconds in an hour). The 60 minutes and 60 seconds do come from
+Babylonian base 60. The 12 hours on a clock face trace back to Egypt, and both go back thousands of
+years, not one thousand.</p>
+</div>
+
+<div class="aside"><span class="label">Lecture correction</span>
+<p>In class Chris described a slide rule as a ruler with a cylinder inside that rolls out lengths of
+&pi;. That is not how a slide rule works. Its scales are marked so that the distance to each number is
+proportional to the number's logarithm. Sliding one scale along another adds two distances, which adds
+two logarithms, and that multiplies the two numbers. The A scale is the D scale squared, so the D
+reading under 2 on A is &radic;2, as on the slide. Apollo engineers did use slide rules, alongside the
+electronic computers that ran the missions.</p>
+</div>
+
+<p>Heron's method is Newton's method for x&sup2;&nbsp;&minus;&nbsp;2&nbsp;=&nbsp;0, which Week 7 covers
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=3313" target="_blank" rel="noopener">55:13</a>. Each round about
+doubles the digits that agree with &radic;2, so a few guesses give very high precision. In Python,
+<code>sum(x) / len(x)</code> and <code>np.mean(np.array(x))</code> both give the mean from the first
+half <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=3342" target="_blank" rel="noopener">55:42</a>, and both carry
+the same rounding error.</p>
+
+<h2 id="assignment-5-fitting-gravity-or-holding-it-at-9-81-66-51">Assignment 5, Fitting Gravity or Holding It at 9.81 <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=4011" target="_blank" rel="noopener">66:51</a></h2>
+
+<p>This week is about fitting a curve to data, which is what the basketball shots are for. Bob
+writes that he has a flight model working two ways
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=4039" target="_blank" rel="noopener">67:19</a>. In the first he lets
+the data tell him what gravity is, and in the second he holds gravity at 9.81 and fits everything else
+around it. He is about to build the rest of the season on one of them, and he wants to know which and
+how you know.</p>
+
+<p>P&oacute;lya's first step is understanding the problem, so start by listing what you do not yet know
+(what a flight model is, what Bob is using it for, how to do the fitting). Then read each phrase with
+what you know about shooting and gravity
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=4135" target="_blank" rel="noopener">68:55</a>.</p>
+
+<ul>
+  <li>"The flight model." In free flight the only force on the ball is gravity, so it slows on the way
+  up, has zero vertical speed at the top and comes back down. Newton's theory says that path is a
+  parabola. The model you expect can change what you see in the data. Early astronomers expected circular orbits and
+  for a long time saw circles where the orbits were ellipses.</li>
+  <li>The parabola <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=4262" target="_blank" rel="noopener">71:02</a>.
+  The axis here is time, so the curve is height over time. The tracking data gives x, y and z, and z is
+  the height, so the model is z(t)&nbsp;=&nbsp;c<sub>0</sub>&nbsp;+&nbsp;c<sub>1</sub>t&nbsp;+&nbsp;c<sub>2</sub>t&sup2;.
+  Picture a web page with one slider for each constant, each moving the parabola a different way.
+  Fitting means finding the three slider settings that match the data best.</li>
+  <li>"Let the data tell me what gravity is" <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=4394" target="_blank" rel="noopener">73:14</a>.
+  Fit c<sub>2</sub> as well, and each shot gets its own gravity, g&nbsp;=&nbsp;&minus;2c<sub>2</sub>. If
+  some shots had been taken on the Moon or Mars, this is the fit that would tell them apart.</li>
+  <li>"Hold gravity at 9.81" <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=4461" target="_blank" rel="noopener">74:21</a>.
+  Fix c<sub>2</sub> at &minus;9.81/2 (divided by 2, because of the integration). That fixes one slider
+  and leaves two to fit, c<sub>0</sub> and c<sub>1</sub>. That leaves the held model one fewer degree of freedom.</li>
+  <li>Gravity from 9.78 to 9.83 <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=4510" target="_blank" rel="noopener">75:10</a>.
+  9.81 is an average. At the Earth's surface gravity runs from 9.78&nbsp;m/s&sup2; at the equator to
+  9.83 at the poles, and it is a little weaker the farther you are from the Earth's center.</li>
+  <li>"Build the rest of the season on one" <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=4609" target="_blank" rel="noopener">76:49</a>.
+  Bob does not say what the model is for. A student suggested predicting whether the shot goes in.
+  Chris pictured a broadcast that shows the chance a shot goes in before it gets there, or a robotic
+  backboard that moves to catch every shot. In either case the model would need to say where the ball is going before it gets there.</li>
+</ul>
+
+<p>Chris broke the work into seven steps <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=4723" target="_blank" rel="noopener">78:43</a>.
+What does one arc look like? Where does free flight start? How do we fit each model? Which model fits
+the data better? What gravity does the free model find? Which model predicts better? Does the answer
+make sense? The fitting is least squares, which uses some linear algebra that the libraries do for
+you. The last steps rest on the difference between residual and error
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=4809" target="_blank" rel="noopener">80:09</a>. A residual is the
+difference between the data and the model. An error is the difference between the model's predictions
+and the real world. Please see
+<a href="model-form-and-parameters.html">Model form and free parameters</a>,
+<a href="linearity-in-the-parameters.html">Linearity in the parameters</a>,
+<a href="least-squares-is-one-norm.html">Least squares and the choice of norm</a> and
+<a href="residual-and-error.html">Residual and error</a>.</p>
+
+<h2 id="one-arc-and-where-free-flight-starts-80-47">One Arc and Where Free Flight Starts <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=4847" target="_blank" rel="noopener">80:47</a></h2>
+
+<p>The slide plots arc 662 three ways.</p>
+
+<ul>
+  <li>From above (x against y). The dots bunch up while the player holds the ball, then run in a
+  straight line to the hoop, so a straight line is the shape to expect there.</li>
+  <li>Height over time <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=4907" target="_blank" rel="noopener">81:47</a>.
+  A parabola through the middle, with "shoulders" at each end where the player is still moving the
+  ball or the ball reaches the backboard. Those ends are not free flight, and including them widens the
+  parabola.</li>
+  <li>Vertical speed <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=4951" target="_blank" rel="noopener">82:31</a>.
+  This comes from the height by last week's finite differences. Differencing amplifies noise, so the
+  forward difference is jagged. A central difference has less noise, and stepping two frames before
+  and after cuts it further. Stepping over more frames smooths more, and it also blurs the moment the
+  hand lets go. Please see <a href="finite-differences.html">Finite differences</a>.</li>
+</ul>
+
+<p>As a human you can look at the height plot and see where the parabola starts, and a computer
+cannot <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=5066" target="_blank" rel="noopener">84:26</a>. The speed
+plot gives the computer a rule. While the ball is in the hand it is pushed upward and its upward speed
+grows. Once it is released only gravity acts, and the upward speed never grows again
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=5110" target="_blank" rel="noopener">85:10</a>.</p>
+
+<p>The class voted on the first frame of free flight for arc 662, frames 10 to 13. Chris's eye said
+frame 10, and each way of computing the speed puts its peak at a different frame
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=5142" target="_blank" rel="noopener">85:42</a>. You probably cannot know from the data when the ball really left the hand <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=5187" target="_blank" rel="noopener">86:27</a>.
+It could even be frame 9, hidden by noise. All you can do is choose a rule and state it, so that anyone
+checking your work can use the same rule and get the same answer. Any of these rules is fine this week,
+and Week 7 looks at other ways to pick the frame.</p>
+
+<div class="aside"><span class="label">Student question</span>
+<p>Q: The example report picks one arc to analyze. Is that just any arc
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=5277" target="_blank" rel="noopener">87:57</a>?</p>
+<p>A: Yes. Pick any arc to start with and work out what you want to do with it. Then run your program
+on all of your arcs (the example pack has 24, and your own pack has 60). On one shot you could
+hard-code frame 10, but you do not want to hand-pick a frame for every shot, so you write a rule, such
+as the peak of the central-difference speed. On arc 662 that rule picks 11 where you might have picked
+10, which matters little, since you were not confident in 10 either.</p>
+</div>
+
+<p>The code starts at the top of the arc and walks back
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=5402" target="_blank" rel="noopener">90:02</a>. For a list
+s&nbsp;=&nbsp;[7,&nbsp;4,&nbsp;10], <code>max(s)</code> gives the largest value, 10, and
+<code>np.argmax(s)</code> gives the index where it sits, 2. So <code>np.argmax(z)</code> is the frame at
+the top of the arc, and a loop walks back from there while the upward speed keeps growing. On arc 662
+it stops at frame 11.</p>
+
+<p>The end needs a rule too <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=5463" target="_blank" rel="noopener">91:03</a>.
+The slides end the flight at the first frame within 1&nbsp;m of the center of the hoop. That close, the
+ball may hit the rim or the backboard, or someone may block it, and gravity is no longer the only force.
+The fit uses only the frames between these two rules.</p>
+
+<h2 id="least-squares-fits-with-gravity-free-and-held-92-20">Least-Squares Fits With Gravity Free and Held <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=5540" target="_blank" rel="noopener">92:20</a></h2>
+
+<p>The fit is two lines of code, and the method is least squares, <code>np.linalg.lstsq</code> in
+NumPy's linear algebra module. The first line builds a matrix with the columns 1, t and t&sup2;. Multiplied
+by the constants c<sub>0</sub>, c<sub>1</sub> and c<sub>2</sub>, it gives the model's height at every
+frame, and the second line finds the constants that match the measured heights best. The held model
+is the same with only the columns 1 and t, after the known gravity term is moved to the other side.</p>
+
+<p>Fitted freely, arc 662's gravity comes out at 9.72
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=5618" target="_blank" rel="noopener">93:38</a>. There are two
+possibilities until you look further. Something physical the model leaves out, such as air resistance,
+could be changing the curve. The other possibility is that the fit is following the noise, which may lean one way on this arc.</p>
+
+<h2 id="residuals-and-rms-94-36">Residuals and RMS <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=5676" target="_blank" rel="noopener">94:36</a></h2>
+
+<p>The top plot lays the fitted parabola out flat and shows each frame's gap from it. Each gap is a
+residual, what is left over after the fit. To get one number for all of them, you could add them up,
+but positive and negative residuals cancel. Taking absolute values first works. RMS, the root mean
+square, squares each residual instead <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=5785" target="_blank" rel="noopener">96:25</a>.
+Squaring removes the sign, and it makes large gaps count much more, so the fit prefers many small gaps
+to a few large ones. Then average the squares (the mean) and take the square root (the root), which
+brings the result back to the size of the residuals.</p>
+
+<p>RMS is a convention <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=5876" target="_blank" rel="noopener">97:56</a>.
+We use F&nbsp;=&nbsp;ma because we believe it is true about the universe. We use RMS because we all
+agreed to and it has nice mathematical properties, much as we agree to say the alphabet in one order.
+Please see <a href="least-squares-is-one-norm.html">Least squares and the choice of norm</a>.</p>
+
+<h2 id="the-free-model-fits-closer-and-its-gravity-varies-99-04">The Free Model Fits Closer, and Its Gravity Varies <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=5944" target="_blank" rel="noopener">99:04</a></h2>
+
+<p>The free model has three degrees of freedom and the held model two. More freedom always fits the
+frames at least as well, and on every arc the held model had the larger RMS
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=6019" target="_blank" rel="noopener">100:19</a>. A polynomial with as
+many constants as there are frames would pass through every frame and still predict nothing about the
+next one. For this reason the RMS of the fit cannot choose between the models, since it mostly reflects how many constants each one has.</p>
+
+<p>The free model's gravity changes from arc to arc
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=6062" target="_blank" rel="noopener">101:02</a>. The plot shows it
+fitted to the whole flight, and fitted to the first half only, where the spread is wider. Fewer frames
+give the noise more room to pull the fit toward gravities we know are not true. Held at 9.81, the
+model does not have that freedom.</p>
+
+<h2 id="held-gravity-predicts-the-unseen-half-better-101-47">Held Gravity Predicts the Unseen Half Better <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=6107" target="_blank" rel="noopener">101:47</a></h2>
+
+<p>Bob will use the model to predict, so Chris split each flight in half. Each model is fitted to the
+first half, and the second half, which neither model sees, measures its error. On arc 662 the held
+model's curve tracks the second half closely, and the free model's drifts away
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=6195" target="_blank" rel="noopener">103:15</a>. The residuals on
+the first half are as small as each model can make them, and on the second half the free model's gaps
+keep growing.</p>
+
+<p>The RMS on the first half is the fit, and the RMS on the second half is the error
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=6234" target="_blank" rel="noopener">103:54</a>. The error says how
+well the curve you would use to predict matches the frames you are trying to predict. More freedom fits
+the data better, and it does not necessarily predict better. In Python, splitting at the middle is
+<code>half = len(t) // 2</code>, then <code>t[:half]</code> and <code>t[half:]</code>
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=6339" target="_blank" rel="noopener">105:39</a>.</p>
+
+<div class="aside"><span class="label">Student question</span>
+<p>Q: A student in Monday's section used only the gap at the last frame as the error. Is that all right
+<a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=6268" target="_blank" rel="noopener">104:28</a>?</p>
+<p>A: Yes, you get to define your error. However, the last frame has its own noise, and if that noise
+happens to land it close to the curve, the model looks better than it is. Using the last few frames, or
+the whole second half, averages that noise out. Other choices are welcome too, as long as the report
+says which you used.</p>
+</div>
+
+<h2 id="arcs-left-out-the-advice-for-bob-and-the-checks-105-57">Arcs Left Out, the Advice for Bob and the Checks <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=6357" target="_blank" rel="noopener">105:57</a></h2>
+
+<ul>
+  <li>Arc 325, left out. Part of its height curve does not look like a parabola. Its height falls by
+  exactly the same step every frame, so its speed is exactly constant there, which real tracking never
+  shows. Chris's guess is that the tracker lost the ball and someone filled the gap with straight lines.
+  You do not have to know why to throw out data that looks this wrong, and the report should say you
+  did.</li>
+  <li>Hold gravity at 9.81 <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=6444" target="_blank" rel="noopener">107:24</a>.
+  The plot puts each arc's error with gravity held against its error with gravity fitted. A point on the
+  diagonal means both did equally well. Most points sit on the side where fitting gravity was worse, so
+  Chris would tell Bob to hold gravity at 9.81. Your own arcs will probably lead to the same conclusion,
+  and if they do not, report the conclusion they lead to.</li>
+  <li>Arc 739, kept <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=6532" target="_blank" rel="noopener">108:52</a>.
+  The release rule put its start at frame 3, which seemed suspicious, but Chris kept it and said so.</li>
+  <li>An earlier split <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=6562" target="_blank" rel="noopener">109:22</a>.
+  Half is convenient. Splitting earlier gave the same result, which shows the conclusion does not hang
+  on where the split falls.</li>
+  <li>About 3&nbsp;cm of tracking noise <a class="ts" href="https://uw.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=e201b05a-d571-4f64-96fe-b4fe0162e196&amp;start=6588" target="_blank" rel="noopener">109:48</a>.
+  The tracking data is good to about 3&nbsp;cm. A model that gets within the instrument's error is about as close as this data can show.</li>
+</ul>
+
+<div class="aside"><span class="label">Lecture correction</span>
+<p>At the end Chris said both models get their prediction error down to about 3&nbsp;cm, the size of
+the tracking noise. That figure describes the fit. On the 23 example arcs the median RMS of the
+residuals is 2.48&nbsp;cm with gravity fitted and 2.55&nbsp;cm held, both under the 3.07&nbsp;cm of
+vertical tracking noise given in the header. The error on the unseen half is larger, a median of
+4.2&nbsp;cm held and 5.8&nbsp;cm fitted. That is, both fits reach the tracking noise, and both prediction errors stay above it.</p>
+</div>
+
+<p>Please see the <a href="reports-06.html">example reports</a> for Assignment 5.</p>
+
+  </main>
+
+  
+
+  <script src="js/page.js?v=20261113083220"></script>
+
+  <footer class="site-footer">
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-16">November 16, 2026</time>.</span>
+    <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
+  </footer>
+  <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">
+    <form id="report-form" method="dialog" novalidate>
+      <input type="checkbox" name="botcheck" id="report-botcheck" class="report-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 id="report-modal-title">Report a problem</h2>
+      <div class="field">
+        <label for="report-page">Page</label>
+        <input type="text" id="report-page" name="page" readonly>
+      </div>
+      <div class="field">
+        <label for="report-message">What's the problem?</label>
+        <textarea id="report-message" name="message" placeholder="Describe the issue…" required></textarea>
+      </div>
+      <div class="report-modal-actions">
+        <button type="button" class="btn-cancel" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn-submit" id="report-submit">Send</button>
+      </div>
+      <div class="report-status" id="report-status" role="status"></div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var modal   = document.getElementById('report-modal');
+      var form    = document.getElementById('report-form');
+      var pageIn  = document.getElementById('report-page');
+      var msgIn   = document.getElementById('report-message');
+      var status  = document.getElementById('report-status');
+      var submit  = document.getElementById('report-submit');
+      var cancel  = document.getElementById('report-cancel');
+
+      function openModal() {
+        pageIn.value = window.location.href;
+        msgIn.value  = '';
+        status.className = 'report-status';
+        status.textContent = '';
+        submit.disabled = false;
+        submit.textContent = 'Send';
+        cancel.textContent = 'Cancel';
+        modal.showModal();
+        msgIn.focus();
+      }
+
+      document.getElementById('report-open-header').addEventListener('click', openModal);
+      document.getElementById('report-open-footer').addEventListener('click', openModal);
+
+      cancel.addEventListener('click', function () { modal.close(); });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.close();
+      });
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!msgIn.value.trim()) {
+          msgIn.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        status.className = 'report-status';
+
+        try {
+          var data = new FormData();
+          data.append('access_key', 'acc19147-142a-4ca9-a387-1efbb98a6e24');
+          data.append('subject', 'Climbing Giants - problem report');
+          data.append('from_name', 'Climbing Giants - Algorithms');
+          data.append('page', pageIn.value);
+          data.append('message', msgIn.value);
+          var hp = document.getElementById('report-botcheck');
+          if (hp && hp.checked) data.append('botcheck', 'true');
+          var res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+          var json = await res.json();
+          if (json.success) {
+            status.className = 'report-status success';
+            status.textContent = 'Report sent — thanks!';
+            submit.style.display = 'none';
+            cancel.textContent = 'Close';
+          } else {
+            throw new Error(json.message || 'Unknown error');
+          }
+        } catch (err) {
+          status.className = 'report-status error';
+          status.textContent = 'Something went wrong. Email dr.chris.marriott@gmail.com directly.';
+          submit.disabled = false;
+          submit.textContent = 'Send';
+        }
+      });
+    })();
+  </script>
+
+  
+  
+  
+  
+
+  <dialog class="search-modal" id="search-modal" aria-labelledby="search-modal-title">
+    <div class="search-modal-inner">
+      <div class="search-modal-head">
+        <h2 id="search-modal-title">Search this site</h2>
+        <button type="button" class="search-modal-close" id="search-close">Close &#10005;</button>
+      </div>
+      <div id="search-ui"></div>
+    </div>
+  </dialog>
+  <script>
+    /* Search. Pagefind's index and UI are written into pagefind/ at build time
+       by ../pagefind-index.js, and load the first time the dialog opens, so a
+       page that is only read never downloads them. Every page sits at the
+       site's top level, so the site's base is this page's directory. */
+    (() => {
+      const openBtn = document.getElementById('search-open');
+      const dlg = document.getElementById('search-modal');
+      const mount = document.getElementById('search-ui');
+      if (!openBtn || !dlg || !mount || typeof dlg.showModal !== 'function') return;
+      const base = location.pathname.replace(/[^/]*$/, '');
+      let ui = null, loading = null;
+
+      const load = () => loading || (loading = new Promise((resolve, reject) => {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = base + 'pagefind/pagefind-ui.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = base + 'pagefind/pagefind-ui.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }));
+
+      const open = () => {
+        if (dlg.open) return;
+        dlg.showModal();
+        load().then(() => {
+          if (!ui) ui = new PagefindUI({
+            element: '#search-ui',
+            bundlePath: base + 'pagefind/',
+            baseUrl: base,
+            showSubResults: true,
+            showImages: false
+          });
+          requestAnimationFrame(() => {
+            const input = mount.querySelector('input');
+            if (input) input.focus();
+          });
+        }).catch(() => {
+          loading = null;
+          mount.textContent = '';
+          const p = document.createElement('p');
+          p.className = 'search-fallback';
+          p.textContent = 'Search could not load. The syllabus and the week pages link to everything on this site.';
+          mount.appendChild(p);
+        });
+      };
+
+      openBtn.addEventListener('click', open);
+      document.getElementById('search-close').addEventListener('click', () => dlg.close());
+      /* A click on the backdrop closes it. The padding sits on an inner box,
+         so a click inside the dialog never reads as one on the backdrop. */
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+      /* / opens it, as on most documentation sites. */
+      addEventListener('keydown', e => {
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest('input, textarea, select') || t.isContentEditable)) return;
+        if (document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        open();
+      });
+    })();
+  </script>
+  <script>
+    /* Page contents, on long pages only (the rule is at build() below).
+       The heading ids come from ../heading-ids.js at build
+       time, so they are in the HTML before any script runs. */
+    (() => {
+      const main = document.querySelector('main');
+      const header = document.querySelector('.site-header');
+      const root = document.documentElement;
+      if (!main) return;
+
+      /* The header is sticky and changes height as the nav folds, so jump
+         targets and the side list read its height from a live variable. */
+      const setHeaderHeight = () => {
+        if (header) root.style.setProperty('--cg-header-h', header.offsetHeight + 'px');
+      };
+      setHeaderHeight();
+      if (header && 'ResizeObserver' in window) new ResizeObserver(setHeaderHeight).observe(header);
+
+      /* Who gets one. A page that is long on screen, at least two and a
+         half window heights, because that is what scrolling costs: a table
+         or a figure takes the room of many words, so a word count misses
+         it. And at least three places to jump to: the page's sections, or
+         on a page with fewer than three sections, its sections and their
+         subsections together.
+         Run after the deferred KaTeX render, so a heading with math in it is
+         listed as it reads, not as its TeX source, and again once images
+         have loaded, since an image without set dimensions has no height
+         before then. */
+      let built = false;
+      const build = () => {
+        if (built) return;
+        const shown = h => !h.closest('dialog, details, .deck-slide');
+        let heads = [...main.querySelectorAll('h2[id]')].filter(shown);
+        if (heads.length < 3) heads = [...main.querySelectorAll('h2[id], h3[id]')].filter(shown);
+        if (heads.length < 3 || main.offsetHeight < 2.5 * innerHeight) return;
+        built = true;
+
+        const label = h => {
+          const c = h.cloneNode(true);
+          c.querySelectorAll('.anchor-link, .katex-mathml').forEach(n => n.remove());
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const list = () => {
+          const ol = document.createElement('ol');
+          let underSection = false;
+          heads.forEach(h => {
+            const li = document.createElement('li');
+            /* A subsection is indented under the section before it. One that
+               opens the page, before any section, stays at the margin. */
+            if (h.tagName === 'H2') underSection = true;
+            else if (underSection) li.className = 'toc-sub';
+            const a = document.createElement('a');
+            a.href = '#' + h.id;
+            a.textContent = label(h);
+            li.appendChild(a);
+            ol.appendChild(li);
+          });
+          return ol;
+        };
+
+        const inline = document.createElement('details');
+        inline.className = 'page-toc-inline';
+        const summary = document.createElement('summary');
+        summary.textContent = 'On this page';
+        inline.append(summary, list());
+        heads[0].parentNode.insertBefore(inline, heads[0]);
+
+        const side = document.createElement('nav');
+        side.className = 'page-toc-side';
+        side.setAttribute('aria-label', 'On this page');
+        const title = document.createElement('p');
+        title.className = 'toc-title';
+        title.textContent = 'On this page';
+        side.append(title, list());
+        document.body.appendChild(side);
+
+        /* Beside the page wherever it can fit, measured from where the page
+           actually ends, so a wide demo page never has the list over it. A
+           page too wide to leave the room when centred (the 960px notes
+           pages on a laptop) moves left just far enough to make it, keeping
+           at least 24px to its left. Only when that is not enough does the
+           list fold above the first section. */
+        const place = () => {
+          root.classList.remove('toc-shift');
+          const box = main.getBoundingClientRect();
+          const short = 272 - (root.clientWidth - box.right);
+          const fits = short <= 0 || box.left - short >= 24;
+          root.classList.toggle('toc-side', fits);
+          if (!fits) return;
+          if (short > 0) {
+            root.style.setProperty('--cg-main-left', (box.left - short) + 'px');
+            root.classList.add('toc-shift');
+          }
+          root.style.setProperty('--cg-toc-left', (box.right - Math.max(short, 0) + 32) + 'px');
+        };
+        place();
+        addEventListener('resize', place);
+
+        /* Mark the section being read. */
+        if ('IntersectionObserver' in window) {
+          const links = new Map([...side.querySelectorAll('a')]
+            .map(a => [a.getAttribute('href').slice(1), a]));
+          const inView = new Set();
+          const io = new IntersectionObserver(entries => {
+            entries.forEach(en => en.isIntersecting ? inView.add(en.target.id) : inView.delete(en.target.id));
+            const current = heads.find(h => inView.has(h.id));
+            if (!current) return;
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(current.id);
+            if (a) a.classList.add('active');
+          }, { rootMargin: '-15% 0px -65% 0px' });
+          heads.forEach(h => io.observe(h));
+        }
+      };
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', build);
+      else build();
+      addEventListener('load', build);
+    })();
+  </script>
+</body>
+</html>

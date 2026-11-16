@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Halving the step, in evaluations — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261109124015">
-  <link rel="stylesheet" href="css/demos.css?v=20261109124015">
+  <link rel="stylesheet" href="css/blocks.css?v=20261113083220">
+  <link rel="stylesheet" href="css/demos.css?v=20261113083220">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -839,9 +839,6 @@
           <span class="site-nav-sep">·</span>
           <strong>Halving the step</strong>
         
-          <span class="site-nav-sep">·</span>
-          <a href="stability-and-accuracy.html">Energy checks</a>
-        
         <span class="site-nav-sep">·</span>
         
         <a href="assign-08.html">Assignment</a>
@@ -904,48 +901,97 @@
 
 <div class="claim">
   <span class="label">Claim</span>
-  <p class="exact">A <dfn data-g="convergence-study">convergence study</dfn> halves the step until
-  two runs agree to the precision the answer needs, and it needs no exact answer to compare with.
-  Heun's method and RK4 evaluate the rate at more than one point in each step. On the tracked shot
-  their first two runs agree within 3&nbsp;mm, where Euler needs six halvings, and the cost of each
-  study is the number of evaluations of the rate it takes.</p>
-  <p class="plain">Halve the step until two runs agree to the precision you need. A stepper that
-  takes the rate more than once a step can get there in fewer evaluations, and a run's cost is
-  counted in evaluations.</p>
+  <p class="exact">With drag there is no formula for the shot's path, so a stepped run has nothing
+  exact to be checked against. Running it again with half the step and comparing where the ball
+  ends up shows whether the step is short enough. When halving the step moves the answer by less
+  than the precision you need, the answer has settled. This is a <dfn
+  data-g="convergence-study">convergence study</dfn>. Every step works out the forces on the ball
+  at least once. Heun's method and RK4 look at the forces more than once a step, and on the shot
+  they settle with far fewer of these evaluations than Euler's method.</p>
+  <p class="plain">Halve the step until the answer stops moving. A stepper that looks at the forces
+  more than once a step usually gets there with less work.</p>
 </div>
 
-<h2 id="halving-the-step-on-the-shot">Halving the Step on the Shot</h2>
+<h2 id="how-short-is-short-enough">Halving the Step Until Two Runs Agree</h2>
 
-<p>The tracked shot on <a href="state-as-a-vector.html" title="State as a vector">page 25</a> has
-no exact answer once drag is in the model, so each run is compared with the run at half its
-step. When halving the step moves the answer by less than the precision you need, you can take
-the answer as settled. The number compared here is the predicted position at the last free-flight
-frame, 0.72&nbsp;s after the starting state at frame 5. (Frames and time count from the release
-this data set marks, which is frame 20 of the arc's record, so frame 5 is 0.20&nbsp;s after it. <a
-href="conditions-become-roots.html#finding-the-release" title="Conditions as roots">Page 19</a>
-finds the release 0.08&nbsp;s earlier.)</p>
+<p><a href="from-a-rate-to-a-trajectory.html" title="Euler&#x27;s method">Page 24</a> stepped the
+tracked shot with Euler's method. With one step a frame (40&nbsp;ms) the ball ended 135&nbsp;mm
+above a run with 0.1&nbsp;ms steps, and shorter steps followed the path more closely. That leaves
+two questions open, how short the step has to be and whether the 0.1&nbsp;ms run is itself close
+to the path. With drag there is no formula to compare either run against. The tracked
+frames scatter about 3&nbsp;cm either side of the path, so they cannot settle a question about a
+few millimeters either.</p>
 
-<p>The study uses the <code>euler</code> function from <a href="from-a-rate-to-a-trajectory.html"
-title="Euler&#x27;s method">page 24</a>, and the <code>shot</code> function and starting state
-<code>s0</code> from <a href="state-as-a-vector.html" title="State as a vector">page 25</a>, with $k$ = 0.016 per meter. The frames are 40&nbsp;ms apart, so $m$
-steps per frame is a step of $40/m$&nbsp;ms, and $18m$ steps reach the last frame.</p>
+<p>If you have run a finite element model, you may have refined the mesh until the stress you
+cared about stopped changing. The same idea works for the step. Run the shot, halve the step, run
+it again, and compare where the ball is at the end. If the two runs agree to the precision you
+need, keep the finer run (the section below shows why it is the one within that precision). If they
+do not, halve again. This is the convergence study. All it needs is the program and a precision to
+aim for, with no exact answer.</p>
+
+<p>The precision is a choice, and the example on this page takes 3&nbsp;mm, about a tenth of the
+tracking noise. A run with drag switched off ends 157&nbsp;mm from the run with drag at the end of
+the flight, so a 3&nbsp;mm uncertainty from the step is probably small next to the effect a model
+with drag is trying to measure. A
+tighter precision costs more work, and the sections below count that work.</p>
+
+<h2 id="halving-the-step-on-the-shot">Halving Euler's Step on the Shot</h2>
+
+<p>The runs below start from the state at frame 5 on <a href="from-a-rate-to-a-trajectory.html" title="Euler&#x27;s method">page 24</a>, 4.202&nbsp;m up and climbing at
+2.75&nbsp;m/s, with the drag constant $k$ = 0.016 per meter. Each run steps 0.72&nbsp;s to frame
+23, the last frame before the ball nears the hoop. (Frames and times count from frame 20 of the
+arc's record, as on <a href="from-a-rate-to-a-trajectory.html" title="Euler&#x27;s method">page 24</a>, and <a href="conditions-become-roots.html#finding-the-release"
+title="Conditions as roots">page 19</a> finds the actual release 0.08&nbsp;s earlier.) The first run takes one step a frame, which is 18
+steps of 40&nbsp;ms. Each run after it doubles the number of steps, which halves the step. The
+number compared is the ball's position at frame 23, and each row gives how far it moved from the
+run before. That is a distance in three dimensions, so it is a little more than the change in
+height alone that <a href="from-a-rate-to-a-trajectory.html" title="Euler&#x27;s method">page 24</a> tabulates (67.7&nbsp;mm against 67.6&nbsp;mm for the first move).</p>
+
+<table class="data">
+  <tr><th class="num">step (ms)</th><th class="num">steps to frame 23</th><th class="num">moved from the run before (mm)</th></tr>
+  <tr><td class="num">40</td><td class="num">18</td><td class="num">&nbsp;</td></tr>
+  <tr><td class="num">20</td><td class="num">36</td><td class="num">67.7</td></tr>
+  <tr><td class="num">10</td><td class="num">72</td><td class="num">33.8</td></tr>
+  <tr><td class="num">5</td><td class="num">144</td><td class="num">16.9</td></tr>
+  <tr><td class="num">2.5</td><td class="num">288</td><td class="num">8.44</td></tr>
+  <tr><td class="num">1.25</td><td class="num">576</td><td class="num">4.22</td></tr>
+  <tr><td class="num">0.625</td><td class="num">1&nbsp;152</td><td class="num">2.11</td></tr>
+  <tr><td class="num">0.3125</td><td class="num">2&nbsp;304</td><td class="num">1.05</td></tr>
+</table>
+
+<p>In the table each halving of Euler's step about halves the move. <a href="from-a-rate-to-a-trajectory.html" title="Euler&#x27;s method">Page 24</a>'s second check gives
+the reason. A step half as long
+lands about a quarter as far off the path, and there are twice as many steps, so the drift at frame
+23 is about half. If the halving keeps up, the moves still to come after a given run add up to
+about its last move (half of it, plus a quarter, and so on). For this reason the move between two
+runs is about how far the finer run still is from the path. The coarser run is about twice as far
+off, which is why the finer run is the one to keep.</p>
+
+<p>Euler's move first falls under 3&nbsp;mm at the sixth halving, where the run of 1&nbsp;152 steps
+(0.625&nbsp;ms each) is 2.1&nbsp;mm from the run of 576. With Euler, then, a step of
+0.625&nbsp;ms is short enough for 3&nbsp;mm. One step a frame is far too long. The 0.1&nbsp;ms run on <a href="from-a-rate-to-a-trajectory.html" title="Euler&#x27;s method">page 24</a> is
+six times shorter again, so it is very likely within a millimeter of the path. The code below runs
+the study. It uses the <code>euler</code> function from <a href="from-a-rate-to-a-trajectory.html" title="Euler&#x27;s method">page 24</a> and the <code>shot</code> function
+and starting state <code>s0</code> from <a href="state-as-a-vector.html" title="State as a
+vector">page 25</a>. With $m$ steps a frame the step is $h = 0.04/m$&nbsp;s, and $18m$ steps reach
+frame 23.</p>
 
 <div class="codetabs" id="codeHalving">
   <div class="tabs" role="tablist">
     <button role="tab" data-lang="python" aria-selected="true">Python</button>
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
   </div>
-  <pre data-lang="python" data-notes="1|stepper is any function with the shape of euler, so the same study runs on heun and rk4 later on this page ([Functions](py-functions.html)).;2|Doubling m halves the step ([Loops](py-loops.html)).;4|[-1, :3] keeps the last row and its first three columns, the position at the last frame ([numpy arrays](py-numpy.html)).;5|The first run has nothing to compare with, so the printing starts at the second.;6|The distance between this run's position and the previous run's, in meters.;8|Keeps this run's position for the next comparison.">def halving(stepper):
+  <pre data-lang="python" data-notes="1|stepper is any function with the shape of euler, so the same study runs on heun and rk4 later on this page ([Functions](py-functions.html)).;2|Doubling m halves the step ([Loops](py-loops.html)).;4|[-1, :3] keeps the last row and its first three columns, the position at frame 23 ([numpy arrays](py-numpy.html)).;5|The first run has nothing to compare with, so the printing starts at the second.;6|The distance between this run's position and the previous run's, turned from meters into millimeters.;8|Keeps this run's position for the next comparison.">def halving(stepper):
     for m in [1, 2, 4, 8, 16, 32, 64, 128]:
         h = 0.04 / m
         p = stepper(shot, s0, 0.20, h, 18*m)[-1, :3]
         if m &gt; 1:
-            change = np.linalg.norm(p - p_prev)
-            print(f'{1000*h:7.4f} ms  {18*m:5d} steps  {change:.2e} m')
+            change = 1000 * np.linalg.norm(p - p_prev)
+            print(f'{1000*h:7.4f} ms  {18*m:5d} steps  {change:.3g} mm')
         p_prev = p
 
 halving(euler)</pre>
-  <pre data-lang="matlab" hidden data-notes="1|The shot with k fixed at 0.016, in the shape euler expects.;2|@euler passes the function itself, so the same study runs on heun and rk4 later on this page.;5|Doubling m halves the step.;8|The last row and its first three columns, the position at the last frame.;10|norm is the length of a vector, so this is the distance between the two runs' positions.;12|Keeps this run's position for the next comparison.">f = @(t, s) shot(t, s, 0.016);
+  <pre data-lang="matlab" hidden data-notes="1|The shot with k fixed at 0.016, in the shape euler expects.;2|@euler passes the function itself, so the same study runs on heun and rk4 later on this page.;5|Doubling m halves the step.;8|The last row and its first three columns, the position at frame 23.;10|norm is the length of a vector, so this is the distance between the two runs' positions, turned into millimeters.;12|Keeps this run's position for the next comparison.">f = @(t, s) shot(t, s, 0.016);
 halving(@euler, f, s0)
 
 function halving(stepper, f, s0)
@@ -954,7 +1000,7 @@ function halving(stepper, f, s0)
         p = stepper(f, s0, 0.20, h, 18*m);
         p = p(end, 1:3);
         if m &gt; 1
-            fprintf('%7.4f ms  %5d steps  %.2e m\n', 1000*h, 18*m, norm(p - p_prev));
+            fprintf('%7.4f ms  %5d steps  %.3g mm\n', 1000*h, 18*m, 1000*norm(p - p_prev));
         end
         p_prev = p;
     end
@@ -962,50 +1008,251 @@ end</pre>
   <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
 </div>
 
-<p>Each row gives the distance between this run's position and the run at twice the step.</p>
+<h2 id="cost-of-a-study">Counting the Work in Evaluations</h2>
+
+<p>Each Euler step works out the forces on the ball once, where the ball is at the start of the
+step, and the program does this by calling <code>shot</code>. Each of those calls is an
+evaluation. A study costs every evaluation in every run it makes, from one step a frame up to the
+pair that agrees. For Euler on the shot that is 18&nbsp;+&nbsp;36&nbsp;+&nbsp;&hellip;&nbsp;+&nbsp;1&nbsp;152
+= 2&nbsp;286 evaluations. <a href="evaluations-are-the-currency.html" title="Evaluation
+cost">Page 22</a> compared root finders by the same count.</p>
+
+<p>On the shot the forces are three lines of arithmetic, and a laptop runs Euler's whole study in
+a blink. Working out the forces is usually the expensive part of a bigger model, though, and there
+the count of evaluations likely matters more than anything else about a run's cost. A model of a seated occupant with many body segments,
+or of the air flowing around the ball, may spend almost all of its time there. In a model like that,
+a stepper that settles in fewer evaluations finishes sooner, and the next section describes two
+that do.</p>
+
+<h2 id="heun-and-rk4">Heun's Method and RK4</h2>
+
+<p>Euler holds the velocity and the acceleration from the start of a step for the whole step. Over
+the first frame of the shot, gravity and drag slow the climb from 2.75 to about 2.35&nbsp;m/s, but
+Euler moves the ball at 2.75&nbsp;m/s for the whole 40&nbsp;ms. That is why it lands 8.1&nbsp;mm
+high on <a href="from-a-rate-to-a-trajectory.html" title="Euler&#x27;s method">page 24</a>. A better step would use a velocity closer to the average over the step. Under a
+fixed acceleration, physics gives that average exactly. The distance is the average of the
+starting and ending velocities times the time, $\Delta z = \tfrac{1}{2}(v_{\text{start}} +
+v_{\text{end}})\,h$.</p>
+
+<p>Heun's method uses that formula. It first takes an Euler step to estimate where the ball will
+be at the end of the step and how fast it will be moving there. It then works out the forces at
+that estimate and goes back to the start of the step. The real step moves the ball at the average
+of the velocities at the start and the end, and changes its velocity by the average of the two
+accelerations. That is two evaluations a step. On the first frame the vertical velocity is
+2.75&nbsp;m/s at the start and about 2.35&nbsp;m/s at the end, so Heun moves the ball up at about
+2.55&nbsp;m/s:</p>
+
+$$z = 4.202 + 0.04 \times \tfrac{1}{2}(2.75 + 2.35) = 4.202 + 0.04 \times 2.55 = 4.304\ \text{m}$$
+
+<p>Euler's step reaches 4.202&nbsp;+&nbsp;0.04&nbsp;&times;&nbsp;2.75 = 4.312&nbsp;m, so Heun lands
+8.1&nbsp;mm lower. To see which is closer, the table below uses a run with steps a thousand times
+shorter (0.04&nbsp;ms) as the path, and Heun lands within 0.014&nbsp;mm of it. <dfn
+data-g="rk4">RK4</dfn> (short for the fourth-order Runge-Kutta method) looks at the forces four
+times a step. The first look is at the start. The second moves half a step with the rates from the
+first look and works out the forces there, at the middle of the step. The third goes back to the
+start, moves half a step with the rates from the second look, and works out the forces at the middle
+again. The fourth moves a full step with the rates from the third look and works out the forces at
+the end. RK4 then steps with a weighted average of the four, with the two middle looks counting
+twice as much as the two at the ends. On the first frame its average vertical velocity is also
+about 2.55&nbsp;m/s, and it lands on the path to well under a thousandth of a millimeter.</p>
 
 <table class="data">
-  <tr><th class="num">step (ms)</th><th class="num">steps in the finer run</th><th class="num">Euler, change from the run at twice the step (m)</th></tr>
-  <tr><td class="num">20</td><td class="num">36</td><td class="num">6.77×10⁻²</td></tr>
-  <tr><td class="num">10</td><td class="num">72</td><td class="num">3.38×10⁻²</td></tr>
-  <tr><td class="num">5</td><td class="num">144</td><td class="num">1.69×10⁻²</td></tr>
-  <tr><td class="num">2.5</td><td class="num">288</td><td class="num">8.44×10⁻³</td></tr>
-  <tr><td class="num">1.25</td><td class="num">576</td><td class="num">4.22×10⁻³</td></tr>
-  <tr><td class="num">0.625</td><td class="num">1&nbsp;152</td><td class="num">2.11×10⁻³</td></tr>
-  <tr><td class="num">0.3125</td><td class="num">2&nbsp;304</td><td class="num">1.05×10⁻³</td></tr>
+  <tr><th>Stepper</th><th class="num">evaluations a step</th><th class="num">vertical velocity used for the 40&nbsp;ms (m/s)</th>
+      <th class="num">height after 40&nbsp;ms (m)</th><th class="num">above the path (mm)</th></tr>
+  <tr><td>Euler</td><td class="num">1</td><td class="num">2.751</td><td class="num">4.312</td><td class="num">8.1</td></tr>
+  <tr><td>Heun</td><td class="num">2</td><td class="num">2.549</td><td class="num">4.304</td><td class="num">&minus;0.014</td></tr>
+  <tr><td>RK4</td><td class="num">4</td><td class="num">2.549</td><td class="num">4.304</td><td class="num">0.000</td></tr>
 </table>
 
-<p>Each halving halves Euler's change. If that keeps up, the moves still to come add up to about
-the last change (half of it, plus a quarter, and so on). This means the change between two runs
-is about the error left in the finer one. The example takes 3&nbsp;mm as settled, a tenth of the
-tracking noise of about 3&nbsp;cm (one choice). Euler's change first falls below that at the sixth halving, where the run of
-1&nbsp;152 steps (0.625&nbsp;ms) is 2.1&nbsp;mm from the run of 576. Drag moves the same point by
-157&nbsp;mm, so the step's share of the answer is small next to the effect being measured.</p>
+<p>In code each stepper has the same shape as the <code>euler</code> function on <a href="from-a-rate-to-a-trajectory.html" title="Euler&#x27;s method">page 24</a>, with its
+one update line replaced by the lines that take the looks. In both functions <code>dt</code> is the
+step. Each of <code>k1</code> to <code>k4</code> holds the six rates found at one look (three
+velocities and three accelerations), and none of them is the drag constant $k$.</p>
 
-<p>The factor each halving divides the change by is $2^p$, where $p$ is the stepper's <dfn
-data-g="order-of-accuracy">order of accuracy</dfn>. Euler's factor, read from the runs alone, is
-2, so its order is 1.</p>
+<div class="codetabs">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="1|The same shape as the euler function: a rate function, a starting state, its time, the step dt and the number of steps n ([Functions](py-functions.html)).;7|The first look, the rates at the start of the step. This is all Euler uses.;8|The second look, at the end of the step, at the state a full Euler step would reach.;9|The real step moves with the average of the two looks.;19|The first look, at the start of the step.;20|A look at the middle of the step, reached with the first look.;21|A second look at the middle, reached with the first middle look.;22|A look at the end of the step, reached with the second middle look.;23|The weighted average of the four looks, with the two middle looks counted twice.">def heun(f, s0, t0, dt, n):
+    s = np.array(s0, dtype=float)
+    out = np.empty((n + 1, s.size))
+    out[0] = s
+    for i in range(n):
+        t = t0 + i*dt
+        k1 = f(t, s)
+        k2 = f(t + dt, s + dt*k1)
+        s = s + dt/2 * (k1 + k2)
+        out[i + 1] = s
+    return out
 
-<h2 id="heun-s-method-and-rk4">Heun's Method and RK4</h2>
+def rk4(f, s0, t0, dt, n):
+    s = np.array(s0, dtype=float)
+    out = np.empty((n + 1, s.size))
+    out[0] = s
+    for i in range(n):
+        t = t0 + i*dt
+        k1 = f(t, s)
+        k2 = f(t + dt/2, s + dt/2*k1)
+        k3 = f(t + dt/2, s + dt/2*k2)
+        k4 = f(t + dt, s + dt*k3)
+        s = s + dt/6 * (k1 + 2*k2 + 2*k3 + k4)
+        out[i + 1] = s
+    return out</pre>
+  <pre data-lang="matlab" hidden data-notes="1|The same shape as the euler function, with the state kept as a column.;7|The first look, the rates at the start of the step. This is all Euler uses.;8|The second look, at the end of the step, at the state a full Euler step would reach.;9|The real step moves with the average of the two looks.;20|The first look, at the start of the step.;21|A look at the middle of the step, reached with the first look.;22|A second look at the middle, reached with the first middle look.;23|A look at the end of the step, reached with the second middle look.;24|The weighted average of the four looks, with the two middle looks counted twice.">function out = heun(f, s0, t0, dt, n)
+    s = s0(:);
+    out = zeros(n+1, numel(s));
+    out(1,:) = s.';
+    for i = 0:n-1
+        t = t0 + i*dt;
+        k1 = f(t, s);
+        k2 = f(t + dt, s + dt*k1);
+        s = s + dt/2 * (k1 + k2);
+        out(i+2,:) = s.';
+    end
+end
 
-<p>Euler takes the rate at the start of a step and uses it for the whole step. Heun's method and
-RK4 evaluate the rate at more than one point inside the step and step with a weighted average of
-those evaluations. Each evaluation is called a slope, meaning the rate function $f$ evaluated at
-some time and some state (writing the state as $s$, as the code on <a
-href="from-a-rate-to-a-trajectory.html" title="Euler&#x27;s method">page 24</a> does).</p>
+function out = rk4(f, s0, t0, dt, n)
+    s = s0(:);
+    out = zeros(n+1, numel(s));
+    out(1,:) = s.';
+    for i = 0:n-1
+        t = t0 + i*dt;
+        k1 = f(t, s);
+        k2 = f(t + dt/2, s + dt/2*k1);
+        k3 = f(t + dt/2, s + dt/2*k2);
+        k4 = f(t + dt, s + dt*k3);
+        s = s + dt/6 * (k1 + 2*k2 + 2*k3 + k4);
+        out(i+2,:) = s.';
+    end
+end</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
+</div>
 
-<p>Heun's method takes two slopes. The first is Euler's, $k_1 = f(t, s)$. The second is taken at
-the end of the step, at the state Euler would have reached, $k_2 = f(t + h,\ s + h k_1)$, and the
-step uses their average:</p>
+<h2 id="halving-with-heun-and-rk4">Halving Heun and RK4 on the Shot</h2>
 
-$$s_{\text{next}} \;=\; s + \tfrac{h}{2}\,(k_1 + k_2)$$
+<p><code>halving(heun)</code> and <code>halving(rk4)</code> run the same study (in MATLAB,
+<code>halving(@heun, f, s0)</code> and <code>halving(@rk4, f, s0)</code>). The first four rows
+are below.</p>
 
-<p>This is the trapezoid rule from week 3 applied to the rate, the average of the two ends times
-the width, with the far end estimated by an Euler step because it is not yet known.</p>
+<table class="data">
+  <tr><th class="num">step (ms)</th><th class="num">steps to frame 23</th><th class="num">Heun, moved from the run before (mm)</th>
+      <th class="num">RK4, moved from the run before (mm)</th></tr>
+  <tr><td class="num">20</td><td class="num">36</td><td class="num">0.167</td><td class="num">1.3×10⁻⁵</td></tr>
+  <tr><td class="num">10</td><td class="num">72</td><td class="num">0.0416</td><td class="num">8.13×10⁻⁷</td></tr>
+  <tr><td class="num">5</td><td class="num">144</td><td class="num">0.0104</td><td class="num">5.07×10⁻⁸</td></tr>
+  <tr><td class="num">2.5</td><td class="num">288</td><td class="num">0.0026</td><td class="num">3.17×10⁻⁹</td></tr>
+</table>
 
-<p><dfn data-g="rk4">RK4</dfn> (the fourth-order Runge-Kutta method) takes four slopes, one at the
-start of the step, two at its midpoint and one at its end. Each slope is used to reach the point
-where the next one is taken:</p>
+<p>Both settle within 3&nbsp;mm at the first halving. Heun's first two runs, at one and two steps
+a frame, agree to 0.17&nbsp;mm, and RK4's agree to about a hundred-thousandth of a millimeter. The
+moves also shrink faster as the step shrinks. Each halving cuts Heun's move to about a quarter and
+RK4's to about a sixteenth. Because their moves shrink faster, the last move is more than the
+error left (for Heun's run of 36 steps it is about three times the error), so it is a safe number
+to report for these two as well. The path from RK4 also checks the argument about Euler above. It puts
+Euler's run of 1&nbsp;152 steps 2.1&nbsp;mm away, which is the last move the halving
+measured.</p>
+
+<h2 id="cost-in-evaluations">Evaluations to Agree Within 3&nbsp;mm</h2>
+
+<p>The table counts every evaluation each study used, from one step a frame up to the pair of runs
+that agree within 3&nbsp;mm. Heun's two runs take 18 and 36 steps at two evaluations each, which is
+108. RK4's take the same steps at four each, which is 216.</p>
+
+<table class="data">
+  <tr><th>Stepper</th><th class="num">evaluations a step</th><th class="num">halvings to agree within 3&nbsp;mm</th>
+      <th class="num">steps in the finer run</th><th class="num">the two runs differ by</th>
+      <th class="num">evaluations in all the runs</th></tr>
+  <tr><td>Euler</td><td class="num">1</td><td class="num">6</td><td class="num">1&nbsp;152</td><td class="num">2.1&nbsp;mm</td><td class="num">2&nbsp;286</td></tr>
+  <tr><td>Heun</td><td class="num">2</td><td class="num">1</td><td class="num">36</td><td class="num">0.17&nbsp;mm</td><td class="num">108</td></tr>
+  <tr><td>RK4</td><td class="num">4</td><td class="num">1</td><td class="num">36</td><td class="num">0.000013&nbsp;mm</td><td class="num">216</td></tr>
+</table>
+
+<p>At 3&nbsp;mm Heun's study is the cheapest, about a twentieth of Euler's. RK4's first two runs
+agree far more closely than 3&nbsp;mm, so its extra evaluations go to precision this example does
+not use. The ranking depends on the precision. Below 0.17&nbsp;mm Heun needs a second halving (252
+evaluations in all), and RK4's 216 become the cheapest. Euler's moves only halve, so each tenfold
+tighter precision costs it about ten times the evaluations. It is a good idea to decide the
+precision first and pick the stepper after. The demo below moves the precision and recounts.</p>
+
+<cg-demo case="order"></cg-demo>
+
+<h2 id="checking-the-stepper">Checking the Stepper Without Drag</h2>
+
+<p>With drag switched off ($k$ = 0) the acceleration is fixed at $g$, and the exact path is the
+parabola from physics. A drag-free run is a check on the stepper. Heun and RK4 both give back the
+parabola to far less than a millionth of a millimeter, at every step tried. The reason is the formula
+above. Under a fixed acceleration the average of the starting and ending velocities is the exact
+average velocity, and both steppers move the ball with that average. Euler lands above the parabola
+by 141.3&nbsp;mm at one step a frame, as <a href="from-a-rate-to-a-trajectory.html" title="Euler&#x27;s method">page 24</a> works out. A drag-free run that misses these
+numbers probably has a mistake in the stepper.</p>
+
+<p>This check says nothing about the drag term. The convergence study does not check it either,
+since a wrong drag term settles under halving just as well as a right one. Comparing the run with
+the tracked frames, as <a href="state-as-a-vector.html" title="State as a vector">page 25</a> does, is the check on the drag term.</p>
+
+<div class="check">
+  <span class="label">Check</span>
+  <ol>
+    <li>Euler's run of 576 steps on the shot moved 4.22&nbsp;mm from the run before. You need the
+    position to 1&nbsp;mm. How many more halvings does that take, and how many steps is the finer
+    run?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Three
+halvings, 4&nbsp;608 steps.</strong> Each halving halves Euler's move, so the next three are 2.11,
+1.05 and 0.53&nbsp;mm. The second is still just over 1&nbsp;mm, so it takes the third. The step is
+then 0.156&nbsp;ms, and 18 frames at 256 steps a frame is 4&nbsp;608 steps. Every run from one step
+a frame on adds up to 9&nbsp;198 evaluations.</p></div></details></li>
+    <li>Heun also averages the vertical acceleration. At frame 5 it is &minus;10.11&nbsp;m/s², and at
+    the end of the Euler step it is &minus;10.06&nbsp;m/s². Starting from 2.751&nbsp;m/s, what
+    vertical velocity do Euler and Heun give after one 40&nbsp;ms step? The path has
+    2.348&nbsp;m/s. Why are both so much closer to it than Euler's height was?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Euler
+2.347&nbsp;m/s, Heun 2.348&nbsp;m/s.</strong> Euler uses the starting acceleration,
+2.751&nbsp;+&nbsp;0.04&nbsp;&times;&nbsp;(&minus;10.11) = 2.347. Heun uses the average,
+&minus;10.08&nbsp;m/s², which gives 2.348. The acceleration changes by only about
+0.05&nbsp;m/s² over the step, since gravity is fixed and only the drag changes, so holding it fixed
+costs about 1&nbsp;mm/s. The velocity changes by about 0.4&nbsp;m/s over the same step, so holding
+it fixed costs the 8&nbsp;mm in height.</p></div></details></li>
+    <li>You need the position to 0.1&nbsp;mm. How many evaluations does Euler's study take, and how
+    many does Heun's take?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Euler
+73&nbsp;710, Heun 252.</strong> Euler's moves keep halving from 1.05&nbsp;mm at 2&nbsp;304 steps
+(0.53, 0.26, 0.13 and then 0.066&nbsp;mm), so it first agrees within 0.1&nbsp;mm at 36&nbsp;864
+steps, eleven halvings in all. Every run from 18 steps on adds up to 73&nbsp;710 evaluations.
+Heun's moves are 0.17 and then 0.042&nbsp;mm, so it takes two halvings, runs of 18, 36 and 72 steps
+at 2 evaluations each, which is 252. At this precision Euler's study takes almost 300 times the
+work.</p></div></details></li>
+  </ol>
+</div>
+
+<h2 id="order-of-accuracy">Order of Accuracy, Rounding and the Steppers' Formulas</h2>
+
+<p>This section is optional. It names the factors above, explains where RK4's moves stop
+shrinking, and writes the two steppers as formulas. Nothing earlier on the page depends on it.</p>
+
+<p>Each halving divides Euler's move by 2, Heun's by 4 and RK4's by 16. These factors are $2^p$,
+where $p$ is the stepper's <dfn data-g="order-of-accuracy">order of accuracy</dfn>. Euler's order
+is 1, Heun's is 2 and RK4's is 4, and a method of order $p$ is called first, second or fourth order.
+The error at a fixed time is roughly proportional to $h^p$. The order is read from the runs alone,
+with no exact answer needed. A factor well away from 2 for Euler, 4 for Heun or 16 for RK4 most
+likely points at a mistake in the stepper.</p>
+
+<p>RK4's moves keep falling by 16 until they reach about 2×10⁻¹³&nbsp;m, at a step of
+1.25&nbsp;ms. Past that the factor drops under 10 and then to about 2, and the moves level off near
+10⁻¹⁴&nbsp;m. At that size the moves are most likely <dfn data-g="rounding-error">rounding
+error</dfn>, the error from storing each number to about 16 significant figures, which does not
+shrink with the step. (In those last rows the Python and MATLAB versions differ in the second
+figure.) The position itself shows no sign of this, so check the move from run to run when the
+moves get this small.</p>
+
+<p>As formulas, with the state written $s$ and the rate function $f(t, s)$ from <a href="from-a-rate-to-a-trajectory.html" title="Euler&#x27;s method">page 24</a>, Heun takes
+two rates and steps with their average:</p>
+
+$$k_1 = f(t,\ s), \qquad k_2 = f(t + h,\ s + h k_1), \qquad s_{\text{next}} = s + \tfrac{h}{2}\,(k_1 + k_2)$$
+
+<p>This is the trapezoid rule from <a href="cumulative-integration.html" title="Cumulative
+integration">week 3</a> applied to the rate, with the far end estimated by an Euler step because it
+is not yet known. RK4 takes four:</p>
 
 $$\begin{aligned}
 k_1 &= f(t,\ s) \\
@@ -1015,182 +1262,6 @@ k_4 &= f(t + h,\ s + h k_3)
 \end{aligned}
 \qquad\qquad
 s_{\text{next}} \;=\; s + \tfrac{h}{6}\,(k_1 + 2k_2 + 2k_3 + k_4)$$
-
-<p>The table gives one step of one frame (40&nbsp;ms) on the shot, from the starting state at
-frame 5, 4.20182&nbsp;m up and rising at 2.7508&nbsp;m/s. The slopes of the height are the vertical
-speed at each evaluation point, which gravity and drag reduce as the step goes on.</p>
-
-<table class="data">
-  <tr><th>Stepper</th><th>Slopes of the height (m/s)</th><th class="num">height after 40&nbsp;ms</th></tr>
-  <tr><td>Euler</td><td>2.7508</td><td class="num">4.31185&nbsp;m</td></tr>
-  <tr><td>Heun</td><td>2.7508, 2.3465</td><td class="num">4.30376&nbsp;m</td></tr>
-  <tr><td>RK4</td><td>2.7508, 2.5487, 2.5492, 2.3476</td><td class="num">4.30378&nbsp;m</td></tr>
-</table>
-
-<p>Euler holds the starting speed for the whole frame and lands 8.1&nbsp;mm above the other two,
-which agree with each other to 0.014&nbsp;mm. In code each is the Euler stepper from <a href="from-a-rate-to-a-trajectory.html" title="Euler&#x27;s method">page 24</a> with
-its update line replaced by the lines that take the slopes:</p>
-
-<div class="codetabs">
-  <div class="tabs" role="tablist">
-    <button role="tab" data-lang="python" aria-selected="true">Python</button>
-    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
-  </div>
-  <pre data-lang="python" data-notes="1|The same shape as the Euler stepper: a starting state, a step dt and a number of steps n ([Functions](py-functions.html)).;8|The slope at the end of the step, estimated by taking a full Euler step with the first slope.;9|Heun's update: the average of the slope at the start and the estimate at the end.;13|The same again, with four slopes in place of two.;20|Two estimates at the midpoint of the step, each built from the one before it.;22|An estimate at the end of the step.;23|The weighted average of the four slopes, with the two midpoint slopes counted twice.">def heun(f, s0, t0, dt, n):
-    s = np.array(s0, dtype=float)
-    out = np.empty((n + 1, s.size))
-    out[0] = s
-    for k in range(n):
-        t = t0 + k*dt
-        k1 = f(t, s)
-        k2 = f(t + dt, s + dt*k1)
-        s = s + dt/2 * (k1 + k2)
-        out[k + 1] = s
-    return out
-
-def rk4(f, s0, t0, dt, n):
-    s = np.array(s0, dtype=float)
-    out = np.empty((n + 1, s.size))
-    out[0] = s
-    for k in range(n):
-        t = t0 + k*dt
-        k1 = f(t, s)
-        k2 = f(t + dt/2, s + dt/2*k1)
-        k3 = f(t + dt/2, s + dt/2*k2)
-        k4 = f(t + dt, s + dt*k3)
-        s = s + dt/6 * (k1 + 2*k2 + 2*k3 + k4)
-        out[k + 1] = s
-    return out</pre>
-  <pre data-lang="matlab" hidden data-notes="1|The same shape as the Euler stepper, with the state kept as a column.;8|The slope at the end of the step, estimated by taking a full Euler step with the first slope.;9|Heun's update: the average of the slope at the start and the estimate at the end.;14|The same again, with four slopes in place of two.;21|Two estimates at the midpoint of the step, each built from the one before it.;23|An estimate at the end of the step.;24|The weighted average of the four slopes, with the two midpoint slopes counted twice.">function out = heun(f, s0, t0, dt, n)
-    s = s0(:);
-    out = zeros(n+1, numel(s));
-    out(1,:) = s.';
-    for k = 0:n-1
-        t = t0 + k*dt;
-        k1 = f(t, s);
-        k2 = f(t + dt, s + dt*k1);
-        s = s + dt/2 * (k1 + k2);
-        out(k+2,:) = s.';
-    end
-end
-
-function out = rk4(f, s0, t0, dt, n)
-    s = s0(:);
-    out = zeros(n+1, numel(s));
-    out(1,:) = s.';
-    for k = 0:n-1
-        t = t0 + k*dt;
-        k1 = f(t, s);
-        k2 = f(t + dt/2, s + dt/2*k1);
-        k3 = f(t + dt/2, s + dt/2*k2);
-        k4 = f(t + dt, s + dt*k3);
-        s = s + dt/6 * (k1 + 2*k2 + 2*k3 + k4);
-        out(k+2,:) = s.';
-    end
-end</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
-</div>
-
-<h2 id="halving-with-heun-and-rk4">Halving Heun and RK4 on the Shot</h2>
-
-<p><code>halving(heun)</code> and <code>halving(rk4)</code> run the same study (in MATLAB,
-<code>halving(@heun, f, s0)</code> and <code>halving(@rk4, f, s0)</code>):</p>
-
-<table class="data">
-  <tr><th class="num">step (ms)</th><th class="num">steps in the finer run</th><th class="num">Heun change (m)</th>
-      <th class="num">RK4 change (m)</th></tr>
-  <tr><td class="num">20</td><td class="num">36</td><td class="num">1.67×10⁻⁴</td><td class="num">1.30×10⁻⁸</td></tr>
-  <tr><td class="num">10</td><td class="num">72</td><td class="num">4.16×10⁻⁵</td><td class="num">8.13×10⁻¹⁰</td></tr>
-  <tr><td class="num">5</td><td class="num">144</td><td class="num">1.04×10⁻⁵</td><td class="num">5.07×10⁻¹¹</td></tr>
-  <tr><td class="num">2.5</td><td class="num">288</td><td class="num">2.60×10⁻⁶</td><td class="num">3.17×10⁻¹²</td></tr>
-  <tr><td class="num">1.25</td><td class="num">576</td><td class="num">6.49×10⁻⁷</td><td class="num">1.97×10⁻¹³</td></tr>
-  <tr><td class="num">0.625</td><td class="num">1&nbsp;152</td><td class="num">1.62×10⁻⁷</td><td class="num">about 2×10⁻¹⁴</td></tr>
-  <tr><td class="num">0.3125</td><td class="num">2&nbsp;304</td><td class="num">4.06×10⁻⁸</td><td class="num">about 1×10⁻¹⁴</td></tr>
-</table>
-
-<p>Heun's change falls by a factor of 4 at each halving, so its order is 2. RK4's falls by 16, so
-its order is 4, until the changes reach about 10<sup>&minus;13</sup>&nbsp;m. After that the factor
-drops to under 10 and then to about 2, and the changes level off near
-10<sup>&minus;14</sup>&nbsp;m. At that size the changes are most likely <dfn
-data-g="rounding-error">rounding error</dfn>, the error from storing each number to about 16
-significant figures, which does not shrink with the step. A factor well away from 2 for Euler,
-4 for Heun or 16 for RK4, before rounding is reached, most likely points at a mistake in the
-stepper. (In the last
-two rows the Python and MATLAB versions differ in the second figure, so only the size is
-given.)</p>
-
-<h2 id="cost-in-evaluations">Evaluations to Agree Within 3&nbsp;mm</h2>
-
-<p>On <a href="evaluations-are-the-currency.html" title="Evaluation cost">page 23</a> root finders
-were compared by the evaluations of $f$ they used, and steppers can be compared the same way. Here
-an evaluation is one call to the rate function <code>shot</code>. Euler makes one a step, Heun two
-and RK4 four. A study needs every run from one step per frame up to the pair that agrees, so the
-last column counts them all.</p>
-
-<table class="data">
-  <tr><th>Stepper</th><th class="num">evaluations a step</th><th class="num">halvings until two runs agree within 3&nbsp;mm</th>
-      <th class="num">steps in the finer run</th><th class="num">the two runs differ by</th>
-      <th class="num">evaluations in all the runs</th></tr>
-  <tr><td>Euler</td><td class="num">1</td><td class="num">6</td><td class="num">1&nbsp;152</td><td class="num">2.1&nbsp;mm</td><td class="num">2&nbsp;286</td></tr>
-  <tr><td>Heun</td><td class="num">2</td><td class="num">1</td><td class="num">36</td><td class="num">0.17&nbsp;mm</td><td class="num">108</td></tr>
-  <tr><td>RK4</td><td class="num">4</td><td class="num">1</td><td class="num">36</td><td class="num">13&nbsp;nm</td><td class="num">216</td></tr>
-</table>
-
-<p>At 3&nbsp;mm Heun's study is the cheapest, and RK4's first two runs agree far more closely than
-the example needs. The ranking depends on the precision asked for. Below 0.17&nbsp;mm Heun needs a
-second halving (252 evaluations in all), and RK4's 216 become the cheapest. Euler's changes only
-halve, so each tenfold tightening costs it about ten times the steps. The demo below moves the
-precision and redraws the counts.</p>
-
-<p>On the shot none of this costs much time. One evaluation of <code>shot</code> takes about
-2&nbsp;microseconds in Python on one desktop machine, and Euler's whole study runs in under
-10&nbsp;milliseconds. As with the sweep on <a href="evaluations-are-the-currency.html" title="Evaluation cost">page 23</a>, when an evaluation is this cheap the simplest
-method that settles is usually good enough. When the rate is expensive to evaluate, the number of
-evaluations sets the run time, and a stepper that settles in fewer of them may be worth the extra
-lines.</p>
-
-<cg-demo case="order"></cg-demo>
-
-<h2 id="checking-the-stepper">Checking the Stepper Without Drag</h2>
-
-<p>With drag switched off the stepped flight has an exact answer, the fitted parabola itself, so
-a drag-free run checks the stepper. RK4 reproduces the parabola to about
-10<sup>&minus;14</sup>&nbsp;m at every step tried. Euler lands above it by $\tfrac12 g h T$,
-where $T$ is the 0.72&nbsp;s stepped (141.3&nbsp;mm at one step per frame and 3.5&nbsp;mm at
-1&nbsp;ms). A drag-free run that misses the parabola by anything else most likely points at a
-mistake in the stepper. This check does not cover the drag term. The convergence study shows that
-the step has settled, though a wrong drag term would settle just as well. Comparing the run with
-the tracked frames, as <a href="state-as-a-vector.html" title="State as a vector">page 25</a> does, is the check on the drag term.</p>
-
-<div class="check">
-  <span class="label">Check</span>
-  <ol>
-    <li>Euler's change on the shot is 4.22&nbsp;mm at 1.25&nbsp;ms. You need the position to
-    1&nbsp;mm. How many more halvings does that take, and how many steps is the finer run?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Three
-halvings, 4&nbsp;608 steps.</strong> Each halving halves Euler's change, so the next three are
-2.11, 1.05 and 0.53&nbsp;mm. The second is still just over 1&nbsp;mm, so it takes the third. The
-step is then 0.156&nbsp;ms, and 18 frames at 256 steps a frame is 4&nbsp;608 steps. Every run from
-one step per frame on adds up to 9&nbsp;198 evaluations.</p></div></details></li>
-    <li>RK4's changes on the shot go 3.17×10⁻¹², 1.97×10⁻¹³, about 2×10⁻¹⁴ and about
-    1×10⁻¹⁴&nbsp;m as the step keeps halving. What is happening in the last two?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>Rounding
-error has taken over.</strong> The factor falls from 16 to under 10 and then to about 2, so
-halving no longer divides the change by 16. Each run stores its numbers to about 16 significant
-figures, and over thousands of steps that rounding adds up to about 10<sup>&minus;14</sup>&nbsp;m.
-Halving the step does not shrink it (in Python, one more halving makes the change larger,
-3.5×10⁻¹⁴&nbsp;m). The position itself shows no sign of this, so the change from run to run is
-what to watch.</p></div></details></li>
-    <li>Heun's first two runs on the shot agree to 0.17&nbsp;mm, and RK4's to 13&nbsp;nm. You need
-    the position to 0.05&nbsp;mm. Which study costs fewer evaluations?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p><strong>RK4,
-216 against 252.</strong> Heun's first change, 0.17&nbsp;mm, is over 0.05&nbsp;mm, so it needs a
-second halving (runs of 18, 36 and 72 steps at 2 evaluations each, 36&nbsp;+&nbsp;72&nbsp;+&nbsp;144
-= 252 evaluations, with a change of 0.042&nbsp;mm). RK4's first pair already agrees to 13&nbsp;nm,
-at 72&nbsp;+&nbsp;144 = 216 (runs of 18 and 36 steps at 4 evaluations each). At 3&nbsp;mm Heun's
-study is the cheaper one, 108 evaluations against 216.</p></div></details></li>
-  </ol>
-</div>
 
 <h2 id="terms-used-on-this-page">Terms Used on This Page</h2>
 
@@ -1217,11 +1288,11 @@ and RK4 on an equation you write, with the order measured from your own runs.</p
   </script>
   
 
-  <script type="module" src="js/bundle/order-of-accuracy-measured.js?v=20261109124015"></script>
+  <script type="module" src="js/bundle/order-of-accuracy-measured.js?v=20261113083220"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-09">November 9, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-12">November 12, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

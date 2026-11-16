@@ -968,10 +968,11 @@ function realNoiseRaw(n, sd = 1) {
 }
 
 /* The convergence study on the tracked shot, counted in evaluations. Each
-   stepper's step is halved from one step per frame, and each point is the
-   distance between a run's predicted position at the last free-flight frame and
-   the previous run's, plotted against the evaluations every run so far has
-   used. The precision slider moves the line two runs must agree within. */
+   stepper's step is halved from one step a frame, and each point is how far
+   the ball's position at frame 23 moved from the previous run's, plotted
+   against the evaluations every run so far has used. The precision slider
+   moves the line two runs must agree within. The runs stop before RK4's moves
+   reach rounding error, which the page's optional section covers. */
 
 const G = 9.81;
 const K = 0.016;          /* per meter, the value the notes pages use */
@@ -995,8 +996,8 @@ function line(tf, v) {
 /* the main trace is RK4; the other two are drawn as extra curves */
 const METHODS = [
   {key: 'euler', label: 'Euler', per: 1, levels: 15, cls: 'ghost'},
-  {key: 'heun',  label: 'Heun',  per: 2, levels: 11, cls: 'pred'},
-  {key: 'rk4',   label: 'RK4',   per: 4, levels: 8,  cls: 'trace'}
+  {key: 'heun',  label: 'Heun',  per: 2, levels: 8,  cls: 'pred'},
+  {key: 'rk4',   label: 'RK4',   per: 4, levels: 5,  cls: 'trace'}
 ];
 
 /* the position at the last frame after 18m steps, without storing the states */
@@ -1045,17 +1046,16 @@ mountDemo({
       for (const meth of METHODS) runs[meth.key] = study(meth, s0);
       return {runs};
     },
-    setting: 'The tracked shot (arc 79) stepped from frame 5 to the last free-flight frame, 0.72&nbsp;s later, ' +
-             'with <em>k</em>&nbsp;=&nbsp;0.016 per meter. Each stepper starts at one step per frame and halves the step. ' +
-             'Each point is how far the predicted position at the last frame moved from the run before, ' +
-             'against the evaluations of the rate used by every run so far.',
+    setting: 'The tracked shot (arc 79) stepped from frame 5 to frame 23, 0.72&nbsp;s later, ' +
+             'with <em>k</em>&nbsp;=&nbsp;0.016 per meter. Each stepper starts at one step a frame and halves the step. ' +
+             'Each point is how far the ball&rsquo;s position at frame 23 moved from the run before, ' +
+             'against the evaluations of the forces used by every run so far.',
     source: {kind: 'measured', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz. The starting state is a least-squares fit to the first 11 free-flight frames of one shot (arc 79), taken at frame 5. The drag constant is a choice from the range on page 25.'},
     caption: 'Euler is the dashed gray line, Heun the dotted red line and RK4 the solid line. ' +
-             'A study is done at the first point under the precision line. ' +
-             'RK4 levels off near 10⁻¹⁴&nbsp;m, where the change is rounding error.',
+             'A study is done at the first point under the precision line, and the readouts count its evaluations.',
     controls: [{key: 'lt', label: 'precision needed', min: -5, max: -1.5, step: 0.05,
                 value: Math.log10(0.003), fmt: v => fmtLen(Math.pow(10, v))}],
-    panels: [{label: 'change on halving', unit: 'm', height: 340, xAxis: true,
+    panels: [{label: 'moved on halving', unit: 'm', height: 340, xAxis: true,
               xLabel: 'evaluations in all runs so far', xUnit: '', xScale: 1, xLog: true, yLog: true}],
     readouts: [
       {key: 'euler', label: 'Euler'},
@@ -1086,8 +1086,8 @@ mountDemo({
       return {
         panels: [{x: rk.x, y: rk.y, range: [30, 1e6],
           opts: {
-            label: 'change on halving',
-            yRange: [1e-15, 1e-1],
+            label: 'moved on halving',
+            yRange: [1e-12, 1e-1],
             curves: [curve(METHODS[0]), curve(METHODS[1])],
             scatter: METHODS.map(m => ({...curve(m), cls: 'scatter', r: 2.5})),
             hlines: [{y: tol, text: 'precision needed'}]

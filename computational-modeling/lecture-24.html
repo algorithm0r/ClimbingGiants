@@ -6,8 +6,8 @@
 <title>Lecture 24 — Euler&#39;s method</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261109124015">
-<link rel="stylesheet" href="css/demos.css?v=20261109124015">
+<link rel="stylesheet" href="css/blocks.css?v=20261113083220">
+<link rel="stylesheet" href="css/demos.css?v=20261113083220">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -687,150 +687,394 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <body>
 
 
-<section class="deck-slide part" data-notes="<p>All right, welcome. In this video we&#x27;re going to take one tracked basketball shot, put air drag into its motion, and carry it forward in time with probably the simplest stepping method there is, Euler&#x27;s method. And then we&#x27;ll look at what happens to the error from one step as the steps keep going. So let&#x27;s take a look.</p>">
-  <style>.cgs .frame{fill:#fff;stroke:#7a7466;stroke-width:1.3} .cgs .fitwin{fill:var(--course-accent);fill-opacity:.08;stroke:none}</style>
+<section class="deck-slide part" data-notes="<p>All right, welcome. In this video I want to come back to the question from the last few weeks, whether a tracked shot goes in, and make the prediction better by putting air drag into the physics. With drag there&#x27;s no formula for the path, so we&#x27;re going to build it a short piece at a time, with what we call Euler&#x27;s method. We&#x27;ll also see how much the length of each piece changes the answer. So let&#x27;s take a look.</p>">
+  <style>.cgs .frame{fill:#fff;stroke:#7a7466;stroke-width:1.3}
+  .cgs .fitbar{fill:#b9b0a0;fill-opacity:.5;stroke:#9b9384;stroke-width:.8}
+  .cgs .dragbar{fill:var(--course-accent);fill-opacity:.6;stroke:none} .cgs text.acc{fill:var(--course-accent-dark)}
+  .deck-slide .anim-replay{align-self:center; margin-top:.6vh; font:inherit; font-size:.8rem; color:var(--warm-gray); background:none; border:1px solid #d9d3c7; border-radius:4px; padding:.2em .8em; cursor:pointer}
+  .fbd{display:block;width:100%;max-width:min(46rem,100%,calc(55vh * 2.2));margin:0 auto}
+  .fbd text{font-family:inherit;font-size:16px;fill:var(--warm-gray)} .fbd text.cap{font-size:13px}
+  .fbd .ball{fill:#f3e2c2;stroke:#b8860b;stroke-width:1.4}
+  .fbd .v{stroke:#9b9384;stroke-width:1.6;stroke-dasharray:5 3}
+  .fbd .g{stroke:#5F7038;stroke-width:2.4} .fbd .d{stroke:#8A6508;stroke-width:2.4}
+  .fbd text.g{fill:#5F7038;stroke:none} .fbd text.d{fill:#8A6508;stroke:none}
+  .fbd.big text{font-size:18px} .fbd.ac text{font-size:20px} .fbd.big text.cap{font-size:15px} .fbd text.lp{font-size:24px} .cgs .zb{fill:none;stroke:#b9b0a0;stroke-width:1} .fbd .lk{stroke:#7a7466;stroke-width:1.4} .cgs .rl{fill:none;stroke:#2f2a24;stroke-width:1.5} .cgs .gring{fill:#fff;stroke:#5F7038;stroke-width:1.8} .fbd .lkd{stroke:#8A6508;stroke-width:1.4} .fbd .s{stroke:#2f2a24;stroke-width:2} .fbd .zoombox{fill:none;stroke:#b9b0a0;stroke-width:1}
+  .cgs .gl{fill:none;stroke:#5F7038;stroke-width:1.4;stroke-dasharray:6 3} .cgs .dl{fill:none;stroke:#8A6508;stroke-width:1.8} .cgs .tan{stroke:#2f2a24;stroke-width:1.2}
+  .cgs text.gt{fill:#5F7038} .cgs text.dt{fill:#8A6508} .cgs .dpt{fill:#8A6508;stroke:#fff;stroke-width:1}
+  .cgs .f6{fill:#fff;stroke:#9b9384;stroke-width:1} .cgs .p6{fill:none;stroke:#9b9384;stroke-width:1.1} .cgs .p11{fill:none;stroke:#b0443a;stroke-width:1.1} .cgs .p16{fill:none;stroke:var(--course-accent);stroke-width:1.1}
+  .cgs .h6{fill:#fff;stroke:#9b9384;stroke-width:1.1} .cgs .h11{fill:#fff;stroke:#b0443a;stroke-width:1.1} .cgs .h16{fill:#fff;stroke:var(--course-accent);stroke-width:1.1} .cgs text.t6{fill:#7a7466} .cgs .f11{fill:#fff;stroke:#b0443a;stroke-width:1}
+  .cgs .f16{fill:#fff;stroke:var(--course-accent);stroke-width:1} .cgs .fun{fill:#fff;stroke:#7a7466;stroke-width:0.8;opacity:.35}
+  .cgs .d6{fill:#9b9384;stroke:#fff;stroke-width:1} .cgs .d11{fill:#b0443a;stroke:#fff;stroke-width:1} .cgs .d16{fill:var(--course-accent);stroke:#fff;stroke-width:1}
+  .cgs .fg{fill:#fff;stroke:#7a7466;stroke-width:.8} .cgs .fpast{fill:#fff;stroke:#7a7466;stroke-width:.8;opacity:.4}
+  .cgs .vec{stroke:#2f2a24;stroke-width:1.1} .cgs .tail{fill:#2f2a24;stroke:none}
+  .cgs .rim{fill:none;stroke:#b0443a;stroke-width:1.8} .cgs .dragpt{fill:var(--course-accent);stroke:#fff;stroke-width:1.2}</style>
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
-    <p class="say">Euler&rsquo;s method, stepping a tracked shot forward in time</p>
+    <p class="say">Euler&rsquo;s method, stepping a tracked ball forward in time</p>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Here&#x27;s the shot. It&#x27;s arc 79 from the tracked shots, a three-pointer that missed, tracked 25 times a second. Time counts from the frame the data set marks as the release, and I&#x27;m numbering frames from there too. So frame 5 here is 0.2 seconds after release.</p><p>To start stepping we need a state, which here is where the ball is and how fast it&#x27;s moving. We get that from a fit to the first 11 frames, the shaded ones. Straight lines in x and y, and a parabola in height with gravity held at 9.81. That fit leaves drag out. Over 11 frames drag only moves the ball about a centimeter and a half, and taking the state at the middle of the fit, frame 5, keeps that effect small.</p><p>So at frame 5 the ball is about 4.2 meters up and rising at about 2.75 meters per second. The horizontal numbers are in the table. From here we&#x27;ll step forward to frame 23, the last frame before the ball gets near the hoop.</p>">
+<section class="deck-slide full" data-notes="<p>Here&#x27;s where we&#x27;ve got to. Cameras tracked this ball 25 times a second, and each circle is one frame. On the left is the court from above. Across the floor the frames fall on a straight line, and we fit one. In the middle is the height against time, and we fit a parabola, with g held at 9.81. Here the fit uses every frame from the release down to the rim.</p><p>What we want to know is how the shot ends. On the right is the hoop from above. Where the ball&#x27;s center comes down through the height of the rim, inside the small inner disk it drops through clean, in the gold band around it the ball touches the rim, and outside that it&#x27;s out. The parabola comes down through the rim about 12 centimeters from the center, on the rim. The tracked ball actually came through about 6 centimeters from the center, clean, and it went in.</p>">
   <div class="head">
-    <p class="say">A fit to the first 11 frames gives <span class="def">the state at frame 5</span>.</p>
-    <p class="sub">Arc 79, tracked 25 times a second, frames and time counted from release. The <span class="term">state</span> is the position and velocity, fitted with lines in <i>x</i> and <i>y</i> and a parabola in <i>z</i>.</p>
+    <p class="say">A fitted line and parabola say where the ball comes down through the rim, <span class="def">and so whether it goes in clean, hits the rim or misses</span>.</p>
+    <p class="sub">Fitted to all 30 frames from release to the last one above the rim.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec24-whole"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Fitting every frame only tells us what already happened. To predict, we want the answer from the first few frames, early in the flight. So let&#x27;s fit the parabola to just the first 6 frames, then the first 11, then the first 16, and carry each one down to the rim. The circles are colored to match the curves, so you can see which frames each fit used, and the faded ones weren&#x27;t used by any of them.</p><p>The fewer frames we fit, the farther the prediction lands. From 6 frames the parabola comes down about 77 centimeters from the center, out. From 11, about 50, still out. From 16, about 31, on the rim. And the ball went in clean, about 6 centimeters from the center.</p>">
+  <div class="head">
+    <p class="say">Fitted to only the first 6, 11 or 16 frames, the parabola <span class="def">comes down 0.77, 0.50 or 0.31&nbsp;m from the hoop&rsquo;s center</span>, and the ball came through at 0.06&nbsp;m.</p>
+    <p class="sub">A prediction can use only the frames tracked so far.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec24-predict"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>The parabola has gravity in it and nothing else. Air drag slows the ball the whole way, so a parabola carries it a little too far. Here are the same three fits, with drag added to the physics, in the same colors as before. The open rings are gravity alone, and the filled dots are the same fits with drag.</p><p>Every prediction moves toward where the ball actually came through. From 6 frames, about 28 centimeters from the center. From 11, about 20. From 16, about 8, inside the clean disk, so it calls the shot right. Getting there takes a way to follow the ball when there&#x27;s no formula for its path, and that&#x27;s the rest of this video.</p>">
+  <div class="head">
+    <p class="say">With drag added, the same fits <span class="def">come down closer to where the ball came through</span>, and the 16-frame fit comes down 0.08&nbsp;m from the center, clean.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec24-dragcall"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Let&#x27;s work it through on the 11-frame fit, the one we used last week. Here are its frames in red, with its parabola drawn over them. To step the ball forward we need a start, where the ball is and how fast it&#x27;s moving at one moment. So we read the parabola at one time. Its value there is the position, r zero, the black point, and its slope there is the velocity, v zero, the arrow.</p><p>Why read it in the middle, 0.2 seconds after release? Well, in the middle the fit has frames on both sides holding it in place, five before and five after. Toward the ends it only has frames on one side, so it can drift a little more there. So the middle is where we expect the fit to be best and its error to be smallest, and that&#x27;s where we read the start.</p>">
+  <div class="head">
+    <p class="say">We read <i>r</i>&#8320; and <i>v</i>&#8320; at the middle of the fitted frames, 0.20&nbsp;s after release, <span class="def">where we expect the fit to be best</span>.</p>
   </div>
   <div class="stage">
     <figure class="figure wide" data-fig="lec24-shot"><div class="fig-body"></div></figure>
-    <table class="tbl nums" style="font-size:calc(var(--stage-text) * .8)">
-      <tr><th>at frame 5</th><th><i>x</i></th><th><i>y</i></th><th><i>z</i></th></tr>
-      <tr><td>position (m)</td><td>5.4796</td><td>3.9957</td><td class="key">4.2018</td></tr>
-      <tr><td>velocity (m/s)</td><td>&minus;4.7333</td><td>3.9732</td><td class="key">2.7508</td></tr>
-    </table>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Now how does that state change? The position changes at the velocity. That&#x27;s the first equation. The velocity changes because of two things. Gravity pulls down at 9.81. And drag pushes back against the velocity, and it grows with the speed squared. That&#x27;s k times the speed times the velocity. For a basketball k is about 0.016 per meter.</p><p>Together those are the rate, how fast each part of the state is changing. Without drag, the height is just a parabola, and we&#x27;ve already fitted that. But with drag, the acceleration depends on the velocity, and the velocity is one of the things we&#x27;re trying to find. There&#x27;s no known formula for this path. What we can do is compute the rate at any state. And that&#x27;s enough to step.</p>">
+<section class="deck-slide full" data-notes="<p>With gravity as the only force, you already know how to do this. From the start, the fit projects the rest of the path with two formulas. Across the floor nothing pushes the ball, so x and y each change at a steady rate, and from above the path is a straight line. In height the acceleration is minus g, so z is a parabola in time. Both formulas count time from the start, 0.2 seconds after release.</p><p>On the left is the court from above, with the hoop, and on the right is the height. The red frames are the ones we fit, and the gray ones are what the ball did afterward. Early on the gray frames sit right on both curves. Later they fall short, behind the line and below the parabola. We&#x27;ll compare at the last frame before the hoop, 0.96 seconds after release, the last one far enough from the rim that the ball can&#x27;t have touched anything, and by then the ball is about 25 centimeters from where gravity alone puts it, most of that across the floor.</p>">
   <div class="head">
-    <p class="say">Drag makes the acceleration depend on the velocity, so <span class="def">no formula is known for the path</span>.</p>
-    <p class="sub">The <span class="term">rate</span> is how fast the state changes. <b>r</b> is the position (<i>x</i>, <i>y</i>, <i>z</i>), <b>v</b> the velocity, |<b>v</b>| the speed, and <b>z&#770;</b> points up. Drag grows with the speed squared, with <i>k</i> = 0.016 per meter.</p>
+    <p class="say">With gravity alone the fit projects a straight line across the floor and a parabola in height, <span class="def">25&nbsp;cm from the ball 0.96&nbsp;s after release</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work" style="font-size:calc(var(--stage-text) * .66)">
+      $$\begin{aligned}
+      \text{across the floor:}\quad (x,\ y) &= (x_0,\ y_0) + (v_{x0},\ v_{y0})\,(t - t_0) \\[4pt]
+      \text{height:}\quad z &= z_0 + v_{z0}\,(t - t_0) \;-\; \tfrac{1}{2}\,g\,(t - t_0)^2, \qquad t_0 = 0.20\ \text{s},\ g = 9.81\ \text{m/s}^2
+      \end{aligned}$$
+    </div>
+    <figure class="figure wide" data-fig="lec24-form"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Let&#x27;s draw a free-body diagram. Once the ball leaves the hand, two forces act on it. Gravity pulls straight down. The second is air drag, which pushes back against the direction the ball is moving. Drag grows with the speed squared, so a ball moving twice as fast feels about four times the drag.</p><p>I&#x27;ve divided each force by the ball&#x27;s mass, so these are in meters per second squared, and the arrows aren&#x27;t to scale. Gravity gives 9.81. Drag at the start is about 0.9, so it&#x27;s small next to gravity, but it acts the whole way through the flight.</p>">
+  <div class="head">
+    <p class="say">Air drag pushes against the ball&rsquo;s motion, with a force that <span class="def">grows with the speed squared</span>.</p>
+  </div>
+  <div class="stage">
+    <svg class="fbd" viewBox="0 0 440 236" role="img" aria-label="Free-body diagram of the ball moving up and away at 7.52 m/s, 0.2 s after release. Gravity, 9.81 m/s squared, points straight down. Drag, 0.90 m/s squared, points back along the line of motion. Arrows not to scale.">
+      <defs>
+        <marker id="fbd-hv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9b9384"/></marker>
+        <marker id="fbd-hg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5F7038"/></marker>
+        <marker id="fbd-hd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8A6508"/></marker>
+      </defs>
+      <line class="v" x1="212.1" y1="96.3" x2="317.7" y2="31.3" marker-end="url(#fbd-hv)"/>
+      <line class="d" x1="167.9" y1="123.7" x2="138.1" y2="142.1" marker-end="url(#fbd-hd)"/>
+      <line class="g" x1="190" y1="138" x2="190" y2="196" marker-end="url(#fbd-hg)"/>
+      <circle class="ball" cx="190" cy="110" r="26"/>
+      <text x="318" y="20" text-anchor="middle">velocity, 7.52 m/s</text>
+      <text class="d" x="134" y="166" text-anchor="end">drag, 0.90 m/s²</text>
+      <text class="g" x="202" y="186" text-anchor="start">gravity, 9.81 m/s²</text>
+      <text class="cap" x="220" y="228" text-anchor="middle">0.2 s after release, per unit mass, arrows not to scale</text>
+    </svg>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Before we step anything, let&#x27;s go back over where the acceleration comes from, because Euler&#x27;s method needs it at every step. Here&#x27;s our question. What is the ball&#x27;s acceleration 0.2 seconds after release? Newton&#x27;s second law says the mass times the acceleration equals the sum of the forces. The bold letters are vectors, each with three components, so this is really three equations, one for each direction, x, y and z.</p><p>To add vectors we put them tip to tail. On the left are the two forces from the free-body diagram. On the right I&#x27;ve drawn the drag arrow first and put the gravity arrow on its tip. The sum runs from the start of the first arrow to the tip of the last, and that sum is m times a. I&#x27;ve drawn drag bigger than it really is so you can see it. We&#x27;ll get the real sizes in a few slides.</p>">
+  <div class="head">
+    <p class="say">Newton&rsquo;s second law: the ball&rsquo;s mass times its acceleration <span class="def">equals the sum of the forces on it</span>.</p>
   </div>
   <div class="stage">
     <div class="work" style="font-size:calc(var(--stage-text) * .95)">
-      $$\frac{\mathrm{d}\mathbf{r}}{\mathrm{d}t} \;=\; \mathbf{v}, \qquad
-      \frac{\mathrm{d}\mathbf{v}}{\mathrm{d}t} \;=\; -g\,\hat{\mathbf{z}} \;\textcolor{#8A6508}{-\; k\,|\mathbf{v}|\,\mathbf{v}}$$
+      $$m\,\mathbf{a} \;=\; \textcolor{#5F7038}{\mathbf{F}_{\text{gravity}}} \;+\; \textcolor{#8A6508}{\mathbf{F}_{\text{drag}}}$$
     </div>
+    <svg class="fbd big" viewBox="0 0 520 200" role="img" aria-label="On the left, the ball with gravity pointing straight down and drag pointing back and down against its motion. On the right, the drag arrow with the gravity arrow placed at its tip, and the sum of the two drawn from the start of the drag arrow to the tip of the gravity arrow, labeled m a. Drag is drawn larger than it really is.">
+      <defs>
+        <marker id="nw-hg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5F7038"/></marker>
+        <marker id="nw-hd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8A6508"/></marker>
+        <marker id="nw-hs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#2f2a24"/></marker>
+      </defs>
+      <line class="d" x1="89.6" y1="72.6" x2="42.8" y2="101.5" marker-end="url(#nw-hd)"/>
+      <line class="g" x1="110" y1="84" x2="110" y2="160" marker-end="url(#nw-hg)"/>
+      <circle class="ball" cx="110" cy="60" r="24"/>
+      <text class="d" x="48" y="128" text-anchor="middle">drag</text>
+      <text class="g" x="122" y="148" text-anchor="start">gravity</text>
+      <text class="cap" x="262" y="92" text-anchor="middle">tip to tail &#8594;</text>
+      <line class="d" x1="420" y1="20" x2="373.2" y2="48.9" marker-end="url(#nw-hd)"/>
+      <line class="g" x1="373.2" y1="48.9" x2="373.2" y2="134" marker-end="url(#nw-hg)"/>
+      <line class="s" x1="420" y1="20" x2="374.4" y2="131.3" marker-end="url(#nw-hs)"/>
+      <text class="d" x="380" y="26" text-anchor="end">drag</text>
+      <text class="g" x="364" y="128" text-anchor="end">gravity</text>
+      <text x="404" y="96" text-anchor="start" style="fill:#2f2a24">the sum, <tspan font-style="italic">m</tspan> <tspan font-weight="bold">a</tspan></text>
+      <text class="cap" x="260" y="190" text-anchor="middle">arrows not to scale, drag drawn larger so the sum shows</text>
+    </svg>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So here&#x27;s Euler&#x27;s method. s is the whole state, all six numbers, position and velocity. f is the rate, the equations from the last slide. h is the step.</p><p>We take the rate at the state we&#x27;re at, multiply by the step, and add it on. That gives the next state. Then we do it again from there.</p><p>If that looks familiar, it&#x27;s the rectangle rule. The change over one step is the rate times the width, with the rate read at the start of the step. The difference is where the rate comes from. Before, it came from a recorded array. Here we compute it from the state, so we need the state before we can compute the rate.</p>">
+<section class="deck-slide full" data-notes="<p>Gravity first. Its size is the ball&#x27;s weight, m times g, with g equal to 9.81 meters per second squared. Its direction is straight down. To write a direction we use a unit vector, an arrow of length 1. z hat is the one that points up, so minus m g z hat is the weight, pointing down.</p><p>Divide by the mass and the m cancels. So with gravity as the only force, every ball has the same acceleration, 9.81 straight down, whatever it weighs. That&#x27;s the acceleration our parabola assumed.</p>">
   <div class="head">
-    <p class="say"><span class="term">Euler&rsquo;s method</span> <span class="def">adds the rate times the step</span> to the current state.</p>
-    <p class="sub"><i>s</i><sub><i>i</i></sub> is the state at time <i>t</i><sub><i>i</i></sub>, all six numbers, <i>f</i> is the rate from the last slide, and <i>h</i> is the step. The rate is read at the start of the step and held across it, as in the rectangle rule.</p>
+    <p class="say">Gravity pulls with the ball&rsquo;s weight, <i>m</i>&#8202;<i>g</i>, straight down, so on its own it gives <span class="def">every ball the same acceleration, 9.81&nbsp;m/s&sup2; down</span>.</p>
   </div>
   <div class="stage">
-    <div class="work" style="font-size:calc(var(--stage-text) * 1.1)">
-      $$s_{i+1} \;=\; s_i \;+\; \textcolor{#8A6508}{h\, f(t_i,\, s_i)}$$
+    <div class="work" style="font-size:calc(var(--stage-text) * .9)">
+      $$\textcolor{#5F7038}{\mathbf{F}_{\text{gravity}}} = -m g\,\hat{\mathbf{z}}
+      \qquad\Longrightarrow\qquad
+      \frac{\textcolor{#5F7038}{\mathbf{F}_{\text{gravity}}}}{m} = -g\,\hat{\mathbf{z}} = (0,\ 0,\ -9.81)\ \text{m/s}^2$$
     </div>
+    <svg class="fbd big" viewBox="0 0 440 190" role="img" aria-label="On the left, the unit vector z hat, an arrow of length 1 pointing up. On the right, the ball with its weight, minus m g z hat, pointing straight down.">
+      <defs>
+        <marker id="gr-hg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5F7038"/></marker>
+        <marker id="gr-hs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#2f2a24"/></marker>
+      </defs>
+      <line class="s" x1="120" y1="170" x2="120" y2="100" marker-end="url(#gr-hs)"/>
+      <text x="132" y="112" text-anchor="start" style="fill:#2f2a24;font-weight:bold">z&#770;</text>
+      <text x="132" y="134" text-anchor="start">length 1,</text>
+      <text x="132" y="154" text-anchor="start">points up</text>
+      <line class="g" x1="300" y1="72" x2="300" y2="172" marker-end="url(#gr-hg)"/>
+      <circle class="ball" cx="300" cy="48" r="24"/>
+      <text class="g" x="312" y="128" text-anchor="start">&#8722;<tspan font-style="italic">m g</tspan> <tspan font-weight="bold">z&#770;</tspan>,</text>
+      <text class="g" x="312" y="148" text-anchor="start">the weight</text>
+    </svg>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Let&#x27;s take one step, one frame, 40 milliseconds. First the speed, from the three velocities, about 6.76 meters per second. Then the vertical acceleration. Gravity is minus 9.81, and the vertical part of drag is k times the speed times the vertical velocity, about 0.3. Together that&#x27;s about minus 10.1.</p><p>Now the step. The height goes up by the step times the vertical velocity, so about 4.20 becomes about 4.31. And the vertical velocity drops by the step times 10.1, from about 2.75 to about 2.35.</p><p>The other four numbers in the state step exactly the same way. And that new state is where the next step starts.</p>">
+<section class="deck-slide full" data-notes="<p>Now drag. Its size comes from the drag equation you saw in fluids, one half rho C D A times the speed squared. Rho is the density of the air, 1.2 kilograms per cubic meter at room temperature. C D is the drag coefficient. It describes the shape, it&#x27;s measured in a wind tunnel, and for a basketball it&#x27;s about 0.35. A is the cross-section the air hits, pi r squared, about 0.045 square meters for this ball. Put those together, and at our ball&#x27;s speed at the start, 7.52 meters per second, drag is about half a newton.</p><p>The speed is squared, so twice the speed gives four times the drag, and half the speed gives a quarter. At half our speed drag is only about 0.13 newtons. So drag is largest at the start, where the ball is fastest.</p>">
   <div class="head">
-    <p class="say">One 40&nbsp;ms step takes the height <span class="def">from 4.2018 to 4.3118&nbsp;m</span>.</p>
-    <p class="sub">The velocity steps too, using the acceleration. The other components step the same way.</p>
+    <p class="say">The drag force is &frac12;&rho;<i>C</i><sub><i>D</i></sub><i>A</i> times the speed squared, <span class="def">about 0.53&nbsp;N at the start</span>, and a quarter of that at half the speed.</p>
   </div>
   <div class="stage">
-    <div class="work" style="font-size:calc(var(--stage-text) * .75)">
+    <div class="work" style="font-size:calc(var(--stage-text) * .68)">
+      $$|\textcolor{#8A6508}{\mathbf{F}_{\text{drag}}}| \;=\; \tfrac{1}{2}\;\underbrace{\;\rho\;}_{\textstyle\begin{array}{c}\text{air density}\\ 1.20\ \text{kg/m}^3\end{array}}\;\;\underbrace{\;C_D\;}_{\textstyle\begin{array}{c}\text{drag coefficient}\\ 0.35\end{array}}\;\;\underbrace{\;A\;}_{\textstyle\begin{array}{c}\text{cross-section}\\ 0.0449\ \text{m}^2\end{array}}\;\;\underbrace{|\mathbf{v}|^2}_{\textstyle\begin{array}{c}\text{speed}\\ \text{squared}\end{array}}$$
+    </div>
+    <figure class="figure wide" data-fig="lec24-dragsize"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Drag always points straight back against the way the ball is moving. To get the direction of the motion on its own, we divide the velocity by its length, the speed. That gives an arrow of length 1 along the motion, v over the size of v. Drag points the opposite way, so its direction is minus that.</p><p>Size times direction gives the drag vector. One of the speeds cancels, which leaves minus one half rho C D A, times the speed, times the velocity vector. Written this way, the drag in each direction uses the full speed, all three components of the velocity together. So the drag along the floor depends on how fast the ball is climbing too, and we can&#x27;t work out the three directions separately the way we could with gravity alone.</p>">
+  <div class="head">
+    <p class="say">Drag points against the velocity, so the drag force is its size <span class="def">times the direction opposite the motion</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work" style="font-size:calc(var(--stage-text) * .8)">
+      $$\textcolor{#8A6508}{\mathbf{F}_{\text{drag}}} \;=\; \tfrac{1}{2}\rho\, C_D A\,|\mathbf{v}|^2 \left(-\frac{\mathbf{v}}{|\mathbf{v}|}\right) \;=\; -\tfrac{1}{2}\rho\, C_D A\,|\mathbf{v}|\,\mathbf{v}$$
+    </div>
+    <svg class="fbd big" viewBox="0 0 460 190" style="max-width:min(46rem,100%,calc(44vh * 2.4))" role="img" aria-label="The ball moving up and to the right. The velocity v is a long dashed arrow along the motion. The unit vector v over the size of v is a short black arrow of length 1 along the same line. Drag points the opposite way, back and down.">
+      <defs>
+        <marker id="dd-hv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9b9384"/></marker>
+        <marker id="dd-hd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8A6508"/></marker>
+        <marker id="dd-hs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#2f2a24"/></marker>
+      </defs>
+      <line class="v" x1="218.7" y1="98.4" x2="344.7" y2="20.7" marker-end="url(#dd-hv)"/>
+      <line class="s" x1="228" y1="110" x2="268" y2="85.3" marker-end="url(#dd-hs)"/>
+      <line class="d" x1="181.3" y1="121.6" x2="119.2" y2="159.9" marker-end="url(#dd-hd)"/>
+      <circle class="ball" cx="200" cy="110" r="22"/>
+      <text x="352" y="26" text-anchor="start"><tspan font-weight="bold">v</tspan>, 7.52&nbsp;m/s</text>
+      <text x="274" y="104" text-anchor="start" style="fill:#2f2a24"><tspan font-weight="bold">v</tspan>&#8202;/&#8202;|<tspan font-weight="bold">v</tspan>|, length 1</text>
+      <text class="d" x="118" y="182" text-anchor="middle">drag, against <tspan font-weight="bold">v</tspan></text>
+    </svg>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Now put the two forces together and divide through by the mass. Gravity becomes minus g z hat, as before. Everything about the air and the ball collects into one constant, k. With the numbers from the drag-size slide and a 600-gram ball, k comes out to 0.0157, and we&#x27;ll round it to 0.016 per meter.</p><p>Here&#x27;s the acceleration at the start. Gravity gives 9.81 straight down. Drag is k times the speed, 7.52, times the velocity, with the sign flipped. It adds about 0.61 and 0.47 across the floor, against the motion, together about 0.77, and another 0.475 down, because the ball is climbing. In the drawing, which is to scale, the acceleration with drag is tipped about 4 degrees back from straight down and is about 5 percent bigger than gravity alone. In the box I&#x27;ve blown the tips up five times, so you can see the drag arrow that joins them.</p>">
+  <div class="head">
+    <p class="say">Dividing by the mass gives the acceleration, with the air and the ball collected <span class="def">in one constant <i>k</i>, about 0.016 per meter</span>.</p>
+  </div>
+  <div class="stage" style="flex-direction:row;align-items:center;justify-content:center;gap:2vw">
+    <div class="work" style="font-size:calc(var(--stage-text) * .64);flex:0 1 auto;width:auto;margin:0">
       $$\begin{aligned}
-      |\mathbf{v}| &= \sqrt{4.7333^2 + 3.9732^2 + 2.7508^2} = 6.76\ \text{m/s} \\[4pt]
-      a_z &= -9.81 - 0.016 \times 6.76 \times 2.7508 = -9.81 - 0.298 = -10.108\ \text{m/s}^2 \\[4pt]
-      z &= 4.2018 + 0.04 \times 2.7508 = \textcolor{#8A6508}{4.3118\ \text{m}} \\[4pt]
-      v_z &= 2.7508 + 0.04 \times (-10.108) = 2.3465\ \text{m/s}
+      \mathbf{a} &= \textcolor{#5F7038}{-g\,\hat{\mathbf{z}}} \;\textcolor{#8A6508}{-\; k\,|\mathbf{v}|\,\mathbf{v}} \\[4pt]
+      k &= \frac{\rho\, C_D A}{2m} = \frac{1.20 \times 0.35 \times 0.0449}{2 \times 0.600} \\[4pt]
+      &= 0.0157 \approx 0.016\ \text{per m} \\[8pt]
+      k\,|\mathbf{v}| &= 0.016 \times 7.52 = 0.1203\ \text{per s} \\[4pt]
+      \mathbf{a} &= \textcolor{#5F7038}{(0,\ 0,\ -9.81)} \;\textcolor{#8A6508}{-\; 0.1203\,(-5.069,\ -3.910,\ 3.945)} \\[4pt]
+      &= (0.610,\ 0.470,\ -10.285)\ \text{m/s}^2
+      \end{aligned}$$
+    </div>
+    <svg class="fbd big ac" viewBox="-24 0 420 256" style="flex:0 0 auto;width:min(40vw, 52vh * 1.9);margin:0" role="img" aria-label="To scale, from the ball: gravity alone, 9.81 m/s squared straight down, and the acceleration with drag, 10.31 m/s squared, tipped 4.3 degrees back from straight down. A box enlarges the two tips five times and shows the drag arrow, 0.90 m/s squared, joining the tip of gravity to the tip of the acceleration with drag.">
+      <defs>
+        <marker id="ac-hg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5F7038"/></marker>
+        <marker id="ac-hd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8A6508"/></marker>
+        <marker id="ac-hs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#2f2a24"/></marker>
+      </defs>
+      <line class="g" x1="110" y1="20" x2="110" y2="216" marker-end="url(#ac-hg)" style="stroke-dasharray:6 3"/>
+      <line class="s" x1="110" y1="20" x2="94.6" y2="225.7" marker-end="url(#ac-hs)"/>
+      <circle class="ball" cx="110" cy="13" r="8"/>
+      <rect class="zoombox" x="86.4" y="207.6" width="29.2" height="22.4"/>
+      <text class="g" x="122" y="70" text-anchor="start">gravity alone,</text>
+      <text class="g" x="122" y="92" text-anchor="start">9.81&nbsp;m/s&sup2;</text>
+      <text x="92" y="130" text-anchor="end" style="fill:#2f2a24">with drag,</text>
+      <text x="92" y="152" text-anchor="end" style="fill:#2f2a24">10.31&nbsp;m/s&sup2;,</text>
+      <text x="92" y="174" text-anchor="end" style="fill:#2f2a24">4.3&deg; back</text>
+      <rect class="zoombox" x="232" y="118" width="146" height="112"/>
+      <line class="g" x1="350" y1="122" x2="350" y2="160" marker-end="url(#ac-hg)" style="stroke-dasharray:6 3"/>
+      <line class="s" x1="279.2" y1="122" x2="273" y2="207.5" marker-end="url(#ac-hs)"/>
+      <line class="d" x1="350" y1="160" x2="273" y2="207.5" marker-end="url(#ac-hd)"/>
+      <text class="d" x="322" y="202" text-anchor="start">drag,</text>
+      <text class="d" x="322" y="222" text-anchor="start">0.90</text>
+      <text class="cap" x="305" y="250" text-anchor="middle">the tips, five times larger</text>
+    </svg>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>With gravity alone the acceleration never changes, so we could integrate it twice and get the parabola. With drag, the acceleration depends on the velocity, and the velocity changes all through the flight. Here&#x27;s the acceleration along our ball&#x27;s flight, worked out with very short steps. Across the floor, gravity alone gives nothing, and drag slows the ball by about 0.6 to 0.8 meters per second squared, the most at the start, where the ball is fastest. In height, gravity alone is a flat line at minus 9.81. With drag the ball loses a little more on the way up, exactly 9.81 at the top, where it isn&#x27;t climbing, and a little less on the way down, because drag now pushes up.</p><p>So the acceleration depends on the velocity, and it changes as the velocity changes. Let&#x27;s write that as an equation and see what it does.</p>">
+  <div class="head">
+    <p class="say">With drag the acceleration depends on the velocity, so <span class="def">it changes all through the flight</span>.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec24-accel"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>As a differential equation for the position, the acceleration is the second derivative and the velocity is the first. With gravity alone the right side is a constant. We integrate once to get the velocity and again to get the position, and that&#x27;s the parabola we used. With drag, the right side has the velocity in it, the first derivative. Plenty of equations with the velocity on the right side can still be solved, so let&#x27;s look closer.</p><p>Look at the x equation, where v x is the x part of the velocity. The rate of change of v x has the speed in it, the square root of the three velocity components squared. That makes the equation nonlinear, and it ties the directions together. The x direction depends on how fast the ball is moving in y and z, and every direction feeds every other one through the speed, as in the loop below. If the ball moved only straight up and down, there would be one direction and nothing to tie together, and this same equation does have a formula, with tan and tanh in it. Tying the three directions together through the speed removes that formula. For the full flight there&#x27;s no solution in ordinary functions. There are exact methods that turn it into integrals, but those integrals have to be worked out numerically anyway. So we&#x27;ll solve it numerically from the start, a step at a time.</p>">
+  <div class="head">
+    <p class="say">With drag the three directions are coupled through the speed, so <span class="def">the path has no formula in ordinary functions</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work" style="font-size:calc(var(--stage-text) * .7)">
+      $$\begin{aligned}
+      \text{gravity alone:}\quad \frac{d^2\mathbf{r}}{dt^2} &= -g\,\hat{\mathbf{z}} \quad\Longrightarrow\quad \mathbf{r} = \mathbf{r}_0 + \mathbf{v}_0\,(t - t_0) - \tfrac{1}{2}\,g\,(t - t_0)^2\,\hat{\mathbf{z}} \\[6pt]
+      \text{with drag:}\quad \frac{d^2\mathbf{r}}{dt^2} &= -g\,\hat{\mathbf{z}} \;\textcolor{#8A6508}{-\; k\,\left|\frac{d\mathbf{r}}{dt}\right|\frac{d\mathbf{r}}{dt}} \\[6pt]
+      \text{in } x\text{, with } \mathbf{v} = \tfrac{d\mathbf{r}}{dt}\text{:}\quad \frac{dv_x}{dt} &= \textcolor{#8A6508}{-k\,\sqrt{v_x^2 + v_y^2 + v_z^2}\;v_x}
+      \end{aligned}$$
+    </div>
+    <svg class="fbd big" viewBox="0 0 520 152" style="max-width:min(46rem,100%,calc(28vh * 3.42))" role="img" aria-label="A loop. The three velocities v x, v y and v z all feed the speed. The speed feeds all three accelerations a x, a y and a z. A dashed arrow from the accelerations back to the velocities shows that the accelerations change the velocities, which changes the speed again.">
+      <defs>
+        <marker id="cp-hs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#7a7466"/></marker>
+        <marker id="cp-hd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8A6508"/></marker>
+      </defs>
+      <text x="76" y="30" text-anchor="middle" class="lp"><tspan font-style="italic">v</tspan><tspan dy="6" font-size="16">x</tspan></text>
+      <line class="lk" x1="100" y1="23" x2="196" y2="62" marker-end="url(#cp-hs)"/>
+      <line class="lkd" x1="324" y1="62" x2="420" y2="23" marker-end="url(#cp-hd)"/>
+      <text x="444" y="30" text-anchor="middle" class="lp"><tspan font-style="italic">a</tspan><tspan dy="6" font-size="16">x</tspan></text>
+      <text x="76" y="70" text-anchor="middle" class="lp"><tspan font-style="italic">v</tspan><tspan dy="6" font-size="16">y</tspan></text>
+      <line class="lk" x1="100" y1="63" x2="196" y2="70" marker-end="url(#cp-hs)"/>
+      <line class="lkd" x1="324" y1="70" x2="420" y2="63" marker-end="url(#cp-hd)"/>
+      <text x="444" y="70" text-anchor="middle" class="lp"><tspan font-style="italic">a</tspan><tspan dy="6" font-size="16">y</tspan></text>
+      <text x="76" y="110" text-anchor="middle" class="lp"><tspan font-style="italic">v</tspan><tspan dy="6" font-size="16">z</tspan></text>
+      <line class="lk" x1="100" y1="103" x2="196" y2="78" marker-end="url(#cp-hs)"/>
+      <line class="lkd" x1="324" y1="78" x2="420" y2="103" marker-end="url(#cp-hd)"/>
+      <text x="444" y="110" text-anchor="middle" class="lp"><tspan font-style="italic">a</tspan><tspan dy="6" font-size="16">z</tspan></text>
+      <rect x="198" y="52" width="124" height="36" rx="6" style="fill:#fbf6ea;stroke:#8A6508;stroke-width:1.2"/>
+      <text class="d lp" x="260" y="77" text-anchor="middle">speed |<tspan font-weight="bold">v</tspan>|</text>
+      <path class="lk" d="M472 16 L480 16 L480 112 L472 112 M480 64 L500 64 L500 130 L20 130 L20 64" style="fill:none"/>
+      <path class="lk" d="M48 16 L40 16 L40 112 L48 112" style="fill:none"/>
+      <line class="lk" x1="20" y1="64" x2="38" y2="64" marker-end="url(#cp-hs)"/>
+      <text class="cap" x="260" y="148" text-anchor="middle">the accelerations change the velocities over time</text>
+    </svg>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>One more piece from calculus before we step. The velocity is the rate of change of the position, the slope of the position against time. The acceleration is the rate of change of the velocity, the slope of the velocity against time.</p><p>On the left is our ball&#x27;s height. At 0.2 seconds after release its tangent line has a slope of v z, 3.95 meters per second. On the right is the vertical velocity, and its tangent there has a slope of a z, minus 10.3, the number we just worked out from the forces. So if we know the position and the velocity right now, the velocity tells us how the position is changing, and the forces tell us how the velocity is changing. Those two rates are what each step of Euler&#x27;s method uses.</p>">
+  <div class="head">
+    <p class="say">The velocity is the rate of change of the position, and <span class="def">the acceleration is the rate of change of the velocity</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work" style="font-size:calc(var(--stage-text) * .9)">
+      $$\frac{d\mathbf{r}}{dt} = \mathbf{v} \qquad\qquad \frac{d\mathbf{v}}{dt} = \mathbf{a}$$
+    </div>
+    <figure class="figure wide" data-fig="lec24-rates"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>We can&#x27;t write a formula for the path, but we do know its rates right now, the velocity and the acceleration, and the path is smooth. Zoom in far enough on a smooth curve and it looks like a straight line, its tangent. On the left is our ball&#x27;s height with its tangent at the start, 0.2 seconds after release. Follow the tangent for 0.3 seconds and it&#x27;s about 46 centimeters above the ball&#x27;s path. On the right I&#x27;ve zoomed in on 40 milliseconds, one frame. Over that short time the tangent is less than a centimeter from the curve.</p><p>So we choose a small time step, which I&#x27;ll call h, small enough that each curve is nearly a straight line over one step. The vertical velocity works the same way, and so do the other four numbers.</p>">
+  <div class="head">
+    <p class="say">We choose a small time step <i>h</i>, because over a short enough time <span class="def">each curve is nearly a straight line</span>.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec24-straight"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So we step with that straight line. Over one step we hold the velocity and the acceleration fixed at their values at the start of the step. Then we&#x27;re back in physics class with the two simplest formulas there are. With the acceleration fixed, the velocity changes by a times h. With the velocity fixed, the position changes by v times h.</p><p>Here&#x27;s one step of 40 milliseconds on our ball, from the start, 0.2 seconds after release. The height goes up in a straight line, by v z times h, about 16 centimeters. The vertical velocity goes down in a straight line, by a z times h, about 0.4 meters per second. Then we find the forces again at the new velocity, and take the next straight step from there.</p>">
+  <div class="head">
+    <p class="say">We step with that straight line, holding <i>v</i> and <i>a</i> fixed for one step, so <span class="def">the position changes by <i>v</i>&#8202;<i>h</i> and the velocity by <i>a</i>&#8202;<i>h</i></span>.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec24-step"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Our ball has six numbers to step, three positions and three velocities. Each position steps with its own velocity, the way the height did. Each velocity steps with its own acceleration. The accelerations come from the forces, gravity and drag, and we work them out from the velocities at the start of the step, so every one of these uses only numbers we already have. The little i counts the steps, so step i is at 0.2 seconds plus i times h.</p><p>Once all six are updated, we work out the speed and the accelerations again from the new velocities, and take the next step.</p>">
+  <div class="head">
+    <p class="say">Each step updates all six numbers, <span class="def">each position by <i>h</i> times its velocity and each velocity by <i>h</i> times its acceleration</span>.</p>
+    <p class="sub"><i>i</i> counts the steps from the start, so step <i>i</i> is at <i>t<sub>i</sub></i> = 0.20 + <i>i</i>&#8202;<i>h</i>. The accelerations come from the forces at the start of the step.</p>
+  </div>
+  <div class="stage">
+    <div class="work" style="font-size:calc(var(--stage-text) * .9)">
+      $$\begin{aligned}
+      x_{i+1} &= x_i + h\,v_{x,i} &\qquad v_{x,i+1} &= v_{x,i} + h\,a_{x,i} &\qquad a_{x,i} &= \textcolor{#8A6508}{-k\,|\mathbf{v}_i|\,v_{x,i}} \\[6pt]
+      y_{i+1} &= y_i + h\,v_{y,i} & v_{y,i+1} &= v_{y,i} + h\,a_{y,i} & a_{y,i} &= \textcolor{#8A6508}{-k\,|\mathbf{v}_i|\,v_{y,i}} \\[6pt]
+      z_{i+1} &= z_i + h\,v_{z,i} & v_{z,i+1} &= v_{z,i} + h\,a_{z,i} & a_{z,i} &= -g\;\textcolor{#8A6508}{-\;k\,|\mathbf{v}_i|\,v_{z,i}}
       \end{aligned}$$
     </div>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>In code the whole method is one line inside a loop. s starts as the starting state. Each time around, we ask f for the rate at the current time and state, and add the step times that rate. Then we store it.</p><p>Notice f is handed the time as well as the state. The shot&#x27;s rate doesn&#x27;t use the time, but a rate that reads from a recorded signal would.</p><p>For the shot, we hand it the rate function, shot, and the state at frame 5, starting at 0.2 seconds, with a step of 0.04, for 18 steps. That takes us from frame 5 to frame 23.</p>">
+<section class="deck-slide full" data-notes="<p>Writing six lines for every step gets old, so let&#x27;s stack them. The state is everything a step needs to know about the ball right now, where it is and how fast it&#x27;s moving, the six numbers in one column. The rate is the column of how fast each of those is changing, the three velocities and then the three accelerations from the forces.</p><p>Then all six formulas become one line. New state equals old state plus h times the rate. That&#x27;s what we call Euler&#x27;s method. f is the rate function. Give it a time and a state, and it gives back the six rates. This rule treats every number the same way, so it doesn&#x27;t care which are positions and which are velocities, and the same rule will step pretty much any system of equations like this one.</p>">
   <div class="head">
-    <p class="say">The loop <span class="def">starts each step from the last step&rsquo;s result</span>.</p>
-    <p class="sub">18 steps of 40&nbsp;ms reach frame 23.</p>
+    <p class="say">Stacked into one state, the six updates become one rule, <span class="term">Euler&rsquo;s method</span>: the new state is the old state plus <i>h</i> times its rate.</p>
+    <p class="sub">The state <i>s</i> is the six numbers, the ball&rsquo;s position and velocity, and <i>s<sub>i</sub></i> is the state after <i>i</i> steps, at time <i>t<sub>i</sub></i>. The <span class="term">rate function</span> <i>f</i>(<i>t</i>, <i>s</i>) takes the time and the state and returns the six rates, the three velocities and the three accelerations from the forces.</p>
   </div>
   <div class="stage">
-    <div class="panels" style="font-size:calc(var(--stage-code) * .9)">
-      <div class="code">def euler(f, s0, t0, dt, n):</div><div class="note">f is the rate, dt the step, n the number of steps</div>
-      <div class="code">    s = np.array(s0, dtype=float)</div><div class="note">the starting state</div>
-      <div class="code">    out = np.empty((n + 1, s.size))</div><div class="note">one row per time</div>
-      <div class="code">    out[0] = s</div><div class="note"></div>
-      <div class="code">    for i in range(n):</div><div class="note"></div>
-      <div class="code">        <span class="k">s = s + dt * f(t0 + i*dt, s)</span></div><div class="note">adds the step times the rate</div>
-      <div class="code">        out[i + 1] = s</div><div class="note"></div>
-      <div class="code">    return out</div><div class="note"></div>
+    <div class="work" style="font-size:calc(var(--stage-text) * .8)">
+      $$s_{i+1} \;=\; s_i \;+\; \textcolor{#8A6508}{h\, f(t_i,\, s_i)}
+      \qquad\qquad
+      \begin{bmatrix} x \\ y \\ z \\ v_x \\ v_y \\ v_z \end{bmatrix}_{i+1}
+      = \begin{bmatrix} x \\ y \\ z \\ v_x \\ v_y \\ v_z \end{bmatrix}_{i}
+      + \;\textcolor{#8A6508}{h \begin{bmatrix} v_x \\ v_y \\ v_z \\ a_x \\ a_y \\ a_z \end{bmatrix}_{i}}$$
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>That&#x27;s six updates for every step, and 19 steps to reach the hoop, so let&#x27;s hand it to a program. The top half is the free-body diagram as code. We call it shot. Hand it a time and a state, and it gives back the six rates. It unpacks the six numbers, works out the speed with np dot sqrt, numpy&#x27;s square root, and returns the rates as a numpy array, the velocities first, then the drag in each direction, with gravity on top of drag in the vertical. It takes the time t and never uses it, because in this model the forces depend only on where the ball is and how fast it&#x27;s moving.</p><p>The bottom half is the method. Start from the fitted state, 0.2 seconds after release, with a step of 0.04. Each time around the loop, ask shot for the rates, multiply by h, and add them on. That one line is Euler&#x27;s method. Nineteen times around gets us to the last frame before the hoop, 0.96 seconds after release.</p>">
+  <div class="head">
+    <p class="say">In code the forces become <span class="def">a function that returns the six rates</span>, and each step is one line in a loop.</p>
+  </div>
+  <div class="stage">
+    <div class="panels" style="font-size:calc(var(--stage-code) * .78)">
+      <div class="code">import numpy as np</div><div class="note">numpy, the library for arrays of numbers</div>
+      <div class="code">def shot(t, s, k=0.016):</div><div class="note">the rate function: a time and a state in, six rates out</div>
+      <div class="code">    x, y, z, vx, vy, vz = s</div><div class="note">the six numbers of the state</div>
+      <div class="code">    speed = np.sqrt(vx**2 + vy**2 + vz**2)</div><div class="note">the speed from the three velocities</div>
+      <div class="code">    return np.array([vx, vy, vz,</div><div class="note">positions change at the velocity</div>
+      <div class="code">                     -k*speed*vx, -k*speed*vy,</div><div class="note">drag across the floor</div>
+      <div class="code">                     -9.81 - k*speed*vz])</div><div class="note">gravity plus drag in the vertical</div>
       <div class="code">&nbsp;</div><div class="note"></div>
-      <div class="code">path = euler(shot, s0, 0.20, 0.04, 18)</div><div class="note">shot is the six-component rate, s0 the state at frame 5</div>
+      <div class="code">s = s0</div><div class="note">the start [<i>x</i>, <i>y</i>, <i>z</i>, <i>v<sub>x</sub></i>, <i>v<sub>y</sub></i>, <i>v<sub>z</sub></i>], 0.2 s after release</div>
+      <div class="code">t = 0.20</div><div class="note">its time, in seconds</div>
+      <div class="code">h = 0.04</div><div class="note">one step a frame</div>
+      <div class="code">for i in range(19):</div><div class="note">(0.96 &minus; 0.20) / 0.04 = 19 steps reach the last frame</div>
+      <div class="code">    <span class="k">s = s + h * shot(t, s)</span></div><div class="note">new state = old state + <i>h</i> &times; rate</div>
+      <div class="code">    t = t + h</div><div class="note">the clock moves one step</div>
     </div>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Here&#x27;s that run, the dots, one per step. The dashed curve is the same program with a step of a tenth of a millisecond, 7200 steps. I&#x27;ll call that the 0.1 millisecond run. And the open circles are where the cameras actually saw the ball.</p><p>The 40 millisecond run sits above the 0.1 millisecond run the whole way, and by frame 23 it&#x27;s about 135 millimeters higher. That&#x27;s about 13 and a half centimeters, from the step size alone. Same rate, same starting state.</p><p>The circles drift away from both runs by the end. That&#x27;s a question about the model and the starting state, not about the stepping, so we&#x27;ll leave it aside here.</p>">
+<section class="deck-slide full" data-notes="<p>Here are the tracked frames from the start, 0.2 seconds after release. First the dashed line, gravity alone, the parabola we had before. It has a formula, so it goes all the way to the hoop in one step. Then the loop running on our ball with drag, in black, taking 40 millisecond steps, one a frame. Each step is a straight piece that starts where the last one ended, with the forces found again at the start of every step. Then the same loop again in gold, with steps of a tenth of a millisecond. That&#x27;s 7,600 steps, far too many to show one at a time, and so short that the straight pieces follow the curve.</p><p>In the middle I&#x27;ve zoomed in on the end, the last frame before the hoop, 0.96 seconds after release. The short steps end 4.4 centimeters above the tracked ball. The 40 millisecond steps end 18.7 centimeters above it, higher even than gravity alone, at 8.9. Both lines use the same forces from the same start, so the 14 centimeters between them comes from the length of the step.</p><p>On the right is the question we started with, the hoop from above, with each run carried on down to the rim height. Gravity alone comes down half a meter from the center, out. The 40 millisecond steps come down 0.36 meters from it, just out. Drag slows both drag runs across the floor, but the long step leaves the ball too high, so it comes down later and farther on than the short steps. The short steps come down 0.20 meters from the center, on the rim. The tracked ball went through clean, 6 centimeters from the center. So drag with short steps moves the prediction most of the way toward the ball, and the long step gives about half of that back.</p>">
   <div class="head">
-    <p class="say">One step a frame ends <span class="def">134.7&nbsp;mm above</span> a run with 0.1&nbsp;ms steps.</p>
-    <p class="sub">The dots are the 40&nbsp;ms steps, the dashed curve the 0.1&nbsp;ms run, and the open circles the measured frames. Both runs use the same rate and starting state.</p>
+    <p class="say">With drag, 40&nbsp;ms steps end 19&nbsp;cm above the tracked ball and 0.1&nbsp;ms steps 4&nbsp;cm, so <span class="def">the step length causes most of the miss in height</span>.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="lec24-run"><div class="fig-body"></div></figure>
+    <figure class="figure wide" data-fig="lec24-arcs"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Let&#x27;s zoom in on the very first step. The dashed curve is the 0.1 millisecond run, and it bends downward, because gravity and drag are pulling the vertical velocity down the whole time. Euler doesn&#x27;t bend. It leaves along the slope it found at the start and goes in a straight line.</p><p>A straight line leaving a curve that bends down ends up above it. Here it lands about 8 millimeters high. And you can estimate that without the 0.1 millisecond run. With a steady acceleration the height would move by v h plus a half a h squared. The straight step keeps the v h and leaves out the half a h squared. Half of about 10.1 times 0.04 squared is about 8 millimeters.</p>">
+<section class="deck-slide full" data-notes="<p>Here&#x27;s the same picture with the fit to the first 16 frames, the one that came closest at the beginning of the video. The middle of 16 frames falls between two frames, so I read the start at the frame just before the middle, 0.28 seconds after release. That way the 40 millisecond steps land on frames. Gravity alone first, then the 40 millisecond steps, 17 of them this time, then the tenth-of-a-millisecond steps, 6,800 of them.</p><p>In the middle, at the last frame, the short steps end 1 centimeter below the tracked ball and gravity alone 1 centimeter above it. The 40 millisecond steps end almost 12 centimeters above it.</p><p>At the rim, gravity alone comes down 0.31 meters from the center and hits the rim. The short steps come down 7 centimeters from the center, clean. That&#x27;s a centimeter closer than the 8 we had at the beginning, because the start is read at a frame here instead of the middle. The tracked ball went through clean, 6 centimeters from the center. The 40 millisecond steps come down 0.23 meters from the center and hit the rim. So with drag and short steps this fit calls the shot right, and the long step gives that away, a rim hit, the same call as gravity alone.</p><p>Hopefully this gives you an idea of how to get a path when there&#x27;s no formula for it, and why the length of the step matters. Thanks a lot for watching, and we&#x27;ll see you in the next video.</p>">
   <div class="head">
-    <p class="say">A straight step on a curve that bends down <span class="def">lands about 8&nbsp;mm high</span>.</p>
-    <p class="sub">The height is <span class="term">concave</span>, bending downward. The step keeps <i>vh</i> and leaves out &frac12;<i>ah</i>² of <i>z</i>&#8320; + <i>vh</i> + &frac12;<i>ah</i>², and &frac12;&nbsp;&times;&nbsp;10.108&nbsp;&times;&nbsp;0.04² = 8.1&nbsp;mm.</p>
+    <p class="say">Fitted to 16 frames, 0.1&nbsp;ms steps call the shot clean, like the tracked ball, and <span class="def">40&nbsp;ms steps call it a rim hit</span>.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="lec24-one"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>Now the second step starts from that high point. It doesn&#x27;t know it&#x27;s 8 millimeters off. It just steps from where it is, and it overshoots again by about the same amount. So after two steps we&#x27;re about 16 millimeters high, after three about 24, and it keeps climbing, almost in a straight line, to about 135 at frame 23.</p>">
-  <div class="head">
-    <p class="say">Each step keeps the last one&rsquo;s overshoot, so <span class="def">the gap grows about 8&nbsp;mm a step</span>.</p>
-    <p class="sub">The gap to the 0.1&nbsp;ms run after each 40&nbsp;ms step, in millimeters.</p>
-  </div>
-  <div class="stage">
-    <figure class="figure wide" data-fig="lec24-gap"><div class="fig-body"></div></figure>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>If the overshoots just added up, the 18 of them would sum to the final gap. So let&#x27;s check. Take each 40 millisecond step starting from the 0.1 millisecond run&#x27;s state, measure its overshoot, and add them up. They come to about 140. The actual gap is about 135. So where did 5 millimeters go?</p><p>The velocity took it. The downward acceleration gets smaller over the flight, from about 10.1 to 9.3, because drag adds to gravity on the way up and works against it on the way down. Euler uses the value at the start of each step, so each step leaves the vertical velocity a little low. By frame 23 it&#x27;s about 15 millimeters per second low. And every later step moves the ball with that velocity, which pulls the height down by about 5 millimeters.</p><p>This is where stepping is different from adding up areas under a recorded curve. There, a bad panel never changes the next panel. Here the rate for the position is the stepped velocity, so a velocity error changes every position step after it. The height error just rides along.</p>">
-  <div class="head">
-    <p class="say">A velocity error made in one step <span class="def">moves every later height</span>.</p>
-    <p class="sub">Each overshoot is measured from the 0.1&nbsp;ms run&rsquo;s state. The downward acceleration falls from 10.11 to 9.32&nbsp;m/s² over the flight, and Euler uses each step&rsquo;s starting value, which leaves the vertical velocity about 15&nbsp;mm/s low by frame 23.</p>
-  </div>
-  <div class="stage">
-    <div class="work" style="font-size:calc(var(--stage-text) * .85)">
-      $$\begin{aligned}
-      \text{18 one-step overshoots, added:}\quad & 139.8\ \text{mm} \\[4pt]
-      \text{gap at frame 23:}\quad & 134.7\ \text{mm} \\[4pt]
-      \text{taken off by the low velocity:}\quad & \textcolor{#8A6508}{5.1\ \text{mm}}
-      \end{aligned}$$
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>So does 135 millimeters matter? The header of the shots file says the vertical tracking noise is about 31 millimeters. So at one step a frame, the stepping error alone is more than four times the tracking noise. If we halve the step to 20 milliseconds, it ends about 67 millimeters high, still about twice the noise.</p><p>Now how do we know the 0.1 millisecond run is close enough to compare against? We don&#x27;t yet. That&#x27;s the next thing: halving the step until the answer stops moving, which we&#x27;ll do in the next video. Thanks a lot for watching, and we&#x27;ll see you in the next video.</p>">
-  <div class="head">
-    <p class="say">At one step a frame, the stepping error is <span class="def">more than four times the tracking noise</span>.</p>
-    <p class="sub">The vertical tracking noise is from the header of the shots file. Each run is compared with the 0.1&nbsp;ms run at frame 23.</p>
-  </div>
-  <div class="stage">
-    <table class="tbl nums" style="font-size:calc(var(--stage-text) * .95)">
-      <tr><th>step size</th><th>steps to frame 23</th><th>height above the 0.1&nbsp;ms run</th></tr>
-      <tr><td>40&nbsp;ms</td><td>18</td><td class="key">134.7&nbsp;mm</td></tr>
-      <tr><td>20&nbsp;ms</td><td>36</td><td class="key">67.1&nbsp;mm</td></tr>
-      <tr><td colspan="2">vertical tracking noise</td><td>30.7&nbsp;mm</td></tr>
-    </table>
+    <figure class="figure wide" data-fig="lec24-arcs" data-n="16"><div class="fig-body"></div></figure>
   </div>
 </section>
 
@@ -841,6 +1085,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <div class="deck-notes"></div>
 
 
-<script type="module" src="js/bundle/lecture-24.js?v=20261109124015"></script>
+<script type="module" src="js/bundle/lecture-24.js?v=20261113083220"></script>
 </body>
 </html>

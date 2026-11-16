@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Function cheat sheet — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261109124015">
-  <link rel="stylesheet" href="css/demos.css?v=20261109124015">
+  <link rel="stylesheet" href="css/blocks.css?v=20261113083220">
+  <link rel="stylesheet" href="css/demos.css?v=20261113083220">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -1038,7 +1038,7 @@ defines the words the course uses.</p>
   <tr><td><code>np.min(y), np.max(y)</code></td><td>The smallest or largest value. <code>np.max(np.array([4, 9, 7]))</code> gives <code>9</code>.</td><td data-label="MATLAB"><code>min(y), max(y)</code></td><td data-label="First used">Week 6, <a href="walk-06.html">Reading the assignment 5 program</a></td></tr>
   <tr><td><code>np.percentile(d, [5, 95])</code></td><td>The values below which 5% and 95% of the data fall, found by sorting and reading between neighbors. <code>np.percentile(np.arange(1, 101), [5, 95])</code> gives <code>[ 5.95 95.05]</code>.</td><td data-label="MATLAB"><code>prctile(d, [5 95])</code><br><span class="cs-note">prctile reads between neighbors differently, so prctile(1:100, [5 95]) gives 5.5 and 95.5. np.percentile(d, [5, 95], method='hazen') matches it.</span></td><td data-label="First used">Week 10, <a href="propagating-by-resampling.html">Propagating uncertainty by resampling</a></td></tr>
   <tr><td><code>np.all(y &gt; 0), np.any(y &gt; 0)</code></td><td>True when every value passes the test, or when at least one does. <code>np.all(np.array([3, 5, -1]) &gt; 0)</code> gives <code>False</code>.</td><td data-label="MATLAB"><code>all(y &gt; 0), any(y &gt; 0)</code></td><td data-label="First used">Week 6, <a href="walk-06.html">Reading the assignment 5 program</a></td></tr>
-  <tr><td><code>y.min(), y.max(), y.mean()</code></td><td>The same as <code>np.min(y)</code>, <code>np.max(y)</code> and <code>np.mean(y)</code>, written as a method of the array y. After <code>y = np.array([4.0, -2.0, 9.0])</code>, <code>y.min()</code> is <code>-2.0</code>.</td><td data-label="MATLAB"><code>min(y)</code></td><td data-label="First used"><a href="class-05.html">Class 5, Abstraction layers and known-answer checks</a></td></tr>
+  <tr><td><code>y.min(), y.max(), y.mean()</code></td><td>The same as <code>np.min(y)</code>, <code>np.max(y)</code> and <code>np.mean(y)</code>, written as a method of the array y. After <code>y = np.array([4.0, -2.0, 9.0])</code>, <code>y.min()</code> is <code>-2.0</code>.</td><td data-label="MATLAB"><code>min(y)</code></td><td data-label="First used">Week 9, <a href="state-as-a-vector.html">State as a vector</a></td></tr>
 </table>
 
 <h2 id="find">Finding and sorting in numpy</h2>
@@ -1050,13 +1050,14 @@ defines the words the course uses.</p>
   <tr><td><code>np.argsort(y)</code></td><td>The positions that would put the values in order, smallest first. <code>np.argsort(np.array([30, 10, 20]))</code> gives <code>[1 2 0]</code>.</td><td data-label="MATLAB"><code>[~, order] = sort(y)</code><br><span class="cs-note">MATLAB counts from 1, so its version of the example gives <code>[2 3 1]</code>.</span></td><td data-label="First used">Week 6, <a href="reports-06.html">Example reports · Assignment 5</a></td></tr>
 </table>
 
-<h2 id="running">numpy running totals, differences and slopes</h2>
+<h2 id="running">numpy running totals, differences, slopes and values between samples</h2>
 
 <table class="data cheatsheet">
   <tr><th>Python</th><th>What it does, with an example</th><th>MATLAB</th><th>First used</th></tr>
   <tr><td><code>np.cumsum(y)</code></td><td>The running total, one value per sample. Times <code>dt</code>, it approximates the running integral. <code>np.cumsum(np.array([1, 2, 3]))</code> gives <code>[1 3 6]</code>.</td><td data-label="MATLAB"><code>cumsum(y)</code></td><td data-label="First used">Week 3, <a href="cumulative-integration.html">Cumulative integration</a></td></tr>
   <tr><td><code>np.diff(y)</code></td><td>Each value minus the one before it, so the result is one shorter. <code>np.diff(np.array([1, 4, 9]))</code> gives <code>[3 5]</code>.</td><td data-label="MATLAB"><code>diff(y)</code></td><td data-label="First used">Week 6, <a href="walk-06.html">Reading the assignment 5 program</a></td></tr>
   <tr><td><code>np.gradient(y, dt)</code></td><td>The slope at every sample: centered differences inside, one-sided at the two ends. <code>np.gradient(np.array([1.0, 4.0, 9.0]), 1.0)</code> gives <code>[3. 4. 5.]</code>.</td><td data-label="MATLAB"><code>gradient(y, dt)</code></td><td data-label="First used">Week 4, <a href="finite-differences.html">Finite differences</a></td></tr>
+  <tr><td><code>np.interp(t, t_rec, y_rec)</code></td><td>The value of the record y_rec at time t, read off the straight line between the two samples on either side of t. t can be one time or an array of times. Before the first sample or after the last, it gives the first or last value. <code>np.interp(1.5, np.array([1.0, 2.0]), np.array([10.0, 30.0]))</code> gives <code>20.0</code>.</td><td data-label="MATLAB"><code>interp1(t_rec, y_rec, t)</code><br><span class="cs-note">interp1 takes the record first and t last, and outside the record it gives NaN.</span></td><td data-label="First used">Week 9, <a href="state-as-a-vector.html">State as a vector</a></td></tr>
 </table>
 
 <h2 id="fit">Polynomial fits and linear algebra in numpy</h2>
@@ -1141,7 +1142,7 @@ defines the words the course uses.</p>
 
   
 
-  <script src="js/page.js?v=20261109124015"></script>
+  <script src="js/page.js?v=20261113083220"></script>
 
   <footer class="site-footer">
     <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-09">November 9, 2026</time>.</span>

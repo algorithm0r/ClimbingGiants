@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>State as a vector — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261109124015">
-  <link rel="stylesheet" href="css/demos.css?v=20261109124015">
+  <link rel="stylesheet" href="css/blocks.css?v=20261113083220">
+  <link rel="stylesheet" href="css/demos.css?v=20261113083220">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -839,9 +839,6 @@
           <span class="site-nav-sep">·</span>
           <a href="order-of-accuracy-measured.html">Halving the step</a>
         
-          <span class="site-nav-sep">·</span>
-          <a href="stability-and-accuracy.html">Energy checks</a>
-        
         <span class="site-nav-sep">·</span>
         
         <a href="assign-08.html">Assignment</a>
@@ -904,240 +901,198 @@
 
 <div class="claim">
   <span class="label">Claim</span>
-  <p class="exact">A stepping method advances a state whose rate depends only on the state and the time.
-  A second-order equation is put into that form by making the first derivative part of the state. The pair (position, velocity) advances as one object, and its rate is (velocity, acceleration).
-  Every method in this week then applies unchanged to a state of any size.</p>
-  <p class="plain">Carry the velocity along as part of what you are tracking, and a second-order
-  problem becomes a first-order one with two numbers in it instead of one.</p>
+  <p class="exact">Each step of Euler's method starts the motion over from the numbers it is
+  handed, so the state has to hold every number the next step needs, plus the numbers you want to
+  follow. For a mass that obeys <i>F</i> = <i>ma</i> those are its positions and its velocities,
+  the initial conditions for the rest of the motion. Drag depends on the speed, so each
+  direction's drag uses all three velocities, and the three directions are stepped together as one
+  state. The same step then runs any system written as a state and its rates, such as a belted
+  occupant in a crashing car.</p>
+  <p class="plain">The state holds every number the next step needs, and the same Euler loop then
+  steps a shot or a crash.</p>
 </div>
 
-<h2 id="the-problem-with-second-order">Euler Has No Update for Velocity</h2>
+<h2 id="the-problem-with-second-order">Positions and Velocities as Initial Conditions</h2>
 
-<p>Newton's second law gives an acceleration, so mechanics produces equations like</p>
+<p><a href="from-a-rate-to-a-trajectory.html" title="Euler's method">Page 24</a> stepped a tracked
+shot with six numbers, three positions and three velocities. The question was where the ball
+goes, which is only the positions. This page explains why the velocities come along and why the
+three directions are stepped together. The six numbers form one vector, and each step updates the
+whole vector at once. The last section uses this to compare the shot stepped with and without drag
+against the tracked frames, the comparison assignment 7 asks for. In between, the same step runs a
+second system, an occupant held by a belt in a crashing car (the system in assignment 7's extra
+problem).</p>
 
-$$m\ddot{x} + c\dot{x} + kx = 0$$
+<p>In physics, finding the path of a thrown ball takes two things, where it starts and how fast it
+starts moving. A differential equations course says the same thing another way. <i>F</i> =
+<i>ma</i> gives the second derivative of the position, and a second-order equation needs two
+<dfn data-g="initial-condition">initial conditions</dfn>, a position and a velocity. Euler's
+method treats every step as a fresh start from the numbers it is handed. For this reason the
+<dfn data-g="state">state</dfn> at any moment has to hold the initial conditions for the rest of
+the motion.</p>
 
-<p>Euler's method advances $y$ using $\dot y$, and it has no way to use $\ddot x$. It can advance
-position using velocity, though nothing in the method updates the velocity itself.</p>
-
-<h2 id="second-order-as-two-first-order-equations">Second Order as Two First-Order Equations</h2>
-
-<p>Define the <dfn data-g="state">state</dfn> as the pair</p>
-
-$$\mathbf{s} \;=\; \begin{bmatrix} x \\ v \end{bmatrix}$$
-
-<p>and write down its rate. The first entry's rate is the velocity, which is the second entry. The
-second entry's rate is the acceleration, which the equation gives:</p>
-
-$$\dot{\mathbf{s}} \;=\; \begin{bmatrix} \dot x \\ \dot v \end{bmatrix}
-  \;=\; \begin{bmatrix} v \\ \dfrac{-c v - k x}{m} \end{bmatrix}$$
-
-<p>The right-hand side depends only on $x$ and $v$. That is, it depends only on the state, which is
-what a stepping method needs. The equation is now first order in a two-component state. Euler applied
-to it is the same one line as before, done to both components at once:</p>
-
-$$\mathbf{s}_{k+1} \;=\; \mathbf{s}_k + h\,\dot{\mathbf{s}}(\mathbf{s}_k)$$
-
-<h2 id="an-occupant-driven-by-the-car">An Occupant Driven by the Car</h2>
-
-<p>Mechanics usually hands you a spring with something pushing on it, and in a crash test the
-something is the car. An occupant is held to the car by a belt. The car hits the barrier and stops, the occupant keeps
-going, and the belt stretches. What it pulls back with depends on how far the occupant has moved
-<em>relative to the car</em> and how fast they are still moving relative to it. That is a spring
-and a damper again, measured between two things that are both moving. Write $u$ for the
-occupant's displacement relative to the car and $w$ for their velocity relative to it. Newton's second law in the car's frame adds one
-term to the equation above:</p>
-
-$$m\ddot{u} + c\dot{u} + k u \;=\; -m\,a_{\text{car}}(t)$$
-
-<p>and the rewrite is the one already done. The forcing adds a term to the acceleration, so the
-state is still the pair, still of size two:</p>
-
-$$\dot{\mathbf{s}} \;=\; \begin{bmatrix} \dot u \\ \dot w \end{bmatrix}
-  \;=\; \begin{bmatrix} w \\ \dfrac{-c w - k u}{m} - a_{\text{car}}(t) \end{bmatrix}$$
-
-<p>Driven by the deceleration of a 2019 BMW X5 in a barrier test (measured on a rear
-crossmember), a 75&nbsp;kg occupant on a belt of 296&nbsp;kN/m with 2.8&nbsp;kN&middot;s/m of
-damping travels about 105&nbsp;mm relative to the car before coming back. That travel has to fit
-in the space between the occupant and the car's interior.</p>
-
-<h3 id="a-time-dependent-rate">A Time-Dependent Rate</h3>
-
-<p>The rate now depends on time as well as on the state. Every rate so far has been a function of
-the state alone, so that handing it $x$ and $v$ returns the derivative, while this one needs
-$a_{\text{car}}(t)$, and that is a recorded array sampled at a fixed interval. So the rate function has to be given the
-time as well as the state, and it has to answer for times that fall between samples. If you take
-a step equal to the record's own sample interval the question never comes up. If you halve the
-step (as you must to show the answer has settled) every second evaluation lands between two
-recorded values.</p>
-
-<div class="check"><p><strong>Check.</strong> A stepper is run on the occupant at half the
-record's sample interval. The driving acceleration is looked up by taking the most recent
-recorded sample. What does the run produce, and would you notice?
-
-    <details class="ans"><summary><span>Answer</span></summary><div class="body">
-    <p>It produces a trajectory driven by a staircase version of the recorded pulse. Each pair of
-half-steps sees the same acceleration value, so the effective input is the record held constant
-across each sample interval.</p>
-    <p>You would not notice from the output. The trajectory is smooth, the travel is
-the right order of magnitude, and halving the step again changes the answer only slightly, so a
-convergence check of the kind <a href="order-of-accuracy-measured.html" title="Order of accuracy">page 26</a> asks for is passed. The run does converge, though it
-converges on the solution to a slightly different problem, since the check shows only that the
-answer stopped moving. Interpolating linearly between the two nearest samples removes the
-staircase.</p>
-    </div></details></p></div>
-
-<h2 id="the-state-holds-everything-the-rate-needs">The State Holds Everything the Rate Needs</h2>
-
-<p>The state must contain everything the rate depends on (other than the time). Anything the rate
-needs and the state lacks has to be added. The state also carries whatever you want to follow,
-such as the positions, which the rate itself may never use.</p>
+<p>Taking one kind of number out of the state shows what each is for. Without the velocities, a step could neither move the
+ball (the position changes at the velocity) nor find the drag (drag depends on the velocity).
+Without the positions, the shot's rates would still work, since gravity and drag do not depend on
+where the ball is, but the run would no longer give the path. So the state holds every number
+the rate needs, plus the numbers you want to follow:</p>
 
 <table class="data">
-  <tr><th>System</th><th>Entries in the state</th><th>Number of entries</th></tr>
-  <tr><td>falling object, no drag</td><td>height, velocity</td><td>2</td></tr>
-  <tr><td>projectile in a plane, with drag</td><td>x, y, v<sub>x</sub>, v<sub>y</sub></td><td>4</td></tr>
-  <tr><td>tracked shot, with drag</td><td>x, y, z, v<sub>x</sub>, v<sub>y</sub>, v<sub>z</sub></td><td>6</td></tr>
-  <tr><td>mass-spring-damper</td><td>x, v</td><td>2</td></tr>
-  <tr><td>two masses on a shared spring</td><td>x₁, x₂, v₁, v₂</td><td>4</td></tr>
-  <tr><td>cooling body</td><td>temperature</td><td>1</td></tr>
+  <tr><th>System stepped</th><th>Numbers in the state</th><th class="num">Size of the state</th></tr>
+  <tr><td>falling object, no drag</td><td>height, vertical velocity</td><td class="num">2</td></tr>
+  <tr><td>projectile in a plane, with drag</td><td>x, z, v<sub>x</sub>, v<sub>z</sub></td><td class="num">4</td></tr>
+  <tr><td>tracked shot, with drag</td><td>x, y, z, v<sub>x</sub>, v<sub>y</sub>, v<sub>z</sub></td><td class="num">6</td></tr>
+  <tr><td>belted occupant (below)</td><td>travel relative to the car, its velocity</td><td class="num">2</td></tr>
+  <tr><td>two masses on a shared spring</td><td>x₁, x₂, v₁, v₂</td><td class="num">4</td></tr>
+  <tr><td>cooling cup of coffee</td><td>temperature</td><td class="num">1</td></tr>
 </table>
 
-<p>The drag case shows why the components of the state cannot be stepped as separate scalars.
-Quadratic drag gives</p>
+<p>A mass that moves in one direction adds two numbers, a position and a velocity. The coffee
+adds one, because the cooling law gives the first derivative of the temperature directly.</p>
 
-$$a_x = -k\,|\mathbf{v}|\,v_x, \qquad a_y = -g - k\,|\mathbf{v}|\,v_y$$
+<h2 id="a-second-order-equation-as-two-first-order-ones">A Second-Order Equation as Two First-Order Ones</h2>
 
-<p>and $|\mathbf{v}| = \sqrt{v_x^2 + v_y^2}$. The horizontal acceleration depends on the vertical
-velocity. The two directions cannot be integrated separately, because neither one's rate is a
-function of that direction alone. That is, each component's rate can use any entry of the
-state.</p>
+<p>Euler's step changes each number by its rate times the step $h$, so it needs the first
+derivative of every number in the state. Newton's second law gives a second derivative. For the
+shot's height:</p>
+
+$$\frac{\mathrm{d}^2 z}{\mathrm{d}t^2} = -g - k\,|\mathbf{v}|\,v_z$$
+
+<p>Carrying the vertical velocity $v_z$ as a number of its own turns this into two first-order
+equations. The height changes at the vertical velocity, and the vertical velocity changes at the
+acceleration from the forces:</p>
+
+$$\frac{\mathrm{d}z}{\mathrm{d}t} = v_z, \qquad \frac{\mathrm{d}v_z}{\mathrm{d}t} = -g -
+k\,|\mathbf{v}|\,v_z$$
+
+<p>The first equation is the definition of the velocity, and the second is <i>F</i> = <i>ma</i>
+divided by the mass. A differential equations course often calls this writing a second-order
+equation as a first-order system. The six rows of the shot's state on <a href="from-a-rate-to-a-trajectory.html" title="Euler's method">page 24</a> are three of these
+pairs, one for each direction.</p>
+
+<h2 id="drag-on-a-tracked-shot">Drag Ties the Three Directions Together</h2>
+
+<p>Drag points against the velocity, and its size is $k$ times the speed squared. Its part along
+$x$ is</p>
+
+$$a_x = -k\,|\mathbf{v}|\,v_x, \qquad |\mathbf{v}| = \sqrt{v_x^2 + v_y^2 + v_z^2}$$
+
+<p>so the drag along $x$ uses the speed, and the speed uses all three velocities. Take the shot at
+frame 5, where <a href="from-a-rate-to-a-trajectory.html" title="Euler's method">page 24</a> starts the stepping. The velocity is $(-4.73,\ 3.97,\ 2.75)$&nbsp;m/s and
+the speed is 6.76&nbsp;m/s, so</p>
+
+$$a_x = -0.016 \times 6.76 \times (-4.73) = 0.51\ \text{m/s}^2$$
+
+<p>(positive, because the ball moves toward smaller $x$ and drag pushes back). If the $x$ step used
+only the size of its own velocity, it would find $0.016 \times 4.73 \times 4.73$ =
+0.36&nbsp;m/s², about 30% too little. That is, the drag along the floor depends on how fast the
+ball is climbing and how fast it moves across the court. Each direction's rate uses all three
+velocities, so the three directions have to be stepped together as one state.</p>
+
+<p>The difference shows up in the path. Stepped from frame 5 to frame 23 (the last frame before the
+ball nears the hoop) with 1&nbsp;ms steps (small enough that a library solver, below, agrees to a
+few millimeters), a run that gives each direction only its own velocity ends 4.9&nbsp;cm from the
+run that steps them together. Measured from the drag-free run, drag moves frame 23 by
+15.7&nbsp;cm when the directions are stepped together and by 11.0&nbsp;cm when they are stepped
+apart. These are distances in three dimensions, between points that are not in a line, so they do
+not subtract to 4.9&nbsp;cm. The separate run always finds too little drag, since the speed is never
+smaller than any one of its components. On one shot the 4.9&nbsp;cm is about the size of the
+5.1&nbsp;cm that tracking noise alone puts between a perfect prediction and the measured frames
+(last section), so it would be hard to see. However, it errs in the same direction on every shot,
+so it would bias any comparison of drag against the data.</p>
 
 <div class="aside">
-  <span class="label">A value for k</span>
+  <span class="label">Where k = 0.016 comes from</span>
   <p>The constant collects the air and the ball, $k = \rho C_D A / (2m)$, where $\rho$ is the
 density of the air, $A = \pi r^2$ is the ball's cross-section, $m$ is its mass and $C_D$ is its
 drag coefficient. $C_D$ is the only one of these with no value set by a rule or a table, so it
 comes from experiment. Zhang, Zhu, Li and Hong measured it for size 7 match balls in a wind
 tunnel ("Experimental investigation on the aerodynamic drag of basketballs", <em>iScience</em>
 29(8), 115873, 2026). Above about 6&nbsp;m/s, which is most of a shot's flight, it settles
-between 0.3 and 0.4. The ball's radius is in the header of the
-shots file (0.1195&nbsp;m, so $A$ = 0.0449&nbsp;m²), and FIBA's equipment rules put a size 7 ball
-between 580 and 620&nbsp;g (Official Basketball Rules 2026, Basketball Equipment, Table 1). Air at
-20&nbsp;°C and sea-level pressure has a density of 1.20&nbsp;kg/m³. Together these give $k$
-between 0.013 and 0.019 per meter (0.016 for $C_D$ = 0.35 and 600&nbsp;g), so at 9&nbsp;m/s
-drag decelerates the ball at about 1.3&nbsp;m/s², or 13% of $g$. The examples and demos on
-these pages use 0.016.</p>
+between 0.3 and 0.4. The ball's radius is in the header of the shots file (0.1195&nbsp;m, so $A$ =
+0.0449&nbsp;m²), and FIBA's equipment rules put a size 7 ball between 580 and 620&nbsp;g
+(Official Basketball Rules 2026, Basketball Equipment, Table 1). Air at 20&nbsp;°C and sea-level
+pressure has a density of 1.20&nbsp;kg/m³. Together these give $k$ between 0.013 and 0.019 per
+meter (0.016 for $C_D$ = 0.35 and 600&nbsp;g). At 7.8&nbsp;m/s, this shot's speed when it leaves
+the hand, drag decelerates the ball at about 1&nbsp;m/s², or 10% of $g$. The examples and demos on these pages use 0.016.</p>
 </div>
+
+<p>The demo below steps a shot in a plane both ways, with the directions together and apart.</p>
 
 <cg-demo case="state"></cg-demo>
 
-<h2 id="one-function-for-the-system-one-for-the-step">One Function for the System, One for the Step</h2>
+<h2 id="a-belted-occupant">A Belted Occupant as a Driven Spring-Mass-Damper</h2>
 
-<p>In practice the code splits in two, with one function that defines the system and another that
-advances any system it is given.</p>
+<p>In differential equations you solved $m\ddot{x} + c\dot{x} + kx = 0$ by hand, and found its
+natural frequency and damping ratio. A belted occupant in a frontal crash can be modeled, roughly,
+as that system. The occupant is the mass, the belt is the spring and the damper, and the other end
+of the belt is fixed to the car. The car hits a barrier and stops in about 62&nbsp;ms. The occupant
+keeps going, the belt stretches, and the belt pulls them back.</p>
 
-<div class="codetabs" id="code1">
-  <div class="tabs" role="tablist">
-    <button role="tab" data-lang="python" aria-selected="true">Python</button>
-    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
-    <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
-  </div>
-  <pre data-lang="python" data-notes="3|The whole physics: unpack the state, return its rate, in the same order. m, c and k have defaults, the oscillator's mass, damping and stiffness ([Functions](py-functions.html)).;4|Unpacks the two components of the state into their own names.;5|The first component's rate is the second component. This is the second-order equation rewritten as two first-order ones.;7|The whole method. It never mentions x, v, mass or springs.;8|Works on a state of any length, because + and * are elementwise on an array.;10|The starting state: 5 cm out, at rest.;11|The step size, 10 ms. Halving it means doubling the number of steps.;12|200 steps of 10 ms, 2 seconds of motion ([Loops](py-loops.html)).;13|Swap oscillator for projectile and step() is untouched.">import numpy as np
+<p>Write $u$ for the occupant's travel forward relative to the car and $w$ for its rate, and
+$a_{\text{car}}$ for the car's acceleration with forward positive. While the car slows,
+$a_{\text{car}}$ is negative. Measured from the ground, the occupant's position is the car's
+position plus $u$, so their acceleration is $a_{\text{car}} + \ddot{u}$ (the dots are time
+derivatives). The only forces on them are the belt's, $-ku - c\dot{u}$, so <i>F</i> = <i>ma</i>
+gives $m(a_{\text{car}} + \ddot{u}) = -ku - c\dot{u}$. Moving the car's term to the right-hand
+side gives the equation from that course with a forcing term:</p>
 
-def oscillator(t, s, m=1.0, c=0.30, k=40.0):
-    x, v = s
-    return np.array([v, (-c*v - k*x) / m])
+$$m\ddot{u} + c\dot{u} + k u \;=\; -m\,a_{\text{car}}(t)$$
 
-def step(f, t, s, h):
-    return s + h * f(t, s)
+<p>Here $k$ and $c$ are the belt's stiffness and damping, a different $k$ from the drag constant.
+The values are the ones assignment 7's extra problem gives, $m$ = 75&nbsp;kg, $k$ =
+296&nbsp;kN/m and $c$ = 2.8&nbsp;kN&middot;s/m.
+The formulas from that course give a natural frequency $\sqrt{k/m}$ = 62.8&nbsp;rad/s (10&nbsp;Hz,
+a period of 100&nbsp;ms) and a damping ratio $c/(2\sqrt{km})$ = 0.30, so the occupant would
+oscillate and die out if the car were not involved. The forcing $-m\,a_{\text{car}}$ is positive
+while the car slows, a push forward like the one you feel when a car brakes hard. The car stops in
+about 62&nbsp;ms, less than one period, so the occupant is still on the first swing when it
+stops.</p>
 
-s = np.array([0.05, 0.0])
-h = 0.01
-for i in range(200):
-    s = step(oscillator, i*h, s, h)</pre>
-  <pre data-lang="matlab" hidden data-notes="2|ode45 takes exactly this shape of function.;8|Unpack, return the rate, same order.;13|The method, independent of the system.">% the library solver takes the same function:
-[T, S] = ode45(@oscillator, [0 5], [0.05; 0.0]);
+<p>With a step or a sine for $a_{\text{car}}$ you could solve this by hand as well. Here the car's
+acceleration is a recording. It comes from a 2019 BMW X5 driven into a barrier at 15.65&nbsp;m/s
+(test 10642 of the US National Highway Traffic Safety Administration). An accelerometer on a rear
+crossmember, a beam across the underside of the car's body, sampled it 12,500 times a second.
+Time is measured from impact, and the record starts 50&nbsp;ms before it. The record is spiky
+(single samples reach &minus;157&nbsp;$g$, while the average over the stop is about 26&nbsp;$g$), and
+no formula is likely to describe it, so we step it.</p>
 
-function ds = oscillator(t, s)
-    m = 1.0;
-    c = 0.30;
-    k = 40.0;
-    x = s(1);
-    v = s(2);
-    ds = [v; (-c*v - k*x)/m];
-end
+<p>As with the shot's height, carrying the rate $w$ as a number of its own turns this second-order
+equation into two first-order ones. The state is the travel and its rate, and the rate of each
+is</p>
 
-function s = step(f, t, s, h)
-    s = s + h * f(t, s);
-end</pre>
-  <pre data-lang="js" hidden data-notes="2|Unpack, return the rate, same order.;7|The method, component by component, so it works on a state of any length.">function oscillator(t, s, m = 1.0, c = 0.30, k = 40.0) {
-  const x = s[0];
-  const v = s[1];
-  return [v, (-c * v - k * x) / m];
-}
+$$\frac{\mathrm{d}}{\mathrm{d}t}\begin{bmatrix} u \\ w \end{bmatrix}
+  \;=\; \begin{bmatrix} w \\ \dfrac{-c\,w - k\,u}{m} - a_{\text{car}}(t) \end{bmatrix}$$
 
-function step(f, t, s, h) {
-  const rate = f(t, s);
-  const next = [];
-  for (let i = 0; i &lt; s.length; i++) {
-    next.push(s[i] + h * rate[i]);
-  }
-  return next;
-}</pre>
-  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
-</div>
+<p>The Euler step from <a href="from-a-rate-to-a-trajectory.html" title="Euler's method">page
+24</a> runs this state without any change. The one new thing is that this rate needs the time, to
+look up the car's acceleration in the recording. The shot's rate never used the time, and Euler's method
+passes it in so that rates like this one can use it.</p>
 
-<p>Library solvers take the same kind of argument, a function returning the rate of a state. <code>scipy.integrate.solve_ivp</code> and MATLAB's <code>ode45</code> take
-a function of the same shape, and putting a problem into this form is usually most of the work of
-using them.</p>
+<p>The recording has a value only every 80&nbsp;µs. With one step per sample interval every time
+the rate asks for is a recorded one. A step half that size asks for a time between two samples on
+every second step, and you need that run to show that the answer no longer changes with the step
+(<a href="order-of-accuracy-measured.html" title="Halving the step">page 26</a>). Reading the value off a
+straight line between the two nearest samples (<dfn data-g="interpolation">interpolation</dfn>)
+gives the value at that time. Euler at the record's own interval puts the occupant's largest travel at
+105.0&nbsp;mm, 70.5&nbsp;ms after impact (just after the car has stopped). Halving the step, which
+is <code>euler</code> called with <code>h/2</code> and twice the steps, moves it by less than
+0.1&nbsp;mm.</p>
 
-<h2 id="drag-on-a-tracked-shot">Drag on a Tracked Shot</h2>
+<p>After the peak the model swings back past zero. That part comes from the model's belt, which
+pulls both ways like a spring. A real belt probably goes slack, and the seat then stops the
+occupant. A restraint designer would likely check the 105&nbsp;mm against the space between the
+occupant and the car's interior.</p>
 
-<p>A tracked shot moves across the court as well as along it, so its state has three positions and
-three velocities. Drag couples all three directions through the speed:</p>
+<h2 id="in-code">One Function for Each System, One for the Step</h2>
 
-$$\frac{\mathrm{d}}{\mathrm{d}t}\begin{bmatrix} x \\ y \\ z \\ v_x \\ v_y \\ v_z \end{bmatrix}
-  \;=\; \begin{bmatrix} v_x \\ v_y \\ v_z \\ -k\,|\mathbf{v}|\,v_x \\ -k\,|\mathbf{v}|\,v_y \\
-  -g - k\,|\mathbf{v}|\,v_z \end{bmatrix},
-  \qquad |\mathbf{v}| = \sqrt{v_x^2 + v_y^2 + v_z^2}$$
-
-<p>The example in this section steps the shot from <a href="conditions-become-roots.html" title="Conditions as roots">page 19</a>, arc 79 of
-the public arcs of the course. That arc is in no student's data. The example uses its 24
-free-flight frames (to the last frame at least 1&nbsp;m from the hoop's center), with time
-measured from frame 20, the release this data set marks (<a href="conditions-become-roots.html#finding-the-release" title="Conditions as roots">page 19
-finds it</a> 0.08&nbsp;s earlier), and $k$ = 0.016 per meter from the aside above. Frames are
-counted from there, so frame 0 below is frame 20 of the record.</p>
-
-<h3 id="a-starting-state-from-a-fit">A Starting State From a Fit</h3>
-
-<p>A stepper needs a position and a velocity at one moment, and the tracker gives positions only,
-each with about 3&nbsp;cm of noise. A fit to the first frames gives both. The example fits the first 11 frames with a
-straight line in each of $x$ and $y$ and a parabola in $z$ with $g$ held at 9.81&nbsp;m/s², the
-held model from assignment 5. If time is measured from the frame where you want the state, the
-intercepts are the position at that frame and the slopes are the velocity there.</p>
-
-<p>Once drag is in the model, the frame where the state is taken matters, since the ball's
-velocity is changing and a straight line has one slope, so the
-fit gives the same horizontal velocity at every frame (the table below shows it at two). That slope
-is roughly the average horizontal velocity over the 11 frames, which is likely to be close to the
-velocity at their middle. If drag is slowing the ball, it was moving faster than that at release,
-by about the horizontal drag deceleration times half the window (0.67&nbsp;m/s² from the drag term at
-frame 5, times 0.2&nbsp;s, gives 0.13&nbsp;m/s on this shot). For this reason the example takes
-the state at frame 5 (0.20&nbsp;s), the middle of the 11 fitted frames.</p>
-
-<table class="data">
-  <tr><th>State taken at</th><th class="num">x, y, z (m)</th><th class="num">v<sub>x</sub>, v<sub>y</sub>, v<sub>z</sub> (m/s)</th><th class="num">speed (m/s)</th></tr>
-  <tr><td>release, frame 0</td><td class="num">6.4262, 3.2011, 3.4554</td><td class="num">&minus;4.7333, 3.9732, 4.7128</td><td class="num">7.77</td></tr>
-  <tr><td>middle of the fit, frame 5</td><td class="num">5.4796, 3.9957, 4.2018</td><td class="num">&minus;4.7333, 3.9732, 2.7508</td><td class="num">6.76</td></tr>
-</table>
-
-<h3 id="stepping-with-and-without-drag">Stepping With and Without Drag</h3>
-
-<p>From frame 5 the program steps to each later frame, 40 Euler steps per 40&nbsp;ms frame (a step
-of 1&nbsp;ms, which <a href="order-of-accuracy-measured.html" title="Order of accuracy">page 26</a> finds within 3.4&nbsp;mm of RK4), once with drag and once with $k$ = 0. The fit did not use
-frames 11 to 23, so those 13 frames are where the two runs can be compared with the ball. The
-comparison is the RMS distance between the predicted center and the measured one.</p>
+<p>In code each system is one function, its rate function, and the step is another that works on
+any of them. The step is the <code>euler</code> function from <a
+href="from-a-rate-to-a-trajectory.html" title="Euler's method">page 24</a>, called with a rate
+function, a starting state, its time, the step and the number of steps. For the shot, the rate
+function is <code>shot</code>, and the starting state comes from the fit described in the last
+section below. <code>times</code>, <code>x</code>, <code>y</code> and <code>z</code> hold arc 79's
+frame times and positions, loaded from the shots file as in assignment 5's program.</p>
 
 <div class="codetabs" id="codeShot">
   <div class="tabs" role="tablist">
@@ -1145,7 +1100,9 @@ comparison is the RMS distance between the predicted center and the measured one
     <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
     <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
   </div>
-  <pre data-lang="python" data-notes="4|The rate of the six-component state. k has a default, so shot(t, s) uses K and shot(t, s, 0.0) has no drag ([Functions](py-functions.html)).;5|Unpacks the six components, positions first and velocities second, the order the rate is returned in.;6|The speed, from all three velocity components. This is what couples the three directions.;8|Each acceleration is the drag on that component, with gravity added to the vertical one.;10|The same flight with drag switched off, for the comparison.;13|The state at frame j, from a fit to the first n frames.;14|Time measured from frame j, so each intercept is the position at frame j and each slope is the velocity there.;15|A column of ones for the intercept and a column of times for the slope ([numpy arrays](py-numpy.html)).;18|Holding g moves the known term to the data side, as on [Linearity in the parameters](linearity-in-the-parameters.html).;21|Steps the state s from the first time in t to every later one, with m steps between each pair of frames.;24|The step size, so halving it means doubling m.;26|step is the Euler step from the code above ([Loops](py-loops.html)).;27|Keeps the state at each frame time, so the run can be compared with the measured frames.;30|t, x, y and z hold the 24 free-flight frames. Frame 5 is the middle of the 11 fitted frames.;31|t[5:] is the frame times from frame 5 on. 40 steps per 40 ms frame is a step of 1 ms.">G = 9.81     # m/s^2
+  <pre data-lang="python" data-notes="1|NumPy, the library for arrays of numbers ([numpy arrays](py-numpy.html)).;6|The rate function: a time and a state in, the six rates out. k has a default, so shot(t, s) uses K and shot(t, s, 0.0) has no drag ([Functions](py-functions.html)).;7|Unpacks the six numbers, positions first and velocities second, the order the rates are returned in.;8|The speed uses all three velocities, so each direction's drag depends on the other two.;10|Each acceleration is the drag in that direction, with gravity added to the vertical one.;12|The same flight with drag switched off, for the comparison.;15|The state at frame j, from a fit to the first n frames. Inside the function, t is the array of frame times.;16|Time measured from frame j, so each intercept is the position at frame j and each slope is the velocity there.;17|A column of ones for the intercept and a column of times for the slope ([numpy arrays](py-numpy.html)).;18|lstsq returns four things, and [0] keeps the first, the intercept and slope. rcond=None only silences a warning.;20|Holding g makes the height a straight line in time once the g term is added to the data, as on [Linearity in the parameters](linearity-in-the-parameters.html).;23|times, x, y and z hold arc 79's 24 free-flight frames. Frame 5 is the middle of the 11 fitted frames.;24|euler is the stepper from page 24. 720 steps of 1 ms run from frame 5 (0.20 s) to frame 23, and [::40] keeps every 40th row, one per frame.">import numpy as np
+
+G = 9.81     # m/s^2
 K = 0.016    # per meter, from the aside above
 
 def shot(t, s, k=K):
@@ -1165,21 +1122,14 @@ def start_state(t, x, y, z, n, j):
     cz = np.linalg.lstsq(A, z[:n] + 0.5*G*tf**2, rcond=None)[0]
     return np.array([cx[0], cy[0], cz[0], cx[1], cy[1], cz[1]])
 
-def fly(f, s, t, m):
-    out = [s]
-    for i in range(len(t) - 1):
-        h = (t[i + 1] - t[i]) / m
-        for p in range(m):
-            s = step(f, t[i] + p*h, s, h)
-        out.append(s)
-    return np.array(out)
-
-s0 = start_state(t, x, y, z, 11, 5)
-with_drag = fly(shot, s0, t[5:], 40)
-without_drag = fly(no_drag, s0, t[5:], 40)</pre>
-  <pre data-lang="matlab" hidden data-notes="1|t, x, y and z are columns holding the 24 free-flight frames. Frame 5 counted from 0 is element 6 counted from 1.;2|@(t, s) makes a function of t and s with k fixed, the shape fly expects.;5|The rate of the six-component state, positions first and velocities second.;7|The speed, from all three velocity components. This is what couples the three directions.;14|Time measured from frame j, so each intercept is the position at frame j and each slope is the velocity there.;16|A \ b is the least-squares solution when A has more rows than columns.;18|Holding g moves the known term to the data side. .^ squares element by element.;26|The step size, so halving it means doubling m.;28|step is the Euler step from the code above.">s0 = start_state(t, x, y, z, 11, 6);
-with_drag = fly(@(t, s) shot(t, s, 0.016), s0, t(6:end), 40);
-without_drag = fly(@(t, s) shot(t, s, 0), s0, t(6:end), 40);
+s0 = start_state(times, x, y, z, 11, 5)
+with_drag = euler(shot, s0, 0.20, 0.001, 720)[::40]
+without_drag = euler(no_drag, s0, 0.20, 0.001, 720)[::40]</pre>
+  <pre data-lang="matlab" hidden data-notes="1|times, x, y and z are columns holding arc 79's 24 free-flight frames. Frame 5 counted from 0 is element 6 counted from 1.;2|@(t, s) makes a function of t and s with k fixed, the shape euler expects. euler is the stepper from page 24.;3|Keeps every 40th row, one per 40 ms frame.;7|The rate function, positions first and velocities second.;9|The speed uses all three velocities, so each direction's drag depends on the other two.;16|Time measured from frame j, so each intercept is the position at frame j and each slope is the velocity there.;18|A \ b is the least-squares solution when A has more rows than columns.;20|Holding g moves the known term to the data side. .^ squares element by element.">s0 = start_state(times, x, y, z, 11, 6);
+with_drag = euler(@(t, s) shot(t, s, 0.016), s0, 0.20, 0.001, 720);
+with_drag = with_drag(1:40:end, :);
+without_drag = euler(@(t, s) shot(t, s, 0), s0, 0.20, 0.001, 720);
+without_drag = without_drag(1:40:end, :);
 
 function ds = shot(t, s, k)
     g = 9.81;
@@ -1196,20 +1146,8 @@ function s = start_state(t, x, y, z, n, j)
     cy = A \ y(1:n);
     cz = A \ (z(1:n) + 0.5*g*tf.^2);
     s = [cx(1); cy(1); cz(1); cx(2); cy(2); cz(2)];
-end
-
-function out = fly(f, s, t, m)
-    out = zeros(numel(t), numel(s));
-    out(1,:) = s.';
-    for i = 1:numel(t)-1
-        h = (t(i+1) - t(i)) / m;
-        for p = 0:m-1
-            s = step(f, t(i) + p*h, s, h);
-        end
-        out(i+1,:) = s.';
-    end
 end</pre>
-  <pre data-lang="js" hidden data-notes="4|The rate of the six-component state. k has a default, so shot(t, s) uses K.;6|The speed, from all three velocity components. This is what couples the three directions.;10|The least-squares intercept and slope of a straight line, from the normal equations of week 6.;26|Time measured from frame j, so each intercept is the position at frame j and each slope is the velocity there.;27|Holding g moves the known term to the data side, so the height is fitted with a straight line too.;38|The step size, so halving it means doubling m.;40|step is the Euler step from the code above.;47|t, x, y and z hold the 24 free-flight frames. Frame 5 is the middle of the 11 fitted frames.">const G = 9.81;
+  <pre data-lang="js" hidden data-notes="4|The rate function. k has a default, so shot(t, s) uses K.;6|The speed uses all three velocities, so each direction's drag depends on the other two.;10|The least-squares intercept and slope of a straight line, from the normal equations of week 6.;26|Time measured from frame j, so each intercept is the position at frame j and each slope is the velocity there.;27|Holding g moves the known term to the data side, so the height is fitted with a straight line too.;37|times, x, y and z hold arc 79's 24 free-flight frames. Frame 5 is the middle of the 11 fitted frames.;38|euler is the stepper from page 24. The filter keeps every 40th state, one per 40 ms frame.">const G = 9.81;
 const K = 0.016;
 
 function shot(t, s, k = K) {
@@ -1243,49 +1181,170 @@ function startState(t, x, y, z, n, j) {
   return [cx[0], cy[0], cz[0], cx[1], cy[1], cz[1]];
 }
 
-function fly(f, s, t, m) {
-  const out = [s];
-  for (let i = 0; i &lt; t.length - 1; i++) {
-    const h = (t[i + 1] - t[i]) / m;
-    for (let p = 0; p &lt; m; p++) {
-      s = step(f, t[i] + p * h, s, h);
-    }
-    out.push(s);
-  }
-  return out;
-}
+const everyFrame = (s, i) =&gt; i % 40 === 0;
 
-const s0 = startState(t, x, y, z, 11, 5);
-const withDrag = fly(shot, s0, t.slice(5), 40);
-const withoutDrag = fly((t, s) =&gt; shot(t, s, 0), s0, t.slice(5), 40);</pre>
+const s0 = startState(times, x, y, z, 11, 5);
+const withDrag = euler(shot, s0, 0.20, 0.001, 720).filter(everyFrame);
+const withoutDrag = euler((t, s) =&gt; shot(t, s, 0), s0, 0.20, 0.001, 720).filter(everyFrame);</pre>
   <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
 </div>
 
-<table class="data">
-  <tr><th>Starting state</th><th class="num">RMS distance, no drag</th><th class="num">RMS distance, drag</th></tr>
-  <tr><td>at release, frame 0</td><td class="num">5.8&nbsp;cm</td><td class="num">19.0&nbsp;cm</td></tr>
-  <tr><td>at frame 5</td><td class="num">5.8&nbsp;cm</td><td class="num">10.4&nbsp;cm</td></tr>
-</table>
+<p>The occupant needs only a new rate function. <code>t_rec</code> and <code>a_rec</code> hold the
+record's times in seconds and the car's acceleration in m/s², forward positive, as the vehicle
+channel gives them.</p>
 
-<p>Without drag the starting frame makes no difference on this shot. The fitted lines and
-parabola are the same functions whichever frame the time is measured from, and a drag-free
-stepper follows them (exactly for RK4, and for Euler to within an error that shrinks with the
-step), so the two runs agree. (This is also a check on the stepper.) With drag,
-starting at release adds 8.6&nbsp;cm, and most of that is likely the 0.13&nbsp;m/s that the
-drag run starts short of the ball and carries through the flight.</p>
+<div class="codetabs" id="codeOccupant">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+    <button role="tab" data-lang="js" aria-selected="false">JavaScript</button>
+  </div>
+  <pre data-lang="python" data-notes="1|The occupant's mass and the belt's damping and stiffness, in kg, N&middot;s/m and N/m. This k is the belt, not the drag constant.;2|The travel forward relative to the car, and its rate.;3|The car's acceleration at time t, read off a straight line between the two nearest samples when t falls between them.;4|Same shape as shot: a time and a state in, the rates out.;6|80 microseconds, one step per sample, so every time the rate asks for is a recorded one.;7|The same euler as for the shot, untouched. 4,500 steps cover the record, which starts 50 ms before impact at rest.;8|The largest forward travel, in meters.">def occupant(t, s, m=75.0, c=2.8e3, k=296e3):
+    u, w = s
+    a_car = np.interp(t, t_rec, a_rec)
+    return np.array([w, (-c*w - k*u) / m - a_car])
 
-<h3 id="drag-against-the-tracking-noise">Drag Against the Tracking Noise</h3>
+h = t_rec[1] - t_rec[0]
+path = euler(occupant, [0.0, 0.0], t_rec[0], h, len(t_rec) - 1)
+travel = path[:, 0].max()</pre>
+  <pre data-lang="matlab" hidden data-notes="1|A function of t and s alone, carrying the record with it, the shape euler expects.;3|The same euler as for the shot, untouched.;6|The occupant's mass and the belt's damping and stiffness. This k is the belt, not the drag constant.;9|The car's acceleration at time t, read off a straight line between the two nearest samples when t falls between them.;10|The travel's rate, then its velocity's rate.">f = @(t, s) occupant(t, s, t_rec, a_rec);
+h = t_rec(2) - t_rec(1);
+path = euler(f, [0; 0], t_rec(1), h, numel(t_rec) - 1);
+travel = max(path(:, 1));
 
-<p>Two numbers say whether drag changed the answer, and both can be compared with the tracking
-noise in the header of the shots file (2.84&nbsp;cm horizontally and 3.07&nbsp;cm vertically).
-The first is how far drag moves the prediction. At the last free-flight frame the two runs are
-15.7&nbsp;cm apart, about three times the 5.1&nbsp;cm floor the noise sets (worked out below), so the difference is likely one the tracker can resolve. The
-second is whether drag moves the prediction toward the ball. On this shot it does not, since the
-RMS distance goes from 5.8&nbsp;cm without drag to 10.4&nbsp;cm with it. The 5.8&nbsp;cm is
-already close to the floor the noise sets. That is, a prediction that followed the ball exactly
-would still miss the measured frames by about
-$\sqrt{2.84^2 + 2.84^2 + 3.07^2}$ = 5.1&nbsp;cm RMS (taking 2.84&nbsp;cm for each of $x$ and $y$),
-because the frames themselves are about that far from the ball.</p>
+function ds = occupant(t, s, t_rec, a_rec)
+    m = 75;
+    c = 2.8e3;
+    k = 296e3;
+    a_car = interp1(t_rec, a_rec, t);
+    ds = [s(2); (-c*s(2) - k*s(1))/m - a_car];
+end</pre>
+  <pre data-lang="js" hidden data-notes="1|A straight line between the two samples on either side of t. The samples are evenly spaced, so the index comes from a division.;8|The occupant's mass and the belt's damping and stiffness. This k is the belt, not the drag constant.;14|The same euler as for the shot, untouched.">function interp(t, ts, as) {
+  let i = Math.floor((t - ts[0]) / (ts[1] - ts[0]));
+  i = Math.min(Math.max(i, 0), ts.length - 2);
+  const f = (t - ts[i]) / (ts[i + 1] - ts[i]);
+  return as[i] + f * (as[i + 1] - as[i]);
+}
+
+function occupant(t, s, m = 75, c = 2.8e3, k = 296e3) {
+  const [u, w] = s;
+  return [w, (-c * w - k * u) / m - interp(t, tRec, aRec)];
+}
+
+const h = tRec[1] - tRec[0];
+const path = euler(occupant, [0, 0], tRec[0], h, tRec.length - 1);
+const travel = Math.max(...path.map(s =&gt; s[0]));</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
+</div>
+
+<p>Library solvers take a rate function of the same shape as <code>shot</code>. <code>scipy.integrate.solve_ivp</code>
+and MATLAB's <code>ode45</code> each take the rate function, the time span and the starting state,
+and choose their own steps. Putting a problem into this form is usually most of the work of using
+them.</p>
+
+<div class="codetabs" id="codeLibrary">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-lang="python" aria-selected="true">Python</button>
+    <button role="tab" data-lang="matlab" aria-selected="false">MATLAB</button>
+  </div>
+  <pre data-lang="python" data-notes="3|The same shot function, the start and end times (frame 5 at 0.20 s, frame 23 at 0.92 s), and the starting state.;4|sol.y has one row per state number and one column per time the solver stepped to, so this is the position at frame 23.">from scipy.integrate import solve_ivp
+
+sol = solve_ivp(shot, (0.20, 0.92), s0)
+frame23 = sol.y[:3, -1]</pre>
+  <pre data-lang="matlab" hidden data-notes="1|The same shot function with k fixed, the start and end times, and the starting state. Each row of S is the state at one time, the transpose of sol.y.;2|The position at frame 23.">[T, S] = ode45(@(t, s) shot(t, s, 0.016), [0.20 0.92], s0);
+frame23 = S(end, 1:3);</pre>
+  <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
+</div>
+
+<p>On the shot, <code>solve_ivp</code> with its default settings (which let it choose its own steps) puts frame 23 at (2.192, 6.756,
+3.629)&nbsp;m. That is 3.4&nbsp;mm from the Euler run with 1&nbsp;ms steps, and
+<code>ode45</code> gives the same point to the millimeter. <a href="order-of-accuracy-measured.html"
+title="Halving the step">Page 26</a> shows how to tell when a stepped answer has settled.</p>
+
+<div class="check">
+  <span class="label">Check</span>
+  <ol>
+    <li>Write the state and its rate for a pendulum, <em>θ̈</em> = −(<em>g</em>/<em>L</em>)
+    sin&thinsp;<em>θ</em>.
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>The
+equation is second order, so the state is the angle and its rate, <strong>s</strong> = (&theta;,
+&omega;) with &omega; = &theta;&#775;. The rate of the state is d<strong>s</strong>/d<em>t</em> =
+(&omega;, &minus;(<em>g</em>/<em>L</em>) sin&thinsp;&theta;).</p>
+     <p>The first entry is the definition of &omega;, and the second comes from the equation of
+motion. The same <code>euler</code> function steps this state, since it uses only the state and
+its rate.</p></div></details></li>
+    <li>A colleague steps the <em>x</em> and <em>z</em> motion of a projectile with quadratic drag
+    in two separate loops. What goes wrong, and where in the flight is it worst?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Quadratic drag
+is &minus;<em>k</em>|<strong>v</strong>|<strong>v</strong>, and the speed |<strong>v</strong>| =
+&radic;(<em>v<sub>x</sub></em>&sup2; + <em>v<sub>z</sub></em>&sup2;) uses both velocities. Two
+separate loops can only use each direction's own velocity, so each direction is slowed as though
+the other were not moving. The speed is never smaller than either component, so the separate loops
+always find too little drag. The ball flies too far and too high, and the error has one sign, so
+it builds up.</p>
+     <p>For the vertical motion the shortfall is worst near the top of the flight.
+There <em>v<sub>z</sub></em> passes through zero while the ball still moves fast horizontally, so
+the separate vertical drag (which goes with <em>v<sub>z</sub></em>&sup2;) shrinks much faster than
+the true one (which goes with |<strong>v</strong>|<em>v<sub>z</sub></em>). For the horizontal
+motion it is worst near release and near the end, where the vertical velocity is largest.</p></div></details></li>
+    <li>Two masses joined by a spring each move along one line. How many numbers are in the state,
+    and what is the rate of each?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Four,
+<strong>s</strong> = (<em>x</em>&#8321;, <em>x</em>&#8322;, <em>v</em>&#8321;, <em>v</em>&#8322;),
+a position and a velocity for each mass. With the spring's stretch <em>e</em> = <em>x</em>&#8322;
+&minus; <em>x</em>&#8321; &minus; <em>L</em>&#8320; (<em>L</em>&#8320; is its unstretched
+length) and its stiffness <em>k</em> (a third <em>k</em> on this page):</p>
+     <p>d<em>x</em>&#8321;/d<em>t</em> = <em>v</em>&#8321;<br> d<em>x</em>&#8322;/d<em>t</em> =
+<em>v</em>&#8322;<br> d<em>v</em>&#8321;/d<em>t</em> = +<em>ke</em>/<em>m</em>&#8321;<br>
+d<em>v</em>&#8322;/d<em>t</em> = &minus;<em>ke</em>/<em>m</em>&#8322;</p>
+     <p>A stretched spring pulls the two masses toward each other with equal and opposite forces
+(Newton's third law), so the accelerations differ by the mass ratio. Six masses moving in three
+dimensions would make a state of 36 numbers, and the stepping code would not change.</p></div></details></li>
+    <li>A run on the occupant uses half the record's sample interval, and the rate looks up the
+    car's acceleration by taking the most recent recorded sample. What does the run produce, and
+    would you notice?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>It steps
+the occupant through a staircase version of the recorded pulse. Each pair of half steps sees the
+same acceleration, so the car's acceleration is held flat across each sample interval.</p>
+     <p>You probably would not notice from the output. The travel curve is smooth, its size is about
+right, and halving the step again changes it only slightly, so the answer looks settled. However,
+it has settled on the staircase pulse, since halving the step shows only that the step no longer
+changes the result. Reading between the two nearest samples on a straight line removes the
+staircase.</p></div></details></li>
+  </ol>
+</div>
+
+<h2 id="drag-against-the-frames">Drag Against the Tracked Frames</h2>
+
+<p>Assignment 7 asks whether drag is worth adding to the model of a shot. Stepping both ways gives
+two predictions, and the tracked frames say which one is closer to the ball. This section works
+that comparison on arc 79 and on the other seven public arcs.</p>
+
+<p>Arc 79 is the shot from <a href="from-a-rate-to-a-trajectory.html" title="Euler's method">page 24</a>. It is one of eight public arcs that are in no
+student's own set of shots. Its free flight runs 24 frames, frames 0 to 23, where frame 23 is the
+last frame at least 1&nbsp;m from the hoop's center. Time is
+measured from frame 20 of the record, the release this data set marks (<a
+href="conditions-become-roots.html#finding-the-release" title="Conditions as roots">page 19</a>
+finds the release 0.08&nbsp;s earlier), and frame 0 below is that frame.</p>
+
+<p>The starting state comes from a least-squares fit to the first 11 frames, a straight line in
+each of $x$ and $y$ and a parabola in $z$ with $g$ held at 9.81&nbsp;m/s² (the held model from
+assignment 5). Holding $g$ makes the parabola a line, since $z + \tfrac{1}{2}g t^2 = z_0 +
+v_{z0}\,t$ is a straight line in $t$, so the code fits a straight line to each of $x$, $y$ and
+$z + \tfrac{1}{2}g t^2$. With time measured from frame 5, the intercepts are the position at frame 5 and the
+slopes are the velocity there. The fit did not use frames 11 to 23, so those 13 frames are where
+the runs can be compared with the ball. The measure is the RMS distance between the predicted
+center and the measured one over those frames.</p>
+
+<p>The tracker's noise sets a floor under that distance. The header of the shots file gives
+2.84&nbsp;cm horizontally and 3.07&nbsp;cm vertically, so a prediction that followed the ball
+exactly would still miss the measured frames by about $\sqrt{2.84^2 + 2.84^2 + 3.07^2}$ =
+5.1&nbsp;cm RMS (taking 2.84&nbsp;cm for each of $x$ and $y$).</p>
+
+<p>On arc 79 drag moves frame 23 by 15.7&nbsp;cm, about three times that floor, so the difference
+is likely one the tracker can resolve. However, drag does not bring this prediction closer to the
+ball. The RMS distance goes from 5.8&nbsp;cm without drag to 10.4&nbsp;cm with it, and the
+5.8&nbsp;cm is already close to the floor.</p>
 
 <p>The same program on all eight public arcs, each started from the middle of an 11-frame fit, run
 to its last frame at least 1&nbsp;m from the hoop's center, and compared over the frames the fit
@@ -1293,7 +1352,7 @@ did not use:</p>
 
 <table class="data">
   <tr><th>Arc</th><th class="num">RMS distance, no drag (cm)</th><th class="num">RMS distance, drag (cm)</th>
-      <th class="num">change (cm), + is further from the ball</th><th class="num">drag moves the last frame by (cm)</th></tr>
+      <th class="num">change (cm), + is farther from the ball</th><th class="num">drag moves the last frame by (cm)</th></tr>
   <tr><td>79</td><td class="num">5.8</td><td class="num">10.4</td><td class="num">+4.6</td><td class="num">15.7</td></tr>
   <tr><td>818</td><td class="num">10.1</td><td class="num">9.5</td><td class="num">&minus;0.6</td><td class="num">18.8</td></tr>
   <tr><td>1226</td><td class="num">11.3</td><td class="num">6.0</td><td class="num">&minus;5.3</td><td class="num">16.1</td></tr>
@@ -1305,63 +1364,37 @@ did not use:</p>
 </table>
 
 <p>On every arc drag moves the last-frame prediction by between 10.7 and 21.0&nbsp;cm, about two
-to four times that 5.1&nbsp;cm floor. It brings the prediction closer on six of the eight, by more
-than 3&nbsp;cm (a threshold about the size of the noise on one axis) on two of them (1226 and
-431), and it moves it further away by more than that on one (79). The other five change by less
-than 3&nbsp;cm. Started from release instead, drag comes
-out further from the ball on seven of the eight, so the choice of starting state may decide the
-verdict. These eight arcs were picked to show particular behaviors on earlier pages (arc 79 is the
-clean one), so they are not a sample of shots, and they do not settle whether drag is worth adding
-in general.</p>
+to four times the 5.1&nbsp;cm floor. It brings the prediction closer on six of the eight, by more
+than 3&nbsp;cm (about the size of the noise on one axis) on two of them (1226 and 431). It moves
+the prediction farther away by more than that on one (79), and the other five change by less than
+3&nbsp;cm. These eight arcs were picked to show particular behaviors on earlier pages, so they are not a sample of shots, and they do not settle whether drag is worth
+adding in general.</p>
 
-<div class="check">
-  <span class="label">Check</span>
-  <ol>
-    <li>Write the state and its rate for a pendulum, <em>θ̈</em> = −(<em>g</em>/<em>L</em>)
-    sin <em>θ</em>.
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>The equation is second order, so the state is the pair of the angle and its rate:</p>
-     <p><strong>s</strong> = (&theta;, &omega;), where &omega; = &theta;&#775;, and the rate of the
-state is d<strong>s</strong>/d<em>t</em> = (&omega;, &minus;(<em>g</em>/<em>L</em>)
-sin&thinsp;&theta;).</p>
-     <p>The first component is the definition of &omega;, and the second comes from the equation of
-motion. A second-order equation in one variable becomes a first-order system in two, at
-the cost of carrying the derivative as a variable in its own right. Nothing about the stepping
-method changes. The same <code>step</code> function advances this state, since it uses only the
-state and its rate.</p></div></details></li>
-    <li>A colleague integrates the x and y motion of a projectile with quadratic drag in two
-    separate loops. What will go wrong, and at what point in the flight will it be worst?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Quadratic drag is &minus;<em>k</em>|<strong>v</strong>|<strong>v</strong>, and
-|<strong>v</strong>| = &radic;(<em>v<sub>x</sub></em>&sup2; + <em>v<sub>y</sub></em>&sup2;)
-couples the two directions. Two separate loops can only use each component's own speed, so each
-axis is decelerated as though the other were stationary. Since |<strong>v</strong>| is never
-smaller than either component, the decoupled version always underestimates the
-drag. The ball flies too far and too high, and the error is one-signed, so it
-accumulates.</p>
-     <p>Worst, relative to the true drag, near the apex for the vertical equation. There
-<em>v<sub>y</sub></em> passes through zero while the ball is still moving fast horizontally, so
-the decoupled vertical drag (proportional to <em>v<sub>y</sub></em>&sup2;) shrinks much faster
-than the true one (proportional to |<strong>v</strong>|<em>v<sub>y</sub></em>), and the ratio
-between them grows without bound. For the horizontal equation the worst points are typically
-launch and landing, where the vertical component is largest. The tell in a result is a fitted
-drag coefficient that differs between the way up and the way down, though the coefficient
-belongs to the ball.</p></div></details></li>
-    <li>Two masses connected by a spring, each free to move in one direction. How large is the
-    state, and what is the rate of each component?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Four components: <strong>s</strong> = (<em>x</em>&#8321;, <em>x</em>&#8322;,
-<em>v</em>&#8321;, <em>v</em>&#8322;), two positions and two velocities. Two masses, one degree
-of freedom each, second order in each, so 2 &times; 2. With extension <em>e</em> =
-<em>x</em>&#8322; &minus; <em>x</em>&#8321; &minus; <em>L</em>&#8320; and stiffness <em>k</em>:</p>
-     <p>d<em>x</em>&#8321;/d<em>t</em> = <em>v</em>&#8321;<br> d<em>x</em>&#8322;/d<em>t</em> =
-<em>v</em>&#8322;<br> d<em>v</em>&#8321;/d<em>t</em> = +<em>ke</em>/<em>m</em>&#8321;<br>
-d<em>v</em>&#8322;/d<em>t</em> = &minus;<em>ke</em>/<em>m</em>&#8322;</p>
-     <p>The signs are the third
-law. The spring pulls the two masses toward each other when stretched, so the forces are equal
-and opposite, and the accelerations differ by the mass ratio.</p>
-     <p>The rule generalizes: two components per degree of freedom for a second-order
-system. Six masses in three dimensions is a state of 36, and the stepping code is unchanged.
-Writing the step against a state vector is what lets the same code handle all 36.</p></div></details></li>
-  </ol>
-</div>
+<h3 id="where-the-fit-places-the-state">Where the Fit Places the Starting State</h3>
+
+<p>This part is optional. It explains why the fit's state is taken at frame 5, and nothing above
+depends on it.</p>
+
+<p>A straight line has one slope, so the fit gives the same horizontal velocity at every frame. With
+drag the ball is slowing, and that slope is roughly its average velocity over the 11 fitted frames,
+which is likely close to the velocity at their middle. At frame 0 the ball was moving faster than
+that, by about the horizontal drag deceleration times half of the 0.4&nbsp;s the fitted frames
+span. The horizontal drag is 0.67&nbsp;m/s² at frame 5 (from $a_x$ = 0.51 and $a_y$ =
+&minus;0.43), and 0.67 times 0.2&nbsp;s gives 0.13&nbsp;m/s on this shot. Taking the fitted
+velocity as the velocity at frame 0 starts the drag run 0.13&nbsp;m/s short. The table gives the
+fitted state at each frame:</p>
+
+<table class="data">
+  <tr><th>State taken at</th><th class="num">x, y, z (m)</th><th class="num">v<sub>x</sub>, v<sub>y</sub>, v<sub>z</sub> (m/s)</th><th class="num">RMS distance, no drag</th><th class="num">RMS distance, drag</th></tr>
+  <tr><td>frame 0, the data set's release mark</td><td class="num">6.43, 3.20, 3.46</td><td class="num">&minus;4.73, 3.97, 4.71</td><td class="num">5.8&nbsp;cm</td><td class="num">19.0&nbsp;cm</td></tr>
+  <tr><td>middle of the fit, frame 5</td><td class="num">5.48, 4.00, 4.20</td><td class="num">&minus;4.73, 3.97, 2.75</td><td class="num">5.8&nbsp;cm</td><td class="num">10.4&nbsp;cm</td></tr>
+</table>
+
+<p>Without drag the starting frame makes no difference. The fitted lines and parabola are the same
+functions whichever frame the time is measured from, and a drag-free run follows them, which is
+also a check on the stepper. With drag, starting at frame 0 adds 8.6&nbsp;cm on arc 79. Started
+from frame 0, drag comes out farther from the ball on seven of the eight arcs, so the choice of
+starting frame may decide the verdict.</p>
 
 <h2 id="terms-used-on-this-page">Terms Used on This Page</h2>
 
@@ -1388,11 +1421,11 @@ and RK4 on an equation you write, with the order measured from the run.</p>
   </script>
   
 
-  <script type="module" src="js/bundle/state-as-a-vector.js?v=20261109124015"></script>
+  <script type="module" src="js/bundle/state-as-a-vector.js?v=20261113083220"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-09">November 9, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-11">November 11, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

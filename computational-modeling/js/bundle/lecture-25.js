@@ -1253,23 +1253,418 @@ setTimeout(() => {
   });
 }, 0);
 
-/* Lecture 25's own figure, on the second system of the notes page.
+/* Lecture 25's own figures, on the two worked problems: a belted occupant and
+   a line of cars.
+   lec25-loop:       the loop for any system: state, rate function, step line;
+                     ball, occupant, 20 cars and the slope lab's 1,906 grains
+                     (animated).
+   lec25-grain:      the lab slope's state, six numbers a grain (animated).
+   The slope lab (DEM, read-only facts from DEM-GPU/sim/classroom/
+   base_scenario.json): 1,906 moving grains on 185 fixed floor grains,
+   0.1 ms steps, 240,000 of them. The run clip is data/img/dem-run-15.mp4.
    The occupant: NHTSA test 10642 (2019 BMW X5 into a barrier), the rear
    crossmember's x acceleration, data/test10642-crossmember-x.json, 4501 samples
    at 12 500 Hz from -50 ms. A 75 kg occupant on a 296 kN/m belt with
    2.8 kN s/m of damping, stepped by Euler at the record's own interval.
-   lec25-occupant: travel relative to the car, peaking at 105.0 mm at 70.5 ms.
-   Hosts are found by data-fig. */
+   lec25-pulse:      the record in g; the car stops 62 ms after impact.
+   lec25-belt:       the model's belt and occupant moving with the travel, beside
+                     the travel curve, peaking at 105.0 mm at 70.5 ms (animated).
+   lec25-ivp:        the first 30 ms of the record with solve_ivp's default steps.
+   lec25-free:       the belt's spring and damper with no forcing, from 100 mm
+                     (animated): one swing 105 ms, 14 mm left after it.
+   lec25-afree:      IDM open-road acceleration against speed.
+   lec25-wantv:      the wanted gap g0 + v T against speed.
+   lec25-wantdv:     the wanted gap at 8 m/s against the closing speed.
+   The line of cars: data/i80-leader-1673.json, a car recorded on NGSIM I-80
+   (lane 4, 4:08 pm), and 20 cars behind it following IDM with the "normal"
+   NGSIM class of Chris's Traffic Sim calibration (v_d 30.2 m/s, T 1.39 s,
+   g0 1.95 m, a_max 1.27, b 1.7 m/s^2, delta 4, length 4.4 m), the wanted gap's
+   dynamic part held at or above 0 as in the sim, Euler h = 0.1 s.
+   lec25-leader:     the recorded car's speed, 0.45 m/s lowest at 31 s.
+   lec25-chainstate: the chain's state and what each car's rate reads (animated).
+   lec25-gapacc:     IDM acceleration against the gap at 8 m/s, level and closing
+                     at 3 m/s: zero at 13.1 and 21.3 m.
+   lec25-platoon:    the road and the 21 trajectories, the slowdown running back
+                     at 14.4 km/h (animated).
+   lec25-measured:   every car in lane 4 of I-80 from 470 to 600 s
+                     (data/i80-lane4.json), with lines at the measured 18.6 km/h
+                     and the model's 14.4 km/h through the recorded car's stop.
+                     18.6 km/h: median of 249 detector pairs 100-300 m apart in
+                     lanes 2-5, by cross-correlating speed series (IQR 16.7-21.3).
+   An animated figure plays when its slide is shown, ends on its last frame,
+   and a Replay button under it runs it again. Hosts are found by data-fig. */
 (() => {
   const hosts = f => document.querySelectorAll('[data-fig="' + f + '"] .fig-body');
   const any = (...fs) => fs.some(f => hosts(f).length);
-  const axis = (xr, yr, xt, yt, xl, yl) => [
-    ...xt.map(v => ({x: v, y: yr[0], dy: 13, anchor: 'middle', text: String(v)})),
+  const axis = (xr, yr, xt, yt, xl, yl, fx = v => String(v)) => [
+    ...xt.map(v => ({x: v, y: yr[0], dy: 13, anchor: 'middle', text: fx(v)})),
     ...yt.map(v => ({x: xr[0], y: v, dx: 4, dy: 4, anchor: 'start', text: String(v)})),
     {x: xr[1], y: yr[0], dy: -5, anchor: 'end', text: xl},
     {x: xr[0], y: yr[1], dx: 4, dy: 10, anchor: 'start', text: yl}];
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (tag, at, parent) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in at) e.setAttribute(k, at[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  };
+  /* text with subscripts after an underscore, e.g. 'x_20' */
+  const label = (parent, x, y, s, at = {}) => {
+    const t = el('text', {x, y, ...at}, parent);
+    s.split(/(_[a-z0-9]+)/).forEach(p => {
+      if (!p) return;
+      if (p[0] === '_') { const q = el('tspan', {'baseline-shift': 'sub', 'font-size': '72%'}, t); q.textContent = p.slice(1); }
+      else t.appendChild(document.createTextNode(p));
+    });
+    return t;
+  };
 
-  if (any('lec25-occupant')) fetch('data/test10642-crossmember-x.json').then(r => r.json()).then(d => {
+  /* draw(i) for i = 0 .. n-1, wait(i) ms apart. The still state is draw(n - 1). */
+  const animate = (host, n, wait, draw) => {
+    draw(n - 1);
+    const slide = host.closest('.deck-slide');
+    let timer = null;
+    const play = () => {
+      clearTimeout(timer);
+      let i = 0;
+      const tick = () => { draw(i); i++; if (i < n) timer = setTimeout(tick, wait(i)); };
+      tick();
+    };
+    /* a button, because the deck reads a click anywhere else as "next slide" */
+    const fig = host.closest('figure');
+    if (fig && slide) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'replay'; b.textContent = 'Replay';
+      b.addEventListener('click', play);
+      fig.after(b);
+    }
+    if (slide) {
+      let was = slide.classList.contains('on');
+      if (was) play();
+      new MutationObserver(() => {
+        const on = slide.classList.contains('on');
+        if (on && !was) play();
+        if (!on) clearTimeout(timer);
+        was = on;
+      }).observe(slide, {attributes: true, attributeFilter: ['class']});
+    }
+  };
+
+  /* lec25-loop: the loop for any system. The state and the rate function change
+     with the system and the step line does not. Steps 0-3 light one system
+     each; the still state shows all four. */
+  hosts('lec25-loop').forEach(host => {
+    const svg = el('svg', {viewBox: '0 0 460 244', class: 'loop', role: 'img',
+      'aria-label': 'Three boxes in a loop: the state, the rate function, and the step line s = s + h times the rate. The state is 6 numbers for the ball, 2 for the occupant, 40 for 20 cars and 11,436 for the slope lab; the rate is gravity and drag, the belt and the crash record, each driver and the car ahead, or contacts, friction and bonds. The step line is the same for all four.'}, host);
+    const defs = el('defs', {}, svg);
+    const mk = el('marker', {id: 'loop-h', viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto'}, defs);
+    el('path', {d: 'M0 0L10 5L0 10z', fill: '#6b655a'}, mk);
+    const box = (x, y, w, h, title) => {
+      el('rect', {x, y, width: w, height: h, rx: 6, class: 'bx'}, svg);
+      if (title) el('text', {x: x + w / 2, y: y + 19, 'text-anchor': 'middle', class: 'hd'}, svg).textContent = title;
+    };
+    box(8, 8, 196, 140, 'state');
+    box(256, 8, 196, 140, 'rate function');
+    box(118, 184, 224, 48, '');
+    el('text', {x: 230, y: 214, 'text-anchor': 'middle', class: 'step'}, svg).textContent = 's = s + h × rate(t, s)';
+    el('line', {x1: 206, y1: 78, x2: 252, y2: 78, class: 'arr', 'marker-end': 'url(#loop-h)'}, svg);
+    el('path', {d: 'M354 150V206H346', class: 'arr', fill: 'none', 'marker-end': 'url(#loop-h)'}, svg);
+    el('path', {d: 'M116 208H106V152', class: 'arr', fill: 'none', 'marker-end': 'url(#loop-h)'}, svg);
+    const rows = [['ball: 6 numbers', 'gravity and drag'], ['occupant: 2 numbers', 'belt and crash record'],
+                  ['20 cars: 40 numbers', 'each driver and the car ahead'], ['slope lab: 11,436 numbers', 'contacts, friction and bonds']];
+    const txt = rows.map((r, i) => [el('text', {x: 106, y: 52 + 25 * i, 'text-anchor': 'middle'}, svg),
+                                    el('text', {x: 354, y: 52 + 25 * i, 'text-anchor': 'middle'}, svg)]);
+    txt.forEach((p, i) => { p[0].textContent = rows[i][0]; p[1].textContent = rows[i][1]; });
+    animate(host, 5, () => 1500, n => txt.forEach((p, i) => p.forEach(t => t.classList.toggle('dim', n < 4 && i !== n))));
+  });
+
+  /* lec25-grain: a patch of 28 grains from the lab slope's starting packing
+     (classroom/base_scenario.json of the DEM, positions relative to the grain
+     at (0.56, 17.0) m, radii in m). The marked grain moves and turns, so its six
+     numbers are the position, the velocity, the rotation and the rotation rate. */
+  hosts('lec25-grain').forEach(host => {
+    const G = [[-1.71, -4.97, 1.045], [3.87, -4.08, 1.001], [-4.68, -2.48, 1.066], [-2.45, -2.85, 1.202], [1.96, -4.78, 0.831],
+      [4.0, -2.02, 1.06], [-3.44, -0.95, 0.922], [0.14, -4.46, 0.879], [2.24, -3.04, 0.932], [-2.11, 0.7, 1.202],
+      [-0.02, -2.31, 1.283], [2.03, -0.92, 1.203], [-4.88, 0.05, 0.827], [-0.53, 2.29, 1.057], [0.0, 0.0, 1.026],
+      [3.35, 0.95, 1.095], [4.95, 0.0, 0.769], [-4.19, 2.03, 1.271], [-0.87, 4.14, 0.825], [1.35, 1.49, 0.987],
+      [3.71, 3.26, 1.253], [5.98, -1.24, 0.852], [-2.31, 3.15, 0.922], [1.13, 3.81, 1.196], [-3.92, 4.38, 1.096],
+      [-1.68, 5.7, 0.945], [0.4, 6.08, 1.173], [5.12, 1.69, 0.826]];
+    const S = 15.5, CX = 124, CY = 100, X = x => CX + S * x, Y = y => CY - S * y;
+    const svg = el('svg', {viewBox: '0 0 460 200', class: 'grain', role: 'img',
+      'aria-label': 'A patch of 28 round grains from the lab slope, packed together. One grain is marked. A dot at its center is labeled x, y, an arrow from it is labeled v_x, v_y, and a line from its center to its edge turns as it rotates, labeled rotation and rotation rate. Beside it: 6 numbers a grain, times 1,906 grains, makes 11,436 numbers in the state.'}, host);
+    const defs = el('defs', {}, svg);
+    const mk = el('marker', {id: 'gr-h', viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: 'auto'}, defs);
+    el('path', {d: 'M0 0L10 5L0 10z', fill: '#8A6508'}, mk);
+    G.forEach((g, i) => { if (i !== 14) el('circle', {cx: X(g[0]), cy: Y(g[1]), r: S * g[2], class: 'gr'}, svg); });
+    const me = el('g', {}, svg);
+    el('circle', {cx: 0, cy: 0, r: S * 1.026, class: 'gh'}, me);
+    const mark = el('line', {x1: 0, y1: 0, x2: S * 1.026, y2: 0, class: 'mark'}, me);
+    el('circle', {cx: 0, cy: 0, r: 2.6, class: 'ctr'}, me);
+    el('line', {x1: 0, y1: 0, x2: 44, y2: -16, class: 'vel', 'marker-end': 'url(#gr-h)'}, me);
+    el('path', {d: 'M' + (S * 1.3) + ' 0A' + (S * 1.3) + ' ' + (S * 1.3) + ' 0 0 0 ' + (S * 1.3 * Math.cos(1.2)).toFixed(1) + ' ' + (-S * 1.3 * Math.sin(1.2)).toFixed(1), class: 'spin', fill: 'none', 'marker-end': 'url(#gr-h)'}, me);
+    label(me, -4, 6, 'x, y', {'text-anchor': 'end', class: 'gl'});
+    label(me, 50, -14, 'v_x, v_y', {class: 'gl'});
+    label(me, 4, -28, 'θ, ω', {class: 'gl'});
+    [['each grain: position, velocity,', 0], ['rotation and rotation rate', 1], ['6 numbers × 1,906 grains', 3], ['= 11,436 numbers in the state', 4]]
+      .forEach(([t, k]) => { el('text', {x: 268, y: 62 + 22 * k, class: k > 2 ? 'big' : ''}, svg).textContent = t; });
+    const NF = 60;
+    animate(host, NF, () => 50, f => {
+      const u = f / (NF - 1), dx = 9 * u, dy = -3 * u, th = -2.2 * u;
+      me.setAttribute('transform', 'translate(' + (X(0) + dx).toFixed(1) + ' ' + (Y(0) + dy).toFixed(1) + ')');
+      mark.setAttribute('x2', (S * 1.026 * Math.cos(th)).toFixed(1)); mark.setAttribute('y2', (S * 1.026 * Math.sin(th)).toFixed(1));
+    });
+  });
+
+
+  /* lec25-chainstate: the chain's state, a position and a speed for each car;
+     each car's rate reads the car ahead. The arrows appear from the front back. */
+  hosts('lec25-chainstate').forEach(host => {
+    const svg = el('svg', {viewBox: '0 0 460 150', class: 'chainst', role: 'img',
+      'aria-label': 'A line of cars on a road, the recorded car in front at the right, then car 1, car 2, car 3 and so on back to car 20 at the left. Under each car its two numbers, its position x and speed v. An arrow from each car to the one behind it reads: gap and closing speed.'}, host);
+    const defs = el('defs', {}, svg);
+    const mk = el('marker', {id: 'cs-h', viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: 'auto'}, defs);
+    el('path', {d: 'M0 0L10 5L0 10z', fill: '#8A6508'}, mk);
+    el('line', {x1: 4, x2: 456, y1: 92, y2: 92, class: 'road'}, svg);
+    const cars = [{x: 392, name: 'recorded', sub: 'from I-80'}, {x: 300, name: 'car 1', sub: 'x_1, v_1'},
+                  {x: 208, name: 'car 2', sub: 'x_2, v_2'}, {x: 116, name: 'car 3', sub: 'x_3, v_3'},
+                  {x: 14, name: 'car 20', sub: 'x_20, v_20'}];
+    cars.forEach((c, i) => {
+      el('rect', {x: c.x, y: 72, width: 54, height: 20, rx: 5, class: i ? 'car' : 'rec'}, svg);
+      el('text', {x: c.x + 27, y: 112, 'text-anchor': 'middle'}, svg).textContent = c.name;
+      label(svg, c.x + 27, 128, c.sub, {'text-anchor': 'middle', class: 'vars'});
+    });
+    el('text', {x: 92, y: 86, 'text-anchor': 'middle', class: 'dots'}, svg).textContent = '…';
+    const arrows = [0, 1, 2].map(i => {
+      const a = cars[i].x + 4, b = cars[i + 1].x + 50;
+      const g = el('g', {class: 'ar'}, svg);
+      el('path', {d: 'M' + a + ' 68Q' + (a + b) / 2 + ' 30 ' + b + ' 68', class: 'reads', fill: 'none', 'marker-end': 'url(#cs-h)'}, g);
+      if (!i) el('text', {x: 230, y: 20, 'text-anchor': 'middle', class: 'rd'}, g).textContent = 'each car reads the gap to the car ahead and how fast it is closing';
+      return g;
+    });
+    animate(host, 4, () => 700, n => arrows.forEach((g, i) => g.classList.toggle('on', i < n)));
+  });
+
+  /* lec25-gapacc: the IDM acceleration against the gap at 8 m/s, with the car
+     ahead at the same speed and closing at 3 m/s. Zero at 13.1 and 21.3 m. */
+  hosts('lec25-gapacc').forEach(host => {
+    const P = {v0: 30.2, T: 1.39, s0: 1.95, a: 1.27, b: 1.7}, v = 8;
+    const acc = (g, dv) => P.a * (1 - (v / P.v0) ** 4 - ((P.s0 + Math.max(0, v * P.T + v * dv / (2 * Math.sqrt(P.a * P.b)))) / g) ** 2);
+    const xr = [0, 60], yr = [-4, 2];
+    const curve = dv => { const x = [], y = [];
+      for (let g = 2; g <= 60; g += 0.1) { const a = acc(g, dv); if (a >= yr[0]) { x.push(g); y.push(a); } }
+      return {x, y}; };
+    const zero = dv => { let lo = 2, hi = 60; for (let k = 0; k < 60; k++) { const m = (lo + hi) / 2; if (acc(m, dv) < 0) lo = m; else hi = m; } return lo; };
+    const z0 = zero(0), z2 = zero(3);
+    diagram(host, {w: 440, h: 168, xRange: xr, yRange: yr, zero: true,
+      alt: 'The model\'s acceleration against the gap to the car ahead, at 8 m/s. With the car ahead at the same speed it is zero at a gap of 13.1 m, braking below that and speeding up above it, toward 1.26 m/s squared far behind. Closing at 3 m/s, the zero moves out to 21.3 m.',
+      curves: [{...curve(0)}, {...curve(3), cls: 'alt'}],
+      points: [{x: z0, y: 0}, {x: z2, y: 0, cls: 'redot'}],
+      notes: [...axis(xr, yr, [0, 20, 40, 60], [-4, -2, 2], 'gap to the car ahead (m) →', '↑ acceleration (m/s²)'),
+        {x: z0, y: 0, dx: -4, dy: -8, anchor: 'end', cls: 'acc', text: 'same speed: ' + z0.toFixed(1) + ' m'},
+        {x: z2, y: 0, dx: 5, dy: 15, anchor: 'start', cls: 'hi', text: 'closing at 3 m/s: ' + z2.toFixed(1) + ' m'},
+        {x: 60, y: acc(60, 0), dx: -2, dy: -8, anchor: 'end', text: 'far behind: up to ' + acc(1e6, 0).toFixed(2) + ' m/s²'}]});
+  });
+
+  /* lec25-free: the belt's spring and damper with no forcing, the occupant
+     pulled 100 mm forward and let go: u = A e^(-zeta wn t)(cos wd t + (zeta wn / wd) sin wd t),
+     wn = sqrt(k/m) = 62.8 rad/s, zeta = c / (2 sqrt(k m)) = 0.30 (animated). */
+  hosts('lec25-free').forEach(host => {
+    const M = 75, K = 296e3, C = 2.8e3, wn = Math.sqrt(K / M), z = C / (2 * Math.sqrt(K * M)), wd = wn * Math.sqrt(1 - z * z);
+    const u = t => 100 * Math.exp(-z * wn * t) * (Math.cos(wd * t) + z * wn / wd * Math.sin(wd * t));
+    const T = [], U = [];
+    for (let t = 0; t <= 0.3 + 1e-9; t += 0.001) { T.push(t * 1e3); U.push(u(t)); }
+    const Td = 2 * Math.PI / wd, xr = [0, 300], yr = [-60, 140], NF = 61;
+    animate(host, NF, () => 40, f => {
+      const m = Math.round(f / (NF - 1) * (T.length - 1)) + 1, end = f === NF - 1;
+      host.textContent = '';
+      diagram(host, {w: 440, h: 180, xRange: xr, yRange: yr, zero: true,
+        alt: 'The occupant\'s travel with no forcing, pulled 100 mm forward and let go. It swings back past zero to about 38 mm the other way, returns to about 14 mm, and has nearly stopped by 300 ms. One full swing takes ' + (Td * 1e3).toFixed(0) + ' ms.',
+        leads: end ? [{from: [0, 116], to: [Td * 1e3, 116], cls: 'level'}] : [],
+        curves: [{x: T.slice(0, m), y: U.slice(0, m)}],
+        points: [{x: T[m - 1], y: U[m - 1]}],
+        notes: [...axis(xr, yr, [0, 100, 200], [-50, 50, 100], 'time (ms) →', '↑ travel u (mm)'),
+          ...(end ? [{x: Td * 1e3 + 6, y: 116, dy: 4, anchor: 'start', cls: 'hi', text: 'one swing, ' + (Td * 1e3).toFixed(0) + ' ms'},
+                     {x: Td * 1e3, y: u(Td), dx: 6, dy: -6, anchor: 'start', cls: 'hi', text: u(Td).toFixed(0) + ' mm left after one swing'}] : [])]});
+    });
+  });
+
+  /* lec25-afree: IDM acceleration on an open road, a_max (1 - (v / v_d)^4). */
+  hosts('lec25-afree').forEach(host => {
+    const A = 1.27, VD = 30.2, xr = [0, 34], yr = [-0.2, 1.6], V = [], Y = [];
+    for (let v = 0; v <= 32; v += 0.1) { V.push(v); Y.push(A * (1 - (v / VD) ** 4)); }
+    diagram(host, {w: 440, h: 180, xRange: xr, yRange: yr, zero: true,
+      alt: 'Acceleration on an open road against the driver\'s speed. It is 1.27 m/s squared from a standstill, still 1.26 at 8 m/s and 1.03 at 20 m/s, then falls quickly to zero at the desired speed, 30.2 m/s.',
+      curves: [{x: V, y: Y}],
+      points: [{x: 0, y: A}, {x: 8, y: A * (1 - (8 / VD) ** 4)}, {x: VD, y: 0}],
+      notes: [...axis(xr, yr, [0, 10, 20, 30], [0.5, 1, 1.5], 'your speed v (m/s) →', '↑ acceleration (m/s²)'),
+        {x: 0, y: A, dx: 8, dy: 16, anchor: 'start', cls: 'acc', text: '1.27 m/s² from a stop'},
+        {x: VD, y: 0, dx: -8, dy: -22, anchor: 'end', cls: 'hi', text: 'zero at the desired speed, 30.2 m/s'}]});
+  });
+
+  /* lec25-wantv: the wanted gap at a steady speed, g0 + v T. */
+  hosts('lec25-wantv').forEach(host => {
+    const G0 = 1.95, TH = 1.39, xr = [0, 32], yr = [0, 50];
+    diagram(host, {w: 440, h: 180, xRange: xr, yRange: yr,
+      alt: 'The wanted gap against speed, with the car ahead at the same speed: 1.95 m at a standstill, rising in a straight line, 13.1 m at 8 m/s and 43.7 m at 30 m/s.',
+      curves: [{x: [0, 30], y: [G0, G0 + 30 * TH]}],
+      points: [{x: 0, y: G0}, {x: 8, y: G0 + 8 * TH}, {x: 30, y: G0 + 30 * TH}],
+      notes: [...axis(xr, yr, [0, 10, 20, 30], [10, 20, 30, 40], 'your speed v (m/s) →', '↑ wanted gap (m)'),
+        {x: 0, y: G0, dx: 8, dy: -8, anchor: 'start', cls: 'acc', text: 'g₀ = 1.95 m when stopped'},
+        {x: 8, y: G0 + 8 * TH, dx: 8, dy: 4, anchor: 'start', cls: 'hi', text: (Math.round((G0 + 8 * TH) * 10) / 10).toFixed(1) + ' m at 8 m/s'},
+        {x: 30, y: G0 + 30 * TH, dx: -8, dy: 4, anchor: 'end', cls: 'hi', text: (Math.round((G0 + 30 * TH) * 10 + 1e-9) / 10).toFixed(1) + ' m at 30 m/s'}]});
+  });
+
+  /* lec25-wantdv: the wanted gap at 8 m/s against the closing speed,
+     g0 + max(0, v T + v dv / (2 sqrt(a_max b))). */
+  hosts('lec25-wantdv').forEach(host => {
+    const G0 = 1.95, TH = 1.39, A = 1.27, B = 1.7, v = 8, xr = [-6, 5], yr = [0, 30];
+    const want = dv => G0 + Math.max(0, v * TH + v * dv / (2 * Math.sqrt(A * B)));
+    const X = [], Y = [];
+    for (let dv = -6; dv <= 5 + 1e-9; dv += 0.05) { X.push(dv); Y.push(want(dv)); }
+    diagram(host, {w: 440, h: 180, xRange: xr, yRange: yr,
+      alt: 'The wanted gap at 8 m/s against how fast you are closing on the car ahead. At 0 it is 13.1 m. Closing at 3 m/s it is 21.2 m. When the car ahead is pulling away the wanted gap shrinks, to 4.9 m at 3 m/s apart, and stays at the 1.95 m standstill gap beyond about 4.1 m/s apart.',
+      leads: [{from: [0, 0], to: [0, 29], cls: 'cast'}],
+      curves: [{x: X, y: Y}],
+      points: [{x: 0, y: want(0)}, {x: 3, y: want(3)}],
+      notes: [...axis(xr, yr, [-4, -2, 0, 2, 4], [10, 20], 'closing speed Δv (m/s) →', '↑ wanted gap at 8 m/s (m)', v => (v < 0 ? '−' : '') + Math.abs(v)),
+        {x: 0, y: want(0), dx: -6, dy: -6, anchor: 'end', cls: 'acc', text: 'same speed: ' + want(0).toFixed(1) + ' m'},
+        {x: 3, y: want(3), dx: -6, dy: -6, anchor: 'end', cls: 'hi', text: 'closing at 3 m/s: ' + want(3).toFixed(1) + ' m'},
+        {x: -6, y: 2, dx: 4, dy: -6, anchor: 'start', text: '← pulling away'}, {x: 5, y: 2, dx: -4, dy: -14, anchor: 'end', text: 'closing →'}]});
+  });
+
+  /* lec25-ivp: the first 30 ms of the record, with solve_ivp's own steps at its
+     default settings marked. Step times from scipy 1.x, RK45, rtol 1e-3, atol
+     1e-6, the occupant's rate with np.interp, recomputed 2026-11-12. */
+  hosts('lec25-ivp').forEach(host => {
+    const STEPS = [0.219, 0.497, 0.767, 1.082, 1.449, 1.92, 2.576, 3.08, 3.584, 4.117, 4.93, 5.834, 6.667, 7.928,
+      9.149, 9.855, 10.422, 10.985, 11.518, 12.166, 12.848, 13.614, 14.381, 15.072, 15.804, 16.469, 17.151,
+      17.909, 18.825, 19.861, 20.472, 21.084, 21.642, 22.251, 22.908, 23.53, 24.174, 24.949, 25.766, 26.815,
+      27.953, 28.979, 29.948];
+    fetch('data/test10642-crossmember-x.json').then(r => r.json()).then(d => {
+      const ms = [], g = [];
+      for (let i = 0; i < d.a.length; i++) {
+        const t = (d.t0 + i * d.dt) * 1e3;
+        if (t < 0) continue; if (t > 30) break;
+        ms.push(t); g.push(d.a[i] / 9.81);
+      }
+      const xr = [0, 30], yr = [-170, 40];
+      diagram(host, {w: 440, h: 190, xRange: xr, yRange: yr, zero: true,
+        alt: 'The first 30 ms of the car\'s recorded acceleration in g, one sample every 0.08 ms, spiking as low as 157 g at 10.8 ms. Dashed lines mark the times solve_ivp steps to with its default settings, about 0.7 ms apart, so each step spans about 9 samples, and the 157 g spike falls between the steps at 10.4 and 11.0 ms.',
+        leads: STEPS.map(t => ({from: [t, yr[0]], to: [t, yr[1] - 14], cls: 'cast'})),
+        curves: [{x: ms, y: g, cls: 'thin'}],
+        notes: [...axis(xr, yr, [0, 10, 20, 30], [-150, -100, -50], 'time from impact (ms) →', '↑ car\'s acceleration (g)'),
+          {x: 30, y: 26, anchor: 'end', cls: 'hi', text: 'dashed: solve_ivp\'s own steps, about 9 samples apart'},
+          {x: 30, y: -128, anchor: 'end', text: 'peak travel: 103.8 mm by default, 104.8 mm with max_step = 80 \u00b5s'}]});
+    });
+  });
+
+  if (any('lec25-leader', 'lec25-platoon', 'lec25-measured')) fetch('data/i80-leader-1673.json').then(r => r.json()).then(L => {
+    /* the recorded leader, vehicle 1673 in lane 4, 70.1 s from 484.7 s into the
+       record; 20 IDM followers ("normal" NGSIM class, rounded), Euler h = 0.1 s,
+       started at the equilibrium spacing for the leader's first speed */
+    const dt = L.dt, X = L.y, V = L.v, nT = X.length, tEnd = (nT - 1) * dt;
+    const at = (arr, t) => { const f = t / dt, i = Math.max(0, Math.min(nT - 2, Math.floor(f))); return arr[i] + (f - i) * (arr[i + 1] - arr[i]); };
+    const P = {v0: 30.2, T: 1.39, s0: 1.95, a: 1.27, b: 1.7, len: 4.4}, N = 20, H = 0.1;
+    const se = (P.s0 + V[0] * P.T) / Math.sqrt(1 - (V[0] / P.v0) ** 4);
+    let x = Array.from({length: N}, (_, i) => X[0] - (i + 1) * (se + P.len)), v = Array(N).fill(V[0]);
+    const xs = [x.slice()], vs = [v.slice()], steps = Math.round(tEnd / H);
+    for (let k = 0; k < steps; k++) {
+      const t = k * H, xa = [at(X, t), ...x.slice(0, -1)], va = [at(V, t), ...v.slice(0, -1)];
+      const acc = v.map((vi, i) => {
+        const gap = xa[i] - x[i] - P.len, want = P.s0 + Math.max(0, vi * P.T + vi * (vi - va[i]) / (2 * Math.sqrt(P.a * P.b)));
+        return P.a * (1 - (vi / P.v0) ** 4 - (want / gap) ** 2); });
+      x = x.map((xi, i) => xi + H * v[i]); v = v.map((vi, i) => vi + H * acc[i]);
+      xs.push(x.slice()); vs.push(v.slice());
+    }
+    const tt = xs.map((_, k) => k * H);
+    /* each vehicle's lowest speed: where and when; the leader's from its record */
+    const il = V.indexOf(Math.min(...V));
+    const dips = [{t: il * dt, x: X[il], v: V[il]}];
+    for (let j = 0; j < N; j++) { let k = 0; vs.forEach((r, q) => { if (r[j] < vs[k][j]) k = q; }); dips.push({t: tt[k], x: xs[k][j], v: vs[k][j]}); }
+    const n = dips.length, mt = dips.reduce((p, q) => p + q.t, 0) / n, mx = dips.reduce((p, q) => p + q.x, 0) / n;
+    const slope = dips.reduce((p, q) => p + (q.t - mt) * (q.x - mx), 0) / dips.reduce((p, q) => p + (q.t - mt) ** 2, 0);
+    const kmh = slope * 3.6, ix = mx - slope * mt;
+
+    hosts('lec25-leader').forEach(host => {
+      const xr = [0, 72], yr = [0, 13], tl = X.map((_, i) => i * dt);
+      diagram(host, {w: 440, h: 190, xRange: xr, yRange: yr,
+        alt: 'The recorded car\'s speed over the 70 s it was in view on I-80. It starts near 11 m/s, slows to 0.45 m/s at 31 s, and speeds back up to about 10 m/s.',
+        curves: [{x: tl, y: V}],
+        points: [{x: il * dt, y: V[il]}],
+        notes: [...axis(xr, yr, [0, 20, 40, 60], [5, 10], 'time (s) →', '↑ speed (m/s)'),
+          {x: il * dt, y: V[il], dx: -8, dy: 4, anchor: 'end', cls: 'hi', text: V[il].toFixed(2) + ' m/s at ' + (il * dt).toFixed(0) + ' s'},
+          {x: 72, y: 12, anchor: 'end', text: 'NGSIM I-80, lane 4, 4:08 pm'}]});
+    });
+
+    hosts('lec25-platoon').forEach(host => {
+      const strip = document.createElement('div'), plot = document.createElement('div');
+      host.append(strip, plot);
+      const xr = [0, 72], yr = [-470, 520], every = 5, nf = Math.floor(steps / every) + 1;
+      animate(host, nf, () => 50, f => {
+        const k = Math.min(steps, f * every), t = tt[k], end = f === nf - 1, xl = at(X, t), vl = at(V, t);
+        strip.textContent = ''; plot.textContent = '';
+        diagram(strip, {w: 440, h: 30, xRange: yr, yRange: [0, 1], axes: false,
+          alt: 'The road, with the recorded car and the 20 model cars as dots at their positions; slow cars are red.',
+          leads: [{from: [yr[0], 0.2], to: [yr[1], 0.2], cls: 'lead'}],
+          points: [...xs[k].map((p, j) => ({x: p, y: 0.2, r: 3.2, cls: vs[k][j] < 2 ? 'redot' : 'dot'})),
+                   {x: xl, y: 0.2, r: 3.8, cls: vl < 2 ? 'redot recd' : 'recd'}],
+          notes: [{x: yr[0], y: 0.95, dx: 2, anchor: 'start', text: t.toFixed(0) + ' s, red: slower than 2 m/s'},
+                  {x: yr[1], y: 0.95, anchor: 'end', text: 'driving direction →'}]});
+        const tlk = Math.min(nT - 1, Math.round(t / dt)), tlx = X.slice(0, tlk + 1).map((_, i) => i * dt);
+        const seen = dips.filter(q => q.t <= t);
+        diagram(plot, {w: 440, h: 160, xRange: xr, yRange: yr,
+          alt: 'Position along the road against time for the recorded car and the 20 model cars behind it. Every line rises, since every car moves forward. Each car\'s slowest moment comes later and farther back than the one ahead, along a line that runs back at 14.4 km/h.',
+          leads: end ? [{from: [dips[0].t, ix + slope * dips[0].t], to: [dips[n - 1].t + 4, ix + slope * (dips[n - 1].t + 4)], cls: 'tangent', over: true}] : [],
+          curves: [{x: tlx, y: X.slice(0, tlk + 1), cls: 'rectr'},
+                   ...Array.from({length: N}, (_, j) => ({x: tt.slice(0, k + 1), y: xs.slice(0, k + 1).map(r => r[j]), cls: 'cartr'}))],
+          points: seen.map(q => ({x: q.t, y: q.x, r: 2.6})),
+          notes: [...axis(xr, yr, [0, 20, 40, 60], [-400, -200, 200, 400], 'time (s) →', '↑ position along the road (m)'),
+            ...(end ? [{x: dips[n - 1].t + 4, y: ix + slope * (dips[n - 1].t + 4), dx: 0, dy: 16, anchor: 'end', cls: 'hi',
+                        text: 'slowest moments: back at ' + Math.abs(kmh).toFixed(1) + ' km/h'}] : [])]});
+      });
+    });
+
+    if (any('lec25-measured')) fetch('data/i80-lane4.json').then(r => r.json()).then(M => {
+      hosts('lec25-measured').forEach(host => {
+        const xr = [470, 600], yr = [0, 570], c = M.wave_kmh_measured / 3.6, cm = kmh / 3.6, ym = 140;
+        const t0 = 484.7 + dips[0].t, x0 = dips[0].x;
+        diagram(host, {w: 440, h: 200, xRange: xr, yRange: yr,
+          alt: 'Position against time for every car tracked in lane 4 of I-80 from 470 to 600 s. Bands where the lines flatten, cars slowing or stopped, run down and to the right: the slowdowns travel back along the road. A line through the recorded car\'s stop at the measured 18.6 km/h follows the bands; the model\'s 14.4 km/h line is shallower.',
+          leads: [{from: [t0, x0], to: [t0 + x0 / -c, 0], cls: 'tangent', over: true},
+                  {from: [t0, x0], to: [t0 + x0 / -cm, 0], cls: 'modl', over: true}],
+          curves: M.trajectories.map(r => ({x: r.y.map((_, i) => r.t0 + i * 0.5), y: r.y, cls: 'cartr'})),
+          points: [{x: t0, y: x0}],
+          notes: [...axis(xr, yr, [480, 520, 560], [100, 200, 300, 400], 'time into the recording (s) →', '↑ position along the road (m)'),
+            {x: t0 + (x0 - ym) / -c, y: ym, dx: -6, dy: 4, anchor: 'end', cls: 'hi', text: 'measured, ' + Math.abs(M.wave_kmh_measured).toFixed(1) + ' km/h'},
+            {x: t0 + (x0 - ym) / -cm, y: ym, dx: 6, dy: 4, anchor: 'start', cls: 'acc', text: 'model, ' + Math.abs(kmh).toFixed(1) + ' km/h'}]});
+      });
+    });
+  });
+
+  /* lec25-pulse: the record itself, in g, so the slide shows what the rate looks up */
+  if (any('lec25-pulse')) fetch('data/test10642-crossmember-x.json').then(r => r.json()).then(d => {
+    const ms = [], g = [];
+    let v = 0, stop = 0;
+    for (let i = 0; i < d.a.length; i++) {
+      const t = (d.t0 + i * d.dt) * 1e3;
+      /* the car's speed from impact, by adding up the record; it reaches zero at the stop */
+      if (t >= 0) { v += d.a[i] * d.dt; if (!stop && 15.65 + v <= 0) stop = t; }
+      if (t > 200) break;
+      ms.push(t); g.push(d.a[i] / 9.81);
+    }
+    hosts('lec25-pulse').forEach(host => {
+      const xr = [-10, 200], yr = [-165, 75];
+      diagram(host, {w: 440, h: 200, xRange: xr, yRange: yr, zero: true,
+        alt: 'The car\'s recorded acceleration in g against time from impact. It is near zero before impact, then a dense band of sharp spikes, mostly between about 60 g and 20 g of deceleration with one spike to 157 g at 11 ms, until the car stops at about 62 ms, and smaller swings after that.',
+        leads: [{from: [stop, yr[0]], to: [stop, yr[1] - 12], cls: 'level'}],
+        curves: [{x: ms, y: g, cls: 'thin'}],
+        notes: [...axis(xr, yr, [0, 50, 100, 150], [-150, -100, -50, 50], 'time from impact (ms) →', '↑ car\'s acceleration (g)'),
+          {x: stop, y: 52, dx: 5, anchor: 'start', cls: 'hi', text: 'car stopped, ' + Math.round(stop) + ' ms'},
+          {x: 200, y: -128, anchor: 'end', text: 'NHTSA test 10642, 2019 BMW X5, 15.65 m/s into a barrier'}]});
+    });
+  });
+
+  if (any('lec25-belt')) fetch('data/test10642-crossmember-x.json').then(r => r.json()).then(d => {
     const A = d.a, dt = d.dt, M = 75, K = 296e3, C = 2.8e3;
     /* the same Euler step as the page, one step per sample, so the rate only
        ever asks for the car's acceleration at a recorded time */
@@ -1281,16 +1676,52 @@ setTimeout(() => {
       const rate = [s[1], (-C * s[1] - K * s[0]) / M - A[i]];
       s = [s[0] + dt * rate[0], s[1] + dt * rate[1]];
     }
-    const upTo = ms.findIndex(t => t > 200);
-    hosts('lec25-occupant').forEach(host => {
-      const xr = [-10, 200], yr = [-60, 125];
-      diagram(host, {w: 440, h: 200, xRange: xr, yRange: yr, zero: true,
-        alt: 'The occupant\'s travel relative to the car against time from impact. It rises from about 10 ms to a peak of 105 mm at 70 ms, swings back to about 40 mm the other way near 130 ms, and settles by 200 ms.',
-        curves: [{x: ms.slice(0, upTo), y: u.slice(0, upTo)}],
-        points: [{x: ms[pk], y: u[pk], r: 3.6}],
-        notes: [...axis(xr, yr, [0, 50, 100, 150], [-50, 50, 100], 'time from impact (ms) →', '↑ travel relative to the car (mm)'),
-          {x: ms[pk], y: u[pk], dx: 7, dy: 2, anchor: 'start', cls: 'hi',
-           text: u[pk].toFixed(1) + ' mm at ' + ms[pk].toFixed(1) + ' ms'}]});
+    const i0 = ms.findIndex(t => t >= -10), upTo = ms.findIndex(t => t > 200);
+    const every = Math.round(2e-3 / dt);
+    hosts('lec25-belt').forEach(host => {
+      const row = document.createElement('div'); row.className = 'beltrow';
+      const pic = document.createElement('div'), plot = document.createElement('div');
+      row.append(pic, plot); host.appendChild(row);
+      /* the belt and occupant, drawn in the car; 0.55 px per mm of travel */
+      const svg = el('svg', {viewBox: '0 0 300 200', class: 'msd', role: 'img',
+        'aria-label': 'The model: a belt anchored to the car, a spring and a damper, holding a block for the occupant. The block moves forward as the travel grows, to 105 mm, then swings back.'}, pic);
+      el('rect', {class: 'car', x: 6, y: 30, width: 288, height: 150, rx: 10}, svg);
+      el('text', {x: 16, y: 47}, svg).textContent = 'car';
+      el('rect', {class: 'wall', x: 22, y: 62, width: 14, height: 90}, svg);
+      el('line', {class: 'restmark', x1: 180, x2: 180, y1: 60, y2: 160}, svg);
+      const spr = el('path', {class: 'spr'}, svg);
+      el('path', {class: 'dmp', d: 'M36 128H90M160 118H90V138H160'}, svg);
+      const rod = el('path', {class: 'dmp'}, svg);
+      const mass = el('rect', {class: 'mass', y: 70, width: 70, height: 76, rx: 4}, svg);
+      const mt = el('text', {y: 112, 'text-anchor': 'middle'}, svg); mt.textContent = 'occupant';
+      const clock = el('text', {x: 150, y: 18, 'text-anchor': 'middle', class: 'clock'}, svg);
+      const PX = 0.55;
+      const pose = um => {
+        const L = 180 + PX * um;
+        mass.setAttribute('x', L); mt.setAttribute('x', L + 35);
+        /* the spring: straight leads, eight zigzags between them */
+        const a = 36, y = 92, lead = 14, z = (L - a - 2 * lead) / 8;
+        let p = 'M' + a + ' ' + y + 'H' + (a + lead);
+        for (let k = 0; k < 8; k++) p += 'l' + (z / 2).toFixed(2) + ' ' + (k % 2 ? 10 : -10) + 'l' + (z / 2).toFixed(2) + ' ' + (k % 2 ? -10 : 10);
+        spr.setAttribute('d', p + 'H' + L);
+        const pis = 125 + PX * um;
+        rod.setAttribute('d', 'M' + pis + ' 120V136M' + pis + ' 128H' + L);
+      };
+      animate(host, Math.ceil((upTo - 1 - i0) / every) + 1, () => 40, f => {
+        const i = Math.min(upTo - 1, i0 + f * every), end = i === upTo - 1;
+        pose(u[i]);
+        clock.textContent = ms[i].toFixed(0) + ' ms after impact, travel ' + u[i].toFixed(0) + ' mm';
+        plot.textContent = '';
+        const xr = [-10, 200], yr = [-60, 125];
+        const k = end ? pk : i;
+        diagram(plot, {w: 300, h: 200, xRange: xr, yRange: yr, zero: true,
+          alt: 'The model occupant\'s travel relative to the car against time from impact. It rises from about 10 ms to a peak of 105 mm at 70.5 ms, swings back to about 40 mm the other way near 130 ms, and settles by 200 ms.',
+          curves: [{x: ms.slice(i0, i + 1), y: u.slice(i0, i + 1)}],
+          points: [{x: ms[k], y: u[k], r: 3.6}],
+          notes: [...axis(xr, yr, [0, 50, 100, 150], [-50, 50, 100], 'time from impact (ms) →', '↑ travel (mm)'),
+            ...(i >= pk ? [{x: ms[pk], y: u[pk], dx: 7, dy: 2, anchor: 'start', cls: 'hi',
+              text: u[pk].toFixed(0) + ' mm at ' + ms[pk].toFixed(1) + ' ms'}] : [])]});
+      });
     });
   });
 })();

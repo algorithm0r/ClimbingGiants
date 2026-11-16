@@ -969,10 +969,11 @@ function realNoiseRaw(n, sd = 1) {
 }
 
 /* The convergence study on the tracked shot, counted in evaluations. Each
-   stepper's step is halved from one step per frame, and each point is the
-   distance between a run's predicted position at the last free-flight frame and
-   the previous run's, plotted against the evaluations every run so far has
-   used. The precision slider moves the line two runs must agree within. */
+   stepper's step is halved from one step a frame, and each point is how far
+   the ball's position at frame 23 moved from the previous run's, plotted
+   against the evaluations every run so far has used. The precision slider
+   moves the line two runs must agree within. The runs stop before RK4's moves
+   reach rounding error, which the page's optional section covers. */
 
 const G = 9.81;
 const K = 0.016;          /* per meter, the value the notes pages use */
@@ -996,8 +997,8 @@ function line(tf, v) {
 /* the main trace is RK4; the other two are drawn as extra curves */
 const METHODS = [
   {key: 'euler', label: 'Euler', per: 1, levels: 15, cls: 'ghost'},
-  {key: 'heun',  label: 'Heun',  per: 2, levels: 11, cls: 'pred'},
-  {key: 'rk4',   label: 'RK4',   per: 4, levels: 8,  cls: 'trace'}
+  {key: 'heun',  label: 'Heun',  per: 2, levels: 8,  cls: 'pred'},
+  {key: 'rk4',   label: 'RK4',   per: 4, levels: 5,  cls: 'trace'}
 ];
 
 /* the position at the last frame after 18m steps, without storing the states */
@@ -1046,17 +1047,16 @@ mountDemo({
       for (const meth of METHODS) runs[meth.key] = study(meth, s0);
       return {runs};
     },
-    setting: 'The tracked shot (arc 79) stepped from frame 5 to the last free-flight frame, 0.72&nbsp;s later, ' +
-             'with <em>k</em>&nbsp;=&nbsp;0.016 per meter. Each stepper starts at one step per frame and halves the step. ' +
-             'Each point is how far the predicted position at the last frame moved from the run before, ' +
-             'against the evaluations of the rate used by every run so far.',
+    setting: 'The tracked shot (arc 79) stepped from frame 5 to frame 23, 0.72&nbsp;s later, ' +
+             'with <em>k</em>&nbsp;=&nbsp;0.016 per meter. Each stepper starts at one step a frame and halves the step. ' +
+             'Each point is how far the ball&rsquo;s position at frame 23 moved from the run before, ' +
+             'against the evaluations of the forces used by every run so far.',
     source: {kind: 'measured', text: 'SportVU optical tracking, 2015&ndash;16 NBA season, 25&nbsp;Hz. The starting state is a least-squares fit to the first 11 free-flight frames of one shot (arc 79), taken at frame 5. The drag constant is a choice from the range on page 25.'},
     caption: 'Euler is the dashed gray line, Heun the dotted red line and RK4 the solid line. ' +
-             'A study is done at the first point under the precision line. ' +
-             'RK4 levels off near 10⁻¹⁴&nbsp;m, where the change is rounding error.',
+             'A study is done at the first point under the precision line, and the readouts count its evaluations.',
     controls: [{key: 'lt', label: 'precision needed', min: -5, max: -1.5, step: 0.05,
                 value: Math.log10(0.003), fmt: v => fmtLen(Math.pow(10, v))}],
-    panels: [{label: 'change on halving', unit: 'm', height: 340, xAxis: true,
+    panels: [{label: 'moved on halving', unit: 'm', height: 340, xAxis: true,
               xLabel: 'evaluations in all runs so far', xUnit: '', xScale: 1, xLog: true, yLog: true}],
     readouts: [
       {key: 'euler', label: 'Euler'},
@@ -1087,8 +1087,8 @@ mountDemo({
       return {
         panels: [{x: rk.x, y: rk.y, range: [30, 1e6],
           opts: {
-            label: 'change on halving',
-            yRange: [1e-15, 1e-1],
+            label: 'moved on halving',
+            yRange: [1e-12, 1e-1],
             curves: [curve(METHODS[0]), curve(METHODS[1])],
             scatter: METHODS.map(m => ({...curve(m), cls: 'scatter', r: 2.5})),
             hlines: [{y: tol, text: 'precision needed'}]
@@ -1287,154 +1287,588 @@ setTimeout(() => {
   });
 }, 0);
 
-/* Lecture 26's own figures, all on the tracked shot (arc 79), time from frame
-   20, starting state from the 11-frame fit taken at frame 5, k = 0.016 per
-   meter. They reuse the notes page's demo module (shot, line, study, METHODS)
-   so the deck and the page step the same flight.
-   lec26-flight: the height stepped with and without drag against the frames.
-   lec26-euler: Euler's change on each halving, with the 3 mm line.
-   lec26-onestep: one 40 ms step from frame 5, Euler against Heun.
-   lec26-halving: all three steppers' changes against evaluations used.
-   Hosts are found by data-fig. */
+/* Lecture 26's own figures, all on the week's ball after release: example shot 1144
+   (data/example/train.json). Release at frame 10 (the A7 example rule), free
+   flight to frame 34, the last frame at least 1 m from the hoop across the
+   floor. The start is last week's fit of the first 11 flight frames, lines in
+   x and y and a parabola in z with g held at 9.81, taken at its middle, frame
+   15 (0.20 s after release). Drag k = 0.016 per meter. Every run steps the 19
+   frames from frame 15 to frame 34. "The path" is RK4 with very short steps.
+   The rate function, the line fit and the steppers come from the notes page's
+   demo module (shot, line, STEPPERS), so the deck and the page step alike.
+   lec26-problem: the fit frames, the state at frame 15, and frame 34 to find.
+   lec26-drag: the shot with and without drag, flown together (animated).
+   lec26-halve: Euler's step halved from 40 ms until the move is under 3 mm,
+   each run fading as the next draws (animated).
+   lec26-ends: the end of the flight zoomed in, each run's samples and end,
+   the move between ends (animated).
+   lec26-left: the moves still to come, closing on the path (animated).
+   lec26-evals / lec26-evals3: evaluations in each study, run by run (animated).
+   lec26-euler1 / lec26-heun1 / lec26-rk41: one 40 ms step from frame 15
+   (the last two animated).
+   lec26-halving: all three steppers' moves on halving (animated).
+   lec26-cost: evaluations each study needs against the precision asked for
+   (animated).
+   lec26-answer: the stepped flight, the tracked frames and frame 34.
+   Hosts are found by data-fig. An animation plays when its slide comes on and
+   has a Replay button, as lecture 23's sweep does. */
 (() => {
+  const FIGS = ['lec26-problem', 'lec26-drag', 'lec26-halve', 'lec26-ends', 'lec26-left', 'lec26-evals',
+                'lec26-evals3', 'lec26-euler1', 'lec26-heun1', 'lec26-rk41', 'lec26-halving', 'lec26-cost',
+                'lec26-answer'];
   const hosts = f => document.querySelectorAll('[data-fig="' + f + '"] .fig-body');
   const any = (...fs) => fs.some(f => hosts(f).length);
   const SUP = {'-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹'};
   const pow10 = v => '10' + String(v).split('').map(c => SUP[c]).join('');
   const L10 = Math.log10;
   const TOL = 0.003;
+  const fmtN = n => n.toLocaleString('en-US');
+  const clamp = v => Math.max(0, Math.min(1, v));
+  const ID = 1144, REL = 10, LAST = 34, MID = 5;   /* MID: frame 15 is the 6th flight frame */
+  const FR = LAST - REL - MID, T0 = 0.04 * MID, SPAN = 0.04 * FR;
 
-  if (!any('lec26-flight', 'lec26-euler', 'lec26-onestep', 'lec26-halving')) return;
-  fetch('data/arcs.json').then(r => r.json()).then(d => {
-    const a = d.arcs.find(x => x.role === 'clean');
-    const r = a.rel;
-    const tf = [], X = [], Y = [], Zg = [];
-    for (let i = 0; i < 11; i++) {
-      const tt = a.t[r + i] - a.t[r + 5];
-      tf.push(tt); X.push(a.x[r + i]); Y.push(a.y[r + i]); Zg.push(a.z[r + i] + 0.5 * G * tt * tt);
+  /* draw(i) for i = 0..n when the slide comes on, then hold on draw(n); off
+     the deck, or before the slide is shown, the figure is draw(n) */
+  const animate = (host, n, draw, tick) => {
+    draw(n);
+    const slide = host.closest('.deck-slide'), fig = host.closest('figure');
+    if (!slide) return;
+    let timer = null;
+    const play = () => {
+      clearTimeout(timer);
+      let i = 0;
+      const go = () => { draw(i); if (i++ < n) timer = setTimeout(go, tick); };
+      go();
+    };
+    /* a button, because the deck reads a click anywhere else as "next slide" */
+    if (fig) {
+      const btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'sweep-replay'; btn.textContent = 'Replay';
+      btn.addEventListener('click', play);
+      fig.after(btn);
     }
-    const cx = line(tf, X), cy = line(tf, Y), cz = line(tf, Zg);
+    let was = slide.classList.contains('on');
+    if (was) play();
+    new MutationObserver(() => {
+      const on = slide.classList.contains('on');
+      if (on && !was) play();
+      if (!on) clearTimeout(timer);
+      was = on;
+    }).observe(slide, {attributes: true, attributeFilter: ['class']});
+  };
+  const redraw = (host, spec) => { host.textContent = ''; diagram(host, spec); };
+
+  if (!any(...FIGS)) return;
+  fetch('data/example/train.json').then(r => r.json()).then(d => {
+    const a = d.shots.find(q => q.id === ID);
+    /* the tracked flight, frames 10 to 34, with time after release */
+    const ft = [], fx = [], fy = [], fz = [];
+    for (let i = REL; i <= LAST; i++) { ft.push(a.t[i] - a.t[REL]); fx.push(a.x[i]); fy.push(a.y[i]); fz.push(a.z[i]); }
+    const tf = [], Zg = [];
+    for (let i = 0; i < 11; i++) { const tt = ft[i] - ft[MID]; tf.push(tt); Zg.push(fz[i] + 0.5 * G * tt * tt); }
+    const cx = line(tf, fx.slice(0, 11)), cy = line(tf, fy.slice(0, 11)), cz = line(tf, Zg);
     const s0 = [cx[0], cy[0], cz[0], cx[1], cy[1], cz[1]];
+    const free = (t, s) => [s[3], s[4], s[5], 0, 0, -G];
+    const dist = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]);
+    /* across the floor from the release point, along the starting direction
+       of travel; drag acts along the velocity, so the flight stays in this
+       vertical plane */
+    const hs = Math.hypot(s0[3], s0[4]), ux = s0[3] / hs, uy = s0[4] / hs;
+    const across = s => (s[0] - fx[0]) * ux + (s[1] - fy[0]) * uy;
+    const tracked = ft.map((t, i) => [fx[i], fy[i], fz[i]]);
 
-    /* lec26-flight: measured heights at frames 5 to 23, the RK4 run with drag,
-       and the same run with drag switched off */
-    hosts('lec26-flight').forEach(host => {
-      /* side view: distance along the floor from the frame-5 position, and height */
-      const along = s => Math.hypot(s[0] - s0[0], s[1] - s0[1]);
-      const run = k => {
-        const f = (t, s) => {
-          const [, , , vx, vy, vz] = s, sp = Math.sqrt(vx * vx + vy * vy + vz * vz);
-          return [vx, vy, vz, -k * sp * vx, -k * sp * vy, -G - k * sp * vz];
-        };
-        const h = 0.04 / 8, xs = [0], zs = [s0[2]];
-        let s = s0.slice();
-        for (let i = 0; i < 18 * 8; i++) { s = STEPPERS.rk4(f, 0.20 + i * h, s, h); xs.push(along(s)); zs.push(s[2]); }
-        return {xs, zs, end: s};
-      };
-      const dr = run(0.016), nd = run(0);
-      const fx = [], fz = [];
-      for (let i = 5; i <= 23; i++) { fx.push(Math.hypot(a.x[r + i] - s0[0], a.y[r + i] - s0[1])); fz.push(a.z[r + i]); }
-      const gap = Math.hypot(dr.end[0] - nd.end[0], dr.end[1] - nd.end[1], dr.end[2] - nd.end[2]);
-      const de = [along(dr.end), dr.end[2]], ne = [along(nd.end), nd.end[2]];
-      const xr = [-0.4, 5.6], yr = [3.2, 5.2];
-      diagram(host, {w: 440, h: 210, xRange: xr, yRange: yr,
-        alt: 'Side view of the tracked shot: height against distance along the floor from frame 5. The tracked frames from frame 5 to the last free-flight frame, the RK4 run with drag through them, and the same run without drag, which goes farther and higher. At the last free-flight frame the two runs are ' + (gap * 1000).toFixed(0) + ' mm apart.',
-        curves: [{x: nd.xs, y: nd.zs, cls: 'ghost'}, {x: dr.xs, y: dr.zs}],
-        points: [...fx.map((x, i) => ({x, y: fz[i], r: 3, cls: 'miss'})),
-                 {x: ne[0], y: ne[1], r: 4.4, cls: 'dot'}, {x: de[0], y: de[1], r: 4.4, cls: 'dot'}],
-        notes: [0, 1, 2, 3, 4].map(v => ({x: v, y: yr[0], dy: 13, anchor: 'middle', text: String(v)})).concat([
-          {x: xr[0], y: 4.0, dx: 4, dy: 4, anchor: 'start', text: '4'},
-          {x: xr[0], y: 5.0, dx: 4, dy: 4, anchor: 'start', text: '5'},
-          {x: xr[1], y: yr[0], dy: -5, anchor: 'end', text: 'along the floor from frame 5 (m) →'},
-          {x: xr[0], y: yr[1], dx: 4, dy: 10, anchor: 'start', text: '↑ height (m)'},
-          {x: 0, y: s0[2], dx: 6, dy: 16, anchor: 'start', text: 'frame 5'},
-          {x: ne[0], y: ne[1], dx: 8, dy: -4, anchor: 'start', text: 'no drag'},
-          {x: de[0], y: de[1], dx: -8, dy: 16, anchor: 'end', text: 'drag'},
-          {x: ne[0], y: ne[1], dx: 8, dy: -20, anchor: 'start', cls: 'hi', text: (gap * 1000).toFixed(0) + ' mm apart'},
-          {x: 1.0, y: 3.45, anchor: 'start', text: 'circles: the tracked frames'}])});
-    });
-
-    const runs = {};
-    if (any('lec26-euler', 'lec26-halving'))
-      for (const m of METHODS) runs[m.key] = study({...m, levels: 8}, s0);
-
-    /* lec26-euler: the change on each halving, log scale, labeled in mm */
-    hosts('lec26-euler').forEach(host => {
-      const pts = runs.euler;
-      const xr = [0, 8], yr = [L10(5e-4), L10(1.5e-1)];
-      const xs = pts.map(p => p.halvings), ys = pts.map(p => L10(p.change));
-      diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr,
-        alt: 'Euler\'s change in the predicted position at the last frame on each halving of the step, on a log scale. It halves each time: ' + pts.map(p => (p.change * 1000).toFixed(1)).join(', ') + ' mm. It first falls below the 3 mm line at the sixth halving, 1,152 steps.',
-        curves: [{x: xs, y: ys}],
-        leads: [{from: [0, L10(TOL)], to: [8, L10(TOL)], cls: 'level'}],
-        points: pts.map(p => ({x: p.halvings, y: L10(p.change), r: p.change < TOL && p.halvings === 6 ? 5 : 3.4,
-                               cls: p.halvings === 6 ? 'dot' : 'miss'})),
-        notes: [...pts.map(p => ({x: p.halvings, y: L10(p.change), dx: p.halvings === 6 ? -8 : 6, dy: p.halvings === 6 ? 16 : -7,
-                                  anchor: p.halvings === 6 ? 'end' : 'start',
-                                  cls: p.halvings === 6 ? 'hi' : '', text: (p.change * 1000).toFixed(p.change < 0.01 ? 2 : 1) + ' mm'})),
-          ...pts.map(p => ({x: p.halvings, y: yr[0], dy: 13, anchor: 'middle', text: p.steps.toLocaleString('en-US')})),
-          {x: 8, y: L10(TOL), dy: -5, anchor: 'end', text: '3 mm'},
-          {x: xr[1], y: yr[0], dy: -5, anchor: 'end', text: 'steps in the finer run →'},
-          {x: xr[0], y: yr[1], dx: 4, dy: 10, anchor: 'start', text: '↑ move in the last-frame position (log scale)'}]});
-    });
-
-    /* lec26-onestep: height over one 40 ms step from frame 5 */
-    hosts('lec26-onestep').forEach(host => {
-      const h = 0.04, z0 = s0[2];
-      const k1 = shot(0.20, s0), e = s0.map((v, i) => v + h * k1[i]);
-      const k2 = shot(0.24, e), heun = s0.map((v, i) => v + h / 2 * (k1[i] + k2[i]));
-      /* the flight itself, from a fine RK4 run, for the curve the steps aim at */
-      const ft = [0], fz = [z0];
+    /* every state along a run of n steps of h from frame 15 */
+    const states = (method, h, n, f = shot) => {
+      const ts = [T0], ss = [s0.slice()];
       let s = s0.slice();
-      for (let i = 0; i < 40; i++) { s = STEPPERS.rk4(shot, 0.20 + i * 0.001, s, 0.001); ft.push((i + 1) * 0.001); fz.push(s[2]); }
-      const ms = v => v * 1000;
-      const xr = [-4, 62], yr = [z0 - 0.012, e[2] + 0.02];
-      const eu = e[2], he = heun[2];
+      for (let i = 0; i < n; i++) { s = STEPPERS[method](f, T0 + i * h, s, h); ts.push(T0 + (i + 1) * h); ss.push(s); }
+      return {ts, ss, end: s};
+    };
+    const endOf = (method, n, f = shot) => {
+      const h = SPAN / n;
+      let s = s0.slice();
+      for (let i = 0; i < n; i++) s = STEPPERS[method](f, T0 + i * h, s, h);
+      return s;
+    };
+    /* the halving study: how far the position at frame 34 moves each time the
+       step is halved from one a frame, with the evaluations every run so far */
+    const LEVELS = {euler: 15, heun: 8, rk4: 5}, PER = {euler: 1, heun: 2, rk4: 4};
+    const study = key => {
+      const out = [];
+      let prev = null, evals = 0;
+      for (let i = 0; i < LEVELS[key]; i++) {
+        const steps = FR * 2 ** i, p = endOf(key, steps);
+        evals += PER[key] * steps;
+        if (prev) out.push({halvings: i, steps, evals, change: dist(p, prev)});
+        prev = p;
+      }
+      return out;
+    };
+    const timeTicks = [0, 0.2, 0.4, 0.6, 0.8];
+
+    /* lec26-problem: the eleven fit frames, the state at frame 15, frame 34 */
+    hosts('lec26-problem').forEach(host => {
+      const xr = [-0.08, 1.1], yr = [2.75, 4.95];
       diagram(host, {w: 440, h: 210, xRange: xr, yRange: yr,
-        alt: 'One step of 40 ms from frame 5. Euler follows the starting slope of 2.7508 m/s and ends at ' + eu.toFixed(5) + ' m. Heun takes a second slope of 2.3465 m/s at the end, averages the two, and ends at ' + he.toFixed(5) + ' m, ' + ms(eu - he).toFixed(1) + ' mm lower. The flight itself bends below Euler\'s line.',
-        curves: [{x: ft.map(ms), y: fz, cls: 'ghost'}],
-        leads: [{from: [0, z0], to: [40, eu], cls: 'chord', over: true},
-                {from: [0, z0], to: [40, he], cls: 'shared', over: true},
-                {from: [34, eu - 6 * k2[2] * 0.001], to: [46, eu + 6 * k2[2] * 0.001], cls: 'tangent'}],
-        drops: [{x: 40, y: eu}],
-        points: [{x: 0, y: z0, r: 4}, {x: 40, y: eu, r: 4.4, cls: 'miss'}, {x: 40, y: he, r: 4.4, cls: 'dot'}],
-        notes: [{x: 0, y: z0, dx: 6, dy: 14, anchor: 'start', text: 'frame 5, ' + z0.toFixed(5) + ' m'},
-          {x: 40, y: eu, dx: -12, dy: -10, anchor: 'end', text: 'Euler ' + eu.toFixed(5) + ' m'},
-          {x: 40, y: he, dx: 9, dy: 12, anchor: 'start', cls: 'hi', text: 'Heun ' + he.toFixed(5) + ' m'},
-          {x: 17, y: z0 + 17 * k1[2] * 0.001, dx: -6, dy: -8, anchor: 'end', text: 'slope 2.7508 m/s'},
-          {x: 46, y: eu + 6 * k2[2] * 0.001, dx: -4, dy: -8, anchor: 'end', text: 'slope at Euler\'s end, 2.3465 m/s'},
-          {x: 26, y: z0 + 26 * 0.001 * (he - z0) / 0.04, dx: 4, dy: 16, anchor: 'start', text: 'Heun: the average, 2.5487 m/s'},
-          {x: 40, y: yr[0], dy: 13, anchor: 'middle', text: '40 ms'},
-          {x: 0, y: yr[0], dy: 13, anchor: 'middle', text: '0'},
-          {x: xr[1], y: yr[0], dy: -5, anchor: 'end', text: 'time from frame 5 (ms) →'},
+        alt: 'Tracked height against time after release for the first 11 frames, with the start 0.20 s after release fitted from them: ' + s0[2].toFixed(3) + ' m up and climbing at ' + s0[5].toFixed(2) + ' m/s. A dashed line at ' + (T0 + SPAN).toFixed(2) + ' s marks the moment where the position is to be found.',
+        leads: [{from: [T0 + SPAN, yr[0]], to: [T0 + SPAN, yr[1]], cls: 'cast'},
+                {from: [T0 - 0.06, s0[2] - 0.06 * s0[5]], to: [T0 + 0.12, s0[2] + 0.12 * s0[5]], cls: 'tangent', over: true}],
+        points: [...ft.slice(0, 11).map((t, i) => ({x: t, y: fz[i], r: 2.8, cls: 'miss'})), {x: T0, y: s0[2], r: 4.6, cls: 'dot'}],
+        notes: [
+          {x: T0, y: s0[2], dx: 10, dy: 10, anchor: 'start', text: 'start, 0.20 s: ' + s0[2].toFixed(3) + ' m up,'},
+          {x: T0, y: s0[2], dx: 10, dy: 24, anchor: 'start', text: 'climbing ' + s0[5].toFixed(2) + ' m/s,'},
+          {x: T0, y: s0[2], dx: 10, dy: 38, anchor: 'start', text: hs.toFixed(2) + ' m/s across the floor'},
+          {x: 0.3, y: 3.0, anchor: 'start', text: 'circles: first 11 tracked frames'},
+          {x: T0 + SPAN, y: 4.75, dx: -6, anchor: 'end', cls: 'hi', text: '0.96 s after release:'},
+          {x: T0 + SPAN, y: 4.75, dx: -6, dy: 14, anchor: 'end', cls: 'hi', text: 'where, within 3 mm?'},
+          ...timeTicks.map(v => ({x: v, y: yr[0], dy: 13, anchor: 'middle', text: v.toFixed(1)})),
+          {x: xr[0], y: 3.0, dx: 4, dy: 4, anchor: 'start', text: '3.0'},
+          {x: xr[0], y: 4.0, dx: 4, dy: 4, anchor: 'start', text: '4.0'},
+          {x: xr[1], y: yr[0], dy: -5, anchor: 'end', text: 'time after release (s) →'},
           {x: xr[0], y: yr[1], dx: 4, dy: 10, anchor: 'start', text: '↑ height (m)'}]});
     });
 
-    /* lec26-halving: change on halving against evaluations in all runs so far,
-       log-log, all three steppers */
-    hosts('lec26-halving').forEach(host => {
-      const xr = [L10(40), L10(6e4)], yr = [-16, -0.5];
-      const lineOf = (m, cls) => ({x: runs[m].map(p => L10(p.evals)), y: runs[m].map(p => L10(p.change)), cls});
-      const first = m => runs[m].find(p => p.change < TOL);
-      const label = (m, txt, dx, dy) => {
-        const p = runs[m][runs[m].length - 1];
-        return {x: L10(p.evals), y: L10(p.change), dx, dy, anchor: 'start', text: txt};
+    /* lec26-drag: with and without drag, flown together over the tracked
+       frames; above, the side view, below, the distance between them */
+    hosts('lec26-drag').forEach(host => {
+      const N = 152, h = SPAN / N;
+      const dr = states('rk4', h, N), fr = states('rk4', h, N, free);
+      const gap = dr.ss.map((s, i) => dist(s, fr.ss[i]) * 1000);
+      const xr = [-1.0, 7.6], yr = [2.8, 5.0];
+      const draw = j => {
+        const i = Math.min(N, j * 2), done = i === N;
+        const side = (run, cls) => ({x: run.ss.slice(0, i + 1).map(across), y: run.ss.slice(0, i + 1).map(s => s[2]), cls});
+        const at = run => ({x: across(run.ss[i]), y: run.ss[i][2]});
+        host.textContent = '';
+        diagram(host, {w: 440, h: 150, xRange: xr, yRange: yr,
+          alt: 'Side view of the shot with its tracked frames, and the flight from 0.20 s to 0.96 s after release with drag and without. Without drag the ball flies the parabola of the constant-acceleration formulas and ends ' + gap[N].toFixed(0) + ' mm from where drag puts it.',
+          curves: [side(fr, 'ghost'), side(dr, 'trace')],
+          points: [...tracked.map(q => ({x: across(q), y: q[2], r: 2, cls: 'miss'})),
+                   {...at(fr), r: 4, cls: 'miss'}, {...at(dr), r: 4, cls: 'dot'}],
+          notes: [
+            {x: 2.4, y: 3.45, anchor: 'start', text: 'small circles: tracked frames'},
+            {x: 2.4, y: 3.45, dy: 13, anchor: 'start', text: 'dashed: no drag, the parabola'},
+            {x: 2.4, y: 3.45, dy: 26, anchor: 'start', text: 'solid: with drag'},
+            ...(done ? [{x: across(fr.end), y: fr.end[2], dx: 10, dy: -8, anchor: 'start', text: '0.96 s'}] : []),
+            ...[0, 2, 4, 6].map(v => ({x: v, y: yr[0], dy: 13, anchor: 'middle', text: String(v)})),
+            {x: xr[0], y: 3.0, dx: 4, dy: 4, anchor: 'start', text: '3.0'},
+            {x: xr[0], y: 4.0, dx: 4, dy: 4, anchor: 'start', text: '4.0'},
+            {x: xr[1], y: yr[0], dy: -5, anchor: 'end', text: 'across the floor from release (m) →'},
+            {x: xr[0], y: yr[1], dx: 4, dy: 10, anchor: 'start', text: '↑ height (m)'}]});
+        const gx = [0.16, 1.04], gy = [0, 240];
+        diagram(host, {w: 440, h: 110, xRange: gx, yRange: gy,
+          alt: 'The distance between the two flights against time, growing from 0 to ' + gap[N].toFixed(0) + ' mm at 0.96 s.',
+          curves: [{x: dr.ts.slice(0, i + 1), y: gap.slice(0, i + 1), cls: 'alt'}],
+          leads: [{from: [gx[0], 3], to: [gx[1], 3], cls: 'level'}],
+          points: [{x: dr.ts[i], y: gap[i], r: 3.6, cls: 'dot'}],
+          notes: [
+            {x: dr.ts[i], y: gap[i], dx: -8, dy: 4, anchor: 'end', cls: 'hi', text: gap[i].toFixed(0) + ' mm apart'},
+            {x: 0.24, y: 3, dy: -4, anchor: 'middle', text: '3 mm'},
+            ...[0.2, 0.4, 0.6, 0.8].map(v => ({x: v, y: gy[0], dy: 13, anchor: 'middle', text: v.toFixed(1)})),
+            {x: T0 + SPAN, y: gy[0], dy: 13, anchor: 'middle', text: '0.96'},
+            {x: gx[0], y: 100, dx: 4, dy: 4, anchor: 'start', text: '100'},
+            {x: gx[1], y: gy[0], dy: -5, anchor: 'end', text: 'time after release (s) →'},
+            {x: gx[0], y: gy[1], dx: 4, dy: 10, anchor: 'start', text: '↑ distance between them (mm)'}]});
       };
-      const hit = ['euler', 'heun', 'rk4'].map(m => ({m, p: first(m)}));
-      diagram(host, {w: 440, h: 200, xRange: xr, yRange: yr,
-        alt: 'Change in the predicted position on each halving, against the evaluations of the rate used by all runs so far, on log scales. Euler falls slowly and first passes under 3 mm at 2,286 evaluations. Heun passes under it at 108 and RK4 at 216. RK4 levels off near 10 to the minus 14 m.',
-        curves: [lineOf('euler', 'alt'), lineOf('heun', 'shared'), lineOf('rk4', 'trace')],
-        leads: [{from: [xr[0], L10(TOL)], to: [xr[1], L10(TOL)], cls: 'level'}],
-        points: hit.map(({p}) => ({x: L10(p.evals), y: L10(p.change), r: 4.4, cls: 'dot'})),
+      animate(host, N / 2, draw, 45);
+    });
+
+    /* lec26-halve: Euler from one step a frame, the step halved until a
+       halving moves the answer at 0.96 s less than 3 mm. Each run draws in,
+       and the run before it fades to half opacity while it does and stays. */
+    hosts('lec26-halve').forEach(host => {
+      const path = states('rk4', 0.005, 8 * FR);
+      const z = run => run.ss.map(s => s[2]);
+      const runs = [], moves = [null];
+      for (let k = 0; ; k++) {
+        runs.push(states('euler', 0.04 / 2 ** k, FR * 2 ** k));
+        if (k) moves.push(dist(runs[k].end, runs[k - 1].end));
+        if (k && moves[k] < TOL) break;
+      }
+      const K = runs.length;
+      const stepMs = k => +(40 / 2 ** k).toFixed(3) + ' ms';
+      const line = k => stepMs(k) + ' (' + fmtN(FR * 2 ** k) + ' steps)' +
+        (k ? ': moved ' + (moves[k] * 1000).toFixed(1) + ' mm' : '') + (k === K - 1 ? ', stop' : '');
+      /* the list of runs sits in two columns under the curves */
+      const ROW = 0.105, rowAt = q => q < 3 ? {x: 0.17, y: 3.86 - (q + 1) * ROW} : {x: 0.64, y: 3.86 - (q - 3) * ROW};
+      const xr = [0.14, 1.13], yr = [3.3, 4.95], tEnd = T0 + SPAN;
+      const B = 26, D = 18;   /* ticks a run, of which D draw it in */
+      const draw = i => {
+        const k = Math.min(K - 1, Math.floor(i / B)), j = i - k * B, f = i >= K * B ? 1 : clamp(j / D);
+        const run = runs[k], n = Math.round(f * (run.ts.length - 1)), done = f === 1;
+        const curves = [{x: path.ts, y: z(path), cls: 'ghost'}];
+        for (let q = 0; q < k; q++)
+          curves.push({x: runs[q].ts, y: z(runs[q]), cls: q === k - 1 ? 'alt fading' : 'alt faded'});
+        curves.push({x: run.ts.slice(0, n + 1), y: z(run).slice(0, n + 1), cls: 'alt'});
+        host.textContent = '';
+        const svg = diagram(host, {w: 440, h: 220, xRange: xr, yRange: yr,
+          alt: 'Height against time after release for Euler runs from 0.20 s, the step halved from 40 ms each time, with the path behind them. Each run is drawn and then fades to half opacity as the next is drawn. The answer at 0.96 s moves ' + moves.slice(1).map(m => (m * 1000).toFixed(1)).join(', ') + ' mm on the halvings, and the study stops at ' + stepMs(K - 1) + ', ' + fmtN(FR * 2 ** (K - 1)) + ' steps, where the move is under 3 mm.',
+          curves,
+          points: done ? [{x: tEnd, y: run.end[2], r: 4, cls: 'dot'}] : [],
+          notes: [0.2, 0.4, 0.6, 0.8].map(v => ({x: v, y: yr[0], dy: 13, anchor: 'middle', text: v.toFixed(1)})).concat([
+            {x: tEnd, y: yr[0], dy: 13, anchor: 'middle', text: '0.96'},
+            {x: xr[0], y: 4.0, dx: 4, dy: 4, anchor: 'start', text: '4.0'},
+            {x: xr[0], y: 4.5, dx: 4, dy: 4, anchor: 'start', text: '4.5'},
+            {x: xr[1], y: yr[0], dy: -5, anchor: 'end', text: 'time after release (s) →'},
+            {x: xr[0], y: yr[1], dx: 4, dy: 10, anchor: 'start', text: '↑ height (m)'},
+            {x: 0.17, y: 3.86, anchor: 'start', text: 'gray: the path. red: Euler'},
+            ...runs.slice(0, done ? k + 1 : k).map((r, q) => ({...rowAt(q), anchor: 'start',
+              cls: q === k && done ? 'hi' : '', text: line(q)}))])});
+        svg.querySelectorAll('.fading').forEach(e => { e.style.opacity = (1 - 0.5 * f).toFixed(2); });
+        svg.querySelectorAll('.faded').forEach(e => { e.style.opacity = '0.5'; });
+      };
+      animate(host, K * B, draw, 45);
+    });
+
+    const runs = {};
+    if (any('lec26-halving', 'lec26-cost'))
+      for (const key of ['euler', 'heun', 'rk4']) runs[key] = study(key);
+
+    /* lec26-ends: the last stretch of the flight, zoomed in, side view at
+       equal scale. Each halving's run shows its step samples there and its
+       end at 0.96 s; the gold segment joins it to the run before, which is
+       the move. Earlier runs stay at half opacity, without their samples. */
+    hosts('lec26-ends').forEach(host => {
+      const runs = [], moves = [null];
+      for (let k = 0; ; k++) {
+        runs.push(states('euler', 0.04 / 2 ** k, FR * 2 ** k));
+        if (k) moves.push(dist(runs[k].end, runs[k - 1].end));
+        if (k && moves[k] < TOL) break;
+      }
+      const K = runs.length, path = states('rk4', 0.0025, 16 * FR), pe = path.end;
+      const ax = across(pe), az = pe[2];
+      /* W wide and W * 260 / 440 tall, so a millimeter is the same either way */
+      const W = 0.516, HH = W * 260 / 440;
+      const xr = [ax - 0.33, ax - 0.33 + W], yr = [az + 0.165 - HH, az + 0.165];
+      const inView = s => { const x = across(s); return x >= xr[0] && x <= xr[1] && s[2] >= yr[0] && s[2] <= yr[1]; };
+      /* the samples in view, and the line from where it crosses into view */
+      const clip = ss => {
+        const i0 = ss.findIndex(inView);
+        const ins = ss.filter(inView);
+        if (i0 <= 0) return {ins, line: ins};
+        const a = ss[i0 - 1], b = ss[i0], ta = [];
+        if (across(a) < xr[0]) ta.push((xr[0] - across(a)) / (across(b) - across(a)));
+        if (a[2] > yr[1]) ta.push((yr[1] - a[2]) / (b[2] - a[2]));
+        const t = Math.max(...ta), e = a.map((v, c) => v + t * (b[c] - v));
+        return {ins, line: [e, ...ins]};
+      };
+      const cl = runs.map(r => clip(r.ss));
+      const pathIn = clip(path.ss).line;
+      const mm = v => (v * 1000).toFixed(1) + ' mm';
+      const B = 24, D = 10;   /* ticks a run, of which D bring its samples in */
+      const draw = i => {
+        const k = Math.min(K - 1, Math.floor(i / B)), j = i - k * B, fin = i >= K * B;
+        const f = fin ? 1 : clamp(j / D), done = fin || j >= D + 2;
+        const curves = [{x: pathIn.map(across), y: pathIn.map(s => s[2]), cls: 'ghost'}];
+        const points = [], leads = [], notes = [];
+        for (let q = 0; q <= k; q++) {
+          const L = cl[q].line, ps = q === k ? L.slice(0, Math.max(1, Math.round(f * L.length))) : L;
+          const cls = q < k ? ' faded' : '';
+          curves.push({x: ps.map(across), y: ps.map(s => s[2]), cls: 'alt' + cls});
+          if (q === k) ps.filter(inView).forEach(s => points.push({x: across(s), y: s[2], r: 1.7, cls: 'miss'}));
+          if (q < k || done) points.push({x: across(runs[q].end), y: runs[q].end[2], r: 3.6, cls: 'dot' + cls});
+        }
+        if (k && done) {
+          const e0 = runs[k - 1].end, e1 = runs[k].end;
+          leads.push({from: [across(e0), e0[2]], to: [across(e1), e1[2]], cls: 'shared', over: true});
+          notes.push({x: across(e1), y: (e0[2] + e1[2]) / 2, dx: 10, dy: 4, anchor: 'start', cls: 'hi', text: 'moved ' + mm(moves[k])});
+        }
+        const list = runs.slice(0, done ? k + 1 : k).map((r, q) => ({x: xr[0] + 0.012, y: az + 0.005, dy: 14 * (q + 1),
+          anchor: 'start', cls: q === k && done ? 'hi' : '',
+          text: fmtN(FR * 2 ** q) + ' steps' + (q ? ', moved ' + mm(moves[q]) : '')}));
+        host.textContent = '';
+        leads.push({from: [xr[1] - 0.06, yr[0] + 0.012], to: [xr[1] - 0.01, yr[0] + 0.012], cls: 'axis'});
+        const svg = diagram(host, {w: 440, h: 260, xRange: xr, yRange: yr, axes: false,
+          alt: 'The last half meter of the flight before 0.96 s, zoomed in. Each Euler run shows its steps as small circles and its end at 0.96 s as a dot. Halving the step doubles the steps, so the circles get twice as dense, and the end moves half as far each time: ' + moves.slice(1).map(mm).join(', ') + ', closing in on the path.',
+          curves, leads, points,
+          notes: [...list,
+            {x: xr[0] + 0.012, y: az + 0.005, anchor: 'start', text: 'Euler, steps to 0.96 s:'},
+            {x: ax, y: az, dx: 8, dy: 18, anchor: 'start', text: 'the path at 0.96 s'},
+            {x: xr[1] - 0.035, y: yr[0] + 0.012, dy: -5, anchor: 'middle', text: '50 mm'},
+            ...notes]});
+        svg.querySelectorAll('.faded').forEach(e => { e.style.opacity = '0.5'; });
+      };
+      animate(host, K * B, draw, 45);
+    });
+
+    /* lec26-left: distance from the path at frame 34 for the runs of 32 and
+       64 steps a frame, then the runs still to come, closing in */
+    hosts('lec26-left').forEach(host => {
+      const PATH = endOf('rk4', FR * 256);
+      const ns = [32, 64, 128, 256, 512, 1024, 2048].map(m => FR * m);
+      const ds = ns.map(n => dist(endOf('euler', n), PATH) * 1000);
+      const xr = [-0.35, 4.9], yr = [0, 4];
+      /* rows: the last move above, the runs on the line, the moves still to
+         come below it, the millimeter scale at the bottom */
+      const YM = 3.3, YL = 2.4, YC = 1.4, YS = 0.5;
+      const draw = i => {
+        const k = Math.min(ns.length, 2 + i), done = i > ns.length - 2;
+        const to = done ? 0 : ds[k - 1], sum = ds[1] - to;
+        redraw(host, {w: 440, h: 190, xRange: xr, yRange: yr, axes: false,
+          alt: 'Distance from the path at 0.96 s on a line in millimeters. The run of ' + fmtN(ns[0]) + ' steps is ' + ds[0].toFixed(1) + ' mm away and the run of ' + fmtN(ns[1]) + ' steps ' + ds[1].toFixed(1) + ' mm, so the last move is about ' + (ds[0] - ds[1]).toFixed(1) + ' mm. Each run after that is half as far as the one before, and all the moves still to come add up to the ' + ds[1].toFixed(1) + ' mm left.',
+          leads: [{from: [0, YL], to: [4.7, YL], cls: 'lead'}, {from: [0, YS], to: [0, YM], cls: 'level'},
+                  {from: [0, YS], to: [4.7, YS], cls: 'lead'},
+                  ...[1, 2, 3, 4].map(v => ({from: [v, YS - 0.12], to: [v, YS + 0.12], cls: 'lead'})),
+                  {from: [ds[1], YM], to: [ds[0], YM], cls: 'chord'},
+                  ...(k > 2 || done ? [{from: [to, YC], to: [ds[1], YC], cls: 'shared'}] : [])],
+          points: ds.slice(0, k).map((v, j) => ({x: v, y: YL, r: j < 2 ? 4.6 : 3.4, cls: j === 1 ? 'dot' : 'miss'})),
+          notes: [
+            {x: 0, y: YM, dy: -6, anchor: 'middle', text: 'the path'},
+            {x: ds[0], y: YL, dy: 18, anchor: 'middle', text: fmtN(ns[0]) + ' steps'},
+            {x: ds[1], y: YL, dy: 18, anchor: 'middle', text: fmtN(ns[1]) + ' steps'},
+            {x: (ds[0] + ds[1]) / 2, y: YM, dy: -6, anchor: 'middle', cls: 'hi', text: 'last move, ' + (ds[0] - ds[1]).toFixed(1) + ' mm'},
+            ...(k > 2 || done ? [{x: ds[1], y: YC, dx: 8, dy: 4, anchor: 'start', cls: done ? 'hi' : '',
+                          text: done ? 'all the moves still to come: ' + sum.toFixed(1) + ' mm'
+                                     : 'moves still to come, ' + (k - 2) + ' so far: ' + sum.toFixed(2) + ' mm'}] : []),
+            ...[0, 1, 2, 3, 4].map(v => ({x: v, y: YS, dy: 16, anchor: 'middle', text: v + ' mm'})),
+            {x: 4.7, y: YS, dy: -6, anchor: 'end', text: 'distance from the path at 0.96 s →'}]});
+      };
+      animate(host, ns.length - 1, draw, 750);
+    });
+
+    /* lec26-evals, lec26-evals3: the evaluations in each study as bars made
+       of one piece a run, added run by run */
+    const evalBars = (host, keys) => {
+      const nr = {euler: 7, heun: 2, rk4: 2};
+      const name = {euler: 'Euler', heun: 'Heun', rk4: 'RK4'}, fillOf = {euler: 'gap', heun: 'tri', rk4: 'pos'};
+      const one = keys.length === 1, rowY = one ? [1] : [2.4, 1.4, 0.4];
+      const total = key => PER[key] * FR * (2 ** nr[key] - 1);
+      const xr = [-400, 2750], yr = [0, one ? 2 : 3.1];
+      const draw = i => {
+        const areas = [], leads = [], notes = [];
+        keys.forEach((key, row) => {
+          const y = rowY[row], k = Math.min(i, nr[key]);
+          let x = 0;
+          for (let j = 0; j < k; j++) {
+            const v = PER[key] * FR * 2 ** j;
+            areas.push({pts: [{x, y: y - 0.3}, {x: x + v, y: y - 0.3}, {x: x + v, y: y + 0.3}, {x, y: y + 0.3}], cls: fillOf[key]});
+            if (j) leads.push({from: [x, y - 0.3], to: [x, y + 0.3], cls: 'cast'});
+            if (one && v >= 152) notes.push({x: x + v / 2, y, dy: 4, anchor: 'middle', text: fmtN(v)});
+            x += v;
+          }
+          notes.push({x: 0, y, dx: -6, dy: 4, anchor: 'end', text: name[key]});
+          if (k) notes.push({x, y, dx: 6, dy: 4, anchor: 'start', cls: k === nr[key] ? 'hi' : '', text: fmtN(x)});
+          if (one && k) notes.push({x: 0, y: y + 0.3, dy: -8, anchor: 'start',
+            text: k + (k === 1 ? ' run, ' + FR + ' steps' : ' runs, ' + FR + ' to ' + fmtN(FR * 2 ** (k - 1)) + ' steps')});
+        });
+        redraw(host, {w: 440, h: one ? 120 : 150, xRange: xr, yRange: yr, axes: false,
+          alt: one
+            ? 'Euler\'s evaluations as one bar made of seven runs, ' + [0, 1, 2, 3, 4, 5, 6].map(j => fmtN(FR * 2 ** j)).join(', ') + ' steps, adding to ' + fmtN(total('euler')) + '.'
+            : 'Evaluations in each study to agree within 3 mm, as bars made of one piece a run: Euler ' + fmtN(total('euler')) + ' from seven runs, Heun ' + fmtN(total('heun')) + ' from two runs at two evaluations a step, RK4 ' + fmtN(total('rk4')) + ' from two runs at four.',
+          areas, leads, notes: [...notes, {x: 0, y: yr[0], dy: 10, anchor: 'start', text: 'evaluations →'},
+            ...[1000, 2000].map(v => ({x: v, y: yr[0], dy: 10, anchor: 'middle', text: fmtN(v)}))]});
+      };
+      animate(host, 7, draw, 550);
+    };
+    hosts('lec26-evals').forEach(host => evalBars(host, ['euler']));
+    hosts('lec26-evals3').forEach(host => evalBars(host, ['euler', 'heun', 'rk4']));
+
+    /* one 40 ms step from frame 15: the path, Euler, Heun and RK4's looks */
+    const H = 0.04, z0 = s0[2];
+    const k1 = shot(T0, s0), eu = s0.map((v, i) => v + H * k1[i]);
+    const k2h = shot(T0 + H, eu), heun = s0.map((v, i) => v + H / 2 * (k1[i] + k2h[i]));
+    const pt = [0], pz = [z0];
+    let fs = s0.slice();
+    /* steps of 0.04 ms, a thousand to the frame, keeping every 25th */
+    for (let i = 0; i < 1000; i++) {
+      fs = STEPPERS.rk4(shot, T0 + i * 4e-5, fs, 4e-5);
+      if ((i + 1) % 25 === 0) { pt.push((i + 1) * 4e-5); pz.push(fs[2]); }
+    }
+    const zEnd = pz[pz.length - 1], vEndPath = fs[5];
+    const ms = v => v * 1000;
+    const oxr = [-4, 64], oyr = [z0 - 0.014, eu[2] + 0.022];
+    const oneAxes = [{x: 40, y: oyr[0], dy: 13, anchor: 'middle', text: '40 ms'},
+      {x: 0, y: oyr[0], dy: 13, anchor: 'middle', text: '0'},
+      {x: oxr[1], y: oyr[0], dy: -5, anchor: 'end', text: 'time into the step (ms) →'},
+      {x: oxr[0], y: oyr[1], dx: 4, dy: 10, anchor: 'start', text: '↑ height (m)'},
+      {x: 0, y: z0, dx: 6, dy: 14, anchor: 'start', text: 'start, ' + z0.toFixed(3) + ' m'}];
+    /* a slope mark through (t ms, z) at climb rate v, ±w ms */
+    const slope = (t, z, v, w, cls = 'tangent') => ({from: [t - w, z - w * v * 0.001], to: [t + w, z + w * v * 0.001], cls, over: true});
+    const along = (frac, from, v) => [ms(frac * H), from + frac * H * v];
+
+    hosts('lec26-euler1').forEach(host => {
+      diagram(host, {w: 440, h: 210, xRange: oxr, yRange: oyr,
+        alt: 'One step of 40 ms from the start. Euler moves the ball at the starting climb of ' + s0[5].toFixed(2) + ' m/s and rises ' + ms(eu[2] - z0).toFixed(0) + ' mm to ' + eu[2].toFixed(3) + ' m. The path rises ' + ms(zEnd - z0).toFixed(0) + ' mm, and its climb has slowed to ' + vEndPath.toFixed(2) + ' m/s by the end of the step.',
+        curves: [{x: pt.map(ms), y: pz, cls: 'ghost'}],
+        leads: [{from: [0, z0], to: [40, eu[2]], cls: 'chord', over: true}, slope(40, zEnd, vEndPath, 7, 'level')],
+        drops: [{x: 40, y: eu[2]}],
+        points: [{x: 0, y: z0, r: 4}, {x: 40, y: eu[2], r: 4.4, cls: 'miss'}, {x: 40, y: zEnd, r: 3.6, cls: 'dot'}],
+        notes: [...oneAxes,
+          {x: 40, y: eu[2], dx: -10, dy: -10, anchor: 'end', cls: 'hi', text: 'Euler, ' + s0[5].toFixed(2) + ' m/s all step: up ' + ms(eu[2] - z0).toFixed(0) + ' mm'},
+          {x: 40, y: zEnd, dx: 10, dy: 14, anchor: 'start', text: 'the path: up ' + ms(zEnd - z0).toFixed(0) + ' mm,'},
+          {x: 40, y: zEnd, dx: 10, dy: 28, anchor: 'start', text: 'climbing ' + vEndPath.toFixed(2) + ' m/s here'}]});
+    });
+
+    hosts('lec26-heun1').forEach(host => {
+      const vEnd = eu[5], vAvg = (s0[5] + eu[5]) / 2;
+      const off = Math.abs(heun[2] - zEnd) * 1000;
+      const draw = i => {
+        const fa = clamp(i / 16), fc = clamp((i - 40) / 16), tan = i >= 24, done = i >= 58;
+        const [ax, az] = along(fa, z0, s0[5]), [cx2, cz2] = along(fc, z0, vAvg);
+        redraw(host, {w: 440, h: 210, xRange: oxr, yRange: oyr,
+          alt: 'One step of 40 ms from the start. An Euler step estimates the end, where the climb is about ' + vEnd.toFixed(2) + ' m/s. Heun moves the ball at the average of ' + s0[5].toFixed(2) + ' and ' + vEnd.toFixed(2) + ', ' + vAvg.toFixed(2) + ' m/s, and ends at ' + heun[2].toFixed(3) + ' m, ' + ms(eu[2] - heun[2]).toFixed(1) + ' mm below Euler and within ' + off.toFixed(3) + ' mm of the path.',
+          curves: [{x: pt.map(ms), y: pz, cls: 'ghost'}],
+          leads: [{from: [0, z0], to: [ax, az], cls: 'chord', over: true},
+                  ...(tan ? [slope(40, eu[2], vEnd, 7)] : []),
+                  ...(fc > 0 ? [{from: [0, z0], to: [cx2, cz2], cls: 'shared', over: true}] : [])],
+          points: [{x: 0, y: z0, r: 4}, ...(fa === 1 ? [{x: 40, y: eu[2], r: 4.4, cls: 'miss'}] : []),
+                   ...(done ? [{x: 40, y: heun[2], r: 4.4, cls: 'dot'}] : [])],
+          notes: [...oneAxes,
+            ...(fa === 1 ? [{x: 40, y: eu[2], dx: -12, dy: -24, anchor: 'end', text: '1. Euler step: estimate the end'}] : []),
+            ...(tan ? [{x: 40, y: eu[2], dx: -12, dy: -10, anchor: 'end', text: '2. climb there: ' + vEnd.toFixed(2) + ' m/s'}] : []),
+            ...(fc > 0 ? [{x: 22, y: z0 + 0.022 * vAvg, dx: 4, dy: 18, anchor: 'start', text: '3. move at the average, ' + vAvg.toFixed(2) + ' m/s'}] : []),
+            ...(done ? [{x: 40, y: heun[2], dx: 9, dy: 12, anchor: 'start', cls: 'hi', text: 'Heun ' + heun[2].toFixed(3) + ' m,'},
+                        {x: 40, y: heun[2], dx: 9, dy: 26, anchor: 'start', cls: 'hi', text: 'on the path'}] : [])]});
+      };
+      animate(host, 60, draw, 55);
+    });
+
+    hosts('lec26-rk41').forEach(host => {
+      /* each look's climb rate is the trial state's vertical velocity */
+      const q1 = shot(T0, s0);
+      const t2 = s0.map((v, i) => v + H / 2 * q1[i]), q2 = shot(T0 + H / 2, t2);
+      const t3 = s0.map((v, i) => v + H / 2 * q2[i]), q3 = shot(T0 + H / 2, t3);
+      const t4 = s0.map((v, i) => v + H * q3[i]);
+      const looks = [[0, s0], [20, t2], [20, t3], [40, t4]];
+      const vw = (s0[5] + 2 * t2[5] + 2 * t3[5] + t4[5]) / 6;
+      const rk = STEPPERS.rk4(shot, T0, s0, H);
+      const off = Math.abs(rk[2] - zEnd) * 1000;
+      const lbl = [['1. start', 10, -4, 'start'], ['2. middle', -8, -8, 'end'], ['3. middle again', 8, 14, 'start'], ['4. end', -8, -10, 'end']];
+      const draw = i => {
+        const shown = Math.min(4, i > 0 ? Math.floor(i / 8) + 1 : 0), fr = clamp((i - 36) / 14), done = i >= 52;
+        const leads = [], points = [{x: 0, y: z0, r: 4}], notes = [...oneAxes];
+        looks.slice(0, shown).forEach(([t, s], j) => {
+          if (j) leads.push({from: [0, z0], to: [t, s[2]], cls: 'cast'});
+          leads.push(slope(t, s[2], s[5], 4));
+          points.push({x: t, y: s[2], r: 3.2, cls: 'miss'});
+          notes.push({x: t, y: s[2], dx: lbl[j][1], dy: lbl[j][2], anchor: lbl[j][3], text: lbl[j][0] + ': ' + s[5].toFixed(2) + ' m/s'});
+        });
+        if (fr > 0) { const [x2, z2] = along(fr, z0, vw); leads.push({from: [0, z0], to: [x2, z2], cls: 'trace', over: true}); }
+        if (done) {
+          points.push({x: 40, y: rk[2], r: 4.4, cls: 'dot'});
+          notes.push({x: 40, y: rk[2], dx: 9, dy: 14, anchor: 'start', cls: 'hi', text: 'RK4 moves at the'},
+                     {x: 40, y: rk[2], dx: 9, dy: 28, anchor: 'start', cls: 'hi', text: 'weighted average,'},
+                     {x: 40, y: rk[2], dx: 9, dy: 42, anchor: 'start', cls: 'hi', text: vw.toFixed(2) + ' m/s'});
+        }
+        redraw(host, {w: 440, h: 210, xRange: oxr, yRange: oyr,
+          alt: 'One step of 40 ms from the start with RK4\'s four looks: at the start the climb is ' + s0[5].toFixed(2) + ' m/s, at the middle twice ' + t2[5].toFixed(2) + ' and ' + t3[5].toFixed(2) + ', at the end ' + t4[5].toFixed(2) + '. RK4 moves the ball at the weighted average, ' + vw.toFixed(2) + ' m/s, and ends within ' + (off < 1e-6 ? 'a millionth of a millimeter' : off.toExponential(1) + ' mm') + ' of the path.',
+          curves: [{x: pt.map(ms), y: pz, cls: 'ghost'}], leads, points, notes});
+      };
+      animate(host, 54, draw, 90);
+    });
+
+    /* lec26-halving: move on halving against the steps in the finer run,
+       log-log, all three steppers, a halving at a time */
+    hosts('lec26-halving').forEach(host => {
+      const ends = {euler: 7, heun: 5, rk4: 4};
+      const xr = [L10(26), L10(4200)], yr = [-12.5, 0.3];
+      const draw = i => {
+        const lineOf = (m, cls) => {
+          const p = runs[m].slice(0, Math.min(i, ends[m]));
+          return {x: p.map(q => L10(q.steps)), y: p.map(q => L10(q.change)), cls};
+        };
+        const label = (m, txt, dx, dy, anchor = 'start') => {
+          const k = Math.min(i, ends[m]);
+          if (!k) return [];
+          const p = runs[m][k - 1];
+          return [{x: L10(p.steps), y: L10(p.change), dx, dy, anchor, text: txt}];
+        };
+        const firsts = i >= 1 ? [runs.heun[0], runs.rk4[0]] : [];
+        const marks = i >= 6 ? [...firsts, runs.euler[5]] : firsts;
+        const lines = [lineOf('euler', 'alt'), lineOf('heun', 'shared'), lineOf('rk4', 'trace')];
+        redraw(host, {w: 440, h: 210, xRange: xr, yRange: yr,
+          alt: 'How far the position at 0.96 s moves on each halving, against the steps in the finer run, on log scales. Euler\'s move halves each time and first passes under 3 mm at ' + fmtN(runs.euler[5].steps) + ' steps. Heun\'s first move, at ' + runs.heun[0].steps + ' steps, is ' + (runs.heun[0].change * 1000).toFixed(2) + ' mm and falls to a quarter each halving. RK4\'s first move is about a hundred-thousandth of a millimeter and falls to a sixteenth each halving.',
+          curves: lines,
+          leads: [{from: [xr[0], L10(TOL)], to: [xr[1], L10(TOL)], cls: 'level'}],
+          points: [...lines.flatMap(c => c.x.map((x, k) => ({x, y: c.y[k], r: 2.4, cls: 'miss'}))),
+                   ...marks.map(p => ({x: L10(p.steps), y: L10(p.change), r: 4.4, cls: 'dot'}))],
+          notes: [
+            ...[1, 4, 16, 64].map(m => ({x: L10(2 * FR * m), y: yr[0], dy: 13, anchor: 'middle', text: fmtN(2 * FR * m)})),
+            ...[-3, -6, -9, -12].map(e => ({x: xr[0], y: e, dx: 4, dy: 4, anchor: 'start', text: e === -3 ? '1 mm' : pow10(e + 3) + ' mm'})),
+            {x: xr[1], y: L10(TOL), dy: -5, anchor: 'end', text: '3 mm'},
+            ...label('euler', 'Euler, halves', -4, 16, 'end'), ...label('heun', 'Heun, a quarter', 6, 4), ...label('rk4', 'RK4, a sixteenth', 6, 4),
+            {x: xr[1], y: yr[0], dy: -5, anchor: 'end', text: 'steps in the finer run →'},
+            {x: xr[0], y: yr[1], dx: 4, dy: 10, anchor: 'start', text: '↑ moved on halving'}]});
+      };
+      animate(host, 7, draw, 650);
+    });
+
+    /* lec26-cost: evaluations each study needs, against the precision asked
+       for, from 10 mm to 0.01 mm; log-log staircases, with the precision
+       swept from coarse to fine */
+    hosts('lec26-cost').forEach(host => {
+      const need = (m, tol) => { const p = runs[m].find(q => q.change < tol); return p ? p.evals : NaN; };
+      const xr = [2, 5.15], yr = [L10(50), L10(2e6)];
+      const stairs = (m, cls) => {
+        const x = [], y = [];
+        for (let e = 2; e <= 5.0001; e += 0.005) { x.push(e); y.push(L10(need(m, Math.pow(10, -e)))); }
+        return {x, y, cls};
+      };
+      const curves = [stairs('euler', 'alt'), stairs('heun', 'shared'), stairs('rk4', 'trace')];
+      const e3 = -L10(TOL), hx = runs.heun[0].change, eX = -L10(hx);
+      const at = (m, e) => L10(need(m, Math.pow(10, -e)));
+      const name = {euler: 'Euler', heun: 'Heun', rk4: 'RK4'};
+      const n3 = {euler: need('euler', TOL), heun: need('heun', TOL), rk4: need('rk4', TOL)};
+      const fixed = [
+        {x: 2, y: yr[0], dy: 13, anchor: 'start', text: '10 mm'}, {x: 3, y: yr[0], dy: 13, anchor: 'middle', text: '1 mm'},
+        {x: 4, y: yr[0], dy: 13, anchor: 'middle', text: '0.1 mm'}, {x: 5, y: yr[0], dy: 13, anchor: 'middle', text: '0.01 mm'},
+        ...[2, 3, 4, 5, 6].map(e => ({x: xr[0], y: e, dx: 4, dy: 4, anchor: 'start', text: pow10(e)})),
+        {x: 4.6, y: at('euler', 4.6), dx: -6, dy: -8, anchor: 'end', text: 'Euler'},
+        {x: 4.6, y: at('heun', 4.6), dy: -8, anchor: 'middle', text: 'Heun'},
+        {x: 3.3, y: L10(n3.rk4), dy: -6, anchor: 'middle', text: 'RK4'},
+        {x: xr[1], y: yr[0], dy: -5, anchor: 'end', text: 'precision asked for →'},
+        {x: xr[0], y: yr[1], dx: 30, dy: 10, anchor: 'start', text: '↑ evaluations in the whole study'}];
+      const alt = 'Evaluations each convergence study needs against the precision asked for, from 10 mm down to 0.01 mm, on log scales. At 3 mm Euler needs ' + fmtN(n3.euler) + ', Heun ' + fmtN(n3.heun) + ' and RK4 ' + fmtN(n3.rk4) + '. Below ' + (hx * 1000).toFixed(2) + ' mm Heun needs a second halving, ' + fmtN(runs.heun[1].evals) + ' evaluations, and RK4 is the cheapest. Euler climbs past half a million at 0.01 mm.';
+      const N = 60;
+      const draw = i => {
+        if (i >= N) {
+          redraw(host, {w: 440, h: 220, xRange: xr, yRange: yr, alt, curves,
+            leads: [{from: [e3, yr[0]], to: [e3, yr[1]], cls: 'level'}, {from: [eX, yr[0]], to: [eX, yr[1]], cls: 'level'}],
+            points: [n3.euler, n3.heun, n3.rk4].map(v => ({x: e3, y: L10(v), r: 4.4, cls: 'dot'})),
+            notes: [...fixed,
+              {x: e3, y: L10(600), dx: 4, anchor: 'start', text: '3 mm'},
+              {x: eX, y: L10(600), dx: 4, anchor: 'start', text: (hx * 1000).toFixed(2) + ' mm'},
+              {x: e3, y: L10(n3.euler), dx: -6, dy: -6, anchor: 'end', cls: 'hi', text: fmtN(n3.euler)},
+              {x: e3, y: L10(n3.rk4), dx: 8, dy: -4, anchor: 'start', cls: 'hi', text: fmtN(n3.rk4)},
+              {x: e3, y: L10(n3.heun), dx: 8, dy: 12, anchor: 'start', cls: 'hi', text: fmtN(n3.heun)}]});
+          return;
+        }
+        const e = 2 + 3 * i / (N - 1), tol = Math.pow(10, -e), mm = tol * 1000;
+        const v = {euler: need('euler', tol), heun: need('heun', tol), rk4: need('rk4', tol)};
+        const best = Object.keys(v).reduce((p, q) => v[q] < v[p] ? q : p);
+        const side = e > 4 ? {dx: -4, anchor: 'end'} : {dx: 4, anchor: 'start'};
+        redraw(host, {w: 440, h: 220, xRange: xr, yRange: yr, alt, curves,
+          leads: [{from: [e, yr[0]], to: [e, yr[1]], cls: 'level'}],
+          points: Object.keys(v).map(q => ({x: e, y: L10(v[q]), r: 4, cls: q === best ? 'dot' : 'miss'})),
+          notes: [...fixed,
+            {x: e, y: L10(1.2e6), ...side, text: 'within ' + (mm >= 1 ? mm.toFixed(1) : mm >= 0.1 ? mm.toFixed(2) : mm.toFixed(3)) + ' mm'},
+            {x: e, y: L10(1.2e6), dy: 14, ...side, cls: 'hi', text: 'fewest: ' + name[best] + ', ' + fmtN(v[best])}]});
+      };
+      animate(host, N, draw, 70);
+    });
+
+    /* lec26-answer: the stepped flight over the tracked frames, and frame 34 */
+    hosts('lec26-answer').forEach(host => {
+      const path = states('rk4', 0.005, 8 * FR);
+      const p = endOf('heun', 2 * FR), tk = tracked[tracked.length - 1];
+      const xr = [-1.0, 9.4], yr = [2.8, 5.0];
+      diagram(host, {w: 440, h: 190, xRange: xr, yRange: yr,
+        alt: 'Side view of the shot: the tracked frames from release to 0.96 s and the flight stepped with drag from 0.20 s. At 0.96 s the stepped ball is ' + p[2].toFixed(3) + ' m up and ' + across(p).toFixed(3) + ' m across the floor from release, ' + (dist(p, tk) * 100).toFixed(1) + ' cm from the tracked frame.',
+        curves: [{x: path.ss.map(across), y: path.ss.map(s => s[2])}],
+        points: [...tracked.map(q => ({x: across(q), y: q[2], r: 2.4, cls: 'miss'})), {x: across(p), y: p[2], r: 4.6, cls: 'dot'}],
         notes: [
-          ...[2, 3, 4].map(e => ({x: e, y: yr[0], dy: 13, anchor: 'middle', text: pow10(e)})),
-          ...[-3, -6, -9, -12].map(e => ({x: xr[0], y: e, dx: 4, dy: 4, anchor: 'start', text: pow10(e) + ' m'})),
-          {x: xr[1], y: L10(TOL), dy: -5, anchor: 'end', text: '3 mm'},
-          ...hit.map(({m, p}) => ({x: L10(p.evals), y: L10(p.change), dx: 8, dy: m === 'euler' ? 15 : -6, anchor: 'start', cls: 'hi',
-                                   text: p.evals.toLocaleString('en-US')})),
-          label('euler', 'Euler', 6, 12), label('heun', 'Heun', 6, 4), label('rk4', 'RK4', 6, -8),
-          {x: xr[1], y: yr[0], dy: -5, anchor: 'end', text: 'evaluations in all runs so far →'},
-          {x: xr[0], y: yr[1], dx: 4, dy: 10, anchor: 'start', text: '↑ move in the last-frame position'}]});
+          {x: across(s0), y: s0[2], dx: 6, dy: 16, anchor: 'start', text: 'start, 0.20 s'},
+          {x: across(p), y: p[2], dx: 10, dy: -30, anchor: 'start', cls: 'hi', text: '0.96 s, stepped:'},
+          {x: across(p), y: p[2], dx: 10, dy: -16, anchor: 'start', cls: 'hi', text: across(p).toFixed(3) + ' m across,'},
+          {x: across(p), y: p[2], dx: 10, dy: -2, anchor: 'start', cls: 'hi', text: p[2].toFixed(3) + ' m up'},
+          {x: across(p), y: p[2], dx: 10, dy: 16, anchor: 'start', text: 'tracked frame ' + (dist(p, tk) * 100).toFixed(1) + ' cm away,'},
+          {x: across(p), y: p[2], dx: 10, dy: 30, anchor: 'start', text: (Math.abs((tk[0] - p[0]) * -uy + (tk[1] - p[1]) * ux) * 100).toFixed(1) + ' cm of it out of this view'},
+          {x: 2.4, y: 3.2, anchor: 'start', text: 'circles: tracked frames'},
+          ...[0, 2, 4, 6].map(v => ({x: v, y: yr[0], dy: 13, anchor: 'middle', text: String(v)})),
+          {x: xr[0], y: 3.0, dx: 4, dy: 4, anchor: 'start', text: '3.0'},
+          {x: xr[0], y: 4.0, dx: 4, dy: 4, anchor: 'start', text: '4.0'},
+          {x: xr[1], y: yr[0], dy: -5, anchor: 'end', text: 'across the floor from release (m) →'},
+          {x: xr[0], y: yr[1], dx: 4, dy: 10, anchor: 'start', text: '↑ height (m)'}]});
     });
   });
 })();

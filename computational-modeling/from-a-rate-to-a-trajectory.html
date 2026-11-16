@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Euler&#39;s method — Computational Physical Modeling</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blocks.css?v=20261109124015">
-  <link rel="stylesheet" href="css/demos.css?v=20261109124015">
+  <link rel="stylesheet" href="css/blocks.css?v=20261113083220">
+  <link rel="stylesheet" href="css/demos.css?v=20261113083220">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {
@@ -839,9 +839,6 @@
           <span class="site-nav-sep">·</span>
           <a href="order-of-accuracy-measured.html">Halving the step</a>
         
-          <span class="site-nav-sep">·</span>
-          <a href="stability-and-accuracy.html">Energy checks</a>
-        
         <span class="site-nav-sep">·</span>
         
         <a href="assign-08.html">Assignment</a>
@@ -904,95 +901,247 @@
 
 <div class="claim">
   <span class="label">Claim</span>
-  <p class="exact">When the rate of change of a state is known as a function of the state itself,
-  the trajectory is obtained by stepping: evaluate the rate at the current state, advance by the
-  rate times a small step, and repeat. That is <dfn data-g="eulers-method">Euler's method</dfn>.
-  Each step starts where the last one ended, so an error made in one step is carried into every
-  later step.</p>
-  <p class="plain">The rate comes from a rule that uses the current state, so you have to reach a
-  state before you can compute the rate there.</p>
+  <p class="exact">Air drag grows with the speed, so the acceleration of a ball in flight changes as the
+  ball moves, and the constant-acceleration formulas from physics (the parabola fit of weeks 6 and
+  7) no longer give its path. Over a short time the velocity and the acceleration usually change
+  little. Holding both fixed for that time, moving the ball, and finding the forces again
+  where the step ends, over and over, builds the path one short step at a time. That is <dfn
+  data-g="eulers-method">Euler's method</dfn>. Without drag and with short steps it gives the same
+  path as the fit, so what it adds comes from drag. Each step starts where the last one ended, so
+  the small error of each step is carried into every step after it, and the length of the step
+  largely sets how large that error grows.</p>
+  <p class="plain">Hold the velocity and the acceleration fixed for a short time, move the ball,
+  then find the forces again and repeat. A shorter step usually drifts less, though it takes more
+  steps.</p>
 </div>
 
-<h2 id="a-shot-with-drag">A Tracked Shot With Drag</h2>
+<h2 id="a-shot-with-drag">A Tracked Shot With Gravity and Drag</h2>
 
-<p>The shot is arc 79 of the tracked shots (SportVU optical tracking, 25 frames a second), a
-three-pointer that missed. Time is measured from frame 20 of the record, the release this data set
-marks (<a href="conditions-become-roots.html#finding-the-release" title="Conditions as roots">page
-19</a> finds the release 0.08&nbsp;s earlier). Frames on this page are counted from that release,
-so frame 5 is frame 25 of the record. A fit to the first 11 free-flight frames gives the ball's
-position and velocity at frame 5, 0.20&nbsp;s after release (<a href="state-as-a-vector.html"
-title="State as a vector">page 25</a> builds that fit).</p>
+<p>Cameras tracked a missed three-pointer 25 times a second (arc 79 of the tracked shots, SportVU
+optical tracking). We know where the ball is and how fast it is moving at one moment, and we want
+its path from there to the hoop. Laid over the tracked frames, that path gives a check of how well
+our physics describes a real shot.</p>
 
-<table class="data">
-  <tr><th>At frame 5</th><th class="num"><em>x</em></th><th class="num"><em>y</em></th><th class="num"><em>z</em></th></tr>
-  <tr><td>position (m)</td><td class="num">5.4796</td><td class="num">3.9957</td><td class="num">4.2018</td></tr>
-  <tr><td>velocity (m/s)</td><td class="num">&minus;4.7333</td><td class="num">3.9732</td><td class="num">2.7508</td></tr>
-</table>
+<p>Weeks 6 and 7 predicted a path like this by fitting. A least-squares fit to the first frames of
+the flight, a straight line across the floor and a parabola in the height with $g$ held at
+9.81&nbsp;m/s² (<a href="model-form-and-parameters.html" title="Model form and free
+parameters">page 13</a>), carried forward, gave the rest of the flight, and assignment 6 carried it
+on to the rim. On this shot the fit to the first 11 frames ends 8&nbsp;cm from the last frame
+before the hoop.</p>
 
-<p>The position changes at the rate set by the velocity. The velocity changes at the rate set by
-gravity and by air drag:</p>
+<p>Two forces act on the ball once it leaves the hand. Gravity pulls straight down, and the fit has
+it. Air drag pushes back against the direction of motion, and it grows with the square of the
+speed (a ball moving twice as fast feels roughly four times the drag).</p>
 
-$$\frac{\mathrm{d}\mathbf{r}}{\mathrm{d}t} \;=\; \mathbf{v}, \qquad
-\frac{\mathrm{d}\mathbf{v}}{\mathrm{d}t} \;=\; -g\,\hat{\mathbf{z}} \;-\; k\,|\mathbf{v}|\,\mathbf{v}$$
+<figure class="figure">
+  <svg class="fbd" viewBox="0 0 440 200" style="display:block;width:100%;max-width:30rem;height:auto;margin:0 auto" role="img" aria-label="Free-body diagram of the ball moving up and to the right at 6.76 m/s. Gravity, 9.81 m/s squared, points straight down. Drag, 0.73 m/s squared, points back along the line of motion.">
+    <defs>
+      <marker id="fbd-hv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#9b9384"/></marker>
+      <marker id="fbd-hg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5F7038"/></marker>
+      <marker id="fbd-hd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8A6508"/></marker>
+    </defs>
+    <line x1="215.6" y1="93.6" x2="336.2" y2="39.9" stroke="#9b9384" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#fbd-hv)"/>
+    <line x1="164.4" y1="116.4" x2="98.6" y2="145.7" stroke="#8A6508" stroke-width="2.4" marker-end="url(#fbd-hd)"/>
+    <line x1="190" y1="133" x2="190" y2="190" stroke="#5F7038" stroke-width="2.4" marker-end="url(#fbd-hg)"/>
+    <circle cx="190" cy="105" r="26" fill="#f3e2c2" stroke="#b8860b" stroke-width="1.4"/>
+    <text x="336" y="28" text-anchor="middle" font-size="14" fill="#6b655a">velocity, 6.76 m/s</text>
+    <text x="92" y="166" text-anchor="middle" font-size="14" fill="#8A6508">drag, 0.73 m/s²</text>
+    <text x="200" y="182" text-anchor="start" font-size="14" fill="#5F7038">gravity, 9.81 m/s²</text>
+  </svg>
+  <figcaption>The forces on the ball 0.2&nbsp;s after release, the moment the stepping below starts
+  from, each divided by the ball's mass. The arrows are not to scale.</figcaption>
+</figure>
 
-<p>Here $\mathbf{r}$ is the position $(x, y, z)$, $\mathbf{v}$ is the velocity, $|\mathbf{v}|$ is
-the speed, $g$ is 9.81&nbsp;m/s², and $\hat{\mathbf{z}}$ points up. Drag acts against the velocity
-and grows with the square of the speed. The constant $k$ is 0.016 per meter (<a href="state-as-a-vector.html" title="State as a vector">page 25</a> gives its
-source). Without drag the height is a parabola in time, the model fitted on <a href="conditions-become-roots.html" title="Conditions as roots">page 19</a>. With drag the
-acceleration depends on the velocity, which is one of the unknowns being solved for. No formula is
-known for this path, so we find it by stepping.</p>
+<p>The positions are measured on the court: $x$ along it, $y$ across it, and $z$ the height above
+the floor. With gravity alone the acceleration is fixed at $g$ = 9.81&nbsp;m/s² downward, and the
+formulas from physics give the whole path. Across the floor the ball keeps a steady speed, and its
+height is a parabola in time. These are the formulas the fit uses, and the fit finds their
+starting position and velocity from the frames:</p>
 
-<h2 id="the-difference-from-week-3">A Rate That Depends on the State</h2>
+$$x(t) = x_0 + v_{x0}\,t, \qquad z(t) = z_0 + v_{z0}\,t - \tfrac{1}{2}\,g\,t^2$$
 
-<p>In week 3 the acceleration was a recorded array, so every value was available before any
-integration started and the whole cumulative sum could be formed in one pass. Here the rate is a
-function of the state $s$, which for the shot is the six numbers $(x, y, z, v_x, v_y, v_z)$:</p>
+<p>Here $x_0$ and $z_0$ are the starting position and $v_{x0}$ and $v_{z0}$ the starting velocity
+($y$ follows the same formula as $x$). With drag added, the acceleration is no longer fixed.
+Newton's second law with the drag equation from fluids, divided by the ball's mass $m$, gives the
+acceleration:</p>
 
-$$\frac{\mathrm{d}s}{\mathrm{d}t} \;=\; f(t, s)$$
+$$m\,\mathbf{a} = -m g\,\hat{\mathbf{z}} - \tfrac{1}{2}\rho\, C_D A\,|\mathbf{v}|\,\mathbf{v}
+\qquad\Longrightarrow\qquad
+\mathbf{a} = -g\,\hat{\mathbf{z}} - k\,|\mathbf{v}|\,\mathbf{v}, \quad k = \frac{\rho\, C_D A}{2m}$$
 
-<p>The rate at a later time needs the state at that time, and the state needs the rate that
-carried it there, and the two are found in turns. Each step uses the rate at the current state to
-find the next state, and the loop repeats from there. ($f$ takes the time as well, for rates that
-depend on a recorded signal. The shot's rate does not use it.)</p>
+<p>Bold letters are vectors. $\mathbf{v}$ is the velocity, $|\mathbf{v}|$ is the speed, and
+$\hat{\mathbf{z}}$ points up. The air density $\rho$, the drag coefficient $C_D$, the ball's
+cross-section $A$ and its mass combine into one constant $k$, about 0.016 per meter for a
+basketball (<a href="state-as-a-vector.html" title="State as a vector">page 25</a> gives its
+source). Writing drag as $|\mathbf{v}|\,\mathbf{v}$ gives it a size of $k$ times the speed squared
+and points it back along the velocity. In each direction the drag is $k$ times the speed times
+that direction's velocity, for instance $a_x = -k\,|\mathbf{v}|\,v_x$ and $a_z = -g -
+k\,|\mathbf{v}|\,v_z$.</p>
 
-<h2 id="one-euler-step-from-frame-5-to-frame-6">One Euler Step From Frame 5 to Frame 6</h2>
+<p>The acceleration now depends on the velocity. The speed sets the drag, the drag added to
+gravity sets the acceleration, and the acceleration changes the speed. So the acceleration changes
+all through the flight, and the constant-acceleration formulas do not apply. No formula is known
+for this path, so there is no formula to fit, and the next section finds the path a short step at a
+time.</p>
+
+<h2 id="short-steps">Short Steps at a Fixed Velocity and Acceleration</h2>
+
+<p>The velocity and the acceleration usually change smoothly, so over a short time $h$ they likely change
+little. Holding each at its value from the start of the step, the two simplest kinematics
+formulas from physics move the ball. The velocity changes by the acceleration times the time, and
+the position changes by the velocity times the time:</p>
+
+$$v_{z,\text{new}} = v_z + a_z\,h, \qquad z_{\text{new}} = z + v_z\,h$$
+
+<p>Both lines use the values at the start of the step. In a program, compute the new position from
+the old velocity before the velocity is replaced (the update of the whole state below does this on its
+own, since it finds every rate of change before it changes anything). Then we find the forces again where the
+ball has moved to, which gives a new acceleration, and take the next short step. The same two
+lines hold for $x$ and $y$.</p>
+
+<p>With the acceleration held fixed, physics would move the height by $v_z\,h +
+\tfrac{1}{2}a_z\,h^2$. The step holds the velocity fixed too, so it leaves out the
+$\tfrac{1}{2}a_z\,h^2$ term. That missing piece is most of this method's error, and it is small
+when $h$ is small because it grows with $h^2$. The reason to leave it out is that the step then
+treats every number the same way. Each changes by how fast it is changing at the start, times
+$h$. That rule does not need to know which numbers are positions and which are velocities, so the
+same loop can step other systems of differential equations, for instance an occupant held by a belt
+in a crashing car. <a href="order-of-accuracy-measured.html" title="Halving the step">Page 26</a>
+improves on it by finding the rates of change more than once in a step, which works for any system
+as well.</p>
+
+<p>Three words name the pieces of a step:</p>
+
+<ul class="plain">
+  <li>State - where the ball is and how fast it is moving, the six numbers $(x, y, z, v_x, v_y,
+  v_z)$. It is everything a step needs to know about the ball.</li>
+  <li>Rate - how fast each of those six numbers is changing. The positions change at the velocity,
+  and the velocities change at the acceleration from the forces.</li>
+  <li>Step - the short time $h$ each move covers. The cameras take a frame every 40&nbsp;ms, so
+  $h$ = 0.04&nbsp;s is one step a frame.</li>
+</ul>
+
+<p>With the state written $s$, the rate is a function of the time and the state, $f(t, s)$. This
+is the right-hand side of a differential equation, the same $f$ as in $\mathrm{d}u/\mathrm{d}t =
+f(t, u)$ from a differential equations course, with the whole state in place of the unknown
+$u$:</p>
+
+$$\frac{\mathrm{d}s}{\mathrm{d}t} = f(t, s)$$
+
+<p>For the shot, $f$ returns the three velocities and the three accelerations from the forces. The
+shot's forces do not use the time. It is passed in for systems whose forces follow a recorded
+signal, such as the occupant in a crashing car. One step is then the new state equals the old state
+plus the step times the rate:</p>
 
 $$s_{i+1} \;=\; s_i \;+\; h\, f(t_i, s_i)$$
 
-<p>Here $s_i$ is the state at time $t_i$ and $h$ is the step. Read it as the rectangle rule from
-<a href="cumulative-integration.html" title="Cumulative integration">week 3</a>, where the change
-over one step is the rate times the step width, with the rate taken at the start of the step.
-Euler treats the rate as constant across the step, though the rate changes during it.</p>
+<p>Here $s_i$ is the state after $i$ steps, at time $t_i$. Each of the six rows of this line is one
+of the two kinematics lines above, for one direction.</p>
 
-<p>On the shot, the speed at frame 5 is 6.76&nbsp;m/s. The vertical part of drag is
-$k\,|\mathbf{v}|\,v_z$ = 0.016&nbsp;&times;&nbsp;6.76&nbsp;&times;&nbsp;2.7508 = 0.298&nbsp;m/s²,
-so the vertical acceleration is &minus;9.81&nbsp;&minus;&nbsp;0.298 = &minus;10.108&nbsp;m/s². One
-step of 40&nbsp;ms (one frame) moves the height and the vertical velocity by the rate times the
-step:</p>
+<h2 id="the-starting-state-from-a-fit">The Starting State From a Fit</h2>
+
+<p>Time and frames on this page count from the release this data set marks (frame 20 of the
+record), so frame 5 is 0.20&nbsp;s after release. (<a href="conditions-become-roots.html#finding-the-release"
+title="Conditions as roots">Page 19</a> puts the actual release 0.08&nbsp;s earlier, and this page
+keeps the data set's mark.)</p>
+
+<p>The cameras give positions, not velocities, so the starting state comes from the same fit to
+the first 11 frames (frames 0 to 10): a straight line in $x$ and in $y$ and a parabola in $z$ with
+$g$ held at 9.81&nbsp;m/s² (<a href="state-as-a-vector.html" title="State as a vector">page 25</a>
+builds it in code). The slope of each fit at frame 5 is a velocity. Frame 5 is the
+middle of the fitted frames, where a fit is generally most reliable. Over those 11 frames drag
+moves the ball by about 1.5&nbsp;cm, so leaving it out of the fit probably costs little.</p>
+
+<p>At frame 5 the ball is 4.20&nbsp;m up, and its velocity is $(-4.73,\ 3.97,\ 2.75)$&nbsp;m/s. The
+$x$ part is negative because the ball is moving toward the end of the court where $x$ is zero. The
+stepping runs to frame 23, the last frame before the ball nears the hoop, which is 18 frames
+later.</p>
+
+<h2 id="one-step-from-frame-5-to-frame-6">One Step From Frame 5 to Frame 6</h2>
+
+<p>The step starts with the forces. The speed is the length of the velocity, and the vertical part
+of drag is $k$ times the speed times $v_z$:</p>
 
 $$\begin{aligned}
-z &= 4.2018 + 0.04 \times 2.7508 = 4.3118\ \text{m} \\
-v_z &= 2.7508 + 0.04 \times (-10.108) = 2.3465\ \text{m/s}
+|\mathbf{v}| &= \sqrt{4.73^2 + 3.97^2 + 2.75^2} = 6.76\ \text{m/s} \\
+k\,|\mathbf{v}|\,v_z &= 0.016 \times 6.76 \times 2.75 = 0.30\ \text{m/s}^2 \\
+a_z &= -9.81 - 0.30 = -10.11\ \text{m/s}^2
 \end{aligned}$$
 
-<p>The other four components step the same way. The new state is the start of the next step, and
-18 steps reach frame 23, the last frame before the ball nears the hoop.</p>
+<p>The ball is rising, so drag points down and adds to gravity. A step of one frame (40&nbsp;ms)
+then moves the height at the vertical velocity and changes that velocity at the acceleration:</p>
+
+$$\begin{aligned}
+z &= 4.20 + 0.04 \times 2.75 = 4.31\ \text{m} \\
+v_z &= 2.75 + 0.04 \times (-10.11) = 2.35\ \text{m/s}
+\end{aligned}$$
+
+<p>The ball is 11&nbsp;cm higher and still climbing, more slowly. The other four numbers of the
+state step the same way, each by $h$ times its own rate. Across the floor, drag gives $a_x$ =
+0.51&nbsp;m/s² and $a_y$ = &minus;0.43&nbsp;m/s², each against that direction's velocity. The new
+state is the start of the next step, and 18 steps reach frame 23.</p>
 
 <cg-demo case="euler"></cg-demo>
 
-<h2 id="errors-carry-forward">An 8&nbsp;mm Overshoot Carried Through 18 Steps</h2>
+<h2 id="stepping-against-the-fit">Without Drag, Stepping Gives Back the Fit</h2>
 
-<p>The comparison here is the same program (the <code>euler</code> function at the end of this
-page) run with 0.1&nbsp;ms steps. It puts the ball at 4.3038&nbsp;m at frame 6, so the single
-40&nbsp;ms step lands about 8&nbsp;mm high. The height is <dfn data-g="concave">concave</dfn> (it
-bends downward), and Euler follows a straight line at the slope it found at the start of the step.
-A tangent line to a concave curve lies above the curve on both sides of the point it touches. The
-overshoot is about half the vertical acceleration times the step squared.</p>
+<p>With drag set to zero ($k$ = 0) the acceleration is $-g$, the formulas of the first
+section are exact, and the exact path is the fit's parabola. The same program with 0.1&nbsp;ms
+steps ends 0.35&nbsp;mm from the fit at frame 23. Without drag, stepping gives the fit back, so
+the only thing it adds is the effect of drag. A step needs only the forces where the ball is at
+that moment, so it can likely carry any force we can write down for one moment, whether or not a
+formula for the path exists.</p>
 
-$$\tfrac{1}{2} \times 10.108 \times 0.04^2 = 0.0081\ \text{m}$$
+<h2 id="drag-against-the-fit">Drag Halves the Miss Across the Floor and Does Worse in Height</h2>
 
-<p>The next step starts from the high point, so its own overshoot adds to the first. The table
-gives the gap to the 0.1&nbsp;ms run after each step.</p>
+<p>To see whether drag improves the prediction, we ran the same recipe on the 666 arcs of the
+training set (the whole flights in <code>data/shots/train.json</code>). Each arc's free flight runs
+from release to its last free-flight frame, the last frame more than 1&nbsp;m from the hoop across
+the floor. We fit the first 11 frames, then predict the rest of the free flight two ways: the fit
+carried forward, and drag stepped from the fit's middle frame with 2&nbsp;ms steps of RK4, the more
+accurate stepper on <a href="order-of-accuracy-measured.html" title="Halving the step">page
+26</a>. The miss is the distance from the prediction to the measured ball, at the last free-flight
+frame and as a root-mean-square (rms) over all the frames after the fit:</p>
+
+<table class="data">
+  <tr><th>median miss after the fit (cm)</th><th class="num">fit carried forward</th><th class="num">stepped with drag</th><th class="num">arcs where drag is closer</th></tr>
+  <tr><td>at the last free-flight frame</td><td class="num">21.1</td><td class="num">13.0</td><td class="num">550</td></tr>
+  <tr><td>across the floor (rms)</td><td class="num">10.5</td><td class="num">5.7</td><td class="num">558</td></tr>
+  <tr><td>in height (rms)</td><td class="num">4.9</td><td class="num">6.1</td><td class="num">209</td></tr>
+</table>
+
+<p>Across the floor, drag cuts the miss about in half. The fit's straight lines keep a steady
+speed, so they carry the ball too far (by a median 17&nbsp;cm at the last frame), and drag slows
+it. In height, drag does worse. At the last frame the measured ball ends a median 3.8&nbsp;cm
+above the fit and 7.5&nbsp;cm above the drag path. We also chose the starting state by least
+squares on the stepped drag path itself (adjusting the six numbers until the path best matched the
+11 frames), and the median height miss moved by only 0.1&nbsp;cm, so the start is probably not the
+cause, and we do not know what is. On the shot on this page the fit lands closer at frame 23
+(8&nbsp;cm against 14&nbsp;cm), so on this shot alone the fit would look better. The program that produces these numbers is
+<code>lectures/lecture24_fit_vs_drag.py</code>.</p>
+
+<h2 id="errors-carry-forward">Drift Over 18 Steps of 40&nbsp;ms</h2>
+
+<p>The runs above used 2&nbsp;ms steps of RK4. One step of Euler a frame is cheaper, and its error
+can be measured against an exact answer without drag, since the exact path is then the parabola. The height curve
+bends downward (it is <dfn data-g="concave">concave</dfn>) because gravity slows the climb. The
+step moves the height along a straight line at the slope it had at the start, and a straight line
+leaving a curve that bends down ends up above it. The amount is the $\tfrac{1}{2}gh^2$ the step
+leaves out:</p>
+
+$$\tfrac{1}{2} \times 9.81 \times 0.04^2 = 0.00785\ \text{m}$$
+
+<p>The velocity steps without error when the acceleration is fixed, so every step lands 7.85&nbsp;mm high
+and the next step starts from there. Eighteen steps end 18 &times; 7.85 = 141.3&nbsp;mm above the
+parabola at frame 23, and the program's drag-free run at 40&nbsp;ms ends there. A program
+that misses this number probably has a bug in it (a position step that uses the new velocity, for
+instance, ends 141.3&nbsp;mm low).</p>
+
+<p>With drag there is no exact path, so the comparison is the same program with 0.1&nbsp;ms steps.
+These hold each velocity and acceleration fixed for 400 times less time, and without drag they land
+within 0.35&nbsp;mm of the parabola, so they likely follow the drag path far more closely than one
+step a frame. The first 40&nbsp;ms step with drag lands $\tfrac{1}{2} \times 10.11 \times 0.04^2$ =
+8.1&nbsp;mm high, and the gap grows by 7 to 8&nbsp;mm a step. This growing gap is the drift:</p>
 
 <table class="data">
   <tr><th class="num">frame</th><th class="num">steps</th><th class="num">height above the 0.1&nbsp;ms run</th></tr>
@@ -1003,71 +1152,66 @@ gives the gap to the 0.1&nbsp;ms run after each step.</p>
   <tr><td class="num">23</td><td class="num">18</td><td class="num">134.7&nbsp;mm</td></tr>
 </table>
 
-<p>If each 40&nbsp;ms step started from the 0.1&nbsp;ms run's state, its overshoot would fall from
-8.1 to 7.5&nbsp;mm over the flight, and the 18 of them add to 139.8&nbsp;mm. The gap at frame 23 is
-5.1&nbsp;mm less, and that difference comes from the vertical velocity. The size of the downward
-acceleration falls from 10.11 to 9.32&nbsp;m/s² over the flight (drag adds to gravity on the way up
-and works against it on the way down). Euler uses the value at the start of each step, so it makes
-the vertical velocity a little too low each step. Every later step moves with that velocity. By
-frame 23 the vertical velocity is about 15&nbsp;mm/s low, and that has pulled the height down by
-about 5&nbsp;mm. The height error and the velocity error both stay in the state and carry into
-every later step.</p>
+<p>Each step starts where the last one ended, and nothing in the method pulls a step back toward
+the path. The error of each step is carried into every step after it, so the drift builds up over
+the flight, with drag much as it does without.</p>
 
-<p>A drag-free run is a check on the program, because without drag the height has a formula. With
-$k$ = 0 the vertical acceleration is exactly $-g$, the velocity steps exactly, and every 40&nbsp;ms
-step overshoots by &frac12;&nbsp;&times;&nbsp;9.81&nbsp;&times;&nbsp;0.04² = 7.85&nbsp;mm. Eighteen
-of them make 141.3&nbsp;mm, and the program's drag-free run at 40&nbsp;ms ends 141.3&nbsp;mm above
-the parabola.</p>
+<h2 id="one-step-a-frame-drifts-four-times-the-tracking-noise">One Step a Frame Drifts Four Times the Tracking Noise</h2>
 
-<h2 id="step-size-against-the-tracking-noise">Step Size Against the Tracking Noise</h2>
+<p>The vertical tracking noise given in the header of the shots file is 3.07&nbsp;cm. One step a
+frame ends 13.5&nbsp;cm from the 0.1&nbsp;ms run at frame 23 (almost all of it in height), more
+than four times the noise. Drag itself moves this shot 15.7&nbsp;cm from the fit at frame 23
+(almost all of it across the floor), so at one step a frame the stepping error (13.5&nbsp;cm) is
+nearly as large as the effect of drag (15.7&nbsp;cm). Across the 666 training arcs the picture is
+much the same. One step a frame drifts a median 15.0&nbsp;cm from the RK4 run by the last
+free-flight frame, and drag moves the prediction a median 19.5&nbsp;cm. Halving the step to 20&nbsp;ms
+about halves the drift (6.7&nbsp;cm on this shot, 7.5&nbsp;cm across the arcs), which is still
+about twice the noise.</p>
 
-<p>In week 3 the instrument fixed the interval. Here you choose the step, and the choice has a cost
-either way:</p>
+<h2 id="the-frames-cannot-choose-the-step">One Step a Frame Scores as Well as Short Steps</h2>
 
-<ul class="plain">
-  <li>Too large - the answer is wrong, possibly wildly.</li>
-  <li>Too small - the run is slow, and eventually less accurate once rounding dominates.</li>
-  <li>No formula - the right step depends on how fast the solution changes, and that is not known
-  before the run.</li>
-</ul>
+<p>Scored against the measured frames, one step a frame does about as well as short steps, and
+slightly better. The median miss at the last free-flight frame over the 666 arcs is 12.5&nbsp;cm
+with Euler at 40&nbsp;ms and 13.0&nbsp;cm with RK4 at 2&nbsp;ms. With short steps the drag path
+ends a median 7.5&nbsp;cm below the last frame, and the drift of one step a frame lifts it to
+7.1&nbsp;cm above, a miss of about the same size on the other side. If we chose the step by
+matching the frames we would likely pick one step a frame (or a longer one), and the comparison
+would not show its 15&nbsp;cm of drift.</p>
 
-<p>On the shot, one step per frame ends 13.5&nbsp;cm high at frame 23. That is more than four times
-the 3.07&nbsp;cm vertical tracking noise in the header of the shots file, so the stepping error
-alone would likely be visible in the data. Steps of 20&nbsp;ms end 6.7&nbsp;cm high. The 0.1&nbsp;ms run is
-a fair comparison only if it is itself close enough. Checking that, by halving the step until the
-answer stops moving, is the <dfn data-g="convergence-study">convergence study</dfn> on <a
-href="order-of-accuracy-measured.html" title="Order of accuracy">page 26</a>.</p>
+<p>Thus we check the step against the stepper itself, by running it again with a shorter step. A shorter step drifts less but takes
+more steps, and a good step likely depends on how fast the acceleration changes along the path,
+which we usually do not know before the run. Halving the step until the answer stops moving is the
+<dfn data-g="convergence-study">convergence study</dfn> on <a href="order-of-accuracy-measured.html"
+title="Halving the step">page 26</a>, and it also checks that the short-step run used as the
+comparison here is close enough.</p>
 
 <div class="check">
   <span class="label">Check</span>
   <ol>
-    <li>Why does an error in one Euler step affect every later step, when an error in one panel of
-    a week-3 integral does not?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>A quadrature panel is computed from the data. The area of panel 40 depends on the samples at
-panel 40 and on nothing else. The panels are independent terms in a sum, so an error in one panel
-changes the total by that amount only.</p>
-     <p>An Euler step is computed from <strong>the result of the previous step</strong>. The state at
-step 40 is the starting point for step 41, so an error made at step 40 displaces the trajectory.
-Every later step is taken from the wrong place, and the rate is evaluated at a state the system
-never occupied. On the shot the rate depends on the velocity and not on the height. For this reason the first
-step's 8&nbsp;mm height error is carried along unchanged, while the velocity error changes every
-later position step (by about 5&nbsp;mm at frame 23).</p></div></details></li>
+    <li>The first 40&nbsp;ms step lands 8.1&nbsp;mm above the 0.1&nbsp;ms run. Where does that
+    number come from in the constant-acceleration formula?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>With the
+acceleration held fixed, the height moves $v_z h + \tfrac{1}{2}a_z h^2$ in one step. Euler's
+position step holds the velocity fixed as well and moves the height by $v_z h$ only. It leaves out
+$\tfrac{1}{2}a_z h^2$, and with $a_z$ = &minus;10.11&nbsp;m/s² and $h$ = 0.04&nbsp;s that is
+8.1&nbsp;mm. The term is negative, so leaving it out puts the ball too high.</p></div></details></li>
     <li>A run with 20&nbsp;ms steps ends 67.1&nbsp;mm above the 0.1&nbsp;ms run at frame 23, about
-    half of the 40&nbsp;ms run's 134.7&nbsp;mm. Explain the half from the overshoot of one step.
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>One step overshoots by about &frac12;&nbsp;|<em>a</em><sub><em>z</em></sub>|&nbsp;<em>h</em>².
-Halving <em>h</em> makes each overshoot a quarter as large (about 2.0&nbsp;mm in place of
-8.1&nbsp;mm). It also doubles the number of steps, from 18 to 36, so the total is about half. That
-is why Euler's error at a fixed time is roughly
-proportional to the step. <a href="order-of-accuracy-measured.html" title="Order of accuracy">Page
-26</a> measures this on the shot and compares it with steppers that do better.</p></div></details></li>
-    <li>Your solution is <dfn data-g="convex">convex</dfn> and not concave. Which way does Euler
-    err, and why?
-    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Euler underestimates a convex solution. Euler steps along the tangent at the current point. For a
-convex solution, meaning one curving upward with a positive second derivative, the tangent
-lies <em>below</em> the curve everywhere except where it touches, so each step lands low. The
-errors have one sign, so they add up and do not cancel. For a concave solution like the shot's
-height, the tangent lies above and Euler overestimates. If the second derivative keeps one sign
-over the run, you can predict the sign of the error before running the program.</p></div></details></li>
+    half of the 40&nbsp;ms run's 134.7&nbsp;mm. Explain the half from the error of one step.
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>One step lands
+high by about &frac12;&nbsp;|<em>a</em><sub><em>z</em></sub>|&nbsp;<em>h</em>². Halving
+<em>h</em> makes each of those errors a quarter as large (about 2.0&nbsp;mm in place of
+8.1&nbsp;mm). It also doubles the number of steps, from 18 to 36, so the total is about half. For
+this reason Euler's error at a fixed time is roughly proportional to the step. <a
+href="order-of-accuracy-measured.html" title="Halving the step">Page 26</a> measures this on the
+shot and compares it with steppers that do better.</p></div></details></li>
+    <li>The solution of some other differential equation is <dfn data-g="convex">convex</dfn> (it
+    bends upward). Which way does Euler err, and why?
+    <details class="ans"><summary><span>Answer</span></summary><div class="body"><p>Euler
+usually lands low on a convex solution. Each step leaves along the slope at its start, and a
+straight line leaving a curve that bends up ends up below it. The one-step errors have one sign,
+so they tend to add up and not cancel. On the shot's height, which bends down, each step lands
+high. If the second derivative keeps one sign over the run, you can usually predict the sign of
+the error before running the program.</p></div></details></li>
   </ol>
 </div>
 
@@ -1113,10 +1257,42 @@ end</pre>
   <div class="code-hint">Hover over a highlighted line, or tap it, for a description of what it does.</div>
 </div>
 
-<p>For the shot, <code>f</code> is the rate above written as a function of the six-component
-state, and <code>euler(f, s0, 0.20, 0.04, 18)</code> is the run at one step per frame. <a
-href="state-as-a-vector.html" title="State as a vector">Page 25</a> writes that rate and the fit
-that gives <code>s0</code>.</p>
+<p>The function is the loop from above with the results kept. <code>f</code> is the rate function,
+<code>s0</code> the starting state, <code>t0</code> its time, <code>dt</code> the step $h$ and
+<code>n</code> the number of steps. Row $i$ of the result is the state after $i$ steps, so the
+whole path can be plotted. For the shot, <code>f</code> is the function <code>shot</code> on <a
+href="state-as-a-vector.html" title="State as a vector">page 25</a>, which returns the three
+velocities and the three accelerations, and <code>euler(shot, s0, 0.20, 0.04, 18)</code> is the
+run at one step a frame.</p>
+
+<h2 id="why-the-error-carries">How the Height and Velocity Errors Carry Forward</h2>
+
+<p>This section is optional. It adds detail to the drift above, and nothing earlier on the page
+depends on it.</p>
+
+<p>The 18 one-step errors do not add exactly to the gap at frame 23. Measured one at a time, each
+starting from the 0.1&nbsp;ms run's state, they fall from 8.1 to 7.5&nbsp;mm over the flight and
+add to 139.8&nbsp;mm. The gap is 134.7&nbsp;mm, about 5&nbsp;mm less. Most of the difference comes
+from the error in the vertical velocity.</p>
+
+<p>The size of the downward acceleration falls from 10.11 to 9.32&nbsp;m/s² over the flight, since
+drag adds to gravity on the way up and works against it on the way down. Euler uses the value at
+the start of each step, so it makes the vertical velocity a little too low each step. By frame 23
+the vertical velocity is about 15&nbsp;mm/s low, and every later position step moves with it,
+which pulls the height down by about 5&nbsp;mm.</p>
+
+<p>The two errors carry forward in different ways. The shot's rates use the velocity and not the
+position, so a height error rides along unchanged and alters no later rate. A velocity error
+changes every later position step, and it also changes the drag the next step finds. For a system
+whose forces depend on position (a spring, for instance) a position error would change the later
+rates as well.</p>
+
+<p>Euler's method is the rectangle rule of <a href="cumulative-integration.html" title="Cumulative
+integration">week 3</a> (each panel's area taken as the rate at its start times its width), except
+that the rate is computed from the state. There, the rate came from a recorded array, so every
+value was known before the sum started, and an error in one panel changed the total by that amount
+only. Here a step cannot start until the step before it has finished, and each step's error moves
+the state every later rate is found at.</p>
 
 <h2 id="terms-used-on-this-page">Terms Used on This Page</h2>
 
@@ -1143,11 +1319,11 @@ and RK4 on an equation you write, with the order measured from the run itself.</
   </script>
   
 
-  <script type="module" src="js/bundle/from-a-rate-to-a-trajectory.js?v=20261109124015"></script>
+  <script type="module" src="js/bundle/from-a-rate-to-a-trajectory.js?v=20261113083220"></script>
   
 
   <footer class="site-footer">
-    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-09">November 9, 2026</time>.</span>
+    <span>Computational Physical Modeling · Climbing Giants · This page co-authored with Claude.<br>Except where noted, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license noopener" target="_blank">CC BY-NC-SA 4.0</a>.<br>Last modified <time datetime="2026-11-11">November 11, 2026</time>.</span>
     <button type="button" class="report-btn" id="report-open-footer">Report a problem ✉</button>
   </footer>
   <dialog class="report-modal" id="report-modal" aria-labelledby="report-modal-title">

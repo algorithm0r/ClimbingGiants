@@ -6,8 +6,8 @@
 <title>Lecture 25 — State as a vector</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<link rel="stylesheet" href="css/blocks.css?v=20261109124015">
-<link rel="stylesheet" href="css/demos.css?v=20261109124015">
+<link rel="stylesheet" href="css/blocks.css?v=20261113083220">
+<link rel="stylesheet" href="css/demos.css?v=20261113083220">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
@@ -687,159 +687,429 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <body>
 
 
-<section class="deck-slide part" data-notes="<p>All right, welcome. In the last video we stepped the shot forward with Euler's method, six numbers at a time. In this video I want to look at those six numbers themselves, what we call the state. We'll see why it has to hold the velocity, why the three directions get stepped together, and how the same step function runs a completely different system, a person in a seat belt during a crash. So let's take a look.</p>">
+<section class="deck-slide part" data-notes="<p>All right, welcome. In the last video we stepped a released ball forward with Euler&#x27;s method: six numbers for its state, a rate function for the forces, and one line that takes the step. In this video we&#x27;ll run that same loop on two other systems. The first is a person held by a seat belt in a car that&#x27;s crashing, and how far forward they move relative to the car. The second is a line of cars in stop-and-go traffic, and how fast a slowdown travels back along the line. So let&#x27;s take a look.</p>">
+  <style>.msd{display:block;width:100%;max-width:min(46rem,100%,calc(50vh * 2.4));margin:0 auto}
+  .msd text{font-family:inherit;font-size:12px;fill:var(--warm-gray)}
+  .msd .car{fill:none;stroke:#9b9384;stroke-width:1.4}
+  .msd .wall{fill:#e8e2d6;stroke:#7a7466;stroke-width:1.2}
+  .msd .mass{fill:#f3e2c2;stroke:#b8860b;stroke-width:1.4}
+  .msd .spr{fill:none;stroke:#5F7038;stroke-width:2}
+  .msd .dmp{fill:none;stroke:#8A6508;stroke-width:2}
+  .msd .arr{stroke:#6b655a;stroke-width:1.6}
+  .msd .restmark{stroke:#cfc7b8;stroke-width:1;stroke-dasharray:3 3}
+  .msd text.k{fill:#5F7038} .msd text.c{fill:#8A6508} .msd text.clock{font-size:13px;fill:#b0443a}
+  .cgs .thin{fill:none;stroke:#7a7466;stroke-width:.8}
+  .cgs .frame{fill:#fff;stroke:#7a7466;stroke-width:1.3} .cgs .redot{fill:#b0443a;stroke:#fff;stroke-width:1.3}
+  .cgs text.acc{fill:var(--course-accent-dark)}
+  .uses{display:block;width:100%;max-width:min(100%,120vh);margin:0 auto}
+  .uses text{font-family:inherit;font-size:13px;fill:var(--warm-gray)}
+  .uses text.hd{font-weight:600;fill:var(--course-accent-dark)} .uses text.ph{font-size:13px;fill:#b0443a}
+  .uses text.dr{fill:#8A6508} .uses text.ft{font-size:12px;fill:#8A6508}
+  .uses line{stroke-width:1.6;opacity:0;transition:opacity .5s}
+  .uses line.on{opacity:1} .uses line.own{stroke:#5F7038} .uses line.drag{stroke:#b8860b}
+  .deck-slide .readout{display:flex;flex-wrap:wrap;justify-content:center;gap:.4em 2.2em;
+    font-size:calc(var(--stage-text) * .62);color:var(--warm-gray);margin-top:.4vh}
+  .deck-slide .readout .when{color:#b0443a}
+  .beltrow{display:grid;grid-template-columns:1fr 1fr;gap:2vw;align-items:center}
+  .beltrow .msd{max-width:none}
+  .deck-slide .replay{align-self:center; margin-top:.6vh; font:inherit; font-size:.8rem; color:var(--warm-gray); background:none; border:1px solid #d9d3c7; border-radius:4px; padding:.2em .8em; cursor:pointer}
+  .loop{display:block;width:100%;max-width:min(100%,92vh);margin:0 auto}
+  .loop text{font-family:inherit;font-size:13px;fill:#3d3a34;transition:opacity .4s} .loop text.dim{opacity:.22}
+  .loop text.hd{font-weight:600;fill:var(--course-accent-dark)} .loop text.step{font-size:15px;fill:#8A6508;font-weight:600}
+  .loop .bx{fill:#fff;stroke:#cfc7b8;stroke-width:1.2} .loop .arr{stroke:#6b655a;stroke-width:1.6}
+  .chainst{display:block;width:100%;max-width:min(100%,120vh);margin:0 auto}
+  .chainst text{font-family:inherit;font-size:12px;fill:#3d3a34} .chainst text.vars{fill:var(--warm-gray)} .chainst text.dots{font-size:20px}
+  .chainst .road{stroke:#b0a99c;stroke-width:1.4} .chainst .car{fill:#f3e2c2;stroke:#b8860b;stroke-width:1.2} .chainst .rec{fill:#e8e2d6;stroke:#5b564d;stroke-width:1.4}
+  .chainst .ar{opacity:0;transition:opacity .4s} .chainst .ar.on{opacity:1} .chainst .reads{stroke:#8A6508;stroke-width:1.5} .chainst text.rd{fill:#8A6508;font-size:11px}
+  .idm{display:block;width:100%;max-width:min(100%,125vh);margin:0 auto}
+  .idm text{font-family:inherit;font-size:12.5px;fill:#3d3a34} .idm text.v{fill:#8A6508} .idm text.g{fill:#5F7038}
+  .idm .road{stroke:#b0a99c;stroke-width:1.4} .idm .you{fill:#f3e2c2;stroke:#b8860b;stroke-width:1.2} .idm .ahead{fill:#e8e2d6;stroke:#5b564d;stroke-width:1.2}
+  .idm .arr{stroke:#6b655a;stroke-width:1.5} .idm .gap{stroke:#5F7038;stroke-width:1.5}
+  .cgs .cartr{fill:none;stroke:#8f897c;stroke-width:.7} .cgs .rectr{fill:none;stroke:#2f2c27;stroke-width:1.6}
+  .cgs .recd{fill:#2f2c27;stroke:#fff;stroke-width:1.2} .cgs .modl{stroke:#5F7038;stroke-width:2.4}
+  .grain{display:block;width:100%;max-width:min(100%,120vh);margin:0 auto}
+  .grain text{font-family:inherit;font-size:13px;fill:#3d3a34} .grain text.big{font-weight:600;fill:#8A6508} .grain text.gl{fill:#8A6508;font-weight:600;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}
+  .grain .gr{fill:#e8e2d6;stroke:#9b9384;stroke-width:1} .grain .gh{fill:#f3e2c2;stroke:#b8860b;stroke-width:1.8}
+  .grain .mark{stroke:#8A6508;stroke-width:2.2} .grain .ctr{fill:#3d3a34} .grain .vel,.grain .spin{stroke:#8A6508;stroke-width:1.6}
+  .deck-slide .demrun video{display:block;width:100%;max-width:min(100%,125vh);height:auto;margin:0 auto}
+  .msd.big{max-width:min(100%,112vh)} .msd.big text{font-size:14px} .msd.big text.sm{font-size:12.5px}
+  .msd .ground{stroke:#b0a99c;stroke-width:1.4} .msd .post{stroke:#5b564d;stroke-width:2} .msd text.sm{font-size:11px}
+  .msd .ua{stroke:#8A6508;stroke-width:1.8} .msd .fk{stroke:#5F7038;stroke-width:2.4} .msd .fc{stroke:#8A6508;stroke-width:2.4} .msd .fa{stroke:#2f2a24;stroke-width:1.8}</style>
   <div class="head">
     <p class="course">Computational Physical Modeling</p>
-    <p class="say">State as a vector, for a tracked shot and a belted occupant</p>
+    <p class="say">State as a vector, for a belted occupant and a line of cars</p>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Newton's law hands us an acceleration. That's the second derivative of the position, a rate of a rate. And a stepper only knows how to do one thing. It takes a rate and adds it times the step. So what do we do with a second derivative?</p><p>Well, we carry the velocity along as part of what we're stepping. The position's rate is the velocity, and that's just the definition. The velocity's rate is the acceleration, and that's the physics, gravity and drag. So one second-order equation becomes two first-order ones, and each of them is a rate we can step.</p><p>The thing we step is that stack of position and velocity, and we call it the state. For the shot that's three positions and three velocities, so six numbers.</p>">
+<section class="deck-slide full" data-notes="<p>So here&#x27;s the loop from last video, and the point of this one is that it doesn&#x27;t care what system it&#x27;s running. Three things go into it. First, the state, every number the next step needs. For the ball that was six numbers, three positions and three velocities. Second, the rate function, which takes a time and a state and gives back how fast each of those numbers is changing. That&#x27;s where the physics goes. For the ball it was gravity and drag. And third, the step line, the new state is the old state plus h times the rate.</p><p>For a new system you work out the first two. What does the next step need to know, and how fast does each of those numbers change? The step line you keep. A list of numbers stepped as one thing like this is called a vector, and the state is that vector, whether it&#x27;s 6 numbers, or 2, or 40. And at the end of this video we&#x27;ll look at one with 11,436, a slope of grains held together by cement bonds.</p>">
   <div class="head">
-    <p class="say">Carrying the velocity in the state turns one second-order equation into <span class="def">a pair of first-order ones</span>.</p>
-    <p class="sub"><b>r</b> is the position (<i>x</i>, <i>y</i>, <i>z</i>), <b>v</b> the velocity, |<b>v</b>| the speed, <i>g</i> = 9.81&nbsp;m/s², <i>&#7825;</i> points up, and <i>k</i> = 0.016 per meter for a basketball.</p>
+    <p class="say">Any system written as rates runs on the same loop: <span class="def">choose the state, write its rate function, keep the step line</span>.</p>
   </div>
   <div class="stage">
-    <style>.deck-slide .work.spaced .katex-display{margin:.6em 0}</style>
-    <div class="work spaced" style="font-size:calc(var(--stage-text) * .9)">
-      $$\frac{\mathrm{d}^2\mathbf{r}}{\mathrm{d}t^2} = -g\,\hat{\mathbf{z}} - k\,|\mathbf{v}|\,\mathbf{v}
-      \qquad\longrightarrow\qquad
-      \frac{\mathrm{d}}{\mathrm{d}t}\begin{bmatrix}\mathbf{r}\\ \mathbf{v}\end{bmatrix}
-      = \begin{bmatrix}\mathbf{v}\\ \textcolor{#8A6508}{-g\,\hat{\mathbf{z}} - k\,|\mathbf{v}|\,\mathbf{v}}\end{bmatrix}$$
+    <figure class="figure wide" data-fig="lec25-loop"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>All right, the first problem. A person in a frontal crash, held by a seat belt. The car hits a barrier at 15.65 meters a second, and we want to know how far forward the person moves relative to the car. That&#x27;s one of the numbers a restraint designer checks, against the room between the person and the inside of the car.</p><p>Roughly, this is a system you&#x27;ve probably met in differential equations, a mass on a spring with a damper. The person is the mass, 75 kilograms. The belt is the spring and the damper, and the other end of the belt is bolted to the car. I&#x27;m reusing k and c for the belt&#x27;s stiffness and damping, which have nothing to do with the drag constant from last video. And I&#x27;m calling the person&#x27;s forward travel relative to the car u. We&#x27;ll build up the physics of this one piece at a time.</p>">
+  <div class="head">
+    <p class="say">The first problem finds <span class="def">how far a belted occupant travels forward, relative to the car</span>, when the car hits a barrier at 15.65&nbsp;m/s.</p>
+  </div>
+  <div class="stage">
+    <svg class="msd" viewBox="0 0 460 180" role="img" aria-label="A car outline with the belt's anchor on the car at the left. A spring for the belt's stiffness, 296 kN/m, and a damper for its damping, 2.8 kN s/m, run from the anchor to a block for the occupant, 75 kg. An arrow above the block points forward, labeled u, travel forward relative to the car.">
+      <defs><marker id="msd-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#6b655a"/></marker></defs>
+      <rect class="car" x="20" y="22" width="420" height="152" rx="10"/>
+      <text x="32" y="40">car</text>
+      <rect class="wall" x="50" y="52" width="16" height="96"/>
+      <text x="58" y="162" text-anchor="middle">belt anchor</text>
+      <path class="spr" d="M66 78H100l8 -12l16 24l16 -24l16 24l16 -24l16 24l16 -24l8 12H270"/>
+      <text class="k" x="168" y="58" text-anchor="middle">belt stiffness k = 296 kN/m</text>
+      <path class="dmp" d="M66 122H150M205 112H150V132H205M178 114V130M178 122H270"/>
+      <text class="c" x="168" y="150" text-anchor="middle">belt damping c = 2.8 kN&#183;s/m</text>
+      <rect class="mass" x="270" y="62" width="90" height="76" rx="4"/>
+      <text x="315" y="96" text-anchor="middle">occupant</text>
+      <text x="315" y="112" text-anchor="middle">m = 75 kg</text>
+      <line class="arr" x1="315" y1="48" x2="420" y2="48" marker-end="url(#msd-h)"/>
+      <text x="368" y="40" text-anchor="middle">u, travel relative to the car</text>
+    </svg>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Before any forces, let&#x27;s be careful about where things are, because two things are moving. The car moves along the road, and I&#x27;ll call its position from a fixed point on the ground x car. The person moves inside the car, and what we want is how far they move forward relative to the car. I&#x27;ll call that u. It&#x27;s zero when they&#x27;re sitting where they started, and positive when they&#x27;ve moved forward toward the dashboard.</p><p>So the person&#x27;s position from the ground is the car&#x27;s position plus u. Strictly it&#x27;s the car&#x27;s position, plus where the seat is in the car, plus u. But the seat doesn&#x27;t move relative to the car, so that piece drops out as soon as we take derivatives, and I&#x27;ll leave it off. That sum is what Newton&#x27;s second law needs, because the law works in a frame fixed to the ground, not one riding along with a car that&#x27;s slamming to a stop.</p>">
+  <div class="head">
+    <p class="say">Measured from the ground, the occupant is at <span class="def"><i>x</i><sub>car</sub> + <i>u</i></span>: the car&rsquo;s position plus the travel relative to the car.</p>
+  </div>
+  <div class="stage">
+    <svg class="msd big" viewBox="0 0 460 190" role="img" aria-label="A fixed marker on the ground at the left. An arrow from it to the car's rear, labeled x car, the car's position from the ground. Inside the car, the occupant's starting place is marked, and an arrow labeled u runs forward from it to where the occupant is now. A long arrow from the ground marker to the occupant is labeled x car plus u.">
+      <defs><marker id="fr-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#6b655a"/></marker><marker id="fr-u" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8A6508"/></marker></defs>
+      <line class="ground" x1="10" y1="170" x2="450" y2="170"/>
+      <path class="post" d="M40 170V140"/><text x="40" y="186" text-anchor="start">fixed point</text>
+      <rect class="car" x="150" y="70" width="270" height="92" rx="10"/><text x="162" y="88">car</text>
+      <line class="restmark" x1="300" y1="78" x2="300" y2="158"/>
+      <rect class="mass" x="326" y="96" width="56" height="52" rx="4"/><text x="354" y="127" text-anchor="middle">occupant</text>
+      <line class="arr" x1="40" y1="150" x2="148" y2="150" marker-end="url(#fr-h)"/><text x="89" y="143" text-anchor="middle">x<tspan baseline-shift="sub" font-size="72%">car</tspan></text>
+      <line class="ua" x1="300" y1="88" x2="324" y2="88" marker-end="url(#fr-u)"/><text class="c" x="312" y="82" text-anchor="middle">u</text>
+      <text x="300" y="174" text-anchor="middle" class="sm">start</text>
+      <line class="arr" x1="40" y1="40" x2="352" y2="40" marker-end="url(#fr-h)"/><text x="190" y="32" text-anchor="middle">x<tspan baseline-shift="sub" font-size="72%">car</tspan> + u, the occupant from the ground</text>
+      <line class="restmark" x1="352" y1="44" x2="352" y2="94"/>
+    </svg>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Now the forces, one at a time. The belt is a strap of webbing, and when the person moves forward it stretches. Stretched webbing pulls back, and for a model we&#x27;ll say it pulls back like a spring, with a force proportional to the stretch. The stretch is u, so the force is k times u, pointing backward, which is why it has a minus sign. k is the stiffness, 296 kilonewtons per meter.</p><p>To get a feel for it, at 10 centimeters of travel that&#x27;s 29.6 kilonewtons. On a 75 kilogram person that&#x27;s an acceleration of about 395 meters per second squared, about 40 times gravity, which we write 40 g. That&#x27;s the scale of the loads in a crash.</p>">
+  <div class="head">
+    <p class="say">The belt stretches as the occupant moves forward, and as a spring it <span class="def">pulls back with a force <i>k</i>&nbsp;<i>u</i></span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work" style="font-size:calc(var(--stage-text) * .8);margin-bottom:.3em">
+      $$F_{\text{spring}} = -k\,u,\qquad k = 296\ \text{kN/m}:\quad u = 0.1\ \text{m} \;\Rightarrow\; 29.6\ \text{kN}$$
+    </div>
+    <svg class="msd big" viewBox="0 0 460 142" role="img" aria-label="The belt anchor on the car at the left, a spring from it to the occupant. The occupant has moved forward a distance u from the start mark, stretching the spring, and an arrow on the occupant points back toward the anchor, labeled k u.">
+      <defs><marker id="sp-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5F7038"/></marker><marker id="sp-u" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8A6508"/></marker></defs>
+      <rect class="wall" x="40" y="24" width="16" height="92"/><text x="48" y="134" text-anchor="middle">anchor</text>
+      <path class="spr" d="M56 70H90l9 -14l18 28l18 -28l18 28l18 -28l18 28l18 -28l9 14H300"/>
+      <line class="restmark" x1="250" y1="20" x2="250" y2="120"/><text x="250" y="134" text-anchor="middle" class="sm">start</text>
+      <rect class="mass" x="300" y="40" width="80" height="60" rx="4"/><text x="340" y="75" text-anchor="middle">occupant</text>
+      <line class="ua" x1="250" y1="28" x2="298" y2="28" marker-end="url(#sp-u)"/><text class="c" x="274" y="22" text-anchor="middle">u</text>
+      <line class="fk" x1="372" y1="114" x2="306" y2="114" marker-end="url(#sp-h)"/><text class="k" x="339" y="134" text-anchor="middle">k u, back toward the anchor</text>
+    </svg>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>The second force. The belt and the person&#x27;s chest don&#x27;t just stretch, they also soak up energy, so we add a damper, like a shock absorber. A damper pushes back in proportion to how fast it&#x27;s moving, not how far. How fast u changes is its rate, u dot, which we&#x27;ll call w in the code. So the damping force is c times u dot, again pointing back. c is 2.8 kilonewton seconds per meter, so at 1 meter a second relative to the car, that&#x27;s 2.8 kilonewtons.</p><p>So now we have both belt forces. One depends on how far the person has moved, and one on how fast.</p>">
+  <div class="head">
+    <p class="say">The belt also soaks up energy, and as a damper it <span class="def">pulls back with a force <i>c</i>&nbsp;<i>u&#775;</i></span>, in proportion to how fast <i>u</i> changes.</p>
+  </div>
+  <div class="stage">
+    <div class="work" style="font-size:calc(var(--stage-text) * .8);margin-bottom:.3em">
+      $$F_{\text{damper}} = -c\,\dot u,\qquad c = 2.8\ \text{kN}\!\cdot\!\text{s/m}:\quad \dot u = 1\ \text{m/s} \;\Rightarrow\; 2.8\ \text{kN}$$
+    </div>
+    <svg class="msd big" viewBox="0 0 460 142" role="img" aria-label="The belt anchor on the car at the left, a damper, a piston in a cylinder, from it to the occupant. The occupant is moving forward at a rate u dot, and an arrow on the occupant points back toward the anchor, labeled c u dot.">
+      <defs><marker id="dp-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8A6508"/></marker><marker id="dp-v" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#6b655a"/></marker></defs>
+      <rect class="wall" x="40" y="24" width="16" height="92"/><text x="48" y="134" text-anchor="middle">anchor</text>
+      <path class="dmp" d="M56 70H150M230 52H150V88H230M200 56V84M200 70H300"/>
+      <rect class="mass" x="300" y="40" width="80" height="60" rx="4"/><text x="340" y="75" text-anchor="middle">occupant</text>
+      <line class="arr" x1="310" y1="28" x2="370" y2="28" marker-end="url(#dp-v)"/><text x="340" y="20" text-anchor="middle">moving at u&#775;</text>
+      <line class="fc" x1="372" y1="114" x2="306" y2="114" marker-end="url(#dp-h)"/><text class="c" x="339" y="134" text-anchor="middle">c u&#775;, back toward the anchor</text>
+    </svg>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Now Newton&#x27;s second law for the person, in the ground frame. Mass times acceleration equals the sum of the forces. The forces are the two belt forces, both pointing back. And the acceleration measured from the ground is the second derivative of x car plus u. The second derivative of x car is the car&#x27;s acceleration, a car, and the second derivative of u is u double dot.</p><p>So m times a car plus u double dot equals minus k u minus c u dot. I&#x27;m leaving out the seat and the airbag, and the belt is the only thing holding them. That&#x27;s the model.</p>">
+  <div class="head">
+    <p class="say">Newton&rsquo;s second law from the ground: <span class="def">the mass times (<i>a</i><sub>car</sub> + <i>&uuml;</i>) equals the two belt forces</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work" style="font-size:calc(var(--stage-text) * .85);margin-bottom:.2em">
+      $$m\,\frac{d^2}{dt^2}\big(x_{\text{car}} + u\big) = m\,\big(a_{\text{car}} + \ddot u\big) = \textcolor{#5F7038}{-k\,u} \;\textcolor{#8A6508}{-\;c\,\dot u}$$
+    </div>
+    <svg class="msd big" viewBox="0 0 460 130" role="img" aria-label="Free-body diagram of the occupant: a block with two arrows pointing back, the spring force k u and the damper force c u dot. Above it, the occupant's acceleration from the ground, a car plus u double dot.">
+      <defs><marker id="nb-k" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5F7038"/></marker><marker id="nb-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8A6508"/></marker><marker id="nb-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#2f2a24"/></marker></defs>
+      <rect class="mass" x="200" y="44" width="80" height="60" rx="4"/><text x="240" y="79" text-anchor="middle">m = 75 kg</text>
+      <line class="fk" x1="198" y1="62" x2="110" y2="62" marker-end="url(#nb-k)"/><text class="k" x="104" y="66" text-anchor="end">k u</text>
+      <line class="fc" x1="198" y1="88" x2="130" y2="88" marker-end="url(#nb-c)"/><text class="c" x="124" y="92" text-anchor="end">c u&#775;</text>
+      <line class="fa" x1="200" y1="30" x2="280" y2="30" marker-end="url(#nb-a)"/><text x="286" y="34" text-anchor="start">a<tspan baseline-shift="sub" font-size="72%">car</tspan> + &uuml; from the ground</text>
+      <text x="240" y="124" text-anchor="middle" class="sm">forward is positive; the seat and airbag are left out</text>
+    </svg>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Now move the car&#x27;s term to the right-hand side. On the left is m u double dot plus c u dot plus k u. That&#x27;s the damped spring, the mass on a spring with a damper that you&#x27;ve solved in differential equations. The only new thing is the right-hand side, minus m times the car&#x27;s acceleration.</p><p>Forward is positive, so while the car slows its acceleration is negative, and minus m a car is a forward push. Riding along in the car, that&#x27;s the push you feel throwing you forward when a car brakes hard. So in the car&#x27;s frame, the crash is a force driving the spring.</p>">
+  <div class="head">
+    <p class="say">Moved across, the car&rsquo;s term makes this <span class="def">the damped spring you have solved, driven by &minus;<i>m</i>&nbsp;<i>a</i><sub>car</sub></span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work" style="font-size:calc(var(--stage-text) * .9)">
+      $$m\,\ddot u + c\,\dot u + k\,u = \textcolor{#8A6508}{-m\,a_{\text{car}}(t)}$$
+    </div>
+    <svg class="msd big" viewBox="0 0 460 130" role="img" aria-label="The spring-mass-damper fixed to the car, with a forward arrow on the occupant labeled minus m a car, the push the car's deceleration gives in the car's frame.">
+      <defs><marker id="fo-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8A6508"/></marker></defs>
+      <rect class="wall" x="40" y="20" width="16" height="92"/>
+      <path class="spr" d="M56 46H90l9 -12l18 24l18 -24l18 24l18 -24l9 12H260"/>
+      <path class="dmp" d="M56 86H120M180 72H120V100H180M155 76V96M155 86H260"/>
+      <rect class="mass" x="260" y="36" width="80" height="60" rx="4"/><text x="300" y="71" text-anchor="middle">occupant</text>
+      <line class="fc" x1="342" y1="66" x2="430" y2="66" marker-end="url(#fo-h)"/><text class="c" x="386" y="56" text-anchor="middle">&#8722;m a<tspan baseline-shift="sub" font-size="72%">car</tspan></text>
+      <text x="300" y="120" text-anchor="middle" class="sm">&#8722;m a<tspan baseline-shift="sub" font-size="72%">car</tspan> points forward while the car slows</text>
+    </svg>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Let&#x27;s remember what this spring does on its own, with no forcing. Pull the person 10 centimeters forward and let go. The spring pulls them back, they overshoot, and the damper takes energy out on every swing.</p><p>Three numbers from your differential equations course describe it. The natural frequency is the square root of k over m, 62.8 radians a second, which is 10 hertz without any damping. The damping ratio is c over 2 times the square root of k m, 0.30. Below 1 means the damping isn&#x27;t enough to stop the overshoot, so it swings. And damping slows the swing a little, to omega d, the natural frequency times the square root of 1 minus zeta squared, 60.0 radians a second. So one full swing takes 105 milliseconds, and when it comes back the second time only 14 millimeters of the 100 are left. Hang on to that tenth of a second, because the car is going to stop faster than that.</p>">
+  <div class="head">
+    <p class="say">Left alone, this belt overshoots and swings back <span class="def">once every 105&nbsp;ms, keeping 14% of its size after each full swing</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work" style="font-size:calc(var(--stage-text) * .72);margin-bottom:.2em">
+      $$\omega_n = \sqrt{k/m} = 62.8\ \text{rad/s},\qquad \zeta = \frac{c}{2\sqrt{k\,m}} = 0.30,\qquad \omega_d = \omega_n\sqrt{1-\zeta^2} = 60.0\ \text{rad/s} \;\Rightarrow\; \frac{2\pi}{\omega_d} = 105\ \text{ms}$$
+    </div>
+    <figure class="figure wide" data-fig="lec25-free"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>And here&#x27;s that forcing. This is a real crash test from the US National Highway Traffic Safety Administration, a 2019 BMW X5 driven into a barrier at 15.65 meters a second. An accelerometer on the car&#x27;s body recorded it 12,500 times a second. It&#x27;s plotted in g, multiples of 9.81, and it&#x27;s negative because the car is slowing.</p><p>It&#x27;s really spiky. Single samples reach about minus 157 g, while the average over the stop is about 26 g. If you add up the record, the car&#x27;s speed reaches zero 62 milliseconds after impact. That&#x27;s less than the belt&#x27;s period of a tenth of a second, so the person is still on their first swing when the car stops.</p><p>A differential equations course solves forcing like a step or a sine wave by hand. With a recording there&#x27;s no formula to plug in, so we step it.</p>">
+  <div class="head">
+    <p class="say">The car&rsquo;s acceleration is a recording, 12,500 samples a second, so <span class="def">the forcing has no formula</span>.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec25-pulse"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So let&#x27;s write it the same way as the ball. The state is the travel u and its rate w, two numbers. The rate of u is w, the definition again. And the rate of w comes from the equation, the belt&#x27;s spring and damper plus the push from the car.</p><p>Now the ball&#x27;s rate never used the time, but this one does. It has to look up the car&#x27;s acceleration in the recording at time t. The recording only has a value every 80 microseconds. If we take one step per sample, every time we ask for is a recorded one. Now to check that the answer doesn&#x27;t change with the step, we&#x27;ll want to halve it, and then every second time falls between two samples. So we read the value off a straight line between them.</p>">
+  <div class="head">
+    <p class="say">The occupant&rsquo;s state is the travel <i>u</i> and how fast it changes, <i>w</i>, and <span class="def">the rate function reads the car&rsquo;s acceleration at time <i>t</i></span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work" style="font-size:calc(var(--stage-text) * .95)">
+      $$\frac{\mathrm{d}}{\mathrm{d}t}\begin{bmatrix} u \\ w \end{bmatrix}
+      = \begin{bmatrix} w \\ (-c\,w - k\,u)/m \;\textcolor{#8A6508}{-\; a_{\text{car}}(t)} \end{bmatrix}$$
     </div>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>So here's the shot's state at frame 5, the six numbers from the fit, and next to each one its rate. Technically the rule for a state is that it has to hold everything the rate needs. Hand the rate function these six numbers and the time, and it can give you back all six rates.</p><p>The first three rates are just copied out of the state. The rate of x is the x velocity, about minus 4.7, and so on. The last three are where the physics is. The vertical one is about minus 10.1, which is gravity plus a little bit of drag pulling down while the ball is still rising.</p><p>Now notice the positions. The rate never actually uses them. Drag and gravity are the same anywhere on the court. We keep them in the state anyway, because the positions are the thing we want out of the run.</p>">
+<section class="deck-slide full" data-notes="<p>Here it is in code. The occupant function is the rate. It unpacks the two numbers, looks up the car&#x27;s acceleration with np dot interp, and returns the two rates. t_rec and a_rec are the record&#x27;s times and accelerations, loaded from its file.</p><p>The loop has the same shape as last video&#x27;s. The start, the step size and the number of steps are the occupant&#x27;s own, one step between each pair of samples. And the step line itself, s equals s plus h times the rate, is unchanged, with occupant in place of shot. As we go I also keep the largest travel, in meters. That&#x27;s a number read off the state, so it isn&#x27;t stepped itself.</p>">
   <div class="head">
-    <p class="say">The state holds <span class="def">everything the rate needs</span>, six numbers for the shot.</p>
-    <p class="sub">Arc 79 at frame 5, 0.20&nbsp;s after the release the data set marks. The rate also gets the time, which the shot&rsquo;s rate never uses. The first three rates are copied from the state. The last three are gravity and drag.</p>
+    <p class="say">A new rate function describes the occupant, and <span class="def">the step line is the ball&rsquo;s</span>.</p>
   </div>
   <div class="stage">
-    <table class="tbl nums" style="font-size:calc(var(--stage-text) * .85)">
-      <tr><th>state entry</th><th>value at frame 5</th><th>its rate at frame 5</th></tr>
-      <tr><td><i>x</i></td><td>5.4796&nbsp;m</td><td>&minus;4.7333&nbsp;m/s</td></tr>
-      <tr><td><i>y</i></td><td>3.9957&nbsp;m</td><td>3.9732&nbsp;m/s</td></tr>
-      <tr><td><i>z</i></td><td>4.2018&nbsp;m</td><td>2.7508&nbsp;m/s</td></tr>
-      <tr><td><i>v<sub>x</sub></i></td><td>&minus;4.7333&nbsp;m/s</td><td class="key">0.5123&nbsp;m/s²</td></tr>
-      <tr><td><i>v<sub>y</sub></i></td><td>3.9732&nbsp;m/s</td><td class="key">&minus;0.4300&nbsp;m/s²</td></tr>
-      <tr><td><i>v<sub>z</sub></i></td><td>2.7508&nbsp;m/s</td><td class="key">&minus;10.1077&nbsp;m/s²</td></tr>
-    </table>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>Let's look at one of those drag numbers. Drag on the x velocity is k, times the speed, times the x velocity. The speed is the full speed of the ball, so it takes all three velocities, and at frame 5 it's about 6.8 meters per second. Times k, times the x velocity, and we get about half a meter per second squared. It's positive because the ball is moving in negative x, and drag pushes back against the motion.</p><p>So what that means is the drag along x depends on how fast the ball is going in y and in z too. Each direction's drag uses all three velocities, so the directions are tied together through the speed.</p>">
-  <div class="head">
-    <p class="say">Drag on each direction uses the speed, <span class="def">which takes all three velocities</span>.</p>
-    <p class="sub">At frame 5. The drag on <i>v<sub>y</sub></i> and <i>v<sub>z</sub></i> uses the same speed.</p>
-  </div>
-  <div class="stage">
-    <style>.deck-slide .work.spaced .katex-display{margin:.6em 0}</style>
-    <div class="work spaced" style="font-size:calc(var(--stage-text) * .8)">
-      $$\begin{aligned}
-      |\mathbf{v}| &= \sqrt{4.7333^2 + 3.9732^2 + 2.7508^2} = 6.764\ \text{m/s} \\[6pt]
-      \frac{\mathrm{d}v_x}{\mathrm{d}t} &= -k\,|\mathbf{v}|\,v_x = -0.016 \times 6.764 \times (-4.7333) = \textcolor{#8A6508}{0.512\ \text{m/s}^2}
-    \end{aligned}$$
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>Now say we stepped each direction on its own, the way you might if you wrote three separate loops. Each loop only knows its own velocity, so the x loop would use the x speed, about 4.7, in place of the full speed. That gives about 0.36 for the drag along x where the shot has about 0.51. So it's low by about 30 percent along x, and it's low in every direction, because the full speed is never smaller than any one component.</p><p>Run both from frame 5 to the last free-flight frame, frame 23, and they end up about 5 centimeters apart. Drag itself moves the ball about 16 centimeters by then. So stepping the directions apart loses something like a third of the drag we put in. That's the reason the six numbers go into one state and get stepped together.</p>">
-  <div class="head">
-    <p class="say">Stepping each direction with only its own velocity <span class="def">moves frame 23 by 49&nbsp;mm</span>.</p>
-    <p class="sub">Frame 23 is the last free-flight frame. Both runs are Euler at 1&nbsp;ms from frame 5. Drag moves frame 23 by 157&nbsp;mm in all.</p>
-  </div>
-  <div class="stage">
-    <style>.deck-slide .work.spaced .katex-display{margin:.6em 0}</style>
-    <div class="work spaced" style="font-size:calc(var(--stage-text) * .8)">
-      $$\begin{aligned}
-      \text{one state, the full speed:}\quad & -0.016 \times 6.764 \times (-4.7333) = 0.512\ \text{m/s}^2 \\[6pt]
-      \text{each direction on its own:}\quad & -0.016 \times 4.7333 \times (-4.7333) = \textcolor{#8A6508}{0.358\ \text{m/s}^2\text{, 30\% low}}
-    \end{aligned}$$
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>Here's how that looks in code. It splits into two functions, and the bottom one is the line inside last video's loop, pulled out on its own. The top one is the whole physics of the shot. It unpacks the six numbers, works out the speed from all three velocities, and returns the six rates in the same order.</p><p>The bottom one is the step, and it's two lines. It never mentions a ball, or a position, or a velocity. It takes a rate function and a state and adds the rate times the step. Plus and times work on every entry of an array, so this same step works on a state of two numbers or six or sixty.</p>">
-  <div class="head">
-    <p class="say">The shot&rsquo;s physics is one function, and <span class="def">the step takes any rate function and state</span>.</p>
-    <p class="sub">The step works on a state of any length, because + and * act on every entry of a NumPy array.</p>
-  </div>
-  <div class="stage">
-    <div class="panels" style="font-size:calc(var(--stage-code) * .86)">
-      <div class="code">def shot(t, s, k=0.016):</div><div class="note">the rate of the shot's state</div>
-      <div class="code">    x, y, z, vx, vy, vz = s</div><div class="note">positions first, then velocities</div>
-      <div class="code">    <span class="k">speed = np.sqrt(vx**2 + vy**2 + vz**2)</span></div><div class="note">all three velocities, so the directions are tied</div>
-      <div class="code">    return np.array([vx, vy, vz,</div><div class="note">the rates in the state's own order</div>
-      <div class="code">                     -k*speed*vx, -k*speed*vy, -9.81 - k*speed*vz])</div><div class="note"></div>
-      <div class="code">&nbsp;</div><div class="note"></div>
-      <div class="code">def step(f, t, s, h):</div><div class="note">any rate function f, any state s</div>
-      <div class="code">    <span class="k">return s + h * f(t, s)</span></div><div class="note">Euler, on every entry at once</div>
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>All right, a different system. This is a person in a seat belt during a frontal crash, from the same BMW X5 barrier test we used for the head injury criterion. The car hits the barrier and stops. The person keeps going and stretches the belt, and the belt pulls back like a spring with a damper.</p><p>I'm going to call the person's forward travel relative to the car u, and its rate w. And I'm reusing k and c here for the belt's stiffness and damping, which have nothing to do with the drag k. Newton's law in the car's frame gives a second-order equation for u, so we do the same rewrite. The state is the pair, u and w, just two numbers. The rate of u is w. The rate of w is the belt's spring and damper, divided by the mass, minus the car's acceleration.</p><p>That last term is the car's acceleration, and it isn't part of the state. It's a recording, so the rate needs the time to look it up.</p>">
-  <div class="head">
-    <p class="say">A belted occupant is a state of two, <span class="def">driven by the car&rsquo;s recorded acceleration</span>.</p>
-    <p class="sub"><i>u</i> is the occupant&rsquo;s travel relative to the car and <i>w</i> its rate. <i>m</i> = 75&nbsp;kg is the occupant. <i>k</i> = 296&nbsp;kN/m and <i>c</i> = 2.8&nbsp;kN&middot;s/m are the belt. <i>a</i><sub>car</sub> is NHTSA test 10642, a 2019 BMW X5 into a barrier, from a rear crossmember at 12,500 samples a second.</p>
-  </div>
-  <div class="stage">
-    <style>.deck-slide .work.spaced .katex-display{margin:.6em 0}</style>
-    <div class="work spaced" style="font-size:calc(var(--stage-text) * .9)">
-      $$m\ddot u + c\dot u + k u = -m\,a_{\text{car}}(t)
-      \qquad\longrightarrow\qquad
-      \frac{\mathrm{d}}{\mathrm{d}t}\begin{bmatrix}u\\ w\end{bmatrix}
-      = \begin{bmatrix}w\\[4pt] (-c\,w - k\,u)/m \textcolor{#8A6508}{\;-\;a_{\text{car}}(t)}\end{bmatrix}$$
-    </div>
-  </div>
-</section>
-
-<section class="deck-slide full" data-notes="<p>So here's the occupant in code. The rate function has the same shape as the shot's, a time and a state in, the rates out. The difference is that this one actually uses the time. It looks the car's acceleration up in the recording at the time it's given. With one step per interval every time it asks for is a recorded one, but np.interp would read between two samples if we halved the step or handed this to a library solver.</p><p>And the loop at the bottom uses the same step function as the shot, unchanged. Here I've taken one step per interval of the record, so 80 microseconds, and 4,500 steps covers the whole record. We keep each state in a list so we can plot it.</p>">
-  <div class="head">
-    <p class="say">The occupant&rsquo;s rate <span class="def">uses the time</span>, to look up the car.</p>
-    <p class="sub"><code>tc</code> and <code>ac</code> are the record&rsquo;s times and accelerations. The step is the same function as the shot&rsquo;s.</p>
-  </div>
-  <div class="stage">
-    <div class="panels" style="font-size:calc(var(--stage-code) * .86)">
-      <div class="code">def occupant(t, s, m=75.0, c=2.8e3, k=296e3):</div><div class="note">the same shape as shot</div>
-      <div class="code">    u, w = s</div><div class="note">travel and its rate</div>
-      <div class="code">    <span class="k">a_car = np.interp(t, tc, ac)</span></div><div class="note">the record at time t, read between samples if t falls between them</div>
-      <div class="code">    return np.array([w, (-c*w - k*u)/m - a_car])</div><div class="note"></div>
+    <div class="panels" style="font-size:calc(var(--stage-code) * .82)">
+      <div class="code">def occupant(t, s, m=75.0, c=2.8e3, k=296e3):</div><div class="note">the rate, a time and a state in and two rates out</div>
+      <div class="code">    u, w = s</div><div class="note">travel relative to the car, and its rate</div>
+      <div class="code">    a_car = np.interp(t, t_rec, a_rec)</div><div class="note">the car at time <i>t</i>, from the record&rsquo;s times and accelerations</div>
+      <div class="code">    return np.array([w, (-c*w - k*u) / m - a_car])</div><div class="note">belt spring and damper, minus the car</div>
       <div class="code">&nbsp;</div><div class="note"></div>
       <div class="code">s = np.array([0.0, 0.0])</div><div class="note">at rest relative to the car</div>
-      <div class="code">path = [s]</div><div class="note">every state, to plot and to find the peak</div>
-      <div class="code">for i in range(len(tc) - 1):</div><div class="note">4,500 steps, one per interval of the record</div>
-      <div class="code">    <span class="k">s = step(occupant, tc[i], s, tc[i+1] - tc[i])</span></div><div class="note">the shot&rsquo;s step, untouched</div>
-      <div class="code">    path.append(s)</div><div class="note"></div>
+      <div class="code">t = t_rec[0]</div><div class="note">the start of the record, 50&nbsp;ms before impact</div>
+      <div class="code">h = t_rec[1] - t_rec[0]</div><div class="note">80&nbsp;&micro;s, one step per sample</div>
+      <div class="code">travel = 0.0</div><div class="note">the largest travel so far, in meters (0.105 at the end)</div>
+      <div class="code">for i in range(len(t_rec) - 1):</div><div class="note">one step between each pair of samples, 4,500 in all</div>
+      <div class="code">    <span class="k">s = s + h * occupant(t, s)</span></div><div class="note">the same Euler step as the ball</div>
+      <div class="code">    t = t + h</div><div class="note">the clock moves one step</div>
+      <div class="code">    travel = max(travel, s[0])</div><div class="note">read off the state, not stepped</div>
     </div>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>And here's what comes out. The occupant starts moving forward relative to the car about 10 milliseconds in, as the car starts to slow. The travel peaks at about 105 millimeters, at about 70 milliseconds. After that the curve swings back past zero, and that part is the model more than the person. In this model the belt pulls both ways like a spring, where a real belt goes slack and the seat stops them.</p><p>That 105 millimeters is one of the numbers a restraint designer checks, because it has to fit in the space between the person and the inside of the car. And we got it from the same two-line step that flew the basketball. The only thing that changed was the rate function.</p>">
+<section class="deck-slide full" data-notes="<p>And here&#x27;s the model&#x27;s run, with the belt and the person drawn in the car on the left, slowed down a lot. Nothing happens until impact. Then the model&#x27;s person moves forward relative to the car, the belt stretches, and they peak at 105 millimeters, 70.5 milliseconds after impact. If we halve the step, that peak moves by less than a tenth of a millimeter.</p><p>After the peak they swing back past zero. That swing comes from the model. In this model the belt pulls both ways, like a spring. A real belt would probably go slack, and the seat would stop them.</p>">
   <div class="head">
-    <p class="say">The occupant travels <span class="def">105&nbsp;mm forward, relative to the car, at 70.5&nbsp;ms</span>.</p>
-    <p class="sub">Euler at the record&rsquo;s own interval, 80&nbsp;&micro;s, with time from impact. In this model the belt pulls both ways, so the swing back past zero is the model&rsquo;s.</p>
+    <p class="say">In the model, the occupant&rsquo;s forward travel, relative to the car, <span class="def">peaks at 105&nbsp;mm at 70.5&nbsp;ms</span>.</p>
   </div>
   <div class="stage">
-    <figure class="figure wide" data-fig="lec25-occupant"><div class="fig-body"></div></figure>
+    <figure class="figure wide" data-fig="lec25-belt"><div class="fig-body"></div></figure>
   </div>
 </section>
 
-<section class="deck-slide full" data-notes="<p>Last thing. Because the physics lives in its own function, we can hand it to a library solver. In Python that's solve_ivp, from scipy. You give it the rate function, the start and end times, and the starting state, and t_eval asks for the state at each frame time. In MATLAB it's ode45, and it takes the same function with the same arguments, a time and a state.</p><p>Both put frame 23 at about the same place, and that's about 3 millimeters from our Euler run at 1 millisecond. A run of solve_ivp with a much tighter tolerance agrees with the default one to about a hundredth of a millimeter, so the 3 millimeters is Euler's step. So most of the work of using these solvers is the part we already did, writing the problem as a state and a function that returns its rate.</p><p>That's all I wanted to do in this video. In the next one we'll look at how to tell when a step is small enough. Thanks a lot for watching and we'll see you in the next video.</p>">
+<section class="deck-slide full" data-notes="<p>All right, the second problem. This car was recorded by cameras over Interstate 80 in Emeryville, California, at about 4 in the afternoon, part of a public data set called NGSIM. The cameras see about 500 meters of road, and this car is in view for 70 seconds, in stop-and-go traffic. It starts at about 11 meters a second, slows almost to a stop, 0.45 meters a second at 31 seconds, and gets going again.</p><p>Now put 20 cars behind it. When the car ahead slows, each driver brakes a moment later and a little farther back. So the slowdown moves back along the line, even though every car keeps moving forward. We want to know how fast the slowdown moves back, and then we&#x27;ll check that against the road.</p>">
   <div class="head">
-    <p class="say"><code>solve_ivp</code> and <code>ode45</code> take <span class="def">a rate function of the same shape</span>, <i>f</i>(<i>t</i>,&nbsp;<i>s</i>).</p>
-    <p class="sub">Both put frame 23 at (2.192, 6.756, 3.629)&nbsp;m, 3.4&nbsp;mm from the Euler run at 1&nbsp;ms. A run at a tight tolerance agrees with <code>solve_ivp</code> to 0.01&nbsp;mm, so the 3.4&nbsp;mm is Euler&rsquo;s.</p>
+    <p class="say">The second problem puts 20 cars behind a car recorded on I-80 and finds <span class="def">how fast its slowdown travels back along the line</span>.</p>
   </div>
   <div class="stage">
-    <div class="panels" style="font-size:calc(var(--stage-code) * .86)">
-      <div class="code">from scipy.integrate import solve_ivp</div><div class="note">Python</div>
-      <div class="code"><span class="k">sol = solve_ivp(shot, (t[5], t[-1]), s0, t_eval=t[5:])</span></div><div class="note">the rate, frames 5 to 23 of t, the state at frame 5</div>
-      <div class="code">sol.y[:3, -1]</div><div class="note">positions at frame 23</div>
+    <figure class="figure wide" data-fig="lec25-leader"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>To step the line of cars, each car needs a rule for how its driver accelerates. Let&#x27;s build one from what you do when you drive. What do you look at? Your own speed, v. The gap to the car in front, which I&#x27;ll call g, measured bumper to bumper. And whether that gap is shrinking, which is how much faster you&#x27;re going than the car ahead, delta v. When delta v is positive you&#x27;re closing in.</p><p>The rule we&#x27;ll use is called the intelligent driver model, and it&#x27;s built from exactly these three things.</p>">
+  <div class="head">
+    <p class="say">In the model, a driver&rsquo;s acceleration depends on three things: <span class="def">their speed <i>v</i>, the gap <i>g</i>, and how fast they are closing, &Delta;<i>v</i></span>.</p>
+  </div>
+  <div class="stage">
+    <svg class="idm" viewBox="0 0 460 150" role="img" aria-label="Your car behind the car ahead on a road. Your speed v points forward. The car ahead has its own speed. The gap g runs from your front bumper to its rear bumper. Delta v, your speed minus its speed, is how fast the gap is closing.">
+      <defs><marker id="in-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#6b655a"/></marker>
+      <marker id="in-g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5F7038"/></marker></defs>
+      <line class="road" x1="10" y1="90" x2="450" y2="90"/>
+      <rect class="you" x="60" y="68" width="74" height="22" rx="6"/><text x="97" y="84" text-anchor="middle">you</text>
+      <rect class="ahead" x="306" y="68" width="74" height="22" rx="6"/><text x="343" y="84" text-anchor="middle">car ahead</text>
+      <line class="arr" x1="97" y1="56" x2="170" y2="56" marker-end="url(#in-h)"/><text x="97" y="46">your speed v</text>
+      <line class="arr" x1="343" y1="56" x2="396" y2="56" marker-end="url(#in-h)"/><text x="343" y="46">v<tspan baseline-shift="sub" font-size="72%">ahead</tspan></text>
+      <line class="gap" x1="138" y1="106" x2="302" y2="106" marker-start="url(#in-g)" marker-end="url(#in-g)"/><text x="220" y="124" text-anchor="middle" class="g">gap g</text>
+      <text x="230" y="144" text-anchor="middle" class="v">closing speed &#916;v = v &#8722; v<tspan baseline-shift="sub" font-size="72%">ahead</tspan></text>
+    </svg>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>First, the open road, with nobody in front. You speed up toward the speed you&#x27;d like to drive, your desired speed, v d. Pulling away from a stop you push at most a max, the hardest you&#x27;re willing to accelerate. And as you get near v d you ease off, so you level out there.</p><p>The model writes that as a max times one minus v over v d to the fourth power. The fourth power keeps that term small at low speed. At 8 meters a second you still get 1.26 of the 1.27, and at 20 about 1.03. Then it drops to zero right at the desired speed, 30.2 meters a second. These numbers come from fitting the model to how drivers actually followed each other on this same stretch of I-80. This is the most common of three driver types in that fit.</p>">
+  <div class="head">
+    <p class="say">On an open road the model <span class="def">speeds up at up to <i>a</i><sub>max</sub> and levels off at the desired speed <i>v</i><sub>d</sub></span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work" style="font-size:calc(var(--stage-text) * .8);margin-bottom:.2em">
+      $$\dot v_{\text{open road}} = a_{\max}\left[1 - \left(\frac{v}{v_d}\right)^{4}\right],\qquad a_{\max} = 1.27\ \text{m/s}^2,\quad v_d = 30.2\ \text{m/s}$$
+    </div>
+    <figure class="figure wide" data-fig="lec25-afree"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Now there&#x27;s a car in front. You keep a gap, and the gap you want has two parts. When you&#x27;re stopped in traffic you still leave a little room, the standstill gap, g zero, here 1.95 meters. And when you&#x27;re moving you leave a fixed amount of time, the time headway T, like the two-second rule you may have learned. Here it&#x27;s 1.39 seconds. Your speed times T is the distance you cover in that time.</p><p>So the gap you want is g zero plus v times T. At 8 meters a second that&#x27;s 13.1 meters, and at 30 meters a second, highway speed, it&#x27;s 43.7.</p>">
+  <div class="head">
+    <p class="say">Behind another car at the same speed, the model wants a gap of <span class="def"><i>g</i><sub>0</sub> when stopped plus <i>T</i> seconds of travel</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work" style="font-size:calc(var(--stage-text) * .8);margin-bottom:.2em">
+      $$g^* = g_0 + v\,T,\qquad g_0 = 1.95\ \text{m},\quad T = 1.39\ \text{s}$$
+    </div>
+    <figure class="figure wide" data-fig="lec25-wantv"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>And if you&#x27;re closing on the car ahead, you want more room than that, because you&#x27;ll need distance to slow down. The model adds v times delta v over 2 times the square root of a max times b. That isn&#x27;t a braking distance worked out from kinematics. It&#x27;s a term the model&#x27;s authors chose so that the extra room grows with your speed and with how fast you&#x27;re closing, scaled by the two comfort limits, and the fit to real drivers sets the numbers. Here b is 1.7 meters per second squared, the braking you&#x27;d rather not go past.</p><p>At 8 meters a second, closing at 3, the wanted gap goes from 13.1 meters to 21.2. If the car ahead is pulling away, delta v is negative and the wanted gap shrinks. The max with zero means it never drops below the standstill gap, which you can see on the left of the graph once the car ahead pulls away faster than about 4 meters a second.</p>">
+  <div class="head">
+    <p class="say">Closing on the car ahead, the model wants <span class="def">extra room, <i>v</i>&nbsp;&Delta;<i>v</i>&thinsp;/&thinsp;(2&radic;(<i>a</i><sub>max</sub><i>b</i>)), that grows with speed and closing rate</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work" style="font-size:calc(var(--stage-text) * .76);margin-bottom:.2em">
+      $$g^* = g_0 + \max\!\left(0,\; v\,T + \frac{v\,\Delta v}{2\sqrt{a_{\max}\,b}}\right),\qquad b = 1.7\ \text{m/s}^2$$
+    </div>
+    <figure class="figure wide" data-fig="lec25-wantdv"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Now put the pieces together. The acceleration is a max times three terms. The one is the push to speed up. The second takes that away near the desired speed, the open-road part. And the third compares the gap you want, g star, with the gap you have, g. If you&#x27;re closer than you want, g star over g is bigger than one, and squaring it makes the braking grow fast as the gap closes. If you&#x27;re far behind, it&#x27;s small, and you speed up.</p><p>On the graph, at 8 meters a second with the car ahead at the same speed, the acceleration crosses zero at a gap of 13.1 meters, the gap from two slides back. That&#x27;s the following distance this driver settles into. Closing at 3 meters a second, it crosses at 21.3, just beyond the 21.2 wanted gap because the open-road term takes a little away. So a driver who&#x27;s closing starts braking farther back.</p>">
+  <div class="head">
+    <p class="say">Put together, the model&rsquo;s acceleration is <span class="def">zero near the wanted gap, braking closer and speeding up farther back</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="work" style="font-size:calc(var(--stage-text) * .82);margin-bottom:.2em">
+      $$\dot v = a_{\max}\left[1 - \left(\frac{v}{v_d}\right)^{4} - \left(\frac{g^*}{g}\right)^{2}\right],\qquad g^* = g_0 + \max\!\left(0,\; v\,T + \frac{v\,\Delta v}{2\sqrt{a_{\max}\,b}}\right),\qquad \Delta v = v - v_{\text{ahead}}$$
+    </div>
+    <figure class="figure wide" data-fig="lec25-gapacc"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So what&#x27;s the state? Each car needs its own position and its own speed, two numbers, like the occupant. Twenty cars, that&#x27;s 40 numbers. The car in front isn&#x27;t in the state, because it&#x27;s a recording. We look it up at time t, the same way the occupant looked up the car&#x27;s acceleration.</p><p>And here&#x27;s the important part. Each car&#x27;s rate reads the car ahead, its gap and how fast that gap is closing. Car 1 reads the recorded car, car 2 reads car 1, and so on back. So every step has to move all 40 numbers together, from the same moment, just like the ball&#x27;s six.</p>">
+  <div class="head">
+    <p class="say">The line&rsquo;s state is <span class="def">40 numbers, a position and a speed for each car</span>, and each car&rsquo;s acceleration depends on the car ahead.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec25-chainstate"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Here it is in code. The chain function is the rate. t_rec, x_rec and v_rec are the recorded car&#x27;s times, positions and speeds. It splits the state into the 20 positions and the 20 speeds. Then it lines up the car ahead of each one. For car 1 that&#x27;s the recorded car, looked up with np dot interp at time t, and for every other car it&#x27;s the car in front of it in the list. So the cars ahead are just the list shifted by one, with the recorded car added at the front by np dot append. That means the equation from two slides back runs for all 20 cars at once, in one line. The gap, minus a car length of 4.4 meters. The wanted gap. And it returns the 20 speeds, which are the rates of the positions, followed by the 20 accelerations.</p><p>And the loop is the same as ever. The 40 starting numbers put every car at the recorded car&#x27;s first speed, 10.9 meters a second, spaced 21.7 meters apart, the gap where these drivers&#x27; acceleration is zero at that speed, plus a car length. Then steps of a tenth of a second, and the step line is unchanged.</p>">
+  <div class="head">
+    <p class="say">In code, the cars ahead are the list of cars shifted by one, so <span class="def">one line gives all 20 accelerations</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="panels" style="font-size:calc(var(--stage-code) * .74)">
+      <div class="code">def chain(t, s, v_d=30.2, T=1.39, g0=1.95, a_max=1.27, b=1.7, length=4.4):</div><div class="note">the rate: a time and 40 numbers in, 40 rates out</div>
+      <div class="code">    n = len(s) // 2</div><div class="note">20 cars</div>
+      <div class="code">    x, v = s[:n], s[n:]</div><div class="note">their positions, then their speeds</div>
+      <div class="code">    x_ahead = np.append(np.interp(t, t_rec, x_rec), x[:-1])</div><div class="note">the car ahead: the recorded car (<code>x_rec</code>, <code>v_rec</code> at <code>t_rec</code>), then each car in front</div>
+      <div class="code">    v_ahead = np.append(np.interp(t, t_rec, v_rec), v[:-1])</div><div class="note">and its speed</div>
+      <div class="code">    gap = x_ahead - x - length</div><div class="note">bumper to bumper</div>
+      <div class="code">    wanted = g0 + np.maximum(0, v*T + v*(v - v_ahead) / (2*np.sqrt(a_max*b)))</div><div class="note">the gap the driver wants</div>
+      <div class="code">    return np.concatenate([v, a_max*(1 - (v/v_d)**4 - (wanted/gap)**2)])</div><div class="note">speeds, then accelerations</div>
       <div class="code">&nbsp;</div><div class="note"></div>
-      <div class="code"><span class="k">[T, S] = ode45(@(t, s) shot(t, s, 0.016), t(6:end), s0);</span></div><div class="note">MATLAB, the same shape of function, with frame 5 at element 6</div>
-      <div class="code">S(end, 1:3)</div><div class="note">positions at frame 23</div>
+      <div class="code">t, h = 0.0, 0.1</div><div class="note">0.1&nbsp;s steps, <code>s</code> the 40 starting numbers</div>
+      <div class="code">for i in range(701):</div><div class="note">the 70.1&nbsp;s the recorded car is in view</div>
+      <div class="code">    <span class="k">s = s + h * chain(t, s)</span></div><div class="note">the same Euler step</div>
+      <div class="code">    t = t + h</div><div class="note">the clock moves one step</div>
     </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>And here&#x27;s the run. On top is the road, with the recorded car in black and the 20 model cars behind it, red when they&#x27;re going slower than 2 meters a second. Underneath, each line is one car&#x27;s position against time. Every line goes up, because every car keeps moving forward. But watch the gold dots, each car&#x27;s slowest moment. Each one comes a little later and a little farther back than the one ahead. So the slowdown runs back along the line while the cars run forward through it. Fit a line through those dots and its slope is the speed of the slowdown, 14.4 kilometers an hour, backward.</p><p>Now how do we know the step is short enough? With steps of a whole second, the cars run into each other at 47 seconds and the numbers blow up. Half a second gives 15.0 kilometers an hour, a fifth of a second 14.5, and a tenth 14.4, and a twentieth is 14.4 too, so it has settled. Next video we&#x27;ll look at that halving properly.</p>">
+  <div class="head">
+    <p class="say">In the model, the slowdown <span class="def">travels back along the line at 14.4&nbsp;km/h</span> while every car moves forward.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec25-platoon"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>So is 14.4 right? We can measure it. These are every car the cameras tracked in the same lane over about two minutes. Where the lines flatten, cars are slow or stopped, and you can see those bands run down and to the right, back along the road.</p><p>To measure the speed of those bands, I put virtual detectors every 25 meters along each lane and recorded the speed of every car as it passed. A slowdown shows up at a detector, then at a detector 100 to 300 meters back a little later. The delay that best lines up the two speed records, and the distance between them, give the speed. Over 249 pairs of detectors in four lanes, the middle value is 18.6 kilometers an hour, and half of them fall between 16.7 and 21.3.</p><p>The model, run behind 16 different recorded cars, gives a middle value of 14.4, the same as this car&#x27;s run, with half between 13.9 and 14.9. So the model&#x27;s slowdowns travel back 4.2 kilometers an hour slower than the road&#x27;s. You can see it on the graph. The measured line through this car&#x27;s stop follows the bands, and the model&#x27;s line is shallower. The driver values were fitted to how single cars follow each other, not to these bands, so this is a test the model didn&#x27;t get to see.</p>">
+  <div class="head">
+    <p class="say">On I-80 the slowdowns travel back at 18.6&nbsp;km/h, so <span class="def">the model&rsquo;s are 4.2&nbsp;km/h slower than the road&rsquo;s</span>.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec25-measured"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Last thing. Because a rate function has this shape, a time and a state in and the rates out, you can hand it straight to a library solver. In Python that&#x27;s solve_ivp from scipy, and in MATLAB it&#x27;s ode45. You give either one the rate function, the start and end times, and the starting state.</p><p>What do you gain? A few lines replace the loop, and the solver picks its own step sizes, small where the state changes fast and longer where it doesn&#x27;t, by estimating its error as it goes. And there&#x27;s one setting here you need, max step. I&#x27;ll show you why on the next slide.</p>">
+  <div class="head">
+    <p class="say"><code>solve_ivp</code> and <code>ode45</code> take <span class="def">the same rate function and choose their own step sizes</span>.</p>
+  </div>
+  <div class="stage">
+    <div class="panels" style="font-size:calc(var(--stage-code) * .82)">
+      <div class="code">from scipy.integrate import solve_ivp</div><div class="note">the library solver</div>
+      <div class="code">sol = solve_ivp(occupant, (t_rec[0], t_rec[-1]), [0.0, 0.0],</div><div class="note">the rate, start and end times, starting state</div>
+      <div class="code">                max_step=t_rec[1] - t_rec[0])</div><div class="note">no step longer than the record&rsquo;s 80&nbsp;&micro;s</div>
+      <div class="code">travel = sol.y[0].max()</div><div class="note">row 0 is <i>u</i>, so the largest travel</div>
+      <div class="code">&nbsp;</div><div class="note"></div>
+      <div class="code">f = @(t, s) occupant(t, s, t_rec, a_rec);</div><div class="note">MATLAB, with <code>occupant</code> written in MATLAB</div>
+      <div class="code">opts = odeset('MaxStep', 8e-5);</div><div class="note">the same limit, 80&nbsp;&micro;s</div>
+      <div class="code">[tt, S] = ode45(f, [t_rec(1) t_rec(end)], [0; 0], opts);</div><div class="note">the rate, start and end times, starting state</div>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Here&#x27;s why. This is the first 30 milliseconds of the crash record, a sample every 80 microseconds. The dashed lines are where solve_ivp steps to when you leave it on its default settings. Its steps are about 0.7 milliseconds, about 9 samples each, and it only reads the record at a few times inside each step. It chooses those steps by estimating its error per step and keeping it under a limit, its tolerance, and that estimate is built from what it reads, so it can&#x27;t tell that it stepped over the samples in between. That 157 g spike at 10.8 milliseconds falls between two of its steps.</p><p>Left alone, it reports a peak travel of 103.8 millimeters. With max step set to the record&#x27;s own 80 microseconds, it gives 104.8, 1.0 millimeter more, and the same as with a far tighter tolerance. Our Euler loop at one step a sample gave 105.0, 0.2 above that, and halving its step moves it down toward 104.8. MATLAB&#x27;s ode45 does the same thing, 103.5 on its defaults and 104.8 with max step set. So when the forcing is a recording, don&#x27;t let the solver step past its samples.</p>">
+  <div class="head">
+    <p class="say">Left to choose its own steps, <code>solve_ivp</code> steps over the record&rsquo;s samples, so <span class="def">set <code>max_step</code> to the record&rsquo;s 80&nbsp;&micro;s</span>.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec25-ivp"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>All right, one more system, to show how far this goes. If you&#x27;re doing the Slope Stability Lab, the slope you shake is a pile of round grains cemented together, 1,906 of them. The slope is simulated flat, in two dimensions, so each grain needs six numbers. Where it is, that&#x27;s two numbers. How fast it&#x27;s moving, two more. Theta, how far it has turned, and omega, how fast it&#x27;s turning, because grains roll and spin, and that changes how they push on each other.</p><p>Six numbers times 1,906 grains is 11,436 numbers in the state. The grains of the floor under the slope aren&#x27;t in it, because they don&#x27;t move on their own. The earthquake moves them.</p>">
+  <div class="head">
+    <p class="say">The slope lab&rsquo;s state is <span class="def">11,436 numbers</span>: 1,906 grains, six numbers each, a position, a velocity, a rotation and a rotation rate.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure wide" data-fig="lec25-grain"><div class="fig-body"></div></figure>
+  </div>
+</section>
+
+<section class="deck-slide full" data-notes="<p>Here&#x27;s one of those slopes in an earthquake, blue where the cement between grains holds and red where it breaks. The rate function behind this has to find which grains are touching, then work out the push between each pair that touch, the friction, and the cement bonds, which stretch and can break. It runs on the graphics card, the chip that normally draws images, which can work on all the grains at once, and there it&#x27;s about 1,200 lines of code.</p><p>And the step is the same idea as ours, every number moved forward by the step times its rate. The one difference is the speeds. They move half a step using the rates at the start, then the positions move, then the rates are worked out again and the speeds take the other half. That&#x27;s a close relative of Euler&#x27;s method, and it&#x27;s the same loop. The contacts are very stiff, so the steps have to be very short, a tenth of a millisecond, 240,000 of them for 24 seconds of shaking.</p><p>If you want to run it on your own slope, that&#x27;s the Slope Stability Lab, on the extra labor page. Hopefully this gives you an idea of how the same loop runs very different systems. Thanks a lot for watching, and we&#x27;ll see you in the next video.</p>">
+  <div class="head">
+    <p class="say">The lab steps its 11,436 numbers with a close relative of Euler&rsquo;s method, and <span class="def">its rate function is about 1,200 lines of contact physics</span>.</p>
+    <p class="sub">Run it on your own slope in the <a href="extra-labor-slope.html">Slope Stability Lab</a>.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure demrun">
+      <video src="data/img/dem-run-15.mp4" poster="data/img/dem-run-15.png" autoplay loop muted playsinline width="1280" height="292"
+             aria-label="The lab's slope of cemented grains shaken by an earthquake, slumping a little on one side and still standing, mostly blue for intact bonds with some red where bonds broke."></video>
+    </figure>
   </div>
 </section>
 
@@ -850,6 +1120,6 @@ body.inclass .deck-slide.fitting{display:flex; visibility:hidden}
 <div class="deck-notes"></div>
 
 
-<script type="module" src="js/bundle/lecture-25.js?v=20261109124015"></script>
+<script type="module" src="js/bundle/lecture-25.js?v=20261113083220"></script>
 </body>
 </html>
