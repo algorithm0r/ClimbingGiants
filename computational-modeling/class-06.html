@@ -767,6 +767,9 @@ body.inclass .deck-slide.point.compact.c6even:not(.part) .say{font-size:1.15em; 
 .deck-slide .c6grid.c6lined > span{padding:.28em .35em; border-bottom:1px solid #e0d9cc; border-left:1px solid #e0d9cc}
 .deck-slide .c6grid.c6lined > span.h{border-bottom:2px solid #3f3b36; background:#f4f1ea}
 .deck-slide .c6grid.c6lined > span.r{border-left:none; background:#f4f1ea}
+.deck-slide .c6grid.c6six{grid-template-columns:auto repeat(6, minmax(0,1fr)); width:80%}
+.deck-slide .c6grid.c6six > span:nth-child(7n+6), .deck-slide .c6grid.c6six > span:nth-child(7n+7){background:#e3e8d4; font-weight:700; color:#3e4a24}
+.deck-slide .c6big{font-size:1.6em !important}
 .deck-slide .c6grid.c6hl4 > span:nth-child(10n+6){background:#e3e8d4; font-weight:700; color:#3e4a24; border-left:2px solid #5F7038; border-right:2px solid #5F7038}
 .deck-slide.c6even .c6grid{font-size:1em}
 .deck-slide.c6even ul.c6pts span{color:#57514a}
@@ -782,6 +785,97 @@ body.inclass .deck-slide.point.compact.c6even:not(.part) .say{font-size:1.15em; 
   <div class="head">
     <p class="course">TME 310 &middot; Computational Physical Modeling</p>
     <p class="say">Class 6</p>
+  </div>
+</section>
+
+<!-- ============================================================ warm-up: the cube root of 100
+     Added 2026-11-17 on Chris's flow (who knows it, who knows the first digit, scan 0-5, bisection, Newton
+     as a rule with the tangent drawn, two steps). Numbers from Teaching/.../in-class/class-06/cuberoot.py
+     ("cube |"): true root 4.641588834; scan 0 1 8 27 64 125; bisection 4.5 -> 91.1250, 4.75 -> 107.1719,
+     4.625 -> 98.9316, 4.6875 -> 102.9968, bracket [4.625, 4.6875]; Newton from 5: 5 - 25/75 = 4.666667 (14/3),
+     then 4.666667 - 1.629630/65.333333 = 4.641723, cubed 100.008695, off 1.35e-04. -->
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
+  <div class="stage tight">
+    <div class="head">
+      <p class="say c6big">Who knows the <span class="term">cube root of 100</span>?</p>
+    </div>
+    <div class="work c6eq">$$x^3 = 100$$</div>
+  </div>
+</section>
+
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
+  <div class="stage tight">
+    <div class="head">
+      <p class="say c6big">Who knows its <span class="term">first digit</span>?</p>
+    </div>
+  </div>
+</section>
+
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
+  <div class="stage tight">
+    <div class="head">
+      <p class="say">Cubing the whole numbers we know puts the root <span class="term">between 4 and 5</span>.</p>
+    </div>
+    <div class="c6grid c6lined c6six" style="margin-top:3vh">
+      <span class="h r">x</span><span class="h">0</span><span class="h">1</span><span class="h">2</span><span class="h">3</span><span class="h">4</span><span class="h">5</span>
+      <span class="r">x&sup3;</span><span>0</span><span>1</span><span>8</span><span>27</span><span>64</span><span>125</span>
+    </div>
+    <p class="c6hint" style="margin-top:3vh">100 falls between 64 and 125, so the first digit is 4.</p>
+  </div>
+</section>
+
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
+  <div class="stage tight">
+    <div class="head">
+      <p class="say"><span class="term">Bisection</span> cubes the middle of the bracket and keeps the half that holds 100.</p>
+    </div>
+    <table class="c6tab nums">
+      <thead><tr><th>round</th><th>bracket</th><th>middle</th><th>middle&sup3;</th><th>new bracket</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>[4, 5]</td><td>4.5</td><td>91.13, too small</td><td>[4.5, 5]</td></tr>
+        <tr><td>2</td><td>[4.5, 5]</td><td>4.75</td><td>107.17, too big</td><td>[4.5, 4.75]</td></tr>
+        <tr><td>3</td><td>[4.5, 4.75]</td><td>4.625</td><td>98.93, too small</td><td>[4.625, 4.75]</td></tr>
+        <tr><td>4</td><td>[4.625, 4.75]</td><td>4.6875</td><td>103.00, too big</td><td>[4.625, 4.6875]</td></tr>
+      </tbody>
+    </table>
+    <p class="c6hint" style="margin-top:2.4vh">Each round halves the bracket. After four rounds it is 0.0625 wide, and the root starts 4.6.</p>
+  </div>
+</section>
+
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
+  <div class="stage tight">
+    <div class="head">
+      <p class="say">Shifting x&sup3; down by 100 puts the cube root of 100 where the curve <span class="term">crosses zero</span>.</p>
+    </div>
+    <img style="display:block; margin:0 auto; max-width:96%; max-height:48vh" src="data/img/class06/c6-c-shape.svg?v=20261113083220"
+         alt="Left, the whole shape for x from -5 to 6: the curve x cubed in gray, and the same curve moved down 100 in green, crossing zero at a red dot near 4.64. A dashed box marks x from 4 to 5. Right, that box zoomed in: x cubed minus 100 rises from -36 at x = 4 to 25 at x = 5 and crosses zero at the root, with a smaller dashed box around x from 4.52 to 5.05.">
+    <p class="c6hint">The right plot is bisection&rsquo;s first bracket, [4, 5]. Its dashed box is the close-up for Newton&rsquo;s first step.</p>
+  </div>
+</section>
+
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
+  <div class="stage tight">
+    <div class="head">
+      <p class="say"><span class="term">Newton&rsquo;s method</span> follows the tangent down to zero and takes that point as the next x.</p>
+    </div>
+    <img style="display:block; margin:0 auto; max-width:96%; max-height:38vh" src="data/img/class06/c6-c-newton1.svg?v=20261113083220"
+         alt="Close-up of x cubed minus 100 for x from 4.52 to 5.05. At x = 5 the curve is at 25, and a dashed tangent line from that point reaches zero at x = 4.6667, an error of 0.025 past the root at 4.6416.">
+    <div class="work c6eq">$$x_{\text{next}} = x - \frac{f(x)}{f'(x)} \qquad f(x) = x^3 - 100, \quad f'(x) = 3x^2$$</div>
+    <div class="work c6eq">$$x - \frac{f(x)}{f\'(x)} = 5 - \frac{125 - 100}{3 \times 25} = 5 - \frac{25}{75} = 4.6667$$</div>
+    <p class="c6hint">f&prime;(x) is the slope of f, the slope of the tangent.</p>
+  </div>
+</section>
+
+<section class="deck-slide point compact c6vc c6even" data-fill="0.95">
+  <div class="stage tight">
+    <div class="head">
+      <p class="say">A second step gives <span class="term">4.6417</span>, and 4.6417&sup3; = 100.009.</p>
+    </div>
+    <img style="display:block; margin:0 auto; max-width:96%; max-height:38vh" src="data/img/class06/c6-c-newton2.svg?v=20261113083220"
+         alt="Zoomed in about 14 times further, x from 4.633 to 4.670, so x = 4.6667 sits as far from the root as x = 5 did before. The curve is nearly straight and the tangent lies almost on it, reaching zero at x = 4.6417, an error of 0.00013.">
+    <div class="work c6eq">$$x - \frac{f(x)}{f'(x)} = \frac{14}{3} - \frac{(14/3)^3 - 100}{3\,(14/3)^2}$$</div>
+    <div class="work c6eq">$$= 4.6667 - \frac{1.6296}{65.333} = 4.6417$$</div>
+    <p class="c6hint">Zoomed in 14 times further, so x and the root sit as far apart as before. Two steps land 0.00013 from the root, 4.64159.</p>
   </div>
 </section>
 
